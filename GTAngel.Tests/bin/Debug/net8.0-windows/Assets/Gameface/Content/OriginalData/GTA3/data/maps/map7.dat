@@ -1,0 +1,27 @@
+#
+# Load IDEs first, then the models and after that the IPLs
+#
+
+# everything is loaded on a per directory basis and in alphabetical order 
+# to improve the speed of loading
+
+#
+# Object types
+#
+IDE DATA\MAPS\GENERIC.IDE
+IDE DATA\MAPS\MULTI7\MULTI7.IDE
+SPLASH loadsc2
+
+#collision data
+COLFILE 0 MODELS\COLL\GENERIC.COL
+COLFILE 0 DATA\MAPS\MULTI7\MULTI7.COL
+
+SPLASH loadsc3
+
+# have to load map.zon before any of the IPLs
+MAPZONE DATA\MAP.ZON
+IPL DATA\GTA3.ZON
+#
+# Scene information
+#
+IPL DATA\MAPS\MULTI7\MULTI7.IPL

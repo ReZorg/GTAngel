@@ -1,0 +1,115 @@
+{
+	"FileVersion": 1,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "GTA Base",
+	"Description": "Base GTA support classes for Trilogy UE4 project",
+	"Category": "GTA",
+	"CreatedBy": "Thomas Williamson",
+	"CreatedByURL": "https://twitter.com/tswilliamson",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "GTABase",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "GTABaseEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ProceduralMeshComponent",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystem",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true,
+			"WhitelistPlatforms": [ "Win64" ]
+		},
+		{
+			"Name": "rageunreal",
+			"Enabled": true,
+			"WhitelistPlatforms": [ "Win64", "PS4", "XboxOne", "Switch", "PS5", "XboxOneGDK", "XSX" ]
+		},
+		{
+			"Name": "DLSS",
+			"Enabled": true,
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "OnlineSubsystemPS5",
+			"Enabled": true,
+			"WhitelistPlatforms": [
+				"PS5"
+			]
+		},
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true,
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "OnlineSubsystemEOS",
+			"Enabled": true,
+			"WhitelistPlatforms": [ "Win64" ]
+		},
+		{
+			"Name": "SequencerScripting",
+			"Enabled": true,
+			"WhitelistPlatforms": [ "Win64" ]
+		},
+		{
+			"Name": "Text3D",
+			"Enabled": true
+		},
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "ChunkDownloader",
+			"Enabled": true
+		},
+		{
+			"Name": "GooglePAD",
+			"Enabled": true,
+			"WhitelistPlatforms": [ "Android" ]
+		},
+		{
+			"Name": "NetflixSDK",
+			"Enabled": true,
+			"Optional": true,
+			"SupportedTargetPlatforms": [ "IOS", "Android" ]
+		},
+		{
+			"Name": "MobileNativeCode",
+			"Enabled": true,
+			"Optional": true,
+			"SupportedTargetPlatforms": [ "IOS", "Android" ]
+		},
+		{
+			"Name": "DeltaDNASDK",
+			"Enabled": true,
+			"Optional": true,
+			"SupportedTargetPlatforms": [ "IOS", "Android" ]
+		}
+	]
+}
