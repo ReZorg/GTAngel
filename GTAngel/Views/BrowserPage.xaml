@@ -1,0 +1,128 @@
+<Page x:Class="GTA3DE.Wpf.Views.BrowserPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+      mc:Ignorable="d"
+      Title="Browser"
+      Background="Black">
+
+    <!--
+    Converted from: res/layout/browser.xml + BrowserScreen.java
+    Android: ConstraintLayout with WebView, ImageButtons (close/back/forward/reload), ProgressBar, error panel
+    WPF: Grid with WebView2, Buttons, ProgressBar, error panel
+    
+    Original Android hierarchy:
+      ConstraintLayout
+        ImageButton#buttonClose (top-left)
+        ImageButton#buttonReload (bottom-right)
+        ImageButton#buttonBack (bottom-left)
+        ImageButton#buttonForward (bottom-center)
+        ProgressBar#loadingIndicator (center)
+        WebView#webview (fills between close and nav buttons)
+        ConstraintLayout#error (overlay)
+          TextView#errorTitle
+          TextView#errorMessage
+          Button#errorRetryButton
+    -->
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />  <!-- Top bar with close -->
+            <RowDefinition Height="*" />   <!-- WebView content -->
+            <RowDefinition Height="50" />  <!-- Bottom nav bar -->
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar (close button) -->
+        <Grid Grid.Row="0" Background="#111111">
+            <Button x:Name="ButtonClose"
+                    HorizontalAlignment="Left"
+                    Style="{StaticResource IconButtonStyle}"
+                    Command="{Binding CloseCommand}">
+                <Image Source="/Assets/Images/browserclose.png"
+                       Width="24" Height="24" />
+            </Button>
+        </Grid>
+
+        <!-- WebView2 (replaces Android WebView) -->
+        <wv2:WebView2 Grid.Row="1"
+                       x:Name="WebView"
+                       Source="{Binding Url}" />
+
+        <!-- Loading Indicator (replaces ProgressBar center, indeterminate) -->
+        <ProgressBar Grid.Row="1"
+                     x:Name="LoadingIndicator"
+                     IsIndeterminate="True"
+                     Width="50" Height="50"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisConverter}}" />
+
+        <!-- Error Panel (replaces ConstraintLayout#error) -->
+        <Grid Grid.Row="1"
+              x:Name="ErrorPanel"
+              Background="Black"
+              Visibility="{Binding IsError, Converter={StaticResource BoolToVisConverter}}">
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Margin="28">
+                <!-- Error Title (replaces #errorTitle, 30sp white) -->
+                <TextBlock x:Name="ErrorTitle"
+                           Text="{Binding ErrorTitle}"
+                           Style="{StaticResource HeadingStyle}"
+                           Margin="0,0,0,28" />
+
+                <!-- Error Message (replaces #errorMessage) -->
+                <TextBlock x:Name="ErrorMessage"
+                           Text="{Binding ErrorMessage}"
+                           Style="{StaticResource SubheadingStyle}"
+                           Margin="32,0" />
+
+                <!-- Retry Button (replaces #errorRetryButton, 180dp wide) -->
+                <Button x:Name="ErrorRetryButton"
+                        Content="{StaticResource WebViewRetry}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Width="180"
+                        Margin="0,32,0,0"
+                        Command="{Binding RetryCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Bottom Navigation Bar -->
+        <Grid Grid.Row="2" Background="#111111">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Back Button (replaces #buttonBack) -->
+            <Button Grid.Column="0"
+                    x:Name="ButtonBack"
+                    Style="{StaticResource IconButtonStyle}"
+                    Command="{Binding BackCommand}">
+                <Image Source="/Assets/Images/browserback.png"
+                       Width="24" Height="24" />
+            </Button>
+
+            <!-- Forward Button (replaces #buttonForward) -->
+            <Button Grid.Column="1"
+                    x:Name="ButtonForward"
+                    Style="{StaticResource IconButtonStyle}"
+                    Command="{Binding ForwardCommand}">
+                <Image Source="/Assets/Images/browserforward.png"
+                       Width="24" Height="24" />
+            </Button>
+
+            <!-- Reload Button (replaces #buttonReload) -->
+            <Button Grid.Column="2"
+                    x:Name="ButtonReload"
+                    Style="{StaticResource IconButtonStyle}"
+                    Command="{Binding ReloadCommand}">
+                <Image Source="/Assets/Images/browserrefresh.png"
+                       Width="24" Height="24" />
+            </Button>
+        </Grid>
+    </Grid>
+</Page>

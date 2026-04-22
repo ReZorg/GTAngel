@@ -1,0 +1,58 @@
+# ============================================================
+# GTAngel .gitignore
+# ============================================================
+
+# --- UE5 engine directories (huge, not needed in repo) ---
+/Binaries/
+/Build/
+/Config/
+/Documentation/
+/Engine/
+/engines/
+/Extras/
+/Gameface/
+/Platforms/
+/Programs/
+/Shaders/
+/Source/
+/Templates/
+/tools/
+
+# --- Temp text files at root ---
+*.txt
+*.ps1
+*.py
+
+# --- Build output inside GTAngel ---
+GTAngel/bin/
+GTAngel/obj/
+
+# --- Build output inside Archecho ---
+Archecho/*/Binaries/
+Archecho/*/Intermediate/
+Archecho/*/Saved/
+Archecho/*/DerivedDataCache/
+
+# --- Large binary assets (use LFS later) ---
+*.pak
+*.uasset
+*.umap
+*.ubulk
+*.utoc
+*.ucas
+
+# --- IDE ---
+.vs/
+.vscode/
+*.user
+*.suo
+*.cache
+*.DotSettings.user
+
+# --- OS ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Logs ---
+*.log

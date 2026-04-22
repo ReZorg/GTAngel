@@ -1,0 +1,105 @@
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using GTA3DE.Wpf.Interop;
+using GTA3DE.Wpf.Services;
+using GTA3DE.Wpf.ViewModels;
+
+namespace GTA3DE.Wpf;
+
+/// <summary>
+/// Application entry point. Configures dependency injection, logging, and services.
+/// Replaces: com.pairip.application.Application + Rockstar.setup()
+/// </summary>
+public partial class App : Application
+{
+    private ServiceProvider? _serviceProvider;
+
+    public static IServiceProvider Services { get; private set; } = null!;
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        // Configure Serilog (replaces Android Log + Sentry)
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.File("logs/gta3de-.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        // Build DI container (replaces manual singleton wiring in Rockstar.setup)
+        var services = new ServiceCollection();
+        ConfigureServices(services);
+        _serviceProvider = services.BuildServiceProvider();
+        Services = _serviceProvider;
+
+        // Initialize NativeInterop with logger
+        var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
+        NativeInterop.Initialize(loggerFactory.CreateLogger("NativeInterop"));
+
+        // Initialize core services
+        var config = _serviceProvider.GetRequiredService<AppConfiguration>();
+        config.LoadAsync().Wait();
+
+        var localization = _serviceProvider.GetRequiredService<LocalizationService>();
+        localization.LoadLanguage("en-US");
+
+        Log.Information("GTA III Definitive Edition WPF - Initialized");
+    }
+
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        // Logging
+        services.AddLogging(builder =>
+        {
+            builder.AddSerilog();
+        });
+
+        // Core Services (replaces Rockstar singleton fields)
+        services.AddSingleton<AppConfiguration>();
+        services.AddSingleton<AppStateService>();
+        services.AddSingleton<LocalizationService>();
+        services.AddSingleton<NavigationService>();
+        services.AddSingleton<AudioService>();
+        services.AddSingleton<TelemetryService>();
+        services.AddSingleton<FileSystemService>();
+        services.AddSingleton<NotificationService>();
+        services.AddSingleton<AssetDownloadService>();
+
+        // UE Engine Integration (replaces NativeActivity + JNI bridge)
+        services.AddSingleton<UEProcessManager>();
+
+        // API Services (replaces SocialClubAPI, RockstarMobileAPI)
+        services.AddSingleton<SocialClubApiClient>();
+        services.AddSingleton<RockstarApiClient>();
+        services.AddSingleton<SubscriptionService>();
+        services.AddSingleton<GtaPlusService>();
+        services.AddSingleton<LicenseService>();
+
+        // ViewModels
+        services.AddTransient<MainWindowViewModel>();
+        services.AddTransient<SplashViewModel>();
+        services.AddTransient<LoginViewModel>();
+        services.AddTransient<DownloadViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<BrowserViewModel>();
+        services.AddTransient<GameViewModel>();
+        services.AddTransient<TrialBannerViewModel>();
+        services.AddTransient<OtherGamesViewModel>();
+        services.AddTransient<LegalViewModel>();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        Log.Information("GTA III Definitive Edition WPF - Shutting down");
+
+        // Gracefully stop the engine if running
+        var processManager = _serviceProvider?.GetService<UEProcessManager>();
+        processManager?.Dispose();
+
+        Log.CloseAndFlush();
+        _serviceProvider?.Dispose();
+        base.OnExit(e);
+    }
+}

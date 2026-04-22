@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>Archecho Desk — Deep Tree Echo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Title Bar -->
+  <div id="titlebar">
+    <div class="titlebar-drag">
+      <span class="titlebar-icon">◈</span>
+      <span class="titlebar-text">Archecho Desk</span>
+      <span class="titlebar-subtitle">DTE-KSM-Evo-Autogenesis ⊗ Time-Crystal-NN</span>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">COGNITIVE CORE</div>
+        <button class="nav-btn active" data-panel="dashboard">
+          <span class="nav-icon">◉</span> Dashboard
+        </button>
+        <button class="nav-btn" data-panel="crystal">
+          <span class="nav-icon">❋</span> Time Crystal
+        </button>
+        <button class="nav-btn" data-panel="brain">
+          <span class="nav-icon">⬡</span> Brain Model
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">EVOLUTION</div>
+        <button class="nav-btn" data-panel="autogenesis">
+          <span class="nav-icon">⟳</span> Autogenesis
+        </button>
+        <button class="nav-btn" data-panel="dove9">
+          <span class="nav-icon">△</span> Dove9 Triadic
+        </button>
+        <button class="nav-btn" data-panel="ksm">
+          <span class="nav-icon">✦</span> KSM Cycle
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">GAMER GIRL</div>
+        <button class="nav-btn" data-panel="persona">
+          <span class="nav-icon">♦</span> Lucy Persona
+        </button>
+        <button class="nav-btn" data-panel="face">
+          <span class="nav-icon">◔</span> MetaHuman Face
+        </button>
+        <button class="nav-btn" data-panel="training">
+          <span class="nav-icon">⚔</span> Training Arena
+        </button>
+        <button class="nav-btn" data-panel="skills">
+          <span class="nav-icon">✦</span> Skill Tree
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">REPOSITORY</div>
+        <button class="nav-btn" data-panel="repository">
+          <span class="nav-icon">⊞</span> Explorer
+        </button>
+        <button class="nav-btn" data-panel="modules">
+          <span class="nav-icon">⧉</span> UE Modules
+        </button>
+      </div>
+      <div class="nav-section nav-bottom">
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span id="status-text">Initializing...</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="content">
+      <!-- Dashboard Panel -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="panel-header">
+          <h1>Deep Tree Echo — Cognitive Architecture</h1>
+          <p class="panel-subtitle">Living memory system with hierarchical oscillatory processing</p>
+        </div>
+        <div class="dashboard-grid">
+          <!-- Autonomy Level Card -->
+          <div class="card card-wide">
+            <div class="card-header">
+              <h3>Autonomy Evolution</h3>
+              <span class="badge" id="autonomy-badge">Level 1</span>
+            </div>
+            <div class="autonomy-track">
+              <div class="autonomy-levels">
+                <div class="autonomy-level" data-level="1">
+                  <div class="level-marker active"></div>
+                  <span>Reactive</span>
+                </div>
+                <div class="autonomy-level" data-level="2">
+                  <div class="level-marker"></div>
+                  <span>Adaptive</span>
+                </div>
+                <div class="autonomy-level" data-level="3">
+                  <div class="level-marker"></div>
+                  <span>Cognitive</span>
+                </div>
+                <div class="autonomy-level" data-level="4">
+                  <div class="level-marker"></div>
+                  <span>Embodied</span>
+                </div>
+                <div class="autonomy-level" data-level="5">
+                  <div class="level-marker"></div>
+                  <span>Autogenesis</span>
+                </div>
+              </div>
+              <div class="autonomy-progress">
+                <div class="progress-bar" id="autonomy-progress" style="width: 20%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coherence Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Property Coherence</h3>
+            </div>
+            <div class="metric-display">
+              <canvas id="coherence-gauge" width="200" height="120"></canvas>
+              <div class="metric-value" id="coherence-value">1.00</div>
+              <div class="metric-label">Alexander's 15 Properties</div>
+            </div>
+          </div>
+
+          <!-- Clock Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Dove9 Clock30</h3>
+            </div>
+            <div class="metric-display">
+              <canvas id="clock-canvas" width="200" height="200"></canvas>
+              <div class="metric-value" id="clock-step">0/30</div>
+              <div class="metric-label">Triadic Phase</div>
+            </div>
+          </div>
+
+          <!-- Crystal Mini-Viz -->
+          <div class="card card-wide">
+            <div class="card-header">
+              <h3>Time Crystal Oscillation</h3>
+              <span class="badge badge-green">nn4c [3,4,3,3]</span>
+            </div>
+            <canvas id="crystal-mini" width="800" height="150"></canvas>
+          </div>
+
+          <!-- Repository Status -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Repository</h3>
+            </div>
+            <div id="repo-status" class="repo-status">
+              <div class="repo-stat">
+                <span class="stat-value" id="plugin-count">—</span>
+                <span class="stat-label">Archecho Plugins</span>
+              </div>
+              <div class="repo-stat">
+                <span class="stat-value" id="module-count">—</span>
+                <span class="stat-label">UE Source Modules</span>
+              </div>
+              <div class="repo-stat">
+                <span class="stat-value" id="engine-count">—</span>
+                <span class="stat-label">Ontelecho Engines</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Experiment Log -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Experiment Log</h3>
+            </div>
+            <div id="experiment-log" class="experiment-log">
+              <div class="log-empty">No experiments yet. Start Autogenesis loop.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Crystal Panel -->
+      <div class="panel" id="panel-crystal">
+        <div class="panel-header">
+          <h1>Time Crystal Neural Network</h1>
+          <p class="panel-subtitle">nn4c: 9 temporal scales (8ms → 1s) | nn9c: 12 hierarchy levels</p>
+        </div>
+        <div class="crystal-layout">
+          <div class="crystal-viz-container">
+            <canvas id="crystal-main" width="900" height="500"></canvas>
+          </div>
+          <div class="crystal-controls">
+            <h3>nn4c Temporal Levels</h3>
+            <div id="crystal-levels" class="crystal-levels"></div>
+            <div class="control-group">
+              <label>Time Step (dt)</label>
+              <input type="range" id="crystal-dt" min="0.001" max="0.1" step="0.001" value="0.01">
+              <span id="crystal-dt-val">0.010s</span>
+            </div>
+            <div class="control-group">
+              <label>Spectral Radius</label>
+              <input type="range" id="crystal-radius" min="0.1" max="1.5" step="0.01" value="0.95">
+              <span id="crystal-radius-val">0.95</span>
+            </div>
+            <button class="btn btn-primary" id="crystal-step-btn">Step Forward</button>
+            <button class="btn btn-secondary" id="crystal-reset-btn">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brain Model Panel -->
+      <div class="panel" id="panel-brain">
+        <div class="panel-header">
+          <h1>nn9c Whole Brain Model</h1>
+          <p class="panel-subtitle">12 hierarchy levels: Microtubule → BloodVessel</p>
+        </div>
+        <div class="brain-layout">
+          <canvas id="brain-canvas" width="900" height="600"></canvas>
+          <div class="brain-sidebar">
+            <h3>Region Activity</h3>
+            <div id="brain-regions" class="brain-regions"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Autogenesis Panel -->
+      <div class="panel" id="panel-autogenesis">
+        <div class="panel-header">
+          <h1>DTE-KSM Evo-Autogenesis</h1>
+          <p class="panel-subtitle">Autonomous metric-driven evolution toward Level 5</p>
+        </div>
+        <div class="autogenesis-layout">
+          <div class="auto-controls">
+            <div class="card">
+              <div class="card-header"><h3>Experiment Parameters</h3></div>
+              <div class="control-group">
+                <label>Target Autonomy Level</label>
+                <select id="auto-target">
+                  <option value="2">Level 2 — Adaptive</option>
+                  <option value="3">Level 3 — Cognitive</option>
+                  <option value="4">Level 4 — Embodied</option>
+                  <option value="5" selected>Level 5 — Autogenesis</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Max Experiments</label>
+                <input type="number" id="auto-max" value="20" min="1" max="100">
+              </div>
+              <div class="control-group">
+                <label>Coherence Threshold</label>
+                <input type="range" id="auto-threshold" min="0.4" max="0.9" step="0.05" value="0.6">
+                <span id="auto-threshold-val">0.60</span>
+              </div>
+              <button class="btn btn-primary" id="auto-start-btn">▶ Start Autogenesis Loop</button>
+              <button class="btn btn-danger" id="auto-stop-btn" disabled>■ Halt</button>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Safety Constraints</h3></div>
+              <div class="safety-list">
+                <div class="safety-item safe"><span class="safety-icon">✓</span> Metric regression guard</div>
+                <div class="safety-item safe"><span class="safety-icon">✓</span> Coherence halt (< 0.15)</div>
+                <div class="safety-item safe"><span class="safety-icon">✓</span> Property degradation (< 0.60)</div>
+                <div class="safety-item safe"><span class="safety-icon">✓</span> Delta clamp (20% max)</div>
+              </div>
+            </div>
+          </div>
+          <div class="auto-results">
+            <div class="card card-tall">
+              <div class="card-header"><h3>Evolution Timeline</h3></div>
+              <canvas id="auto-chart" width="700" height="300"></canvas>
+              <div id="auto-log" class="auto-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dove9 Triadic Panel -->
+      <div class="panel" id="panel-dove9">
+        <div class="panel-header">
+          <h1>Dove9 Triadic Cognitive Loop</h1>
+          <p class="panel-subtitle">12-step loop × 3 streams = Clock30 synchronization</p>
+        </div>
+        <div class="dove9-layout">
+          <canvas id="dove9-canvas" width="600" height="600"></canvas>
+          <div class="dove9-sidebar">
+            <div class="card">
+              <div class="card-header"><h3>Streams</h3></div>
+              <div class="stream-display">
+                <div class="stream" id="stream-primary">
+                  <span class="stream-label">PRIMARY</span>
+                  <span class="stream-phase">0°</span>
+                </div>
+                <div class="stream" id="stream-secondary">
+                  <span class="stream-label">SECONDARY</span>
+                  <span class="stream-phase">120°</span>
+                </div>
+                <div class="stream" id="stream-tertiary">
+                  <span class="stream-label">TERTIARY</span>
+                  <span class="stream-phase">240°</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Active Term</h3></div>
+              <div class="term-display" id="active-term">T1_PERCEPTION</div>
+              <div class="term-list" id="term-list"></div>
+            </div>
+            <button class="btn btn-primary" id="dove9-step-btn">Advance Clock</button>
+            <button class="btn btn-secondary" id="dove9-auto-btn">Auto-Run</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KSM Cycle Panel -->
+      <div class="panel" id="panel-ksm">
+        <div class="panel-header">
+          <h1>KSM 12-Step Living Structure</h1>
+          <p class="panel-subtitle">Alexander's 15 Properties of Living Structure × Evolution Cycle</p>
+        </div>
+        <div class="ksm-layout">
+          <canvas id="ksm-canvas" width="600" height="600"></canvas>
+          <div class="ksm-sidebar">
+            <div class="card">
+              <div class="card-header"><h3>15 Properties</h3></div>
+              <div id="properties-list" class="properties-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Repository Explorer Panel -->
+      <div class="panel" id="panel-repository">
+        <div class="panel-header">
+          <h1>UnrealEngineCog Explorer</h1>
+          <p class="panel-subtitle" id="repo-path"></p>
+        </div>
+        <div class="repo-layout">
+          <div class="repo-tree" id="repo-tree"></div>
+          <div class="repo-preview" id="repo-preview">
+            <div class="preview-empty">Select a file to preview</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UE Modules Panel -->
+      <div class="panel" id="panel-modules">
+        <div class="panel-header">
+          <h1>Unreal Engine Cognitive Modules</h1>
+          <p class="panel-subtitle">Source modules: Neurochemical, Personality, Avatar, Live2DCubism, Environment, AssetManagement</p>
+        </div>
+        <div class="modules-grid" id="modules-grid"></div>
+      </div>
+
+      <!-- Lucy Persona Panel -->
+      <div class="panel" id="panel-persona">
+        <div class="panel-header">
+          <h1>Lucy — Hyper-Chaotic Gamer Girl</h1>
+          <p class="panel-subtitle">SuperHotGirlPersonality ⊗ HyperChaoticBehavior ⊗ 4E Embodied Cognition</p>
+        </div>
+        <div class="persona-layout">
+          <div class="persona-identity">
+            <div class="card">
+              <div class="card-header"><h3>Identity</h3><span class="badge badge-pink" id="persona-autonomy">L0</span></div>
+              <div class="persona-name" id="persona-name">Lucy</div>
+              <div class="persona-stats">
+                <div class="pstat"><span class="pstat-val" id="p-xp">0</span><span class="pstat-label">Total XP</span></div>
+                <div class="pstat"><span class="pstat-val" id="p-matches">0</span><span class="pstat-label">Matches</span></div>
+                <div class="pstat"><span class="pstat-val" id="p-kills">0</span><span class="pstat-label">Kills</span></div>
+                <div class="pstat"><span class="pstat-val" id="p-streak">0</span><span class="pstat-label">Win Streak</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Cognitive State</h3></div>
+              <div class="cog-meters">
+                <div class="cog-meter"><label>Valence</label><div class="meter-bar"><div class="meter-fill meter-valence" id="m-valence"></div></div><span id="v-valence">0</span></div>
+                <div class="cog-meter"><label>Arousal</label><div class="meter-bar"><div class="meter-fill meter-arousal" id="m-arousal"></div></div><span id="v-arousal">0</span></div>
+                <div class="cog-meter"><label>Flow</label><div class="meter-bar"><div class="meter-fill meter-flow" id="m-flow"></div></div><span id="v-flow">0</span></div>
+                <div class="cog-meter"><label>Chaos</label><div class="meter-bar"><div class="meter-fill meter-chaos" id="m-chaos"></div></div><span id="v-chaos">0</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Endocrine Mode</h3></div>
+              <div class="endo-mode" id="endo-mode">RESTING</div>
+              <div class="endo-hormones" id="endo-hormones"></div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <div class="card card-tall">
+              <div class="card-header"><h3>Personality Traits</h3></div>
+              <canvas id="traits-radar" width="400" height="400"></canvas>
+              <div id="traits-list" class="traits-list"></div>
+            </div>
+          </div>
+          <div class="persona-4e">
+            <div class="card">
+              <div class="card-header"><h3>4E Embodied Cognition</h3></div>
+              <div id="e4-channels" class="e4-channels"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MetaHuman Face Panel -->
+      <div class="panel" id="panel-face">
+        <div class="panel-header">
+          <h1>MetaHuman Expression System</h1>
+          <p class="panel-subtitle">FACS Action Units → CTRL_ Morph Targets | Lorenz Attractor Micro-Expressions</p>
+        </div>
+        <div class="face-layout">
+          <div class="face-viz">
+            <canvas id="face-canvas" width="500" height="600"></canvas>
+          </div>
+          <div class="face-data">
+            <div class="card">
+              <div class="card-header"><h3>Expression</h3><span class="badge" id="face-expression">Neutral</span></div>
+              <div id="au-list" class="au-list"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Lorenz Attractor</h3></div>
+              <canvas id="lorenz-canvas" width="300" height="200"></canvas>
+              <div class="lorenz-stats">
+                <span>Lyapunov: <b id="lyapunov-val">0</b></span>
+                <span>Chaos: <b id="chaos-intensity">0.15</b></span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Aesthetic Parameters</h3></div>
+              <div id="aesthetics-list" class="aesthetics-list"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Morph Targets</h3></div>
+              <div id="morph-list" class="morph-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Training Arena Panel -->
+      <div class="panel" id="panel-training">
+        <div class="panel-header">
+          <h1>Training Arena</h1>
+          <p class="panel-subtitle">Train Lucy through gameplay scenarios — events drive endocrine → expression → skill gain</p>
+        </div>
+        <div class="training-layout">
+          <div class="training-controls">
+            <div class="card">
+              <div class="card-header"><h3>Scenario Select</h3></div>
+              <div id="scenario-grid" class="scenario-grid"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Training Speed</h3></div>
+              <div class="control-group">
+                <input type="range" id="train-speed" min="1" max="10" step="1" value="1">
+                <span id="train-speed-val">1x</span>
+              </div>
+              <button class="btn btn-primary" id="train-start-btn">▶ Start Training</button>
+              <button class="btn btn-danger" id="train-stop-btn" disabled>■ Stop</button>
+              <button class="btn btn-secondary" id="train-save-btn">Save Persona</button>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Quick Events</h3></div>
+              <div id="event-buttons" class="event-buttons"></div>
+            </div>
+          </div>
+          <div class="training-viz">
+            <div class="card card-tall">
+              <div class="card-header"><h3>Training Metrics</h3></div>
+              <canvas id="training-chart" width="700" height="250"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Live Feed</h3></div>
+              <div id="training-log" class="training-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skill Tree Panel -->
+      <div class="panel" id="panel-skills">
+        <div class="panel-header">
+          <h1>Skill Tree</h1>
+          <p class="panel-subtitle">5 Domains × 6 Skills = 30 Mastery Tracks | FPS • MOBA • Fighting • Survival • Meta</p>
+        </div>
+        <div class="skills-layout">
+          <div id="skill-domains" class="skill-domains"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="persona-panels.js"></script>
+</body>
+</html>

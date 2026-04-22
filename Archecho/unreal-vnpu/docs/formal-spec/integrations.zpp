@@ -1,0 +1,641 @@
+(*===========================================================================*)
+(* Z++ Formal Specification: NPU External Integrations                       *)
+(* Repository: o9nn/npu                                                       *)
+(* Description: Formalization of external integration contracts for the NPU *)
+(*             system, including GGUF runtime, I/O streams, and external     *)
+(*             data sources.                                                  *)
+(*===========================================================================*)
+
+(*---------------------------------------------------------------------------*)
+(* Import Base Specifications                                                 *)
+(*---------------------------------------------------------------------------*)
+
+(* This specification builds upon all previous specifications *)
+(* Assumed: All types, schemas, states, and operations are in scope *)
+
+(*---------------------------------------------------------------------------*)
+(* GGUF Runtime Integration                                                   *)
+(*---------------------------------------------------------------------------*)
+
+[TOKEN_ID]      (* Token identifier from tokenizer *)
+[MODEL_HANDLE]  (* Opaque handle to loaded GGUF model *)
+[CONTEXT_HANDLE] (* Opaque handle to inference context *)
+
+(* GGUF model parameters *)
+GGUFModelParams
+  n_ctx : ℕ₁
+  n_batch : ℕ₁
+  n_threads : ℕ₁
+  n_gpu_layers : ℕ
+  use_mmap : 𝔹
+  use_mlock : 𝔹
+  vocab_only : 𝔹
+  rope_freq_base : ℝ
+  rope_freq_scale : ℝ
+
+where
+  (* Context size constraints *)
+  n_ctx ≥ 512 ∧ n_ctx ≤ 32768 ∧
+  
+  (* Batch size constraints *)
+  n_batch ≥ 1 ∧ n_batch ≤ 512 ∧
+  
+  (* Thread count constraints *)
+  n_threads ≥ 1 ∧ n_threads ≤ 64 ∧
+  
+  (* RoPE (Rotary Position Embedding) parameters *)
+  rope_freq_base > 0 ∧
+  rope_freq_scale > 0
+
+(* GGUF context parameters *)
+GGUFContextParams
+  seed : ℕ
+  n_ctx : ℕ₁
+  n_batch : ℕ₁
+  n_threads : ℕ₁
+  n_threads_batch : ℕ₁
+
+where
+  n_ctx ≥ 512 ∧ n_ctx ≤ 32768 ∧
+  n_batch ≥ 1 ∧ n_batch ≤ 512 ∧
+  n_threads ≥ 1 ∧ n_threads ≤ 64 ∧
+  n_threads_batch ≥ 1 ∧ n_threads_batch ≤ 64
+
+(* External GGUF runtime state *)
+GGUFRuntimeState
+  model_handle : MODEL_HANDLE
+  context_handle : CONTEXT_HANDLE
+  model_params : GGUFModelParams
+  context_params : GGUFContextParams
+  model_loaded : 𝔹
+  context_initialized : 𝔹
+
+where
+  (* Context requires loaded model *)
+  context_initialized ⇒ model_loaded ∧
+  
+  (* Parameters must be consistent *)
+  (model_loaded ∧ context_initialized ⇒
+    model_params.n_ctx = context_params.n_ctx)
+
+(* Load GGUF model from file *)
+GGUFLoadModel
+  ΔGGUFRuntimeState
+  model_path? : MODEL_PATH
+  params? : GGUFModelParams
+  success! : 𝔹
+  error_msg! : seq CHAR
+
+where
+  (* Preconditions *)
+  ¬model_loaded ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    model_loaded' = true ∧
+    model_params' = params? ∧
+    model_handle' ≠ ∅ ∧
+    error_msg! = ⟨⟩) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    model_loaded' = false ∧
+    #error_msg! > 0)
+
+(* Initialize inference context *)
+GGUFInitContext
+  ΔGGUFRuntimeState
+  params? : GGUFContextParams
+  success! : 𝔹
+  error_msg! : seq CHAR
+
+where
+  (* Preconditions *)
+  model_loaded ∧
+  ¬context_initialized ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    context_initialized' = true ∧
+    context_params' = params? ∧
+    context_handle' ≠ ∅ ∧
+    error_msg! = ⟨⟩) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    context_initialized' = false ∧
+    #error_msg! > 0)
+
+(* Tokenize text input *)
+GGUFTokenize
+  ΞGGUFRuntimeState
+  text? : seq CHAR
+  add_bos? : 𝔹
+  tokens! : seq TOKEN_ID
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  model_loaded ∧
+  #text? > 0 ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    #tokens! > 0 ∧
+    (add_bos? ⇒ tokens!(1) = BOS_TOKEN)) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    tokens! = ⟨⟩)
+
+where
+  BOS_TOKEN : TOKEN_ID  (* Beginning-of-sequence token *)
+
+(* Detokenize token sequence to text *)
+GGUFDetokenize
+  ΞGGUFRuntimeState
+  tokens? : seq TOKEN_ID
+  text! : seq CHAR
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  model_loaded ∧
+  #tokens? > 0 ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    #text! > 0) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    text! = ⟨⟩)
+
+(* Decode tokens and update KV cache *)
+GGUFDecode
+  ΔGGUFRuntimeState
+  tokens? : seq TOKEN_ID
+  n_past? : ℕ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  model_loaded ∧
+  context_initialized ∧
+  #tokens? > 0 ∧
+  n_past? + #tokens? ≤ context_params.n_ctx ∧
+  
+  (* Post-conditions *)
+  (success! = true ⇒
+    (* KV cache is updated - abstracted *) true) ∧
+  
+  (success! = false ⇒
+    (* No state change on failure *) true)
+
+(* Sample next token from logits *)
+GGUFSample
+  ΞGGUFRuntimeState
+  temperature? : ℝ
+  top_k? : ℕ
+  top_p? : ℝ
+  repeat_penalty? : ℝ
+  previous_tokens? : seq TOKEN_ID
+  token! : TOKEN_ID
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  context_initialized ∧
+  temperature? > 0 ∧
+  top_k? > 0 ∧
+  top_p? > 0 ∧ top_p? ≤ 1 ∧
+  repeat_penalty? ≥ 1 ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    token! ≠ ∅) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    token! = ∅)
+
+(* Free GGUF runtime resources *)
+GGUFFreeRuntime
+  ΔGGUFRuntimeState
+
+where
+  (* Mark as unloaded *)
+  model_loaded' = false ∧
+  context_initialized' = false ∧
+  model_handle' = ∅ ∧
+  context_handle' = ∅
+
+(*---------------------------------------------------------------------------*)
+(* I/O Stream Integration                                                     *)
+(*---------------------------------------------------------------------------*)
+
+[STREAM_HANDLE] (* Opaque handle to I/O stream *)
+[DEVICE_PATH]   (* Path to device file *)
+
+(* Stream status *)
+STREAM_STATUS ::= stream_closed | stream_open | stream_error
+
+(* UART configuration *)
+UARTConfig
+  baud_rate : ℕ
+  data_bits : ℕ
+  stop_bits : ℕ
+  parity : CHAR
+  flow_control : 𝔹
+
+where
+  (* Valid baud rates *)
+  baud_rate ∈ {9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600} ∧
+  
+  (* Valid data bits *)
+  data_bits ∈ {5, 6, 7, 8} ∧
+  
+  (* Valid stop bits *)
+  stop_bits ∈ {1, 2} ∧
+  
+  (* Valid parity *)
+  parity ∈ {'N', 'E', 'O', 'M', 'S'}
+
+(* UART stream state *)
+UARTStreamState
+  device_path : DEVICE_PATH
+  handle : STREAM_HANDLE
+  config : UARTConfig
+  status : STREAM_STATUS
+  bytes_sent : ℕ
+  bytes_received : ℕ
+
+where
+  (* Handle is valid when stream is open *)
+  (status = stream_open ⇔ handle ≠ ∅) ∧
+  
+  (* Counters are non-negative *)
+  bytes_sent ≥ 0 ∧
+  bytes_received ≥ 0
+
+(* Open UART stream *)
+UARTOpen
+  ΔUARTStreamState
+  device? : DEVICE_PATH
+  config? : UARTConfig
+  success! : 𝔹
+  error_msg! : seq CHAR
+
+where
+  (* Preconditions *)
+  status = stream_closed ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    status' = stream_open ∧
+    device_path' = device? ∧
+    config' = config? ∧
+    handle' ≠ ∅ ∧
+    bytes_sent' = 0 ∧
+    bytes_received' = 0 ∧
+    error_msg! = ⟨⟩) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    status' = stream_error ∧
+    #error_msg! > 0)
+
+(* Send data over UART *)
+UARTSend
+  ΔUARTStreamState
+  data? : seq ℕ
+  bytes_sent! : ℕ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  status = stream_open ∧
+  #data? > 0 ∧
+  (∀ b : 1 .. #data? • data?(b) ≤ 255) ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    bytes_sent! = #data? ∧
+    bytes_sent' = bytes_sent + bytes_sent!) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    bytes_sent! = 0)
+
+(* Receive data from UART *)
+UARTReceive
+  ΔUARTStreamState
+  max_bytes? : ℕ
+  timeout_ms? : ℕ
+  data! : seq ℕ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  status = stream_open ∧
+  max_bytes? > 0 ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    #data! ≤ max_bytes? ∧
+    (∀ b : 1 .. #data! • data!(b) ≤ 255) ∧
+    bytes_received' = bytes_received + #data!) ∧
+  
+  (* Post-conditions on failure or timeout *)
+  (success! = false ⇒
+    data! = ⟨⟩)
+
+(* Close UART stream *)
+UARTClose
+  ΔUARTStreamState
+
+where
+  status' = stream_closed ∧
+  handle' = ∅
+
+(* SPI configuration *)
+SPIConfig
+  clock_speed : ℕ
+  mode : ℕ
+  bits_per_word : ℕ
+  lsb_first : 𝔹
+
+where
+  (* Valid clock speeds (Hz) *)
+  clock_speed ≥ 1000 ∧ clock_speed ≤ 50000000 ∧
+  
+  (* Valid SPI modes *)
+  mode ∈ {0, 1, 2, 3} ∧
+  
+  (* Valid bits per word *)
+  bits_per_word ∈ {8, 16}
+
+(* I2C configuration *)
+I2CConfig
+  address : ℕ
+  clock_speed : ℕ
+  addressing_mode : ℕ
+
+where
+  (* Valid 7-bit or 10-bit address *)
+  (addressing_mode = 7 ⇒ address < 128) ∧
+  (addressing_mode = 10 ⇒ address < 1024) ∧
+  
+  (* Valid clock speeds *)
+  clock_speed ∈ {10000, 100000, 400000, 1000000, 3400000}
+
+(*---------------------------------------------------------------------------*)
+(* External Data Integration                                                  *)
+(*---------------------------------------------------------------------------*)
+
+(* Chart of Accounts JSON structure *)
+ChartOfAccounts
+  accounts : ACCOUNT_CODE ⇸ AccountDefinition
+  version : seq CHAR
+  last_modified : ℕ
+
+where
+  (* Account codes are non-empty *)
+  dom accounts ≠ ∅ ∧
+  
+  (* Version is non-empty *)
+  #version > 0
+
+AccountDefinition
+  code : ACCOUNT_CODE
+  name : seq CHAR
+  account_type : ACCOUNT_TYPE
+  parent_code : ACCOUNT_CODE ∪ {⊥}
+  is_active : 𝔹
+  normal_balance : BALANCE_TYPE
+
+where
+  (* Code and name are non-empty *)
+  #code > 0 ∧
+  #name > 0 ∧
+  
+  (* Parent code must be different from self *)
+  (parent_code ≠ ⊥ ⇒ parent_code ≠ code)
+
+ACCOUNT_TYPE ::= asset | liability | equity | revenue | expense
+BALANCE_TYPE ::= debit | credit
+
+(* Load chart of accounts from JSON *)
+LoadChartOfAccounts
+  ΔFinancialDeviceState
+  json_path? : seq CHAR
+  chart! : ChartOfAccounts
+  success! : 𝔹
+  error_msg! : seq CHAR
+
+where
+  (* Preconditions *)
+  driver.is_initialized ∧
+  #json_path? > 0 ∧
+  
+  (* Post-conditions on success *)
+  (success! = true ⇒
+    #chart!.accounts > 0 ∧
+    error_msg! = ⟨⟩ ∧
+    (* Map accounts to appropriate GPIO pin ranges *)
+    (∀ a : dom chart!.accounts •
+      let account == chart!.accounts(a) •
+      (account.account_type = asset ⇒ 
+        ∃ pin : ASSET_PIN_RANGE • 
+          driver'.account_pins(a).pin_number = pin) ∧
+      (account.account_type = liability ⇒ 
+        ∃ pin : LIABILITY_PIN_RANGE • 
+          driver'.account_pins(a).pin_number = pin) ∧
+      (account.account_type = equity ⇒ 
+        ∃ pin : EQUITY_PIN_RANGE • 
+          driver'.account_pins(a).pin_number = pin) ∧
+      (account.account_type = revenue ⇒ 
+        ∃ pin : REVENUE_PIN_RANGE • 
+          driver'.account_pins(a).pin_number = pin) ∧
+      (account.account_type = expense ⇒ 
+        ∃ pin : EXPENSE_PIN_RANGE • 
+          driver'.account_pins(a).pin_number = pin))) ∧
+  
+  (* Post-conditions on failure *)
+  (success! = false ⇒
+    chart!.accounts = ∅ ∧
+    #error_msg! > 0)
+
+(*---------------------------------------------------------------------------*)
+(* External API Contracts                                                     *)
+(*---------------------------------------------------------------------------*)
+
+(* Rate limiting for API calls *)
+RateLimiter
+  requests_per_second : ℕ
+  current_window_start : ℕ
+  current_window_count : ℕ
+  total_requests : ℕ
+  total_rate_limits : ℕ
+
+where
+  requests_per_second > 0 ∧
+  current_window_count ≤ requests_per_second ∧
+  total_requests ≥ total_rate_limits ∧
+  total_rate_limits ≥ 0
+
+(* Check if API call is allowed *)
+CheckRateLimit
+  ΔRateLimiter
+  current_time? : ℕ
+  allowed! : 𝔹
+
+where
+  (* Reset window if expired *)
+  (current_time? - current_window_start ≥ 1000000 ⇒
+    current_window_start' = current_time? ∧
+    current_window_count' = 0) ∧
+  
+  (* Check if within limit *)
+  (current_window_count < requests_per_second ⇒
+    allowed! = true ∧
+    current_window_count' = current_window_count + 1 ∧
+    total_requests' = total_requests + 1) ∧
+  
+  (* Rate limit exceeded *)
+  (current_window_count ≥ requests_per_second ⇒
+    allowed! = false ∧
+    total_rate_limits' = total_rate_limits + 1)
+
+(* Retry logic with exponential backoff *)
+RetryPolicy
+  max_retries : ℕ
+  base_delay_ms : ℕ
+  max_delay_ms : ℕ
+  current_attempt : ℕ
+
+where
+  max_retries > 0 ∧
+  base_delay_ms > 0 ∧
+  max_delay_ms ≥ base_delay_ms ∧
+  current_attempt ≤ max_retries
+
+(* Calculate next retry delay *)
+CalculateRetryDelay
+  ΞRetryPolicy
+  delay_ms! : ℕ
+
+where
+  (* Exponential backoff with cap *)
+  let exponential_delay == base_delay_ms * (2 ^ current_attempt) •
+  delay_ms! = min(exponential_delay, max_delay_ms)
+
+(*---------------------------------------------------------------------------*)
+(* Integration Composition                                                    *)
+(*---------------------------------------------------------------------------*)
+
+(* Complete LLM inference with GGUF integration *)
+LLMInferenceWithGGUF
+  ΔLLMCoprocessorState
+  ΔGGUFRuntimeState
+  prompt? : seq CHAR
+  sequence_config? : LlamaSequenceConfig
+  completion! : seq CHAR
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.model_loaded ∧
+  gguf_runtime.model_loaded ∧
+  gguf_runtime.context_initialized ∧
+  #prompt? > 0 ∧
+  
+  (* Inference pipeline *)
+  ∃ tokens_in, tokens_out : seq TOKEN_ID; 
+    tokenize_ok, decode_ok, sample_ok, detok_ok : 𝔹 •
+  
+  (* 1. Tokenize input *)
+  GGUFTokenize[prompt?/text?, true/add_bos?, 
+               tokens_in/tokens!, tokenize_ok/success!] ∧
+  tokenize_ok = true ∧
+  
+  (* 2. Configure and start inference *)
+  ConfigureInference[0/prompt_addr?, #tokens_in/prompt_len?,
+                    sequence_config?.n_predict/n_predict?] ∧
+  StartInference ∧
+  
+  (* 3. Token generation loop *)
+  (∀ i : 1 .. sequence_config?.n_predict •
+    GGUFDecode[⟨tokens_in(i)⟩/tokens?, i-1/n_past?, decode_ok/success!] ∧
+    decode_ok = true ∧
+    GGUFSample[1.0/temperature?, 40/top_k?, 0.95/top_p?, 
+               1.1/repeat_penalty?, tokens_out/previous_tokens?,
+               sample_ok/success!] ∧
+    sample_ok = true ∧
+    tokens_out' = tokens_out ⌢ ⟨token!⟩) ∧
+  
+  (* 4. Detokenize output *)
+  GGUFDetokenize[tokens_out/tokens?, completion!/text!, detok_ok/success!] ∧
+  detok_ok = true ∧
+  
+  (* 5. Complete inference *)
+  CompleteInference[completion!/completion_text!] ∧
+  
+  success! = (tokenize_ok ∧ decode_ok ∧ sample_ok ∧ detok_ok)
+
+(* Financial transaction with external validation *)
+ValidatedFinancialTransaction
+  ΔFinancialDeviceState
+  debit_account? : ACCOUNT_CODE
+  credit_account? : ACCOUNT_CODE
+  amount? : ℝ
+  description? : seq CHAR
+  success! : 𝔹
+  error_msg! : seq CHAR
+
+where
+  (* Preconditions *)
+  driver.is_initialized ∧
+  debit_account? ∈ dom driver.account_pins ∧
+  credit_account? ∈ dom driver.account_pins ∧
+  debit_account? ≠ credit_account? ∧
+  amount? > 0 ∧
+  #description? > 0 ∧
+  
+  (* Double-entry accounting: debit one account, credit another *)
+  ∃ debit_balance, credit_balance : ℝ •
+  
+  (* Read current balances *)
+  ReadAccountBalance[debit_account?/account_code?, 
+                    debit_balance/balance!] ∧
+  ReadAccountBalance[credit_account?/account_code?, 
+                    credit_balance/balance!] ∧
+  
+  (* Update debit account *)
+  UpdateAccountBalance[debit_account?/account_code?, 
+                      debit_balance + amount?/balance?] ∧
+  
+  (* Update credit account *)
+  UpdateAccountBalance[credit_account?/account_code?, 
+                      credit_balance + amount?/balance?] ∧
+  
+  (* Verify accounting equation still holds *)
+  let total_debits == Σ{a : dom driver'.account_pins | 
+                        a ∈ ASSET_PIN_RANGE ∨ a ∈ EXPENSE_PIN_RANGE •
+                        driver'.account_pins(a).balance_voltage} •
+  let total_credits == Σ{a : dom driver'.account_pins | 
+                        a ∈ LIABILITY_PIN_RANGE ∨ a ∈ EQUITY_PIN_RANGE ∨
+                        a ∈ REVENUE_PIN_RANGE •
+                        driver'.account_pins(a).balance_voltage} •
+  
+  (total_debits = total_credits ⇒
+    success! = true ∧
+    error_msg! = ⟨⟩) ∧
+  
+  (total_debits ≠ total_credits ⇒
+    success! = false ∧
+    error_msg! = "Accounting equation violated")
+
+(*===========================================================================*)
+(* End of Integrations Specification                                         *)
+(*===========================================================================*)

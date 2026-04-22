@@ -1,0 +1,80 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Converted from res/values/strings.xml + rockstar/lang/lang_en-US.json -->
+
+    <!-- App Core -->
+    <sys:String x:Key="AppName">GTA III - Definitive Edition</sys:String>
+    <sys:String x:Key="AppShortName">GTA III</sys:String>
+
+    <!-- Download Screen (from DownloaderActivity) -->
+    <sys:String x:Key="TextButtonPause">Pause Download</sys:String>
+    <sys:String x:Key="TextButtonResume">Resume Download</sys:String>
+    <sys:String x:Key="TextButtonCancel">Cancel</sys:String>
+    <sys:String x:Key="TextButtonCancelVerify">Cancel Verification</sys:String>
+    <sys:String x:Key="TextButtonResumeCellular">Resume download</sys:String>
+    <sys:String x:Key="TextButtonWifiSettings">Wi-Fi settings</sys:String>
+    <sys:String x:Key="TextPausedCellular">Would you like to enable downloading over cellular connections? Depending on your data plan, this may cost you money.</sys:String>
+    <sys:String x:Key="TextPausedCellular2">If you choose not to enable downloading over cellular connections, the download will automatically resume when wi-fi is available.</sys:String>
+    <sys:String x:Key="KilobytesPerSecond">{0} KB/s</sys:String>
+    <sys:String x:Key="TimeRemaining">Time remaining: {0}</sys:String>
+    <sys:String x:Key="NotificationDownloadComplete">Download complete</sys:String>
+    <sys:String x:Key="NotificationDownloadFailed">Download unsuccessful</sys:String>
+
+    <!-- Rockstar SDK Strings (from lang_en-US.json) -->
+    <sys:String x:Key="Loading">loading...</sys:String>
+    <sys:String x:Key="Ok">OK</sys:String>
+    <sys:String x:Key="ErrorHeading">Error</sys:String>
+
+    <!-- Login -->
+    <sys:String x:Key="LoginCompleteErrorHeading">Error</sys:String>
+    <sys:String x:Key="LoginCompleteErrorOkay">Okay</sys:String>
+    <sys:String x:Key="LogoutConfirmHeading">Logout?</sys:String>
+    <sys:String x:Key="LogoutConfirmMessage">Are you sure you want to logout?</sys:String>
+    <sys:String x:Key="LogoutConfirmButtonCancel">Cancel</sys:String>
+    <sys:String x:Key="LogoutConfirmButtonLogout">Logout</sys:String>
+
+    <!-- Purchase / Trial -->
+    <sys:String x:Key="PurchaseCompleteHeading">Thank you for your purchase</sys:String>
+    <sys:String x:Key="PurchaseCompleteSubheading">The full game is now unlocked and ready to play.</sys:String>
+    <sys:String x:Key="PurchaseCompleteOkay">Okay</sys:String>
+    <sys:String x:Key="PurchaseFailedHeading">Purchase Failed!</sys:String>
+    <sys:String x:Key="PurchaseDisabledHeading">Purchase Disabled</sys:String>
+    <sys:String x:Key="FreeTrialOverHeading">Free Trial Over</sys:String>
+
+    <!-- Legacy Upgrade -->
+    <sys:String x:Key="LegacyRestoredHeading">Purchase Restored</sys:String>
+    <sys:String x:Key="LegacyRestoredSubheading">The full game is now unlocked and ready to play.</sys:String>
+
+    <!-- Cloud Saves -->
+    <sys:String x:Key="CloudSavesForPaidHeading">Cloud Saves</sys:String>
+
+    <!-- Other Games -->
+    <sys:String x:Key="OtherGamesHeading">More Rockstar games</sys:String>
+    <sys:String x:Key="OtherGamesSubheading">Try our other world-class mobile games</sys:String>
+
+    <!-- Rate -->
+    <sys:String x:Key="RatePopupTitle">Rate GTA III?</sys:String>
+    <sys:String x:Key="RatePopupMessage">Would you like to rate GTA III?</sys:String>
+    <sys:String x:Key="RatePopupYes">Yes</sys:String>
+    <sys:String x:Key="RatePopupNo">No</sys:String>
+
+    <!-- Delete Account -->
+    <sys:String x:Key="DeleteAccountConfirmHeading">Delete Account</sys:String>
+    <sys:String x:Key="DeleteAccountDoneHeading">Account Deleted</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="SettingsTitle">Settings</sys:String>
+    <sys:String x:Key="SettingsGraphics">Graphics</sys:String>
+    <sys:String x:Key="SettingsAudio">Audio</sys:String>
+    <sys:String x:Key="SettingsControls">Controls</sys:String>
+    <sys:String x:Key="SettingsLanguage">Language</sys:String>
+    <sys:String x:Key="SettingsAccount">Account</sys:String>
+
+    <!-- Browser -->
+    <sys:String x:Key="WebViewErrorTitle">Connection Error</sys:String>
+    <sys:String x:Key="WebViewErrorMessage">Unable to load the page. Please check your internet connection and try again.</sys:String>
+    <sys:String x:Key="WebViewRetry">Retry</sys:String>
+
+</ResourceDictionary>

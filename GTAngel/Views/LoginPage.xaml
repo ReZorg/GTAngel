@@ -1,0 +1,95 @@
+<Page x:Class="GTA3DE.Wpf.Views.LoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Title="Social Club Login"
+      Background="Black">
+
+    <!--
+    Converted from: FlutterSocialClubLoginScreen
+    Android: Flutter-based Social Club login via WebView
+    WPF: WebView2 for Social Club OAuth + native login form fallback
+    -->
+
+    <Grid>
+        <!-- Background -->
+        <Image Source="/Assets/Images/rockstarbg.png"
+               Stretch="UniformToFill"
+               Opacity="0.3" />
+        <Rectangle Fill="{StaticResource FadeOutBrush}" />
+
+        <!-- Login Content -->
+        <Grid HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Width="400">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Rockstar Logo -->
+            <Image Grid.Row="0"
+                   Source="/Assets/Images/rockstar.png"
+                   Width="60" Height="60"
+                   Margin="0,0,0,20" />
+
+            <!-- Heading -->
+            <TextBlock Grid.Row="1"
+                       Text="Sign in to Social Club"
+                       Style="{StaticResource HeadingStyle}"
+                       FontSize="24"
+                       Margin="0,0,0,8" />
+
+            <TextBlock Grid.Row="2"
+                       Text="Sign in with your Rockstar Games Social Club account to continue."
+                       Style="{StaticResource SubheadingStyle}"
+                       Opacity="0.7"
+                       Margin="0,0,0,30" />
+
+            <!-- Email Field (replaces EditText) -->
+            <TextBox Grid.Row="3"
+                     x:Name="EmailTextBox"
+                     FontSize="14"
+                     Padding="12,10"
+                     Margin="0,0,0,12"
+                     Background="#33FFFFFF"
+                     Foreground="White"
+                     BorderBrush="#55FFFFFF"
+                     BorderThickness="1"
+                     Tag="Email address" />
+
+            <!-- Password Field (replaces EditText inputType=password) -->
+            <PasswordBox Grid.Row="4"
+                         x:Name="PasswordBox"
+                         FontSize="14"
+                         Padding="12,10"
+                         Margin="0,0,0,20"
+                         Background="#33FFFFFF"
+                         Foreground="White"
+                         BorderBrush="#55FFFFFF"
+                         BorderThickness="1" />
+
+            <!-- Sign In Button -->
+            <Button Grid.Row="5"
+                    Content="SIGN IN"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    HorizontalAlignment="Stretch"
+                    Margin="0,0,0,12"
+                    Command="{Binding LoginCommand}" />
+
+            <!-- Skip / Play Offline -->
+            <Button Grid.Row="6"
+                    Content="Continue without signing in"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    HorizontalAlignment="Center"
+                    Command="{Binding SkipLoginCommand}" />
+        </Grid>
+    </Grid>
+</Page>

@@ -1,0 +1,314 @@
+{
+  "P1": {
+    "structure_term": 1,
+    "process_term": 8,
+    "forward_energy": 0.44999999999999996,
+    "backward_energy": 0.15000000000000002,
+    "activations": [
+      {
+        "step": 0,
+        "thread": "B",
+        "term": 8,
+        "mode": "E",
+        "fwd": 0.05,
+        "bwd": 0.0
+      },
+      {
+        "step": 1,
+        "thread": "C",
+        "term": 1,
+        "mode": "E",
+        "fwd": 0.1,
+        "bwd": 0.0
+      },
+      {
+        "step": 2,
+        "thread": "A",
+        "term": 8,
+        "mode": "E",
+        "fwd": 0.15,
+        "bwd": 0.0
+      },
+      {
+        "step": 3,
+        "thread": "B",
+        "term": 1,
+        "mode": "R",
+        "fwd": 0.15,
+        "bwd": 0.05
+      },
+      {
+        "step": 4,
+        "thread": "C",
+        "term": 8,
+        "mode": "E",
+        "fwd": 0.2,
+        "bwd": 0.05
+      },
+      {
+        "step": 5,
+        "thread": "A",
+        "term": 1,
+        "mode": "E",
+        "fwd": 0.25,
+        "bwd": 0.05
+      },
+      {
+        "step": 6,
+        "thread": "B",
+        "term": 8,
+        "mode": "E",
+        "fwd": 0.3,
+        "bwd": 0.05
+      },
+      {
+        "step": 7,
+        "thread": "C",
+        "term": 1,
+        "mode": "R",
+        "fwd": 0.3,
+        "bwd": 0.1
+      },
+      {
+        "step": 8,
+        "thread": "A",
+        "term": 8,
+        "mode": "E",
+        "fwd": 0.35,
+        "bwd": 0.1
+      },
+      {
+        "step": 9,
+        "thread": "B",
+        "term": 1,
+        "mode": "E",
+        "fwd": 0.4,
+        "bwd": 0.1
+      },
+      {
+        "step": 10,
+        "thread": "C",
+        "term": 8,
+        "mode": "E",
+        "fwd": 0.45,
+        "bwd": 0.1
+      },
+      {
+        "step": 11,
+        "thread": "A",
+        "term": 1,
+        "mode": "R",
+        "fwd": 0.45,
+        "bwd": 0.15
+      }
+    ]
+  },
+  "P2": {
+    "structure_term": 4,
+    "process_term": 5,
+    "forward_energy": 0.3,
+    "backward_energy": 0.3,
+    "activations": [
+      {
+        "step": 0,
+        "thread": "A",
+        "term": 4,
+        "mode": "R",
+        "fwd": 0.0,
+        "bwd": 0.05
+      },
+      {
+        "step": 1,
+        "thread": "B",
+        "term": 5,
+        "mode": "R",
+        "fwd": 0.0,
+        "bwd": 0.1
+      },
+      {
+        "step": 2,
+        "thread": "C",
+        "term": 4,
+        "mode": "E",
+        "fwd": 0.05,
+        "bwd": 0.1
+      },
+      {
+        "step": 3,
+        "thread": "A",
+        "term": 5,
+        "mode": "E",
+        "fwd": 0.1,
+        "bwd": 0.1
+      },
+      {
+        "step": 4,
+        "thread": "B",
+        "term": 4,
+        "mode": "R",
+        "fwd": 0.1,
+        "bwd": 0.15
+      },
+      {
+        "step": 5,
+        "thread": "C",
+        "term": 5,
+        "mode": "R",
+        "fwd": 0.1,
+        "bwd": 0.2
+      },
+      {
+        "step": 6,
+        "thread": "A",
+        "term": 4,
+        "mode": "E",
+        "fwd": 0.15,
+        "bwd": 0.2
+      },
+      {
+        "step": 7,
+        "thread": "B",
+        "term": 5,
+        "mode": "E",
+        "fwd": 0.2,
+        "bwd": 0.2
+      },
+      {
+        "step": 8,
+        "thread": "C",
+        "term": 4,
+        "mode": "R",
+        "fwd": 0.2,
+        "bwd": 0.25
+      },
+      {
+        "step": 9,
+        "thread": "A",
+        "term": 5,
+        "mode": "R",
+        "fwd": 0.2,
+        "bwd": 0.3
+      },
+      {
+        "step": 10,
+        "thread": "B",
+        "term": 4,
+        "mode": "E",
+        "fwd": 0.25,
+        "bwd": 0.3
+      },
+      {
+        "step": 11,
+        "thread": "C",
+        "term": 5,
+        "mode": "E",
+        "fwd": 0.3,
+        "bwd": 0.3
+      }
+    ]
+  },
+  "P3": {
+    "structure_term": 7,
+    "process_term": 2,
+    "forward_energy": 0.3,
+    "backward_energy": 0.3,
+    "activations": [
+      {
+        "step": 0,
+        "thread": "C",
+        "term": 7,
+        "mode": "E",
+        "fwd": 0.05,
+        "bwd": 0.0
+      },
+      {
+        "step": 1,
+        "thread": "A",
+        "term": 2,
+        "mode": "R",
+        "fwd": 0.05,
+        "bwd": 0.05
+      },
+      {
+        "step": 2,
+        "thread": "B",
+        "term": 7,
+        "mode": "R",
+        "fwd": 0.05,
+        "bwd": 0.1
+      },
+      {
+        "step": 3,
+        "thread": "C",
+        "term": 2,
+        "mode": "E",
+        "fwd": 0.1,
+        "bwd": 0.1
+      },
+      {
+        "step": 4,
+        "thread": "A",
+        "term": 7,
+        "mode": "E",
+        "fwd": 0.15,
+        "bwd": 0.1
+      },
+      {
+        "step": 5,
+        "thread": "B",
+        "term": 2,
+        "mode": "R",
+        "fwd": 0.15,
+        "bwd": 0.15
+      },
+      {
+        "step": 6,
+        "thread": "C",
+        "term": 7,
+        "mode": "R",
+        "fwd": 0.15,
+        "bwd": 0.2
+      },
+      {
+        "step": 7,
+        "thread": "A",
+        "term": 2,
+        "mode": "E",
+        "fwd": 0.2,
+        "bwd": 0.2
+      },
+      {
+        "step": 8,
+        "thread": "B",
+        "term": 7,
+        "mode": "E",
+        "fwd": 0.25,
+        "bwd": 0.2
+      },
+      {
+        "step": 9,
+        "thread": "C",
+        "term": 2,
+        "mode": "R",
+        "fwd": 0.25,
+        "bwd": 0.25
+      },
+      {
+        "step": 10,
+        "thread": "A",
+        "term": 7,
+        "mode": "R",
+        "fwd": 0.25,
+        "bwd": 0.3
+      },
+      {
+        "step": 11,
+        "thread": "B",
+        "term": 2,
+        "mode": "E",
+        "fwd": 0.3,
+        "bwd": 0.3
+      }
+    ]
+  }
+}

@@ -1,0 +1,411 @@
+(*===========================================================================*)
+(* Z++ Formal Specification: NPU System State                                *)
+(* Repository: o9nn/npu                                                       *)
+(* Description: Formalization of the complete system state for the NPU       *)
+(*             Virtual PCB architecture, integrating all hardware components *)
+(*             and device drivers into a coherent state model.                *)
+(*===========================================================================*)
+
+(*---------------------------------------------------------------------------*)
+(* Import Base Data Model                                                     *)
+(*---------------------------------------------------------------------------*)
+
+(* This specification builds upon data_model.zpp *)
+(* Assumed: All types and schemas from data_model.zpp are in scope *)
+
+(*---------------------------------------------------------------------------*)
+(* Virtual PCB System State                                                   *)
+(*---------------------------------------------------------------------------*)
+
+(* Complete state of the Virtual PCB hardware system *)
+VirtualPCBState
+  device_id : DEVICE_ID
+  model_number : seq CHAR
+  current_state : DEVICE_STATE
+  
+  (* Memory subsystem *)
+  sram_region : MemoryRegion
+  flash_region : MemoryRegion
+  periph_region : MemoryRegion
+  
+  (* GPIO subsystem *)
+  gpio_bank : GPIOPinBank
+  
+  (* DMA subsystem *)
+  dma_controller : DMAController
+  
+  (* Interrupt subsystem *)
+  irq_controller : InterruptController
+  
+  (* Power subsystem *)
+  power_mgmt : PowerManagement
+  
+  (* Firmware state *)
+  firmware_loaded : 𝔹
+  firmware_version : seq CHAR
+  
+  (* Runtime state *)
+  uptime_microseconds : ℕ
+  update_cycle_ms : ℕ₁
+
+where
+  (* Memory regions have correct base addresses and sizes *)
+  sram_region.base_address = SRAM_BASE ∧
+  sram_region.size = SRAM_SIZE ∧
+  sram_region.region_type = sram ∧
+  sram_region.is_writable ∧
+  
+  flash_region.base_address = FLASH_BASE ∧
+  flash_region.size = FLASH_SIZE ∧
+  flash_region.region_type = flash ∧
+  
+  periph_region.base_address = PERIPH_BASE ∧
+  periph_region.size = PERIPH_SIZE ∧
+  periph_region.region_type = peripheral ∧
+  periph_region.is_writable ∧
+  
+  (* Memory regions are disjoint *)
+  (sram_region.base_address + sram_region.size ≤ flash_region.base_address ∨
+   flash_region.base_address + flash_region.size ≤ sram_region.base_address) ∧
+  (sram_region.base_address + sram_region.size ≤ periph_region.base_address ∨
+   periph_region.base_address + periph_region.size ≤ sram_region.base_address) ∧
+  (flash_region.base_address + flash_region.size ≤ periph_region.base_address ∨
+   periph_region.base_address + periph_region.size ≤ flash_region.base_address) ∧
+  
+  (* GPIO bank is properly initialized *)
+  dom gpio_bank.pins = 0 .. 63 ∧
+  
+  (* Device state constraints *)
+  (current_state = uninitialized ⇒ ¬firmware_loaded) ∧
+  (current_state = running ∨ current_state = sleeping ⇒ firmware_loaded) ∧
+  
+  (* Firmware must be loaded to FLASH region *)
+  (firmware_loaded ⇒ flash_region.data ≠ ∅) ∧
+  
+  (* Update cycle is reasonable (1-100ms) *)
+  update_cycle_ms ≥ 1 ∧ update_cycle_ms ≤ 100
+
+(*---------------------------------------------------------------------------*)
+(* Financial Device State                                                     *)
+(*---------------------------------------------------------------------------*)
+
+(* State of the financial device driver and its hardware registers *)
+FinancialDeviceState
+  driver : FinancialDeviceDriver
+  
+  (* Hardware register values *)
+  reg_transaction_status : ℕ
+  reg_balance_total : ℕ
+  reg_transaction_count : ℕ
+  reg_error_code : ERROR_CODE
+  
+  (* Transaction buffer in SRAM *)
+  transaction_buffer_addr : ADDRESS
+  transaction_buffer_size : ℕ
+  
+  (* Pin mapping state *)
+  active_account_count : ℕ
+
+where
+  (* Driver must be loaded and initialized *)
+  driver.is_loaded ∧
+  driver.is_initialized ∧
+  
+  (* Register values are consistent with driver state *)
+  reg_transaction_count = driver.transaction_count ∧
+  
+  (* Transaction buffer is in SRAM region *)
+  transaction_buffer_addr ≥ SRAM_BASE ∧
+  transaction_buffer_addr + transaction_buffer_size ≤ SRAM_BASE + SRAM_SIZE ∧
+  
+  (* Active account count matches mapped accounts *)
+  active_account_count = #{a : dom driver.account_pins | 
+                           driver.account_pins(a).is_active} ∧
+  
+  (* Active accounts have non-zero balance voltage *)
+  (∀ a : dom driver.account_pins • 
+    driver.account_pins(a).is_active ⇒ 
+    driver.account_pins(a).balance_voltage > 0) ∧
+  
+  (* Total balance register is consistent *)
+  reg_balance_total ≥ 0
+
+(*---------------------------------------------------------------------------*)
+(* LLM Coprocessor State                                                      *)
+(*---------------------------------------------------------------------------*)
+
+(* State of the LLM coprocessor driver and its hardware registers *)
+LLMCoprocessorState
+  driver : LlamaCoprocessorDriver
+  
+  (* Hardware register values *)
+  reg_cmd : ℕ
+  reg_status : ℕ
+  reg_prompt_addr : ADDRESS
+  reg_prompt_len : ℕ
+  reg_n_predict : ℕ
+  reg_token_out : ℤ         (* Token ID, can be negative *)
+  reg_token_ready : 𝔹
+  reg_model_id : ℕ
+  reg_ctx_used : ℕ
+  reg_error_code : ERROR_CODE
+  reg_perf_tokens_sec : ℕ
+  
+  (* Inference state *)
+  prompt_buffer : seq ℤ     (* Tokenized prompt *)
+  output_tokens : seq ℤ     (* Generated tokens *)
+  current_token_index : ℕ
+  
+  (* Runtime state *)
+  inference_start_time : ℕ  (* Microseconds *)
+  inference_end_time : ℕ    (* Microseconds *)
+
+where
+  (* Driver must be loaded and initialized if model is loaded *)
+  (driver.model_loaded ⇒ driver.is_loaded ∧ driver.is_initialized) ∧
+  
+  (* Model ID register matches driver state *)
+  (driver.model_loaded ⇒ reg_model_id = driver.model_id) ∧
+  (¬driver.model_loaded ⇒ reg_model_id = 0) ∧
+  
+  (* Status register reflects driver state *)
+  (driver.inference_active ⇒ (reg_status & (1 << STATUS_BIT_BUSY)) ≠ 0) ∧
+  (¬driver.inference_active ⇒ (reg_status & (1 << STATUS_BIT_BUSY)) = 0) ∧
+  (driver.model_loaded ⇒ (reg_status & (1 << STATUS_BIT_MODEL_READY)) ≠ 0) ∧
+  
+  (* Token ready flag is consistent *)
+  (reg_token_ready ⇔ (reg_status & (1 << STATUS_BIT_TOKEN_READY)) ≠ 0) ∧
+  
+  (* Prompt address is in valid SRAM region when inference active *)
+  (driver.inference_active ⇒ 
+    reg_prompt_addr ≥ SRAM_BASE ∧ 
+    reg_prompt_addr + reg_prompt_len ≤ SRAM_BASE + SRAM_SIZE) ∧
+  
+  (* Context used is within model limits *)
+  (driver.model_loaded ⇒ 
+    reg_ctx_used ≤ driver.model_config.n_ctx) ∧
+  
+  (* Predict count is reasonable *)
+  (reg_n_predict > 0 ∧ reg_n_predict ≤ 2048) ∧
+  
+  (* Current token index is within output bounds *)
+  current_token_index ≤ #output_tokens ∧
+  
+  (* Token output is valid when token ready *)
+  (reg_token_ready ⇒ current_token_index > 0) ∧
+  
+  (* Timing invariants *)
+  (driver.inference_active ⇒ inference_start_time > 0) ∧
+  (¬driver.inference_active ∧ inference_end_time > 0 ⇒ 
+    inference_end_time ≥ inference_start_time) ∧
+  
+  (* Performance counter is consistent with telemetry *)
+  (driver.telemetry.tokens_per_second ≥ 0 ⇒
+    reg_perf_tokens_sec = ⌊driver.telemetry.tokens_per_second⌋)
+
+(*---------------------------------------------------------------------------*)
+(* Complete System State                                                      *)
+(*---------------------------------------------------------------------------*)
+
+(* Top-level system state integrating all components *)
+NPUSystemState
+  pcb_state : VirtualPCBState
+  financial_state : FinancialDeviceState
+  llm_state : LLMCoprocessorState
+  
+  (* System-wide invariants *)
+  system_initialized : 𝔹
+  drivers_loaded : 𝔹
+  system_error : 𝔹
+  error_log : seq ERROR_CODE
+
+where
+  (* System initialization dependencies *)
+  (system_initialized ⇔ 
+    pcb_state.current_state ∈ {ready, running, sleeping}) ∧
+  
+  (* Drivers loaded implies PCB is at least ready *)
+  (drivers_loaded ⇒ system_initialized) ∧
+  
+  (* Both drivers must be loaded for system to be ready *)
+  (drivers_loaded ⇔ 
+    financial_state.driver.is_loaded ∧ 
+    llm_state.driver.is_loaded) ∧
+  
+  (* System error flag reflects component errors *)
+  (system_error ⇔ 
+    pcb_state.current_state = error ∨
+    financial_state.reg_error_code ≠ ∅ ∨
+    llm_state.reg_error_code ≠ ∅) ∧
+  
+  (* Error log contains all component errors *)
+  (financial_state.reg_error_code ≠ ∅ ⇒ 
+    financial_state.reg_error_code ∈ ran error_log) ∧
+  (llm_state.reg_error_code ≠ ∅ ⇒ 
+    llm_state.reg_error_code ∈ ran error_log) ∧
+  
+  (* GPIO pin consistency between PCB and financial driver *)
+  (∀ a : dom financial_state.driver.account_pins •
+    let pin_num == financial_state.driver.account_pins(a).pin_number |
+    let pin == pcb_state.gpio_bank.pins(pin_num) |
+      (* Pin mode must be analog for financial accounts *)
+      pin.mode = analog ∧
+      (* Pin analog value corresponds to balance voltage *)
+      let voltage == financial_state.driver.account_pins(a).balance_voltage |
+      let adc_value == ⌊(voltage / 3.3) * 4095⌋ |
+        pin.analog_value = adc_value) ∧
+  
+  (* Peripheral memory region contains both device registers *)
+  (∀ addr : FIN_REG_BASE .. (FIN_REG_BASE + 0x10) |
+    addr ∈ dom pcb_state.periph_region.data) ∧
+  (∀ addr : LLM_REG_BASE .. (LLM_REG_BASE + 0x2C) |
+    addr ∈ dom pcb_state.periph_region.data) ∧
+  
+  (* Financial device registers are mapped to peripheral memory *)
+  read_reg32(pcb_state.periph_region, FIN_REG_TRANSACTION_STATUS) = 
+    financial_state.reg_transaction_status ∧
+  read_reg32(pcb_state.periph_region, FIN_REG_BALANCE_TOTAL) = 
+    financial_state.reg_balance_total ∧
+  read_reg32(pcb_state.periph_region, FIN_REG_TRANSACTION_COUNT) = 
+    financial_state.reg_transaction_count ∧
+  
+  (* LLM device registers are mapped to peripheral memory *)
+  read_reg32(pcb_state.periph_region, LLM_REG_CMD) = llm_state.reg_cmd ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_STATUS) = llm_state.reg_status ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_PROMPT_ADDR) = llm_state.reg_prompt_addr ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_PROMPT_LEN) = llm_state.reg_prompt_len ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_N_PREDICT) = llm_state.reg_n_predict ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_MODEL_ID) = llm_state.reg_model_id ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_CTX_USED) = llm_state.reg_ctx_used ∧
+  read_reg32(pcb_state.periph_region, LLM_REG_PERF_TOKENS_SEC) = llm_state.reg_perf_tokens_sec
+
+(*---------------------------------------------------------------------------*)
+(* Helper Functions for Register Access                                       *)
+(*---------------------------------------------------------------------------*)
+
+(* Read a 32-bit register from memory region *)
+read_reg32 : MemoryRegion × ADDRESS → ℕ
+∀ region : MemoryRegion; addr : ADDRESS •
+  addr ∈ dom region.data ∧ 
+  addr + 3 ∈ dom region.data ⇒
+    read_reg32(region, addr) = 
+      region.data(addr) + 
+      (region.data(addr + 1) << 8) + 
+      (region.data(addr + 2) << 16) + 
+      (region.data(addr + 3) << 24)
+
+(* Write a 32-bit register to memory region *)
+write_reg32 : MemoryRegion × ADDRESS × ℕ → MemoryRegion
+∀ region : MemoryRegion; addr : ADDRESS; value : ℕ •
+  region.is_writable ∧
+  addr ∈ dom region.data ∧ 
+  addr + 3 ∈ dom region.data ∧
+  value ≤ 0xFFFFFFFF ⇒
+    let region' == region |
+      region'.data = region.data ⊕ {
+        addr ↦ (value & 0xFF),
+        addr + 1 ↦ ((value >> 8) & 0xFF),
+        addr + 2 ↦ ((value >> 16) & 0xFF),
+        addr + 3 ↦ ((value >> 24) & 0xFF)
+      }
+
+(*---------------------------------------------------------------------------*)
+(* State Invariants                                                           *)
+(*---------------------------------------------------------------------------*)
+
+(* Global system invariants that must hold in all states *)
+SystemInvariants
+  NPUSystemState
+
+where
+  (* PCB device state is consistent *)
+  pcb_state.current_state ∈ DEVICE_STATE ∧
+  
+  (* Memory regions are properly initialized *)
+  sram_region.region_type = sram ∧
+  flash_region.region_type = flash ∧
+  periph_region.region_type = peripheral ∧
+  
+  (* GPIO pins are within valid ranges *)
+  (∀ i : 0 .. 63 • i ∈ dom pcb_state.gpio_bank.pins) ∧
+  
+  (* DMA transfers are bounded *)
+  #pcb_state.dma_controller.active_transfers ≤ 8 ∧
+  
+  (* Interrupt queue is bounded *)
+  #pcb_state.irq_controller.pending_queue ≤ 256 ∧
+  
+  (* Power rails are within spec *)
+  pcb_state.power_mgmt.voltage_rails(rail_3v3) ≥ 3.2 ∧
+  pcb_state.power_mgmt.voltage_rails(rail_3v3) ≤ 3.4 ∧
+  pcb_state.power_mgmt.voltage_rails(rail_5v0) ≥ 4.9 ∧
+  pcb_state.power_mgmt.voltage_rails(rail_5v0) ≤ 5.1 ∧
+  
+  (* Temperature is within operating range *)
+  pcb_state.power_mgmt.temperature_celsius ≥ -40 ∧
+  pcb_state.power_mgmt.temperature_celsius ≤ 85 ∧
+  
+  (* Financial accounts respect double-entry accounting *)
+  (∀ a : dom financial_state.driver.account_pins |
+    a ∈ ASSET_PIN_RANGE ∨ a ∈ EXPENSE_PIN_RANGE •
+    (* Assets and Expenses have debit balances (positive voltage) *)
+    financial_state.driver.account_pins(a).balance_voltage ≥ 0) ∧
+  
+  (* LLM inference constraints *)
+  (llm_state.driver.inference_active ⇒
+    llm_state.driver.model_loaded ∧
+    llm_state.reg_prompt_len > 0 ∧
+    llm_state.reg_n_predict > 0) ∧
+  
+  (* Token generation progress *)
+  (llm_state.driver.inference_active ⇒
+    #llm_state.output_tokens ≤ llm_state.reg_n_predict) ∧
+  
+  (* Telemetry consistency *)
+  llm_state.driver.telemetry.total_tokens_generated = 
+    #{t : ℕ | t ∈ 1 .. llm_state.driver.telemetry.total_prompts • 
+      llm_state.driver.telemetry.last_completion_tokens}
+
+(*---------------------------------------------------------------------------*)
+(* State Transition Predicates                                                *)
+(*---------------------------------------------------------------------------*)
+
+(* Predicate for valid state transitions *)
+ValidStateTransition
+  before : NPUSystemState
+  after : NPUSystemState
+
+where
+  (* Device state transitions follow defined state machine *)
+  (before.pcb_state.current_state = uninitialized ∧
+   after.pcb_state.current_state = initializing) ∨
+  (before.pcb_state.current_state = initializing ∧
+   after.pcb_state.current_state ∈ {ready, error}) ∨
+  (before.pcb_state.current_state = ready ∧
+   after.pcb_state.current_state ∈ {running, shutdown}) ∨
+  (before.pcb_state.current_state = running ∧
+   after.pcb_state.current_state ∈ {ready, sleeping, error, shutdown}) ∨
+  (before.pcb_state.current_state = sleeping ∧
+   after.pcb_state.current_state ∈ {running, shutdown}) ∨
+  (before.pcb_state.current_state = error ∧
+   after.pcb_state.current_state ∈ {ready, shutdown}) ∧
+  
+  (* Uptime only increases *)
+  after.pcb_state.uptime_microseconds ≥ 
+    before.pcb_state.uptime_microseconds ∧
+  
+  (* Transaction count only increases *)
+  after.financial_state.reg_transaction_count ≥ 
+    before.financial_state.reg_transaction_count ∧
+  
+  (* Total tokens generated only increases *)
+  after.llm_state.driver.telemetry.total_tokens_generated ≥ 
+    before.llm_state.driver.telemetry.total_tokens_generated ∧
+  
+  (* Model cannot be unloaded while inference is active *)
+  (before.llm_state.driver.inference_active ⇒ 
+    after.llm_state.driver.model_loaded)
+
+(*===========================================================================*)
+(* End of System State Specification                                         *)
+(*===========================================================================*)

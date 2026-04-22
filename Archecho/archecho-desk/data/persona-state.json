@@ -1,0 +1,1035 @@
+{
+  "name": "Lucy",
+  "time": 3024,
+  "totalXP": 587077.5840549807,
+  "matchesPlayed": 2,
+  "killCount": 24,
+  "deathCount": 0,
+  "winStreak": 2,
+  "traits": {
+    "Confidence": 0.998,
+    "Charm": 0.7539999999999999,
+    "Playfulness": 0.948,
+    "Wit": 0.8019999999999998,
+    "Sass": 0.813,
+    "Aggression": 0.689999999999978,
+    "Precision": 0.994,
+    "Adaptability": 0.997,
+    "RiskTolerance": 0.6029999999999999,
+    "FlowState": 0.5899999999999996,
+    "Randomness": 0.6279999999999999,
+    "Unpredictability": 0.9069999999999999,
+    "EmotionalVolatility": 0.584
+  },
+  "skills": {
+    "FPS": {
+      "name": "First-Person Shooter",
+      "skills": {
+        "aimPrecision": {
+          "level": 24,
+          "xp": 1748.5083887530084,
+          "maxLevel": 100,
+          "xpPerLevel": 100
+        },
+        "reactionTime": {
+          "level": 35,
+          "xp": 2705.9253612955463,
+          "maxLevel": 100,
+          "xpPerLevel": 120
+        },
+        "mapAwareness": {
+          "level": 30,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 80
+        },
+        "flicking": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 150
+        },
+        "tracking": {
+          "level": 23,
+          "xp": 529.0845501069209,
+          "maxLevel": 100,
+          "xpPerLevel": 130
+        },
+        "crosshairPlacement": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 90
+        }
+      }
+    },
+    "MOBA": {
+      "name": "MOBA / Strategy",
+      "skills": {
+        "lastHitting": {
+          "level": 29,
+          "xp": 1854.7613339872476,
+          "maxLevel": 100,
+          "xpPerLevel": 80
+        },
+        "mapControl": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 100
+        },
+        "teamfightPos": {
+          "level": 22,
+          "xp": 160.10832918503266,
+          "maxLevel": 100,
+          "xpPerLevel": 110
+        },
+        "objectiveTiming": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 90
+        },
+        "championMastery": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 140
+        },
+        "shotcalling": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 120
+        }
+      }
+    },
+    "Fighting": {
+      "name": "Fighting Games",
+      "skills": {
+        "comboExecution": {
+          "level": 20,
+          "xp": 857.9226513608241,
+          "maxLevel": 100,
+          "xpPerLevel": 130
+        },
+        "frameData": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 150
+        },
+        "mixupGame": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 110
+        },
+        "spacing": {
+          "level": 26,
+          "xp": 1497.7924327155197,
+          "maxLevel": 100,
+          "xpPerLevel": 100
+        },
+        "reads": {
+          "level": 7,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 120
+        },
+        "clutchFactor": {
+          "level": 23,
+          "xp": 2267.628385358062,
+          "maxLevel": 100,
+          "xpPerLevel": 140
+        }
+      }
+    },
+    "Survival": {
+      "name": "Battle Royale / Survival",
+      "skills": {
+        "looting": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 70
+        },
+        "rotationSense": {
+          "level": 36,
+          "xp": 1570.1551237767974,
+          "maxLevel": 100,
+          "xpPerLevel": 90
+        },
+        "buildSpeed": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 120
+        },
+        "editSpeed": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 130
+        },
+        "endgameIQ": {
+          "level": 20,
+          "xp": 710.8122653702511,
+          "maxLevel": 100,
+          "xpPerLevel": 110
+        },
+        "resourceMgmt": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 80
+        }
+      }
+    },
+    "Meta": {
+      "name": "Meta-Gaming Intelligence",
+      "skills": {
+        "patchAdaptation": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 100
+        },
+        "tiltResistance": {
+          "level": 26,
+          "xp": 2548.7692734026086,
+          "maxLevel": 100,
+          "xpPerLevel": 150
+        },
+        "mindGames": {
+          "level": 17,
+          "xp": 1017.1067458320834,
+          "maxLevel": 100,
+          "xpPerLevel": 120
+        },
+        "streamPresence": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 80
+        },
+        "trashTalk": {
+          "level": 0,
+          "xp": 0,
+          "maxLevel": 100,
+          "xpPerLevel": 60
+        },
+        "clutchPerformance": {
+          "level": 27,
+          "xp": 3286.0194852598934,
+          "maxLevel": 100,
+          "xpPerLevel": 140
+        }
+      }
+    }
+  },
+  "endocrine": {
+    "hormones": {
+      "CRH": {
+        "id": 0,
+        "value": 0.05,
+        "baseline": 0.05,
+        "halfLife": 5,
+        "label": "Stress Signal"
+      },
+      "ACTH": {
+        "id": 1,
+        "value": 0.05,
+        "baseline": 0.05,
+        "halfLife": 10,
+        "label": "Stress Relay"
+      },
+      "Cortisol": {
+        "id": 2,
+        "value": 0.9424332890824251,
+        "baseline": 0.15,
+        "halfLife": 30,
+        "label": "Resource Mobilization"
+      },
+      "DopamineTonic": {
+        "id": 3,
+        "value": 0.9452669284708122,
+        "baseline": 0.3,
+        "halfLife": 20,
+        "label": "Baseline Motivation"
+      },
+      "DopaminePhasic": {
+        "id": 4,
+        "value": 0.4905077894648251,
+        "baseline": 0,
+        "halfLife": 3,
+        "label": "Reward Spike"
+      },
+      "Serotonin": {
+        "id": 5,
+        "value": 0.9916822338332807,
+        "baseline": 0.4,
+        "halfLife": 50,
+        "label": "Mood / Patience"
+      },
+      "Norepinephrine": {
+        "id": 6,
+        "value": 0.850798254882237,
+        "baseline": 0.1,
+        "halfLife": 8,
+        "label": "Arousal / Vigilance"
+      },
+      "Oxytocin": {
+        "id": 7,
+        "value": 0.3299874900404931,
+        "baseline": 0.1,
+        "halfLife": 15,
+        "label": "Trust / Bonding"
+      },
+      "T3T4": {
+        "id": 8,
+        "value": 0.5,
+        "baseline": 0.5,
+        "halfLife": 100,
+        "label": "Processing Rate"
+      },
+      "Melatonin": {
+        "id": 9,
+        "value": 1.5474150343850153e-63,
+        "baseline": 0,
+        "halfLife": 12,
+        "label": "Circadian"
+      },
+      "Insulin": {
+        "id": 10,
+        "value": 0.2,
+        "baseline": 0.2,
+        "halfLife": 10,
+        "label": "Energy Conservation"
+      },
+      "Glucagon": {
+        "id": 11,
+        "value": 0.1,
+        "baseline": 0.1,
+        "halfLife": 8,
+        "label": "Energy Mobilization"
+      },
+      "IL6": {
+        "id": 12,
+        "value": 0.3792287502526557,
+        "baseline": 0.05,
+        "halfLife": 20,
+        "label": "System Health"
+      },
+      "Anandamide": {
+        "id": 13,
+        "value": 0.45142603936382086,
+        "baseline": 0.1,
+        "halfLife": 6,
+        "label": "Noise Reduction"
+      },
+      "Reserved1": {
+        "id": 14,
+        "value": 0,
+        "baseline": 0,
+        "halfLife": 10,
+        "label": "Extension 1"
+      },
+      "Reserved2": {
+        "id": 15,
+        "value": 0,
+        "baseline": 0,
+        "halfLife": 10,
+        "label": "Extension 2"
+      }
+    },
+    "mode": "THREAT",
+    "modeHistory": [
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757308
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757402
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757403
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757487
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757487
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757487
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757487
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757487
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757535
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757575
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757576
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757576
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757620
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757620
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757669
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757669
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757710
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757710
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757710
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757755
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757755
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757755
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757802
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757803
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757803
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757803
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757803
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757803
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757844
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757888
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757888
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757888
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757888
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757888
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757944
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757944
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757944
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757944
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915757991
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915757991
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758034
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758124
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758172
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758172
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758172
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758211
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758211
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758211
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758211
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758211
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758211
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758211
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758253
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758253
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758253
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758304
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758304
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758358
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758358
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758358
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758404
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758455
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758455
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758455
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758455
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758455
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758455
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758556
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758556
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758606
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758606
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758606
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758606
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758606
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915758705
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915758986
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915759258
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915759306
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915759400
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915759494
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915759544
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915759595
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915759752
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915759854
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915759903
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915760004
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915760206
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915760307
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915760355
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915760403
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915760453
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915760667
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915760702
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915760753
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915760902
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915761096
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915761388
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915761436
+      },
+      {
+        "from": "THREAT",
+        "to": "REWARD",
+        "time": 1775915761636
+      },
+      {
+        "from": "REWARD",
+        "to": "THREAT",
+        "time": 1775915761830
+      }
+    ]
+  },
+  "cognitiveState": {
+    "valence": -0.4490918602292129,
+    "arousal": 0.850798254882237,
+    "cognitiveLoad": 0.009444521379883853,
+    "flowLevel": 0.98,
+    "chaosIntensity": 0.24387999999999999
+  },
+  "expression": "Genuine Smile",
+  "morphTargets": {
+    "CTRL_brow_inner_UP": 0.458379859054119,
+    "CTRL_brow_outer_UP": 0,
+    "CTRL_brow_down": 0.946302009309667,
+    "CTRL_eye_upperLid_UP": 1,
+    "CTRL_cheek_raise": 1,
+    "CTRL_eye_squint": 0.4131863250451857,
+    "CTRL_nose_wrinkle": 0,
+    "CTRL_mouth_upperLip_UP": 0.15169150010106228,
+    "CTRL_mouth_cornerPull": 1,
+    "CTRL_mouth_dimple": 0,
+    "CTRL_mouth_cornerDepress": 0.5873835602448894,
+    "CTRL_chin_raise": 0.085,
+    "CTRL_mouth_stretch": 0.2552394764646711,
+    "CTRL_mouth_tighten": 0,
+    "CTRL_mouth_lipsPart": 0.511030341477396,
+    "CTRL_jaw_open": 0.18631280749028883,
+    "CTRL_mouth_lipSuck": 0,
+    "CTRL_eye_blink": 1.0831905240695107e-63
+  },
+  "actionUnits": {
+    "AU1": 0.458379859054119,
+    "AU2": 0,
+    "AU4": 0.946302009309667,
+    "AU5": 1,
+    "AU6": 1,
+    "AU7": 0.4131863250451857,
+    "AU9": 0,
+    "AU10": 0.15169150010106228,
+    "AU12": 1,
+    "AU14": 0,
+    "AU15": 0.5873835602448894,
+    "AU17": 0.085,
+    "AU20": 0.2552394764646711,
+    "AU23": 0,
+    "AU25": 0.511030341477396,
+    "AU26": 0.18631280749028883,
+    "AU28": 0,
+    "AU43": 1.0831905240695107e-63,
+    "AU45": 0,
+    "AU46": 0
+  },
+  "lyapunov": 15.088582310991336,
+  "lorenzState": {
+    "x": -4.372321278200202,
+    "y": -8.495915237291898,
+    "z": 7.801107875776942
+  },
+  "aesthetics": {
+    "ConfidencePosture": 0.85,
+    "Charisma": 0.8,
+    "EyeSparkle": 0.75,
+    "GracefulMovement": 0.7,
+    "EmissiveGlow": 0.2
+  },
+  "embodied4E": {
+    "Embodied": {
+      "description": "Body schema drives gameplay mechanics",
+      "channels": [
+        {
+          "name": "Hand-Eye Coordination",
+          "source": "nn4c.Dendritic",
+          "target": "FPS.aimPrecision"
+        },
+        {
+          "name": "Muscle Memory",
+          "source": "nn4c.Synaptic",
+          "target": "Fighting.comboExecution"
+        },
+        {
+          "name": "Reaction Reflex",
+          "source": "nn4c.AIS",
+          "target": "FPS.reactionTime"
+        },
+        {
+          "name": "Somatic Markers",
+          "source": "endocrine.cortisol",
+          "target": "Meta.tiltResistance"
+        },
+        {
+          "name": "Proprioceptive Aim",
+          "source": "nn4c.Membrane",
+          "target": "FPS.tracking"
+        }
+      ]
+    },
+    "Embedded": {
+      "description": "Environmental context shapes strategy",
+      "channels": [
+        {
+          "name": "Map Reading",
+          "source": "nn9c.CortexDomain",
+          "target": "FPS.mapAwareness"
+        },
+        {
+          "name": "Audio Cues",
+          "source": "nn9c.CranialNerve",
+          "target": "Survival.rotationSense"
+        },
+        {
+          "name": "UI Parsing",
+          "source": "nn9c.ThalamicBody",
+          "target": "MOBA.objectiveTiming"
+        },
+        {
+          "name": "Spawn Timing",
+          "source": "dove9.Clock30",
+          "target": "MOBA.mapControl"
+        },
+        {
+          "name": "Zone Awareness",
+          "source": "nn9c.SkinNerveNet",
+          "target": "Survival.endgameIQ"
+        }
+      ]
+    },
+    "Enacted": {
+      "description": "Meaning created through gameplay interaction",
+      "channels": [
+        {
+          "name": "Combo Discovery",
+          "source": "dove9.T2_IDEA_FORMATION",
+          "target": "Fighting.mixupGame"
+        },
+        {
+          "name": "Build Creativity",
+          "source": "dove9.T5_ACTION_SEQUENCE",
+          "target": "Survival.buildSpeed"
+        },
+        {
+          "name": "Play-Making",
+          "source": "dove9.T8_BALANCED_RESPONSE",
+          "target": "MOBA.teamfightPos"
+        },
+        {
+          "name": "Improvisation",
+          "source": "chaos.lorenz",
+          "target": "Meta.mindGames"
+        },
+        {
+          "name": "Style Expression",
+          "source": "aesthetic.Charisma",
+          "target": "Meta.streamPresence"
+        }
+      ]
+    },
+    "Extended": {
+      "description": "Cognition extends through tools and community",
+      "channels": [
+        {
+          "name": "Controller Mastery",
+          "source": "nn9c.ThoracicNerve",
+          "target": "Fighting.frameData"
+        },
+        {
+          "name": "Team Synergy",
+          "source": "endocrine.oxytocin",
+          "target": "MOBA.shotcalling"
+        },
+        {
+          "name": "Meta Knowledge",
+          "source": "nn9c.Hippocampus",
+          "target": "Meta.patchAdaptation"
+        },
+        {
+          "name": "Chat Presence",
+          "source": "aesthetic.Confidence",
+          "target": "Meta.trashTalk"
+        },
+        {
+          "name": "Stream Performance",
+          "source": "aesthetic.EyeSparkle",
+          "target": "Meta.streamPresence"
+        }
+      ]
+    }
+  }
+}

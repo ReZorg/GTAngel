@@ -1,0 +1,89 @@
+syntax = "proto3";
+package metahuman_service_api;
+option go_package = "github.ol.epicgames.net/MHTech/mh-uemhc-autorig-service/api/proto";
+
+// Point in three-dimensional space
+message Vertex {
+	float x = 1;
+	float y = 2;
+	float z = 3;
+}
+
+// Array of vertices making up a 3D mesh
+message Mesh {
+	repeated Vertex vertices = 1;
+}
+
+// Meshes targeting the eyes
+message Eyes {
+	Mesh left = 1;
+	Mesh right = 2;
+	Mesh edge = 3;
+	Mesh shell = 4;
+	Mesh lashes = 5;
+}
+
+// Meshes targeting the head
+message Head {
+	Mesh face = 1;
+	Eyes eyes = 2;
+	Mesh teeth = 3;
+	Mesh cartilage = 4;
+	Mesh saliva = 5;
+}
+
+// Additional parameters to speed up autorigging
+message Parameters {
+	repeated float bind_pose = 1;
+	repeated float solver_coefficients = 2;
+	string model_id = 3;
+}
+
+// What algorithm to use to perform autorigging
+enum RigType {
+    RIG_TYPE_UNKNOWN = 0;
+    RIG_TYPE_JOINTS_ONLY = 1;
+    RIG_TYPE_JOINTS_AND_BLENDSHAPES = 2;
+}
+
+// How much to refine the output of autorigging
+enum RefinementLevel {
+    REFINEMENT_LEVEL_UNKNOWN = 0;
+    REFINEMENT_LEVEL_NONE = 1;
+    REFINEMENT_LEVEL_MEDIUM = 2;
+}
+
+// What layers to export to the autorig output
+enum ExportLayers {
+	EXPORT_LAYERS_UNKNOWN = 0;
+	EXPORT_LAYERS_NONE = 1;
+	// Radial Basis Function
+	EXPORT_LAYERS_RBF = 2; // default
+}
+
+// Desired quality of an autorig
+message Quality {
+	RigType rig_type = 1;
+	RefinementLevel refinement_level = 2;
+	ExportLayers export_layers = 3;
+}
+
+// Unreal Engine version (major and minor only).
+// e.g. "UE5.6" -> major=5, minor=6
+message UEVersion {
+	uint32 major = 1;
+	uint32 minor = 2;
+}
+
+message AutorigRequest {
+	Head head = 1;
+	// Index of a high frequency face map to use in the autorig (0-154)
+	int32 high_frequency_index = 2;
+	// Scale factor (>0) for the resulting rig, with 1.0 meaning no scale change
+	float to_target_scale = 3;
+	// Optional parameters to speed up the autorig
+	optional Parameters parameters = 4;
+	Quality quality = 5;
+	// Version of UE with which to make results compatible
+	UEVersion ue_version = 6;
+}

@@ -1,0 +1,176 @@
+{
+  "currentLevel": 5,
+  "targetLevel": 5,
+  "experiments": [],
+  "coherenceScore": 0.9061254924920742,
+  "cycleCount": 240,
+  "timestamp": "2026-04-11T13:23:47.973Z",
+  "crystalState": {
+    "levels": [
+      {
+        "id": 0,
+        "period": 0.008,
+        "phase": 1.2383415824648483,
+        "amplitude": 0.9548971275638138,
+        "label": "Protein"
+      },
+      {
+        "id": 1,
+        "period": 0.026,
+        "phase": 1.655946155362662,
+        "amplitude": 0.525371548386876,
+        "label": "Ion-Channel"
+      },
+      {
+        "id": 2,
+        "period": 0.052,
+        "phase": 0.657796739393282,
+        "amplitude": 0.9039673370032364,
+        "label": "Membrane"
+      },
+      {
+        "id": 3,
+        "period": 0.11,
+        "phase": 1.2566287453515088,
+        "amplitude": 0.756406597568168,
+        "label": "AIS"
+      },
+      {
+        "id": 4,
+        "period": 0.16,
+        "phase": 2.9860678828486167,
+        "amplitude": 0.7128475024004315,
+        "label": "Dendritic"
+      },
+      {
+        "id": 5,
+        "period": 0.25,
+        "phase": 2.6898648907167826,
+        "amplitude": 0.5635614767842025,
+        "label": "Synaptic"
+      },
+      {
+        "id": 6,
+        "period": 0.33,
+        "phase": 5.174310536410693,
+        "amplitude": 0.9411438522123425,
+        "label": "Soma"
+      },
+      {
+        "id": 7,
+        "period": 0.5,
+        "phase": 5.658604886992217,
+        "amplitude": 0.5657071245194518,
+        "label": "Network"
+      },
+      {
+        "id": 8,
+        "period": 1,
+        "phase": 4.653236726102436,
+        "amplitude": 0.6421974779462052,
+        "label": "Global"
+      }
+    ]
+  },
+  "brainState": {
+    "levels": [
+      {
+        "id": 0,
+        "name": "Microtubule",
+        "activity": 0.6594825222193197,
+        "coherence": 0.7142748939366921
+      },
+      {
+        "id": 1,
+        "name": "Neuron",
+        "activity": 0.4993246072297679,
+        "coherence": 0.9658623421498875
+      },
+      {
+        "id": 2,
+        "name": "CorticalBranch",
+        "activity": 0.3846533243644302,
+        "coherence": 0.5567908945675568
+      },
+      {
+        "id": 3,
+        "name": "CortexDomain",
+        "activity": 0.2167733371674947,
+        "coherence": 0.8605554033566285
+      },
+      {
+        "id": 4,
+        "name": "Cerebellum",
+        "activity": 0.05049953764143933,
+        "coherence": 0.9259715959871538
+      },
+      {
+        "id": 5,
+        "name": "Hypothalamus",
+        "activity": 0.1970593122695583,
+        "coherence": 0.5059557353822643
+      },
+      {
+        "id": 6,
+        "name": "Hippocampus",
+        "activity": 0.8970162817135907,
+        "coherence": 0.8158871970576351
+      },
+      {
+        "id": 7,
+        "name": "ThalamicBody",
+        "activity": 0.654718762026444,
+        "coherence": 0.5560991225862195
+      },
+      {
+        "id": 8,
+        "name": "SkinNerveNet",
+        "activity": 0.5411384280950543,
+        "coherence": 0.5785491603086974
+      },
+      {
+        "id": 9,
+        "name": "CranialNerve",
+        "activity": 0.7570508216206093,
+        "coherence": 0.6651217185828817
+      },
+      {
+        "id": 10,
+        "name": "ThoracicNerve",
+        "activity": 0.22229071376872733,
+        "coherence": 0.9168261254844516
+      },
+      {
+        "id": 11,
+        "name": "BloodVessel",
+        "activity": 0.6507143946780216,
+        "coherence": 0.5841786810638743
+      }
+    ]
+  },
+  "dove9": {
+    "streams": {
+      "PRIMARY": {
+        "phase": 180,
+        "active": true
+      },
+      "SECONDARY": {
+        "phase": 300,
+        "active": true
+      },
+      "TERTIARY": {
+        "phase": 60,
+        "active": true
+      }
+    },
+    "clockStep": 15,
+    "terms": [
+      "T1_PERCEPTION",
+      "T2_IDEA_FORMATION",
+      "T4_SENSORY_INPUT",
+      "T5_ACTION_SEQUENCE",
+      "T7_MEMORY_ENCODING",
+      "T8_BALANCED_RESPONSE"
+    ]
+  }
+}

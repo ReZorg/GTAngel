@@ -1,0 +1,75 @@
+<UserControl x:Class="GTA3DE.Wpf.Controls.TrialBannerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Height="100">
+
+    <!--
+    Converted from: res/layout/trialbanner.xml
+    Android: FrameLayout > LinearLayout(vertical) > [spacer, horizontal(spacer,caption,unlock,x), spacer, progress]
+    WPF: Grid with DockPanel layout preserving the exact structure
+    
+    Original hierarchy:
+      FrameLayout (match_parent, 100dp, transparent bg)
+        LinearLayout (vertical, black bg)
+          View (20dp spacer top)
+          LinearLayout (horizontal)
+            View (30dp spacer left)
+            TextView#caption (weight=1, white, "Play for free for 7:12 minutes")
+            Button#buttonUnlock (button_background_unlock, "Unlock")
+            View (8dp spacer)
+            AppCompatImageButton#buttonX (button_background_x, bannerclose)
+            View (30dp spacer right)
+          View (20dp spacer bottom, weight=1)
+          ConstraintLayout (3dp height)
+            View#progress (amber #ffab00, width_percent=0)
+    -->
+
+    <Grid Background="Transparent" ClipToBounds="False">
+        <StackPanel Background="Black">
+            <!-- Top Spacer (20dp) -->
+            <Border Height="20" />
+
+            <!-- Content Row -->
+            <DockPanel Margin="30,0">
+                <!-- Close Button (replaces #buttonX with bannerclose.png) -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="ButtonX"
+                        Width="40" Height="36"
+                        Style="{StaticResource IconButtonStyle}"
+                        Command="{Binding CloseCommand}">
+                    <Image Source="/Assets/Images/bannerclose.png"
+                           Width="16" Height="16" />
+                </Button>
+
+                <!-- Spacer -->
+                <Border DockPanel.Dock="Right" Width="8" />
+
+                <!-- Unlock Button (replaces #buttonUnlock) -->
+                <Button DockPanel.Dock="Right"
+                        x:Name="ButtonUnlock"
+                        Content="Unlock"
+                        Style="{StaticResource UnlockButtonStyle}"
+                        Command="{Binding UnlockCommand}" />
+
+                <!-- Caption (replaces #caption TextView, weight=1) -->
+                <TextBlock x:Name="Caption"
+                           Text="{Binding CaptionText}"
+                           Foreground="White"
+                           VerticalAlignment="Center"
+                           FontSize="14" />
+            </DockPanel>
+
+            <!-- Bottom Spacer (20dp, weight=1) -->
+            <Border Height="20" />
+
+            <!-- Progress Bar (replaces ConstraintLayout with View#progress, 3dp, amber) -->
+            <ProgressBar x:Name="Progress"
+                         Style="{StaticResource TrialProgressStyle}"
+                         Value="{Binding ProgressPercent}"
+                         Maximum="100" />
+        </StackPanel>
+    </Grid>
+</UserControl>

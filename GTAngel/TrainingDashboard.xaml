@@ -1,0 +1,878 @@
+<Window x:Class="GTA3DE.Wpf.TrainingDashboard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:GTA3DE.Wpf.ViewModels"
+        xmlns:views="clr-namespace:GTA3DE.Wpf.Views"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        Title="AngelClaw Game World — Deep Tree Echo Training Environment"
+        Width="1400" Height="900" MinWidth="1100" MinHeight="700"
+        Background="{StaticResource BgDarkBrush}"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== HEADER ===== -->
+        <Border Grid.Row="0" Background="{StaticResource BgMediumBrush}" Padding="16,10" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="&#x1F43E;" FontSize="24" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel>
+                        <TextBlock Text="AngelClaw Game World" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}"/>
+                        <TextBlock Text="Deep Tree Echo Training Environment" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="8,4" Margin="4,0">
+                        <TextBlock Text="{Binding AutonomyLevelText}" Foreground="{StaticResource AccentGreenBrush}" FontWeight="SemiBold" FontSize="12"/>
+                    </Border>
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="8,4" Margin="4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Coherence: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding StreamCoherence, StringFormat='{}{0:F3}'}" Foreground="{StaticResource AccentCyanBrush}" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ===== MAIN CONTENT (TabControl) ===== -->
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}" Background="Transparent" BorderThickness="0" Padding="0" Margin="8">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Background" Value="{StaticResource BgMediumBrush}"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                    <Setter Property="Padding" Value="16,8"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border x:Name="Bd" Background="{StaticResource BgMediumBrush}" CornerRadius="6,6,0,0" Padding="16,8" Margin="2,0,2,0" BorderBrush="#22FFFFFF" BorderThickness="1,1,1,0">
+                                    <ContentPresenter ContentSource="Header"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="{StaticResource BgLightBrush}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#1F3460"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- ===== TAB 0: GAME WORLD ASSETS ===== -->
+            <TabItem Header="Game World Assets">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Asset Path + Load -->
+                    <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Archive:" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding AssetArchivePath, UpdateSourceTrigger=PropertyChanged}" Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF" Padding="8,6" FontSize="12"/>
+                            <Button Grid.Column="2" Content="Scan Assets" Command="{Binding LoadAssetsCommand}" Style="{StaticResource AccentButton}" Margin="8,0,0,0" IsEnabled="{Binding IsBusy, Converter={StaticResource InvBoolToVis}}"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Summary Cards -->
+                    <Border Grid.Row="1" Style="{StaticResource CardBorder}" Visibility="{Binding IsAssetLoaded, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CatalogSummary.TotalAssets}" Style="{StaticResource MetricValue}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Total Assets" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CatalogSummary.TotalSizeFormatted}" Style="{StaticResource MetricValue}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Total Size" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CatalogSummary.MapCount}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentCyanBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Maps" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CatalogSummary.TextureCount}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentOrangeBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Textures" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CatalogSummary.BlueprintCount}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentPurpleBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Blueprints" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="5" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding CatalogSummary.AudioCount}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentGreenBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Audio" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Asset List + Chart -->
+                    <Grid Grid.Row="2" Visibility="{Binding IsAssetLoaded, Converter={StaticResource BoolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Asset List -->
+                        <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding AssetSearchQuery, UpdateSourceTrigger=PropertyChanged}" Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF" Padding="8,6" FontSize="12">
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Return" Command="{Binding FilterAssetsCommand}"/>
+                                        </TextBox.InputBindings>
+                                    </TextBox>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <Button Content="Search" Command="{Binding FilterAssetsCommand}" Style="{StaticResource AccentButton}" Margin="4,0,0,0"/>
+                                        <Button Content="Clear" Command="{Binding ClearFilterCommand}" Style="{StaticResource DangerButton}" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding FilteredAssets}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}" BorderThickness="0"
+                                          RowBackground="#11FFFFFF" AlternatingRowBackground="#08FFFFFF"
+                                          GridLinesVisibility="None" HeadersVisibility="Column" CanUserSortColumns="True"
+                                          FontSize="11" RowHeight="26">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="{StaticResource BgLightBrush}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+                                            <Setter Property="Padding" Value="8,4"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="FontSize" Value="11"/>
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="File" Binding="{Binding FileName}" Width="200"/>
+                                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="100"/>
+                                        <DataGridTextColumn Header="Game" Binding="{Binding GameTitle}" Width="80"/>
+                                        <DataGridTextColumn Header="Size" Binding="{Binding SizeFormatted}" Width="80"/>
+                                        <DataGridTextColumn Header="Extension" Binding="{Binding Extension}" Width="70"/>
+                                        <DataGridTextColumn Header="Path" Binding="{Binding FullPath}" Width="*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <!-- Category Breakdown + Maps -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Asset Distribution Chart -->
+                            <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Asset Distribution" Style="{StaticResource SectionHeader}"/>
+                                    <lvc:PieChart Grid.Row="1" Series="{Binding AssetDistributionSeries}" LegendPosition="Bottom" MinHeight="200"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Maps List -->
+                            <Border Grid.Row="1" Style="{StaticResource CardBorder}" MaxHeight="200">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="Game World Maps" Style="{StaticResource SectionHeader}"/>
+                                    <ListBox Grid.Row="1" ItemsSource="{Binding Maps}" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextPrimaryBrush}" FontSize="11">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Margin="2">
+                                                    <TextBlock Text="&#x1F5FA;" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{StaticResource AccentCyanBrush}"/>
+                                                    <TextBlock Text=" — " Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                    <TextBlock Text="{Binding Region}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== TAB 1: DTE TRAINING DASHBOARD ===== -->
+            <TabItem Header="DTE Training">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Training Controls -->
+                    <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                <TextBlock Text="Max Experiments" Style="{StaticResource MetricLabel}"/>
+                                <TextBox Text="{Binding MaxExperiments}" Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF" Padding="6,4" Width="60"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                                <TextBlock Text="Spectral Radius" Style="{StaticResource MetricLabel}"/>
+                                <TextBox Text="{Binding SpectralRadius, StringFormat='{}{0:F2}'}" Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF" Padding="6,4" Width="60"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                                <TextBlock Text="Leaking Rate" Style="{StaticResource MetricLabel}"/>
+                                <TextBox Text="{Binding LeakingRate, StringFormat='{}{0:F2}'}" Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF" Padding="6,4" Width="60"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Margin="0,0,16,0">
+                                <TextBlock Text="Target Level" Style="{StaticResource MetricLabel}"/>
+                                <ComboBox SelectedItem="{Binding TargetAutonomyLevel}" Background="#11FFFFFF" Foreground="Black" Padding="6,4" Width="110">
+                                    <ComboBoxItem Content="Reactive"/>
+                                    <ComboBoxItem Content="Adaptive"/>
+                                    <ComboBoxItem Content="Strategic"/>
+                                    <ComboBoxItem Content="Cognitive"/>
+                                    <ComboBoxItem Content="Embodied"/>
+                                    <ComboBoxItem Content="Autonomous"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <Button Grid.Column="5" Content="Start Autogenesis" Command="{Binding StartTrainingCommand}" Style="{StaticResource SuccessButton}" Margin="4,0" Visibility="{Binding IsTrainingRunning, Converter={StaticResource InvBoolToVis}}"/>
+                            <Button Grid.Column="6" Content="Stop" Command="{Binding StopTrainingCommand}" Style="{StaticResource DangerButton}" Margin="4,0" Visibility="{Binding IsTrainingRunning, Converter={StaticResource BoolToVis}}"/>
+                            <Button Grid.Column="7" Content="Reset" Command="{Binding ResetTrainingCommand}" Style="{StaticResource AccentButton}" Margin="4,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Dashboard Grid -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Cognitive State Card -->
+                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Cognitive State" Style="{StaticResource SectionHeader}"/>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="4">
+                                        <TextBlock Text="Mode" Style="{StaticResource MetricLabel}"/>
+                                        <TextBlock Text="{Binding CognitiveModeName}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="4">
+                                        <TextBlock Text="Cycle Step" Style="{StaticResource MetricLabel}"/>
+                                        <TextBlock FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentOrangeBrush}">
+                                            <Run Text="{Binding CurrentCycleStep, Mode=OneWay}"/><Run Text="/11: "/><Run Text="{Binding CycleStepName, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="4">
+                                        <TextBlock Text="Valence" Style="{StaticResource MetricLabel}"/>
+                                        <TextBlock Text="{Binding Valence, StringFormat='{}{0:F3}'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="3" Margin="4">
+                                        <TextBlock Text="Arousal" Style="{StaticResource MetricLabel}"/>
+                                        <TextBlock Text="{Binding Arousal, StringFormat='{}{0:F3}'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    </StackPanel>
+
+                                    <!-- 4E Cognition -->
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="4">
+                                        <TextBlock Text="Embodied" Style="{StaticResource MetricLabel}"/>
+                                        <ProgressBar Value="{Binding Embodied}" Maximum="1" Height="8" Foreground="{StaticResource AccentCyanBrush}" Background="#11FFFFFF"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="4">
+                                        <TextBlock Text="Embedded" Style="{StaticResource MetricLabel}"/>
+                                        <ProgressBar Value="{Binding Embedded}" Maximum="1" Height="8" Foreground="{StaticResource AccentGreenBrush}" Background="#11FFFFFF"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="4">
+                                        <TextBlock Text="Enacted" Style="{StaticResource MetricLabel}"/>
+                                        <ProgressBar Value="{Binding Enacted}" Maximum="1" Height="8" Foreground="{StaticResource AccentOrangeBrush}" Background="#11FFFFFF"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="1" Grid.Column="3" Margin="4">
+                                        <TextBlock Text="Extended" Style="{StaticResource MetricLabel}"/>
+                                        <ProgressBar Value="{Binding Extended}" Maximum="1" Height="8" Foreground="{StaticResource AccentPurpleBrush}" Background="#11FFFFFF"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="4">
+                                        <TextBlock Text="Wisdom" Style="{StaticResource MetricLabel}"/>
+                                        <TextBlock Text="{Binding WisdomLevel, StringFormat='{}{0:F3}'}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentGreenBrush}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="4">
+                                        <TextBlock Text="Autonomy Progress" Style="{StaticResource MetricLabel}"/>
+                                        <ProgressBar Value="{Binding AutonomyProgress}" Maximum="1" Height="12" Foreground="{StaticResource AccentCyanBrush}" Background="#11FFFFFF"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <!-- Experiment Stats Card -->
+                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Autogenesis Stats" Style="{StaticResource SectionHeader}"/>
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding TotalExperiments}" Style="{StaticResource MetricValue}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Experiments" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding KeptExperiments}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentGreenBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Kept" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding DiscardedExperiments}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentRedBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Discarded" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding BestReward, StringFormat='{}{0:F2}'}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentCyanBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Best Reward" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <!-- Reward Chart -->
+                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Reward Progression" Style="{StaticResource SectionHeader}"/>
+                                <lvc:CartesianChart Grid.Row="1" Series="{Binding RewardSeries}" MinHeight="150"
+                                                    XAxes="{Binding RewardXAxes}"
+                                                    ZoomMode="X" TooltipPosition="Top"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Reservoir Activation Chart -->
+                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="ESN Reservoir Activation (3-Layer)" Style="{StaticResource SectionHeader}"/>
+                                <lvc:CartesianChart Grid.Row="1" Series="{Binding ReservoirSeries}" MinHeight="150"
+                                                    XAxes="{Binding ReservoirXAxes}"
+                                                    ZoomMode="X" TooltipPosition="Top"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Experiment Log -->
+                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Experiment Log" Style="{StaticResource SectionHeader}"/>
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding ExperimentLog}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}" BorderThickness="0"
+                                          RowBackground="#11FFFFFF" AlternatingRowBackground="#08FFFFFF"
+                                          GridLinesVisibility="None" HeadersVisibility="Column" FontSize="11" RowHeight="24">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <Style TargetType="DataGridColumnHeader">
+                                            <Setter Property="Background" Value="{StaticResource BgLightBrush}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+                                            <Setter Property="Padding" Value="6,3"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="FontSize" Value="11"/>
+                                        </Style>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="#" Binding="{Binding ExperimentId}" Width="35"/>
+                                        <DataGridTextColumn Header="KSM Step" Binding="{Binding KsmStepName}" Width="80"/>
+                                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="65"/>
+                                        <DataGridTextColumn Header="Metric" Binding="{Binding PrimaryMetric, StringFormat='{}{0:F3}'}" Width="65"/>
+                                        <DataGridTextColumn Header="Delta" Binding="{Binding MetricDelta, StringFormat='{}{0:+0.000;-0.000}'}" Width="65"/>
+                                        <DataGridTextColumn Header="Coherence" Binding="{Binding PropertyCoherenceScore, StringFormat='{}{0:F3}'}" Width="75"/>
+                                        <DataGridTextColumn Header="Reason" Binding="{Binding StatusReason}" Width="*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <!-- Log Messages -->
+                        <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="System Log" Style="{StaticResource SectionHeader}"/>
+                                <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" FontFamily="Consolas"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== TAB 2: KSM EVOLUTION / PROPERTY COHERENCE ===== -->
+            <TabItem Header="KSM Evolution">
+                <Grid Margin="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Alexander's 15 Properties -->
+                    <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Alexander's 15 Properties of Living Structure" Style="{StaticResource SectionHeader}"/>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="Overall Coherence: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="14"/>
+                                <TextBlock Text="{Binding PropertyCoherence, StringFormat='{}{0:P1}'}" FontSize="14" FontWeight="Bold" Foreground="{Binding PropertyCoherence, Converter={StaticResource ScoreToColor}}"/>
+                            </StackPanel>
+                            <ItemsControl Grid.Row="2" ItemsSource="{Binding PropertyScores}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#08FFFFFF" CornerRadius="4" Padding="8,6" Margin="0,2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="25"/>
+                                                    <ColumnDefinition Width="180"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="50"/>
+                                                    <ColumnDefinition Width="50"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Index}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                                                <ProgressBar Grid.Column="2" Value="{Binding Score}" Maximum="1" Height="8" Margin="4,0"
+                                                             Foreground="{Binding Score, Converter={StaticResource ScoreToColor}}" Background="#11FFFFFF"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding ScoreText}" Foreground="{StaticResource TextPrimaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding DeltaText}" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+
+                    <!-- KSM 12-Step Cycle + Coherence Chart -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- KSM 12-Step Cycle Visualization -->
+                        <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="KSM 12-Step Evolution Cycle" Style="{StaticResource SectionHeader}"/>
+                                <ItemsControl Grid.Row="1">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="0. Observe" Foreground="{StaticResource AccentCyanBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Levels of Scale" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="1. Diagnose" Foreground="{StaticResource AccentCyanBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Strong Centers" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="2. Hypothesize" Foreground="{StaticResource AccentCyanBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Boundaries" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="3. Design" Foreground="{StaticResource AccentOrangeBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Alt. Repetition" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="4. Implement" Foreground="{StaticResource AccentOrangeBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Positive Space" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="5. Test" Foreground="{StaticResource AccentOrangeBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Good Shape" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="6. Measure" Foreground="{StaticResource AccentGreenBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Local Symmetries" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="7. Evaluate" Foreground="{StaticResource AccentGreenBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Deep Interlock" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="8. Integrate" Foreground="{StaticResource AccentGreenBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Contrast" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="9. Consolidate" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Gradients" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="10. Reflect" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Echoes" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#11FFFFFF" CornerRadius="4" Padding="8,6" Margin="2" Width="140">
+                                        <StackPanel>
+                                            <TextBlock Text="11. Evolve" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Text="Not-Separateness" Foreground="{StaticResource TextSecondaryBrush}" FontSize="9"/>
+                                        </StackPanel>
+                                    </Border>
+                                </ItemsControl>
+                            </Grid>
+                        </Border>
+
+                        <!-- Coherence Over Time Chart -->
+                        <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Stream Coherence Over Time" Style="{StaticResource SectionHeader}"/>
+                                <lvc:CartesianChart Grid.Row="1" Series="{Binding CoherenceSeries}" MinHeight="200"
+                                                    XAxes="{Binding CoherenceXAxes}"
+                                                    ZoomMode="X" TooltipPosition="Top"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== TAB 3: GTANGEL GUARDIAN ANGEL ===== -->
+            <TabItem Header="👼 GTAngel">
+                <views:GTAngelView/>
+            </TabItem>
+
+            <!-- ===== TAB 4: 4E AVATAR ===== -->
+            <TabItem Header="🤖 4E Avatar">
+                <views:AvatarView/>
+            </TabItem>
+
+            <!-- ===== TAB 5: GAME RUNTIME ===== -->
+            <TabItem Header="Game Runtime">
+                <views:GameRuntimeView/>
+            </TabItem>
+
+            <!-- ===== TAB 6: COGNITIVE CORE (KSM Cycle 5) ===== -->
+            <TabItem Header="&#x1F9E0; Cognitive Core">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0: ECAN + MOSES -->
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- ECAN Attention Economics -->
+                            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,4,0">
+                                <StackPanel>
+                                    <TextBlock Text="ECAN Attention Economics" Style="{StaticResource SectionHeader}"/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Top Clusters:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding EcanTopNeurons}" Foreground="{StaticResource AccentCyanBrush}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Attn Budget:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="1" Grid.Column="1" Value="{Binding EcanAttentionBudget}" Maximum="1" Height="12" Foreground="{StaticResource AccentCyanBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding EcanAttentionBudget, StringFormat='{}{0:F3}'}" Foreground="{StaticResource AccentCyanBrush}" FontSize="11" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Entropy:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,0"/>
+                                        <ProgressBar Grid.Row="2" Grid.Column="1" Value="{Binding AttentionEntropy}" Maximum="3" Height="12" Foreground="{StaticResource AccentOrangeBrush}" Background="#22FFFFFF" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding AttentionEntropy, StringFormat='{}{0:F3}'}" Foreground="{StaticResource AccentOrangeBrush}" FontSize="11"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- MOSES Pattern Library -->
+                            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="4,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="MOSES Pattern Library" Style="{StaticResource SectionHeader}"/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Patterns:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="0" Grid.Column="1" Value="{Binding MosesPatternCount}" Maximum="256" Height="12" Foreground="{StaticResource AccentGreenBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding MosesPatternCount}" Foreground="{StaticResource AccentGreenBrush}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Top Fitness:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="1" Grid.Column="1" Value="{Binding MosesTopFitness}" Maximum="1" Height="12" Foreground="{StaticResource AccentGreenBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding MosesTopFitness, StringFormat='{}{0:F3}'}" Foreground="{StaticResource AccentGreenBrush}" FontSize="11" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Diversity:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,0"/>
+                                        <ProgressBar Grid.Row="2" Grid.Column="1" Value="{Binding PatternDiversity}" Maximum="1" Height="12" Foreground="{StaticResource AccentPurpleBrush}" Background="#22FFFFFF" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding PatternDiversity, StringFormat='{}{0:F3}'}" Foreground="{StaticResource AccentPurpleBrush}" FontSize="11"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Row 1: Wout Training + Thompson Sampling -->
+                        <Grid Grid.Row="1" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Wout Ridge Regression -->
+                            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,4,0">
+                                <StackPanel>
+                                    <TextBlock Text="Wout Ridge Regression" Style="{StaticResource SectionHeader}"/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Ridge Loss:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="0" Grid.Column="1" Value="{Binding WoutTrainingLoss}" Maximum="1" Height="12" Foreground="{StaticResource AccentOrangeBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding WoutTrainingLoss, StringFormat='{}{0:F6}'}" Foreground="{StaticResource AccentOrangeBrush}" FontSize="11" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Samples:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding WoutSampleCount}" Foreground="{StaticResource AccentCyanBrush}" FontSize="11" FontWeight="SemiBold"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Thompson Sampling -->
+                            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="4,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Thompson Sampling Policy" Style="{StaticResource SectionHeader}"/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Alpha (α):" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="0" Grid.Column="1" Value="{Binding ThompsonAlpha}" Maximum="100" Height="12" Foreground="{StaticResource AccentGreenBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding ThompsonAlpha, StringFormat='{}{0:F2}'}" Foreground="{StaticResource AccentGreenBrush}" FontSize="11" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Beta (β):" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="1" Grid.Column="1" Value="{Binding ThompsonBeta}" Maximum="100" Height="12" Foreground="{StaticResource AccentOrangeBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ThompsonBeta, StringFormat='{}{0:F2}'}" Foreground="{StaticResource AccentOrangeBrush}" FontSize="11" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Policy H:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,0"/>
+                                        <ProgressBar Grid.Row="2" Grid.Column="1" Value="{Binding PolicyEntropy}" Maximum="3" Height="12" Foreground="{StaticResource AccentPurpleBrush}" Background="#22FFFFFF" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding PolicyEntropy, StringFormat='{}{0:F3}'}" Foreground="{StaticResource AccentPurpleBrush}" FontSize="11"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- Row 2: Cognitive Coherence Gauge -->
+                        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0,8,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="8">
+                                    <TextBlock Text="Cognitive Coherence" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding CognitiveCoherence, StringFormat='{}{0:F3}'}" Style="{StaticResource MetricValue}" Foreground="{Binding CognitiveCoherence, Converter={StaticResource ScoreToColor}}" HorizontalAlignment="Center"/>
+                                    <ProgressBar Value="{Binding CognitiveCoherence}" Maximum="1" Height="8" Foreground="{Binding CognitiveCoherence, Converter={StaticResource ScoreToColor}}" Background="#22FFFFFF" Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Margin="8">
+                                    <TextBlock Text="ECAN Attention" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding EcanAttentionBudget, StringFormat='{}{0:F3}'}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentCyanBrush}" HorizontalAlignment="Center"/>
+                                    <ProgressBar Value="{Binding EcanAttentionBudget}" Maximum="1" Height="8" Foreground="{StaticResource AccentCyanBrush}" Background="#22FFFFFF" Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Center" Margin="8">
+                                    <TextBlock Text="MOSES Patterns" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding MosesPatternCount}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentGreenBrush}" HorizontalAlignment="Center"/>
+                                    <ProgressBar Value="{Binding MosesPatternCount}" Maximum="256" Height="8" Foreground="{StaticResource AccentGreenBrush}" Background="#22FFFFFF" Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="3" HorizontalAlignment="Center" Margin="8">
+                                    <TextBlock Text="Wout Samples" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding WoutSampleCount}" Style="{StaticResource MetricValue}" Foreground="{StaticResource AccentOrangeBrush}" HorizontalAlignment="Center"/>
+                                    <ProgressBar Value="{Binding WoutSampleCount}" Maximum="10000" Height="8" Foreground="{StaticResource AccentOrangeBrush}" Background="#22FFFFFF" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- ===== STATUS BAR ===== -->
+        <Border Grid.Row="2" Background="{StaticResource BgMediumBrush}" Padding="12,6" BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="ESN: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding SpectralRadius, StringFormat='SR={0:F2}'}" Foreground="{StaticResource AccentCyanBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding LeakingRate, StringFormat='LR={0:F2}'}" Foreground="{StaticResource AccentCyanBrush}" FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="Property Coherence: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding PropertyCoherence, StringFormat='{}{0:P1}'}" Foreground="{Binding PropertyCoherence, Converter={StaticResource ScoreToColor}}" FontSize="10" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

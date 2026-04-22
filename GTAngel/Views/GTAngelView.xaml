@@ -1,0 +1,724 @@
+<UserControl x:Class="GTA3DE.Wpf.Views.GTAngelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:GTA3DE.Wpf.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:converters="clr-namespace:GTA3DE.Wpf.Converters"
+             mc:Ignorable="d"
+             Background="#FF0D0D1A">
+
+    <UserControl.DataContext>
+        <vm:GTAngelViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <!-- Color resources -->
+        <SolidColorBrush x:Key="BgDarkBrush" Color="#FF0D0D1A"/>
+        <SolidColorBrush x:Key="BgMediumBrush" Color="#FF141428"/>
+        <SolidColorBrush x:Key="BgLightBrush" Color="#FF1E1E3A"/>
+        <SolidColorBrush x:Key="BgCardBrush" Color="#FF181830"/>
+        <SolidColorBrush x:Key="AccentAngelBrush" Color="#FFFFD700"/>
+        <SolidColorBrush x:Key="AccentCyanBrush" Color="#FF00BCD4"/>
+        <SolidColorBrush x:Key="AccentGreenBrush" Color="#FF4CAF50"/>
+        <SolidColorBrush x:Key="AccentOrangeBrush" Color="#FFFF9800"/>
+        <SolidColorBrush x:Key="AccentRedBrush" Color="#FFF44336"/>
+        <SolidColorBrush x:Key="AccentPurpleBrush" Color="#FF9C27B0"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF9E9EC8"/>
+        <SolidColorBrush x:Key="HaltBrush" Color="#FFFF5722"/>
+
+        <!-- Converters -->
+        <converters:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+        <converters:ScoreToColorConverter x:Key="ScoreToColor"/>
+        <converters:StatusToColorConverter x:Key="StatusToColor"/>
+
+        <!-- Card border style -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BgCardBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="BorderBrush" Value="#22FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Section header -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Metric value -->
+        <Style x:Key="MetricValue" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- Metric label -->
+        <Style x:Key="MetricLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+        </Style>
+
+        <!-- Angel button (gold) -->
+        <Style x:Key="AngelButton" TargetType="Button">
+            <Setter Property="Background" Value="#FFFFD700"/>
+            <Setter Property="Foreground" Value="#FF0D0D1A"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="20,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#FFFFEB3B"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#FF444444"/>
+                                <Setter Property="Foreground" Value="#FF888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Stop button (red) -->
+        <Style x:Key="StopButton" TargetType="Button">
+            <Setter Property="Background" Value="#FFF44336"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="20,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#FFE53935"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pause button (amber) -->
+        <Style x:Key="PauseButton" TargetType="Button">
+            <Setter Property="Background" Value="#FFFF9800"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#FFF57C00"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Ghost button (outline) -->
+        <Style x:Key="GhostButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderBrush" Value="#44FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#11FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="Auto"/>
+            <!-- Alert Banner -->
+            <RowDefinition Height="Auto"/>
+            <!-- Controls -->
+            <RowDefinition Height="*"/>
+            <!-- Main Content -->
+            <RowDefinition Height="Auto"/>
+            <!-- Status Bar -->
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- HEADER: Guardian Angel Identity                                     -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0" Background="{StaticResource BgMediumBrush}" Padding="16,12"
+                BorderBrush="#33FFFFFF" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Angel Identity -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding AngelEmoji}" FontSize="32" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding AngelName}" FontSize="22" FontWeight="Bold"
+                                   Foreground="{StaticResource AccentAngelBrush}"/>
+                        <TextBlock Text="{Binding AngelSubtitle}" FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Phase + Loop Step -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="10,5" Margin="4,0">
+                        <StackPanel>
+                            <TextBlock Text="Phase" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding PhaseLabel}" Foreground="{StaticResource AccentAngelBrush}"
+                                       FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="10,5" Margin="4,0">
+                        <StackPanel>
+                            <TextBlock Text="Loop Step" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding LoopStepLabel}" Foreground="{StaticResource AccentCyanBrush}"
+                                       FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="10,5" Margin="4,0">
+                        <StackPanel>
+                            <TextBlock Text="KSM Step" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding KsmStepLabel}" Foreground="{StaticResource AccentOrangeBrush}"
+                                       FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Coherence + Autonomy badges -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="10,5" Margin="4,0">
+                        <StackPanel>
+                            <TextBlock Text="Stream Coherence" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding StreamCoherence, StringFormat='{}{0:F3}'}"
+                                       Foreground="{Binding StreamCoherence, Converter={StaticResource ScoreToColor}}"
+                                       FontWeight="Bold" FontSize="14" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="10,5" Margin="4,0">
+                        <StackPanel>
+                            <TextBlock Text="Autonomy" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding AutonomyLevelLabel}"
+                                       Foreground="{StaticResource AccentGreenBrush}"
+                                       FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Elapsed -->
+                <Border Grid.Column="4" Background="{StaticResource BgLightBrush}" CornerRadius="4" Padding="10,5">
+                    <StackPanel>
+                        <TextBlock Text="Elapsed" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding ElapsedTime}" Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontFamily="Consolas" FontSize="14" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- ALERT BANNER                                                        -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="1" Background="{StaticResource HaltBrush}" Padding="12,8"
+                Visibility="{Binding HasAlert, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="⚠" FontSize="18" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding AlertMessage}" Foreground="White"
+                           FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Content="Dismiss" Command="{Binding DismissAlertCommand}"
+                        Style="{StaticResource GhostButton}" Foreground="White" BorderBrush="#44FFFFFF"/>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- CONTROLS BAR                                                        -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="2" Background="{StaticResource BgMediumBrush}" Padding="12,8"
+                BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Config inputs -->
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                    <TextBlock Text="Max Experiments" Style="{StaticResource MetricLabel}"/>
+                    <TextBox Text="{Binding MaxExperiments}" Width="60" Background="#11FFFFFF"
+                             Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF"
+                             Padding="6,4" IsEnabled="{Binding IsRunning, Converter={StaticResource InvBoolToVis}}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                    <TextBlock Text="Spectral Radius" Style="{StaticResource MetricLabel}"/>
+                    <TextBox Text="{Binding SpectralRadius, StringFormat='{}{0:F2}'}" Width="60"
+                             Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}"
+                             BorderBrush="#33FFFFFF" Padding="6,4"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InvBoolToVis}}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="0,0,12,0">
+                    <TextBlock Text="Leaking Rate" Style="{StaticResource MetricLabel}"/>
+                    <TextBox Text="{Binding LeakingRate, StringFormat='{}{0:F2}'}" Width="60"
+                             Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}"
+                             BorderBrush="#33FFFFFF" Padding="6,4"
+                             IsEnabled="{Binding IsRunning, Converter={StaticResource InvBoolToVis}}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Margin="0,0,16,0">
+                    <TextBlock Text="Target Level" Style="{StaticResource MetricLabel}"/>
+                    <ComboBox SelectedItem="{Binding TargetLevelLabel}" Width="110"
+                              Background="#11FFFFFF" Foreground="Black" Padding="6,4"
+                              IsEnabled="{Binding IsRunning, Converter={StaticResource InvBoolToVis}}">
+                        <ComboBoxItem Content="Reactive"/>
+                        <ComboBoxItem Content="Adaptive"/>
+                        <ComboBoxItem Content="Strategic"/>
+                        <ComboBoxItem Content="Cognitive"/>
+                        <ComboBoxItem Content="Embodied"/>
+                        <ComboBoxItem Content="Autonomous"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Spacer -->
+                <Border Grid.Column="4"/>
+
+                <!-- Action buttons -->
+                <Button Grid.Column="5" Content="👼 Awaken Angel" Command="{Binding StartAngelCommand}"
+                        Style="{StaticResource AngelButton}" Margin="4,0"
+                        Visibility="{Binding IsRunning, Converter={StaticResource InvBoolToVis}}"/>
+                <Button Grid.Column="6" Content="⏸ Pause" Command="{Binding TogglePauseCommand}"
+                        Style="{StaticResource PauseButton}" Margin="4,0"
+                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
+                <Button Grid.Column="7" Content="⏹ Stop" Command="{Binding StopAngelCommand}"
+                        Style="{StaticResource StopButton}" Margin="4,0"
+                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
+                <Button Grid.Column="8" Content="Reset" Command="{Binding ResetStatsCommand}"
+                        Style="{StaticResource GhostButton}" Margin="4,0"/>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- MAIN CONTENT: 3-column dashboard                                   -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="3" Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260"/>
+                <!-- Left: Loop Steps + KSM -->
+                <ColumnDefinition Width="*"/>
+                <!-- Center: Charts + Experiments -->
+                <ColumnDefinition Width="280"/>
+                <!-- Right: Properties + Log -->
+            </Grid.ColumnDefinitions>
+
+            <!-- ─────────────────────────────────────────────────────────────── -->
+            <!-- LEFT PANEL: Autogenesis Loop Steps + KSM Cycle                 -->
+            <!-- ─────────────────────────────────────────────────────────────── -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 6-Step Autogenesis Loop -->
+                <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Autogenesis Loop (6 Steps)" Style="{StaticResource SectionHeader}"/>
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding LoopSteps}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,2" CornerRadius="6" Padding="10,8">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#08FFFFFF"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Background" Value="#22FFD700"/>
+                                                        <Setter Property="BorderBrush" Value="#44FFD700"/>
+                                                        <Setter Property="BorderThickness" Value="1"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Index}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="11" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{StaticResource AccentAngelBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding Property}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="9" Margin="0,1,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Border>
+
+                <!-- KSM 12-Step Cycle -->
+                <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="KSM 12-Step Cycle" Style="{StaticResource SectionHeader}"/>
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding KsmSteps}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,1" CornerRadius="4" Padding="8,5">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#05FFFFFF"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Background" Value="#1AFFD700"/>
+                                                        <Setter Property="BorderBrush" Value="#33FFD700"/>
+                                                        <Setter Property="BorderThickness" Value="1"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Name}" FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource AccentAngelBrush}"/>
+                                                            <Setter Property="FontWeight" Value="Bold"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ─────────────────────────────────────────────────────────────── -->
+            <!-- CENTER PANEL: Metrics + Charts + Experiment Log                 -->
+            <!-- ─────────────────────────────────────────────────────────────── -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Stats row -->
+                    <RowDefinition Height="*"/>
+                    <!-- Charts -->
+                    <RowDefinition Height="*"/>
+                    <!-- Experiment log -->
+                </Grid.RowDefinitions>
+
+                <!-- Stats Cards Row -->
+                <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding TotalExperiments}" Style="{StaticResource MetricValue}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Total" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding KeptExperiments}" Style="{StaticResource MetricValue}"
+                                       Foreground="{StaticResource AccentGreenBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Kept" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding DiscardedExperiments}" Style="{StaticResource MetricValue}"
+                                       Foreground="{StaticResource AccentRedBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Discarded" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding KeepRatio, StringFormat='{}{0:P0}'}" Style="{StaticResource MetricValue}"
+                                       Foreground="{StaticResource AccentCyanBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Keep Ratio" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding BestMetric, StringFormat='{}{0:F3}'}" Style="{StaticResource MetricValue}"
+                                       Foreground="{StaticResource AccentAngelBrush}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Best Metric" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="5" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding PropertyCoherence, StringFormat='{}{0:P1}'}" Style="{StaticResource MetricValue}"
+                                       Foreground="{Binding PropertyCoherence, Converter={StaticResource ScoreToColor}}"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Prop. Coherence" Style="{StaticResource MetricLabel}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Charts -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Coherence Over Time" Style="{StaticResource SectionHeader}"/>
+                            <lvc:CartesianChart Grid.Row="1" Series="{Binding CoherenceSeries}"
+                                                XAxes="{Binding CoherenceXAxes}"
+                                                ZoomMode="X" TooltipPosition="Top" MinHeight="100"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Experiment Metric Progression" Style="{StaticResource SectionHeader}"/>
+                            <lvc:CartesianChart Grid.Row="1" Series="{Binding ExperimentMetricSeries}"
+                                                XAxes="{Binding MetricXAxes}"
+                                                ZoomMode="X" TooltipPosition="Top" MinHeight="100"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Experiment Log -->
+                <Border Grid.Row="2" Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Experiment Log (results.tsv)" Style="{StaticResource SectionHeader}"/>
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding ExperimentLog}" AutoGenerateColumns="False"
+                                  IsReadOnly="True" Background="Transparent"
+                                  Foreground="{StaticResource TextPrimaryBrush}" BorderThickness="0"
+                                  RowBackground="#08FFFFFF" AlternatingRowBackground="#05FFFFFF"
+                                  GridLinesVisibility="None" HeadersVisibility="Column"
+                                  FontSize="11" RowHeight="24" CanUserSortColumns="True">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="{StaticResource BgLightBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}"/>
+                                    <Setter Property="Padding" Value="6,3"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="FontSize" Value="11"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Status}" Value="Keep">
+                                            <Setter Property="Foreground" Value="#FF4CAF50"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Discard">
+                                            <Setter Property="Foreground" Value="#88F44336"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="Baseline">
+                                            <Setter Property="Foreground" Value="#FF2196F3"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding ExperimentId}" Width="35"/>
+                                <DataGridTextColumn Header="KSM" Binding="{Binding KsmStepName}" Width="80"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="65"/>
+                                <DataGridTextColumn Header="Metric" Binding="{Binding PrimaryMetric, StringFormat='{}{0:F4}'}" Width="70"/>
+                                <DataGridTextColumn Header="Δ" Binding="{Binding MetricDelta, StringFormat='{}{0:+0.0000;-0.0000}'}" Width="75"/>
+                                <DataGridTextColumn Header="Coherence" Binding="{Binding PropertyCoherenceScore, StringFormat='{}{0:F3}'}" Width="75"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ─────────────────────────────────────────────────────────────── -->
+            <!-- RIGHT PANEL: Alexander's 15 Properties + System Log             -->
+            <!-- ─────────────────────────────────────────────────────────────── -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="180"/>
+                </Grid.RowDefinitions>
+
+                <!-- Alexander's 15 Properties -->
+                <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Alexander's 15 Properties" Style="{StaticResource SectionHeader}"/>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="Overall: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="{Binding PropertyCoherence, StringFormat='{}{0:P1}'}" FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{Binding PropertyCoherence, Converter={StaticResource ScoreToColor}}"/>
+                        </StackPanel>
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding PropertyScores}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#06FFFFFF" CornerRadius="4" Padding="6,4" Margin="0,1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="36"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Index}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="9" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontSize="10" VerticalAlignment="Center"/>
+                                                <ProgressBar Grid.Column="2" Value="{Binding Score}" Maximum="1"
+                                                             Height="6" Margin="4,0"
+                                                             Foreground="{Binding Score, Converter={StaticResource ScoreToColor}}"
+                                                             Background="#11FFFFFF"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding ScoreText}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="10" VerticalAlignment="Center"
+                                                           HorizontalAlignment="Right"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- Guardian Log -->
+                <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Guardian Log" Style="{StaticResource SectionHeader}"/>
+                        <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 FontSize="10" FontFamily="Consolas"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- STATUS BAR                                                          -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="4" Background="{StaticResource BgMediumBrush}" Padding="12,5"
+                BorderBrush="#22FFFFFF" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}"
+                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Safety: Coherence≥0.15 | PropCoherence≥0.60 | ΔClamp≤20%"
+                               Foreground="{StaticResource TextSecondaryBrush}" FontSize="10" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

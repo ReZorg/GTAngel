@@ -1,0 +1,475 @@
+(*===========================================================================*)
+(* Z++ Formal Specification: NPU Data Model                                  *)
+(* Repository: o9nn/npu                                                       *)
+(* Description: Formalization of the data layer for the NPU Virtual PCB      *)
+(*             architecture, including memory regions, GPIO pins, device     *)
+(*             drivers, and peripheral state.                                 *)
+(*===========================================================================*)
+
+(*---------------------------------------------------------------------------*)
+(* Base Types                                                                 *)
+(*---------------------------------------------------------------------------*)
+
+[DEVICE_ID]     (* Unique identifier for virtual devices *)
+[MODEL_PATH]    (* Path to GGUF model files *)
+[ACCOUNT_CODE]  (* Financial account code (e.g., "1101") *)
+[ERROR_CODE]    (* System error codes *)
+
+(* Memory address space *)
+ADDRESS == ℕ
+
+(* Device states enumeration *)
+DEVICE_STATE ::= uninitialized | initializing | ready | running | sleeping | error | shutdown
+
+(* GPIO pin modes *)
+PIN_MODE ::= input | output | analog | pwm | interrupt
+
+(* GPIO pin states *)
+PIN_STATE ::= low | high | tristate
+
+(* Interrupt types *)
+INTERRUPT_TYPE ::= edge_rising | edge_falling | level_high | level_low
+
+(* Memory region types *)
+REGION_TYPE ::= sram | flash | peripheral
+
+(*---------------------------------------------------------------------------*)
+(* Memory Region Schema                                                       *)
+(*---------------------------------------------------------------------------*)
+
+(* Represents a contiguous region of addressable memory *)
+MemoryRegion
+  base_address : ADDRESS
+  size : ℕ₁                  (* Size must be positive *)
+  name : seq CHAR
+  region_type : REGION_TYPE
+  is_writable : 𝔹
+  data : ADDRESS ⇸ ℕ        (* Partial function: address to byte value *)
+
+where
+  (* All addresses within region are bounded *)
+  dom data ⊆ base_address .. (base_address + size - 1) ∧
+  
+  (* All byte values are valid (0-255) *)
+  (∀ addr : dom data • data(addr) ≤ 255) ∧
+  
+  (* Write protection invariant *)
+  (¬ is_writable ⇒ data = ∅)
+
+(* Specific memory regions defined by address ranges *)
+SRAM_BASE : ADDRESS
+SRAM_SIZE : ℕ₁
+FLASH_BASE : ADDRESS
+FLASH_SIZE : ℕ₁
+PERIPH_BASE : ADDRESS
+PERIPH_SIZE : ℕ₁
+
+where
+  SRAM_BASE = 0x20000000 ∧
+  SRAM_SIZE = 262144 ∧         (* 256 KB *)
+  FLASH_BASE = 0x08000000 ∧
+  FLASH_SIZE = 1048576 ∧       (* 1 MB *)
+  PERIPH_BASE = 0x40000000 ∧
+  PERIPH_SIZE = 65536          (* 64 KB *)
+
+(*---------------------------------------------------------------------------*)
+(* GPIO Pin Schema                                                            *)
+(*---------------------------------------------------------------------------*)
+
+(* Represents a single General Purpose I/O pin *)
+GPIOPin
+  pin_number : ℕ
+  mode : PIN_MODE
+  state : PIN_STATE
+  analog_value : ℕ           (* 12-bit ADC: 0-4095 *)
+  interrupt_enabled : 𝔹
+  interrupt_vector : ℕ
+
+where
+  (* Pin number is valid (64 GPIO pins total) *)
+  pin_number < 64 ∧
+  
+  (* Analog value is within 12-bit range *)
+  analog_value ≤ 4095 ∧
+  
+  (* Interrupt vector is valid when interrupts enabled *)
+  (interrupt_enabled ⇒ interrupt_vector < 256) ∧
+  
+  (* Analog mode implies specific value constraints *)
+  (mode = analog ⇒ state = tristate)
+
+(* GPIO Pin Bank - collection of 64 pins *)
+GPIOPinBank
+  pins : ℕ ⇸ GPIOPin
+
+where
+  (* Exactly 64 pins *)
+  dom pins = 0 .. 63 ∧
+  
+  (* Each pin has unique number matching its index *)
+  (∀ i : dom pins • pins(i).pin_number = i)
+
+(*---------------------------------------------------------------------------*)
+(* Financial Account Pin Mapping                                              *)
+(*---------------------------------------------------------------------------*)
+
+(* Maps financial account codes to GPIO pins *)
+AccountPin
+  account_code : ACCOUNT_CODE
+  pin_number : ℕ
+  balance_voltage : ℝ        (* Balance mapped to voltage *)
+  is_active : 𝔹
+
+where
+  (* Pin number is valid *)
+  pin_number < 64 ∧
+  
+  (* Voltage is within valid range (0-3.3V) *)
+  balance_voltage ≥ 0 ∧ balance_voltage ≤ 3.3 ∧
+  
+  (* Active pins have non-zero voltage *)
+  (is_active ⇒ balance_voltage > 0)
+
+(* Financial account categories mapped to pin ranges *)
+ASSET_PIN_RANGE : ℙ ℕ
+LIABILITY_PIN_RANGE : ℙ ℕ
+EQUITY_PIN_RANGE : ℙ ℕ
+REVENUE_PIN_RANGE : ℙ ℕ
+EXPENSE_PIN_RANGE : ℙ ℕ
+
+where
+  ASSET_PIN_RANGE = 0 .. 15 ∧
+  LIABILITY_PIN_RANGE = 16 .. 31 ∧
+  EQUITY_PIN_RANGE = 32 .. 39 ∧
+  REVENUE_PIN_RANGE = 40 .. 47 ∧
+  EXPENSE_PIN_RANGE = 48 .. 63 ∧
+  
+  (* Ranges are disjoint and cover all 64 pins *)
+  ASSET_PIN_RANGE ∩ LIABILITY_PIN_RANGE = ∅ ∧
+  ASSET_PIN_RANGE ∩ EQUITY_PIN_RANGE = ∅ ∧
+  ASSET_PIN_RANGE ∩ REVENUE_PIN_RANGE = ∅ ∧
+  ASSET_PIN_RANGE ∩ EXPENSE_PIN_RANGE = ∅ ∧
+  LIABILITY_PIN_RANGE ∩ EQUITY_PIN_RANGE = ∅ ∧
+  LIABILITY_PIN_RANGE ∩ REVENUE_PIN_RANGE = ∅ ∧
+  LIABILITY_PIN_RANGE ∩ EXPENSE_PIN_RANGE = ∅ ∧
+  EQUITY_PIN_RANGE ∩ REVENUE_PIN_RANGE = ∅ ∧
+  EQUITY_PIN_RANGE ∩ EXPENSE_PIN_RANGE = ∅ ∧
+  REVENUE_PIN_RANGE ∩ EXPENSE_PIN_RANGE = ∅ ∧
+  
+  ASSET_PIN_RANGE ∪ LIABILITY_PIN_RANGE ∪ EQUITY_PIN_RANGE ∪ 
+    REVENUE_PIN_RANGE ∪ EXPENSE_PIN_RANGE = 0 .. 63
+
+(*---------------------------------------------------------------------------*)
+(* DMA (Direct Memory Access) Schema                                          *)
+(*---------------------------------------------------------------------------*)
+
+(* Represents a DMA transfer operation *)
+DMATransfer
+  channel_id : ℕ
+  source_address : ADDRESS
+  dest_address : ADDRESS
+  length : ℕ₁
+  completed : 𝔹
+  start_time : ℕ            (* Timestamp in microseconds *)
+
+where
+  (* Channel ID is valid (8 DMA channels) *)
+  channel_id < 8 ∧
+  
+  (* Source and destination don't overlap *)
+  source_address + length ≤ dest_address ∨ 
+  dest_address + length ≤ source_address
+
+(* DMA Controller manages multiple transfers *)
+DMAController
+  active_transfers : ℕ ⇸ DMATransfer
+  max_channels : ℕ₁
+
+where
+  max_channels = 8 ∧
+  
+  (* Number of active transfers doesn't exceed max channels *)
+  #active_transfers ≤ max_channels ∧
+  
+  (* Channel IDs are unique and valid *)
+  dom active_transfers ⊆ 0 .. (max_channels - 1) ∧
+  
+  (* Each transfer has matching channel ID *)
+  (∀ ch : dom active_transfers • active_transfers(ch).channel_id = ch)
+
+(*---------------------------------------------------------------------------*)
+(* Interrupt Controller Schema                                                *)
+(*---------------------------------------------------------------------------*)
+
+(* Interrupt descriptor with priority and type *)
+InterruptDescriptor
+  vector : ℕ
+  int_type : INTERRUPT_TYPE
+  priority : ℕ              (* Higher number = higher priority *)
+  enabled : 𝔹
+  pending : 𝔹
+
+where
+  (* Vector number is valid (256 interrupt vectors) *)
+  vector < 256 ∧
+  
+  (* Priority is within valid range (0-15) *)
+  priority ≤ 15 ∧
+  
+  (* Cannot be pending if not enabled *)
+  (pending ⇒ enabled)
+
+(* Interrupt Controller manages interrupt vectors *)
+InterruptController
+  interrupt_table : ℕ ⇸ InterruptDescriptor
+  pending_queue : seq ℕ     (* Queue of pending interrupt vectors *)
+  max_vectors : ℕ₁
+
+where
+  max_vectors = 256 ∧
+  
+  (* Interrupt table has entries for all vectors *)
+  dom interrupt_table = 0 .. (max_vectors - 1) ∧
+  
+  (* Each descriptor has matching vector number *)
+  (∀ v : dom interrupt_table • interrupt_table(v).vector = v) ∧
+  
+  (* Pending queue contains only valid, enabled, pending interrupts *)
+  (∀ i : 1 .. #pending_queue • 
+    pending_queue(i) ∈ dom interrupt_table ∧
+    interrupt_table(pending_queue(i)).enabled ∧
+    interrupt_table(pending_queue(i)).pending) ∧
+  
+  (* No duplicate vectors in pending queue *)
+  (∀ i, j : 1 .. #pending_queue • i ≠ j ⇒ pending_queue(i) ≠ pending_queue(j))
+
+(*---------------------------------------------------------------------------*)
+(* Power Management Schema                                                     *)
+(*---------------------------------------------------------------------------*)
+
+(* Power rail identifier *)
+RAIL_ID ::= rail_3v3 | rail_5v0
+
+(* Power management state *)
+PowerManagement
+  voltage_rails : RAIL_ID ⇸ ℝ
+  current_draw : RAIL_ID ⇸ ℝ
+  temperature_celsius : ℝ
+
+where
+  (* Voltage rails have correct nominal values *)
+  voltage_rails(rail_3v3) ≥ 3.2 ∧ voltage_rails(rail_3v3) ≤ 3.4 ∧
+  voltage_rails(rail_5v0) ≥ 4.9 ∧ voltage_rails(rail_5v0) ≤ 5.1 ∧
+  
+  (* Current draw is non-negative *)
+  (∀ rail : dom current_draw • current_draw(rail) ≥ 0) ∧
+  
+  (* Temperature is within operating range *)
+  temperature_celsius ≥ -40 ∧ temperature_celsius ≤ 85
+
+(*---------------------------------------------------------------------------*)
+(* LLM Hardware Registers                                                      *)
+(*---------------------------------------------------------------------------*)
+
+(* LLM coprocessor register offsets *)
+LLM_REG_BASE : ADDRESS
+LLM_REG_CMD : ADDRESS
+LLM_REG_STATUS : ADDRESS
+LLM_REG_PROMPT_ADDR : ADDRESS
+LLM_REG_PROMPT_LEN : ADDRESS
+LLM_REG_N_PREDICT : ADDRESS
+LLM_REG_TOKEN_OUT : ADDRESS
+LLM_REG_TOKEN_READY : ADDRESS
+LLM_REG_MODEL_ID : ADDRESS
+LLM_REG_CTX_USED : ADDRESS
+LLM_REG_ERROR_CODE : ADDRESS
+LLM_REG_PERF_TOKENS_SEC : ADDRESS
+
+where
+  LLM_REG_BASE = PERIPH_BASE + 0x1000 ∧
+  LLM_REG_CMD = LLM_REG_BASE + 0x00 ∧
+  LLM_REG_STATUS = LLM_REG_BASE + 0x04 ∧
+  LLM_REG_PROMPT_ADDR = LLM_REG_BASE + 0x08 ∧
+  LLM_REG_PROMPT_LEN = LLM_REG_BASE + 0x0C ∧
+  LLM_REG_N_PREDICT = LLM_REG_BASE + 0x10 ∧
+  LLM_REG_TOKEN_OUT = LLM_REG_BASE + 0x14 ∧
+  LLM_REG_TOKEN_READY = LLM_REG_BASE + 0x18 ∧
+  LLM_REG_MODEL_ID = LLM_REG_BASE + 0x1C ∧
+  LLM_REG_CTX_USED = LLM_REG_BASE + 0x20 ∧
+  LLM_REG_ERROR_CODE = LLM_REG_BASE + 0x24 ∧
+  LLM_REG_PERF_TOKENS_SEC = LLM_REG_BASE + 0x28
+
+(* Command register bits *)
+CMD_BIT_RESET : ℕ
+CMD_BIT_LOAD_MODEL : ℕ
+CMD_BIT_START_INF : ℕ
+CMD_BIT_SOFT_STOP : ℕ
+
+where
+  CMD_BIT_RESET = 0 ∧
+  CMD_BIT_LOAD_MODEL = 1 ∧
+  CMD_BIT_START_INF = 2 ∧
+  CMD_BIT_SOFT_STOP = 3
+
+(* Status register bits *)
+STATUS_BIT_IDLE : ℕ
+STATUS_BIT_BUSY : ℕ
+STATUS_BIT_EOG : ℕ
+STATUS_BIT_ERROR : ℕ
+STATUS_BIT_MODEL_READY : ℕ
+STATUS_BIT_TOKEN_READY : ℕ
+
+where
+  STATUS_BIT_IDLE = 0 ∧
+  STATUS_BIT_BUSY = 1 ∧
+  STATUS_BIT_EOG = 2 ∧
+  STATUS_BIT_ERROR = 3 ∧
+  STATUS_BIT_MODEL_READY = 4 ∧
+  STATUS_BIT_TOKEN_READY = 5
+
+(*---------------------------------------------------------------------------*)
+(* LLM Model Configuration                                                     *)
+(*---------------------------------------------------------------------------*)
+
+(* Configuration parameters for LLM models *)
+LlamaModelConfig
+  model_path : MODEL_PATH
+  model_name : seq CHAR
+  n_ctx : ℕ₁                (* Context window size *)
+  n_threads : ℕ₁            (* CPU threads *)
+  n_gpu_layers : ℕ          (* GPU layers (0 = CPU only) *)
+  batch_size : ℕ₁
+  offload_kv_cache : 𝔹
+  low_vram_mode : 𝔹
+
+where
+  (* Context size is reasonable (512 to 32768) *)
+  n_ctx ≥ 512 ∧ n_ctx ≤ 32768 ∧
+  
+  (* Thread count is reasonable (1 to 64) *)
+  n_threads ≥ 1 ∧ n_threads ≤ 64 ∧
+  
+  (* GPU layers is non-negative *)
+  n_gpu_layers ≥ 0 ∧
+  
+  (* Batch size is reasonable (1 to 512) *)
+  batch_size ≥ 1 ∧ batch_size ≤ 512
+
+(* Sequence generation configuration *)
+LlamaSequenceConfig
+  n_predict : ℕ₁            (* Tokens to generate *)
+  max_ctx : ℕ₁              (* Maximum context *)
+  echo_prompt : 𝔹
+  stream_tokens : 𝔹
+  stream_delay_ms : ℕ
+
+where
+  (* Predict count is reasonable (1 to 2048) *)
+  n_predict ≥ 1 ∧ n_predict ≤ 2048 ∧
+  
+  (* Max context is reasonable *)
+  max_ctx ≥ 512 ∧ max_ctx ≤ 32768 ∧
+  
+  (* Stream delay is reasonable (0 to 1000ms) *)
+  stream_delay_ms ≤ 1000
+
+(* Telemetry data for LLM operations *)
+LlamaTelemetry
+  tokens_per_second : ℝ
+  total_tokens_generated : ℕ
+  total_prompts : ℕ
+  last_prompt_tokens : ℕ
+  last_completion_tokens : ℕ
+
+where
+  (* Tokens per second is non-negative *)
+  tokens_per_second ≥ 0 ∧
+  
+  (* Total tokens is sum of all completions *)
+  total_tokens_generated ≥ last_completion_tokens ∧
+  
+  (* Total prompts is positive if tokens generated *)
+  (total_tokens_generated > 0 ⇒ total_prompts > 0)
+
+(*---------------------------------------------------------------------------*)
+(* Financial Device Registers                                                 *)
+(*---------------------------------------------------------------------------*)
+
+(* Financial device register offsets *)
+FIN_REG_BASE : ADDRESS
+FIN_REG_TRANSACTION_STATUS : ADDRESS
+FIN_REG_BALANCE_TOTAL : ADDRESS
+FIN_REG_TRANSACTION_COUNT : ADDRESS
+FIN_REG_ERROR_CODE : ADDRESS
+
+where
+  FIN_REG_BASE = PERIPH_BASE + 0x0000 ∧
+  FIN_REG_TRANSACTION_STATUS = FIN_REG_BASE + 0x00 ∧
+  FIN_REG_BALANCE_TOTAL = FIN_REG_BASE + 0x04 ∧
+  FIN_REG_TRANSACTION_COUNT = FIN_REG_BASE + 0x08 ∧
+  FIN_REG_ERROR_CODE = FIN_REG_BASE + 0x0C
+
+(*---------------------------------------------------------------------------*)
+(* Device Driver Base Schema                                                  *)
+(*---------------------------------------------------------------------------*)
+
+(* Abstract device driver interface *)
+DeviceDriver
+  driver_name : seq CHAR
+  version : seq CHAR
+  is_loaded : 𝔹
+  is_initialized : 𝔹
+
+where
+  (* Driver must be loaded before initialization *)
+  (is_initialized ⇒ is_loaded) ∧
+  
+  (* Driver name is non-empty *)
+  #driver_name > 0
+
+(*---------------------------------------------------------------------------*)
+(* Financial Device Driver Schema                                             *)
+(*---------------------------------------------------------------------------*)
+
+FinancialDeviceDriver
+  DeviceDriver                  (* Inherits base driver schema *)
+  account_pins : ACCOUNT_CODE ⇸ AccountPin
+  transaction_count : ℕ
+  total_balance : ℝ
+
+where
+  (* Account codes map to unique pins *)
+  (∀ a1, a2 : dom account_pins • 
+    a1 ≠ a2 ⇒ account_pins(a1).pin_number ≠ account_pins(a2).pin_number) ∧
+  
+  (* Total balance is sum of all account balances *)
+  total_balance ≥ 0 ∧
+  
+  (* Transaction count is non-negative *)
+  transaction_count ≥ 0
+
+(*---------------------------------------------------------------------------*)
+(* LLM Coprocessor Driver Schema                                              *)
+(*---------------------------------------------------------------------------*)
+
+LlamaCoprocessorDriver
+  DeviceDriver                  (* Inherits base driver schema *)
+  model_config : LlamaModelConfig
+  telemetry : LlamaTelemetry
+  model_id : ℕ
+  model_loaded : 𝔹
+  inference_active : 𝔹
+
+where
+  (* Model must be loaded before inference *)
+  (inference_active ⇒ model_loaded) ∧
+  
+  (* Model ID is non-zero when loaded *)
+  (model_loaded ⇒ model_id > 0) ∧
+  
+  (* Driver must be initialized if model loaded *)
+  (model_loaded ⇒ is_initialized)
+
+(*===========================================================================*)
+(* End of Data Model Specification                                           *)
+(*===========================================================================*)

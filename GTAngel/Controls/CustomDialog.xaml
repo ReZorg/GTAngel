@@ -1,0 +1,67 @@
+<UserControl x:Class="GTA3DE.Wpf.Controls.CustomDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+
+    <!--
+    Converted from: res/layout/custom_dialog.xml
+    Android: ConstraintLayout with title, message, and two buttons
+    WPF: Grid overlay with centered dialog card
+    
+    Original hierarchy:
+      ConstraintLayout (match_parent, colorPrimary bg)
+        TextView#title (30sp, white, centerHorizontal)
+        TextView#message (14sp, white, centerHorizontal, below title)
+        Button#positiveButton (below message, start_toStartOf message)
+        Button#negativeButton (below message, end_toEndOf message)
+    -->
+
+    <Grid Background="#80000000">
+        <Border Background="{StaticResource PrimaryBrush}"
+                CornerRadius="8"
+                Padding="30"
+                MaxWidth="450"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                >
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.5" />
+            </Border.Effect>
+
+            <StackPanel>
+                <!-- Title (replaces #title, 30sp white) -->
+                <TextBlock x:Name="TitleText"
+                           Text="{Binding Title}"
+                           Style="{StaticResource HeadingStyle}"
+                           Margin="0,0,0,16" />
+
+                <!-- Message (replaces #message, 14sp white) -->
+                <TextBlock x:Name="MessageText"
+                           Text="{Binding Message}"
+                           Style="{StaticResource BodyTextStyle}"
+                           TextAlignment="Center"
+                           Margin="0,0,0,24" />
+
+                <!-- Buttons -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                    <!-- Positive Button (replaces #positiveButton) -->
+                    <Button x:Name="PositiveButton"
+                            Content="{Binding PositiveText}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Margin="0,0,10,0"
+                            Click="PositiveButton_Click" />
+
+                    <!-- Negative Button (replaces #negativeButton) -->
+                    <Button x:Name="NegativeButton"
+                            Content="{Binding NegativeText}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Visibility="{Binding HasNegativeButton, Converter={StaticResource BoolToVisConverter}}"
+                            Click="NegativeButton_Click" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

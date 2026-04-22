@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Converted from res/values/colors.xml -->
+    <!-- App accent color from info.json: #b4103c -->
+
+    <!-- Primary Colors (from Android colorPrimary/colorPrimaryLight) -->
+    <Color x:Key="ColorPrimary">#FF120D36</Color>
+    <Color x:Key="ColorPrimaryLight">#FF4F4C73</Color>
+    <Color x:Key="ColorPrimaryText">#FFFFFFFF</Color>
+    <Color x:Key="ColorPrimaryError">#FFFFFFFF</Color>
+    <Color x:Key="ColorAccent">#FFB4103C</Color>
+
+    <!-- App-specific Colors -->
+    <Color x:Key="ColorDarkAlpha">#A0000000</Color>
+    <Color x:Key="ColorDarkGray">#FF2E2E2E</Color>
+    <Color x:Key="ColorDisabled">#FFE6E6E6</Color>
+    <Color x:Key="ColorFadeOut">#E0000000</Color>
+    <Color x:Key="ColorGray">#FF808080</Color>
+    <Color x:Key="ColorRetryError">#FF6564FF</Color>
+    <Color x:Key="ColorTransparent">#00000000</Color>
+
+    <!-- Trial Banner Colors -->
+    <Color x:Key="ColorTrialProgress">#FFFFAB00</Color>
+    <Color x:Key="ColorTrialBackground">#FF000000</Color>
+    <Color x:Key="ColorTrialText">#FFFFFFFF</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource ColorPrimary}" />
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource ColorPrimaryLight}" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource ColorPrimaryText}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource ColorAccent}" />
+    <SolidColorBrush x:Key="DarkAlphaBrush" Color="{StaticResource ColorDarkAlpha}" />
+    <SolidColorBrush x:Key="DarkGrayBrush" Color="{StaticResource ColorDarkGray}" />
+    <SolidColorBrush x:Key="DisabledBrush" Color="{StaticResource ColorDisabled}" />
+    <SolidColorBrush x:Key="FadeOutBrush" Color="{StaticResource ColorFadeOut}" />
+    <SolidColorBrush x:Key="GrayBrush" Color="{StaticResource ColorGray}" />
+    <SolidColorBrush x:Key="RetryErrorBrush" Color="{StaticResource ColorRetryError}" />
+    <SolidColorBrush x:Key="TransparentBrush" Color="{StaticResource ColorTransparent}" />
+    <SolidColorBrush x:Key="TrialProgressBrush" Color="{StaticResource ColorTrialProgress}" />
+    <SolidColorBrush x:Key="TrialBackgroundBrush" Color="{StaticResource ColorTrialBackground}" />
+    <SolidColorBrush x:Key="TrialTextBrush" Color="{StaticResource ColorTrialText}" />
+
+    <!-- Background Gradients -->
+    <LinearGradientBrush x:Key="SplashGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF120D36" Offset="0" />
+        <GradientStop Color="#FF1A1040" Offset="0.5" />
+        <GradientStop Color="#FF0A0820" Offset="1" />
+    </LinearGradientBrush>
+
+</ResourceDictionary>

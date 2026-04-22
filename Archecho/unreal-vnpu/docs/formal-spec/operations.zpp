@@ -1,0 +1,643 @@
+(*===========================================================================*)
+(* Z++ Formal Specification: NPU Operations                                  *)
+(* Repository: o9nn/npu                                                       *)
+(* Description: Formalization of system operations for the NPU Virtual PCB   *)
+(*             architecture, including device initialization, LLM inference, *)
+(*             financial transactions, and hardware management.               *)
+(*===========================================================================*)
+
+(*---------------------------------------------------------------------------*)
+(* Import Base Specifications                                                 *)
+(*---------------------------------------------------------------------------*)
+
+(* This specification builds upon data_model.zpp and system_state.zpp *)
+(* Assumed: All types, schemas, and state definitions are in scope *)
+
+(*---------------------------------------------------------------------------*)
+(* Virtual PCB Lifecycle Operations                                           *)
+(*---------------------------------------------------------------------------*)
+
+(* Initialize the Virtual PCB hardware *)
+InitializeVirtualPCB
+  ΔNPU SystemState
+  device_id? : DEVICE_ID
+  model_number? : seq CHAR
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = uninitialized ∧
+  
+  (* State transition *)
+  pcb_state'.current_state = initializing ∧
+  
+  (* Device identification *)
+  pcb_state'.device_id = device_id? ∧
+  pcb_state'.model_number = model_number? ∧
+  
+  (* Initialize memory regions with zero data *)
+  pcb_state'.sram_region.data = {a : SRAM_BASE .. (SRAM_BASE + SRAM_SIZE - 1) • a ↦ 0} ∧
+  pcb_state'.flash_region.data = ∅ ∧  (* FLASH starts empty *)
+  pcb_state'.periph_region.data = {a : PERIPH_BASE .. (PERIPH_BASE + PERIPH_SIZE - 1) • a ↦ 0} ∧
+  
+  (* Initialize GPIO pins to default state *)
+  (∀ i : 0 .. 63 •
+    pcb_state'.gpio_bank.pins(i).mode = input ∧
+    pcb_state'.gpio_bank.pins(i).state = low ∧
+    pcb_state'.gpio_bank.pins(i).analog_value = 0 ∧
+    pcb_state'.gpio_bank.pins(i).interrupt_enabled = false) ∧
+  
+  (* Initialize DMA controller *)
+  pcb_state'.dma_controller.active_transfers = ∅ ∧
+  
+  (* Initialize interrupt controller *)
+  (∀ v : 0 .. 255 •
+    pcb_state'.irq_controller.interrupt_table(v).enabled = false ∧
+    pcb_state'.irq_controller.interrupt_table(v).pending = false) ∧
+  pcb_state'.irq_controller.pending_queue = ⟨⟩ ∧
+  
+  (* Initialize power management *)
+  pcb_state'.power_mgmt.voltage_rails(rail_3v3) = 3.3 ∧
+  pcb_state'.power_mgmt.voltage_rails(rail_5v0) = 5.0 ∧
+  pcb_state'.power_mgmt.temperature_celsius = 25.0 ∧
+  
+  (* Reset uptime *)
+  pcb_state'.uptime_microseconds = 0 ∧
+  
+  (* System state updates *)
+  system_initialized' = false ∧
+  drivers_loaded' = false ∧
+  system_error' = false
+
+(* Complete initialization and enter ready state *)
+CompleteInitialization
+  ΔNPU SystemState
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = initializing ∧
+  ¬system_error ∧
+  
+  (* State transition *)
+  pcb_state'.current_state = ready ∧
+  
+  (* Mark system as initialized *)
+  system_initialized' = true ∧
+  
+  (* Firmware marked as loaded if FLASH contains data *)
+  pcb_state'.firmware_loaded = (pcb_state'.flash_region.data ≠ ∅) ∧
+  
+  (* Preserve other state *)
+  pcb_state'.device_id = pcb_state.device_id ∧
+  pcb_state'.model_number = pcb_state.model_number ∧
+  drivers_loaded' = drivers_loaded
+
+(* Start the Virtual PCB device *)
+StartVirtualPCB
+  ΔNPU SystemState
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = ready ∧
+  system_initialized ∧
+  
+  (* State transition *)
+  pcb_state'.current_state = running ∧
+  
+  (* All other state preserved *)
+  pcb_state'.device_id = pcb_state.device_id ∧
+  pcb_state'.gpio_bank = pcb_state.gpio_bank ∧
+  system_initialized' = system_initialized ∧
+  drivers_loaded' = drivers_loaded
+
+(* Stop the Virtual PCB device *)
+StopVirtualPCB
+  ΔNPU SystemState
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = running ∧
+  
+  (* LLM inference must not be active *)
+  ¬llm_state.driver.inference_active ∧
+  
+  (* State transition *)
+  pcb_state'.current_state = ready ∧
+  
+  (* Preserve all state *)
+  pcb_state'.device_id = pcb_state.device_id ∧
+  pcb_state'.gpio_bank = pcb_state.gpio_bank ∧
+  system_initialized' = system_initialized ∧
+  drivers_loaded' = drivers_loaded
+
+(*---------------------------------------------------------------------------*)
+(* Memory Operations                                                          *)
+(*---------------------------------------------------------------------------*)
+
+(* Read a byte from memory *)
+ReadMemory
+  ΞNPU SystemState
+  address? : ADDRESS
+  value! : ℕ
+
+where
+  (* Determine which region contains the address *)
+  ((address? ≥ SRAM_BASE ∧ address? < SRAM_BASE + SRAM_SIZE ∧
+    address? ∈ dom pcb_state.sram_region.data ∧
+    value! = pcb_state.sram_region.data(address?)) ∨
+   (address? ≥ FLASH_BASE ∧ address? < FLASH_BASE + FLASH_SIZE ∧
+    address? ∈ dom pcb_state.flash_region.data ∧
+    value! = pcb_state.flash_region.data(address?)) ∨
+   (address? ≥ PERIPH_BASE ∧ address? < PERIPH_BASE + PERIPH_SIZE ∧
+    address? ∈ dom pcb_state.periph_region.data ∧
+    value! = pcb_state.periph_region.data(address?))) ∧
+  
+  (* Value is a valid byte *)
+  value! ≤ 255
+
+(* Write a byte to memory *)
+WriteMemory
+  ΔNPU SystemState
+  address? : ADDRESS
+  value? : ℕ
+
+where
+  (* Value must be a valid byte *)
+  value? ≤ 255 ∧
+  
+  (* Update appropriate memory region *)
+  ((address? ≥ SRAM_BASE ∧ address? < SRAM_BASE + SRAM_SIZE ∧
+    pcb_state'.sram_region.data = pcb_state.sram_region.data ⊕ {address? ↦ value?}) ∨
+   (address? ≥ FLASH_BASE ∧ address? < FLASH_BASE + FLASH_SIZE ∧
+    pcb_state.flash_region.is_writable ∧
+    pcb_state'.flash_region.data = pcb_state.flash_region.data ⊕ {address? ↦ value?}) ∨
+   (address? ≥ PERIPH_BASE ∧ address? < PERIPH_BASE + PERIPH_SIZE ∧
+    pcb_state'.periph_region.data = pcb_state.periph_region.data ⊕ {address? ↦ value?})) ∧
+  
+  (* Preserve other memory regions *)
+  (address? ∈ SRAM_BASE .. (SRAM_BASE + SRAM_SIZE - 1) ⇒
+    pcb_state'.flash_region = pcb_state.flash_region ∧
+    pcb_state'.periph_region = pcb_state.periph_region) ∧
+  (address? ∈ FLASH_BASE .. (FLASH_BASE + FLASH_SIZE - 1) ⇒
+    pcb_state'.sram_region = pcb_state.sram_region ∧
+    pcb_state'.periph_region = pcb_state.periph_region) ∧
+  (address? ∈ PERIPH_BASE .. (PERIPH_BASE + PERIPH_SIZE - 1) ⇒
+    pcb_state'.sram_region = pcb_state.sram_region ∧
+    pcb_state'.flash_region = pcb_state.flash_region)
+
+(*---------------------------------------------------------------------------*)
+(* GPIO Operations                                                            *)
+(*---------------------------------------------------------------------------*)
+
+(* Set GPIO pin mode *)
+SetGPIOMode
+  ΔNPU SystemState
+  pin_number? : ℕ
+  mode? : PIN_MODE
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = running ∧
+  pin_number? < 64 ∧
+  
+  (* Update pin mode *)
+  pcb_state'.gpio_bank.pins = pcb_state.gpio_bank.pins ⊕ 
+    {pin_number? ↦ (pcb_state.gpio_bank.pins(pin_number?) | mode := mode?)} ∧
+  
+  (* Reset analog value if not in analog mode *)
+  (mode? ≠ analog ⇒ 
+    pcb_state'.gpio_bank.pins(pin_number?).analog_value = 0)
+
+(* Set GPIO pin digital state *)
+SetGPIOState
+  ΔNPU SystemState
+  pin_number? : ℕ
+  state? : PIN_STATE
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = running ∧
+  pin_number? < 64 ∧
+  pcb_state.gpio_bank.pins(pin_number?).mode ∈ {output, input} ∧
+  
+  (* Update pin state *)
+  pcb_state'.gpio_bank.pins = pcb_state.gpio_bank.pins ⊕ 
+    {pin_number? ↦ (pcb_state.gpio_bank.pins(pin_number?) | state := state?)}
+
+(* Set GPIO pin analog value *)
+SetGPIOAnalog
+  ΔNPU SystemState
+  pin_number? : ℕ
+  analog_value? : ℕ
+
+where
+  (* Preconditions *)
+  pcb_state.current_state = running ∧
+  pin_number? < 64 ∧
+  pcb_state.gpio_bank.pins(pin_number?).mode = analog ∧
+  analog_value? ≤ 4095 ∧
+  
+  (* Update analog value *)
+  pcb_state'.gpio_bank.pins = pcb_state.gpio_bank.pins ⊕ 
+    {pin_number? ↦ (pcb_state.gpio_bank.pins(pin_number?) | 
+                    analog_value := analog_value?)}
+
+(* Read GPIO pin state *)
+ReadGPIOPin
+  ΞNPU SystemState
+  pin_number? : ℕ
+  mode! : PIN_MODE
+  state! : PIN_STATE
+  analog_value! : ℕ
+
+where
+  (* Preconditions *)
+  pin_number? < 64 ∧
+  
+  (* Read pin values *)
+  mode! = pcb_state.gpio_bank.pins(pin_number?).mode ∧
+  state! = pcb_state.gpio_bank.pins(pin_number?).state ∧
+  analog_value! = pcb_state.gpio_bank.pins(pin_number?).analog_value
+
+(*---------------------------------------------------------------------------*)
+(* Financial Device Operations                                                *)
+(*---------------------------------------------------------------------------*)
+
+(* Map a financial account to a GPIO pin *)
+MapAccountToPin
+  ΔFinancialDeviceState
+  account_code? : ACCOUNT_CODE
+  pin_number? : ℕ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.is_initialized ∧
+  pin_number? < 64 ∧
+  account_code? ∉ dom driver.account_pins ∧
+  
+  (* Create account pin mapping *)
+  let new_pin == AccountPin | 
+    new_pin.account_code = account_code? ∧
+    new_pin.pin_number = pin_number? ∧
+    new_pin.balance_voltage = 0.0 ∧
+    new_pin.is_active = false •
+  
+  driver'.account_pins = driver.account_pins ∪ {account_code? ↦ new_pin} ∧
+  success! = true ∧
+  
+  (* Preserve other state *)
+  driver'.transaction_count = driver.transaction_count ∧
+  driver'.total_balance = driver.total_balance
+
+(* Update account balance *)
+UpdateAccountBalance
+  ΔFinancialDeviceState
+  ΔGPIOPinBank
+  account_code? : ACCOUNT_CODE
+  balance? : ℝ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.is_initialized ∧
+  account_code? ∈ dom driver.account_pins ∧
+  balance? ≥ 0 ∧
+  
+  (* Convert balance to voltage using logarithmic scale *)
+  let voltage == (log₁₀(balance? + 1) / 6.0) * 3.3 •
+  let pin_num == driver.account_pins(account_code?).pin_number •
+  let adc_value == ⌊(voltage / 3.3) * 4095⌋ •
+  
+  (* Update account pin mapping *)
+  driver'.account_pins = driver.account_pins ⊕ 
+    {account_code? ↦ (driver.account_pins(account_code?) | 
+                      balance_voltage := voltage,
+                      is_active := (balance? > 0))} ∧
+  
+  (* Update corresponding GPIO pin *)
+  gpio_bank'.pins = gpio_bank.pins ⊕
+    {pin_num ↦ (gpio_bank.pins(pin_num) | 
+                mode := analog,
+                analog_value := adc_value)} ∧
+  
+  (* Update total balance *)
+  driver'.total_balance = 
+    Σ {a : dom driver'.account_pins • 
+       (driver'.account_pins(a).balance_voltage / 3.3) * 4095} ∧
+  
+  (* Increment transaction count *)
+  driver'.transaction_count = driver.transaction_count + 1 ∧
+  
+  (* Update hardware registers *)
+  reg_transaction_count' = driver'.transaction_count ∧
+  reg_balance_total' = ⌊driver'.total_balance⌋ ∧
+  
+  success! = true
+
+(* Read account balance *)
+ReadAccountBalance
+  ΞFinancialDeviceState
+  account_code? : ACCOUNT_CODE
+  balance! : ℝ
+
+where
+  (* Preconditions *)
+  driver.is_initialized ∧
+  account_code? ∈ dom driver.account_pins ∧
+  
+  (* Convert voltage back to balance *)
+  let voltage == driver.account_pins(account_code?).balance_voltage •
+  balance! = 10^((voltage / 3.3) * 6.0) - 1
+
+(*---------------------------------------------------------------------------*)
+(* LLM Coprocessor Operations                                                 *)
+(*---------------------------------------------------------------------------*)
+
+(* Load GGUF model *)
+LoadModel
+  ΔLLMCoprocessorState
+  model_path? : MODEL_PATH
+  model_config? : LlamaModelConfig
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.is_initialized ∧
+  ¬driver.model_loaded ∧
+  ¬driver.inference_active ∧
+  
+  (* Update model configuration *)
+  driver'.model_config = model_config? ∧
+  
+  (* Mark model as loaded *)
+  driver'.model_loaded = true ∧
+  
+  (* Assign model ID *)
+  driver'.model_id > 0 ∧
+  
+  (* Update hardware registers *)
+  reg_model_id' = driver'.model_id ∧
+  reg_ctx_used' = model_config?.n_ctx ∧
+  reg_status' = reg_status ∨ (1 << STATUS_BIT_MODEL_READY) ∧
+  reg_error_code' = ∅ ∧
+  
+  (* Initialize telemetry *)
+  driver'.telemetry.total_tokens_generated = 0 ∧
+  driver'.telemetry.total_prompts = 0 ∧
+  
+  success! = true
+
+(* Configure inference parameters *)
+ConfigureInference
+  ΔLLMCoprocessorState
+  prompt_addr? : ADDRESS
+  prompt_len? : ℕ
+  n_predict? : ℕ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.model_loaded ∧
+  ¬driver.inference_active ∧
+  prompt_addr? ≥ SRAM_BASE ∧
+  prompt_addr? + prompt_len? ≤ SRAM_BASE + SRAM_SIZE ∧
+  prompt_len? > 0 ∧
+  n_predict? > 0 ∧ n_predict? ≤ 2048 ∧
+  
+  (* Update hardware registers *)
+  reg_prompt_addr' = prompt_addr? ∧
+  reg_prompt_len' = prompt_len? ∧
+  reg_n_predict' = n_predict? ∧
+  
+  (* Clear previous output *)
+  output_tokens' = ⟨⟩ ∧
+  current_token_index' = 0 ∧
+  reg_token_ready' = false ∧
+  
+  success! = true
+
+(* Start inference *)
+StartInference
+  ΔLLMCoprocessorState
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.model_loaded ∧
+  ¬driver.inference_active ∧
+  reg_prompt_len > 0 ∧
+  reg_n_predict > 0 ∧
+  
+  (* Mark inference as active *)
+  driver'.inference_active = true ∧
+  
+  (* Set hardware status *)
+  reg_status' = (reg_status ∨ (1 << STATUS_BIT_BUSY)) ∧
+                ~(1 << STATUS_BIT_IDLE) ∧
+  reg_cmd' = reg_cmd ∨ (1 << CMD_BIT_START_INF) ∧
+  
+  (* Record start time *)
+  inference_start_time' > inference_start_time ∧
+  
+  (* Increment prompt counter *)
+  driver'.telemetry.total_prompts = driver.telemetry.total_prompts + 1 ∧
+  
+  success! = true
+
+(* Generate next token *)
+GenerateToken
+  ΔLLMCoprocessorState
+  token_id! : ℤ
+  is_eog! : 𝔹
+
+where
+  (* Preconditions *)
+  driver.inference_active ∧
+  #output_tokens < reg_n_predict ∧
+  
+  (* Generate token (abstract - actual generation by GGUF runtime) *)
+  token_id! ∈ ℤ ∧
+  
+  (* Append to output *)
+  output_tokens' = output_tokens ⌢ ⟨token_id!⟩ ∧
+  current_token_index' = current_token_index + 1 ∧
+  
+  (* Update hardware registers *)
+  reg_token_out' = token_id! ∧
+  reg_token_ready' = true ∧
+  reg_status' = reg_status ∨ (1 << STATUS_BIT_TOKEN_READY) ∧
+  
+  (* Update telemetry *)
+  driver'.telemetry.total_tokens_generated = 
+    driver.telemetry.total_tokens_generated + 1 ∧
+  driver'.telemetry.last_completion_tokens = #output_tokens' ∧
+  
+  (* Check for end of generation *)
+  is_eog! = (#output_tokens' ≥ reg_n_predict)
+
+(* Complete inference *)
+CompleteInference
+  ΔLLMCoprocessorState
+  completion_text! : seq CHAR
+
+where
+  (* Preconditions *)
+  driver.inference_active ∧
+  (#output_tokens ≥ reg_n_predict ∨ 
+   (reg_cmd & (1 << CMD_BIT_SOFT_STOP)) ≠ 0) ∧
+  
+  (* Mark inference as complete *)
+  driver'.inference_active = false ∧
+  
+  (* Update hardware status *)
+  reg_status' = (reg_status ∧ ~(1 << STATUS_BIT_BUSY)) ∨ 
+                (1 << STATUS_BIT_EOG) ∨
+                (1 << STATUS_BIT_IDLE) ∧
+  
+  (* Record end time *)
+  inference_end_time' > inference_start_time ∧
+  
+  (* Calculate performance metrics *)
+  let duration_sec == (inference_end_time' - inference_start_time) / 1000000.0 •
+  let tokens_generated == #output_tokens •
+  driver'.telemetry.tokens_per_second = tokens_generated / duration_sec ∧
+  reg_perf_tokens_sec' = ⌊driver'.telemetry.tokens_per_second⌋ ∧
+  
+  (* Detokenization produces completion text *)
+  #completion_text! > 0
+
+(* High-level inference operation (composition of above operations) *)
+PerformInference
+  ΔLLMCoprocessorState
+  prompt? : seq CHAR
+  sequence_config? : LlamaSequenceConfig
+  completion! : seq CHAR
+
+where
+  (* Execute inference pipeline *)
+  ∃ prompt_addr : ADDRESS; prompt_len : ℕ; 
+    tokens : seq ℤ; cfg_success, start_success : 𝔹 •
+  
+  (* 1. Tokenize prompt (abstract) *)
+  prompt_len = #tokens ∧
+  
+  (* 2. Configure inference *)
+  ConfigureInference[prompt_addr/prompt_addr?, prompt_len/prompt_len?, 
+                    sequence_config?.n_predict/n_predict?, 
+                    cfg_success/success!] ∧
+  cfg_success = true ∧
+  
+  (* 3. Start inference *)
+  StartInference[start_success/success!] ∧
+  start_success = true ∧
+  
+  (* 4. Generate tokens until complete *)
+  (∃ i : 1 .. sequence_config?.n_predict •
+    GenerateToken) ∧
+  
+  (* 5. Complete and get result *)
+  CompleteInference[completion!/completion_text!]
+
+(* Reset LLM device *)
+ResetLLMDevice
+  ΔLLMCoprocessorState
+
+where
+  (* Can reset at any time except during active inference *)
+  ¬driver.inference_active ∧
+  
+  (* Reset to initial state *)
+  driver'.model_loaded = false ∧
+  driver'.model_id = 0 ∧
+  reg_status' = 1 << STATUS_BIT_IDLE ∧
+  reg_model_id' = 0 ∧
+  reg_ctx_used' = 0 ∧
+  reg_error_code' = ∅ ∧
+  output_tokens' = ⟨⟩ ∧
+  current_token_index' = 0 ∧
+  
+  (* Reset telemetry *)
+  driver'.telemetry.total_tokens_generated = 0 ∧
+  driver'.telemetry.total_prompts = 0 ∧
+  driver'.telemetry.tokens_per_second = 0
+
+(*---------------------------------------------------------------------------*)
+(* DMA Operations                                                             *)
+(*---------------------------------------------------------------------------*)
+
+(* Start a DMA transfer *)
+StartDMATransfer
+  ΔDMAController
+  source? : ADDRESS
+  dest? : ADDRESS
+  length? : ℕ₁
+  channel! : ℕ
+  success! : 𝔹
+
+where
+  (* Preconditions *)
+  #active_transfers < max_channels ∧
+  source? + length? ≤ dest? ∨ dest? + length? ≤ source? ∧
+  
+  (* Allocate channel *)
+  channel! ∈ (0 .. (max_channels - 1)) \ dom active_transfers ∧
+  
+  (* Create transfer descriptor *)
+  let transfer == DMATransfer |
+    transfer.channel_id = channel! ∧
+    transfer.source_address = source? ∧
+    transfer.dest_address = dest? ∧
+    transfer.length = length? ∧
+    transfer.completed = false •
+  
+  active_transfers' = active_transfers ∪ {channel! ↦ transfer} ∧
+  success! = true
+
+(* Check if DMA transfer is complete *)
+IsDMAComplete
+  ΞDMAController
+  channel? : ℕ
+  complete! : 𝔹
+
+where
+  channel? ∈ dom active_transfers ∧
+  complete! = active_transfers(channel?).completed
+
+(*---------------------------------------------------------------------------*)
+(* Error Handling Operations                                                  *)
+(*---------------------------------------------------------------------------*)
+
+(* Report system error *)
+ReportError
+  ΔNPU SystemState
+  error_code? : ERROR_CODE
+  component? : seq CHAR
+
+where
+  (* Add error to log *)
+  error_log' = error_log ⌢ ⟨error_code?⟩ ∧
+  
+  (* Set system error flag *)
+  system_error' = true ∧
+  
+  (* Update appropriate component error register *)
+  (component? = "financial" ⇒ 
+    financial_state'.reg_error_code = error_code?) ∧
+  (component? = "llm" ⇒ 
+    llm_state'.reg_error_code = error_code?)
+
+(* Clear error *)
+ClearError
+  ΔNPU SystemState
+
+where
+  (* Clear error flag *)
+  system_error' = false ∧
+  
+  (* Clear component error registers *)
+  financial_state'.reg_error_code = ∅ ∧
+  llm_state'.reg_error_code = ∅
+
+(*===========================================================================*)
+(* End of Operations Specification                                           *)
+(*===========================================================================*)

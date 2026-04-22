@@ -1,0 +1,56 @@
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#58a6ff', 'primaryTextColor': '#c9d1d9', 'primaryBorderColor': '#30363d', 'lineColor': '#58a6ff', 'secondaryColor': '#161b22', 'tertiaryColor': '#21262d'}}}%%
+graph TB
+    subgraph ONTELECHO["ONTELECHO — Cosmic Order Cognitive Architecture Simulator"]
+        direction TB
+        
+        subgraph PERF["Phase 1: Performance (R)"]
+            direction LR
+            T9a["T9 CoreSelf<br/>Sets Direction"]
+            T1["T1 EchoBeats<br/>Sense Need"]
+            T8a["T8 Coherence<br/>Budget Energy"]
+            T4["T4 Memory<br/>Retrieve Patterns"]
+            T9a --> T1 --> T8a --> T4
+        end
+        
+        subgraph POT["Phase 2: Potential (D)"]
+            direction LR
+            T9b["T9 CoreSelf<br/>Review Hypothesis"]
+            T2["T2 autoresearch<br/>Generate Hypothesis"]
+            T8b["T8 Coherence<br/>Allocate"]
+            T8c["T8 Coherence<br/>Balance"]
+            T9b --> T2 --> T8b --> T8c
+        end
+        
+        subgraph COM["Phase 3: Commitment (E)"]
+            direction LR
+            T9c["T9 CoreSelf<br/>Commit"]
+            T5["T5 git commit<br/>Action Sequence"]
+            T8d["T8 Coherence<br/>Track Results"]
+            T7["T7 echo-garden<br/>Encode Memory"]
+            T9c --> T5 --> T8d --> T7
+        end
+        
+        PERF -->|"⊕ concurrent"| POT
+        POT -->|"⊗ sequential"| COM
+        COM -->|"cycle back"| PERF
+    end
+    
+    subgraph ALGEBRA["R ⊕ (D ⊗ E)"]
+        R["R: Research<br/>BRANCH topology<br/>⊕ additive"]
+        D["D: Development<br/>NEST topology<br/>⊗ multiplicative"]
+        E["E: Evolution<br/>NEST topology<br/>⊗ multiplicative"]
+        R ---|"⊕"| DE["D ⊗ E"]
+        D ---|"⊗"| E
+    end
+    
+    subgraph LEVELS["Autonomy Levels (A000081)"]
+        L0["L0 Void<br/>1 tree"]
+        L1["L1 Source<br/>1 tree"]
+        L2["L2 Polarity<br/>2 trees"]
+        L3["L3 Structure<br/>4 trees"]
+        L35["L3.5 Exchange<br/>9 trees"]
+        L4["L4 Creativity<br/>20 trees"]
+        L45["L4.5 Dynamics<br/>48 trees"]
+        L5["L5 Rhythm<br/>115 trees ★"]
+        L0 --> L1 --> L2 --> L3 --> L35 --> L4 --> L45 --> L5
+    end

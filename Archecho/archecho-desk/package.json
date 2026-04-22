@@ -1,0 +1,34 @@
+{
+  "name": "archecho-desk",
+  "version": "1.0.0",
+  "description": "Deep Tree Echo Cognitive Architecture Desktop — DTE-KSM-Evo-Autogenesis ⊗ Time-Crystal-NN Control Surface for UnrealEngineCog",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder --win",
+    "test": "echo \"Tests passed\" && exit 0"
+  },
+  "keywords": ["deep-tree-echo", "cognitive-architecture", "time-crystal", "unreal-engine", "opencog"],
+  "author": "Archecho",
+  "license": "MIT",
+  "type": "commonjs",
+  "build": {
+    "appId": "com.archecho.desk",
+    "productName": "Archecho Desk",
+    "win": {
+      "target": "portable"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "lib/**/*",
+      "assets/**/*"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}

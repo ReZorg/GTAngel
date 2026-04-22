@@ -1,0 +1,152 @@
+<Page x:Class="GTA3DE.Wpf.Views.GamePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Title="GTA III"
+      Background="Black"
+      Loaded="GamePage_Loaded"
+      Unloaded="GamePage_Unloaded">
+
+    <!--
+    Converted from: GameActivity (UE4 NativeActivity) game viewport
+    Android: NativeActivity with SurfaceView for OpenGL ES 3.0 / Vulkan rendering
+    WPF: UEWindowHost (HwndHost) embeds the UE4/UE5 game window as a child HWND
+    
+    Architecture:
+      1. UEProcessManager launches the game .exe
+      2. UEWindowHost embeds the game's HWND via Win32 SetParent
+      3. Named pipe IPC replaces the JNI NativeCalls bridge
+      4. Input forwarding replaces Android touch/sensor events
+    
+    The Android version loads libUE4.so in-process via NativeActivity.
+    The Windows version hosts the game as a child process with embedded window.
+    -->
+
+    <Grid>
+        <!-- Engine Viewport Host Container -->
+        <Border x:Name="GameViewportBorder"
+                Background="Black"
+                ClipToBounds="True">
+            <Grid>
+                <!-- The UEWindowHost control is added programmatically in code-behind
+                     because HwndHost requires the engine HWND which is only available
+                     after the process starts -->
+                <Border x:Name="EngineHostContainer"
+                        Background="Black"
+                        ClipToBounds="True" />
+
+                <!-- Pre-launch overlay: shown before game starts -->
+                <Grid x:Name="PreLaunchOverlay"
+                      Visibility="Visible">
+                    <Image Source="/Assets/Images/bg.horizontal.png"
+                           Stretch="UniformToFill"
+                           Opacity="0.6" />
+                    <Rectangle Fill="#88000000" />
+
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center">
+                        <Image Source="/Assets/Images/logo.png"
+                               Width="400"
+                               Margin="0,0,0,30" />
+
+                        <!-- Launch button -->
+                        <Button x:Name="LaunchButton"
+                                Content="LAUNCH GAME"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                FontSize="18"
+                                Padding="40,15"
+                                Command="{Binding LaunchGameCommand}"
+                                Visibility="{Binding IsGameNotRunning, Converter={StaticResource BoolToVisConverter}}" />
+
+                        <!-- Engine status text -->
+                        <TextBlock x:Name="StatusText"
+                                   Text="{Binding EngineStatusText}"
+                                   Foreground="#AAFFFFFF"
+                                   FontSize="13"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,15,0,0" />
+
+                        <!-- Discovered UE projects list -->
+                        <Border Margin="0,20,0,0"
+                                Background="#22FFFFFF"
+                                CornerRadius="4"
+                                Padding="15"
+                                MaxWidth="500"
+                                Visibility="{Binding HasDiscoveredProjects, Converter={StaticResource BoolToVisConverter}}">
+                            <StackPanel>
+                                <TextBlock Text="Discovered UE Projects:"
+                                           Foreground="#88FFFFFF"
+                                           FontSize="11"
+                                           Margin="0,0,0,8" />
+                                <ItemsControl ItemsSource="{Binding DiscoveredProjects}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding Name}"
+                                                    Command="{Binding DataContext.SelectProjectCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource SecondaryButtonStyle}"
+                                                    Margin="0,2"
+                                                    HorizontalAlignment="Stretch"
+                                                    Padding="10,6" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Press F11 for fullscreen | ESC to exit"
+                                   Foreground="#44FFFFFF"
+                                   FontSize="11"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,15,0,0" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Loading overlay: shown during engine startup -->
+                <Grid x:Name="LoadingOverlay"
+                      Visibility="{Binding IsGameLoading, Converter={StaticResource BoolToVisConverter}}">
+                    <Rectangle Fill="#CC000000" />
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True"
+                                     Width="200" Height="3"
+                                     Foreground="{StaticResource AccentBrush}" />
+                        <TextBlock Text="{Binding LoadingStatusText}"
+                                   Foreground="White"
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,10,0,0" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- In-game HUD overlay (transparent, on top of engine window) -->
+                <Grid x:Name="HudOverlay"
+                      Visibility="Collapsed"
+                      IsHitTestVisible="False">
+                    <!-- FPS counter (top-right) -->
+                    <TextBlock Text="{Binding FpsText}"
+                               Foreground="#88FFFFFF"
+                               FontSize="11"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Top"
+                               Margin="0,5,10,0" />
+
+                    <!-- Engine state indicator (top-left) -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Margin="10,5,0,0">
+                        <Ellipse Width="8" Height="8"
+                                 Fill="{Binding EngineStateColor}"
+                                 Margin="0,0,5,0" />
+                        <TextBlock Text="{Binding EngineStateText}"
+                                   Foreground="#88FFFFFF"
+                                   FontSize="11" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

@@ -1,0 +1,77 @@
+<Window x:Class="GTA3DE.Wpf.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:GTA3DE.Wpf.Controls"
+        mc:Ignorable="d"
+        Title="GTAngel — Guardian Angel Cognitive Orchestrator"
+        Style="{StaticResource GameWindowStyle}"
+        WindowStartupLocation="CenterScreen"
+        KeyDown="Window_KeyDown">
+
+    <!--
+    Converted from: com.epicgames.ue4.GameActivity (NativeActivity)
+    Android: Theme.Black.NoTitleBar.Fullscreen, sensorLandscape, singleTask
+    WPF: Borderless maximized window with Frame-based navigation
+    -->
+
+    <Grid x:Name="RootGrid">
+        <!-- Layer 0: Background -->
+        <Image x:Name="BackgroundImage"
+               Source="/Assets/Images/bg.horizontal.png"
+               Stretch="UniformToFill"
+               Opacity="0.3" />
+
+        <!-- Layer 1: Main Content Frame (NavigationService replaces Android Intent navigation) -->
+        <Frame x:Name="MainFrame"
+               NavigationUIVisibility="Hidden"
+               Navigated="MainFrame_Navigated" />
+
+        <!-- Layer 2: Trial Banner Overlay (from trialbanner.xml) -->
+        <controls:TrialBannerControl x:Name="TrialBanner"
+                                      VerticalAlignment="Top"
+                                      Visibility="Collapsed" />
+
+        <!-- Layer 3: Custom Title Bar (replaces Android ActionBar/Toolbar) -->
+        <DockPanel x:Name="TitleBar"
+                   VerticalAlignment="Top"
+                   Height="40"
+                   Background="#80000000"
+                   Visibility="Collapsed">
+            <Image Source="/Assets/Images/logomono.png"
+                   Width="24" Height="24"
+                   Margin="10,0,0,0"
+                   DockPanel.Dock="Left" />
+            <TextBlock Text="GTAngel"
+                       Foreground="White"
+                       FontSize="14"
+                       VerticalAlignment="Center"
+                       Margin="8,0,0,0"
+                       DockPanel.Dock="Left" />
+
+            <!-- Window Controls -->
+            <StackPanel Orientation="Horizontal"
+                        DockPanel.Dock="Right"
+                        HorizontalAlignment="Right">
+                <Button Content="&#x2014;"
+                        Style="{StaticResource IconButtonStyle}"
+                        Width="40" Height="40"
+                        Foreground="White"
+                        Click="MinimizeButton_Click" />
+                <Button Content="&#x25A1;"
+                        Style="{StaticResource IconButtonStyle}"
+                        Width="40" Height="40"
+                        Foreground="White"
+                        Click="MaximizeButton_Click" />
+                <Button x:Name="CloseButton"
+                        Content="&#x2715;"
+                        Style="{StaticResource IconButtonStyle}"
+                        Width="40" Height="40"
+                        Foreground="White"
+                        Click="CloseButton_Click" />
+            </StackPanel>
+            <TextBlock />
+        </DockPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,25 @@
+#
+# Load IDEs first, then the models and after that the IPLs
+#
+
+# everything is loaded on a per directory basis and in alphabetical order 
+# to improve the speed of loading
+
+#
+# Object types
+#
+IDE DATA\MAPS\GENERIC.IDE
+IDE DATA\MAPS\MULTI3\MULTI3.IDE
+SPLASH loadsc2
+
+#collision data
+COLFILE 0 MODELS\COLL\GENERIC.COL
+COLFILE 0 DATA\MAPS\MULTI3\MULTI3.COL
+#
+# Scene information
+#
+IPL DATA\MAPS\MULTI3\MULTI3.IPL
+CDIMAGE DATA\MAPS\multi3\multi3.IMG
+
+
+

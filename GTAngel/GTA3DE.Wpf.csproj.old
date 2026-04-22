@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>GTA3DE.Wpf</RootNamespace>
+    <AssemblyName>GTA3DE</AssemblyName>
+    <Version>1.84.3</Version>
+    <FileVersion>1.84.3.0</FileVersion>
+    <AssemblyVersion>1.84.3.0</AssemblyVersion>
+    <Company>Rockstar Games</Company>
+    <Product>GTA III - Definitive Edition</Product>
+    <Description>Grand Theft Auto III - The Definitive Edition for Windows Desktop</Description>
+    <Copyright>Copyright © Rockstar Games 2025</Copyright>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2535.41" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.8" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\**\*" />
+    <Content Include="Assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Images\icon.png" />
+    <Resource Include="Assets\Images\logo.png" />
+    <Resource Include="Assets\Images\rockstar.png" />
+    <Resource Include="Assets\Images\rockstarbg.png" />
+    <Resource Include="Assets\Images\bg.horizontal.png" />
+    <Resource Include="Assets\Images\bg.vertical.png" />
+    <Resource Include="Assets\Images\gtapluslogo.png" />
+  </ItemGroup>
+
+</Project>

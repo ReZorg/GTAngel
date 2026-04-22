@@ -1,0 +1,73 @@
+<Page x:Class="GTA3DE.Wpf.Views.OtherGamesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Title="Other Games"
+      Background="{StaticResource PrimaryBrush}">
+
+    <!--
+    Converted from: FlutterOtherGamesScreen
+    Android: Flutter screen showing other Rockstar games (GamesConfig)
+    WPF: ItemsControl with game cards
+    -->
+
+    <Grid Margin="40">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{StaticResource OtherGamesHeading}"
+                   Style="{StaticResource HeadingStyle}"
+                   HorizontalAlignment="Left"
+                   Margin="0,0,0,8" />
+
+        <TextBlock Grid.Row="1"
+                   Text="{StaticResource OtherGamesSubheading}"
+                   Style="{StaticResource SubheadingStyle}"
+                   HorizontalAlignment="Left"
+                   Opacity="0.7"
+                   Margin="0,0,0,30" />
+
+        <!-- Game Cards List (replaces Flutter ListView with GameConfig items) -->
+        <ItemsControl Grid.Row="2"
+                      ItemsSource="{Binding Games}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource CardStyle}"
+                            Width="200" Margin="0,0,15,15"
+                            Padding="15"
+                            Cursor="Hand">
+                        <StackPanel>
+                            <!-- Game Icon (replaces gc_game_icon.xml CardView) -->
+                            <Border Style="{StaticResource GameIconCardStyle}"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,0,10">
+                                <Image Source="{Binding IconUrl}"
+                                       Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock Text="{Binding Name}"
+                                       Foreground="White"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Subtitle}"
+                                       Foreground="#AAFFFFFF"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Margin="0,4,0,0" />
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</Page>
