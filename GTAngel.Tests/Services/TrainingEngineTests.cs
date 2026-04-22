@@ -119,9 +119,9 @@ public class TrainingEngineTests
     [Fact]
     public void Events_CanBeSubscribedAndUnsubscribed()
     {
-        Action<GTA3DE.Wpf.Models.CognitiveState>? handler = _ => { };
-        _engine.OnCognitiveStateChanged += handler;
-        _engine.OnCognitiveStateChanged -= handler;
+        Action<GTA3DE.Wpf.Models.CognitiveState>? cognitiveStateHandler = _ => { };
+        _engine.OnCognitiveStateChanged += cognitiveStateHandler;
+        _engine.OnCognitiveStateChanged -= cognitiveStateHandler;
         // No assertion needed — just verifying no exception is thrown
     }
 }
