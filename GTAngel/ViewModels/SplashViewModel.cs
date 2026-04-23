@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Services;
-using GTA3DE.Wpf.Views;
+using GTAngel.Services;
+using GTAngel.Views;
 
-namespace GTA3DE.Wpf.ViewModels;
+namespace GTAngel.ViewModels;
 
 /// <summary>
 /// Splash screen view model.

@@ -1,8 +1,8 @@
-<UserControl x:Class="GTA3DE.Wpf.Views.AvatarView"
+<UserControl x:Class="GTAngel.Views.AvatarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:GTA3DE.Wpf.ViewModels"
-             xmlns:conv="clr-namespace:GTA3DE.Wpf.Converters"
+             xmlns:vm="clr-namespace:GTAngel.ViewModels"
+             xmlns:conv="clr-namespace:GTAngel.Converters"
              Background="#0A0A14">
     <UserControl.DataContext>
         <vm:AvatarViewModel/>

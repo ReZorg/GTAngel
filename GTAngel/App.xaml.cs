@@ -2,11 +2,11 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using GTA3DE.Wpf.Interop;
-using GTA3DE.Wpf.Services;
-using GTA3DE.Wpf.ViewModels;
+using GTAngel.Interop;
+using GTAngel.Services;
+using GTAngel.ViewModels;
 
-namespace GTA3DE.Wpf;
+namespace GTAngel;
 
 /// <summary>
 /// Application entry point. Configures dependency injection, logging, and services.

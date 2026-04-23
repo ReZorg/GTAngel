@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.IO;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Interop;
-using GTA3DE.Wpf.Models;
+using GTAngel.Interop;
+using GTAngel.Models;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// DTE 4E Embodied Cognition Avatar Service for GTAngel.

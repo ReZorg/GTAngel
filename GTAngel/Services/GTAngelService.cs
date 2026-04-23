@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Models;
+using GTAngel.Models;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// GTAngel — Guardian Angel Cognitive Orchestrator.
@@ -10,7 +10,7 @@ namespace GTA3DE.Wpf.Services;
 /// Composition: /dte-ksm-evo-autogenesis ( /gta3-ue5-wpf ) → "GTAngel"
 ///
 /// This service is the top-level autogenesis loop controller that wraps the
-/// DTE-KSM-Evo-Autogenesis skill over the GTA3DE.Wpf environment.
+/// DTE-KSM-Evo-Autogenesis skill over the GTAngel environment.
 ///
 /// It implements:
 ///   1. The 6-step Autogenesis Loop (Observe → Hypothesize → Edit → Run → Assess → Decide)

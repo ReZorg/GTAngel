@@ -1,8 +1,8 @@
 using System.IO;
 using System.IO.Compression;
-using GTA3DE.Wpf.Models;
+using GTAngel.Models;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Service to catalog and browse GTA3DE game world assets from the zip archive.

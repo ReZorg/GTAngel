@@ -1,7 +1,7 @@
 using System.IO;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// File system service for game asset management and UE project discovery.

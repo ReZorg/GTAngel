@@ -1,4 +1,4 @@
-namespace GTA3DE.Wpf.Models;
+namespace GTAngel.Models;
 
 /// <summary>
 /// Represents a single asset entry from the GTA3DE asset archive.

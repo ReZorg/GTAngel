@@ -1,11 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Models;
-using GTA3DE.Wpf.Services;
-using GTA3DE.Wpf.Views;
+using GTAngel.Models;
+using GTAngel.Services;
+using GTAngel.Views;
 
-namespace GTA3DE.Wpf.ViewModels;
+namespace GTAngel.ViewModels;
 
 /// <summary>
 /// Download page view model.

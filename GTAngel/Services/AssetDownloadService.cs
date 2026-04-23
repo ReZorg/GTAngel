@@ -1,8 +1,8 @@
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Models;
+using GTAngel.Models;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Asset download service.

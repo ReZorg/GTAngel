@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Interop;
+namespace GTAngel.Interop;
 
 /// <summary>
 /// UE5 Build Integration service for discovering, validating, and optionally

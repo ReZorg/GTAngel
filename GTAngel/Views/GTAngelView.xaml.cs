@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace GTA3DE.Wpf.Views;
+namespace GTAngel.Views;
 
 /// <summary>
 /// GTAngel Guardian Angel View — UserControl for embedding in TrainingDashboard tab.

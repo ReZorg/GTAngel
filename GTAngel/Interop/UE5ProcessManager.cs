@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Interop;
+namespace GTAngel.Interop;
 
 /// <summary>
 /// UE5-upgraded process manager for GTAngel.
@@ -242,7 +242,7 @@ public class UE5ProcessManager : IDisposable
     /// <summary>
     /// KSM Cycle 6: Send the current Player↔AI bridge mode to UE5
     /// </summary>
-    public async Task SendPlayerAiModeAsync(GTA3DE.Wpf.Services.PlayerAiBridgeMode mode)
+    public async Task SendPlayerAiModeAsync(GTAngel.Services.PlayerAiBridgeMode mode)
     {
         await SendCommandAsync(new UEMessage
         {

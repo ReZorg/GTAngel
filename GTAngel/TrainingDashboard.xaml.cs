@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace GTA3DE.Wpf;
+namespace GTAngel;
 
 /// <summary>
 /// Training Dashboard — AngelClaw Game World DTE Training Environment.

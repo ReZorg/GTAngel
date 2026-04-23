@@ -3,10 +3,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Interop;
-using GTA3DE.Wpf.ViewModels;
+using GTAngel.Interop;
+using GTAngel.ViewModels;
 
-namespace GTA3DE.Wpf.Views;
+namespace GTAngel.Views;
 
 /// <summary>
 /// Main game viewport page with UE engine window hosting.

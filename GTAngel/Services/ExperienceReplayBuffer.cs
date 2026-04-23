@@ -3,7 +3,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Experience Replay Buffer for off-policy reinforcement learning algorithms (DQN, SAC, TD3).

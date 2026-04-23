@@ -6,9 +6,9 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GTA3DE.Wpf.Services;
+using GTAngel.Services;
 
-namespace GTA3DE.Wpf.ViewModels;
+namespace GTAngel.ViewModels;
 
 /// <summary>
 /// ViewModel for the Game Runtime tab.

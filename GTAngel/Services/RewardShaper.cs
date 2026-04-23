@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Domain-specific reward shaping for GTA3 Deep Tree Echo training.

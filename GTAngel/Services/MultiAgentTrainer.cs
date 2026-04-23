@@ -5,7 +5,7 @@ using System.IO.MemoryMappedFiles;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Multi-Agent Distributed Training for Deep Tree Echo.

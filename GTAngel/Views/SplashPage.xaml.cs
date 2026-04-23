@@ -1,10 +1,10 @@
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using GTA3DE.Wpf.Services;
-using GTA3DE.Wpf.ViewModels;
+using GTAngel.Services;
+using GTAngel.ViewModels;
 using Serilog;
 
-namespace GTA3DE.Wpf.Views;
+namespace GTAngel.Views;
 
 /// <summary>
 /// Splash/gate screen shown during initialization.

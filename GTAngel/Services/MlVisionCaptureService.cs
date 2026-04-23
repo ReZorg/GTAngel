@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services
+namespace GTAngel.Services
 {
     /// <summary>
     /// ML Vision Capture Service — KSM Evolution Cycle 1 Implementation

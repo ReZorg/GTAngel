@@ -1,4 +1,4 @@
-namespace GTA3DE.Wpf.Models;
+namespace GTAngel.Models;
 
 /// <summary>
 /// A single training episode in the game world environment.

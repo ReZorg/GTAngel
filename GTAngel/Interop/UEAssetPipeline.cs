@@ -2,7 +2,7 @@ using System.IO;
 using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Interop;
+namespace GTAngel.Interop;
 
 /// <summary>
 /// Asset pipeline for extracting and managing UE4/UE5 game assets.

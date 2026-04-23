@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace GTA3DE.Wpf.Models;
+namespace GTAngel.Models;
 
 /// <summary>
 /// Game configuration model.

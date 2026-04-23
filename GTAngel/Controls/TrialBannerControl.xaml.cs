@@ -1,8 +1,8 @@
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using GTA3DE.Wpf.ViewModels;
+using GTAngel.ViewModels;
 
-namespace GTA3DE.Wpf.Controls;
+namespace GTAngel.Controls;
 
 /// <summary>
 /// Trial mode banner overlay control.

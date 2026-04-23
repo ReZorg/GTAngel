@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Interop;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Interop;
+namespace GTAngel.Interop;
 
 /// <summary>
 /// WPF HwndHost that embeds the UE4/UE5 game engine window as a child window.

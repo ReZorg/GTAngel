@@ -1,4 +1,4 @@
-namespace GTA3DE.Wpf.Models;
+namespace GTAngel.Models;
 
 /// <summary>
 /// Deep Tree Echo cognitive state — mirrors the angelclaw DeepTreeEcho/Core architecture.
