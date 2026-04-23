@@ -3,15 +3,15 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GTA3DE.Wpf.Models;
-using GTA3DE.Wpf.Services;
+using GTAngel.Models;
+using GTAngel.Services;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 
-namespace GTA3DE.Wpf.ViewModels;
+namespace GTAngel.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {

@@ -1,7 +1,7 @@
-<UserControl x:Class="GTA3DE.Wpf.Views.GameRuntimeView"
+<UserControl x:Class="GTAngel.Views.GameRuntimeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:GTA3DE.Wpf.ViewModels">
+             xmlns:vm="clr-namespace:GTAngel.ViewModels">
 
     <UserControl.DataContext>
         <vm:GameRuntimeViewModel/>

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Echo State Network (ESN) Reservoir Pipeline for Deep Tree Echo training.

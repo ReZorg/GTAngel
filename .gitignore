@@ -1,13 +1,15 @@
 # ============================================================
-# GTAngel .gitignore
+# GTAngel .gitignore — AI Training Platform
 # ============================================================
 
-# --- UE5 engine directories (huge, not needed in repo) ---
+# --- UE5 Engine runtime (3 GB, stays local, embedded in build output only) ---
+/Engine/
+
+# --- UE5 engine directories at root (legacy layout) ---
 /Binaries/
 /Build/
 /Config/
 /Documentation/
-/Engine/
 /engines/
 /Extras/
 /Gameface/
@@ -18,12 +20,7 @@
 /Templates/
 /tools/
 
-# --- Temp text files at root ---
-*.txt
-*.ps1
-*.py
-
-# --- Build output inside GTAngel ---
+# --- Build output ---
 GTAngel/bin/
 GTAngel/obj/
 
@@ -37,13 +34,19 @@ Archecho/*/Intermediate/
 Archecho/*/Saved/
 Archecho/*/DerivedDataCache/
 
-# --- Large binary assets (use LFS later) ---
+# --- Large UE5 binary assets ---
 *.pak
 *.uasset
 *.umap
 *.ubulk
 *.utoc
 *.ucas
+
+# --- Temp scripts and build logs ---
+*.txt
+*.ps1
+*.py
+*.bat
 
 # --- IDE ---
 .vs/

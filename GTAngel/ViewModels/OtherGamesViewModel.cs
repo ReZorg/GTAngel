@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Models;
-using GTA3DE.Wpf.Services;
+using GTAngel.Models;
+using GTAngel.Services;
 
-namespace GTA3DE.Wpf.ViewModels;
+namespace GTAngel.ViewModels;
 
 /// <summary>
 /// Other games page view model.

@@ -2,9 +2,9 @@ using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Interop;
+using GTAngel.Interop;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// KSM Cycle 6: UE5 Player↔AI Bridge Service

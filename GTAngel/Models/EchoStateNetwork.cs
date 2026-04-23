@@ -1,4 +1,4 @@
-namespace GTA3DE.Wpf.Models;
+namespace GTAngel.Models;
 
 /// <summary>
 /// Echo State Network (ESN) reservoir computing model.

@@ -1,8 +1,8 @@
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using GTA3DE.Wpf.ViewModels;
+using GTAngel.ViewModels;
 
-namespace GTA3DE.Wpf.Views;
+namespace GTAngel.Views;
 
 /// <summary>
 /// Other Rockstar games showcase page.

@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Manages the GTA3 game runtime, frame capture pipeline, virtual controller input,

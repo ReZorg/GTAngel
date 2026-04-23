@@ -1,9 +1,9 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Models;
+using GTAngel.Models;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Rockstar Social Club API client.

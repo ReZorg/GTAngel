@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Bridge to OpenRW (open-source GTA3 engine reimplementation) and re3 (reverse-engineered GTA3).

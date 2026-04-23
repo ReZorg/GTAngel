@@ -1,11 +1,11 @@
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
-using GTA3DE.Wpf.Services;
-using GTA3DE.Wpf.ViewModels;
+using GTAngel.Services;
+using GTAngel.ViewModels;
 using Serilog;
 
-namespace GTA3DE.Wpf.Views;
+namespace GTAngel.Views;
 
 /// <summary>
 /// Main application window. Replaces GameActivity (NativeActivity) from UE4.

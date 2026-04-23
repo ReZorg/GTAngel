@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Interop;
+namespace GTAngel.Interop;
 
 /// <summary>
 /// Manages the UE4/UE5 game engine process lifecycle.

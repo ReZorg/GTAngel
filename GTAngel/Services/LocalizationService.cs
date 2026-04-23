@@ -2,7 +2,7 @@ using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Localization service.

@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Interop;
+namespace GTAngel.Interop;
 
 /// <summary>
 /// Native Windows interop layer — complete translation of all 52 JNI exports from libUE4.so.

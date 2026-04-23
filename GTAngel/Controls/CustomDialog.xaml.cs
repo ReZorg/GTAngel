@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace GTA3DE.Wpf.Controls;
+namespace GTAngel.Controls;
 
 /// <summary>
 /// Custom dialog overlay control.

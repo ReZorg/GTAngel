@@ -5,10 +5,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Interop;
-using GTA3DE.Wpf.Services;
+using GTAngel.Interop;
+using GTAngel.Services;
 
-namespace GTA3DE.Wpf.ViewModels;
+namespace GTAngel.ViewModels;
 
 /// <summary>
 /// Game viewport view model with full UE engine process management.

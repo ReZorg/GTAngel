@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using GTA3DE.Wpf.Models;
+using GTAngel.Models;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Application configuration service.

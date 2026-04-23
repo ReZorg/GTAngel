@@ -1,7 +1,7 @@
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Rockstar Mobile API client.

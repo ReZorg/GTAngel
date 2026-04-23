@@ -1,7 +1,7 @@
 using System.Windows.Controls;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 /// <summary>
 /// Frame-based navigation service.

@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace GTA3DE.Wpf.Services;
+namespace GTAngel.Services;
 
 // ── Launch Stage Enum ─────────────────────────────────────────────────────────
 public enum UE5LaunchStage
@@ -42,7 +42,7 @@ public sealed record UE5LaunchResult(
 public sealed class UE5LaunchOrchestrator : IDisposable
 {
     // ── Constants ─────────────────────────────────────────────────────────────
-    private const string DefaultEnginePath   = @"E:\u9n\UnrealEngine";
+    private const string DefaultEnginePath   = @".\Engine";
     private const string EditorBinary        = @"Engine\Binaries\Win64\UnrealEditor.exe";
     private const string CognitivePipePrefix = "GTAngel_MLVision_IPC";
     private const int    MlVisionWidth       = 768;
