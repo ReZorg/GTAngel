@@ -24,7 +24,11 @@
 GTAngel/bin/
 GTAngel/obj/
 
-# --- Archecho build artifacts ---
+# --- Build output inside GTAngel.Tests ---
+GTAngel.Tests/bin/
+GTAngel.Tests/obj/
+
+# --- Build output inside Archecho ---
 Archecho/*/Binaries/
 Archecho/*/Intermediate/
 Archecho/*/Saved/
