@@ -4,6 +4,7 @@
         xmlns:vm="clr-namespace:GTAngel.ViewModels"
         xmlns:views="clr-namespace:GTAngel.Views"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        xmlns:converters="clr-namespace:GTAngel.Converters"
         Title="AngelClaw Game World — Deep Tree Echo Training Environment"
         Width="1400" Height="900" MinWidth="1100" MinHeight="700"
         Background="{StaticResource BgDarkBrush}"
@@ -12,6 +13,148 @@
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Color brushes -->
+        <SolidColorBrush x:Key="BgDarkBrush"       Color="#FF0D0D1A"/>
+        <SolidColorBrush x:Key="BgMediumBrush"     Color="#FF141428"/>
+        <SolidColorBrush x:Key="BgLightBrush"      Color="#FF1E1E3A"/>
+        <SolidColorBrush x:Key="BgCardBrush"       Color="#FF181830"/>
+        <SolidColorBrush x:Key="AccentAngelBrush"  Color="#FFFFD700"/>
+        <SolidColorBrush x:Key="AccentCyanBrush"   Color="#FF00BCD4"/>
+        <SolidColorBrush x:Key="AccentGreenBrush"  Color="#FF4CAF50"/>
+        <SolidColorBrush x:Key="AccentOrangeBrush" Color="#FFFF9800"/>
+        <SolidColorBrush x:Key="AccentRedBrush"    Color="#FFF44336"/>
+        <SolidColorBrush x:Key="AccentPurpleBrush" Color="#FF9C27B0"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush"  Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF9E9EC8"/>
+        <SolidColorBrush x:Key="HaltBrush"         Color="#FFFF5722"/>
+
+        <!-- Converters -->
+        <converters:BoolToVisibilityConverter        x:Key="BoolToVis"/>
+        <converters:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+        <converters:InverseBoolConverter             x:Key="InvBool"/>
+        <converters:ScoreToColorConverter            x:Key="ScoreToColor"/>
+        <converters:StatusToColorConverter           x:Key="StatusToColor"/>
+
+        <!-- Card border -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background"        Value="{StaticResource BgCardBrush}"/>
+            <Setter Property="CornerRadius"      Value="8"/>
+            <Setter Property="Padding"           Value="12"/>
+            <Setter Property="Margin"            Value="4"/>
+            <Setter Property="BorderBrush"       Value="#22FFFFFF"/>
+            <Setter Property="BorderThickness"   Value="1"/>
+        </Style>
+
+        <!-- Section header -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="Foreground"  Value="{StaticResource AccentCyanBrush}"/>
+            <Setter Property="FontSize"    Value="13"/>
+            <Setter Property="FontWeight"  Value="SemiBold"/>
+            <Setter Property="Margin"      Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Metric value -->
+        <Style x:Key="MetricValue" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontSize"   Value="22"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- Metric label -->
+        <Style x:Key="MetricLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize"   Value="10"/>
+        </Style>
+
+        <!-- Accent button (cyan) -->
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background"       Value="{StaticResource AccentCyanBrush}"/>
+            <Setter Property="Foreground"       Value="#FF0D0D1A"/>
+            <Setter Property="FontSize"         Value="12"/>
+            <Setter Property="FontWeight"       Value="SemiBold"/>
+            <Setter Property="Padding"          Value="14,6"/>
+            <Setter Property="Cursor"           Value="Hand"/>
+            <Setter Property="BorderThickness"  Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#FF00ACC1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#FF444444"/>
+                                <Setter Property="Foreground" Value="#FF888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Success button (green) -->
+        <Style x:Key="SuccessButton" TargetType="Button">
+            <Setter Property="Background"       Value="{StaticResource AccentGreenBrush}"/>
+            <Setter Property="Foreground"       Value="White"/>
+            <Setter Property="FontSize"         Value="12"/>
+            <Setter Property="FontWeight"       Value="SemiBold"/>
+            <Setter Property="Padding"          Value="14,6"/>
+            <Setter Property="Cursor"           Value="Hand"/>
+            <Setter Property="BorderThickness"  Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#FF43A047"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#FF444444"/>
+                                <Setter Property="Foreground" Value="#FF888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Danger button (red) -->
+        <Style x:Key="DangerButton" TargetType="Button">
+            <Setter Property="Background"       Value="{StaticResource AccentRedBrush}"/>
+            <Setter Property="Foreground"       Value="White"/>
+            <Setter Property="FontSize"         Value="12"/>
+            <Setter Property="FontWeight"       Value="SemiBold"/>
+            <Setter Property="Padding"          Value="14,6"/>
+            <Setter Property="Cursor"           Value="Hand"/>
+            <Setter Property="BorderThickness"  Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#FFE53935"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Background" Value="#FF444444"/>
+                                <Setter Property="Foreground" Value="#FF888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -100,7 +243,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Archive:" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBox Grid.Column="1" Text="{Binding AssetArchivePath, UpdateSourceTrigger=PropertyChanged}" Background="#11FFFFFF" Foreground="{StaticResource TextPrimaryBrush}" BorderBrush="#33FFFFFF" Padding="8,6" FontSize="12"/>
-                            <Button Grid.Column="2" Content="Scan Assets" Command="{Binding LoadAssetsCommand}" Style="{StaticResource AccentButton}" Margin="8,0,0,0" IsEnabled="{Binding IsBusy, Converter={StaticResource InvBoolToVis}}"/>
+                            <Button Grid.Column="2" Content="Scan Assets" Command="{Binding LoadAssetsCommand}" Style="{StaticResource AccentButton}" Margin="8,0,0,0" IsEnabled="{Binding IsBusy, Converter={StaticResource InvBool}}"/>
                         </Grid>
                     </Border>
 
