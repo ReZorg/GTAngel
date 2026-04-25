@@ -1,4 +1,4 @@
-using GTA3DE.Wpf.Services;
+using GTAngel.Services;
 using Xunit;
 
 namespace GTAngel.Tests.Services;

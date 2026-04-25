@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GTAngel\GTA3DE.Wpf.csproj" />
+    <ProjectReference Include="..\GTAngel\GTAngel.csproj" />
   </ItemGroup>
 
 </Project>

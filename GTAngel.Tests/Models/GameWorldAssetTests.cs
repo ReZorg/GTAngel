@@ -1,4 +1,4 @@
-using GTA3DE.Wpf.Models;
+using GTAngel.Models;
 using Xunit;
 
 namespace GTAngel.Tests.Models;
