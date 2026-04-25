@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
-using GTA3DE.Wpf.Converters;
+using GTAngel.Converters;
 using Xunit;
 
 #pragma warning disable CS8625 // null parameter for non-nullable CultureInfo

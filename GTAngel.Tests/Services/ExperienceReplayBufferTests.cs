@@ -1,4 +1,4 @@
-using GTA3DE.Wpf.Services;
+using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 

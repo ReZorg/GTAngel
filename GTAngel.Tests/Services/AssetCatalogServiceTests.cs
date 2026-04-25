@@ -1,5 +1,5 @@
-using GTA3DE.Wpf.Models;
-using GTA3DE.Wpf.Services;
+using GTAngel.Models;
+using GTAngel.Services;
 using Xunit;
 
 namespace GTAngel.Tests.Services;
