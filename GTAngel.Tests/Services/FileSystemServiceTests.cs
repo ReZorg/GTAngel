@@ -103,7 +103,7 @@ public class FileSystemServiceTests
     public void GetAllGameExecutablePaths_AllPathsEndWithExe()
     {
         var paths = _service.GetAllGameExecutablePaths();
-        Assert.All(paths, p => Assert.True(p.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)));
+        Assert.All(paths, p => Assert.EndsWith(".exe", p, StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class FileSystemServiceTests
     public void GetGameExecutablePath_EndsWithExe()
     {
         var path = _service.GetGameExecutablePath();
-        Assert.True(path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+        Assert.EndsWith(".exe", path, StringComparison.OrdinalIgnoreCase);
     }
 
     // ── GetUProjectPath ───────────────────────────────────────────────────

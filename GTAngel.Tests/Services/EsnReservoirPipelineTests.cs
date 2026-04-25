@@ -156,7 +156,7 @@ public class EsnReservoirPipelineTests : IDisposable
     {
         _pipeline.ProcessStep(new float[22], new float[22], new float[18]);
         var state = _pipeline.GetFullState();
-        Assert.True(state.Any(s => s != 0f));
+        Assert.Contains(state, s => s != 0f);
     }
 
     [Fact]
