@@ -187,17 +187,17 @@ namespace GTAngel.Services
                     }
 
                     OnFrameCaptured?.Invoke(normFrame, norm);
+
+                    // Throttle to target FPS
+                    int elapsed = (int)sw.ElapsedMilliseconds;
+                    int delay = Math.Max(1, FRAME_MS - elapsed);
+                    await Task.Delay(delay, ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) { break; }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "[MLVision] Frame capture error");
                 }
-
-                // Throttle to target FPS
-                int elapsed = (int)sw.ElapsedMilliseconds;
-                int delay = Math.Max(1, FRAME_MS - elapsed);
-                await Task.Delay(delay, ct).ConfigureAwait(false);
             }
         }
 

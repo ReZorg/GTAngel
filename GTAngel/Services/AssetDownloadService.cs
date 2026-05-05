@@ -64,6 +64,8 @@ public class AssetDownloadService
         var downloaded = 0L;
         var startTime = DateTime.UtcNow;
 
+        try
+        {
         while (downloaded < totalSize && !_cancellationSource.Token.IsCancellationRequested)
         {
             if (_isPaused)
@@ -90,6 +92,8 @@ public class AssetDownloadService
 
             await Task.Delay(50, _cancellationSource.Token);
         }
+        }
+        catch (OperationCanceledException) { }
 
         if (!_cancellationSource.Token.IsCancellationRequested)
         {
