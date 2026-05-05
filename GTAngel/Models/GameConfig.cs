@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace GTAngel.Models;
@@ -10,6 +11,7 @@ namespace GTAngel.Models;
 public class GameConfig
 {
     [JsonPropertyName("id")]
+    [JsonConverter(typeof(StringOrNumberConverter))]
     public string Id { get; set; } = string.Empty;
 
     [JsonPropertyName("slug")]
@@ -137,4 +139,28 @@ public static class BuildConfig
     public const string VersionName = "1.84.3";
     public const int VersionCode = 54543439;
     public const bool Debug = false;
+}
+
+/// <summary>
+/// Reads a JSON field that may be either a quoted string or an unquoted number into a string property.
+/// </summary>
+internal sealed class StringOrNumberConverter : JsonConverter<string>
+{
+    public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            if (reader.TryGetInt64(out long l)) return l.ToString();
+            if (reader.TryGetDouble(out double d)) return d.ToString();
+            return reader.GetDecimal().ToString();
+        }
+        if (reader.TokenType == JsonTokenType.String)
+            return reader.GetString();
+        if (reader.TokenType == JsonTokenType.Null)
+            return null;
+        return reader.GetString();
+    }
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        => writer.WriteStringValue(value);
 }

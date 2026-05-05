@@ -154,7 +154,9 @@ public class EsnReservoirPipelineTests : IDisposable
     [Fact]
     public void GetFullState_AfterProcessing_IsNotAllZero()
     {
-        _pipeline.ProcessStep(new float[22], new float[22], new float[18]);
+        var frame = new float[22];
+        frame[0] = 1.0f; // non-zero pixel to drive reservoir activation
+        _pipeline.ProcessStep(frame, new float[22], new float[18]);
         var state = _pipeline.GetFullState();
         Assert.Contains(state, s => s != 0f);
     }
