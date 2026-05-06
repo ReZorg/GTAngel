@@ -76,6 +76,8 @@ public class DTE4EAvatarService : IDisposable
     // ── Exploration parameters ───────────────────────────────────────────────
     private const float ExplorationStepIntervalMs = 250f;  // 4 Hz decision rate
     private const int   MaxExplorationSteps       = 10_000;
+    /// <summary>Phase 5.3: Max perception+ESN latency (ms) before FACS/IK is skipped for the step.</summary>
+    private const double MaxPerceptionLatencyMs   = 200.0;
     private const float RewardDiscoveryBonus      = 1.0f;
     private const float RewardMovementPenalty     = -0.01f;
     private const float RewardIdlePenalty         = -0.1f;
@@ -260,7 +262,7 @@ public class DTE4EAvatarService : IDisposable
 
                 // Phase 5.3: Token-bucket — measure perception+ESN latency to govern FACS/IK
                 var percepElapsedMs = (DateTime.UtcNow - percepStart).TotalMilliseconds;
-                bool skipEmbodimentThisStep = percepElapsedMs > 200.0;
+                bool skipEmbodimentThisStep = percepElapsedMs > MaxPerceptionLatencyMs;
 
                 // ── 3. UPDATE COGNITIVE STATE ─────────────────────────────
                 UpdateCognitiveState(obs, esnState);

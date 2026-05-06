@@ -393,6 +393,11 @@ public class TrainingEngine
     private double _prevLeakingRate;
     private double _prevExplorationRate;
     private double _prevCurriculumDifficulty;
+    // Saved values for rollback of service-level parameters
+    private float _prevNavWeight;
+    private float _prevExplorationWeight;
+    private float _prevJaccardThresh;
+    private float _prevRidgeLambda;
 
     // Phase 6.3: References to real services for expanded hypothesis application
     private DteCognitiveCoreService? _cognitiveCoreService;
@@ -410,6 +415,10 @@ public class TrainingEngine
         _prevLeakingRate       = _esn.LeakingRate;
         _prevExplorationRate   = _config.ExplorationRate;
         _prevCurriculumDifficulty = _config.CurriculumDifficulty;
+        _prevNavWeight         = _rewardShaperRef?.Weights.Navigation ?? 1.0f;
+        _prevExplorationWeight = _rewardShaperRef?.Weights.Exploration ?? 2.0f;
+        _prevJaccardThresh     = _cognitiveCoreService?.JaccardThresh ?? 0.55f;
+        _prevRidgeLambda       = _cognitiveCoreService?.RidgeLambda ?? 1e-4f;
 
         double delta = (_rng.NextDouble() - 0.5) * _config.MaxParameterDelta;
 
@@ -453,10 +462,20 @@ public class TrainingEngine
 
     private void RevertHypothesis()
     {
-        _esn.SpectralRadius       = _prevSpectralRadius;
-        _esn.LeakingRate          = _prevLeakingRate;
-        _config.ExplorationRate   = _prevExplorationRate;
+        _esn.SpectralRadius          = _prevSpectralRadius;
+        _esn.LeakingRate             = _prevLeakingRate;
+        _config.ExplorationRate      = _prevExplorationRate;
         _config.CurriculumDifficulty = _prevCurriculumDifficulty;
+        if (_rewardShaperRef != null)
+        {
+            _rewardShaperRef.Weights.Navigation  = _prevNavWeight;
+            _rewardShaperRef.Weights.Exploration = _prevExplorationWeight;
+        }
+        if (_cognitiveCoreService != null)
+        {
+            _cognitiveCoreService.JaccardThresh = _prevJaccardThresh;
+            _cognitiveCoreService.RidgeLambda   = _prevRidgeLambda;
+        }
     }
 
     private void EvolveProperties(double delta)

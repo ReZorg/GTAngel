@@ -553,17 +553,27 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
             if (!_ipcServer.IsConnected)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-            // Read a single line of JSON from the named pipe (non-blocking peek)
-            var buffer = new byte[1024];
-            int bytesAvailable = _ipcServer.InBufferSize;
-            if (bytesAvailable == 0)
+            // Use a 4KB buffer to handle realistic JSON message sizes
+            var buffer = new byte[4096];
+            int bytesRead = 0;
+
+            // Non-blocking peek: only read if data is available
+            if (_ipcServer.InBufferSize == 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-            int bytesRead = _ipcServer.Read(buffer, 0, Math.Min(buffer.Length, bytesAvailable));
+            int toRead = Math.Min(buffer.Length, _ipcServer.InBufferSize);
+            bytesRead = _ipcServer.Read(buffer, 0, toRead);
             if (bytesRead == 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-            var json = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            // Find the end of the first complete JSON object (terminated by '}' or newline)
+            var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            // Trim to the last '}' to handle any trailing data or partial messages
+            int jsonEnd = raw.LastIndexOf('}');
+            if (jsonEnd < 0)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            var json = raw[..(jsonEnd + 1)];
             var doc = System.Text.Json.JsonDocument.Parse(json);
             var root = doc.RootElement;
 

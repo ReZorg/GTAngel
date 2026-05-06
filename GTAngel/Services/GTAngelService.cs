@@ -357,13 +357,15 @@ public sealed class GTAngelService : IDisposable
             // 15 Alexander property scores (P0..P14)
             for (int p = 0; p < 15; p++)
             {
-                var key = $"P{p}";
-                double score = exp.PropertyScores.TryGetValue(key, out var s) ? s : 0.0;
-                // Also try looking up by partial name match
-                if (score == 0.0)
+                // Try direct "P{n}" key first, then fall back to partial name match
+                if (!exp.PropertyScores.TryGetValue($"P{p}", out var score))
                 {
-                    var match = exp.PropertyScores.FirstOrDefault(kv => kv.Key.StartsWith(key, StringComparison.OrdinalIgnoreCase));
-                    if (!match.Equals(default)) score = match.Value;
+                    score = 0.0;
+                    foreach (var kv in exp.PropertyScores)
+                    {
+                        if (kv.Key.StartsWith($"P{p}", StringComparison.OrdinalIgnoreCase))
+                        { score = kv.Value; break; }
+                    }
                 }
                 sb.Append(score.ToString("F4")).Append('\t');
             }
