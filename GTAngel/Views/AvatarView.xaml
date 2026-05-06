@@ -485,8 +485,9 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/><!-- KSM Cycle 6: PlayerAI Bridge -->
-                        <RowDefinition Height="Auto"/><!-- KSM Cycle 4: Navigation -->
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/><!-- KSM Cycle 4: Navigation + Mini-map -->
+                        <RowDefinition Height="Auto"/><!-- Phase 8.4: Cognitive Cycle Step -->
+                        <RowDefinition Height="*"/>  <!-- Exploration Log -->
                     </Grid.RowDefinitions>
 
                     <!-- ── FACS Action Units ────────────────────────────────────────────────── -->
@@ -697,7 +698,39 @@
                                 <Rectangle HorizontalAlignment="Left" RadiusX="2" RadiusY="2" Fill="#34D399"
                                            Width="{Binding ObservationFusionNorm, Converter={StaticResource FloatToHeight}, ConverterParameter=100}"/>
                             </Grid>
+
+                            <!-- Phase 4.4: Human↔AI Arbitration Weight Slider -->
+                            <TextBlock Text="HUMAN ↔ AI WEIGHT" FontSize="8" Foreground="#8888AA" Margin="0,6,0,2"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="AI" FontSize="8" Foreground="#F472B6" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <Slider Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding ArbitrationWeight, Mode=TwoWay}"
+                                        TickFrequency="0.25" IsSnapToTickEnabled="False"
+                                        Foreground="#60A5FA" Height="16"/>
+                                <TextBlock Grid.Column="2" Text="HUMAN" FontSize="8" Foreground="#60A5FA" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                            </Grid>
                         </StackPanel>
+                    </Border>
+
+                    <!-- Phase 8.4: Cognitive Cycle Step display -->
+                    <Border Grid.Row="6" Background="#0D0D1A" CornerRadius="4" Padding="8,4" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="KSM CYCLE:" FontSize="8" Foreground="#8888AA" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Grid.Column="1" Text="{Binding CycleStageName}" FontSize="10" FontWeight="Bold"
+                                       Foreground="#FBBF24" VerticalAlignment="Center"/>
+                            <Border Grid.Column="2" Background="#1A1A2E" CornerRadius="3" Padding="5,1">
+                                <TextBlock Text="KSM-5" FontSize="8" Foreground="#606080"/>
+                            </Border>
+                        </Grid>
                     </Border>
 
                       <!-- ── KSM Cycle 4: Game World Navigation ─────────────────────────────────────── -->
@@ -790,11 +823,63 @@
                                 <TextBlock Grid.Column="1" Text="{Binding CurrentPOI, StringFormat=Near: {0}}"
                                            FontSize="9" Foreground="#9090B0" VerticalAlignment="Center"/>
                             </Grid>
+
+                            <!-- Phase 8.1: Liberty City Mini-Map (3 districts as colored zones) -->
+                            <Border Margin="0,6,0,0" Background="#060610" CornerRadius="3"
+                                    Height="70" ToolTip="Liberty City — Portland | Staunton | Shoreside">
+                                <Grid>
+                                    <!-- District zone indicators (approximate proportional layout) -->
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40*"/>
+                                        <ColumnDefinition Width="35*"/>
+                                        <ColumnDefinition Width="25*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Portland (leftmost island) -->
+                                    <Border Grid.Column="0" Margin="2" CornerRadius="2">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#1A2A1A"
+                                                Opacity="{Binding NavDistrictCoverage, Converter={StaticResource FloatToHeight}, ConverterParameter=1}"/>
+                                        </Border.Background>
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock Text="PORTLAND" FontSize="7" Foreground="#22D3EE"
+                                                       HorizontalAlignment="Center" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding CurrentDistrict}" FontSize="7"
+                                                       Foreground="#404060" HorizontalAlignment="Center"
+                                                       Visibility="{Binding CurrentDistrict, Converter={StaticResource BoolToVis}}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- Staunton Island (center) -->
+                                    <Border Grid.Column="1" Margin="2" CornerRadius="2" Background="#1A1A2A">
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock Text="STAUNTON" FontSize="7" Foreground="#60A5FA"
+                                                       HorizontalAlignment="Center" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- Shoreside Vale (right) -->
+                                    <Border Grid.Column="2" Margin="2" CornerRadius="2" Background="#2A1A1A">
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock Text="SHORE" FontSize="7" Foreground="#FBBF24"
+                                                       HorizontalAlignment="Center" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <!-- Avatar position overlay (current district highlight) -->
+                                    <Border Grid.Column="0" Margin="2" CornerRadius="2" BorderThickness="1"
+                                            BorderBrush="#22D3EE" Background="Transparent"
+                                            Visibility="{Binding CurrentDistrict, Converter={StaticResource BoolToVis}}"/>
+                                    <!-- POI count badge -->
+                                    <Border Grid.Column="0" Grid.ColumnSpan="3"
+                                            VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                            Background="#80000000" CornerRadius="2" Padding="3,1" Margin="4">
+                                        <TextBlock Text="{Binding NavPOIProgress, StringFormat=POIs {0}}" FontSize="7"
+                                                   Foreground="#22D3EE"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
                         </StackPanel>
                     </Border>
 
                     <!-- ── Exploration Log ────────────────────────────────────────────────────────── -->
-                    <Border Grid.Row="5" Background="#0D0D1A" CornerRadius="4" Padding="8,6">
+                    <Border Grid.Row="7" Background="#0D0D1A" CornerRadius="4" Padding="8,6">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>

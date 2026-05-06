@@ -825,6 +825,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Row 0: ECAN + MOSES -->
@@ -995,6 +996,86 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+
+                        <!-- Phase 8.3: Row 3 — ECAN Cluster STI bar chart (16 bars) + Wout convergence -->
+                        <Grid Grid.Row="3" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Cluster STI bar chart -->
+                            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,4,0">
+                                <StackPanel>
+                                    <TextBlock Text="ECAN Cluster STI (16 clusters)" Style="{StaticResource SectionHeader}"/>
+                                    <TextBlock Text="{Binding EcanTopNeurons}" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                    <!-- 16 STI bars using ItemsControl bound to ClusterStiValues -->
+                                    <ItemsControl ItemsSource="{Binding ClusterStiValues}" Height="60">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Rows="1" Columns="16"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid VerticalAlignment="Bottom" Margin="1,0">
+                                                    <Rectangle Fill="#1A1A2E" VerticalAlignment="Stretch"/>
+                                                    <Rectangle Fill="{StaticResource AccentCyanBrush}" VerticalAlignment="Bottom"
+                                                               Height="{Binding Converter={StaticResource FloatToHeight}, ConverterParameter=60}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Grid Margin="0,4,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Entropy:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="10"/>
+                                        <ProgressBar Grid.Column="1" Value="{Binding AttentionEntropy}" Maximum="3" Height="8"
+                                                     Foreground="{StaticResource AccentOrangeBrush}" Background="#22FFFFFF" Margin="8,0"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding AttentionEntropy, StringFormat='{}{0:F3}'}"
+                                                   Foreground="{StaticResource AccentOrangeBrush}" FontSize="10"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Wout convergence indicator + Pattern diversity -->
+                            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="4,0,0,0">
+                                <StackPanel>
+                                    <TextBlock Text="Wout Convergence" Style="{StaticResource SectionHeader}"/>
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Loss:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <ProgressBar Grid.Row="0" Grid.Column="1" Value="{Binding WoutTrainingLoss}" Maximum="0.1" Height="12"
+                                                     Foreground="{StaticResource AccentOrangeBrush}" Background="#22FFFFFF" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding WoutTrainingLoss, StringFormat='{}{0:E2}'}"
+                                                   Foreground="{StaticResource AccentOrangeBrush}" FontSize="10" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Converged:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,4"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WoutConverged}"
+                                                   Foreground="{StaticResource AccentGreenBrush}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Diversity:" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" Margin="0,0,8,0"/>
+                                        <ProgressBar Grid.Row="2" Grid.Column="1" Value="{Binding PatternDiversity}" Maximum="1" Height="12"
+                                                     Foreground="{StaticResource AccentPurpleBrush}" Background="#22FFFFFF" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding PatternDiversity, StringFormat='{}{0:F3}'}"
+                                                   Foreground="{StaticResource AccentPurpleBrush}" FontSize="10"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </ScrollViewer>
             </TabItem>

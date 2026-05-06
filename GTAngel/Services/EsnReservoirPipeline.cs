@@ -30,6 +30,12 @@ public sealed class EsnReservoirPipeline : IDisposable
     // ── KSM Cycle 5: DTE Cognitive Core integration ────────────────────────
     private DteCognitiveCoreService? _cognitiveCore;
 
+    // ── Phase 2.3: ECAN STI top-down modulation from DteCognitiveCoreService ──
+    private float[] _topDownSTI = Array.Empty<float>();
+
+    // ── Phase 4.1: Observation fusion scale from Ue5PlayerAiBridgeService ──────
+    private float _observationFusionScale = 1.0f;
+
     // Reservoir layers
     private ReservoirLayer _sensoryLayer;
     private ReservoirLayer _cognitiveLayer;
@@ -287,8 +293,25 @@ public sealed class EsnReservoirPipeline : IDisposable
         Array.Copy(_sensoryLayer.State, cognitiveInput, _sensoryLayer.Size);
         Array.Copy(gameState, 0, cognitiveInput, _sensoryLayer.Size, gameState.Length);
 
-        // Top-down feedback from executive layer
-        _cognitiveLayer.Update(cognitiveInput, _executiveLayer.State);
+        // Phase 4.1: Scale cognitive drive by observation fusion norm (high agreement → stronger drive)
+        if (_observationFusionScale != 1.0f)
+        {
+            for (int i = 0; i < cognitiveInput.Length; i++)
+                cognitiveInput[i] *= _observationFusionScale;
+        }
+
+        // Phase 2.3: Build top-down feedback from executive layer + ECAN STI modulation
+        float[]? topDownFeedback = null;
+        if (_topDownSTI.Length > 0)
+        {
+            // Concatenate executive state with STI for richer top-down signal
+            topDownFeedback = new float[_executiveLayer.Size + _topDownSTI.Length];
+            Array.Copy(_executiveLayer.State, topDownFeedback, _executiveLayer.Size);
+            Array.Copy(_topDownSTI, 0, topDownFeedback, _executiveLayer.Size, _topDownSTI.Length);
+        }
+
+        // Top-down feedback from executive layer (+ optional ECAN STI)
+        _cognitiveLayer.Update(cognitiveInput, topDownFeedback ?? _executiveLayer.State);
 
         // Stage 4: Executive reservoir — combine cognitive output with action history
         var executiveInput = new float[_cognitiveLayer.Size + previousAction.Length];
@@ -508,6 +531,25 @@ public sealed class EsnReservoirPipeline : IDisposable
     {
         _cognitiveCore = svc;
         _logger.LogInformation("EsnReservoirPipeline: DteCognitiveCoreService wired in — attention-gated logits enabled.");
+    }
+
+    /// <summary>
+    /// Phase 2.3: Set the ECAN cluster STI vector for top-down modulation of the cognitive layer.
+    /// Called by DteTrainingLoop/DTE4EAvatarService after each attention update step.
+    /// The 16-dim STI vector is projected into the cognitive layer's top-down feedback path.
+    /// </summary>
+    public void SetTopDownModulation(float[] stiVector)
+    {
+        _topDownSTI = stiVector ?? Array.Empty<float>();
+    }
+
+    /// <summary>
+    /// Phase 4.1: Scale the cognitive layer's input drive by the observation fusion norm.
+    /// High fusion norm (strong human+ML agreement) → higher cognitive drive.
+    /// </summary>
+    public void SetObservationFusionScale(float scale)
+    {
+        _observationFusionScale = Math.Clamp(scale, 0.5f, 2.0f);
     }
 
     private float[] ComputeActionLogits(float[] executiveState)

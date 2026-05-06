@@ -65,6 +65,20 @@ public sealed class RewardShaper
     private float _prevPotential;
     private float _gamma = 0.99f;
 
+    // Phase 1.3: Navigation Coverage Component — POI discovery and grid cell bonuses
+    private float _pendingPOIBonus;
+    private float _pendingNavCellBonus;
+
+    /// <summary>
+    /// Phase 1.3: Call when the avatar reaches a named POI. Adds +1.0 discovery bonus.
+    /// </summary>
+    public void NotifyPOIReached() => _pendingPOIBonus += 1.0f;
+
+    /// <summary>
+    /// Phase 1.3: Call when the avatar enters a new 50-UU navigation grid cell. Adds +0.5 curiosity reward.
+    /// </summary>
+    public void NotifyNewNavigationCell() => _pendingNavCellBonus += 0.5f;
+
     // Statistics
     public RewardBreakdown LastBreakdown { get; private set; } = new();
     public float CumulativeReward { get; private set; }
@@ -118,6 +132,12 @@ public sealed class RewardShaper
         breakdown.PotentialShaping = _gamma * currentPotential - _prevPotential;
         _prevPotential = currentPotential;
 
+        // ── 8. Navigation Coverage Bonus (Phase 1.3) ────────────────────
+        // Consume pending POI discovery and cell-entry bonuses
+        breakdown.NavigationBonus = _pendingPOIBonus + _pendingNavCellBonus;
+        _pendingPOIBonus = 0f;
+        _pendingNavCellBonus = 0f;
+
         // ── Weighted sum ────────────────────────────────────────────────
         float totalReward =
             Weights.Survival * breakdown.Survival +
@@ -128,7 +148,8 @@ public sealed class RewardShaper
             Weights.Economic * breakdown.Economic +
             Weights.Curiosity * breakdown.Curiosity +
             Weights.Social * breakdown.Social +
-            Weights.PotentialShaping * breakdown.PotentialShaping;
+            Weights.PotentialShaping * breakdown.PotentialShaping +
+            Weights.Navigation * breakdown.NavigationBonus;
 
         // Clip reward to prevent extreme values
         totalReward = Math.Clamp(totalReward, -10f, 10f);
@@ -185,6 +206,8 @@ public sealed class RewardShaper
         _consecutiveCrashes = 0;
         _smoothDrivingStreak = 0;
         _prevPotential = 0;
+        _pendingPOIBonus = 0f;
+        _pendingNavCellBonus = 0f;
         CumulativeReward = 0;
         TotalSteps = 0;
     }
@@ -518,6 +541,7 @@ public class RewardWeights
     public float Curiosity { get; set; } = 1.0f;
     public float Social { get; set; } = 0.5f;
     public float PotentialShaping { get; set; } = 0.1f;
+    public float Navigation { get; set; } = 1.0f;
 
     /// <summary>Preset: Exploration-focused (for early training).</summary>
     public static RewardWeights ExplorationFocused => new()
@@ -566,6 +590,8 @@ public class RewardBreakdown
     public float Curiosity { get; set; }
     public float Social { get; set; }
     public float PotentialShaping { get; set; }
+    /// <summary>Phase 1.3: POI discovery and navigation cell coverage bonus.</summary>
+    public float NavigationBonus { get; set; }
     public float Total { get; set; }
 }
 

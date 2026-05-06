@@ -542,12 +542,63 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
 
     private GameState ReadGameStateFromIpc()
     {
-        // Placeholder — in production, reads from named pipe
-        return new GameState
+        // Phase 5.4: Parse 22-dim game state from named IPC pipe
+        // Protocol: the engine sends a JSON line with fields matching GameState properties
+        // Falls back to a default state if the pipe is not connected or read fails
+        if (_ipcServer == null)
+            return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+        try
         {
-            PlayerHealth = 100,
-            CurrentIsland = "Portland",
-        };
+            if (!_ipcServer.IsConnected)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            // Read a single line of JSON from the named pipe (non-blocking peek)
+            var buffer = new byte[1024];
+            int bytesAvailable = _ipcServer.InBufferSize;
+            if (bytesAvailable == 0)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            int bytesRead = _ipcServer.Read(buffer, 0, Math.Min(buffer.Length, bytesAvailable));
+            if (bytesRead == 0)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            var json = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            return new GameState
+            {
+                PlayerX          = root.TryGetProperty("x",        out var px)  ? px.GetSingle()  : 0f,
+                PlayerY          = root.TryGetProperty("y",        out var py)  ? py.GetSingle()  : 0f,
+                PlayerZ          = root.TryGetProperty("z",        out var pz)  ? pz.GetSingle()  : 0f,
+                PlayerHeading    = root.TryGetProperty("heading",  out var ph)  ? ph.GetSingle()  : 0f,
+                PlayerHealth     = root.TryGetProperty("health",   out var hlt) ? hlt.GetSingle() : 100f,
+                PlayerArmor      = root.TryGetProperty("armor",    out var arm) ? arm.GetSingle() : 0f,
+                PlayerMoney      = root.TryGetProperty("money",    out var mon) ? mon.GetInt32()  : 0,
+                WantedLevel      = root.TryGetProperty("wanted",   out var wnt) ? wnt.GetInt32()  : 0,
+                CurrentWeapon    = root.TryGetProperty("weapon",   out var wpn) ? wpn.GetInt32()  : 0,
+                InVehicle        = root.TryGetProperty("inVehicle",out var inv) && inv.GetBoolean(),
+                VehicleHealth    = root.TryGetProperty("vehHealth",out var vh)  ? vh.GetSingle()  : 0f,
+                VehicleSpeed     = root.TryGetProperty("vehSpeed", out var vs)  ? vs.GetSingle()  : 0f,
+                VelocityX        = root.TryGetProperty("velX",     out var vx)  ? vx.GetSingle()  : 0f,
+                VelocityY        = root.TryGetProperty("velY",     out var vy)  ? vy.GetSingle()  : 0f,
+                VelocityZ        = root.TryGetProperty("velZ",     out var vz2) ? vz2.GetSingle() : 0f,
+                CurrentIsland    = root.TryGetProperty("island",   out var isl) ? isl.GetString() ?? "Portland" : "Portland",
+                GameHour         = root.TryGetProperty("hour",     out var hr)  ? hr.GetInt32()   : 12,
+                GameMinute       = root.TryGetProperty("minute",   out var mn)  ? mn.GetInt32()   : 0,
+                Weather          = root.TryGetProperty("weather",  out var wx)  ? wx.GetString() ?? "Sunny" : "Sunny",
+                IsDead           = root.TryGetProperty("isDead",   out var id2) && id2.GetBoolean(),
+                IsArrested       = root.TryGetProperty("arrested", out var arr) && arr.GetBoolean(),
+                MissionIndex     = root.TryGetProperty("mission",  out var mis) ? mis.GetInt32()  : 0,
+                DistanceTraveled = root.TryGetProperty("dist",     out var dst) ? dst.GetSingle() : 0f,
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "IPC GameState parse failed — using defaults");
+            return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+        }
     }
 
     [DllImport("kernel32.dll")]

@@ -106,13 +106,17 @@ public sealed class DteCognitiveCoreService : IDisposable
     private const int ActionCount      = 18;    // action dimensions (matches ESN output)
     private const int PatternWindowLen = 50;    // sliding window length for MOSES
     private const int MaxPatterns      = 256;   // max patterns in MOSES library
-    private const double RidgeLambda   = 1e-4;  // ridge regression regularization
     private const double LearningRate  = 1e-3;  // Wout update step size
     private const double HebbianDecay  = 0.99;  // LTI hebbian forgetting rate
     private const double StiBudget     = 1.0;   // total STI budget (normalized)
     private const double StiDecay      = 0.95;  // STI decay per step
-    private const double JaccardThresh = 0.55;  // MOSES pattern match threshold
     private const double ConvergThresh = 1e-4;  // Wout convergence threshold
+
+    // ── Mutable parameters (for ApplyHypothesis mutation in Phase 6.3) ────────
+    /// <summary>Phase 6.3: MOSES pattern match threshold (0.1..0.9). Mutated by TrainingEngine.</summary>
+    public float JaccardThresh { get; set; } = 0.55f;
+    /// <summary>Phase 6.3: Ridge regression regularization (1e-6..1e-1). Mutated by TrainingEngine.</summary>
+    public float RidgeLambda   { get; set; } = 1e-4f;
 
     // ── ECAN State ────────────────────────────────────────────────────────────
     private readonly float[] _sti  = new float[ClusterCount];  // short-term importance

@@ -327,7 +327,22 @@ public sealed class DteTrainingLoop : IDisposable
                 visualFeatures, gameState, prevAction);
 
             // ── 5. Decide: Select action ──
-            int action = SelectAction(actionProbabilities);
+            // Phase 2.2: Per-step cognitive core integration (ECAN attention → Thompson sampling)
+            int action;
+            if (_cognitiveCore != null)
+            {
+                var execState = _reservoir.LastReservoirState;  // executive layer (512-dim)
+                _cognitiveCore.UpdateAttention(execState);
+                _cognitiveCore.MinePatterns(execState);
+                // Feed ECAN STI back into ESN as top-down modulation
+                _reservoir.SetTopDownModulation(_cognitiveCore.GetClusterSTI());
+                var logits = _cognitiveCore.ComputeAttentionGatedLogits(execState);
+                action = _cognitiveCore.ThompsonSampleAction(logits);
+            }
+            else
+            {
+                action = SelectAction(actionProbabilities);
+            }
 
             // ── 6. Act: Execute action via controller ──
             _controller.ExecuteDiscreteAction((VigemControllerService.DiscreteAction)action);
@@ -335,6 +350,23 @@ public sealed class DteTrainingLoop : IDisposable
             // ── 7. Observe: Compute reward ──
             float reward = rewardShaper.ComputeReward(prevGameState, gameState, action, stepCount);
             done = rewardShaper.IsTerminal(gameState);
+
+            // Phase 2.2: Update Thompson belief and periodic Wout training
+            if (_cognitiveCore != null)
+            {
+                var execState = _reservoir.LastReservoirState;
+                _cognitiveCore.UpdateThompson(action, reward);
+
+                if (State.TotalSteps % 32 == 0 && execState.Length >= 512)
+                {
+                    var targetActions = new float[18];
+                    if (action >= 0 && action < 18) targetActions[action] = 1f;
+                    _cognitiveCore.TrainWout(execState[^512..], targetActions);
+                    var coherence = _cognitiveCore.ComputeCoherence();
+                    State.CognitiveCoherence = coherence.Coherence;
+                    OnStateUpdated?.Invoke(State);
+                }
+            }
 
             // ── 8. Remember: Store transition ──
             _replayBuffer.Add(

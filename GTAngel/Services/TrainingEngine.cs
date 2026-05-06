@@ -202,14 +202,20 @@ public class TrainingEngine
 
         for (int step = 0; step < maxSteps && !ct.IsCancellationRequested; step++)
         {
+            // Phase 2.4: Semantic CognitiveState cycle advancement (12-step KSM cycle)
+            // Steps 0-4: Perception/Attention/Recognition/Comprehension/Evaluation
+            // Steps 5-7: Planning/Intention/Execution
+            // Steps 8-11: Monitoring/Learning/Consolidation/Reflection
+            int cycleStep = step % 12;
+            _cognitiveState.CurrentCycleStep = cycleStep;
+
             // Generate game state observation (simulated from asset catalog)
             var input = GenerateGameObservation(step);
 
             // ESN forward pass
             var output = _esn.Step(input);
 
-            // Advance cognitive cycle
-            _cognitiveState.CurrentCycleStep = step % 12;
+            // Trigger cognitive sub-processes based on semantic cycle step
             UpdateCognitiveState(output, step);
 
             // Compute reward
@@ -385,15 +391,30 @@ public class TrainingEngine
 
     private double _prevSpectralRadius;
     private double _prevLeakingRate;
+    private double _prevExplorationRate;
+    private double _prevCurriculumDifficulty;
+
+    // Phase 6.3: References to real services for expanded hypothesis application
+    private DteCognitiveCoreService? _cognitiveCoreService;
+    private RewardShaper? _rewardShaperRef;
+
+    /// <summary>Phase 6.3: Wire in DteCognitiveCoreService for MOSES/Thompson parameter mutation.</summary>
+    public void SetCognitiveCoreService(DteCognitiveCoreService svc) => _cognitiveCoreService = svc;
+
+    /// <summary>Phase 6.3: Wire in RewardShaper for reward weight mutation.</summary>
+    public void SetRewardShaperRef(RewardShaper shaper) => _rewardShaperRef = shaper;
 
     private void ApplyHypothesis(AutogenesisExperiment exp)
     {
-        _prevSpectralRadius = _esn.SpectralRadius;
-        _prevLeakingRate = _esn.LeakingRate;
+        _prevSpectralRadius    = _esn.SpectralRadius;
+        _prevLeakingRate       = _esn.LeakingRate;
+        _prevExplorationRate   = _config.ExplorationRate;
+        _prevCurriculumDifficulty = _config.CurriculumDifficulty;
 
         double delta = (_rng.NextDouble() - 0.5) * _config.MaxParameterDelta;
 
-        switch (exp.KsmStep % 4)
+        // Phase 6.3: Expand ApplyHypothesis across 8 parameter spaces (one per KSM cycle)
+        switch (exp.KsmStep % 8)
         {
             case 0:
                 _esn.SpectralRadius = Math.Clamp(_esn.SpectralRadius + delta * 0.1, 0.5, 1.2);
@@ -407,13 +428,35 @@ public class TrainingEngine
             case 3:
                 _config.CurriculumDifficulty = Math.Clamp(_config.CurriculumDifficulty + delta * 0.05, 0.0, 1.0);
                 break;
+            case 4:
+                // Phase 6.3: Reward Navigation weight mutation
+                if (_rewardShaperRef != null)
+                    _rewardShaperRef.Weights.Navigation = Math.Clamp(_rewardShaperRef.Weights.Navigation + (float)(delta * 0.2), 0.1f, 5.0f);
+                break;
+            case 5:
+                // Phase 6.3: MOSES JaccardThresh mutation
+                if (_cognitiveCoreService != null)
+                    _cognitiveCoreService.JaccardThresh = Math.Clamp(_cognitiveCoreService.JaccardThresh + (float)(delta * 0.05), 0.1f, 0.9f);
+                break;
+            case 6:
+                // Phase 6.3: Thompson RidgeLambda mutation
+                if (_cognitiveCoreService != null)
+                    _cognitiveCoreService.RidgeLambda = (float)Math.Clamp(_cognitiveCoreService.RidgeLambda + delta * 1e-5, 1e-6, 1e-1);
+                break;
+            case 7:
+                // Phase 6.3: Exploration reward weight mutation
+                if (_rewardShaperRef != null)
+                    _rewardShaperRef.Weights.Exploration = Math.Clamp(_rewardShaperRef.Weights.Exploration + (float)(delta * 0.3), 0.1f, 8.0f);
+                break;
         }
     }
 
     private void RevertHypothesis()
     {
-        _esn.SpectralRadius = _prevSpectralRadius;
-        _esn.LeakingRate = _prevLeakingRate;
+        _esn.SpectralRadius       = _prevSpectralRadius;
+        _esn.LeakingRate          = _prevLeakingRate;
+        _config.ExplorationRate   = _prevExplorationRate;
+        _config.CurriculumDifficulty = _prevCurriculumDifficulty;
     }
 
     private void EvolveProperties(double delta)

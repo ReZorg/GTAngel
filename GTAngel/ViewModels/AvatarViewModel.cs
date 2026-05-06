@@ -130,6 +130,16 @@ public partial class AvatarViewModel : ObservableObject
     [ObservableProperty] private string _navMode             = "Idle";
     [ObservableProperty] private bool   _navIsActive         = false;
 
+    // ── Phase 8.4: KSM Cycle 5 Cognitive Cycle Step Display ─────────────────
+    [ObservableProperty] private string _cycleStageName = "Perception";
+
+    // ── Phase 4.4: Player↔AI arbitration weight (0=full AI, 1=full human) ────
+    [ObservableProperty] private double _arbitrationWeight = 0.5;
+    partial void OnArbitrationWeightChanged(double value)
+    {
+        _playerAiBridge?.UpdateArbitrationWeights((float)value);
+    }
+
     // ── Log ──────────────────────────────────────────────────────────────────
     public ObservableCollection<string> ExplorationLog { get; } = new();
     public ObservableCollection<string> Ue5LaunchLogLines { get; } = new();
@@ -452,6 +462,11 @@ public partial class AvatarViewModel : ObservableObject
                                        state.EnactedVelocity[1] * state.EnactedVelocity[1]);
                 VelocityText = $"{speed:F1} UU/s";
             }
+
+            // Phase 8.4: Update cognitive cycle step name from CognitiveState semantic names
+            // Derive from TotalSteps modulo 12 to stay in sync with KSM cycle
+            int cycleStep = state.TotalSteps % 12;
+            CycleStageName = GTAngel.Models.CognitiveState.CycleStepNames[cycleStep];
         });
     }
 

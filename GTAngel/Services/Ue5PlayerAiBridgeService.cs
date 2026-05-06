@@ -25,6 +25,11 @@ public class Ue5PlayerAiBridgeService
     public event EventHandler<PlayerAiBridgeMode>? OnModeChanged;
     public event EventHandler<float>? OnArbitrationScoreUpdated;
     public event EventHandler<float>? OnObservationFused;
+    /// <summary>Phase 4.3: Fired when mode transitions to AiOnly, marking an episode boundary.</summary>
+    public event EventHandler<int>? OnEpisodeBoundary;
+
+    // Episode boundary counter for telemetry
+    private int _episodeBoundaryCount;
 
     public Ue5PlayerAiBridgeService(ILogger<Ue5PlayerAiBridgeService> logger)
     {
@@ -43,15 +48,37 @@ public class Ue5PlayerAiBridgeService
     {
         if (CurrentMode == newMode) return;
 
+        var prevMode = CurrentMode;
         CurrentMode = newMode;
         _logger.LogInformation("Player↔AI Bridge mode changed to: {Mode}", newMode);
         
         OnModeChanged?.Invoke(this, newMode);
 
+        // Phase 4.3: Mode transition to AiOnly marks a new curriculum episode boundary
+        if (newMode == PlayerAiBridgeMode.AiOnly && prevMode != PlayerAiBridgeMode.AiOnly)
+        {
+            _episodeBoundaryCount++;
+            OnEpisodeBoundary?.Invoke(this, _episodeBoundaryCount);
+            _logger.LogInformation("Episode boundary #{Count} triggered by mode switch to AiOnly", _episodeBoundaryCount);
+        }
+
         if (_ue5 != null)
         {
             await _ue5.SendPlayerAiModeAsync(newMode);
         }
+    }
+
+    /// <summary>
+    /// Phase 4.4: Dynamically adjust the human/AI arbitration weights.
+    /// humanWeight in [0,1]: 0.0 = full AI, 1.0 = full human.
+    /// Bind to a WPF Slider in AvatarView.xaml.
+    /// </summary>
+    public void UpdateArbitrationWeights(float humanWeight)
+    {
+        HumanInputWeight = Math.Clamp(humanWeight, 0f, 1f);
+        AiPolicyWeight   = 1f - HumanInputWeight;
+        OnArbitrationScoreUpdated?.Invoke(this, HumanInputWeight);
+        _logger.LogDebug("Arbitration weights updated: Human={H:F2} AI={A:F2}", HumanInputWeight, AiPolicyWeight);
     }
 
     /// <summary>

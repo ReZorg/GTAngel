@@ -53,6 +53,10 @@ public partial class App : Application
         var trainingLoop = _serviceProvider.GetRequiredService<DteTrainingLoop>();
         esnPipeline.SetCognitiveCoreService(cogCore);
         trainingLoop.SetCognitiveCoreService(cogCore);
+
+        // Phase 6.1: Wire full DTE pipeline into GTAngelService for KSM orchestration
+        var gtAngel = _serviceProvider.GetRequiredService<GTAngelService>();
+        gtAngel.SetDtePipelineServices(trainingLoop, esnPipeline, cogCore);
         
         // KSM Cycle 6: Initialize bridge service early if needed (it gets wired in AvatarViewModel)
         var bridge = _serviceProvider.GetRequiredService<Ue5PlayerAiBridgeService>();
