@@ -57,7 +57,10 @@ public class UEInteropModelsTests
         Assert.True(args.Success);
         Assert.Equal(@"C:\Build\Output", args.OutputPath);
         Assert.Equal(duration, args.Duration);
-        Assert.Equal(["warn-1", "warn-2"], args.Errors);
+        Assert.Collection(
+            args.Errors,
+            error => Assert.Equal("warn-1", error),
+            error => Assert.Equal("warn-2", error));
     }
 
     [Fact]

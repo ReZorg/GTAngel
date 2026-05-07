@@ -1,5 +1,6 @@
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using Xunit;
@@ -309,6 +310,9 @@ public class MultiAgentTrainerTests : IDisposable
         var method = typeof(MultiAgentTrainer).GetMethod("ComputeGradients", BindingFlags.NonPublic | BindingFlags.Static);
         var result = Assert.IsType<float[]>(method!.Invoke(null, [new[] { 3f, 1f }, new[] { 1f, 0.5f }])!);
 
-        Assert.Equal([2f, 0.5f], result);
+        Assert.Collection(
+            result,
+            value => Assert.Equal(2f, value),
+            value => Assert.Equal(0.5f, value));
     }
 }
