@@ -577,7 +577,7 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
             var json = raw[..(jsonEnd + 1)];
-            var doc = System.Text.Json.JsonDocument.Parse(json);
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
             var root = doc.RootElement;
 
             return new GameState
