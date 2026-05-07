@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 
 namespace GTAngel.Services;
 
@@ -65,19 +66,31 @@ public sealed class RewardShaper
     private float _prevPotential;
     private float _gamma = 0.99f;
 
-    // Phase 1.3: Navigation Coverage Component — POI discovery and grid cell bonuses
-    private float _pendingPOIBonus;
-    private float _pendingNavCellBonus;
+    // Phase 1.3: Navigation Coverage Component — POI discovery and grid cell bonuses.
+    // Counters are written from navigation event handlers (typically the
+    // DTE4EAvatarService exploration thread) and read+zeroed from the
+    // training-loop thread inside ComputeReward / Reset, so we use
+    // Interlocked operations on int counters and scale by the fixed
+    // bonus magnitudes when consuming. This avoids non-atomic float +=
+    // and read-then-write races that would silently drop bonuses.
+    private const float PoiBonusMagnitude = 1.0f;
+    private const float NavCellBonusMagnitude = 0.5f;
+    private int _pendingPOICount;
+    private int _pendingNavCellCount;
 
     /// <summary>
     /// Phase 1.3: Call when the avatar reaches a named POI. Adds +1.0 discovery bonus.
+    /// Thread-safe: invoked from navigation event handlers on a different
+    /// thread than the consuming training loop.
     /// </summary>
-    public void NotifyPOIReached() => _pendingPOIBonus += 1.0f;
+    public void NotifyPOIReached() => Interlocked.Increment(ref _pendingPOICount);
 
     /// <summary>
     /// Phase 1.3: Call when the avatar enters a new 50-UU navigation grid cell. Adds +0.5 curiosity reward.
+    /// Thread-safe: invoked from navigation event handlers on a different
+    /// thread than the consuming training loop.
     /// </summary>
-    public void NotifyNewNavigationCell() => _pendingNavCellBonus += 0.5f;
+    public void NotifyNewNavigationCell() => Interlocked.Increment(ref _pendingNavCellCount);
 
     // Statistics
     public RewardBreakdown LastBreakdown { get; private set; } = new();
@@ -133,10 +146,15 @@ public sealed class RewardShaper
         _prevPotential = currentPotential;
 
         // ── 8. Navigation Coverage Bonus (Phase 1.3) ────────────────────
-        // Consume pending POI discovery and cell-entry bonuses
-        breakdown.NavigationBonus = _pendingPOIBonus + _pendingNavCellBonus;
-        _pendingPOIBonus = 0f;
-        _pendingNavCellBonus = 0f;
+        // Atomically consume pending POI discovery and cell-entry counters.
+        // Interlocked.Exchange returns the previous value and resets to 0
+        // in a single op, so we cannot lose increments that arrive between
+        // the read and the reset (which a non-atomic read+zero would drop).
+        int poiCount     = Interlocked.Exchange(ref _pendingPOICount,     0);
+        int navCellCount = Interlocked.Exchange(ref _pendingNavCellCount, 0);
+        breakdown.NavigationBonus =
+            poiCount     * PoiBonusMagnitude +
+            navCellCount * NavCellBonusMagnitude;
 
         // ── Weighted sum ────────────────────────────────────────────────
         float totalReward =
@@ -206,8 +224,11 @@ public sealed class RewardShaper
         _consecutiveCrashes = 0;
         _smoothDrivingStreak = 0;
         _prevPotential = 0;
-        _pendingPOIBonus = 0f;
-        _pendingNavCellBonus = 0f;
+        // Atomically clear the pending counters; concurrent Notify*
+        // increments arriving during a reset will simply restart the
+        // accumulation from zero on the next ComputeReward.
+        Interlocked.Exchange(ref _pendingPOICount,     0);
+        Interlocked.Exchange(ref _pendingNavCellCount, 0);
         CumulativeReward = 0;
         TotalSteps = 0;
     }
