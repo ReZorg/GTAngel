@@ -411,20 +411,33 @@ public class TrainingEngine
 
     private string GenerateHypothesis(int ksmStep)
     {
+        // Each hypothesis must describe the parameter mutation that
+        // ApplyHypothesis actually performs for the same ksmStep. Because
+        // ApplyHypothesis switches on `ksmStep % 8` while ksmStep ranges
+        // 0..11, entries 8..11 deliberately repeat 0..3 here.
         string[] hypotheses =
         {
-            "Increase sensory layer activation threshold",
-            "Reduce leaking rate for better temporal memory",
-            "Boost cross-reservoir coupling strength",
-            "Adjust spectral radius for edge of chaos",
+            // 0 → SpectralRadius
+            "Tune ESN spectral radius for edge-of-chaos dynamics",
+            // 1 → LeakingRate
+            "Adjust leaking rate for better temporal memory",
+            // 2 → ExplorationRate
             "Increase exploration rate for novel strategies",
-            "Optimize reward weights for navigation",
-            "Enhance 4E embodiment coupling",
-            "Strengthen combat pattern recognition",
-            "Improve stream synchronization timing",
-            "Reduce cognitive load during transitions",
+            // 3 → CurriculumDifficulty
             "Optimize curriculum difficulty progression",
-            "Enhance introspection depth for self-model"
+            // 4 → RewardShaper.Weights.Navigation
+            "Reweight navigation reward for POI-directed search",
+            // 5 → DteCognitiveCoreService.JaccardThresh
+            "Tune MOSES Jaccard threshold for pattern mining",
+            // 6 → DteCognitiveCoreService.RidgeLambda
+            "Tune Wout ridge regression λ for action readout",
+            // 7 → RewardShaper.Weights.Exploration
+            "Reweight exploration reward for cell-coverage drive",
+            // 8..11 wrap around to 0..3 because of `% 8` in ApplyHypothesis
+            "Re-tune ESN spectral radius (second pass)",
+            "Re-tune leaking rate (second pass)",
+            "Re-tune exploration rate (second pass)",
+            "Re-tune curriculum difficulty (second pass)"
         };
         return hypotheses[ksmStep % hypotheses.Length];
     }

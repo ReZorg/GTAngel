@@ -77,8 +77,14 @@ public class DTE4EAvatarService : IDisposable
     // ── Exploration parameters ───────────────────────────────────────────────
     private const float ExplorationStepIntervalMs = 250f;  // 4 Hz decision rate
     private const int   MaxExplorationSteps       = 10_000;
-    /// <summary>Phase 5.3: Max perception+ESN latency (ms) before FACS/IK is skipped for the step.</summary>
-    private const double MaxPerceptionLatencyMs   = 200.0;
+    /// <summary>
+    /// Phase 5.3: Max perception+ESN latency (ms) before FACS/IK is skipped
+    /// for the step. The 250ms step budget needs ~75ms for the rest of the
+    /// pipeline (action dispatch, reward, navigation, logging), so we cap
+    /// perception+ESN at 175ms — anything above that and embodiment is
+    /// skipped to keep the step rate stable.
+    /// </summary>
+    private const double MaxPerceptionLatencyMs   = 175.0;
     private const float RewardDiscoveryBonus      = 1.0f;
     private const float RewardMovementPenalty     = -0.01f;
     private const float RewardIdlePenalty         = -0.1f;
@@ -261,6 +267,14 @@ public class DTE4EAvatarService : IDisposable
                 var actionProbs = _esn.ProcessStep(visionFrame, gameState, _previousAction);
                 var esnState = _esn.LastReservoirState;
 
+                // Phase 5.3: Token-bucket — measure perception+ESN latency
+                // BEFORE the cognitive core update so the governor only
+                // reflects the pipeline its name implies. (UpdateAttention /
+                // MinePatterns latency is governed separately by the rate
+                // limiter inside DteCognitiveCoreService.)
+                var percepElapsedMs = (DateTime.UtcNow - percepStart).TotalMilliseconds;
+                bool skipEmbodimentThisStep = percepElapsedMs > MaxPerceptionLatencyMs;
+
                 // KSM Cycle 5: advance ECAN attention + MOSES pattern state on the executive
                 // reservoir, then feed the cluster STI back into the ESN as top-down modulation.
                 // The training-loop variant does the same per-step; the exploration path needs
@@ -271,10 +285,6 @@ public class DTE4EAvatarService : IDisposable
                     _cognitiveCore.MinePatterns(esnState);
                     _esn.SetTopDownModulation(_cognitiveCore.GetClusterSTI());
                 }
-
-                // Phase 5.3: Token-bucket — measure perception+ESN latency to govern FACS/IK
-                var percepElapsedMs = (DateTime.UtcNow - percepStart).TotalMilliseconds;
-                bool skipEmbodimentThisStep = percepElapsedMs > MaxPerceptionLatencyMs;
 
                 // ── 3. UPDATE COGNITIVE STATE ─────────────────────────────
                 UpdateCognitiveState(obs, esnState);
@@ -405,12 +415,16 @@ public class DTE4EAvatarService : IDisposable
     {
         var neuro = obs.NeurochemicalState ?? new NeurochemicalSnapshot();
 
-        // Phase 1.2: Navigation direction toward current POI target (dims 16..17)
+        // Phase 1.2: Navigation direction toward current POI target (dims 16..17).
+        // Capture NextPOI into a local first so the null check and the field reads
+        // see the same value — _navigation is a singleton whose NextPOI can be
+        // updated from the navigation loop concurrently with this encode call.
         float navDirX = 0f, navDirY = 0f;
-        if (_navigation?.NextPOI != null && obs.Position.Length >= 2)
+        var nextPoi = _navigation?.NextPOI;
+        if (nextPoi != null && nextPoi.Position.Length >= 2 && obs.Position.Length >= 2)
         {
-            float dx = _navigation.NextPOI.Position[0] - obs.Position[0];
-            float dy = _navigation.NextPOI.Position[1] - obs.Position[1];
+            float dx = nextPoi.Position[0] - obs.Position[0];
+            float dy = nextPoi.Position[1] - obs.Position[1];
             float dist = MathF.Sqrt(dx * dx + dy * dy) + 1e-6f;
             navDirX = dx / dist;
             navDirY = dy / dist;

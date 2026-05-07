@@ -129,6 +129,17 @@ public sealed class DteCognitiveCoreService : IDisposable
     // would race on `_sti[c] = _sti[c] * StiDecay + …`.
     private readonly object _attentionLock = new();
 
+    // Rate-limit gate to coalesce duplicate UpdateAttention/MinePatterns calls
+    // when the same singleton is driven by both the training loop and the
+    // exploration loop in lockstep. Without it, STI would decay twice per
+    // step (StiDecay=0.95 → 0.9025) and patterns would be mined at double
+    // rate. The window is just below the typical 250ms step interval so a
+    // single caller running alone is never throttled.
+    private long _lastUpdateAttentionTicks;
+    private long _lastMinePatternsTicks;
+    private static readonly long MinUpdateIntervalTicks =
+        TimeSpan.FromMilliseconds(200).Ticks;
+
     // ── MOSES Pattern Library ─────────────────────────────────────────────────
     private readonly List<MosesPattern> _patterns = new();
     private readonly Queue<float[]> _stateWindow  = new();  // sliding window of reservoir states
@@ -182,6 +193,16 @@ public sealed class DteCognitiveCoreService : IDisposable
     public void UpdateAttention(float[] reservoirState)
     {
         if (reservoirState.Length != ReservoirSize) return;
+
+        // Coalesce concurrent callers: if another caller already advanced
+        // attention within the last MinUpdateIntervalTicks window, skip this
+        // call so STI/LTI don't decay twice per step when both the training
+        // loop and the exploration loop drive the same singleton.
+        var nowTicks = DateTime.UtcNow.Ticks;
+        var lastTicks = Interlocked.Read(ref _lastUpdateAttentionTicks);
+        if (nowTicks - lastTicks < MinUpdateIntervalTicks) return;
+        if (Interlocked.CompareExchange(ref _lastUpdateAttentionTicks, nowTicks, lastTicks) != lastTicks)
+            return;
 
         // Compute cluster activation magnitude (L2 norm per cluster). This step
         // is read-only over `reservoirState` so it is safe to do outside the
@@ -267,6 +288,15 @@ public sealed class DteCognitiveCoreService : IDisposable
     public void MinePatterns(float[] reservoirState)
     {
         if (reservoirState.Length != ReservoirSize) return;
+
+        // Coalesce concurrent callers (see UpdateAttention) so the sliding
+        // window doesn't advance twice per step when both training and
+        // exploration loops run against the same singleton.
+        var nowTicks = DateTime.UtcNow.Ticks;
+        var lastTicks = Interlocked.Read(ref _lastMinePatternsTicks);
+        if (nowTicks - lastTicks < MinUpdateIntervalTicks) return;
+        if (Interlocked.CompareExchange(ref _lastMinePatternsTicks, nowTicks, lastTicks) != lastTicks)
+            return;
 
         // Binarize reservoir state per cluster (above-mean activation = 1)
         var binaryState = BinarizeState(reservoirState);

@@ -17,8 +17,24 @@ namespace GTAngel.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly AssetCatalogService _catalogService = new();
-    private readonly TrainingEngine _trainingEngine = new();
+    // Resolve TrainingEngine from DI so we share the same singleton that
+    // GTAngelService.SetDtePipelineServices wires with the cognitive core
+    // and shared RewardShaper. Without this, the Training Dashboard's local
+    // engine never receives those references and Phase 6.3 features
+    // (cognitive-core feedback in reward, MOSES/Wout metrics, expanded
+    // hypothesis cases 4–7) silently no-op when training is started here.
+    // Fall back to a fresh instance if the DI container isn't yet built
+    // (e.g. designer / unit-test scenarios).
+    private readonly TrainingEngine _trainingEngine = ResolveTrainingEngine();
     private DteCognitiveCoreService? _cognitiveCore;
+
+    private static TrainingEngine ResolveTrainingEngine()
+    {
+        // App.Services is declared non-nullable but is `null!` until
+        // App.OnStartup runs, so check at runtime before resolving.
+        IServiceProvider? sp = App.Services;
+        return sp?.GetService<TrainingEngine>() ?? new TrainingEngine();
+    }
 
     // ========== Navigation ==========
     [ObservableProperty] private int _selectedTabIndex;

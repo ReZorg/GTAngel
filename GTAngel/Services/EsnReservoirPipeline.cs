@@ -293,10 +293,17 @@ public sealed class EsnReservoirPipeline : IDisposable
         Array.Copy(_sensoryLayer.State, cognitiveInput, _sensoryLayer.Size);
         Array.Copy(gameState, 0, cognitiveInput, _sensoryLayer.Size, gameState.Length);
 
-        // Phase 4.1: Scale cognitive drive by observation fusion norm (high agreement → stronger drive)
+        // Phase 4.1: Scale cognitive drive by observation fusion norm (high
+        // agreement → stronger drive). The scale is derived from ML-vision
+        // feature L2 norm and is only meaningful for the sensory portion of
+        // the cognitive input. Applying it to the game state portion
+        // (proprioceptive position/velocity/etc.) would conflate visual
+        // confidence with proprioceptive amplitude — instead, leave the
+        // game state portion untouched.
         if (_observationFusionScale != 1.0f)
         {
-            for (int i = 0; i < cognitiveInput.Length; i++)
+            int sensorySize = _sensoryLayer.Size;
+            for (int i = 0; i < sensorySize; i++)
                 cognitiveInput[i] *= _observationFusionScale;
         }
 

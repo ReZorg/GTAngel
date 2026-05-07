@@ -396,7 +396,10 @@ public sealed class DteTrainingLoop : IDisposable
                 var execState = _reservoir.LastReservoirState;
                 _cognitiveCore.UpdateThompson(action, reward);
 
-                if (State.TotalSteps % 32 == 0 && execState.Length >= 512)
+                // Train Wout every 32 steps, but skip step 0 (otherwise we'd
+                // train against a single noisy sample at the very start of
+                // training before the reservoir has any meaningful state).
+                if (State.TotalSteps > 0 && State.TotalSteps % 32 == 0 && execState.Length >= 512)
                 {
                     var targetActions = new float[18];
                     if (action >= 0 && action < 18) targetActions[action] = 1f;
