@@ -37,6 +37,12 @@ public sealed class DteTrainingLoop : IDisposable
     // ── KSM Cycle 5: DTE Cognitive Core ──────────────────────────────────
     private DteCognitiveCoreService? _cognitiveCore;
 
+    // Phase 6.3: shared RewardShaper instance, exposed so TrainingEngine's
+    // autogenesis hypothesis loop can mutate Navigation/Exploration weights
+    // (TrainingEngine.SetRewardShaperRef). Without a single owning instance the
+    // reward-weight mutation cases in ApplyHypothesis silently no-op.
+    public RewardShaper RewardShaper { get; } = new RewardShaper();
+
     private CancellationTokenSource? _cts;
     private Task? _trainingTask;
     private bool _disposed;
@@ -202,7 +208,7 @@ public sealed class DteTrainingLoop : IDisposable
     private async Task TrainingLoopAsync(CancellationToken ct)
     {
         var stepwatch = new Stopwatch();
-        var rewardShaper = new RewardShaper();
+        var rewardShaper = RewardShaper;
 
         try
         {

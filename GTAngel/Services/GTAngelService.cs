@@ -103,6 +103,11 @@ public sealed class GTAngelService : IDisposable
         _esnPipeline         = esnPipeline;
         _cognitiveCoreService = cognitiveCoreService;
         _trainingEngine.SetCognitiveCoreService(cognitiveCoreService);
+        // Phase 6.3: share the training loop's RewardShaper so the autogenesis
+        // hypothesis cases that mutate Navigation/Exploration weights actually
+        // reach the same instance the loop uses (otherwise those mutations
+        // silently no-op against a null reference).
+        _trainingEngine.SetRewardShaperRef(trainingLoop.RewardShaper);
         Log("[GTAngel] KSM Cycle 5 wired: DteTrainingLoop + ESN + CognitiveCore bound to autogenesis loop.");
     }
 
