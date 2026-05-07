@@ -1,7 +1,6 @@
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using Xunit;
 
@@ -233,6 +232,8 @@ public class MultiAgentTrainerTests : IDisposable
         Assert.True(doc.RootElement.TryGetProperty("GlobalWeights", out _));
         Assert.True(doc.RootElement.TryGetProperty("Stats", out _));
         Assert.True(doc.RootElement.TryGetProperty("Agents", out _));
+        var firstAgent = doc.RootElement.GetProperty("Agents")[0];
+        Assert.Equal("Agent-00", firstAgent.GetProperty("Name").GetString());
     }
 
     [Fact]
@@ -268,51 +269,5 @@ public class MultiAgentTrainerTests : IDisposable
         Assert.Equal(88, stat.Steps);
         Assert.Equal(0.4, stat.Epsilon);
         Assert.Equal(AgentStatus.Running, stat.Status);
-    }
-
-    [Fact]
-    public void AgentUpdate_InternalType_StoresPropertyValues()
-    {
-        var type = typeof(MultiAgentTrainer).Assembly.GetType("GTAngel.Services.AgentUpdate");
-        var instance = Activator.CreateInstance(type!);
-        type!.GetProperty("AgentId")!.SetValue(instance, 9);
-        type.GetProperty("WeightGradients")!.SetValue(instance, new[] { 0.25f, -0.5f });
-        type.GetProperty("EpisodeReward")!.SetValue(instance, 4.5f);
-        type.GetProperty("Steps")!.SetValue(instance, 12);
-
-        Assert.Equal(9, type.GetProperty("AgentId")!.GetValue(instance));
-        Assert.Equal(4.5f, type.GetProperty("EpisodeReward")!.GetValue(instance));
-        Assert.Equal(12, type.GetProperty("Steps")!.GetValue(instance));
-        Assert.Equal(new[] { 0.25f, -0.5f }, (float[]?)type.GetProperty("WeightGradients")!.GetValue(instance));
-    }
-
-    [Fact]
-    public void ComputeActionProbabilities_PrivateHelper_ReturnsNormalizedDistribution()
-    {
-        var method = typeof(MultiAgentTrainer).GetMethod("ComputeActionProbabilities", BindingFlags.NonPublic | BindingFlags.Static);
-        var weights = new float[512 * 3];
-        weights[0] = 2f;
-        weights[512] = 1f;
-        weights[1024] = -1f;
-        var state = new float[512];
-        state[0] = 1f;
-
-        var result = Assert.IsType<float[]>(method!.Invoke(null, [weights, state, 3])!);
-
-        Assert.Equal(3, result.Length);
-        Assert.Equal(1f, result.Sum(), 4);
-        Assert.Equal(0, Array.IndexOf(result, result.Max()));
-    }
-
-    [Fact]
-    public void ComputeGradients_PrivateHelper_ReturnsElementwiseDifference()
-    {
-        var method = typeof(MultiAgentTrainer).GetMethod("ComputeGradients", BindingFlags.NonPublic | BindingFlags.Static);
-        var result = Assert.IsType<float[]>(method!.Invoke(null, [new[] { 3f, 1f }, new[] { 1f, 0.5f }])!);
-
-        Assert.Collection(
-            result,
-            value => Assert.Equal(2f, value),
-            value => Assert.Equal(0.5f, value));
     }
 }

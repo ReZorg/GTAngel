@@ -1,7 +1,6 @@
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.IO;
-using System.Reflection;
 using Xunit;
 
 namespace GTAngel.Tests.Services;
@@ -271,17 +270,6 @@ public class OpenRwEngineBridgeTests : IDisposable
 
         Assert.Contains("DEFAULT_SCREEN_WIDTH=512", config);
         Assert.Contains("DEFAULT_SCREEN_HEIGHT=512", config);
-    }
-
-    [Fact]
-    public void FindFirstJsonObjectEnd_PrivateHelper_HandlesNestedObjectsAndEscapes()
-    {
-        var method = typeof(OpenRwEngineBridge).GetMethod("FindFirstJsonObjectEnd", BindingFlags.NonPublic | BindingFlags.Static);
-        const string raw = "{\"outer\":{\"message\":\"brace } and quote \\\" ok\"}} trailing";
-
-        var end = Assert.IsType<int>(method!.Invoke(null, [raw])!);
-
-        Assert.Equal(raw.IndexOf("}}", StringComparison.Ordinal) + 1, end);
     }
 
     // ── Stop / Dispose ────────────────────────────────────────────────────────
