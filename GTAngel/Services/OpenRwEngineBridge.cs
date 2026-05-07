@@ -572,7 +572,7 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
             // Find the end of the first complete JSON object (terminated by '}' or newline)
             var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
             // Trim to the last '}' to handle any trailing data or partial messages
-            int jsonEnd = raw.LastIndexOf('}');
+            int jsonEnd = raw.IndexOf('}');
             if (jsonEnd < 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
