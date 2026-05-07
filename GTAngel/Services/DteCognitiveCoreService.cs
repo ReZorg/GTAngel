@@ -133,12 +133,18 @@ public sealed class DteCognitiveCoreService : IDisposable
     // when the same singleton is driven by both the training loop and the
     // exploration loop in lockstep. Without it, STI would decay twice per
     // step (StiDecay=0.95 → 0.9025) and patterns would be mined at double
-    // rate. The window is just below the typical 250ms step interval so a
-    // single caller running alone is never throttled.
+    // rate. Production code (App.OnStartup) sets MinUpdateIntervalMs to ~200
+    // (just below the typical 250ms step interval) so a single caller running
+    // alone is never throttled. Default is 0 (off) so unit tests that call
+    // these methods in tight loops still observe per-call advancement.
     private long _lastUpdateAttentionTicks;
     private long _lastMinePatternsTicks;
-    private static readonly long MinUpdateIntervalTicks =
-        TimeSpan.FromMilliseconds(200).Ticks;
+    /// <summary>
+    /// Minimum interval (in milliseconds) between accepted UpdateAttention /
+    /// MinePatterns calls. 0 disables the gate. Set to ~200 in production to
+    /// coalesce dual-caller concurrent updates from training+exploration loops.
+    /// </summary>
+    public int MinUpdateIntervalMs { get; set; } = 0;
 
     // ── MOSES Pattern Library ─────────────────────────────────────────────────
     private readonly List<MosesPattern> _patterns = new();
@@ -195,14 +201,18 @@ public sealed class DteCognitiveCoreService : IDisposable
         if (reservoirState.Length != ReservoirSize) return;
 
         // Coalesce concurrent callers: if another caller already advanced
-        // attention within the last MinUpdateIntervalTicks window, skip this
+        // attention within the last MinUpdateIntervalMs window, skip this
         // call so STI/LTI don't decay twice per step when both the training
         // loop and the exploration loop drive the same singleton.
-        var nowTicks = DateTime.UtcNow.Ticks;
-        var lastTicks = Interlocked.Read(ref _lastUpdateAttentionTicks);
-        if (nowTicks - lastTicks < MinUpdateIntervalTicks) return;
-        if (Interlocked.CompareExchange(ref _lastUpdateAttentionTicks, nowTicks, lastTicks) != lastTicks)
-            return;
+        if (MinUpdateIntervalMs > 0)
+        {
+            long minIntervalTicks = TimeSpan.FromMilliseconds(MinUpdateIntervalMs).Ticks;
+            var nowTicks = DateTime.UtcNow.Ticks;
+            var lastTicks = Interlocked.Read(ref _lastUpdateAttentionTicks);
+            if (nowTicks - lastTicks < minIntervalTicks) return;
+            if (Interlocked.CompareExchange(ref _lastUpdateAttentionTicks, nowTicks, lastTicks) != lastTicks)
+                return;
+        }
 
         // Compute cluster activation magnitude (L2 norm per cluster). This step
         // is read-only over `reservoirState` so it is safe to do outside the
@@ -292,11 +302,15 @@ public sealed class DteCognitiveCoreService : IDisposable
         // Coalesce concurrent callers (see UpdateAttention) so the sliding
         // window doesn't advance twice per step when both training and
         // exploration loops run against the same singleton.
-        var nowTicks = DateTime.UtcNow.Ticks;
-        var lastTicks = Interlocked.Read(ref _lastMinePatternsTicks);
-        if (nowTicks - lastTicks < MinUpdateIntervalTicks) return;
-        if (Interlocked.CompareExchange(ref _lastMinePatternsTicks, nowTicks, lastTicks) != lastTicks)
-            return;
+        if (MinUpdateIntervalMs > 0)
+        {
+            long minIntervalTicks = TimeSpan.FromMilliseconds(MinUpdateIntervalMs).Ticks;
+            var nowTicks = DateTime.UtcNow.Ticks;
+            var lastTicks = Interlocked.Read(ref _lastMinePatternsTicks);
+            if (nowTicks - lastTicks < minIntervalTicks) return;
+            if (Interlocked.CompareExchange(ref _lastMinePatternsTicks, nowTicks, lastTicks) != lastTicks)
+                return;
+        }
 
         // Binarize reservoir state per cluster (above-mean activation = 1)
         var binaryState = BinarizeState(reservoirState);
