@@ -495,21 +495,22 @@ public sealed class MultiAgentTrainer : IDisposable
         var state = new float[22];
         float t = step * 0.1f + agentId * 100;
 
-        // Phase 7.2: Per-agent starting district for navigation diversity
-        // Agent 0 = Portland (-1000, -500), Agent 1 = Staunton (300, 100), Agent 2 = Shoreside (1100, 200)
-        // Agent N>2 rotates through districts with an offset
+        // Phase 7.2: Per-agent starting district for navigation diversity.
+        // Values stay in raw game-world scale so RewardShaper.ParseState gets the
+        // units it expects (positions in game units, health 0–100, money as int).
+        // The ESN pipeline does its own input normalization downstream.
         var districtOrigins = new (float x, float y)[] { (-1000f, -500f), (300f, 100f), (1100f, 200f) };
         var (originX, originY) = districtOrigins[agentId % 3];
         float districtScale = 400f;
 
-        state[0] = (originX + (float)(districtScale * Math.Sin(t * 0.05 + agentId))) / 3000f;
-        state[1] = (originY + (float)(districtScale * Math.Cos(t * 0.05 + agentId))) / 3000f;
-        state[2] = 10f / 500f;
-        state[3] = (t % 360) / 360f;
-        state[4] = (float)((rng.NextDouble() * 20 - 10) / 600.0);
-        state[5] = (float)((rng.NextDouble() * 20 - 10) / 600.0);
-        state[7] = Math.Max(0, 100 - step * 0.05f + (float)rng.NextDouble() * 10) / 100f;
-        state[14] = Math.Min((1000 + step * 10) / 1_000_000f, 1f);
+        state[0] = originX + (float)(districtScale * Math.Sin(t * 0.05 + agentId));
+        state[1] = originY + (float)(districtScale * Math.Cos(t * 0.05 + agentId));
+        state[2] = 10f;
+        state[3] = t % 360;
+        state[4] = (float)(rng.NextDouble() * 20 - 10);
+        state[5] = (float)(rng.NextDouble() * 20 - 10);
+        state[7] = Math.Max(0, 100 - step * 0.05f + (float)rng.NextDouble() * 10);
+        state[14] = 1000 + step * 10;
         return state;
     }
 

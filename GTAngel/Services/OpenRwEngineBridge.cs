@@ -555,14 +555,17 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
 
             // Use a 4KB buffer to handle realistic JSON message sizes
             var buffer = new byte[4096];
-            int bytesRead = 0;
 
-            // Non-blocking peek: only read if data is available
-            if (_ipcServer.InBufferSize == 0)
+            // NamedPipeServerStream.InBufferSize reports the configured pipe capacity,
+            // not the bytes currently available, so it cannot be used as a non-blocking
+            // peek. Instead, issue a ReadAsync and bound it with a short timeout so the
+            // game-state poll thread is never stuck waiting for the engine client.
+            const int readTimeoutMs = 50;
+            var readTask = _ipcServer.ReadAsync(buffer, 0, buffer.Length);
+            if (!readTask.Wait(readTimeoutMs))
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-            int toRead = Math.Min(buffer.Length, _ipcServer.InBufferSize);
-            bytesRead = _ipcServer.Read(buffer, 0, toRead);
+            int bytesRead = readTask.Result;
             if (bytesRead == 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 

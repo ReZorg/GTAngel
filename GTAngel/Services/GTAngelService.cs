@@ -354,19 +354,14 @@ public sealed class GTAngelService : IDisposable
             sb.Append(exp.PrimaryMetric.ToString("F6")).Append('\t');
             sb.Append(exp.PropertyCoherenceScore.ToString("F4")).Append('\t');
 
-            // 15 Alexander property scores (P0..P14)
+            // 15 Alexander property scores (P0..P14) keyed by canonical property names
+            var propertyNames = AlexanderProperty.CreateAll();
             for (int p = 0; p < 15; p++)
             {
-                // Look up by property name from the AlexanderProperty list
-                var propName = p < GTAngel.Models.AlexanderProperty.CreateAll().Count
-                    ? GTAngel.Models.AlexanderProperty.CreateAll()[p].Name
-                    : $"P{p}";
+                var propName = p < propertyNames.Count ? propertyNames[p].Name : $"P{p}";
                 if (!exp.PropertyScores.TryGetValue(propName, out var score))
-                {
                     score = 0.0;
-                }
                 sb.Append(score.ToString("F4")).Append('\t');
-            }
             }
 
             sb.Append((int)State.AutonomyLevel).Append('\t');
