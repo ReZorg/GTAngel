@@ -215,6 +215,27 @@ public class TrainingEngine
             // ESN forward pass
             var output = _esn.Step(input);
 
+            // Phase 6.3: Drive the wired DteCognitiveCoreService with the executive
+            // reservoir state so that JaccardThresh / RidgeLambda mutations applied
+            // by ApplyHypothesis actually exercise MOSES pattern mining and the
+            // attention economy whose metrics (top pattern fitness, Wout loss)
+            // feed back into ComputeStepReward below — otherwise the autogenesis
+            // KEEP/DISCARD decision would be uncorrelated with the mutated
+            // cognitive-core parameters.
+            if (_cognitiveCoreService != null && _esn.Layers.Count >= 3)
+            {
+                var execLayer = _esn.Layers[^1];
+                if (execLayer.State.Length == 512)
+                {
+                    var execStateF = new float[execLayer.State.Length];
+                    for (int i = 0; i < execStateF.Length; i++)
+                        execStateF[i] = (float)execLayer.State[i];
+                    _cognitiveCoreService.UpdateAttention(execStateF);
+                    if (step % 4 == 0)  // pattern mining is heavier; subsample
+                        _cognitiveCoreService.MinePatterns(execStateF);
+                }
+            }
+
             // Trigger cognitive sub-processes based on semantic cycle step
             UpdateCognitiveState(output, step);
 
@@ -346,15 +367,24 @@ public class TrainingEngine
     {
         double reward = 0;
 
-        // Exploration reward
-        reward += 0.1 * Math.Abs(output[0]);
+        // Phase 6.3: Scale reward components by the wired RewardShaper weights so
+        // ApplyHypothesis mutations of Weights.Exploration / Weights.Navigation
+        // actually move PrimaryMetric. Default weights (Exploration=2.0,
+        // Navigation=1.0) reproduce the original constants 0.1 and 0.1.
+        double wExp = _rewardShaperRef?.Weights.Exploration ?? 2.0;
+        double wNav = _rewardShaperRef?.Weights.Navigation  ?? 1.0;
+
+        // Exploration reward (scaled by Exploration weight)
+        reward += 0.05 * wExp * Math.Abs(output[0]);
 
         // Coherence reward
         reward += 0.3 * _esn.StreamCoherence;
 
-        // 4E integration reward
-        reward += 0.1 * (_cognitiveState.Embodied + _cognitiveState.Embedded +
-                        _cognitiveState.Enacted + _cognitiveState.Extended) / 4.0;
+        // 4E integration reward (scaled by Navigation weight as a proxy for the
+        // spatial/embodiment coupling that navigation pressures).
+        double e4 = (_cognitiveState.Embodied + _cognitiveState.Embedded +
+                     _cognitiveState.Enacted + _cognitiveState.Extended) / 4.0;
+        reward += 0.1 * wNav * e4;
 
         // Flow state bonus
         if (_cognitiveState.Mode == CognitiveMode.Flow)
@@ -362,6 +392,16 @@ public class TrainingEngine
 
         // Stability reward
         reward += 0.1 * _cognitiveState.Stability;
+
+        // Phase 6.3: Cognitive-core feedback so JaccardThresh / RidgeLambda
+        // mutations change PrimaryMetric. Top pattern fitness rises when MOSES
+        // generalizes well (sensitive to JaccardThresh); (1 − Wout loss) rises
+        // when ridge regression converges well (sensitive to RidgeLambda).
+        if (_cognitiveCoreService != null)
+        {
+            reward += 0.10 * _cognitiveCoreService.GetTopPatternFitness();
+            reward += 0.05 * Math.Max(0.0, 1.0 - _cognitiveCoreService.GetWoutLoss());
+        }
 
         // Noise
         reward += (_rng.NextDouble() - 0.5) * 0.05;
