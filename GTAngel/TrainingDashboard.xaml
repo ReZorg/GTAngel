@@ -15,6 +15,9 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <!-- Converters -->
+        <converters:FloatToHeightConverter x:Key="FloatToHeight"/>
+
         <!-- Color brushes -->
         <SolidColorBrush x:Key="BgDarkBrush"       Color="#FF0D0D1A"/>
         <SolidColorBrush x:Key="BgMediumBrush"     Color="#FF141428"/>

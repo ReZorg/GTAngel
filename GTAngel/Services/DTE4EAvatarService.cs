@@ -327,7 +327,8 @@ public class DTE4EAvatarService : IDisposable
                 _navigation?.UpdatePosition(obs.Position);
 
                 // ── 6b. EMBODY (KSM Cycle 3: FACS+IK+Neuro+Personality) ──────────────
-                // Phase 5.3: Skip FACS/IK if perception+ESN took > 200ms (rate governor)
+                // Phase 5.3: Skip FACS/IK if perception+ESN exceeded the
+                // MaxPerceptionLatencyMs rate-governor budget computed above.
                 if (_embodiment != null && !skipEmbodimentThisStep)
                 {
                     // Synthesize emotional state from ESN output + neurochemical state

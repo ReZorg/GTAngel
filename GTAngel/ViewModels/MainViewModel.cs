@@ -121,8 +121,11 @@ public partial class MainViewModel : ObservableObject
         InitializeCharts();
         InitializePropertyScores();
 
-        // Phase 8.3: Wire DteCognitiveCoreService for real-time telemetry
-        _cognitiveCore = App.Services.GetService<DteCognitiveCoreService>();
+        // Phase 8.3: Wire DteCognitiveCoreService for real-time telemetry.
+        // App.Services is declared non-nullable but is null! until App.OnStartup
+        // runs (designer / unit-test scenarios), so guard the lookup the same
+        // way ResolveTrainingEngine does to avoid an NRE here.
+        _cognitiveCore = App.Services?.GetService<DteCognitiveCoreService>();
         if (_cognitiveCore != null)
         {
             _cognitiveCore.OnAttentionUpdated     += OnCognitiveCoreAttentionUpdated;
