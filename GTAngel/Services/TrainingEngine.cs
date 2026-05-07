@@ -233,6 +233,27 @@ public class TrainingEngine
         int maxSteps = 100;
         double totalReward = 0;
 
+        // RunEpisode is a *simulated-time* loop: it iterates 100 steps in
+        // <10ms, whereas DteTrainingLoop and DTE4EAvatarService run at ~250ms
+        // per step and use the rate-limit gate to coalesce dual-caller updates.
+        // If we leave the production gate (e.g. 200ms) on for this loop, >99%
+        // of the UpdateAttention/MinePatterns calls below get dropped and the
+        // cognitive core's metrics (top pattern fitness, Wout loss) stay
+        // near-constant across experiments — making JaccardThresh / RidgeLambda
+        // mutations in ApplyHypothesis effectively unobservable in PrimaryMetric.
+        // Disable the gate just for the duration of this episode and restore
+        // it in finally so concurrent real-time callers regain protection.
+        int prevMinUpdateIntervalMs = 0;
+        bool overrodeRateLimit = false;
+        if (_cognitiveCoreService != null && _cognitiveCoreService.MinUpdateIntervalMs > 0)
+        {
+            prevMinUpdateIntervalMs = _cognitiveCoreService.MinUpdateIntervalMs;
+            _cognitiveCoreService.MinUpdateIntervalMs = 0;
+            overrodeRateLimit = true;
+        }
+
+        try
+        {
         for (int step = 0; step < maxSteps && !ct.IsCancellationRequested; step++)
         {
             // Phase 2.4: Semantic CognitiveState cycle advancement (12-step KSM cycle)
@@ -308,6 +329,14 @@ public class TrainingEngine
         OnEpisodeCompleted?.Invoke(_currentEpisode);
 
         return _currentEpisode;
+        }
+        finally
+        {
+            // Always restore the production rate-limit so concurrent
+            // DteTrainingLoop / DTE4EAvatarService callers regain coalescing.
+            if (overrodeRateLimit && _cognitiveCoreService != null)
+                _cognitiveCoreService.MinUpdateIntervalMs = prevMinUpdateIntervalMs;
+        }
     }
 
     private double[] GenerateGameObservation(int step)
