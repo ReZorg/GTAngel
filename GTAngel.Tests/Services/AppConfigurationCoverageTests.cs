@@ -10,7 +10,15 @@ namespace GTAngel.Tests.Services;
 [Collection("AppConfiguration file system")]
 public sealed class AppConfigurationCoverageTests : IDisposable
 {
-    private readonly string _configDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Config");
+    private const string AssetsDirectoryName = "Assets";
+    private const string ConfigDirectoryName = "Config";
+    private const int MaxRetryAttempts = 50;
+    private const int RetryDelayMilliseconds = 50;
+
+    private readonly string _configDirectory = Path.Combine(
+        AppDomain.CurrentDomain.BaseDirectory,
+        AssetsDirectoryName,
+        ConfigDirectoryName);
     private readonly string _configPath;
     private readonly string _settingsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -122,7 +130,7 @@ public sealed class AppConfigurationCoverageTests : IDisposable
 
     private async Task<UserSettings> WaitForSettingsAsync()
     {
-        for (var attempt = 0; attempt < 50; attempt++)
+        for (var attempt = 0; attempt < MaxRetryAttempts; attempt++)
         {
             if (File.Exists(_settingsPath))
             {
@@ -134,7 +142,7 @@ public sealed class AppConfigurationCoverageTests : IDisposable
                 }
             }
 
-            await Task.Delay(50);
+            await Task.Delay(RetryDelayMilliseconds);
         }
 
         throw new TimeoutException("Timed out waiting for user settings to be persisted.");
