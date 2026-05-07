@@ -19,6 +19,10 @@ public class TrainingEngine
     private readonly List<AlexanderProperty> _properties;
     private TrainingStats _stats = new();
     private bool _isRunning;
+    // Backing int for Interlocked.CompareExchange — int because Interlocked
+    // doesn't support bool. 0 = idle, 1 = running. Used to atomically reject
+    // concurrent StartAutogenesisAsync calls on the shared singleton.
+    private int  _isRunningFlag;
     private CancellationTokenSource? _cts;
 
     public EchoStateNetwork ESN => _esn;
@@ -54,53 +58,82 @@ public class TrainingEngine
     /// <summary>
     /// Configure and start the autogenesis training loop.
     /// </summary>
+    /// <remarks>
+    /// Concurrent-start guarded: this engine is a DI singleton shared by both
+    /// the Training Dashboard (MainViewModel) and the GTAngel Guardian Angel
+    /// tab (GTAngelService). If a second caller starts while one is already
+    /// running, the call is logged and ignored — without this guard, the
+    /// second caller would overwrite _config, leak the existing _cts, and
+    /// race the experiment-history collections.
+    /// </remarks>
     public async Task StartAutogenesisAsync(TrainingConfig config, IProgress<string>? progress = null)
     {
-        _config = config;
-        _cts = new CancellationTokenSource();
-        _isRunning = true;
-
-        OnLogMessage?.Invoke($"[Autogenesis] Starting evolution toward {config.TargetLevel}");
-        OnLogMessage?.Invoke($"[Autogenesis] Max experiments: {config.MaxExperiments}, Min coherence: {config.MinCoherence}");
-
-        // Record baseline
-        var baseline = await RunBaselineExperiment(progress);
-        _experiments.Add(baseline);
-        OnExperimentCompleted?.Invoke(baseline);
-
-        // Main autogenesis loop
-        int experimentId = 1;
-        while (experimentId <= config.MaxExperiments && !_cts.Token.IsCancellationRequested)
+        // Atomic claim of the running slot — first caller wins.
+        if (Interlocked.CompareExchange(ref _isRunningFlag, 1, 0) != 0)
         {
-            try
-            {
-                var experiment = await RunExperiment(experimentId, progress, _cts.Token);
-                _experiments.Add(experiment);
-                OnExperimentCompleted?.Invoke(experiment);
-
-                // Update stats
-                UpdateStats();
-
-                // Check if target autonomy level reached
-                if (_stats.CurrentAutonomyLevel >= config.TargetLevel)
-                {
-                    OnLogMessage?.Invoke($"[Autogenesis] TARGET REACHED: {config.TargetLevel}!");
-                    break;
-                }
-
-                experimentId++;
-                await Task.Delay(100, _cts.Token); // Small delay for UI responsiveness
-            }
-            catch (OperationCanceledException)
-            {
-                OnLogMessage?.Invoke("[Autogenesis] Loop cancelled by user");
-                break;
-            }
+            OnLogMessage?.Invoke("[Autogenesis] Already running — ignoring concurrent StartAutogenesisAsync call");
+            progress?.Report("Autogenesis already running");
+            return;
         }
 
-        _isRunning = false;
-        OnLogMessage?.Invoke($"[Autogenesis] Complete. {_experiments.Count} experiments, " +
-                           $"Keep ratio: {_stats.KeepRatio:P0}");
+        _config = config;
+        var cts = new CancellationTokenSource();
+        _cts = cts;
+        _isRunning = true;
+
+        try
+        {
+            OnLogMessage?.Invoke($"[Autogenesis] Starting evolution toward {config.TargetLevel}");
+            OnLogMessage?.Invoke($"[Autogenesis] Max experiments: {config.MaxExperiments}, Min coherence: {config.MinCoherence}");
+
+            // Record baseline
+            var baseline = await RunBaselineExperiment(progress);
+            _experiments.Add(baseline);
+            OnExperimentCompleted?.Invoke(baseline);
+
+            // Main autogenesis loop
+            int experimentId = 1;
+            while (experimentId <= config.MaxExperiments && !cts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    var experiment = await RunExperiment(experimentId, progress, cts.Token);
+                    _experiments.Add(experiment);
+                    OnExperimentCompleted?.Invoke(experiment);
+
+                    // Update stats
+                    UpdateStats();
+
+                    // Check if target autonomy level reached
+                    if (_stats.CurrentAutonomyLevel >= config.TargetLevel)
+                    {
+                        OnLogMessage?.Invoke($"[Autogenesis] TARGET REACHED: {config.TargetLevel}!");
+                        break;
+                    }
+
+                    experimentId++;
+                    await Task.Delay(100, cts.Token); // Small delay for UI responsiveness
+                }
+                catch (OperationCanceledException)
+                {
+                    OnLogMessage?.Invoke("[Autogenesis] Loop cancelled by user");
+                    break;
+                }
+            }
+
+            OnLogMessage?.Invoke($"[Autogenesis] Complete. {_experiments.Count} experiments, " +
+                               $"Keep ratio: {_stats.KeepRatio:P0}");
+        }
+        finally
+        {
+            // Always release the running slot — without this, an unhandled
+            // exception during the loop would leave _isRunningFlag=1 forever
+            // and lock out all future StartAutogenesisAsync calls.
+            _isRunning = false;
+            cts.Dispose();
+            if (ReferenceEquals(_cts, cts)) _cts = null;
+            Interlocked.Exchange(ref _isRunningFlag, 0);
+        }
     }
 
     public void Stop()
@@ -200,16 +233,64 @@ public class TrainingEngine
         int maxSteps = 100;
         double totalReward = 0;
 
+        // RunEpisode is a *simulated-time* loop: it iterates 100 steps in
+        // <10ms, whereas DteTrainingLoop and DTE4EAvatarService run at ~250ms
+        // per step and use the rate-limit gate to coalesce dual-caller updates.
+        // If we leave the production gate (e.g. 200ms) on for this loop, >99%
+        // of the UpdateAttention/MinePatterns calls below get dropped and the
+        // cognitive core's metrics (top pattern fitness, Wout loss) stay
+        // near-constant across experiments — making JaccardThresh / RidgeLambda
+        // mutations in ApplyHypothesis effectively unobservable in PrimaryMetric.
+        // Disable the gate just for the duration of this episode and restore
+        // it in finally so concurrent real-time callers regain protection.
+        int prevMinUpdateIntervalMs = 0;
+        bool overrodeRateLimit = false;
+        if (_cognitiveCoreService != null && _cognitiveCoreService.MinUpdateIntervalMs > 0)
+        {
+            prevMinUpdateIntervalMs = _cognitiveCoreService.MinUpdateIntervalMs;
+            _cognitiveCoreService.MinUpdateIntervalMs = 0;
+            overrodeRateLimit = true;
+        }
+
+        try
+        {
         for (int step = 0; step < maxSteps && !ct.IsCancellationRequested; step++)
         {
+            // Phase 2.4: Semantic CognitiveState cycle advancement (12-step KSM cycle)
+            // Steps 0-4: Perception/Attention/Recognition/Comprehension/Evaluation
+            // Steps 5-7: Planning/Intention/Execution
+            // Steps 8-11: Monitoring/Learning/Consolidation/Reflection
+            int cycleStep = step % 12;
+            _cognitiveState.CurrentCycleStep = cycleStep;
+
             // Generate game state observation (simulated from asset catalog)
             var input = GenerateGameObservation(step);
 
             // ESN forward pass
             var output = _esn.Step(input);
 
-            // Advance cognitive cycle
-            _cognitiveState.CurrentCycleStep = step % 12;
+            // Phase 6.3: Drive the wired DteCognitiveCoreService with the executive
+            // reservoir state so that JaccardThresh / RidgeLambda mutations applied
+            // by ApplyHypothesis actually exercise MOSES pattern mining and the
+            // attention economy whose metrics (top pattern fitness, Wout loss)
+            // feed back into ComputeStepReward below — otherwise the autogenesis
+            // KEEP/DISCARD decision would be uncorrelated with the mutated
+            // cognitive-core parameters.
+            if (_cognitiveCoreService != null && _esn.Layers.Count >= 3)
+            {
+                var execLayer = _esn.Layers[^1];
+                if (execLayer.State.Length == 512)
+                {
+                    var execStateF = new float[execLayer.State.Length];
+                    for (int i = 0; i < execStateF.Length; i++)
+                        execStateF[i] = (float)execLayer.State[i];
+                    _cognitiveCoreService.UpdateAttention(execStateF);
+                    if (step % 4 == 0)  // pattern mining is heavier; subsample
+                        _cognitiveCoreService.MinePatterns(execStateF);
+                }
+            }
+
+            // Trigger cognitive sub-processes based on semantic cycle step
             UpdateCognitiveState(output, step);
 
             // Compute reward
@@ -248,6 +329,14 @@ public class TrainingEngine
         OnEpisodeCompleted?.Invoke(_currentEpisode);
 
         return _currentEpisode;
+        }
+        finally
+        {
+            // Always restore the production rate-limit so concurrent
+            // DteTrainingLoop / DTE4EAvatarService callers regain coalescing.
+            if (overrodeRateLimit && _cognitiveCoreService != null)
+                _cognitiveCoreService.MinUpdateIntervalMs = prevMinUpdateIntervalMs;
+        }
     }
 
     private double[] GenerateGameObservation(int step)
@@ -340,15 +429,24 @@ public class TrainingEngine
     {
         double reward = 0;
 
-        // Exploration reward
-        reward += 0.1 * Math.Abs(output[0]);
+        // Phase 6.3: Scale reward components by the wired RewardShaper weights so
+        // ApplyHypothesis mutations of Weights.Exploration / Weights.Navigation
+        // actually move PrimaryMetric. Default weights (Exploration=2.0,
+        // Navigation=1.0) reproduce the original constants 0.1 and 0.1.
+        double wExp = _rewardShaperRef?.Weights.Exploration ?? 2.0;
+        double wNav = _rewardShaperRef?.Weights.Navigation  ?? 1.0;
+
+        // Exploration reward (scaled by Exploration weight)
+        reward += 0.05 * wExp * Math.Abs(output[0]);
 
         // Coherence reward
         reward += 0.3 * _esn.StreamCoherence;
 
-        // 4E integration reward
-        reward += 0.1 * (_cognitiveState.Embodied + _cognitiveState.Embedded +
-                        _cognitiveState.Enacted + _cognitiveState.Extended) / 4.0;
+        // 4E integration reward (scaled by Navigation weight as a proxy for the
+        // spatial/embodiment coupling that navigation pressures).
+        double e4 = (_cognitiveState.Embodied + _cognitiveState.Embedded +
+                     _cognitiveState.Enacted + _cognitiveState.Extended) / 4.0;
+        reward += 0.1 * wNav * e4;
 
         // Flow state bonus
         if (_cognitiveState.Mode == CognitiveMode.Flow)
@@ -356,6 +454,16 @@ public class TrainingEngine
 
         // Stability reward
         reward += 0.1 * _cognitiveState.Stability;
+
+        // Phase 6.3: Cognitive-core feedback so JaccardThresh / RidgeLambda
+        // mutations change PrimaryMetric. Top pattern fitness rises when MOSES
+        // generalizes well (sensitive to JaccardThresh); (1 − Wout loss) rises
+        // when ridge regression converges well (sensitive to RidgeLambda).
+        if (_cognitiveCoreService != null)
+        {
+            reward += 0.10 * _cognitiveCoreService.GetTopPatternFitness();
+            reward += 0.05 * Math.Max(0.0, 1.0 - _cognitiveCoreService.GetWoutLoss());
+        }
 
         // Noise
         reward += (_rng.NextDouble() - 0.5) * 0.05;
@@ -365,35 +473,95 @@ public class TrainingEngine
 
     private string GenerateHypothesis(int ksmStep)
     {
+        // Each hypothesis must describe the parameter mutation that
+        // ApplyHypothesis actually performs for the same ksmStep. Because
+        // ApplyHypothesis switches on `ksmStep % 8` while ksmStep ranges
+        // 0..11, entries 8..11 deliberately repeat 0..3 here.
         string[] hypotheses =
         {
-            "Increase sensory layer activation threshold",
-            "Reduce leaking rate for better temporal memory",
-            "Boost cross-reservoir coupling strength",
-            "Adjust spectral radius for edge of chaos",
+            // 0 → SpectralRadius
+            "Tune ESN spectral radius for edge-of-chaos dynamics",
+            // 1 → LeakingRate
+            "Adjust leaking rate for better temporal memory",
+            // 2 → ExplorationRate
             "Increase exploration rate for novel strategies",
-            "Optimize reward weights for navigation",
-            "Enhance 4E embodiment coupling",
-            "Strengthen combat pattern recognition",
-            "Improve stream synchronization timing",
-            "Reduce cognitive load during transitions",
+            // 3 → CurriculumDifficulty
             "Optimize curriculum difficulty progression",
-            "Enhance introspection depth for self-model"
+            // 4 → RewardShaper.Weights.Navigation
+            "Reweight navigation reward for POI-directed search",
+            // 5 → DteCognitiveCoreService.JaccardThresh
+            "Tune MOSES Jaccard threshold for pattern mining",
+            // 6 → DteCognitiveCoreService.RidgeLambda
+            "Tune Wout ridge regression λ for action readout",
+            // 7 → RewardShaper.Weights.Exploration
+            "Reweight exploration reward for cell-coverage drive",
+            // 8..11 wrap around to 0..3 because of `% 8` in ApplyHypothesis
+            "Re-tune ESN spectral radius (second pass)",
+            "Re-tune leaking rate (second pass)",
+            "Re-tune exploration rate (second pass)",
+            "Re-tune curriculum difficulty (second pass)"
         };
         return hypotheses[ksmStep % hypotheses.Length];
     }
 
     private double _prevSpectralRadius;
     private double _prevLeakingRate;
+    private double _prevExplorationRate;
+    private double _prevCurriculumDifficulty;
+    // Saved values for rollback of service-level parameters
+    private float _prevNavWeight;
+    private float _prevExplorationWeight;
+    private float _prevJaccardThresh;
+    private float _prevRidgeLambda;
+    // Validity flags: only restore service-level fields when ApplyHypothesis
+    // captured them from a non-null service. Without these, if a service is
+    // wired AFTER ApplyHypothesis but BEFORE RevertHypothesis, RevertHypothesis
+    // would silently overwrite the service's actual values with the fallback
+    // defaults that ApplyHypothesis stored when the service was null.
+    private bool  _prevRewardWeightsValid;
+    private bool  _prevCognitiveCoreParamsValid;
+
+    // Phase 6.3: References to real services for expanded hypothesis application
+    private DteCognitiveCoreService? _cognitiveCoreService;
+    private RewardShaper? _rewardShaperRef;
+
+    /// <summary>Phase 6.3: Wire in DteCognitiveCoreService for MOSES/Thompson parameter mutation.</summary>
+    public void SetCognitiveCoreService(DteCognitiveCoreService svc) => _cognitiveCoreService = svc;
+
+    /// <summary>Phase 6.3: Wire in RewardShaper for reward weight mutation.</summary>
+    public void SetRewardShaperRef(RewardShaper shaper) => _rewardShaperRef = shaper;
 
     private void ApplyHypothesis(AutogenesisExperiment exp)
     {
-        _prevSpectralRadius = _esn.SpectralRadius;
-        _prevLeakingRate = _esn.LeakingRate;
+        _prevSpectralRadius    = _esn.SpectralRadius;
+        _prevLeakingRate       = _esn.LeakingRate;
+        _prevExplorationRate   = _config.ExplorationRate;
+        _prevCurriculumDifficulty = _config.CurriculumDifficulty;
+        if (_rewardShaperRef != null)
+        {
+            _prevNavWeight              = _rewardShaperRef.Weights.Navigation;
+            _prevExplorationWeight      = _rewardShaperRef.Weights.Exploration;
+            _prevRewardWeightsValid     = true;
+        }
+        else
+        {
+            _prevRewardWeightsValid     = false;
+        }
+        if (_cognitiveCoreService != null)
+        {
+            _prevJaccardThresh             = _cognitiveCoreService.JaccardThresh;
+            _prevRidgeLambda               = _cognitiveCoreService.RidgeLambda;
+            _prevCognitiveCoreParamsValid  = true;
+        }
+        else
+        {
+            _prevCognitiveCoreParamsValid  = false;
+        }
 
         double delta = (_rng.NextDouble() - 0.5) * _config.MaxParameterDelta;
 
-        switch (exp.KsmStep % 4)
+        // Phase 6.3: Expand ApplyHypothesis across 8 parameter spaces (one per KSM cycle)
+        switch (exp.KsmStep % 8)
         {
             case 0:
                 _esn.SpectralRadius = Math.Clamp(_esn.SpectralRadius + delta * 0.1, 0.5, 1.2);
@@ -407,13 +575,49 @@ public class TrainingEngine
             case 3:
                 _config.CurriculumDifficulty = Math.Clamp(_config.CurriculumDifficulty + delta * 0.05, 0.0, 1.0);
                 break;
+            case 4:
+                // Phase 6.3: Reward Navigation weight mutation
+                if (_rewardShaperRef != null)
+                    _rewardShaperRef.Weights.Navigation = Math.Clamp(_rewardShaperRef.Weights.Navigation + (float)(delta * 0.2), 0.1f, 5.0f);
+                break;
+            case 5:
+                // Phase 6.3: MOSES JaccardThresh mutation
+                if (_cognitiveCoreService != null)
+                    _cognitiveCoreService.JaccardThresh = Math.Clamp(_cognitiveCoreService.JaccardThresh + (float)(delta * 0.05), 0.1f, 0.9f);
+                break;
+            case 6:
+                // Phase 6.3: Thompson RidgeLambda mutation
+                if (_cognitiveCoreService != null)
+                    _cognitiveCoreService.RidgeLambda = (float)Math.Clamp(_cognitiveCoreService.RidgeLambda + delta * 1e-5, 1e-6, 1e-1);
+                break;
+            case 7:
+                // Phase 6.3: Exploration reward weight mutation
+                if (_rewardShaperRef != null)
+                    _rewardShaperRef.Weights.Exploration = Math.Clamp(_rewardShaperRef.Weights.Exploration + (float)(delta * 0.3), 0.1f, 8.0f);
+                break;
         }
     }
 
     private void RevertHypothesis()
     {
-        _esn.SpectralRadius = _prevSpectralRadius;
-        _esn.LeakingRate = _prevLeakingRate;
+        _esn.SpectralRadius          = _prevSpectralRadius;
+        _esn.LeakingRate             = _prevLeakingRate;
+        _config.ExplorationRate      = _prevExplorationRate;
+        _config.CurriculumDifficulty = _prevCurriculumDifficulty;
+        // Only restore service-level params when ApplyHypothesis actually
+        // captured them from the same (non-null) service — otherwise we'd
+        // overwrite a service that was wired *after* the experiment started
+        // with the fallback defaults stored at save time.
+        if (_rewardShaperRef != null && _prevRewardWeightsValid)
+        {
+            _rewardShaperRef.Weights.Navigation  = _prevNavWeight;
+            _rewardShaperRef.Weights.Exploration = _prevExplorationWeight;
+        }
+        if (_cognitiveCoreService != null && _prevCognitiveCoreParamsValid)
+        {
+            _cognitiveCoreService.JaccardThresh = _prevJaccardThresh;
+            _cognitiveCoreService.RidgeLambda   = _prevRidgeLambda;
+        }
     }
 
     private void EvolveProperties(double delta)

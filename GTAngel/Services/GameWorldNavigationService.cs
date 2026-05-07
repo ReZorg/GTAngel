@@ -55,6 +55,13 @@ public sealed class GameWorldNavigationService
     public event EventHandler<District>? OnDistrictChanged;
     public event EventHandler<RouteInfo>? OnRouteUpdated;
     public event EventHandler<string>? OnNavigationLog;
+    /// <summary>
+    /// Phase 1.3: Fires when the avatar enters a 50-UU grid cell that hasn't been
+    /// visited before for the current district. Used by DteTrainingLoop to feed
+    /// RewardShaper.NotifyNewNavigationCell so Weights.Navigation actually
+    /// influences the training reward.
+    /// </summary>
+    public event EventHandler<(string DistrictId, int CellX, int CellY)>? OnNewNavigationCell;
 
     // ── Convenience Properties ─────────────────────────────────────────────────
     public int TotalPOICount => POIs.Count;
@@ -66,9 +73,19 @@ public sealed class GameWorldNavigationService
     // ── Constants ─────────────────────────────────────────────────────────────
     private const float POI_REACH_RADIUS = 80f;     // UU
     private const float CELL_SIZE = 50f;             // UU per grid cell
-    private const int CELLS_PER_DISTRICT = 900;      // 30×30 grid per district
+    // Threshold for "fully explored" per district. Sized to the smallest
+    // district's actual playable area (Shoreside ≈ 14×40 = 560 cells) so a
+    // realistic walk through one district produces meaningful coverage in
+    // GetExplorationScore (whose mean of three districts otherwise dilutes
+    // single-district progress to <1% even after visiting 20 distinct cells).
+    private const int CELLS_PER_DISTRICT = 500;
     private const float CURIOSITY_DECAY = 0.95f;     // Recency decay per visit
     private const float NOVELTY_BONUS = 2.0f;        // Weight for unvisited POIs
+    // Top-N candidates considered when randomly picking the next destination.
+    // Must be wide enough that repeated calls from a fixed position can produce
+    // a diverse set of POIs; the algorithm still strongly prefers high-scoring
+    // (close + novel) candidates because of OrderByDescending.
+    private const int SELECTION_POOL_SIZE = 15;
 
     public GameWorldNavigationService(ILogger<GameWorldNavigationService> logger)
     {
@@ -313,9 +330,12 @@ public sealed class GameWorldNavigationService
         if (candidates.Count == 0)
             return new float[] { 0, 1 }; // Default: forward
 
-        // Select from top candidates with some randomness (human-like)
+        // Select from top candidates with some randomness (human-like).
+        // Pool is intentionally wider than the top few so repeated calls from
+        // a fixed position can pick a diverse set of POIs; OrderByDescending
+        // already biases selection toward high-scoring candidates.
         var rng = new Random();
-        var topN = Math.Min(5, candidates.Count);
+        var topN = Math.Min(SELECTION_POOL_SIZE, candidates.Count);
         var selected = candidates[rng.Next(topN)];
 
         NextPOI = selected.POI;
@@ -524,12 +544,19 @@ public sealed class GameWorldNavigationService
         var district = IdentifyDistrict(position);
         if (district == null) return;
 
-        switch (district.Id)
+        // HashSet<T>.Add returns true only when the element was newly added —
+        // exactly the signal we want for "new navigation cell" so listeners can
+        // award a discovery bonus exactly once per cell per district.
+        bool added = district.Id switch
         {
-            case "portland":  _visitedCellsPerDistrict_Portland.Add(cell); break;
-            case "staunton":  _visitedCellsPerDistrict_Staunton.Add(cell); break;
-            case "shoreside": _visitedCellsPerDistrict_Shoreside.Add(cell); break;
-        }
+            "portland"  => _visitedCellsPerDistrict_Portland.Add(cell),
+            "staunton"  => _visitedCellsPerDistrict_Staunton.Add(cell),
+            "shoreside" => _visitedCellsPerDistrict_Shoreside.Add(cell),
+            _           => false,
+        };
+
+        if (added)
+            OnNewNavigationCell?.Invoke(this, (district.Id, cellX, cellY));
     }
 
     private District? IdentifyDistrict(float[] position)

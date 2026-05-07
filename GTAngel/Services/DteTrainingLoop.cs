@@ -37,6 +37,20 @@ public sealed class DteTrainingLoop : IDisposable
     // ── KSM Cycle 5: DTE Cognitive Core ──────────────────────────────────
     private DteCognitiveCoreService? _cognitiveCore;
 
+    // Phase 6.3: shared RewardShaper instance, exposed so TrainingEngine's
+    // autogenesis hypothesis loop can mutate Navigation/Exploration weights
+    // (TrainingEngine.SetRewardShaperRef). Without a single owning instance the
+    // reward-weight mutation cases in ApplyHypothesis silently no-op.
+    public RewardShaper RewardShaper { get; } = new RewardShaper();
+
+    // ── KSM Cycle 4: GameWorld navigation hookup ─────────────────────────
+    // Wired in App.xaml.cs after both singletons exist. We keep handler refs so
+    // Dispose can unsubscribe and avoid leaking the loop through the navigation
+    // service's event invocation list.
+    private GameWorldNavigationService? _navigation;
+    private EventHandler<PointOfInterest>? _navPOIHandler;
+    private EventHandler<(string DistrictId, int CellX, int CellY)>? _navCellHandler;
+
     private CancellationTokenSource? _cts;
     private Task? _trainingTask;
     private bool _disposed;
@@ -61,6 +75,31 @@ public sealed class DteTrainingLoop : IDisposable
     {
         _cognitiveCore = svc;
         _logger.LogInformation("DteTrainingLoop: DteCognitiveCoreService wired in.");
+    }
+
+    /// <summary>
+    /// Phase 1.3 / 6.3: Wire the GameWorldNavigationService so that POI
+    /// arrivals and new-cell entries are forwarded to RewardShaper.
+    /// Without this, RewardShaper.NavigationBonus stays 0 forever and
+    /// Weights.Navigation × NavigationBonus is identically zero — making
+    /// TrainingEngine.ApplyHypothesis case 4 (Navigation weight mutation)
+    /// a silent no-op.
+    /// </summary>
+    public void SetNavigationService(GameWorldNavigationService nav)
+    {
+        // Idempotent: if already wired, unsubscribe the old handlers first.
+        if (_navigation != null)
+        {
+            if (_navPOIHandler != null) _navigation.OnPOIReached -= _navPOIHandler;
+            if (_navCellHandler != null) _navigation.OnNewNavigationCell -= _navCellHandler;
+        }
+
+        _navigation = nav;
+        _navPOIHandler  = (_, _) => RewardShaper.NotifyPOIReached();
+        _navCellHandler = (_, _) => RewardShaper.NotifyNewNavigationCell();
+        _navigation.OnPOIReached      += _navPOIHandler;
+        _navigation.OnNewNavigationCell += _navCellHandler;
+        _logger.LogInformation("DteTrainingLoop: GameWorldNavigationService wired into RewardShaper (POI + cell discovery).");
     }
 
     public DteTrainingLoop(
@@ -202,7 +241,7 @@ public sealed class DteTrainingLoop : IDisposable
     private async Task TrainingLoopAsync(CancellationToken ct)
     {
         var stepwatch = new Stopwatch();
-        var rewardShaper = new RewardShaper();
+        var rewardShaper = RewardShaper;
 
         try
         {
@@ -327,7 +366,22 @@ public sealed class DteTrainingLoop : IDisposable
                 visualFeatures, gameState, prevAction);
 
             // ── 5. Decide: Select action ──
-            int action = SelectAction(actionProbabilities);
+            // Phase 2.2: Per-step cognitive core integration (ECAN attention → Thompson sampling)
+            int action;
+            if (_cognitiveCore != null)
+            {
+                var execState = _reservoir.LastReservoirState;  // executive layer (512-dim)
+                _cognitiveCore.UpdateAttention(execState);
+                _cognitiveCore.MinePatterns(execState);
+                // Feed ECAN STI back into ESN as top-down modulation
+                _reservoir.SetTopDownModulation(_cognitiveCore.GetClusterSTI());
+                var logits = _cognitiveCore.ComputeAttentionGatedLogits(execState);
+                action = _cognitiveCore.ThompsonSampleAction(logits);
+            }
+            else
+            {
+                action = SelectAction(actionProbabilities);
+            }
 
             // ── 6. Act: Execute action via controller ──
             _controller.ExecuteDiscreteAction((VigemControllerService.DiscreteAction)action);
@@ -335,6 +389,26 @@ public sealed class DteTrainingLoop : IDisposable
             // ── 7. Observe: Compute reward ──
             float reward = rewardShaper.ComputeReward(prevGameState, gameState, action, stepCount);
             done = rewardShaper.IsTerminal(gameState);
+
+            // Phase 2.2: Update Thompson belief and periodic Wout training
+            if (_cognitiveCore != null)
+            {
+                var execState = _reservoir.LastReservoirState;
+                _cognitiveCore.UpdateThompson(action, reward);
+
+                // Train Wout every 32 steps, but skip step 0 (otherwise we'd
+                // train against a single noisy sample at the very start of
+                // training before the reservoir has any meaningful state).
+                if (State.TotalSteps > 0 && State.TotalSteps % 32 == 0 && execState.Length >= 512)
+                {
+                    var targetActions = new float[18];
+                    if (action >= 0 && action < 18) targetActions[action] = 1f;
+                    _cognitiveCore.TrainWout(execState[^512..], targetActions);
+                    var coherence = _cognitiveCore.ComputeCoherence();
+                    State.CognitiveCoherence = coherence.Coherence;
+                    OnStateUpdated?.Invoke(State);
+                }
+            }
 
             // ── 8. Remember: Store transition ──
             _replayBuffer.Add(
@@ -612,17 +686,50 @@ public sealed class DteTrainingLoop : IDisposable
         };
 
         var json = JsonSerializer.Serialize(checkpoint, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(checkpointPath, json);
+
+        // Best-effort write with a short retry — checkpoint paths are derived from
+        // TotalEpisodes and the LOCALAPPDATA folder, so concurrent training instances
+        // (and parallel xUnit test classes that exercise Start/StopAsync) can briefly
+        // contend on the same file handle. A failure here should not crash training.
+        if (!await TryWriteCheckpointAsync(checkpointPath, json))
+        {
+            Log($"Checkpoint skipped (file in use): {checkpointPath}");
+            return;
+        }
 
         // Save replay buffer
         var bufferPath = Path.Combine(checkpointDir, "replay_buffer.bin");
-        await _replayBuffer.SaveAsync(bufferPath);
+        try { await _replayBuffer.SaveAsync(bufferPath); }
+        catch (IOException ex) { Log($"Replay buffer save skipped: {ex.Message}"); }
 
         // Save projection weights
         var projPath = Path.Combine(checkpointDir, "projection_weights.bin");
-        await _featureExtractor.SaveProjectionAsync(projPath);
+        try { await _featureExtractor.SaveProjectionAsync(projPath); }
+        catch (IOException ex) { Log($"Projection weights save skipped: {ex.Message}"); }
 
         Log($"Checkpoint saved: {checkpointPath}");
+    }
+
+    private static async Task<bool> TryWriteCheckpointAsync(string path, string json)
+    {
+        const int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await File.WriteAllTextAsync(path, json);
+                return true;
+            }
+            catch (IOException) when (attempt < maxAttempts)
+            {
+                await Task.Delay(50 * attempt);
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+        return false;
     }
 
     public async Task LoadCheckpointAsync(string path)
@@ -657,6 +764,14 @@ public sealed class DteTrainingLoop : IDisposable
         _cts?.Cancel();
         _trainingTask?.Wait(5000);
         _cts?.Dispose();
+
+        // Unsubscribe from navigation events so we don't leak the loop through
+        // the singleton GameWorldNavigationService's event invocation list.
+        if (_navigation != null)
+        {
+            if (_navPOIHandler != null) _navigation.OnPOIReached -= _navPOIHandler;
+            if (_navCellHandler != null) _navigation.OnNewNavigationCell -= _navCellHandler;
+        }
 
         _logger.LogInformation("DteTrainingLoop disposed. Episodes: {Ep}, Steps: {St}",
             State.TotalEpisodes, State.TotalSteps);

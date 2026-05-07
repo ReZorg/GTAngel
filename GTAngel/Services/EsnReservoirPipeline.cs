@@ -30,6 +30,12 @@ public sealed class EsnReservoirPipeline : IDisposable
     // ── KSM Cycle 5: DTE Cognitive Core integration ────────────────────────
     private DteCognitiveCoreService? _cognitiveCore;
 
+    // ── Phase 2.3: ECAN STI top-down modulation from DteCognitiveCoreService ──
+    private float[] _topDownSTI = Array.Empty<float>();
+
+    // ── Phase 4.1: Observation fusion scale from Ue5PlayerAiBridgeService ──────
+    private float _observationFusionScale = 1.0f;
+
     // Reservoir layers
     private ReservoirLayer _sensoryLayer;
     private ReservoirLayer _cognitiveLayer;
@@ -287,8 +293,52 @@ public sealed class EsnReservoirPipeline : IDisposable
         Array.Copy(_sensoryLayer.State, cognitiveInput, _sensoryLayer.Size);
         Array.Copy(gameState, 0, cognitiveInput, _sensoryLayer.Size, gameState.Length);
 
-        // Top-down feedback from executive layer
-        _cognitiveLayer.Update(cognitiveInput, _executiveLayer.State);
+        // Phase 4.1: Scale cognitive drive by observation fusion norm (high
+        // agreement → stronger drive). The scale is derived from ML-vision
+        // feature L2 norm and is only meaningful for the sensory portion of
+        // the cognitive input. Applying it to the game state portion
+        // (proprioceptive position/velocity/etc.) would conflate visual
+        // confidence with proprioceptive amplitude — instead, leave the
+        // game state portion untouched.
+        if (_observationFusionScale != 1.0f)
+        {
+            int sensorySize = _sensoryLayer.Size;
+            for (int i = 0; i < sensorySize; i++)
+                cognitiveInput[i] *= _observationFusionScale;
+        }
+
+        // Phase 2.3: Modulate the executive feedback by ECAN cluster STI.
+        // Wfb is sized [_cognitiveLayer.Size, _executiveLayer.Size], so we keep the
+        // feedback vector at _executiveLayer.Size and instead scale each cluster's
+        // 32 neurons by their corresponding STI weight (with a small floor so STI=0
+        // doesn't completely silence the cluster). This actually delivers the STI
+        // signal through Wfb instead of letting it fall off the end of the matrix.
+        // Capture _topDownSTI into a local reference so a concurrent
+        // SetTopDownModulation (called from DteTrainingLoop / DTE4EAvatarService
+        // background tasks) cannot replace the array between the length check
+        // and the indexed access — which would otherwise throw
+        // IndexOutOfRangeException if the new array were shorter.
+        var topDownSTI = _topDownSTI;
+        float[] topDownFeedback;
+        if (topDownSTI.Length > 0 && _executiveLayer.Size % topDownSTI.Length == 0)
+        {
+            int clusterSize = _executiveLayer.Size / topDownSTI.Length;
+            topDownFeedback = new float[_executiveLayer.Size];
+            for (int c = 0; c < topDownSTI.Length; c++)
+            {
+                float stiWeight = topDownSTI[c] + 0.1f; // floor mirrors ComputeAttentionGatedLogits
+                int offset = c * clusterSize;
+                for (int n = 0; n < clusterSize; n++)
+                    topDownFeedback[offset + n] = _executiveLayer.State[offset + n] * stiWeight;
+            }
+        }
+        else
+        {
+            topDownFeedback = _executiveLayer.State;
+        }
+
+        // Top-down feedback from executive layer (with optional ECAN STI modulation)
+        _cognitiveLayer.Update(cognitiveInput, topDownFeedback);
 
         // Stage 4: Executive reservoir — combine cognitive output with action history
         var executiveInput = new float[_cognitiveLayer.Size + previousAction.Length];
@@ -510,16 +560,34 @@ public sealed class EsnReservoirPipeline : IDisposable
         _logger.LogInformation("EsnReservoirPipeline: DteCognitiveCoreService wired in — attention-gated logits enabled.");
     }
 
+    /// <summary>
+    /// Phase 2.3: Set the ECAN cluster STI vector for top-down modulation of the cognitive layer.
+    /// Called by DteTrainingLoop/DTE4EAvatarService after each attention update step.
+    /// The 16-dim STI vector is projected into the cognitive layer's top-down feedback path.
+    /// </summary>
+    public void SetTopDownModulation(float[] stiVector)
+    {
+        _topDownSTI = stiVector ?? Array.Empty<float>();
+    }
+
+    /// <summary>
+    /// Phase 4.1: Scale the cognitive layer's input drive by the observation fusion norm.
+    /// High fusion norm (strong human+ML agreement) → higher cognitive drive.
+    /// </summary>
+    public void SetObservationFusionScale(float scale)
+    {
+        _observationFusionScale = Math.Clamp(scale, 0.5f, 2.0f);
+    }
+
     private float[] ComputeActionLogits(float[] executiveState)
     {
-        // KSM Cycle 5: if cognitive core is available, use attention-gated logits
+        // KSM Cycle 5: if cognitive core is available, use attention-gated logits.
+        // Note: ECAN attention and MOSES pattern state are advanced by DteTrainingLoop
+        // (which also performs Thompson sampling). The pipeline only reads the current
+        // STI/Wout state here so STI doesn't decay twice and pattern counters don't
+        // double-increment per training step.
         if (_cognitiveCore != null)
         {
-            // Update ECAN attention with current executive state
-            _cognitiveCore.UpdateAttention(executiveState);
-            // Mine patterns from current state
-            _cognitiveCore.MinePatterns(executiveState);
-            // Return attention-gated logits (Wout × attention-weighted reservoir)
             return _cognitiveCore.ComputeAttentionGatedLogits(executiveState);
         }
 

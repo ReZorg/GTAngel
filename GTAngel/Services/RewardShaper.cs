@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 
 namespace GTAngel.Services;
 
@@ -65,6 +66,32 @@ public sealed class RewardShaper
     private float _prevPotential;
     private float _gamma = 0.99f;
 
+    // Phase 1.3: Navigation Coverage Component — POI discovery and grid cell bonuses.
+    // Counters are written from navigation event handlers (typically the
+    // DTE4EAvatarService exploration thread) and read+zeroed from the
+    // training-loop thread inside ComputeReward / Reset, so we use
+    // Interlocked operations on int counters and scale by the fixed
+    // bonus magnitudes when consuming. This avoids non-atomic float +=
+    // and read-then-write races that would silently drop bonuses.
+    private const float PoiBonusMagnitude = 1.0f;
+    private const float NavCellBonusMagnitude = 0.5f;
+    private int _pendingPOICount;
+    private int _pendingNavCellCount;
+
+    /// <summary>
+    /// Phase 1.3: Call when the avatar reaches a named POI. Adds +1.0 discovery bonus.
+    /// Thread-safe: invoked from navigation event handlers on a different
+    /// thread than the consuming training loop.
+    /// </summary>
+    public void NotifyPOIReached() => Interlocked.Increment(ref _pendingPOICount);
+
+    /// <summary>
+    /// Phase 1.3: Call when the avatar enters a new 50-UU navigation grid cell. Adds +0.5 curiosity reward.
+    /// Thread-safe: invoked from navigation event handlers on a different
+    /// thread than the consuming training loop.
+    /// </summary>
+    public void NotifyNewNavigationCell() => Interlocked.Increment(ref _pendingNavCellCount);
+
     // Statistics
     public RewardBreakdown LastBreakdown { get; private set; } = new();
     public float CumulativeReward { get; private set; }
@@ -118,6 +145,17 @@ public sealed class RewardShaper
         breakdown.PotentialShaping = _gamma * currentPotential - _prevPotential;
         _prevPotential = currentPotential;
 
+        // ── 8. Navigation Coverage Bonus (Phase 1.3) ────────────────────
+        // Atomically consume pending POI discovery and cell-entry counters.
+        // Interlocked.Exchange returns the previous value and resets to 0
+        // in a single op, so we cannot lose increments that arrive between
+        // the read and the reset (which a non-atomic read+zero would drop).
+        int poiCount     = Interlocked.Exchange(ref _pendingPOICount,     0);
+        int navCellCount = Interlocked.Exchange(ref _pendingNavCellCount, 0);
+        breakdown.NavigationBonus =
+            poiCount     * PoiBonusMagnitude +
+            navCellCount * NavCellBonusMagnitude;
+
         // ── Weighted sum ────────────────────────────────────────────────
         float totalReward =
             Weights.Survival * breakdown.Survival +
@@ -128,7 +166,8 @@ public sealed class RewardShaper
             Weights.Economic * breakdown.Economic +
             Weights.Curiosity * breakdown.Curiosity +
             Weights.Social * breakdown.Social +
-            Weights.PotentialShaping * breakdown.PotentialShaping;
+            Weights.PotentialShaping * breakdown.PotentialShaping +
+            Weights.Navigation * breakdown.NavigationBonus;
 
         // Clip reward to prevent extreme values
         totalReward = Math.Clamp(totalReward, -10f, 10f);
@@ -185,6 +224,11 @@ public sealed class RewardShaper
         _consecutiveCrashes = 0;
         _smoothDrivingStreak = 0;
         _prevPotential = 0;
+        // Atomically clear the pending counters; concurrent Notify*
+        // increments arriving during a reset will simply restart the
+        // accumulation from zero on the next ComputeReward.
+        Interlocked.Exchange(ref _pendingPOICount,     0);
+        Interlocked.Exchange(ref _pendingNavCellCount, 0);
         CumulativeReward = 0;
         TotalSteps = 0;
     }
@@ -518,6 +562,7 @@ public class RewardWeights
     public float Curiosity { get; set; } = 1.0f;
     public float Social { get; set; } = 0.5f;
     public float PotentialShaping { get; set; } = 0.1f;
+    public float Navigation { get; set; } = 1.0f;
 
     /// <summary>Preset: Exploration-focused (for early training).</summary>
     public static RewardWeights ExplorationFocused => new()
@@ -525,6 +570,7 @@ public class RewardWeights
         Survival = 0.5f, Exploration = 5.0f, DrivingSkill = 1.0f,
         Combat = 0.2f, MissionProgress = 1.0f, Economic = 0.3f,
         Curiosity = 3.0f, Social = 0.2f, PotentialShaping = 0.2f,
+        Navigation = 3.0f,
     };
 
     /// <summary>Preset: Mission-focused (for mid training).</summary>
@@ -533,6 +579,7 @@ public class RewardWeights
         Survival = 1.5f, Exploration = 1.0f, DrivingSkill = 1.0f,
         Combat = 1.5f, MissionProgress = 5.0f, Economic = 1.0f,
         Curiosity = 0.5f, Social = 1.0f, PotentialShaping = 0.1f,
+        Navigation = 2.0f,
     };
 
     /// <summary>Preset: Driving-focused (for vehicle training).</summary>
@@ -541,6 +588,7 @@ public class RewardWeights
         Survival = 1.0f, Exploration = 2.0f, DrivingSkill = 5.0f,
         Combat = 0.1f, MissionProgress = 0.5f, Economic = 0.3f,
         Curiosity = 1.0f, Social = 0.5f, PotentialShaping = 0.1f,
+        Navigation = 2.0f,
     };
 
     /// <summary>Preset: Combat-focused (for combat training).</summary>
@@ -549,6 +597,7 @@ public class RewardWeights
         Survival = 2.0f, Exploration = 0.5f, DrivingSkill = 0.5f,
         Combat = 5.0f, MissionProgress = 2.0f, Economic = 0.5f,
         Curiosity = 0.5f, Social = 0.3f, PotentialShaping = 0.1f,
+        Navigation = 0.3f,
     };
 }
 
@@ -566,6 +615,8 @@ public class RewardBreakdown
     public float Curiosity { get; set; }
     public float Social { get; set; }
     public float PotentialShaping { get; set; }
+    /// <summary>Phase 1.3: POI discovery and navigation cell coverage bonus.</summary>
+    public float NavigationBonus { get; set; }
     public float Total { get; set; }
 }
 

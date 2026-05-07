@@ -106,18 +106,45 @@ public sealed class DteCognitiveCoreService : IDisposable
     private const int ActionCount      = 18;    // action dimensions (matches ESN output)
     private const int PatternWindowLen = 50;    // sliding window length for MOSES
     private const int MaxPatterns      = 256;   // max patterns in MOSES library
-    private const double RidgeLambda   = 1e-4;  // ridge regression regularization
     private const double LearningRate  = 1e-3;  // Wout update step size
     private const double HebbianDecay  = 0.99;  // LTI hebbian forgetting rate
     private const double StiBudget     = 1.0;   // total STI budget (normalized)
     private const double StiDecay      = 0.95;  // STI decay per step
-    private const double JaccardThresh = 0.55;  // MOSES pattern match threshold
     private const double ConvergThresh = 1e-4;  // Wout convergence threshold
+
+    // ── Mutable parameters (for ApplyHypothesis mutation in Phase 6.3) ────────
+    /// <summary>Phase 6.3: MOSES pattern match threshold (0.1..0.9). Mutated by TrainingEngine.</summary>
+    public float JaccardThresh { get; set; } = 0.55f;
+    /// <summary>Phase 6.3: Ridge regression regularization (1e-6..1e-1). Mutated by TrainingEngine.</summary>
+    public float RidgeLambda   { get; set; } = 1e-4f;
 
     // ── ECAN State ────────────────────────────────────────────────────────────
     private readonly float[] _sti  = new float[ClusterCount];  // short-term importance
     private readonly float[] _lti  = new float[ClusterCount];  // long-term importance
     private long _ecanStep;
+    // Guards _sti/_lti read-modify-write (see UpdateAttention,
+    // ComputeAttentionGatedLogits, GetClusterSTI/LTI). The same singleton is
+    // wired into multiple background tasks (DteTrainingLoop, DTE4EAvatarService,
+    // and the autogenesis loop in TrainingEngine), so unsynchronized access
+    // would race on `_sti[c] = _sti[c] * StiDecay + …`.
+    private readonly object _attentionLock = new();
+
+    // Rate-limit gate to coalesce duplicate UpdateAttention/MinePatterns calls
+    // when the same singleton is driven by both the training loop and the
+    // exploration loop in lockstep. Without it, STI would decay twice per
+    // step (StiDecay=0.95 → 0.9025) and patterns would be mined at double
+    // rate. Production code (App.OnStartup) sets MinUpdateIntervalMs to ~200
+    // (just below the typical 250ms step interval) so a single caller running
+    // alone is never throttled. Default is 0 (off) so unit tests that call
+    // these methods in tight loops still observe per-call advancement.
+    private long _lastUpdateAttentionTicks;
+    private long _lastMinePatternsTicks;
+    /// <summary>
+    /// Minimum interval (in milliseconds) between accepted UpdateAttention /
+    /// MinePatterns calls. 0 disables the gate. Set to ~200 in production to
+    /// coalesce dual-caller concurrent updates from training+exploration loops.
+    /// </summary>
+    public int MinUpdateIntervalMs { get; set; } = 0;
 
     // ── MOSES Pattern Library ─────────────────────────────────────────────────
     private readonly List<MosesPattern> _patterns = new();
@@ -173,7 +200,23 @@ public sealed class DteCognitiveCoreService : IDisposable
     {
         if (reservoirState.Length != ReservoirSize) return;
 
-        // Compute cluster activation magnitude (L2 norm per cluster)
+        // Coalesce concurrent callers: if another caller already advanced
+        // attention within the last MinUpdateIntervalMs window, skip this
+        // call so STI/LTI don't decay twice per step when both the training
+        // loop and the exploration loop drive the same singleton.
+        if (MinUpdateIntervalMs > 0)
+        {
+            long minIntervalTicks = TimeSpan.FromMilliseconds(MinUpdateIntervalMs).Ticks;
+            var nowTicks = DateTime.UtcNow.Ticks;
+            var lastTicks = Interlocked.Read(ref _lastUpdateAttentionTicks);
+            if (nowTicks - lastTicks < minIntervalTicks) return;
+            if (Interlocked.CompareExchange(ref _lastUpdateAttentionTicks, nowTicks, lastTicks) != lastTicks)
+                return;
+        }
+
+        // Compute cluster activation magnitude (L2 norm per cluster). This step
+        // is read-only over `reservoirState` so it is safe to do outside the
+        // lock; only the _sti/_lti updates need to be serialized.
         var rawSTI = new float[ClusterCount];
         for (int c = 0; c < ClusterCount; c++)
         {
@@ -196,44 +239,51 @@ public sealed class DteCognitiveCoreService : IDisposable
             expSTI[c] = (float)Math.Exp((rawSTI[c] - maxRaw) * 4.0);
             sumExp += expSTI[c];
         }
-        for (int c = 0; c < ClusterCount; c++)
+
+        AttentionSnapshot snapshot;
+        lock (_attentionLock)
         {
-            // Decay previous STI, add new activation
-            _sti[c] = (float)(_sti[c] * StiDecay + expSTI[c] / sumExp * StiBudget * (1.0 - StiDecay));
+            for (int c = 0; c < ClusterCount; c++)
+            {
+                // Decay previous STI, add new activation
+                _sti[c] = (float)(_sti[c] * StiDecay + expSTI[c] / sumExp * StiBudget * (1.0 - StiDecay));
+            }
+
+            // Hebbian LTI update: LTI slowly tracks STI
+            for (int c = 0; c < ClusterCount; c++)
+            {
+                _lti[c] = (float)(_lti[c] * HebbianDecay + _sti[c] * (1.0 - HebbianDecay));
+            }
+
+            _ecanStep++;
+
+            // Compute attention entropy
+            float entropy = ComputeEntropy(_sti);
+            float budget  = _sti.Sum();
+
+            // Top-3 clusters by STI
+            var top3 = _sti
+                .Select((v, i) => (v, i))
+                .OrderByDescending(x => x.v)
+                .Take(3)
+                .Select(x => $"C{x.i}({x.v:F2})")
+                .ToArray();
+
+            snapshot = new AttentionSnapshot(
+                ClusterSTI:       (float[])_sti.Clone(),
+                ClusterLTI:       (float[])_lti.Clone(),
+                AttentionBudget:  budget,
+                AttentionEntropy: entropy,
+                TopNeuronClusters: string.Join(", ", top3)
+            );
+
+            if (_ecanStep % 100 == 0)
+                EmitLog($"ECAN step {_ecanStep}: top={snapshot.TopNeuronClusters}, entropy={entropy:F3}");
         }
 
-        // Hebbian LTI update: LTI slowly tracks STI
-        for (int c = 0; c < ClusterCount; c++)
-        {
-            _lti[c] = (float)(_lti[c] * HebbianDecay + _sti[c] * (1.0 - HebbianDecay));
-        }
-
-        _ecanStep++;
-
-        // Compute attention entropy
-        float entropy = ComputeEntropy(_sti);
-        float budget  = _sti.Sum();
-
-        // Top-3 clusters by STI
-        var top3 = _sti
-            .Select((v, i) => (v, i))
-            .OrderByDescending(x => x.v)
-            .Take(3)
-            .Select(x => $"C{x.i}({x.v:F2})")
-            .ToArray();
-
-        var snapshot = new AttentionSnapshot(
-            ClusterSTI:       (float[])_sti.Clone(),
-            ClusterLTI:       (float[])_lti.Clone(),
-            AttentionBudget:  budget,
-            AttentionEntropy: entropy,
-            TopNeuronClusters: string.Join(", ", top3)
-        );
-
+        // Event invocation is done outside the lock to avoid running subscriber
+        // code while holding it (subscribers may dispatch back to UI threads).
         OnAttentionUpdated?.Invoke(this, new AttentionUpdatedEventArgs(snapshot));
-
-        if (_ecanStep % 100 == 0)
-            EmitLog($"ECAN step {_ecanStep}: top={snapshot.TopNeuronClusters}, entropy={entropy:F3}");
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -248,6 +298,19 @@ public sealed class DteCognitiveCoreService : IDisposable
     public void MinePatterns(float[] reservoirState)
     {
         if (reservoirState.Length != ReservoirSize) return;
+
+        // Coalesce concurrent callers (see UpdateAttention) so the sliding
+        // window doesn't advance twice per step when both training and
+        // exploration loops run against the same singleton.
+        if (MinUpdateIntervalMs > 0)
+        {
+            long minIntervalTicks = TimeSpan.FromMilliseconds(MinUpdateIntervalMs).Ticks;
+            var nowTicks = DateTime.UtcNow.Ticks;
+            var lastTicks = Interlocked.Read(ref _lastMinePatternsTicks);
+            if (nowTicks - lastTicks < minIntervalTicks) return;
+            if (Interlocked.CompareExchange(ref _lastMinePatternsTicks, nowTicks, lastTicks) != lastTicks)
+                return;
+        }
 
         // Binarize reservoir state per cluster (above-mean activation = 1)
         var binaryState = BinarizeState(reservoirState);
@@ -456,11 +519,19 @@ public sealed class DteCognitiveCoreService : IDisposable
         if (reservoirState.Length != ReservoirSize)
             return new float[ActionCount];
 
+        // Snapshot _sti under the attention lock so we don't see torn updates
+        // mid-write from concurrent UpdateAttention calls.
+        var stiSnapshot = new float[ClusterCount];
+        lock (_attentionLock)
+        {
+            Array.Copy(_sti, stiSnapshot, ClusterCount);
+        }
+
         // Weight each neuron by its cluster's STI
         var weighted = new float[ReservoirSize];
         for (int c = 0; c < ClusterCount; c++)
         {
-            float stiWeight = _sti[c] + 0.1f;  // floor to avoid zero-out
+            float stiWeight = stiSnapshot[c] + 0.1f;  // floor to avoid zero-out
             int offset = c * ClusterSize;
             for (int n = 0; n < ClusterSize; n++)
                 weighted[offset + n] = reservoirState[offset + n] * stiWeight;
@@ -561,7 +632,9 @@ public sealed class DteCognitiveCoreService : IDisposable
     public CognitiveCoherenceSnapshot ComputeCoherence()
     {
         // Attention coherence: inverse entropy (focused attention = high coherence)
-        float attentionEntropy = ComputeEntropy(_sti);
+        float attentionEntropy;
+        lock (_attentionLock)
+            attentionEntropy = ComputeEntropy(_sti);
         double attentionCoherence = 1.0 - attentionEntropy / Math.Log(ClusterCount);
 
         // Pattern coherence: pattern count / max patterns, weighted by mean fitness
@@ -594,12 +667,28 @@ public sealed class DteCognitiveCoreService : IDisposable
     // Public Accessors
     // ─────────────────────────────────────────────────────────────────────────
 
-    public float[] GetClusterSTI() => (float[])_sti.Clone();
-    public float[] GetClusterLTI() => (float[])_lti.Clone();
+    public float[] GetClusterSTI()
+    {
+        lock (_attentionLock)
+            return (float[])_sti.Clone();
+    }
+    public float[] GetClusterLTI()
+    {
+        lock (_attentionLock)
+            return (float[])_lti.Clone();
+    }
     public double  GetWoutLoss()   => _woutLoss;
     public int     GetWoutSampleCount() => _woutSampleCount;
-    public float   GetAttentionBudget() => _sti.Sum();
-    public float   GetAttentionEntropy() => ComputeEntropy(_sti);
+    public float   GetAttentionBudget()
+    {
+        lock (_attentionLock)
+            return _sti.Sum();
+    }
+    public float   GetAttentionEntropy()
+    {
+        lock (_attentionLock)
+            return ComputeEntropy(_sti);
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Private Helpers

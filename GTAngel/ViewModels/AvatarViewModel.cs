@@ -130,6 +130,16 @@ public partial class AvatarViewModel : ObservableObject
     [ObservableProperty] private string _navMode             = "Idle";
     [ObservableProperty] private bool   _navIsActive         = false;
 
+    // ── Phase 8.4: KSM Cycle 5 Cognitive Cycle Step Display ─────────────────
+    [ObservableProperty] private string _cycleStageName = "Perception";
+
+    // ── Phase 4.4: Player↔AI arbitration weight (0=full AI, 1=full human) ────
+    [ObservableProperty] private double _arbitrationWeight = 0.5;
+    partial void OnArbitrationWeightChanged(double value)
+    {
+        _playerAiBridge?.UpdateArbitrationWeights((float)value);
+    }
+
     // ── Log ──────────────────────────────────────────────────────────────────
     public ObservableCollection<string> ExplorationLog { get; } = new();
     public ObservableCollection<string> Ue5LaunchLogLines { get; } = new();
@@ -345,6 +355,12 @@ public partial class AvatarViewModel : ObservableObject
                 _ue5, esn, _mlVision, _embodiment, _navigation);
             _avatarService.SetPlayerAiBridge(_playerAiBridge);
 
+            // KSM Cycle 5: wire the cognitive core into the exploration loop too — without
+            // this, ECAN STI and MOSES patterns never advance in the 4E avatar path and
+            // attention gating collapses to a uniform weight.
+            var cogCore = App.Services.GetRequiredService<DteCognitiveCoreService>();
+            _avatarService.SetCognitiveCoreService(cogCore);
+
             // Wire events
             _avatarService.CognitiveStateUpdated += OnCognitiveStateUpdated;
             _avatarService.ObservationReceived   += OnObservationReceived;
@@ -452,6 +468,11 @@ public partial class AvatarViewModel : ObservableObject
                                        state.EnactedVelocity[1] * state.EnactedVelocity[1]);
                 VelocityText = $"{speed:F1} UU/s";
             }
+
+            // Phase 8.4: Update cognitive cycle step name from CognitiveState semantic names
+            // Derive from TotalSteps modulo 12 to stay in sync with KSM cycle
+            int cycleStep = state.TotalSteps % 12;
+            CycleStageName = GTAngel.Models.CognitiveState.CycleStepNames[cycleStep];
         });
     }
 

@@ -53,6 +53,25 @@ public partial class App : Application
         var trainingLoop = _serviceProvider.GetRequiredService<DteTrainingLoop>();
         esnPipeline.SetCognitiveCoreService(cogCore);
         trainingLoop.SetCognitiveCoreService(cogCore);
+        // The same singleton is now driven by both DteTrainingLoop and
+        // DTE4EAvatarService at ~4 Hz each. Enable the rate-limit gate so
+        // STI/LTI don't decay twice per step and patterns aren't mined at
+        // double rate when both loops run simultaneously. The 200ms window
+        // is just below the 250ms step interval so a single caller running
+        // alone is never throttled.
+        cogCore.MinUpdateIntervalMs = 200;
+
+        // Phase 1.3 wiring: route POI arrivals and new-cell discoveries from
+        // GameWorldNavigationService into the training loop's RewardShaper so
+        // RewardShaper.NavigationBonus is actually nonzero — without this,
+        // Weights.Navigation × NavigationBonus is identically 0 and the
+        // autogenesis Navigation-weight mutation has no effect.
+        var navigation = _serviceProvider.GetRequiredService<GameWorldNavigationService>();
+        trainingLoop.SetNavigationService(navigation);
+
+        // Phase 6.1: Wire full DTE pipeline into GTAngelService for KSM orchestration
+        var gtAngel = _serviceProvider.GetRequiredService<GTAngelService>();
+        gtAngel.SetDtePipelineServices(trainingLoop, esnPipeline, cogCore);
         
         // KSM Cycle 6: Initialize bridge service early if needed (it gets wired in AvatarViewModel)
         var bridge = _serviceProvider.GetRequiredService<Ue5PlayerAiBridgeService>();

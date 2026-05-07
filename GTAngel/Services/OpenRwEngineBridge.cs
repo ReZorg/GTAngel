@@ -542,12 +542,125 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
 
     private GameState ReadGameStateFromIpc()
     {
-        // Placeholder — in production, reads from named pipe
-        return new GameState
+        // Phase 5.4: Parse 22-dim game state from named IPC pipe
+        // Protocol: the engine sends a JSON line with fields matching GameState properties
+        // Falls back to a default state if the pipe is not connected or read fails
+        if (_ipcServer == null)
+            return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+        try
         {
-            PlayerHealth = 100,
-            CurrentIsland = "Portland",
-        };
+            if (!_ipcServer.IsConnected)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            // Use a 4KB buffer to handle realistic JSON message sizes
+            var buffer = new byte[4096];
+
+            // NamedPipeServerStream.InBufferSize reports the configured pipe capacity,
+            // not the bytes currently available, so it cannot be used as a non-blocking
+            // peek. Instead, issue a ReadAsync bound by a CancellationToken so that on
+            // timeout the underlying read is actually cancelled — abandoning the task
+            // would leak it and start a concurrent ReadAsync on the next call, which
+            // violates Stream's contract and silently drops data.
+            const int readTimeoutMs = 50;
+            int bytesRead;
+            using (var cts = new CancellationTokenSource(readTimeoutMs))
+            {
+                try
+                {
+                    bytesRead = _ipcServer.ReadAsync(buffer, 0, buffer.Length, cts.Token)
+                                          .GetAwaiter().GetResult();
+                }
+                catch (OperationCanceledException)
+                {
+                    return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+                }
+            }
+            if (bytesRead == 0)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            // Find the end of the first complete JSON object so concatenated messages
+            // (e.g. "{\"x\":1}\n{\"y\":2}") parse the first one cleanly instead of
+            // including trailing content that JsonDocument.Parse rejects. Uses a
+            // brace-depth tracker that respects string literals and escapes so nested
+            // objects (e.g. "{\"pos\":{\"x\":1}}") and strings containing '}' parse
+            // correctly even if the protocol grows beyond flat scalars.
+            var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            int jsonEnd = FindFirstJsonObjectEnd(raw);
+            if (jsonEnd < 0)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            var json = raw[..(jsonEnd + 1)];
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            return new GameState
+            {
+                PlayerX          = root.TryGetProperty("x",        out var px)  ? px.GetSingle()  : 0f,
+                PlayerY          = root.TryGetProperty("y",        out var py)  ? py.GetSingle()  : 0f,
+                PlayerZ          = root.TryGetProperty("z",        out var pz)  ? pz.GetSingle()  : 0f,
+                PlayerHeading    = root.TryGetProperty("heading",  out var ph)  ? ph.GetSingle()  : 0f,
+                PlayerHealth     = root.TryGetProperty("health",   out var hlt) ? hlt.GetSingle() : 100f,
+                PlayerArmor      = root.TryGetProperty("armor",    out var arm) ? arm.GetSingle() : 0f,
+                PlayerMoney      = root.TryGetProperty("money",    out var mon) ? mon.GetInt32()  : 0,
+                WantedLevel      = root.TryGetProperty("wanted",   out var wnt) ? wnt.GetInt32()  : 0,
+                CurrentWeapon    = root.TryGetProperty("weapon",   out var wpn) ? wpn.GetInt32()  : 0,
+                InVehicle        = root.TryGetProperty("inVehicle",out var inv) && inv.GetBoolean(),
+                VehicleHealth    = root.TryGetProperty("vehHealth",out var vh)  ? vh.GetSingle()  : 0f,
+                VehicleSpeed     = root.TryGetProperty("vehSpeed", out var vs)  ? vs.GetSingle()  : 0f,
+                VelocityX        = root.TryGetProperty("velX",     out var vx)  ? vx.GetSingle()  : 0f,
+                VelocityY        = root.TryGetProperty("velY",     out var vy)  ? vy.GetSingle()  : 0f,
+                VelocityZ        = root.TryGetProperty("velZ",     out var vz2) ? vz2.GetSingle() : 0f,
+                CurrentIsland    = root.TryGetProperty("island",   out var isl) ? isl.GetString() ?? "Portland" : "Portland",
+                GameHour         = root.TryGetProperty("hour",     out var hr)  ? hr.GetInt32()   : 12,
+                GameMinute       = root.TryGetProperty("minute",   out var mn)  ? mn.GetInt32()   : 0,
+                Weather          = root.TryGetProperty("weather",  out var wx)  ? wx.GetString() ?? "Sunny" : "Sunny",
+                IsDead           = root.TryGetProperty("isDead",   out var id2) && id2.GetBoolean(),
+                IsArrested       = root.TryGetProperty("arrested", out var arr) && arr.GetBoolean(),
+                MissionIndex     = root.TryGetProperty("mission",  out var mis) ? mis.GetInt32()  : 0,
+                DistanceTraveled = root.TryGetProperty("dist",     out var dst) ? dst.GetSingle() : 0f,
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "IPC GameState parse failed — using defaults");
+            return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+        }
+    }
+
+    /// <summary>
+    /// Returns the index of the closing brace that terminates the first top-level
+    /// JSON object in <paramref name="raw"/>, or -1 if no complete object is present.
+    /// Tracks brace depth and respects string literals (including escaped quotes) so
+    /// nested objects and strings containing '}' do not produce false-positive ends.
+    /// </summary>
+    private static int FindFirstJsonObjectEnd(string raw)
+    {
+        int depth = 0;
+        bool inString = false;
+        bool escape = false;
+        bool started = false;
+        for (int i = 0; i < raw.Length; i++)
+        {
+            char c = raw[i];
+            if (inString)
+            {
+                if (escape)            escape = false;
+                else if (c == '\\')    escape = true;
+                else if (c == '"')     inString = false;
+                continue;
+            }
+            switch (c)
+            {
+                case '"': inString = true; break;
+                case '{': depth++; started = true; break;
+                case '}':
+                    depth--;
+                    if (started && depth == 0) return i;
+                    break;
+            }
+        }
+        return -1;
     }
 
     [DllImport("kernel32.dll")]

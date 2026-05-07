@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using GTAngel.Models;
 using GTAngel.Services;
 using LiveChartsCore;
@@ -16,7 +17,24 @@ namespace GTAngel.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly AssetCatalogService _catalogService = new();
-    private readonly TrainingEngine _trainingEngine = new();
+    // Resolve TrainingEngine from DI so we share the same singleton that
+    // GTAngelService.SetDtePipelineServices wires with the cognitive core
+    // and shared RewardShaper. Without this, the Training Dashboard's local
+    // engine never receives those references and Phase 6.3 features
+    // (cognitive-core feedback in reward, MOSES/Wout metrics, expanded
+    // hypothesis cases 4–7) silently no-op when training is started here.
+    // Fall back to a fresh instance if the DI container isn't yet built
+    // (e.g. designer / unit-test scenarios).
+    private readonly TrainingEngine _trainingEngine = ResolveTrainingEngine();
+    private DteCognitiveCoreService? _cognitiveCore;
+
+    private static TrainingEngine ResolveTrainingEngine()
+    {
+        // App.Services is declared non-nullable but is `null!` until
+        // App.OnStartup runs, so check at runtime before resolving.
+        IServiceProvider? sp = App.Services;
+        return sp?.GetService<TrainingEngine>() ?? new TrainingEngine();
+    }
 
     // ========== Navigation ==========
     [ObservableProperty] private int _selectedTabIndex;
@@ -73,6 +91,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private double _attentionEntropy;
     [ObservableProperty] private double _policyEntropy;
     [ObservableProperty] private double _patternDiversity;
+    // Phase 8.3: 16 cluster STI values for bar chart + Wout convergence status
+    [ObservableProperty] private string _woutConverged = "No";
+    public ObservableCollection<float> ClusterStiValues { get; } = new(new float[16]);
 
     public ObservableCollection<AutogenesisExperiment> ExperimentLog { get; } = new();
     public ObservableCollection<AlexanderPropertyVM> PropertyScores { get; } = new();
@@ -99,6 +120,19 @@ public partial class MainViewModel : ObservableObject
     {
         InitializeCharts();
         InitializePropertyScores();
+
+        // Phase 8.3: Wire DteCognitiveCoreService for real-time telemetry.
+        // App.Services is declared non-nullable but is null! until App.OnStartup
+        // runs (designer / unit-test scenarios), so guard the lookup the same
+        // way ResolveTrainingEngine does to avoid an NRE here.
+        _cognitiveCore = App.Services?.GetService<DteCognitiveCoreService>();
+        if (_cognitiveCore != null)
+        {
+            _cognitiveCore.OnAttentionUpdated     += OnCognitiveCoreAttentionUpdated;
+            _cognitiveCore.OnPatternMined         += OnCognitiveCorePatternMined;
+            _cognitiveCore.OnWoutTrained          += OnCognitiveCoreWoutTrained;
+            _cognitiveCore.OnCognitiveCoherenceUpdated += OnCognitiveCoreCoherenceUpdated;
+        }
 
         _trainingEngine.OnCognitiveStateChanged += OnCognitiveStateChanged;
         _trainingEngine.OnEpisodeCompleted += OnEpisodeCompleted;
@@ -435,6 +469,52 @@ public partial class MainViewModel : ObservableObject
                 PropertyScores[i].Score = _trainingEngine.Properties[i].Score;
                 PropertyScores[i].Delta = _trainingEngine.Properties[i].Delta;
             }
+        });
+    }
+
+    // Phase 8.3: Cognitive Core telemetry event handlers
+
+    private void OnCognitiveCoreAttentionUpdated(object? sender, AttentionUpdatedEventArgs e)
+    {
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            EcanAttentionBudget = e.Snapshot.AttentionBudget;
+            AttentionEntropy    = e.Snapshot.AttentionEntropy;
+            EcanTopNeurons      = e.Snapshot.TopNeuronClusters;
+
+            // Update cluster STI bar chart values (16 values)
+            var sti = e.Snapshot.ClusterSTI;
+            for (int i = 0; i < ClusterStiValues.Count && i < sti.Length; i++)
+                ClusterStiValues[i] = sti[i];
+        });
+    }
+
+    private void OnCognitiveCorePatternMined(object? sender, PatternMinedEventArgs e)
+    {
+        if (_cognitiveCore == null) return;
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            MosesPatternCount = _cognitiveCore.PatternCount;
+            PatternDiversity  = _cognitiveCore.GetPatternDiversity();
+            MosesTopFitness   = _cognitiveCore.GetTopPatternFitness();
+        });
+    }
+
+    private void OnCognitiveCoreWoutTrained(object? sender, WoutTrainedEventArgs e)
+    {
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            WoutTrainingLoss = e.Snapshot.RidgeLoss;
+            WoutSampleCount  = e.Snapshot.SampleCount;
+            WoutConverged    = e.Snapshot.IsConverged ? "Yes ✓" : "No";
+        });
+    }
+
+    private void OnCognitiveCoreCoherenceUpdated(object? sender, CognitiveCoherenceUpdatedEventArgs e)
+    {
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            CognitiveCoherence = e.Snapshot.Coherence;
         });
     }
 }

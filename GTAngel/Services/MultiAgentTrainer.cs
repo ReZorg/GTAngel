@@ -494,8 +494,17 @@ public sealed class MultiAgentTrainer : IDisposable
     {
         var state = new float[22];
         float t = step * 0.1f + agentId * 100;
-        state[0] = (float)(200 * Math.Sin(t * 0.05 + agentId));
-        state[1] = (float)(200 * Math.Cos(t * 0.05 + agentId));
+
+        // Phase 7.2: Per-agent starting district for navigation diversity.
+        // Values stay in raw game-world scale so RewardShaper.ParseState gets the
+        // units it expects (positions in game units, health 0–100, money as int).
+        // The ESN pipeline does its own input normalization downstream.
+        var districtOrigins = new (float x, float y)[] { (-1000f, -500f), (300f, 100f), (1100f, 200f) };
+        var (originX, originY) = districtOrigins[agentId % 3];
+        float districtScale = 400f;
+
+        state[0] = originX + (float)(districtScale * Math.Sin(t * 0.05 + agentId));
+        state[1] = originY + (float)(districtScale * Math.Cos(t * 0.05 + agentId));
         state[2] = 10f;
         state[3] = t % 360;
         state[4] = (float)(rng.NextDouble() * 20 - 10);

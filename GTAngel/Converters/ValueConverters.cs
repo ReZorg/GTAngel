@@ -83,6 +83,45 @@ public class FloatToHeightConverter : IValueConverter
         => throw new NotImplementedException();
 }
 
+/// <summary>
+/// Converts a float [0,1] to an opacity in [0,1]. Optional parameter scales the
+/// max (default 1.0). Unlike FloatToHeightConverter, this does NOT floor the
+/// result at 1.0 — needed for Opacity bindings where 1.0 means fully opaque.
+/// </summary>
+public class FloatToOpacityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        double max = 1.0;
+        if (parameter is string s && double.TryParse(s, out double p)) max = p;
+        double raw = value is float f ? (double)f : value is double d ? d : 0.0;
+        double clamped = Math.Max(0.0, Math.Min(1.0, raw));
+        return clamped * max;
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+/// <summary>
+/// Converts a string to Visibility.Visible if it equals the ConverterParameter
+/// (case-insensitive ordinal compare), otherwise Visibility.Collapsed. Used
+/// for "show this element when CurrentDistrict == 'Portland'" style bindings.
+/// </summary>
+public class StringEqualsToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var s = value as string;
+        var target = parameter as string;
+        if (string.IsNullOrEmpty(s) || target is null) return Visibility.Collapsed;
+        return string.Equals(s, target, StringComparison.OrdinalIgnoreCase)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
 /// <summary>Converts bool to bool (inverse) — for IsEnabled bindings.</summary>
 public class InverseBoolConverter : IValueConverter
 {

@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.IO;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using GTAngel.Models;
 
@@ -17,16 +19,24 @@ namespace GTAngel.Services;
 ///   2. The KSM 12-step Evolution Cycle annotated by Alexander's 15 Properties
 ///   3. Guardian Angel persona state (coherence guardian, property warden, safety enforcer)
 ///   4. Safety constraints: coherence halt, property degradation, delta clamp
-///   5. Results.tsv experiment log (in-memory + file)
+///   5. Results.tsv experiment log (Phase 6.4)
 /// </summary>
 public sealed class GTAngelService : IDisposable
 {
     private readonly ILogger<GTAngelService> _logger;
     private readonly TrainingEngine _trainingEngine;
 
+    // Phase 6.1: Optional references to full DTE pipeline services
+    private DteTrainingLoop?               _dteTrainingLoop;
+    private EsnReservoirPipeline?          _esnPipeline;
+    private DteCognitiveCoreService?       _cognitiveCoreService;
+
     private CancellationTokenSource? _cts;
     private Task? _loopTask;
     private bool _disposed;
+
+    // Phase 6.4: results.tsv writer
+    private readonly string _resultsTsvPath;
 
     // ── Guardian Angel State ──────────────────────────────────────────────────
     public GTAngelState State { get; } = new();
@@ -48,11 +58,15 @@ public sealed class GTAngelService : IDisposable
         _logger = logger;
         _trainingEngine = trainingEngine;
 
+        _resultsTsvPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "GTAngel", "results.tsv");
+        Directory.CreateDirectory(Path.GetDirectoryName(_resultsTsvPath)!);
+        EnsureResultsTsvHeader();
+
         // Wire training engine events
         _trainingEngine.OnCognitiveStateChanged += cs =>
         {
-            // CognitiveState uses stream coherence from CognitiveStream.Coherence
-            // Overall stream coherence comes from ESN.StreamCoherence
             State.StreamCoherence = _trainingEngine.ESN.StreamCoherence;
             State.PropertyCoherence = _trainingEngine.ComputeOverallPropertyCoherence();
             State.AutonomyLevel = _trainingEngine.Stats.CurrentAutonomyLevel;
@@ -66,6 +80,7 @@ public sealed class GTAngelService : IDisposable
             if (exp.Status == ExperimentStatus.Keep) State.KeptExperiments++;
             else if (exp.Status == ExperimentStatus.Discard) State.DiscardedExperiments++;
             if (exp.PrimaryMetric > State.BestMetric) State.BestMetric = exp.PrimaryMetric;
+            WriteExperimentTsv(exp);
             OnExperimentCompleted?.Invoke(exp);
             OnStateUpdated?.Invoke(State);
         };
@@ -76,6 +91,24 @@ public sealed class GTAngelService : IDisposable
             while (State.RecentLogs.Count > 200) State.RecentLogs.TryDequeue(out _);
             OnLogMessage?.Invoke(msg);
         };
+    }
+
+    /// <summary>Phase 6.1: Wire in the full DTE pipeline services for KSM orchestration.</summary>
+    public void SetDtePipelineServices(
+        DteTrainingLoop trainingLoop,
+        EsnReservoirPipeline esnPipeline,
+        DteCognitiveCoreService cognitiveCoreService)
+    {
+        _dteTrainingLoop     = trainingLoop;
+        _esnPipeline         = esnPipeline;
+        _cognitiveCoreService = cognitiveCoreService;
+        _trainingEngine.SetCognitiveCoreService(cognitiveCoreService);
+        // Phase 6.3: share the training loop's RewardShaper so the autogenesis
+        // hypothesis cases that mutate Navigation/Exploration weights actually
+        // reach the same instance the loop uses (otherwise those mutations
+        // silently no-op against a null reference).
+        _trainingEngine.SetRewardShaperRef(trainingLoop.RewardShaper);
+        Log("[GTAngel] KSM Cycle 5 wired: DteTrainingLoop + ESN + CognitiveCore bound to autogenesis loop.");
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -290,6 +323,63 @@ public sealed class GTAngelService : IDisposable
         State.RecentLogs.Enqueue($"[{DateTime.Now:HH:mm:ss}] {msg}");
         while (State.RecentLogs.Count > 200) State.RecentLogs.TryDequeue(out _);
         OnLogMessage?.Invoke(msg);
+    }
+
+    // ── Phase 6.4: results.tsv file writer ────────────────────────────────────
+
+    private void EnsureResultsTsvHeader()
+    {
+        try
+        {
+            if (!File.Exists(_resultsTsvPath))
+            {
+                var header = string.Join("\t",
+                    "EpisodeId", "Timestamp", "PrimaryMetric", "PropertyCoherenceScore",
+                    "P0_LevelsOfScale", "P1_StrongCenters", "P2_Boundaries", "P3_Alternating",
+                    "P4_PositiveSpace", "P5_GoodShape", "P6_LocalSymm", "P7_DeepInterlock",
+                    "P8_Contrast", "P9_Gradients", "P10_Roughness", "P11_Echoes",
+                    "P12_TheVoid", "P13_Simplicity", "P14_NotSeparateness",
+                    "AutonomyLevel", "KsmStep", "KsmStepName", "StatusReason");
+                File.WriteAllText(_resultsTsvPath, header + Environment.NewLine);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not create results.tsv header");
+        }
+    }
+
+    private void WriteExperimentTsv(AutogenesisExperiment exp)
+    {
+        try
+        {
+            var sb = new StringBuilder();
+            sb.Append(exp.ExperimentId).Append('\t');
+            sb.Append(exp.Timestamp.ToString("O")).Append('\t');
+            sb.Append(exp.PrimaryMetric.ToString("F6")).Append('\t');
+            sb.Append(exp.PropertyCoherenceScore.ToString("F4")).Append('\t');
+
+            // 15 Alexander property scores (P0..P14) keyed by canonical property names
+            var propertyNames = AlexanderProperty.CreateAll();
+            for (int p = 0; p < 15; p++)
+            {
+                var propName = p < propertyNames.Count ? propertyNames[p].Name : $"P{p}";
+                if (!exp.PropertyScores.TryGetValue(propName, out var score))
+                    score = 0.0;
+                sb.Append(score.ToString("F4")).Append('\t');
+            }
+
+            sb.Append((int)State.AutonomyLevel).Append('\t');
+            sb.Append(exp.KsmStep).Append('\t');
+            sb.Append(exp.KsmStepName).Append('\t');
+            sb.Append(exp.StatusReason);
+
+            File.AppendAllText(_resultsTsvPath, sb.ToString() + Environment.NewLine);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not write to results.tsv");
+        }
     }
 
     public void Dispose()

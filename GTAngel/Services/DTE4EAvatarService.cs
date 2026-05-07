@@ -40,6 +40,7 @@ public class DTE4EAvatarService : IDisposable
     private readonly AvatarEmbodimentService? _embodiment;    // KSM Cycle 3: FACS+IK+Neuro+Personality
     private readonly GameWorldNavigationService? _navigation;   // KSM Cycle 4: POI-directed navigation
     private Ue5PlayerAiBridgeService? _playerAiBridge;          // KSM Cycle 6: Player↔AI Bridge
+    private DteCognitiveCoreService? _cognitiveCore;            // KSM Cycle 5: ECAN attention / MOSES patterns
     private float[] _previousAction = new float[18]; // 18-dim action history for ESN
     private readonly AvatarExplorationPolicy _policy;
     private readonly ConcurrentQueue<AvatarObservation> _observationQueue = new();
@@ -76,6 +77,14 @@ public class DTE4EAvatarService : IDisposable
     // ── Exploration parameters ───────────────────────────────────────────────
     private const float ExplorationStepIntervalMs = 250f;  // 4 Hz decision rate
     private const int   MaxExplorationSteps       = 10_000;
+    /// <summary>
+    /// Phase 5.3: Max perception+ESN latency (ms) before FACS/IK is skipped
+    /// for the step. The 250ms step budget needs ~75ms for the rest of the
+    /// pipeline (action dispatch, reward, navigation, logging), so we cap
+    /// perception+ESN at 175ms — anything above that and embodiment is
+    /// skipped to keep the step rate stable.
+    /// </summary>
+    private const double MaxPerceptionLatencyMs   = 175.0;
     private const float RewardDiscoveryBonus      = 1.0f;
     private const float RewardMovementPenalty     = -0.01f;
     private const float RewardIdlePenalty         = -0.1f;
@@ -248,7 +257,8 @@ public class DTE4EAvatarService : IDisposable
                 // ProcessStep(frame[768*768*3], gameState[22], prevAction[18])
                 // We pass an empty frame (visual processing handled by UE5 side)
                 // and encode the observation as the 22-dim game state vector
-                var gameState = EncodeObservationForESN(obs);  // 16-dim, padded to 22
+                var percepStart = DateTime.UtcNow;
+                var gameState = EncodeObservationForESN(obs);  // 22-dim, navigation+neuro integrated
                 // KSM Cycle 1: use real 768×768 frames from MlVisionCaptureService
                 // (falls back to Array.Empty if capture service not yet started)
                 var visionFrame = (_mlVision?.IsCapturing == true)
@@ -256,6 +266,25 @@ public class DTE4EAvatarService : IDisposable
                     : Array.Empty<float>();
                 var actionProbs = _esn.ProcessStep(visionFrame, gameState, _previousAction);
                 var esnState = _esn.LastReservoirState;
+
+                // Phase 5.3: Token-bucket — measure perception+ESN latency
+                // BEFORE the cognitive core update so the governor only
+                // reflects the pipeline its name implies. (UpdateAttention /
+                // MinePatterns latency is governed separately by the rate
+                // limiter inside DteCognitiveCoreService.)
+                var percepElapsedMs = (DateTime.UtcNow - percepStart).TotalMilliseconds;
+                bool skipEmbodimentThisStep = percepElapsedMs > MaxPerceptionLatencyMs;
+
+                // KSM Cycle 5: advance ECAN attention + MOSES pattern state on the executive
+                // reservoir, then feed the cluster STI back into the ESN as top-down modulation.
+                // The training-loop variant does the same per-step; the exploration path needs
+                // it too so attention gating and pattern mining aren't frozen at zero here.
+                if (_cognitiveCore != null && esnState.Length > 0)
+                {
+                    _cognitiveCore.UpdateAttention(esnState);
+                    _cognitiveCore.MinePatterns(esnState);
+                    _esn.SetTopDownModulation(_cognitiveCore.GetClusterSTI());
+                }
 
                 // ── 3. UPDATE COGNITIVE STATE ─────────────────────────────
                 UpdateCognitiveState(obs, esnState);
@@ -298,7 +327,9 @@ public class DTE4EAvatarService : IDisposable
                 _navigation?.UpdatePosition(obs.Position);
 
                 // ── 6b. EMBODY (KSM Cycle 3: FACS+IK+Neuro+Personality) ──────────────
-                if (_embodiment != null)
+                // Phase 5.3: Skip FACS/IK if perception+ESN exceeded the
+                // MaxPerceptionLatencyMs rate-governor budget computed above.
+                if (_embodiment != null && !skipEmbodimentThisStep)
                 {
                     // Synthesize emotional state from ESN output + neurochemical state
                     var neuroState = _embodiment.CurrentNeuro;
@@ -357,6 +388,17 @@ public class DTE4EAvatarService : IDisposable
         {
             var features = _mlVision.GetLatestFeatures();
             _playerAiBridge.ProcessObservation(obs, features);
+
+            // Phase 4.1: Feed fused observation norm back into ESN cognitive input scaling
+            // High fusion norm (strong ML feature signal) → amplify cognitive layer drive
+            float fusionNorm = 0f;
+            if (features.Length > 0)
+            {
+                foreach (var f in features) fusionNorm += f * f;
+                fusionNorm = MathF.Sqrt(fusionNorm);
+            }
+            float scale = 1.0f + Math.Clamp(fusionNorm / 10f, 0f, 1f) * 0.5f; // 1.0 .. 1.5
+            _esn.SetObservationFusionScale(scale);
         }
 
         // Keep queue bounded
@@ -367,11 +409,36 @@ public class DTE4EAvatarService : IDisposable
     /// <summary>
     /// Encode an AvatarObservation into a float vector for the ESN reservoir.
     /// Output: 22-dim game state vector (padded from 16 dims to match ESN input)
-    /// Layout: position(3) + rotation(3) + velocity(3) + neurochemical(6) + perceived(1) + padding(6)
+    /// Layout: position(3) + rotation(3) + velocity(3) + neurochemical(6) + perceived(1) +
+    ///         navDirX(1) + navDirY(1) + embodimentNeuro(4)
     /// </summary>
     private float[] EncodeObservationForESN(AvatarObservation obs)
     {
         var neuro = obs.NeurochemicalState ?? new NeurochemicalSnapshot();
+
+        // Phase 1.2: Navigation direction toward current POI target (dims 16..17).
+        // Capture NextPOI into a local first so the null check and the field reads
+        // see the same value — _navigation is a singleton whose NextPOI can be
+        // updated from the navigation loop concurrently with this encode call.
+        float navDirX = 0f, navDirY = 0f;
+        var nextPoi = _navigation?.NextPOI;
+        if (nextPoi != null && nextPoi.Position.Length >= 2 && obs.Position.Length >= 2)
+        {
+            float dx = nextPoi.Position[0] - obs.Position[0];
+            float dy = nextPoi.Position[1] - obs.Position[1];
+            float dist = MathF.Sqrt(dx * dx + dy * dy) + 1e-6f;
+            navDirX = dx / dist;
+            navDirY = dy / dist;
+        }
+
+        // Phase 3.3: Embodiment neurochemical feedback (dims 18..21)
+        // Prefer live readback from AvatarEmbodimentService over obs snapshot
+        var embNeuro = _embodiment?.CurrentNeuro;
+        float embCuriosity   = embNeuro?.Curiosity   ?? neuro.Curiosity;
+        float embEndorphin   = embNeuro?.Endorphin   ?? neuro.Endorphin;
+        float embChaos       = embNeuro?.Chaos       ?? neuro.ChaosIntensity;
+        float embHomeostasis = embNeuro?.Homeostasis ?? neuro.Homeostasis;
+
         return new float[]
         {
             // Spatial (normalized to Liberty City bounds ~3000 UU)
@@ -386,7 +453,7 @@ public class DTE4EAvatarService : IDisposable
             obs.Velocity[0] / 600f,
             obs.Velocity[1] / 600f,
             obs.Velocity[2] / 600f,
-            // Neurochemical state
+            // Neurochemical state (from UE5 observation)
             neuro.Curiosity,
             neuro.Endorphin,
             neuro.ChaosIntensity,
@@ -395,8 +462,14 @@ public class DTE4EAvatarService : IDisposable
             neuro.Scarcity,
             // Perceived objects count (normalized)
             Math.Min(obs.PerceivedObjects.Length / 10f, 1f),
-            // Padding to reach 22-dim (ESN cognitive layer input requirement)
-            0f, 0f, 0f, 0f, 0f, 0f
+            // Phase 1.2: Navigation direction toward POI target (normalized 2D unit vector)
+            navDirX,
+            navDirY,
+            // Phase 3.3: Embodiment neurochemical feedback loop (live readback from service)
+            embCuriosity,
+            embEndorphin,
+            embChaos,
+            embHomeostasis
         };
     }
 
@@ -529,6 +602,18 @@ public class DTE4EAvatarService : IDisposable
     public void SetPlayerAiBridge(Ue5PlayerAiBridgeService bridge)
     {
         _playerAiBridge = bridge;
+    }
+
+    /// <summary>
+    /// KSM Cycle 5: wire in the DTE Cognitive Core so the 4E exploration loop
+    /// advances ECAN attention / MOSES pattern state and feeds STI back into the
+    /// ESN as top-down modulation. Without this, ComputeAttentionGatedLogits
+    /// runs against a frozen-zero STI and effectively disables attention gating.
+    /// </summary>
+    public void SetCognitiveCoreService(DteCognitiveCoreService svc)
+    {
+        _cognitiveCore = svc;
+        _logger.LogInformation("DTE4EAvatarService: DteCognitiveCoreService wired in — ECAN/MOSES advanced from exploration loop.");
     }
 
     public void Dispose()
