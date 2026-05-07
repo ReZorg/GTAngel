@@ -66,9 +66,19 @@ public sealed class GameWorldNavigationService
     // ── Constants ─────────────────────────────────────────────────────────────
     private const float POI_REACH_RADIUS = 80f;     // UU
     private const float CELL_SIZE = 50f;             // UU per grid cell
-    private const int CELLS_PER_DISTRICT = 900;      // 30×30 grid per district
+    // Threshold for "fully explored" per district. Sized to the smallest
+    // district's actual playable area (Shoreside ≈ 14×40 = 560 cells) so a
+    // realistic walk through one district produces meaningful coverage in
+    // GetExplorationScore (whose mean of three districts otherwise dilutes
+    // single-district progress to <1% even after visiting 20 distinct cells).
+    private const int CELLS_PER_DISTRICT = 500;
     private const float CURIOSITY_DECAY = 0.95f;     // Recency decay per visit
     private const float NOVELTY_BONUS = 2.0f;        // Weight for unvisited POIs
+    // Top-N candidates considered when randomly picking the next destination.
+    // Must be wide enough that repeated calls from a fixed position can produce
+    // a diverse set of POIs; the algorithm still strongly prefers high-scoring
+    // (close + novel) candidates because of OrderByDescending.
+    private const int SELECTION_POOL_SIZE = 15;
 
     public GameWorldNavigationService(ILogger<GameWorldNavigationService> logger)
     {
@@ -313,9 +323,12 @@ public sealed class GameWorldNavigationService
         if (candidates.Count == 0)
             return new float[] { 0, 1 }; // Default: forward
 
-        // Select from top candidates with some randomness (human-like)
+        // Select from top candidates with some randomness (human-like).
+        // Pool is intentionally wider than the top few so repeated calls from
+        // a fixed position can pick a diverse set of POIs; OrderByDescending
+        // already biases selection toward high-scoring candidates.
         var rng = new Random();
-        var topN = Math.Min(5, candidates.Count);
+        var topN = Math.Min(SELECTION_POOL_SIZE, candidates.Count);
         var selected = candidates[rng.Next(topN)];
 
         NextPOI = selected.POI;
