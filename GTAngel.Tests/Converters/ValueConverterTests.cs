@@ -267,6 +267,62 @@ public class ValueConverterTests
         Assert.Equal(Color.FromRgb(100, 100, 120), brush.Color);
     }
 
+    // ── FloatToOpacityConverter ────────────────────────────────────────────
+
+    [Fact]
+    public void FloatToOpacity_HalfValue_UsesDefaultMax()
+    {
+        var conv = new FloatToOpacityConverter();
+        var result = conv.Convert(0.5f, typeof(double), null, CultureInfo.InvariantCulture);
+        Assert.Equal(0.5, result);
+    }
+
+    [Fact]
+    public void FloatToOpacity_OverOne_ClampsBeforeScaling()
+    {
+        var conv = new FloatToOpacityConverter();
+        var result = conv.Convert(2.0f, typeof(double), "0.4", CultureInfo.InvariantCulture);
+        Assert.Equal(0.4, result);
+    }
+
+    [Fact]
+    public void FloatToOpacity_NegativeValue_ClampsToZero()
+    {
+        var conv = new FloatToOpacityConverter();
+        var result = conv.Convert(-0.25f, typeof(double), null, CultureInfo.InvariantCulture);
+        Assert.Equal(0.0, result);
+    }
+
+    // ── StringEqualsToVisibilityConverter ─────────────────────────────────
+
+    [Fact]
+    public void StringEqualsToVisibility_MatchingValue_IgnoresCase()
+    {
+        var conv = new StringEqualsToVisibilityConverter();
+        var result = conv.Convert("Portland", typeof(Visibility), "portland", CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Visible, result);
+    }
+
+    [Fact]
+    public void StringEqualsToVisibility_MismatchedValue_ReturnsCollapsed()
+    {
+        var conv = new StringEqualsToVisibilityConverter();
+        var result = conv.Convert("Staunton", typeof(Visibility), "Portland", CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void StringEqualsToVisibility_NullOrEmptyValue_ReturnsCollapsed()
+    {
+        var conv = new StringEqualsToVisibilityConverter();
+        Assert.Equal(
+            Visibility.Collapsed,
+            conv.Convert(string.Empty, typeof(Visibility), "Portland", CultureInfo.InvariantCulture));
+        Assert.Equal(
+            Visibility.Collapsed,
+            conv.Convert("Portland", typeof(Visibility), null, CultureInfo.InvariantCulture));
+    }
+
     // ── ProgressToWidthConverter (IMultiValueConverter) ──────────────────
 
     [Fact]

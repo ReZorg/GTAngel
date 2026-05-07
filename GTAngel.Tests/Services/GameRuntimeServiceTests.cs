@@ -198,6 +198,62 @@ public class GameRuntimeServiceTests : IDisposable
         Assert.Equal(0f, result.Reward);
     }
 
+    [Fact]
+    public void RLStepResult_DefaultState_IsInitialized()
+    {
+        var result = new RLStepResult();
+        Assert.NotNull(result.State);
+    }
+
+    [Fact]
+    public void RLStepResult_CanStoreFrameStateAndAction()
+    {
+        var frame = new FrameData { Width = 32, Height = 32, FrameNumber = 7 };
+        var state = new ProprioceptiveState { Health = 80f };
+        var result = new RLStepResult
+        {
+            Frame = frame,
+            State = state,
+            Reward = 1.25f,
+            Done = true,
+            Action = 3,
+        };
+
+        Assert.Same(frame, result.Frame);
+        Assert.Same(state, result.State);
+        Assert.Equal(1.25f, result.Reward);
+        Assert.True(result.Done);
+        Assert.Equal(3, result.Action);
+    }
+
+    [Fact]
+    public void FrameData_Defaults_AreEmptyAndNull()
+    {
+        var frame = new FrameData();
+        Assert.Empty(frame.NormalizedPixels);
+        Assert.Null(frame.Preview);
+    }
+
+    [Fact]
+    public void FrameData_Properties_CanBeAssigned()
+    {
+        var pixels = new[] { 0.1f, 0.2f, 0.3f };
+        var frame = new FrameData
+        {
+            Timestamp = 123,
+            FrameNumber = 4,
+            Width = 1,
+            Height = 1,
+            NormalizedPixels = pixels,
+        };
+
+        Assert.Equal(123, frame.Timestamp);
+        Assert.Equal(4, frame.FrameNumber);
+        Assert.Equal(1, frame.Width);
+        Assert.Equal(1, frame.Height);
+        Assert.Same(pixels, frame.NormalizedPixels);
+    }
+
     // ── Dispose ───────────────────────────────────────────────────────────────
 
     [Fact]

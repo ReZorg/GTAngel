@@ -158,6 +158,8 @@ public class UE5LaunchOrchestratorTests : IDisposable
         await _svc.LaunchAsync(cts.Token);
 
         Assert.NotEmpty(stages);
+        Assert.Equal(UE5LaunchStage.Validating, stages[0]);
+        Assert.Equal(UE5LaunchStage.Failed, stages[^1]);
     }
 
     [Fact]
@@ -194,6 +196,19 @@ public class UE5LaunchOrchestratorTests : IDisposable
             NullLogger<UE5LaunchOrchestrator>.Instance, config2);
         var ex = Record.Exception(() => svc2.Dispose());
         Assert.Null(ex);
+    }
+
+    [Fact]
+    public async Task LaunchAsync_WhenValidationFails_LogsMissingEnginePath()
+    {
+        var lines = new List<string>();
+        _svc.OnLogLine += lines.Add;
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var result = await _svc.LaunchAsync(cts.Token);
+
+        Assert.False(result.Success);
+        Assert.Contains(lines, line => line.Contains("Engine path not found:", StringComparison.Ordinal));
     }
 
     public void Dispose() => _svc.Dispose();

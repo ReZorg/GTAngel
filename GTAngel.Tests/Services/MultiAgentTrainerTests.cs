@@ -1,5 +1,7 @@
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Reflection;
+using System.Text.Json;
 using Xunit;
 
 namespace GTAngel.Tests.Services;
@@ -214,5 +216,99 @@ public class MultiAgentTrainerTests : IDisposable
         Assert.Equal(0f, stats.AverageReward);
         Assert.Equal(0f, stats.BestReward);
         Assert.Equal(0L, stats.GlobalUpdateCount);
+    }
+
+    [Fact]
+    public async Task SaveAsync_WritesJsonSnapshot()
+    {
+        await _trainer.InitializeAsync(numAgents: 1);
+        string directory = Path.Combine(Path.GetTempPath(), "GTAngel.Tests", Guid.NewGuid().ToString("N"));
+        string path = Path.Combine(directory, "multi-agent.json");
+
+        await _trainer.SaveAsync(path);
+
+        Assert.True(File.Exists(path));
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        Assert.True(doc.RootElement.TryGetProperty("GlobalWeights", out _));
+        Assert.True(doc.RootElement.TryGetProperty("Stats", out _));
+        Assert.True(doc.RootElement.TryGetProperty("Agents", out _));
+    }
+
+    [Fact]
+    public async Task Start_AfterInitialize_ActivatesAgentsAndStopAsyncResetsCount()
+    {
+        await _trainer.InitializeAsync(numAgents: 1);
+
+        _trainer.Start();
+        await Task.Delay(50);
+
+        Assert.True(_trainer.Stats.ActiveAgents >= 1);
+
+        await _trainer.StopAsync();
+        Assert.Equal(0, _trainer.Stats.ActiveAgents);
+    }
+
+    [Fact]
+    public void AgentStat_CanStoreValues()
+    {
+        var stat = new AgentStat
+        {
+            Id = 2,
+            Name = "Agent-02",
+            Episodes = 7,
+            Steps = 88,
+            AverageReward = 1.5f,
+            BestReward = 3.0f,
+            Epsilon = 0.4,
+            Status = AgentStatus.Running,
+        };
+
+        Assert.Equal("Agent-02", stat.Name);
+        Assert.Equal(88, stat.Steps);
+        Assert.Equal(0.4, stat.Epsilon);
+        Assert.Equal(AgentStatus.Running, stat.Status);
+    }
+
+    [Fact]
+    public void AgentUpdate_InternalType_StoresPropertyValues()
+    {
+        var type = typeof(MultiAgentTrainer).Assembly.GetType("GTAngel.Services.AgentUpdate");
+        var instance = Activator.CreateInstance(type!);
+        type!.GetProperty("AgentId")!.SetValue(instance, 9);
+        type.GetProperty("WeightGradients")!.SetValue(instance, new[] { 0.25f, -0.5f });
+        type.GetProperty("EpisodeReward")!.SetValue(instance, 4.5f);
+        type.GetProperty("Steps")!.SetValue(instance, 12);
+
+        Assert.Equal(9, type.GetProperty("AgentId")!.GetValue(instance));
+        Assert.Equal(4.5f, type.GetProperty("EpisodeReward")!.GetValue(instance));
+        Assert.Equal(12, type.GetProperty("Steps")!.GetValue(instance));
+        Assert.Equal(new[] { 0.25f, -0.5f }, (float[]?)type.GetProperty("WeightGradients")!.GetValue(instance));
+    }
+
+    [Fact]
+    public void ComputeActionProbabilities_PrivateHelper_ReturnsNormalizedDistribution()
+    {
+        var method = typeof(MultiAgentTrainer).GetMethod("ComputeActionProbabilities", BindingFlags.NonPublic | BindingFlags.Static);
+        var weights = new float[512 * 3];
+        weights[0] = 2f;
+        weights[512] = 1f;
+        weights[1024] = -1f;
+        var state = new float[512];
+        state[0] = 1f;
+
+        var result = Assert.IsType<float[]>(method!.Invoke(null, [weights, state, 3])!);
+
+        Assert.Equal(3, result.Length);
+        Assert.Equal(1f, result.Sum(), 4);
+        Assert.Equal(0, Array.IndexOf(result, result.Max()));
+    }
+
+    [Fact]
+    public void ComputeGradients_PrivateHelper_ReturnsElementwiseDifference()
+    {
+        var method = typeof(MultiAgentTrainer).GetMethod("ComputeGradients", BindingFlags.NonPublic | BindingFlags.Static);
+        var result = Assert.IsType<float[]>(method!.Invoke(null, [new[] { 3f, 1f }, new[] { 1f, 0.5f }])!);
+
+        Assert.Equal([2f, 0.5f], result);
     }
 }
