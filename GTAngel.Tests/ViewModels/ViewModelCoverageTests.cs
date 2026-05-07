@@ -1,32 +1,53 @@
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reflection;
-using GTAngel.Models;
 using GTAngel.Services;
 using GTAngel.ViewModels;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
+using static GTAngel.Tests.ViewModels.ViewModelTestPaths;
+
 namespace GTAngel.Tests.ViewModels;
 
-public class OtherGamesViewModelTests
+[Collection("AppConfiguration file system")]
+public sealed class OtherGamesViewModelTests : IDisposable
 {
-    [Fact]
-    public void Constructor_WhenSdkConfigContainsGames_LoadsEachGame()
+    private readonly string _configPath = Path.Combine(
+        AppDomain.CurrentDomain.BaseDirectory,
+        AssetsDirectoryName,
+        ConfigDirectoryName,
+        "SDK.config");
+    private readonly string? _originalConfigContents;
+
+    public OtherGamesViewModelTests()
     {
+        _originalConfigContents = File.Exists(_configPath)
+            ? File.ReadAllText(_configPath)
+            : null;
+    }
+
+    [Fact]
+    public async Task Constructor_WhenSdkConfigContainsGames_LoadsEachGame()
+    {
+        var configDirectory = Path.GetDirectoryName(_configPath)!;
+        Directory.CreateDirectory(configDirectory);
+        await File.WriteAllTextAsync(_configPath, """
+        {
+          "games": {
+            "gta3": {
+              "id": "gta3",
+              "name": "Grand Theft Auto III"
+            },
+            "gtasa": {
+              "id": "gtasa",
+              "name": "Grand Theft Auto: San Andreas"
+            }
+          }
+        }
+        """);
+
         var config = new AppConfiguration(NullLogger<AppConfiguration>.Instance);
-        typeof(AppConfiguration)
-            .GetProperty(
-                nameof(AppConfiguration.SdkConfig),
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
-            .SetValue(config, new SdkConfig
-            {
-                Games = new Dictionary<string, GameConfig>
-                {
-                    ["gta3"] = new() { Id = "gta3", Name = "Grand Theft Auto III" },
-                    ["gtasa"] = new() { Id = "gtasa", Name = "Grand Theft Auto: San Andreas" }
-                }
-            });
+        await config.LoadAsync();
 
         var viewModel = new OtherGamesViewModel(
             NullLogger<OtherGamesViewModel>.Instance,
@@ -45,9 +66,25 @@ public class OtherGamesViewModelTests
 
         Assert.Empty(viewModel.Games);
     }
+
+    public void Dispose()
+    {
+        if (_originalConfigContents is null)
+        {
+            if (File.Exists(_configPath))
+            {
+                File.Delete(_configPath);
+            }
+
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(_configPath)!);
+        File.WriteAllText(_configPath, _originalConfigContents);
+    }
 }
 
-public class BrowserViewModelTests
+public sealed class BrowserViewModelTests
 {
     private readonly BrowserViewModel _viewModel = new(
         NullLogger<BrowserViewModel>.Instance,
@@ -113,4 +150,10 @@ public class BrowserViewModelTests
         Assert.Null(backException);
         Assert.Null(forwardException);
     }
+}
+
+internal static class ViewModelTestPaths
+{
+    public const string AssetsDirectoryName = "Assets";
+    public const string ConfigDirectoryName = "Config";
 }
