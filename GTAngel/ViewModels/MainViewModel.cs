@@ -477,7 +477,7 @@ public partial class MainViewModel : ObservableObject
         {
             MosesPatternCount = _cognitiveCore.PatternCount;
             PatternDiversity  = _cognitiveCore.GetPatternDiversity();
-            MosesTopFitness   = e.Pattern.Fitness;
+            MosesTopFitness   = _cognitiveCore.GetTopPatternFitness();
         });
     }
 
