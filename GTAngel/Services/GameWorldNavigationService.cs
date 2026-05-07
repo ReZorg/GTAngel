@@ -55,6 +55,13 @@ public sealed class GameWorldNavigationService
     public event EventHandler<District>? OnDistrictChanged;
     public event EventHandler<RouteInfo>? OnRouteUpdated;
     public event EventHandler<string>? OnNavigationLog;
+    /// <summary>
+    /// Phase 1.3: Fires when the avatar enters a 50-UU grid cell that hasn't been
+    /// visited before for the current district. Used by DteTrainingLoop to feed
+    /// RewardShaper.NotifyNewNavigationCell so Weights.Navigation actually
+    /// influences the training reward.
+    /// </summary>
+    public event EventHandler<(string DistrictId, int CellX, int CellY)>? OnNewNavigationCell;
 
     // ── Convenience Properties ─────────────────────────────────────────────────
     public int TotalPOICount => POIs.Count;
@@ -537,12 +544,19 @@ public sealed class GameWorldNavigationService
         var district = IdentifyDistrict(position);
         if (district == null) return;
 
-        switch (district.Id)
+        // HashSet<T>.Add returns true only when the element was newly added —
+        // exactly the signal we want for "new navigation cell" so listeners can
+        // award a discovery bonus exactly once per cell per district.
+        bool added = district.Id switch
         {
-            case "portland":  _visitedCellsPerDistrict_Portland.Add(cell); break;
-            case "staunton":  _visitedCellsPerDistrict_Staunton.Add(cell); break;
-            case "shoreside": _visitedCellsPerDistrict_Shoreside.Add(cell); break;
-        }
+            "portland"  => _visitedCellsPerDistrict_Portland.Add(cell),
+            "staunton"  => _visitedCellsPerDistrict_Staunton.Add(cell),
+            "shoreside" => _visitedCellsPerDistrict_Shoreside.Add(cell),
+            _           => false,
+        };
+
+        if (added)
+            OnNewNavigationCell?.Invoke(this, (district.Id, cellX, cellY));
     }
 
     private District? IdentifyDistrict(float[] position)

@@ -306,14 +306,20 @@ public sealed class EsnReservoirPipeline : IDisposable
         // 32 neurons by their corresponding STI weight (with a small floor so STI=0
         // doesn't completely silence the cluster). This actually delivers the STI
         // signal through Wfb instead of letting it fall off the end of the matrix.
+        // Capture _topDownSTI into a local reference so a concurrent
+        // SetTopDownModulation (called from DteTrainingLoop / DTE4EAvatarService
+        // background tasks) cannot replace the array between the length check
+        // and the indexed access — which would otherwise throw
+        // IndexOutOfRangeException if the new array were shorter.
+        var topDownSTI = _topDownSTI;
         float[] topDownFeedback;
-        if (_topDownSTI.Length > 0 && _executiveLayer.Size % _topDownSTI.Length == 0)
+        if (topDownSTI.Length > 0 && _executiveLayer.Size % topDownSTI.Length == 0)
         {
-            int clusterSize = _executiveLayer.Size / _topDownSTI.Length;
+            int clusterSize = _executiveLayer.Size / topDownSTI.Length;
             topDownFeedback = new float[_executiveLayer.Size];
-            for (int c = 0; c < _topDownSTI.Length; c++)
+            for (int c = 0; c < topDownSTI.Length; c++)
             {
-                float stiWeight = _topDownSTI[c] + 0.1f; // floor mirrors ComputeAttentionGatedLogits
+                float stiWeight = topDownSTI[c] + 0.1f; // floor mirrors ComputeAttentionGatedLogits
                 int offset = c * clusterSize;
                 for (int n = 0; n < clusterSize; n++)
                     topDownFeedback[offset + n] = _executiveLayer.State[offset + n] * stiWeight;

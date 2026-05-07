@@ -43,6 +43,14 @@ public sealed class DteTrainingLoop : IDisposable
     // reward-weight mutation cases in ApplyHypothesis silently no-op.
     public RewardShaper RewardShaper { get; } = new RewardShaper();
 
+    // ── KSM Cycle 4: GameWorld navigation hookup ─────────────────────────
+    // Wired in App.xaml.cs after both singletons exist. We keep handler refs so
+    // Dispose can unsubscribe and avoid leaking the loop through the navigation
+    // service's event invocation list.
+    private GameWorldNavigationService? _navigation;
+    private EventHandler<PointOfInterest>? _navPOIHandler;
+    private EventHandler<(string DistrictId, int CellX, int CellY)>? _navCellHandler;
+
     private CancellationTokenSource? _cts;
     private Task? _trainingTask;
     private bool _disposed;
@@ -67,6 +75,31 @@ public sealed class DteTrainingLoop : IDisposable
     {
         _cognitiveCore = svc;
         _logger.LogInformation("DteTrainingLoop: DteCognitiveCoreService wired in.");
+    }
+
+    /// <summary>
+    /// Phase 1.3 / 6.3: Wire the GameWorldNavigationService so that POI
+    /// arrivals and new-cell entries are forwarded to RewardShaper.
+    /// Without this, RewardShaper.NavigationBonus stays 0 forever and
+    /// Weights.Navigation × NavigationBonus is identically zero — making
+    /// TrainingEngine.ApplyHypothesis case 4 (Navigation weight mutation)
+    /// a silent no-op.
+    /// </summary>
+    public void SetNavigationService(GameWorldNavigationService nav)
+    {
+        // Idempotent: if already wired, unsubscribe the old handlers first.
+        if (_navigation != null)
+        {
+            if (_navPOIHandler != null) _navigation.OnPOIReached -= _navPOIHandler;
+            if (_navCellHandler != null) _navigation.OnNewNavigationCell -= _navCellHandler;
+        }
+
+        _navigation = nav;
+        _navPOIHandler  = (_, _) => RewardShaper.NotifyPOIReached();
+        _navCellHandler = (_, _) => RewardShaper.NotifyNewNavigationCell();
+        _navigation.OnPOIReached      += _navPOIHandler;
+        _navigation.OnNewNavigationCell += _navCellHandler;
+        _logger.LogInformation("DteTrainingLoop: GameWorldNavigationService wired into RewardShaper (POI + cell discovery).");
     }
 
     public DteTrainingLoop(
@@ -728,6 +761,14 @@ public sealed class DteTrainingLoop : IDisposable
         _cts?.Cancel();
         _trainingTask?.Wait(5000);
         _cts?.Dispose();
+
+        // Unsubscribe from navigation events so we don't leak the loop through
+        // the singleton GameWorldNavigationService's event invocation list.
+        if (_navigation != null)
+        {
+            if (_navPOIHandler != null) _navigation.OnPOIReached -= _navPOIHandler;
+            if (_navCellHandler != null) _navigation.OnNewNavigationCell -= _navCellHandler;
+        }
 
         _logger.LogInformation("DteTrainingLoop disposed. Episodes: {Ep}, Steps: {St}",
             State.TotalEpisodes, State.TotalSteps);

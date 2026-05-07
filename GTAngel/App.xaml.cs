@@ -54,6 +54,14 @@ public partial class App : Application
         esnPipeline.SetCognitiveCoreService(cogCore);
         trainingLoop.SetCognitiveCoreService(cogCore);
 
+        // Phase 1.3 wiring: route POI arrivals and new-cell discoveries from
+        // GameWorldNavigationService into the training loop's RewardShaper so
+        // RewardShaper.NavigationBonus is actually nonzero — without this,
+        // Weights.Navigation × NavigationBonus is identically 0 and the
+        // autogenesis Navigation-weight mutation has no effect.
+        var navigation = _serviceProvider.GetRequiredService<GameWorldNavigationService>();
+        trainingLoop.SetNavigationService(navigation);
+
         // Phase 6.1: Wire full DTE pipeline into GTAngelService for KSM orchestration
         var gtAngel = _serviceProvider.GetRequiredService<GTAngelService>();
         gtAngel.SetDtePipelineServices(trainingLoop, esnPipeline, cogCore);
