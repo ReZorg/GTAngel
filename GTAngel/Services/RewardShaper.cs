@@ -549,6 +549,7 @@ public class RewardWeights
         Survival = 0.5f, Exploration = 5.0f, DrivingSkill = 1.0f,
         Combat = 0.2f, MissionProgress = 1.0f, Economic = 0.3f,
         Curiosity = 3.0f, Social = 0.2f, PotentialShaping = 0.2f,
+        Navigation = 3.0f,
     };
 
     /// <summary>Preset: Mission-focused (for mid training).</summary>
@@ -557,6 +558,7 @@ public class RewardWeights
         Survival = 1.5f, Exploration = 1.0f, DrivingSkill = 1.0f,
         Combat = 1.5f, MissionProgress = 5.0f, Economic = 1.0f,
         Curiosity = 0.5f, Social = 1.0f, PotentialShaping = 0.1f,
+        Navigation = 2.0f,
     };
 
     /// <summary>Preset: Driving-focused (for vehicle training).</summary>
@@ -565,6 +567,7 @@ public class RewardWeights
         Survival = 1.0f, Exploration = 2.0f, DrivingSkill = 5.0f,
         Combat = 0.1f, MissionProgress = 0.5f, Economic = 0.3f,
         Curiosity = 1.0f, Social = 0.5f, PotentialShaping = 0.1f,
+        Navigation = 2.0f,
     };
 
     /// <summary>Preset: Combat-focused (for combat training).</summary>
@@ -573,6 +576,7 @@ public class RewardWeights
         Survival = 2.0f, Exploration = 0.5f, DrivingSkill = 0.5f,
         Combat = 5.0f, MissionProgress = 2.0f, Economic = 0.5f,
         Curiosity = 0.5f, Social = 0.3f, PotentialShaping = 0.1f,
+        Navigation = 0.3f,
     };
 }
 

@@ -581,9 +581,12 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
 
             // Find the end of the first complete JSON object so concatenated messages
             // (e.g. "{\"x\":1}\n{\"y\":2}") parse the first one cleanly instead of
-            // including trailing content that JsonDocument.Parse rejects.
+            // including trailing content that JsonDocument.Parse rejects. Uses a
+            // brace-depth tracker that respects string literals and escapes so nested
+            // objects (e.g. "{\"pos\":{\"x\":1}}") and strings containing '}' parse
+            // correctly even if the protocol grows beyond flat scalars.
             var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            int jsonEnd = raw.IndexOf('}');
+            int jsonEnd = FindFirstJsonObjectEnd(raw);
             if (jsonEnd < 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
@@ -623,6 +626,41 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
             _logger.LogDebug(ex, "IPC GameState parse failed — using defaults");
             return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
         }
+    }
+
+    /// <summary>
+    /// Returns the index of the closing brace that terminates the first top-level
+    /// JSON object in <paramref name="raw"/>, or -1 if no complete object is present.
+    /// Tracks brace depth and respects string literals (including escaped quotes) so
+    /// nested objects and strings containing '}' do not produce false-positive ends.
+    /// </summary>
+    private static int FindFirstJsonObjectEnd(string raw)
+    {
+        int depth = 0;
+        bool inString = false;
+        bool escape = false;
+        bool started = false;
+        for (int i = 0; i < raw.Length; i++)
+        {
+            char c = raw[i];
+            if (inString)
+            {
+                if (escape)            escape = false;
+                else if (c == '\\')    escape = true;
+                else if (c == '"')     inString = false;
+                continue;
+            }
+            switch (c)
+            {
+                case '"': inString = true; break;
+                case '{': depth++; started = true; break;
+                case '}':
+                    depth--;
+                    if (started && depth == 0) return i;
+                    break;
+            }
+        }
+        return -1;
     }
 
     [DllImport("kernel32.dll")]
