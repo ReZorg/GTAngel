@@ -644,17 +644,50 @@ public sealed class DteTrainingLoop : IDisposable
         };
 
         var json = JsonSerializer.Serialize(checkpoint, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(checkpointPath, json);
+
+        // Best-effort write with a short retry — checkpoint paths are derived from
+        // TotalEpisodes and the LOCALAPPDATA folder, so concurrent training instances
+        // (and parallel xUnit test classes that exercise Start/StopAsync) can briefly
+        // contend on the same file handle. A failure here should not crash training.
+        if (!await TryWriteCheckpointAsync(checkpointPath, json))
+        {
+            Log($"Checkpoint skipped (file in use): {checkpointPath}");
+            return;
+        }
 
         // Save replay buffer
         var bufferPath = Path.Combine(checkpointDir, "replay_buffer.bin");
-        await _replayBuffer.SaveAsync(bufferPath);
+        try { await _replayBuffer.SaveAsync(bufferPath); }
+        catch (IOException ex) { Log($"Replay buffer save skipped: {ex.Message}"); }
 
         // Save projection weights
         var projPath = Path.Combine(checkpointDir, "projection_weights.bin");
-        await _featureExtractor.SaveProjectionAsync(projPath);
+        try { await _featureExtractor.SaveProjectionAsync(projPath); }
+        catch (IOException ex) { Log($"Projection weights save skipped: {ex.Message}"); }
 
         Log($"Checkpoint saved: {checkpointPath}");
+    }
+
+    private static async Task<bool> TryWriteCheckpointAsync(string path, string json)
+    {
+        const int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await File.WriteAllTextAsync(path, json);
+                return true;
+            }
+            catch (IOException) when (attempt < maxAttempts)
+            {
+                await Task.Delay(50 * attempt);
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+        return false;
     }
 
     public async Task LoadCheckpointAsync(string path)
