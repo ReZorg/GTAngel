@@ -22,6 +22,13 @@ public class TrainingModelsTests
     }
 
     [Fact]
+    public void TrainingEpisode_AverageReward_SupportsNegativeTotals()
+    {
+        var ep = new TrainingEpisode { Steps = 4, TotalReward = -6.0 };
+        Assert.Equal(-1.5, ep.AverageReward);
+    }
+
+    [Fact]
     public void TrainingEpisode_Duration_ReturnsPositiveWhenComplete()
     {
         var ep = new TrainingEpisode
@@ -208,11 +215,25 @@ public class TrainingModelsTests
     }
 
     [Fact]
+    public void TrainingStats_KeepRatio_UsesFloatingPointDivision()
+    {
+        var stats = new TrainingStats { ExperimentsRun = 3, ExperimentsKept = 1 };
+        Assert.Equal(1d / 3d, stats.KeepRatio, precision: 10);
+    }
+
+    [Fact]
     public void TrainingStats_DefaultListsAreNotNull()
     {
         var stats = new TrainingStats();
         Assert.NotNull(stats.RewardHistory);
         Assert.NotNull(stats.CoherenceHistory);
+    }
+
+    [Fact]
+    public void TrainingStats_DefaultTargetAutonomyLevel_IsAutonomous()
+    {
+        var stats = new TrainingStats();
+        Assert.Equal(AutonomyLevel.Autonomous, stats.TargetAutonomyLevel);
     }
 
     // ── TrainingConfig ─────────────────────────────────────────────────────

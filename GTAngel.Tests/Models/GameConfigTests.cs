@@ -62,6 +62,41 @@ public class GameConfigTests
         Assert.Equal(new[] { "sandbox" }, config.Genres);
     }
 
+    [Fact]
+    public void GameConfig_Deserialize_IdFromNumber_ConvertsToString()
+    {
+        const string json = """{"id":12345}""";
+        var config = JsonSerializer.Deserialize<GameConfig>(json);
+        Assert.NotNull(config);
+        Assert.Equal("12345", config!.Id);
+    }
+
+    [Fact]
+    public void GameConfig_Deserialize_IdFromFloatingNumber_ConvertsToString()
+    {
+        const string json = """{"id":123.5}""";
+        var config = JsonSerializer.Deserialize<GameConfig>(json);
+        Assert.NotNull(config);
+        Assert.Equal("123.5", config!.Id);
+    }
+
+    [Fact]
+    public void GameConfig_Deserialize_IdFromNull_PreservesNull()
+    {
+        const string json = """{"id":null}""";
+        var config = JsonSerializer.Deserialize<GameConfig>(json);
+        Assert.NotNull(config);
+        Assert.Null(config!.Id);
+    }
+
+    [Fact]
+    public void GameConfig_Serialize_Id_WritesJsonString()
+    {
+        var json = JsonSerializer.Serialize(new GameConfig { Id = "abc123" });
+        using var doc = JsonDocument.Parse(json);
+        Assert.Equal("abc123", doc.RootElement.GetProperty("id").GetString());
+    }
+
     // ── SdkConfig defaults ─────────────────────────────────────────────────
 
     [Fact]

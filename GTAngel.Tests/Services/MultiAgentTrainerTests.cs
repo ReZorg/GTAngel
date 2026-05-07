@@ -1,5 +1,7 @@
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.IO;
+using System.Text.Json;
 using Xunit;
 
 namespace GTAngel.Tests.Services;
@@ -214,5 +216,58 @@ public class MultiAgentTrainerTests : IDisposable
         Assert.Equal(0f, stats.AverageReward);
         Assert.Equal(0f, stats.BestReward);
         Assert.Equal(0L, stats.GlobalUpdateCount);
+    }
+
+    [Fact]
+    public async Task SaveAsync_WritesJsonSnapshot()
+    {
+        await _trainer.InitializeAsync(numAgents: 1);
+        string directory = Path.Combine(Path.GetTempPath(), "GTAngel.Tests", Guid.NewGuid().ToString("N"));
+        string path = Path.Combine(directory, "multi-agent.json");
+
+        await _trainer.SaveAsync(path);
+
+        Assert.True(File.Exists(path));
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        Assert.True(doc.RootElement.TryGetProperty("GlobalWeights", out _));
+        Assert.True(doc.RootElement.TryGetProperty("Stats", out _));
+        Assert.True(doc.RootElement.TryGetProperty("Agents", out _));
+        var firstAgent = doc.RootElement.GetProperty("Agents")[0];
+        Assert.Equal("Agent-00", firstAgent.GetProperty("Name").GetString());
+    }
+
+    [Fact]
+    public async Task Start_AfterInitialize_ActivatesAgentsAndStopAsyncResetsCount()
+    {
+        await _trainer.InitializeAsync(numAgents: 1);
+
+        _trainer.Start();
+        await Task.Delay(50);
+
+        Assert.True(_trainer.Stats.ActiveAgents >= 1);
+
+        await _trainer.StopAsync();
+        Assert.Equal(0, _trainer.Stats.ActiveAgents);
+    }
+
+    [Fact]
+    public void AgentStat_CanStoreValues()
+    {
+        var stat = new AgentStat
+        {
+            Id = 2,
+            Name = "Agent-02",
+            Episodes = 7,
+            Steps = 88,
+            AverageReward = 1.5f,
+            BestReward = 3.0f,
+            Epsilon = 0.4,
+            Status = AgentStatus.Running,
+        };
+
+        Assert.Equal("Agent-02", stat.Name);
+        Assert.Equal(88, stat.Steps);
+        Assert.Equal(0.4, stat.Epsilon);
+        Assert.Equal(AgentStatus.Running, stat.Status);
     }
 }

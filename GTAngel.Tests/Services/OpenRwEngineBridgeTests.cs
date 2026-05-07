@@ -1,5 +1,6 @@
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.IO;
 using Xunit;
 
 namespace GTAngel.Tests.Services;
@@ -131,6 +132,34 @@ public class OpenRwEngineBridgeTests : IDisposable
         Assert.Equal(60, _svc.TargetFps);
     }
 
+    [Fact]
+    public void SetEnginePath_WithExistingFile_SetsDetectedEngineAndDataPath()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "GTAngel.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        string exe = Path.Combine(directory, "openrw.exe");
+        File.WriteAllText(exe, string.Empty);
+
+        _svc.SetEnginePath(exe, OpenRwEngineBridge.EngineType.OpenRW);
+
+        Assert.Equal(OpenRwEngineBridge.EngineType.OpenRW, _svc.DetectedEngine);
+        Assert.Equal(exe, _svc.EnginePath);
+        Assert.Equal(directory, _svc.GameDataPath);
+    }
+
+    [Fact]
+    public void SetGameDataPath_WithInvalidDirectory_LeavesPathUnchanged()
+    {
+        _svc.SetGameDataPath("/path/that/does/not/exist");
+        Assert.Null(_svc.GameDataPath);
+    }
+
+    [Fact]
+    public async Task LaunchAsync_WhenNoEngineDetected_ReturnsFalse()
+    {
+        Assert.False(await _svc.LaunchAsync());
+    }
+
     // ── GameState.ToFeatureVector ─────────────────────────────────────────────
 
     [Fact]
@@ -209,6 +238,38 @@ public class OpenRwEngineBridgeTests : IDisposable
         var state = new OpenRwEngineBridge.GameState { CurrentIsland = "Shoreside" };
         var vector = state.ToFeatureVector();
         Assert.Equal(1f, vector[15]);
+    }
+
+    [Fact]
+    public void ReadGameState_WhenNoProcess_ReturnsDefaultState()
+    {
+        var state = _svc.ReadGameState();
+        Assert.Equal(0f, state.PlayerX);
+        Assert.Equal("Portland", state.CurrentIsland);
+    }
+
+    [Fact]
+    public void GenerateOpenRwBuildConfig_UsesConfiguredResolution()
+    {
+        _svc.RenderWidth = 640;
+        _svc.RenderHeight = 640;
+
+        var config = _svc.GenerateOpenRwBuildConfig();
+
+        Assert.Contains("OPENRW_DEFAULT_WIDTH=640", config);
+        Assert.Contains("OPENRW_DEFAULT_HEIGHT=640", config);
+    }
+
+    [Fact]
+    public void GenerateRe3BuildConfig_UsesConfiguredResolution()
+    {
+        _svc.RenderWidth = 512;
+        _svc.RenderHeight = 512;
+
+        var config = _svc.GenerateRe3BuildConfig();
+
+        Assert.Contains("DEFAULT_SCREEN_WIDTH=512", config);
+        Assert.Contains("DEFAULT_SCREEN_HEIGHT=512", config);
     }
 
     // ── Stop / Dispose ────────────────────────────────────────────────────────
