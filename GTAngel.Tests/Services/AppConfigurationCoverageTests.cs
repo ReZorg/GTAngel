@@ -12,6 +12,8 @@ public sealed class AppConfigurationCoverageTests : IDisposable
 {
     private const string AssetsDirectoryName = "Assets";
     private const string ConfigDirectoryName = "Config";
+    // SaveUserSettingsAsync is fire-and-forget from the property setter, so the test
+    // allows up to 2.5 seconds (50 × 50 ms) for the background write to complete.
     private const int MaxRetryAttempts = 50;
     private const int RetryDelayMilliseconds = 50;
 

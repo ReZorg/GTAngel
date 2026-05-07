@@ -91,7 +91,7 @@ public sealed class BrowserViewModelTests
         new NavigationService(NullLogger<NavigationService>.Instance));
 
     [Fact]
-    public void Defaults_AreInitializedForBlankLoadingPage()
+    public void Constructor_InitializesDefaultState()
     {
         Assert.Equal("about:blank", _viewModel.Url);
         Assert.True(_viewModel.IsLoading);
