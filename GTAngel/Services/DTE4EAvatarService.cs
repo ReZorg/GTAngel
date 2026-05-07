@@ -40,6 +40,7 @@ public class DTE4EAvatarService : IDisposable
     private readonly AvatarEmbodimentService? _embodiment;    // KSM Cycle 3: FACS+IK+Neuro+Personality
     private readonly GameWorldNavigationService? _navigation;   // KSM Cycle 4: POI-directed navigation
     private Ue5PlayerAiBridgeService? _playerAiBridge;          // KSM Cycle 6: Player↔AI Bridge
+    private DteCognitiveCoreService? _cognitiveCore;            // KSM Cycle 5: ECAN attention / MOSES patterns
     private float[] _previousAction = new float[18]; // 18-dim action history for ESN
     private readonly AvatarExplorationPolicy _policy;
     private readonly ConcurrentQueue<AvatarObservation> _observationQueue = new();
@@ -259,6 +260,17 @@ public class DTE4EAvatarService : IDisposable
                     : Array.Empty<float>();
                 var actionProbs = _esn.ProcessStep(visionFrame, gameState, _previousAction);
                 var esnState = _esn.LastReservoirState;
+
+                // KSM Cycle 5: advance ECAN attention + MOSES pattern state on the executive
+                // reservoir, then feed the cluster STI back into the ESN as top-down modulation.
+                // The training-loop variant does the same per-step; the exploration path needs
+                // it too so attention gating and pattern mining aren't frozen at zero here.
+                if (_cognitiveCore != null && esnState.Length > 0)
+                {
+                    _cognitiveCore.UpdateAttention(esnState);
+                    _cognitiveCore.MinePatterns(esnState);
+                    _esn.SetTopDownModulation(_cognitiveCore.GetClusterSTI());
+                }
 
                 // Phase 5.3: Token-bucket — measure perception+ESN latency to govern FACS/IK
                 var percepElapsedMs = (DateTime.UtcNow - percepStart).TotalMilliseconds;
@@ -575,6 +587,18 @@ public class DTE4EAvatarService : IDisposable
     public void SetPlayerAiBridge(Ue5PlayerAiBridgeService bridge)
     {
         _playerAiBridge = bridge;
+    }
+
+    /// <summary>
+    /// KSM Cycle 5: wire in the DTE Cognitive Core so the 4E exploration loop
+    /// advances ECAN attention / MOSES pattern state and feeds STI back into the
+    /// ESN as top-down modulation. Without this, ComputeAttentionGatedLogits
+    /// runs against a frozen-zero STI and effectively disables attention gating.
+    /// </summary>
+    public void SetCognitiveCoreService(DteCognitiveCoreService svc)
+    {
+        _cognitiveCore = svc;
+        _logger.LogInformation("DTE4EAvatarService: DteCognitiveCoreService wired in — ECAN/MOSES advanced from exploration loop.");
     }
 
     public void Dispose()

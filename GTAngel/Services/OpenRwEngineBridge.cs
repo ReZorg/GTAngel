@@ -558,20 +558,31 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
 
             // NamedPipeServerStream.InBufferSize reports the configured pipe capacity,
             // not the bytes currently available, so it cannot be used as a non-blocking
-            // peek. Instead, issue a ReadAsync and bound it with a short timeout so the
-            // game-state poll thread is never stuck waiting for the engine client.
+            // peek. Instead, issue a ReadAsync bound by a CancellationToken so that on
+            // timeout the underlying read is actually cancelled — abandoning the task
+            // would leak it and start a concurrent ReadAsync on the next call, which
+            // violates Stream's contract and silently drops data.
             const int readTimeoutMs = 50;
-            var readTask = _ipcServer.ReadAsync(buffer, 0, buffer.Length);
-            if (!readTask.Wait(readTimeoutMs))
-                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
-
-            int bytesRead = readTask.Result;
+            int bytesRead;
+            using (var cts = new CancellationTokenSource(readTimeoutMs))
+            {
+                try
+                {
+                    bytesRead = _ipcServer.ReadAsync(buffer, 0, buffer.Length, cts.Token)
+                                          .GetAwaiter().GetResult();
+                }
+                catch (OperationCanceledException)
+                {
+                    return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+                }
+            }
             if (bytesRead == 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-            // Find the end of the first complete JSON object (terminated by '}' or newline)
+            // Find the end of the first complete JSON object so concatenated messages
+            // (e.g. "{\"x\":1}\n{\"y\":2}") parse the first one cleanly instead of
+            // including trailing content that JsonDocument.Parse rejects.
             var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            // Trim to the last '}' to handle any trailing data or partial messages
             int jsonEnd = raw.IndexOf('}');
             if (jsonEnd < 0)
                 return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };

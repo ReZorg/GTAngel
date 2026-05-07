@@ -355,6 +355,12 @@ public partial class AvatarViewModel : ObservableObject
                 _ue5, esn, _mlVision, _embodiment, _navigation);
             _avatarService.SetPlayerAiBridge(_playerAiBridge);
 
+            // KSM Cycle 5: wire the cognitive core into the exploration loop too — without
+            // this, ECAN STI and MOSES patterns never advance in the 4E avatar path and
+            // attention gating collapses to a uniform weight.
+            var cogCore = App.Services.GetRequiredService<DteCognitiveCoreService>();
+            _avatarService.SetCognitiveCoreService(cogCore);
+
             // Wire events
             _avatarService.CognitiveStateUpdated += OnCognitiveStateUpdated;
             _avatarService.ObservationReceived   += OnObservationReceived;
