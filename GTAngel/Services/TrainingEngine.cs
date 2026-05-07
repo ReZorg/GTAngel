@@ -451,6 +451,13 @@ public class TrainingEngine
     private float _prevExplorationWeight;
     private float _prevJaccardThresh;
     private float _prevRidgeLambda;
+    // Validity flags: only restore service-level fields when ApplyHypothesis
+    // captured them from a non-null service. Without these, if a service is
+    // wired AFTER ApplyHypothesis but BEFORE RevertHypothesis, RevertHypothesis
+    // would silently overwrite the service's actual values with the fallback
+    // defaults that ApplyHypothesis stored when the service was null.
+    private bool  _prevRewardWeightsValid;
+    private bool  _prevCognitiveCoreParamsValid;
 
     // Phase 6.3: References to real services for expanded hypothesis application
     private DteCognitiveCoreService? _cognitiveCoreService;
@@ -468,10 +475,26 @@ public class TrainingEngine
         _prevLeakingRate       = _esn.LeakingRate;
         _prevExplorationRate   = _config.ExplorationRate;
         _prevCurriculumDifficulty = _config.CurriculumDifficulty;
-        _prevNavWeight         = _rewardShaperRef?.Weights.Navigation ?? 1.0f;
-        _prevExplorationWeight = _rewardShaperRef?.Weights.Exploration ?? 2.0f;
-        _prevJaccardThresh     = _cognitiveCoreService?.JaccardThresh ?? 0.55f;
-        _prevRidgeLambda       = _cognitiveCoreService?.RidgeLambda ?? 1e-4f;
+        if (_rewardShaperRef != null)
+        {
+            _prevNavWeight              = _rewardShaperRef.Weights.Navigation;
+            _prevExplorationWeight      = _rewardShaperRef.Weights.Exploration;
+            _prevRewardWeightsValid     = true;
+        }
+        else
+        {
+            _prevRewardWeightsValid     = false;
+        }
+        if (_cognitiveCoreService != null)
+        {
+            _prevJaccardThresh             = _cognitiveCoreService.JaccardThresh;
+            _prevRidgeLambda               = _cognitiveCoreService.RidgeLambda;
+            _prevCognitiveCoreParamsValid  = true;
+        }
+        else
+        {
+            _prevCognitiveCoreParamsValid  = false;
+        }
 
         double delta = (_rng.NextDouble() - 0.5) * _config.MaxParameterDelta;
 
@@ -519,12 +542,16 @@ public class TrainingEngine
         _esn.LeakingRate             = _prevLeakingRate;
         _config.ExplorationRate      = _prevExplorationRate;
         _config.CurriculumDifficulty = _prevCurriculumDifficulty;
-        if (_rewardShaperRef != null)
+        // Only restore service-level params when ApplyHypothesis actually
+        // captured them from the same (non-null) service — otherwise we'd
+        // overwrite a service that was wired *after* the experiment started
+        // with the fallback defaults stored at save time.
+        if (_rewardShaperRef != null && _prevRewardWeightsValid)
         {
             _rewardShaperRef.Weights.Navigation  = _prevNavWeight;
             _rewardShaperRef.Weights.Exploration = _prevExplorationWeight;
         }
-        if (_cognitiveCoreService != null)
+        if (_cognitiveCoreService != null && _prevCognitiveCoreParamsValid)
         {
             _cognitiveCoreService.JaccardThresh = _prevJaccardThresh;
             _cognitiveCoreService.RidgeLambda   = _prevRidgeLambda;

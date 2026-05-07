@@ -11,6 +11,8 @@
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
         <conv:FloatToHeightConverter x:Key="FloatToHeight"/>
+        <conv:FloatToOpacityConverter x:Key="FloatToOpacity"/>
+        <conv:StringEqualsToVisibilityConverter x:Key="StringEqualsToVis"/>
         <conv:BoolToGreenGrayConverter x:Key="BoolToGreenGray"/>
         <conv:InverseBoolConverter x:Key="InvBool"/>
         <conv:ProgressToWidthConverter x:Key="ProgressToWidth"/>
@@ -837,15 +839,16 @@
                                     <!-- Portland (leftmost island) -->
                                     <Border Grid.Column="0" Margin="2" CornerRadius="2">
                                         <Border.Background>
+                                            <!-- Opacity must be in [0,1]; FloatToHeightConverter floors at 1.0 (pixel height) so use FloatToOpacityConverter here -->
                                             <SolidColorBrush Color="#1A2A1A"
-                                                Opacity="{Binding NavDistrictCoverage, Converter={StaticResource FloatToHeight}, ConverterParameter=1}"/>
+                                                Opacity="{Binding NavDistrictCoverage, Converter={StaticResource FloatToOpacity}}"/>
                                         </Border.Background>
                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                             <TextBlock Text="PORTLAND" FontSize="7" Foreground="#22D3EE"
                                                        HorizontalAlignment="Center" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding CurrentDistrict}" FontSize="7"
                                                        Foreground="#404060" HorizontalAlignment="Center"
-                                                       Visibility="{Binding CurrentDistrict, Converter={StaticResource BoolToVis}}"/>
+                                                       Visibility="{Binding CurrentDistrict, Converter={StaticResource StringEqualsToVis}, ConverterParameter=Portland}"/>
                                         </StackPanel>
                                     </Border>
                                     <!-- Staunton Island (center) -->
@@ -862,10 +865,10 @@
                                                        HorizontalAlignment="Center" FontWeight="Bold"/>
                                         </StackPanel>
                                     </Border>
-                                    <!-- Avatar position overlay (current district highlight) -->
+                                    <!-- Avatar position overlay (current district highlight) — only over Portland column -->
                                     <Border Grid.Column="0" Margin="2" CornerRadius="2" BorderThickness="1"
                                             BorderBrush="#22D3EE" Background="Transparent"
-                                            Visibility="{Binding CurrentDistrict, Converter={StaticResource BoolToVis}}"/>
+                                            Visibility="{Binding CurrentDistrict, Converter={StaticResource StringEqualsToVis}, ConverterParameter=Portland}"/>
                                     <!-- POI count badge -->
                                     <Border Grid.Column="0" Grid.ColumnSpan="3"
                                             VerticalAlignment="Bottom" HorizontalAlignment="Right"
