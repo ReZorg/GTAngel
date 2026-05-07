@@ -19,6 +19,10 @@ public class TrainingEngine
     private readonly List<AlexanderProperty> _properties;
     private TrainingStats _stats = new();
     private bool _isRunning;
+    // Backing int for Interlocked.CompareExchange — int because Interlocked
+    // doesn't support bool. 0 = idle, 1 = running. Used to atomically reject
+    // concurrent StartAutogenesisAsync calls on the shared singleton.
+    private int  _isRunningFlag;
     private CancellationTokenSource? _cts;
 
     public EchoStateNetwork ESN => _esn;
@@ -54,53 +58,82 @@ public class TrainingEngine
     /// <summary>
     /// Configure and start the autogenesis training loop.
     /// </summary>
+    /// <remarks>
+    /// Concurrent-start guarded: this engine is a DI singleton shared by both
+    /// the Training Dashboard (MainViewModel) and the GTAngel Guardian Angel
+    /// tab (GTAngelService). If a second caller starts while one is already
+    /// running, the call is logged and ignored — without this guard, the
+    /// second caller would overwrite _config, leak the existing _cts, and
+    /// race the experiment-history collections.
+    /// </remarks>
     public async Task StartAutogenesisAsync(TrainingConfig config, IProgress<string>? progress = null)
     {
-        _config = config;
-        _cts = new CancellationTokenSource();
-        _isRunning = true;
-
-        OnLogMessage?.Invoke($"[Autogenesis] Starting evolution toward {config.TargetLevel}");
-        OnLogMessage?.Invoke($"[Autogenesis] Max experiments: {config.MaxExperiments}, Min coherence: {config.MinCoherence}");
-
-        // Record baseline
-        var baseline = await RunBaselineExperiment(progress);
-        _experiments.Add(baseline);
-        OnExperimentCompleted?.Invoke(baseline);
-
-        // Main autogenesis loop
-        int experimentId = 1;
-        while (experimentId <= config.MaxExperiments && !_cts.Token.IsCancellationRequested)
+        // Atomic claim of the running slot — first caller wins.
+        if (Interlocked.CompareExchange(ref _isRunningFlag, 1, 0) != 0)
         {
-            try
-            {
-                var experiment = await RunExperiment(experimentId, progress, _cts.Token);
-                _experiments.Add(experiment);
-                OnExperimentCompleted?.Invoke(experiment);
-
-                // Update stats
-                UpdateStats();
-
-                // Check if target autonomy level reached
-                if (_stats.CurrentAutonomyLevel >= config.TargetLevel)
-                {
-                    OnLogMessage?.Invoke($"[Autogenesis] TARGET REACHED: {config.TargetLevel}!");
-                    break;
-                }
-
-                experimentId++;
-                await Task.Delay(100, _cts.Token); // Small delay for UI responsiveness
-            }
-            catch (OperationCanceledException)
-            {
-                OnLogMessage?.Invoke("[Autogenesis] Loop cancelled by user");
-                break;
-            }
+            OnLogMessage?.Invoke("[Autogenesis] Already running — ignoring concurrent StartAutogenesisAsync call");
+            progress?.Report("Autogenesis already running");
+            return;
         }
 
-        _isRunning = false;
-        OnLogMessage?.Invoke($"[Autogenesis] Complete. {_experiments.Count} experiments, " +
-                           $"Keep ratio: {_stats.KeepRatio:P0}");
+        _config = config;
+        var cts = new CancellationTokenSource();
+        _cts = cts;
+        _isRunning = true;
+
+        try
+        {
+            OnLogMessage?.Invoke($"[Autogenesis] Starting evolution toward {config.TargetLevel}");
+            OnLogMessage?.Invoke($"[Autogenesis] Max experiments: {config.MaxExperiments}, Min coherence: {config.MinCoherence}");
+
+            // Record baseline
+            var baseline = await RunBaselineExperiment(progress);
+            _experiments.Add(baseline);
+            OnExperimentCompleted?.Invoke(baseline);
+
+            // Main autogenesis loop
+            int experimentId = 1;
+            while (experimentId <= config.MaxExperiments && !cts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    var experiment = await RunExperiment(experimentId, progress, cts.Token);
+                    _experiments.Add(experiment);
+                    OnExperimentCompleted?.Invoke(experiment);
+
+                    // Update stats
+                    UpdateStats();
+
+                    // Check if target autonomy level reached
+                    if (_stats.CurrentAutonomyLevel >= config.TargetLevel)
+                    {
+                        OnLogMessage?.Invoke($"[Autogenesis] TARGET REACHED: {config.TargetLevel}!");
+                        break;
+                    }
+
+                    experimentId++;
+                    await Task.Delay(100, cts.Token); // Small delay for UI responsiveness
+                }
+                catch (OperationCanceledException)
+                {
+                    OnLogMessage?.Invoke("[Autogenesis] Loop cancelled by user");
+                    break;
+                }
+            }
+
+            OnLogMessage?.Invoke($"[Autogenesis] Complete. {_experiments.Count} experiments, " +
+                               $"Keep ratio: {_stats.KeepRatio:P0}");
+        }
+        finally
+        {
+            // Always release the running slot — without this, an unhandled
+            // exception during the loop would leave _isRunningFlag=1 forever
+            // and lock out all future StartAutogenesisAsync calls.
+            _isRunning = false;
+            cts.Dispose();
+            if (ReferenceEquals(_cts, cts)) _cts = null;
+            Interlocked.Exchange(ref _isRunningFlag, 0);
+        }
     }
 
     public void Stop()
