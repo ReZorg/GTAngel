@@ -17,14 +17,24 @@ linked to the specific .NET code that depends on it.
 
 ## 1. Data contracts
 
-The cognition module sees the engine *only* through three IPC types defined in
-`GTAngel/Interop/UE5ProcessManager.cs`:
+The cognition module sees the engine *only* through three IPC types, each
+defined in its own file under `GTAngel/Interop/`:
 
-- `AvatarObservation` — the per-tick ground-truth snapshot UE5 emits.
-- `PerceivedObject` — what the UE5 AI Perception system reports as nearby.
-- `NeurochemicalSnapshot` — DTE NeurochemicalSystem state.
+- `AvatarObservation` (`GTAngel/Interop/AvatarObservation.cs`) — the per-tick
+  ground-truth snapshot UE5 emits.
+- `PerceivedObject` (`GTAngel/Interop/PerceivedObject.cs`) — what the UE5 AI
+  Perception system reports as nearby.
+- `NeurochemicalSnapshot` (`GTAngel/Interop/NeurochemicalSnapshot.cs`) — DTE
+  NeurochemicalSystem state.
 
-The cognition module then emits `AvatarAction` back to UE5.
+The cognition module then emits `AvatarAction`
+(`GTAngel/Interop/AvatarAction.cs`) back to UE5.
+
+The matching UE5 C++ structs (`FAvatarObservation`, `FPerceivedObject`,
+`FNeurochemicalSnapshot`, `FAvatarAction`) are reproduced as a contract
+reference at `docs/embodied-cognition/AvatarIPCTypes.h` — the UE5 plugin
+should copy that header into its own module rather than re-declaring the
+structs from scratch.
 
 ### 1.1 `AvatarObservation` — required fields
 
@@ -317,12 +327,58 @@ They mirror the .NET integration tests in `EmbodiedDecisionLoopTests`:
 
 ---
 
-## 7. Cross-references
+## 7. Models inventory
 
-- Implementation: `GTAngel/Services/EmbodiedCognition/`
-- Models: `GTAngel/Models/EmbodiedCognition/`
-- Wiring: `GTAngel/Services/DTE4EAvatarService.cs` (search for `_embodiedLoop`)
-- IPC types: `GTAngel/Interop/UE5ProcessManager.cs`
+Every type the embodied cognition pipeline depends on lives in this codebase.
+This table is the canonical map from "concept" to "file". If you add a new
+model used by the cognition pipeline, add a row here.
+
+### 7.1 Embodied cognition models (.NET)
+
+| Type | File | Purpose |
+|---|---|---|
+| `PerceptualField` | `GTAngel/Models/EmbodiedCognition/PerceptualField.cs` | The complete perception bundle the policy sees this tick. |
+| `VisualPercept` | `GTAngel/Models/EmbodiedCognition/PerceptualField.cs` | One sight-cone-filtered object. |
+| `AuditoryPercept` | `GTAngel/Models/EmbodiedCognition/PerceptualField.cs` | One audible source. |
+| `EmbodiedSelfState` | `GTAngel/Models/EmbodiedCognition/PerceptualField.cs` | Avatar's awareness of its own body. |
+| `MotorIntent` | `GTAngel/Models/EmbodiedCognition/MotorIntent.cs` | High-level body-independent action request. |
+| `MotorIntentType` | `GTAngel/Models/EmbodiedCognition/MotorIntent.cs` | Enum: `Idle`, `MoveToward`, `Strafe`, `TurnTo`, `Jump`, `Crouch`, `Sprint`, `Interact`, `LookAt`. |
+| `PerceptionConfig` | `GTAngel/Models/EmbodiedCognition/PerceptionConfig.cs` | FOV / sight / hearing / silent-tags tunables. |
+| `MotorConfig` | `GTAngel/Models/EmbodiedCognition/MotorConfig.cs` | Deadzone, max-axis, hold duration, crouch lockouts. |
+| `SpatialMemoryEntry` | `GTAngel/Models/EmbodiedCognition/SpatialMemoryEntry.cs` | One remembered object with confidence + last-seen time. |
+
+### 7.2 IPC contract types (.NET)
+
+| Type | File | Direction |
+|---|---|---|
+| `AvatarObservation` | `GTAngel/Interop/AvatarObservation.cs` | UE5 → .NET |
+| `PerceivedObject` | `GTAngel/Interop/PerceivedObject.cs` | UE5 → .NET (nested) |
+| `NeurochemicalSnapshot` | `GTAngel/Interop/NeurochemicalSnapshot.cs` | UE5 → .NET (nested) |
+| `AvatarAction` | `GTAngel/Interop/AvatarAction.cs` | .NET → UE5 |
+| `UEMessage` | `GTAngel/Interop/UE5ProcessManager.cs` | bidirectional envelope |
+
+### 7.3 UE5 C++ contract reference (header-only mirror)
+
+| Type | File | Notes |
+|---|---|---|
+| `FAvatarObservation`, `FAvatarAction`, `FPerceivedObject`, `FNeurochemicalSnapshot` | `docs/embodied-cognition/AvatarIPCTypes.h` | Drop-in `USTRUCT` declarations for the UE5 plugin. Field names match the .NET types byte-for-byte; both sides serialise via JSON. |
+
+> The header is documentation only and is not compiled by the .NET solution.
+> When the .NET IPC types change, this header **must** be updated in the
+> same PR — both sides of the contract are versioned together.
+
+---
+
+## 8. Cross-references
+
+- Cognitive pipeline: `GTAngel/Services/EmbodiedCognition/`
+  (`SensoryPerceptionService`, `SpatialMemory`, `MotorController`,
+  `EmbodiedDecisionLoop`, `IPerceptionPolicy`, `ReactivePerceptionPolicy`).
+- Models: `GTAngel/Models/EmbodiedCognition/` — see §7.1 for the full list.
+- Wiring: `GTAngel/Services/DTE4EAvatarService.cs` (search for `_embodiedLoop`).
+- IPC types (.NET): `GTAngel/Interop/Avatar*.cs`,
+  `GTAngel/Interop/PerceivedObject.cs`, `GTAngel/Interop/NeurochemicalSnapshot.cs`.
+- IPC types (UE5 C++ mirror): `docs/embodied-cognition/AvatarIPCTypes.h`.
 - Tests pinning these contracts:
   - `GTAngel.Tests/Services/EmbodiedCognition/SensoryPerceptionServiceTests.cs`
   - `GTAngel.Tests/Services/EmbodiedCognition/MotorControllerTests.cs`
