@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Logging;
 using GTAngel.Interop;
 using GTAngel.Models;
+using GTAngel.Services.EmbodiedCognition;
 
 namespace GTAngel.Services;
 
@@ -41,6 +42,7 @@ public class DTE4EAvatarService : IDisposable
     private readonly GameWorldNavigationService? _navigation;   // KSM Cycle 4: POI-directed navigation
     private Ue5PlayerAiBridgeService? _playerAiBridge;          // KSM Cycle 6: Player↔AI Bridge
     private DteCognitiveCoreService? _cognitiveCore;            // KSM Cycle 5: ECAN attention / MOSES patterns
+    private EmbodiedDecisionLoop? _embodiedLoop;                // Embodied cognition: perception-grounded action selection
     private float[] _previousAction = new float[18]; // 18-dim action history for ESN
     private readonly AvatarExplorationPolicy _policy;
     private readonly ConcurrentQueue<AvatarObservation> _observationQueue = new();
@@ -292,6 +294,19 @@ public class DTE4EAvatarService : IDisposable
                 // ── 4. DECIDE (Exploration Policy) ────────────────────────
                 // The policy uses ESN state + neurochemical state to decide action
                 var action = _policy.SelectAction(CognitiveState, esnState);
+
+                // ── 4b. EMBODIED OVERRIDE (perception-limited cognition) ─────
+                // If an embodied decision loop is wired in, it takes precedence:
+                // it filters obs into a perceptual field (sight + hearing + body),
+                // updates spatial memory, runs a perception-grounded policy, and
+                // produces an AvatarAction through a constraint-aware MotorController.
+                // Falls back to the legacy ESN-policy action when the embodied loop
+                // chooses Idle (e.g. nothing visible, nothing heard, no memory).
+                if (_embodiedLoop != null)
+                {
+                    var embodiedAction = _embodiedLoop.Step(obs);
+                    if (embodiedAction != null) action = embodiedAction;
+                }
 
                 // ── 5. ACT (UE5 Enhanced Input) ───────────────────────────
                 // KSM Cycle 6: Arbitrate input before executing
@@ -615,6 +630,21 @@ public class DTE4EAvatarService : IDisposable
         _cognitiveCore = svc;
         _logger.LogInformation("DTE4EAvatarService: DteCognitiveCoreService wired in — ECAN/MOSES advanced from exploration loop.");
     }
+
+    /// <summary>
+    /// Inject (or replace) the embodied cognition decision loop. When set, the
+    /// exploration loop will route observations through it on every tick:
+    /// the AI's "knowledge" of the world is then limited to what its sensors
+    /// (sight cone, hearing radius) can perceive, plus what it has remembered.
+    /// Pass <c>null</c> to disable and revert to the legacy ESN-policy path.
+    /// </summary>
+    public void SetEmbodiedDecisionLoop(EmbodiedDecisionLoop? loop)
+    {
+        _embodiedLoop = loop;
+    }
+
+    /// <summary>The active embodied decision loop, or <c>null</c> if not wired.</summary>
+    public EmbodiedDecisionLoop? EmbodiedLoop => _embodiedLoop;
 
     public void Dispose()
     {
