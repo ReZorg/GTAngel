@@ -195,6 +195,24 @@ public sealed class MotorControllerTests
         Assert.True(mc.IsSprinting);
     }
 
+    /// <summary>
+    /// Regression: a sprint intent whose magnitude is below the deadzone must NOT
+    /// flip <see cref="MotorController.IsSprinting"/> to true. Previously the
+    /// state flag was committed before the deadzone check, leaving the controller
+    /// reporting "sprinting" while emitting a zero-magnitude no-op action.
+    /// </summary>
+    [Fact]
+    public void Sprint_BelowDeadzone_DoesNotCorruptIsSprintingState()
+    {
+        var mc = new MotorController(new MotorConfig { DeadzoneMagnitude = 0.2f });
+        var act = mc.Translate(
+            new MotorIntent { Type = MotorIntentType.Sprint, Magnitude = 0.05f },
+            Self(new float[3], new float[3]));
+
+        Assert.Null(act);                  // sub-deadzone → no action
+        Assert.False(mc.IsSprinting);      // state must stay clean
+    }
+
     // ── 5. TurnTo ─────────────────────────────────────────────────────────
 
     [Fact]

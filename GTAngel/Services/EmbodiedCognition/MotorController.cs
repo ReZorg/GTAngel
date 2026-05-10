@@ -103,11 +103,16 @@ public sealed class MotorController
                         return BuildMoveToward(intent, self);
                     return null;
                 }
+                // Validate magnitude against deadzone BEFORE committing IsSprinting,
+                // otherwise a sub-deadzone request would corrupt the body-state flag
+                // while producing a zero-magnitude no-op action.
+                var sprintMag = ApplyDeadzone(intent.Magnitude);
+                if (sprintMag <= 0f) return null;
                 IsSprinting = true;
                 return new AvatarAction
                 {
                     InputAction = "IA_Sprint",
-                    Magnitude = ApplyDeadzone(intent.Magnitude),
+                    Magnitude = sprintMag,
                     Source = intent.Source
                 };
 

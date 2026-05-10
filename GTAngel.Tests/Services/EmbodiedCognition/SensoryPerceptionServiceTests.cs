@@ -183,6 +183,40 @@ public sealed class SensoryPerceptionServiceTests
         Assert.True(close.SignalStrength > mid.SignalStrength);
     }
 
+    /// <summary>
+    /// Regression: <see cref="VisualPercept.RelativeElevationDeg"/> must be derived
+    /// from the planar (XY) distance, even when the engine's <c>PerceivedObject.Distance</c>
+    /// field is the full 3D Euclidean distance. Previously the 3D distance was used
+    /// as the denominator of <c>atan2(dz, dist)</c>, underestimating elevation angles
+    /// for objects with significant vertical offset.
+    /// </summary>
+    [Fact]
+    public void Sight_Elevation_UsesPlanarDistance_NotEngineReported3DDistance()
+    {
+        var svc = MakeSvc(new PerceptionConfig
+        {
+            FieldOfViewDeg = 180f,
+            RequireVisibility = false,
+            SightRangeUu = 5000f
+        });
+        // Object at (100, 0, 100): planar distance = 100, height = 100 → 45° elevation.
+        // Engine reports 3D distance = sqrt(100²+100²) ≈ 141.42 (which is wrong for elevation).
+        var obj = new PerceivedObject
+        {
+            Tag = "HighSign",
+            Location = new[] { 100f, 0f, 100f },
+            IsVisible = true,
+            Distance = MathF.Sqrt(100f * 100f + 100f * 100f)
+        };
+        var obs = MakeObs(objects: new[] { obj });
+
+        var field = svc.Perceive(obs);
+        var p = field.Visuals.Single(v => v.Tag == "HighSign");
+
+        // Correct elevation atan2(100, 100) = 45°. Tolerate a tiny floating-point fuzz.
+        Assert.InRange(p.RelativeElevationDeg, 44.5f, 45.5f);
+    }
+
     [Fact]
     public void Sight_SignalStrength_FallsOffWithAngularOffset()
     {

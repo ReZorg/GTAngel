@@ -122,8 +122,13 @@ public sealed class SensoryPerceptionService
             if (loc.Length < 2) continue;
 
             // Engine reports distance directly when available; otherwise compute.
-            float dist = obj.Distance > 0f ? obj.Distance : Distance2D(self.Position, loc);
+            // We track the planar (XY) distance separately because elevation math
+            // requires it: ElevationDeg = atan2(dz, planarDist), and the engine's
+            // Distance field is generally the full 3D Euclidean magnitude.
+            float planarDist = Distance2D(self.Position, loc);
+            float dist = obj.Distance > 0f ? obj.Distance : planarDist;
             if (dist <= 0.0001f) dist = 0.0001f;
+            if (planarDist <= 0.0001f) planarDist = 0.0001f;
 
             float bearingDeg = SignedYawDelta(self.Position, loc, yawDeg);
 
@@ -143,7 +148,7 @@ public sealed class SensoryPerceptionService
                     WorldLocation = new[] { Get(loc, 0), Get(loc, 1), Get(loc, 2) },
                     Distance = dist,
                     RelativeBearingDeg = bearingDeg,
-                    RelativeElevationDeg = ElevationDeg(self.Position, loc, dist),
+                    RelativeElevationDeg = ElevationDeg(self.Position, loc, planarDist),
                     SignalStrength = strength
                 });
             }
