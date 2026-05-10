@@ -154,6 +154,77 @@ public sealed class SpatialMemoryTests
     }
 
     [Fact]
+    public void Decay_DoesNotOverwriteLastSeen_ForUnReperceivedEntries()
+    {
+        // Regression: Decay() previously overwrote LastSeen with the decay
+        // tick time, breaking the documented "last actually re-perceived"
+        // semantics that policies use as a recency signal. After the fix,
+        // an entry never seen again must keep its original LastSeen.
+        var mem = new SpatialMemory
+        {
+            CellSize = 100f,
+            DecayPerSecond = 0.1f,
+            MinConfidence = 0.001f
+        };
+        mem.Update(FieldWith(0.0, VPerc("Door", 100f, 100f, 1f)));
+
+        mem.Decay(1.0);
+        mem.Decay(2.0);
+        mem.Decay(5.0);
+
+        var entry = mem.Snapshot().Single();
+        Assert.Equal(0.0, entry.LastSeen, 6);
+    }
+
+    [Fact]
+    public void Decay_LastSeenIsRefreshedOnReperceive_NotOnDecay()
+    {
+        var mem = new SpatialMemory
+        {
+            CellSize = 100f,
+            DecayPerSecond = 0.1f,
+            MinConfidence = 0.001f
+        };
+        mem.Update(FieldWith(0.0, VPerc("Door", 100f, 100f, 1f)));
+        mem.Decay(2.0);                                       // not re-perceived → LastSeen still 0
+        mem.Update(FieldWith(3.0, VPerc("Door", 100f, 100f, 1f))); // re-perceived → LastSeen = 3
+        mem.Decay(4.0);                                       // not re-perceived → LastSeen stays 3
+
+        var entry = mem.Snapshot().Single();
+        Assert.Equal(3.0, entry.LastSeen, 6);
+    }
+
+    [Fact]
+    public void Decay_ConsecutiveDecaysComposeWithoutDoubleDecay()
+    {
+        // After the fix, internal decay bookkeeping is tracked separately
+        // from LastSeen, so two consecutive decays should yield the same
+        // total decay factor as one decay over the same total elapsed time.
+        var memA = new SpatialMemory
+        {
+            CellSize = 100f,
+            DecayPerSecond = 0.5f,
+            MinConfidence = 0.0001f
+        };
+        var memB = new SpatialMemory
+        {
+            CellSize = 100f,
+            DecayPerSecond = 0.5f,
+            MinConfidence = 0.0001f
+        };
+
+        memA.Update(FieldWith(0.0, VPerc("Door", 100f, 100f, 1f)));
+        memB.Update(FieldWith(0.0, VPerc("Door", 100f, 100f, 1f)));
+
+        memA.Decay(2.0);
+
+        memB.Decay(1.0);
+        memB.Decay(2.0);
+
+        Assert.Equal(memA.Snapshot()[0].Confidence, memB.Snapshot()[0].Confidence, 5);
+    }
+
+    [Fact]
     public void Clear_RemovesAllEntries()
     {
         var mem = new SpatialMemory();

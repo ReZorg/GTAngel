@@ -21,6 +21,12 @@ public sealed class SpatialMemory
 {
     private readonly Dictionary<(string tag, int cx, int cy), SpatialMemoryEntry> _entries = new();
 
+    // Tracks when decay was last applied to each entry so the public
+    // SpatialMemoryEntry.LastSeen field can preserve its documented
+    // "last actually re-perceived" semantics. This must NOT leak into
+    // Snapshot() — it's purely internal decay bookkeeping.
+    private readonly Dictionary<(string tag, int cx, int cy), double> _lastDecayedAt = new();
+
     /// <summary>XY cell size in unreal units. Default 100 (= 1 m).</summary>
     public float CellSize { get; set; } = 100f;
 
@@ -56,7 +62,14 @@ public sealed class SpatialMemory
         }
     }
 
-    /// <summary>Apply exponential decay since the previous tick and prune dim entries.</summary>
+    /// <summary>
+    /// Apply exponential decay since the previous decay tick and prune dim
+    /// entries. <see cref="SpatialMemoryEntry.LastSeen"/> is intentionally
+    /// NOT modified here — it tracks the last actual re-perception, which
+    /// policies use as a recency signal. Internal decay bookkeeping is kept
+    /// separately so consecutive Decay calls compose correctly without
+    /// double-decaying.
+    /// </summary>
     public void Decay(double currentTimestampSeconds)
     {
         if (_entries.Count == 0) return;
@@ -65,15 +78,25 @@ public sealed class SpatialMemory
         foreach (var kv in _entries)
         {
             var entry = kv.Value;
-            float elapsed = (float)Math.Max(0, currentTimestampSeconds - entry.LastSeen);
+            // Decay from the later of (last actually seen, last decayed) so
+            // that an entry just refreshed via UpsertOne does not get
+            // immediately decayed back down on the same tick.
+            double decayFrom = _lastDecayedAt.TryGetValue(kv.Key, out var t)
+                ? Math.Max(t, entry.LastSeen)
+                : entry.LastSeen;
+            float elapsed = (float)Math.Max(0, currentTimestampSeconds - decayFrom);
             if (elapsed > 0f)
             {
                 entry.Confidence *= MathF.Exp(-DecayPerSecond * elapsed);
-                entry.LastSeen = currentTimestampSeconds;
+                _lastDecayedAt[kv.Key] = currentTimestampSeconds;
             }
             if (entry.Confidence < MinConfidence) dead.Add(kv.Key);
         }
-        foreach (var k in dead) _entries.Remove(k);
+        foreach (var k in dead)
+        {
+            _entries.Remove(k);
+            _lastDecayedAt.Remove(k);
+        }
     }
 
     /// <summary>
@@ -105,7 +128,11 @@ public sealed class SpatialMemory
             .ToList();
 
     /// <summary>Forget everything.</summary>
-    public void Clear() => _entries.Clear();
+    public void Clear()
+    {
+        _entries.Clear();
+        _lastDecayedAt.Clear();
+    }
 
     // ── Internals ─────────────────────────────────────────────────────────
 
