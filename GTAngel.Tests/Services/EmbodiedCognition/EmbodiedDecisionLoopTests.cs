@@ -195,19 +195,22 @@ public sealed class EmbodiedDecisionLoopTests
     [Fact]
     public void Step_ReactivePolicy_OrientsTowardSoundWhenNothingVisible()
     {
+        // Pick perception parameters so the source is unambiguously above
+        // ReactivePerceptionPolicy's OrientToSoundThreshold (0.25):
+        // loudness = 1/(distance/fullLoudness)² = 1/(250/200)² = 0.64
         var perception = new SensoryPerceptionService(NullLogger<SensoryPerceptionService>.Instance,
             new PerceptionConfig
             {
                 FieldOfViewDeg = 60f,           // narrow visual cone
-                SightRangeUu = 200f,            // short sight
+                SightRangeUu = 200f,            // short sight (object at 250 is invisible)
                 HearingRangeUu = 5000f,
-                FullLoudnessRangeUu = 100f
+                FullLoudnessRangeUu = 200f
             });
         var loop = new EmbodiedDecisionLoop(perception, new SpatialMemory(), new MotorController(),
             new ReactivePerceptionPolicy(), NullLogger<EmbodiedDecisionLoop>.Instance);
 
-        // Object behind & far → not visible, but hearable.
-        var act = loop.Step(MakeObs(0.0, Obj("NPC", -300f, 0f)));
+        // Object behind & beyond sight range → not visible, but plenty audible.
+        var act = loop.Step(MakeObs(0.0, Obj("NPC", -250f, 0f)));
 
         Assert.NotNull(act);
         Assert.Equal("IA_Look", act!.InputAction);
