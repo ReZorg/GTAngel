@@ -1,0 +1,2 @@
+
+<!-- Declarative environment verification -->
