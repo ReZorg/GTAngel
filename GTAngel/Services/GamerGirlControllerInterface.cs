@@ -219,7 +219,10 @@ public sealed class GamerGirlControllerInterface : IDisposable
             _hapticArousal * 0.9f + (leftMotor + rightMotor) * 0.5f * 0.1f,
             0f, 1f);
 
-        HapticFeedbackTriggered?.Invoke(this, new HapticFeedbackEventArgs(pulse));
+        HapticFeedbackTriggered?.Invoke(this, new HapticFeedbackEventArgs(
+            pulse.LeftMotor,
+            pulse.RightMotor,
+            pulse.DurationMs));
     }
 
     /// <summary>
@@ -598,11 +601,11 @@ public sealed class GamingIntentChangedEventArgs(GamingIntent previous, GamingIn
     public GamingIntent Current { get; } = current;
 }
 
-public sealed class HapticFeedbackEventArgs(GamerGirlControllerInterface.HapticPulse pulse) : EventArgs
+public sealed class HapticFeedbackEventArgs(float leftMotor, float rightMotor, float durationMs) : EventArgs
 {
-    public float LeftMotor { get; } = pulse.LeftMotor;
-    public float RightMotor { get; } = pulse.RightMotor;
-    public float DurationMs { get; } = pulse.DurationMs;
+    public float LeftMotor { get; } = leftMotor;
+    public float RightMotor { get; } = rightMotor;
+    public float DurationMs { get; } = durationMs;
 }
 
 /// <summary>Telemetry snapshot of the gamer-girl controller state.</summary>
