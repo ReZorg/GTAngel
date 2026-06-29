@@ -114,8 +114,8 @@ jobs:
           if ($match.Success) {
             $coverage = [double]$match.Groups[1].Value
             Write-Host "Line coverage: $coverage%"
-            if ($coverage -lt 40) {
-              Write-Error "Coverage $coverage% is below the 40% minimum threshold"
+            if ($coverage -lt 42) {
+              Write-Error "Coverage $coverage% is below the 42% minimum threshold"
               exit 1
             }
           } else {
