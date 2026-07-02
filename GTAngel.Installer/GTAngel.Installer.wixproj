@@ -1,0 +1,27 @@
+<Project Sdk="WixToolset.Sdk/5.0.0">
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    
+    <!-- Product Information -->
+    <ProductName>GTAngel AI Training Platform</ProductName>
+    <ProductVersion>1.84.3</ProductVersion>
+    <ProductManufacturer>ReZorg AI</ProductManufacturer>
+    
+    <!-- Output -->
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <!-- Define variables that can be overridden from command line -->
+  <PropertyGroup>
+    <DefineConstants>
+      ProductVersion=$(ProductVersion);
+      SourceDir=..\GTAngel\bin\Release\net8.0-windows\publish\win-x64\
+    </DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+</Project>

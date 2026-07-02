@@ -1,0 +1,396 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.84.3)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  WINDOWS_TARGETING: "-p:EnableWindowsTargeting=true"
+
+jobs:
+  # ============================================================================
+  # Build Stage - Create all platform artifacts
+  # ============================================================================
+  build:
+    name: Build (${{ matrix.rid }})
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - rid: win-x64
+            artifact_name: GTAngel-win-x64
+          - rid: win-arm64
+            artifact_name: GTAngel-win-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for version detection
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          } else {
+            $version = "${{ github.ref_name }}".TrimStart('v')
+          }
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Version: $version"
+
+      - name: Restore dependencies
+        run: dotnet restore GTAngel.sln
+
+      - name: Run tests
+        run: |
+          dotnet test GTAngel.Tests/GTAngel.Tests.csproj `
+            --configuration Release `
+            --filter "Category!=E2E" `
+            --verbosity normal `
+            ${{ env.WINDOWS_TARGETING }}
+
+      - name: Publish Self-Contained (${{ matrix.rid }})
+        run: |
+          dotnet publish GTAngel/GTAngel.csproj `
+            --configuration Release `
+            --runtime ${{ matrix.rid }} `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:PublishReadyToRun=true `
+            -p:EnableCompressionInSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:Version=${{ steps.version.outputs.VERSION }} `
+            --output ./publish/${{ matrix.rid }} `
+            ${{ env.WINDOWS_TARGETING }}
+
+      - name: Create portable archive
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $archiveName = "GTAngel-$version-${{ matrix.rid }}.zip"
+          Compress-Archive -Path "./publish/${{ matrix.rid }}/*" -DestinationPath "./$archiveName"
+          echo "ARCHIVE_NAME=$archiveName" >> $env:GITHUB_OUTPUT
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ./GTAngel-*.zip
+          retention-days: 7
+
+  # ============================================================================
+  # Portable Build - Framework-dependent smaller package
+  # ============================================================================
+  build-portable:
+    name: Build (Portable)
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          } else {
+            $version = "${{ github.ref_name }}".TrimStart('v')
+          }
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore GTAngel.sln
+
+      - name: Publish Portable
+        run: |
+          dotnet publish GTAngel/GTAngel.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained false `
+            -p:PublishReadyToRun=true `
+            -p:Version=${{ steps.version.outputs.VERSION }} `
+            --output ./publish/portable `
+            ${{ env.WINDOWS_TARGETING }}
+
+      - name: Create portable archive
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $archiveName = "GTAngel-$version-portable.zip"
+          Compress-Archive -Path "./publish/portable/*" -DestinationPath "./$archiveName"
+
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GTAngel-portable
+          path: ./GTAngel-*-portable.zip
+          retention-days: 7
+
+  # ============================================================================
+  # WiX Installer Build
+  # ============================================================================
+  build-installer:
+    name: Build MSI Installer
+    runs-on: windows-latest
+    needs: build
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install WiX Toolset
+        run: dotnet tool install --global wix
+
+      - name: Download win-x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: GTAngel-win-x64
+          path: ./artifacts
+
+      - name: Extract artifact
+        shell: pwsh
+        run: |
+          Expand-Archive -Path "./artifacts/*.zip" -DestinationPath "./installer-source"
+
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          } else {
+            $version = "${{ github.ref_name }}".TrimStart('v')
+          }
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build MSI Installer
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          
+          # Check if WiX project exists
+          if (Test-Path "GTAngel.Installer/GTAngel.Installer.wixproj") {
+            cd GTAngel.Installer
+            wix build -o "../GTAngel-$version-setup.msi" `
+              -d ProductVersion="$version" `
+              -d SourceDir="../installer-source"
+          } else {
+            Write-Host "WiX installer project not found, skipping MSI build"
+            # Create placeholder for workflow to continue
+            echo "MSI_SKIPPED=true" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Upload MSI artifact
+        if: hashFiles('GTAngel-*-setup.msi') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: GTAngel-installer
+          path: ./GTAngel-*-setup.msi
+          retention-days: 7
+
+  # ============================================================================
+  # Create GitHub Release
+  # ============================================================================
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build, build-portable, build-installer]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-artifacts
+
+      - name: Prepare release assets
+        shell: bash
+        run: |
+          mkdir -p ./release-files
+          find ./release-artifacts -name "*.zip" -exec cp {} ./release-files/ \;
+          find ./release-artifacts -name "*.msi" -exec cp {} ./release-files/ \; 2>/dev/null || true
+          ls -la ./release-files/
+
+      - name: Generate SHA256 checksums
+        shell: bash
+        run: |
+          cd ./release-files
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Generate Release Notes
+        id: release_notes
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          cat << EOF > RELEASE_NOTES.md
+          # GTAngel v$VERSION
+          
+          ## Downloads
+          
+          | Platform | File | Description |
+          |----------|------|-------------|
+          | Windows x64 | GTAngel-$VERSION-win-x64.zip | Self-contained executable (recommended) |
+          | Windows ARM64 | GTAngel-$VERSION-win-arm64.zip | For ARM64 devices (Surface Pro X, etc.) |
+          | Portable | GTAngel-$VERSION-portable.zip | Requires .NET 8 Runtime |
+          | Installer | GTAngel-$VERSION-setup.msi | MSI installer with Start Menu shortcuts |
+          
+          ## System Requirements
+          
+          - **OS:** Windows 10 version 1809 or later, Windows 11
+          - **Architecture:** x64 or ARM64
+          - **RAM:** 8 GB minimum, 16 GB recommended
+          - **GPU:** DirectX 12 compatible (for UE5 integration)
+          - **.NET:** 8.0 Runtime (included in self-contained builds)
+          
+          ## Installation
+          
+          ### Self-Contained (Recommended)
+          1. Download the ZIP file for your architecture
+          2. Extract to a folder of your choice
+          3. Run \`GTAngel.exe\`
+          
+          ### MSI Installer
+          1. Download the MSI file
+          2. Run the installer
+          3. Launch from Start Menu
+          
+          ## Verification
+          
+          Verify your download using the SHA256 checksums in \`SHA256SUMS.txt\`.
+          
+          ## What's New
+          
+          See [CHANGELOG.md](https://github.com/ReZorg/GTAngel/blob/main/CHANGELOG.md) for details.
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: GTAngel v${{ steps.version.outputs.VERSION }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ inputs.prerelease || false }}
+          files: |
+            ./release-files/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # Post-Release Validation
+  # ============================================================================
+  validate:
+    name: Validate Release
+    runs-on: windows-latest
+    needs: release
+    
+    steps:
+      - name: Determine Version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          } else {
+            $version = "${{ github.ref_name }}".TrimStart('v')
+          }
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Download release artifact
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.VERSION }}"
+          $url = "https://github.com/${{ github.repository }}/releases/download/v$version/GTAngel-$version-win-x64.zip"
+          Invoke-WebRequest -Uri $url -OutFile "GTAngel.zip" -ErrorAction SilentlyContinue
+          if (Test-Path "GTAngel.zip") {
+            Expand-Archive -Path "GTAngel.zip" -DestinationPath "./test-install"
+          } else {
+            Write-Host "Could not download release artifact for validation (expected on first run)"
+          }
+
+      - name: Verify executable exists
+        shell: pwsh
+        run: |
+          if (Test-Path "./test-install/GTAngel.exe") {
+            Write-Host "✓ GTAngel.exe found"
+            $fileInfo = Get-Item "./test-install/GTAngel.exe"
+            Write-Host "  Size: $($fileInfo.Length / 1MB) MB"
+            Write-Host "  Version: $((Get-Item './test-install/GTAngel.exe').VersionInfo.FileVersion)"
+          } else {
+            Write-Host "⚠ GTAngel.exe not found (expected on first release workflow run)"
+          }

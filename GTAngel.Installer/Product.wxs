@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GTAngel WiX Installer Definition
+  
+  This creates an MSI installer for GTAngel with:
+  - Program Files installation
+  - Start Menu shortcuts
+  - Desktop shortcut (optional)
+  - Uninstaller registration
+  - Upgrade support
+  
+  Build: wix build -o GTAngel-setup.msi -d ProductVersion=1.84.3 -d SourceDir=path/to/publish
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  
+  <!-- Product Definition -->
+  <Package 
+    Name="GTAngel AI Training Platform" 
+    Manufacturer="ReZorg AI"
+    Version="$(var.ProductVersion)" 
+    UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+    Scope="perUser">
+    
+    <SummaryInformation 
+      Description="GTAngel — UE5 Cognitive AI Training Environment with Deep Tree Echo"
+      Manufacturer="ReZorg AI" />
+
+    <!-- Upgrade handling - automatically upgrade previous versions -->
+    <MajorUpgrade 
+      DowngradeErrorMessage="A newer version of GTAngel is already installed."
+      AllowSameVersionUpgrades="yes" />
+
+    <!-- Embed CAB in MSI for single-file distribution -->
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Features -->
+    <Feature Id="ProductFeature" Title="GTAngel" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+    
+    <!-- Set icon for Add/Remove Programs -->
+    <Icon Id="GTAngelIcon" SourceFile="$(var.SourceDir)icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="GTAngelIcon" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/ReZorg/GTAngel" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/ReZorg/GTAngel" />
+    
+    <!-- Launch application after install (optional) -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch GTAngel" />
+    <CustomAction Id="LaunchApplication" 
+                  Directory="INSTALLFOLDER" 
+                  ExeCommand="[INSTALLFOLDER]GTAngel.exe" 
+                  Execute="immediate"
+                  Return="asyncNoWait" />
+  </Package>
+
+  <!-- Directory Structure -->
+  <Fragment>
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="CompanyFolder" Name="ReZorg">
+        <Directory Id="INSTALLFOLDER" Name="GTAngel" />
+      </Directory>
+    </StandardDirectory>
+    
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="GTAngel" />
+    </StandardDirectory>
+    
+    <StandardDirectory Id="DesktopFolder" />
+  </Fragment>
+
+  <!-- Application Files -->
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      
+      <!-- Main Executable -->
+      <Component Id="MainExecutable" Guid="B1B2B3B4-B5B6-B7B8-B9BA-BBCBDBEBFBGB">
+        <File Id="GTAngelExe" 
+              Source="$(var.SourceDir)GTAngel.exe" 
+              KeyPath="yes">
+          <Shortcut Id="ExeShortcut" 
+                    Directory="ApplicationProgramsFolder" 
+                    Name="GTAngel" 
+                    WorkingDirectory="INSTALLFOLDER" 
+                    Advertise="yes" />
+        </File>
+      </Component>
+
+      <!-- Configuration Files -->
+      <Component Id="ConfigFiles" Guid="C1C2C3C4-C5C6-C7C8-C9CA-CBCCDCECFCGC">
+        <File Id="AppSettings" Source="$(var.SourceDir)appsettings.json" />
+        <File Id="AppSettingsProd" Source="$(var.SourceDir)appsettings.Production.json" />
+      </Component>
+
+      <!-- Assets Directory (harvested) -->
+      <Component Id="AssetsDir" Guid="D1D2D3D4-D5D6-D7D8-D9DA-DBDCDDEDFDED">
+        <CreateFolder />
+        <RemoveFolder Id="RemoveAssets" On="uninstall" />
+      </Component>
+
+      <!-- Logs Directory -->
+      <Component Id="LogsDir" Guid="E1E2E3E4-E5E6-E7E8-E9EA-EBECEDEEEFEG">
+        <CreateFolder>
+          <util:PermissionEx xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util" 
+                             User="Users" 
+                             GenericAll="yes" />
+        </CreateFolder>
+        <RemoveFolder Id="RemoveLogs" On="uninstall" />
+      </Component>
+      
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Start Menu Shortcut -->
+  <Fragment>
+    <Component Id="ApplicationShortcut" Guid="F1F2F3F4-F5F6-F7F8-F9FA-FBFCFDFEFFGF" Directory="ApplicationProgramsFolder">
+      <Shortcut Id="ApplicationStartMenuShortcut"
+                Name="GTAngel"
+                Description="GTAngel AI Training Platform"
+                Target="[INSTALLFOLDER]GTAngel.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" 
+                     Key="Software\ReZorg\GTAngel" 
+                     Name="installed" 
+                     Type="integer" 
+                     Value="1" 
+                     KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+  <!-- Desktop Shortcut -->
+  <Fragment>
+    <Component Id="DesktopShortcut" Guid="G1G2G3G4-G5G6-G7G8-G9GA-GBGCGDGEGFGG" Directory="DesktopFolder">
+      <Shortcut Id="DesktopShortcutLink"
+                Name="GTAngel"
+                Description="GTAngel AI Training Platform"
+                Target="[INSTALLFOLDER]GTAngel.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RegistryValue Root="HKCU" 
+                     Key="Software\ReZorg\GTAngel" 
+                     Name="DesktopShortcut" 
+                     Type="integer" 
+                     Value="1" 
+                     KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+</Wix>
