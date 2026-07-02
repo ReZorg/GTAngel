@@ -32,7 +32,9 @@
 - [x] docs/sprint-0/ contains plan.md and progress.md
 - [x] docs/brainstorm/ directory exists
 - [x] docs/qa/ directory exists
-- [ ] All files committed to branch
+- [x] Team agent files created in .github/agents/
+- [x] Copilot orchestration guide created
+- [x] All files committed to branch
 
 ## What's NOT in This Sprint
 
