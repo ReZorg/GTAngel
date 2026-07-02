@@ -1,0 +1,53 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/GTAngel.Installer.wixproj": {}
+  },
+  "projects": {
+    "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/GTAngel.Installer.wixproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/GTAngel.Installer.wixproj",
+        "projectName": "GTAngel.Installer",
+        "projectPath": "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/GTAngel.Installer.wixproj",
+        "packagesPath": "/home/runner/.nuget/packages/",
+        "outputPath": "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/obj/",
+        "projectStyle": "PackageReference",
+        "UsingMicrosoftNETSdk": false,
+        "configFilePaths": [
+          "/home/runner/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "native"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "native": {
+            "framework": "native",
+            "targetAlias": "native",
+            "projectReferences": {}
+          }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "native": {
+          "framework": "native",
+          "targetAlias": "native",
+          "dependencies": {
+            "WixToolset.Util.wixext": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "version": 3,
+  "targets": {
+    "native,Version=v0.0": {
+      "WixToolset.Util.wixext/5.0.0": {
+        "type": "package",
+        "build": {
+          "build/WixToolset.Util.wixext.targets": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "WixToolset.Util.wixext/5.0.0": {
+      "sha512": "7lLwyrf+2cTuPju0swTWtRNYesnOMxXhGugMnGGNEPDB4g/+BCUsub2RDYAxnBnbnND7QmPwZnneLrTIQOdAbg==",
+      "type": "package",
+      "path": "wixtoolset.util.wixext/5.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "build/WixToolset.Util.wixext.targets",
+        "wix.png",
+        "wixext5/WixToolset.Util.wixext.dll",
+        "wixtoolset.util.wixext.5.0.0.nupkg.sha512",
+        "wixtoolset.util.wixext.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "native,Version=v0.0": [
+      "WixToolset.Util.wixext >= 5.0.0"
+    ]
+  },
+  "packageFolders": {
+    "/home/runner/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/GTAngel.Installer.wixproj",
+      "projectName": "GTAngel.Installer",
+      "projectPath": "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/GTAngel.Installer.wixproj",
+      "packagesPath": "/home/runner/.nuget/packages/",
+      "outputPath": "/home/runner/work/GTAngel/GTAngel/GTAngel.Installer/obj/",
+      "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
+      "configFilePaths": [
+        "/home/runner/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "native"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "native": {
+          "framework": "native",
+          "targetAlias": "native",
+          "projectReferences": {}
+        }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      }
+    },
+    "frameworks": {
+      "native": {
+        "framework": "native",
+        "targetAlias": "native",
+        "dependencies": {
+          "WixToolset.Util.wixext": {
+            "target": "Package",
+            "version": "[5.0.0, )"
+          }
+        }
+      }
+    }
+  }
+}
