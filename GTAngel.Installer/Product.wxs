@@ -11,7 +11,8 @@
   
   Build: wix build -o GTAngel-setup.msi -d ProductVersion=1.84.3 -d SourceDir=path/to/publish
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   
   <!-- Product Definition -->
   <Package 
@@ -75,7 +76,7 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       
       <!-- Main Executable -->
-      <Component Id="MainExecutable" Guid="B1B2B3B4-B5B6-B7B8-B9BA-BBCBDBEBFBGB">
+      <Component Id="MainExecutable" Guid="8FB72F87-349F-4E3C-985E-EE4A989D2E72">
         <File Id="GTAngelExe" 
               Source="$(var.SourceDir)GTAngel.exe" 
               KeyPath="yes">
@@ -88,7 +89,7 @@
       </Component>
 
       <!-- Configuration Files -->
-      <Component Id="ConfigFiles" Guid="C1C2C3C4-C5C6-C7C8-C9CA-CBCCDCECFCGC">
+      <Component Id="ConfigFiles" Guid="A5A17D2E-3629-4F7C-91E7-7447CEB04A3F">
         <File Id="AppSettings" Source="$(var.SourceDir)appsettings.json" />
         <File Id="AppSettingsProd" Source="$(var.SourceDir)appsettings.Production.json" />
       </Component>
@@ -100,10 +101,9 @@
       </Component>
 
       <!-- Logs Directory -->
-      <Component Id="LogsDir" Guid="E1E2E3E4-E5E6-E7E8-E9EA-EBECEDEEEFEG">
+      <Component Id="LogsDir" Guid="13208D86-BD2E-49D3-82B8-3B9567D8D89E">
         <CreateFolder>
-          <util:PermissionEx xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util" 
-                             User="Users" 
+          <util:PermissionEx User="Users" 
                              GenericAll="yes" />
         </CreateFolder>
         <RemoveFolder Id="RemoveLogs" On="uninstall" />
@@ -114,7 +114,7 @@
 
   <!-- Start Menu Shortcut -->
   <Fragment>
-    <Component Id="ApplicationShortcut" Guid="F1F2F3F4-F5F6-F7F8-F9FA-FBFCFDFEFFGF" Directory="ApplicationProgramsFolder">
+    <Component Id="ApplicationShortcut" Guid="60A324E4-3B58-4717-A796-0E62C4217C3F" Directory="ApplicationProgramsFolder">
       <Shortcut Id="ApplicationStartMenuShortcut"
                 Name="GTAngel"
                 Description="GTAngel AI Training Platform"
@@ -132,7 +132,7 @@
 
   <!-- Desktop Shortcut -->
   <Fragment>
-    <Component Id="DesktopShortcut" Guid="G1G2G3G4-G5G6-G7G8-G9GA-GBGCGDGEGFGG" Directory="DesktopFolder">
+    <Component Id="DesktopShortcut" Guid="7F7E2854-8B98-4AA1-99EF-D2DA0CF6EF57" Directory="DesktopFolder">
       <Shortcut Id="DesktopShortcutLink"
                 Name="GTAngel"
                 Description="GTAngel AI Training Platform"
