@@ -9,13 +9,34 @@
     <Version>1.84.3</Version>
     <FileVersion>1.84.3.0</FileVersion>
     <AssemblyVersion>1.84.3.0</AssemblyVersion>
+    <InformationalVersion>1.84.3+$(SourceRevisionId)</InformationalVersion>
     <Company>ReZorg AI</Company>
     <Product>GTAngel AI Training Platform</Product>
     <Description>GTAngel — UE5 Cognitive AI Training Environment with Deep Tree Echo</Description>
     <Copyright>Copyright © ReZorg 2026</Copyright>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    
+    <!-- Production Publishing Configuration -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    
+    <!-- Symbol Configuration for Production -->
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    
+    <!-- Source Link for crash analysis -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
+
+  <!-- Source Link package for better crash diagnostics -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
