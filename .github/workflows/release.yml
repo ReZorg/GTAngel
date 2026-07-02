@@ -97,6 +97,7 @@ jobs:
             ${{ env.WINDOWS_TARGETING }}
 
       - name: Create portable archive
+        id: archive
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.VERSION }}"
@@ -108,7 +109,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: ./GTAngel-*.zip
+          path: ./${{ steps.archive.outputs.ARCHIVE_NAME }}
           retention-days: 7
 
   # ============================================================================
@@ -221,6 +222,7 @@ jobs:
           echo "VERSION=$version" >> $env:GITHUB_OUTPUT
 
       - name: Build MSI Installer
+        id: msi_build
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.VERSION }}"
@@ -231,14 +233,14 @@ jobs:
             wix build -o "../GTAngel-$version-setup.msi" `
               -d ProductVersion="$version" `
               -d SourceDir="../installer-source"
+            echo "MSI_BUILT=true" >> $env:GITHUB_OUTPUT
           } else {
             Write-Host "WiX installer project not found, skipping MSI build"
-            # Create placeholder for workflow to continue
-            echo "MSI_SKIPPED=true" >> $env:GITHUB_OUTPUT
+            echo "MSI_BUILT=false" >> $env:GITHUB_OUTPUT
           }
 
       - name: Upload MSI artifact
-        if: hashFiles('GTAngel-*-setup.msi') != ''
+        if: steps.msi_build.outputs.MSI_BUILT == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: GTAngel-installer
