@@ -84,6 +84,8 @@ User flow: Launch GTAngel → Configure training parameters → Launch UE5 → R
 | CI/CD | `.github/workflows/ci.yml` | GitHub Actions pipeline |
 | Docs | `docs/` | Architecture & sprint docs |
 | Config | `GTAngel/appsettings.json` | App configuration |
+| Agents | `.github/agents/` | Team agent definitions (Remy, Nova, Sage, Milo, Ivy, Kira, Dash) |
+| Instructions | `.github/copilot-instructions.md` | Copilot orchestration guide |
 
 ## 6. Team Roles
 

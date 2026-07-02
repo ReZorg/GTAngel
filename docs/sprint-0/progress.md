@@ -13,6 +13,8 @@
 | 3 | Create Sprint 0 plan + progress | ✅ Done | This file + plan.md |
 | 4 | Document chat architecture | ✅ Done | Covered in PROJECT_BRIEF.md §12-14 |
 | 5 | Document anti-patterns | ✅ Done | anti-patterns.md created |
+| 6 | Create team agent files | ✅ Done | .github/agents/ — 7 agents |
+| 7 | Create copilot orchestration guide | ✅ Done | .github/copilot-instructions.md |
 
 ## Bugs Found
 
@@ -25,3 +27,4 @@
 - Sprint 0 is orchestration-only, no code changes to source
 - AI Team structure customized for GTAngel: WPF/Frontend (Nova), ML/Backend (Sage), UE5/C++ (Milo)
 - Product role (Kira) focused on cognitive architecture design rather than traditional UX
+- Team agents created in .github/agents/ for Copilot agent mode integration
