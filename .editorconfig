@@ -1,0 +1,57 @@
+# EditorConfig — GTAngel
+# https://editorconfig.org
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{xml,xaml,wxs,pubxml,props,targets,csproj,sln}]
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# C# Code Style and Analyzer Rules
+[*.cs]
+
+# Naming conventions
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case_prefix
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.camel_case_prefix.capitalization = camel_case
+dotnet_naming_style.camel_case_prefix.required_prefix = _
+
+# Analyzer severity overrides
+# Suppress noisy rules that conflict with the existing codebase patterns
+dotnet_diagnostic.CA1062.severity = suggestion   # Validate arguments of public methods
+dotnet_diagnostic.CA1303.severity = none         # Do not pass literals as localized params
+dotnet_diagnostic.CA1816.severity = suggestion   # Dispose methods should call SuppressFinalize
+dotnet_diagnostic.CA1822.severity = suggestion   # Mark members as static
+dotnet_diagnostic.CA1848.severity = suggestion   # Use LoggerMessage delegates
+dotnet_diagnostic.CA2007.severity = none         # ConfigureAwait (not relevant in WPF)
+dotnet_diagnostic.CA2227.severity = suggestion   # Collection properties should be read only
+dotnet_diagnostic.IDE0060.severity = suggestion  # Remove unused parameter
+dotnet_diagnostic.IDE0290.severity = none        # Use primary constructors
+
+# Keep important security/correctness rules as warnings
+dotnet_diagnostic.CA2100.severity = warning      # Review SQL queries for vulnerabilities
+dotnet_diagnostic.CA2300.severity = error        # Do not use insecure deserializer
+dotnet_diagnostic.CA2301.severity = error        # BinaryFormatter without binder
+dotnet_diagnostic.CA3001.severity = warning      # Review code for SQL injection
+dotnet_diagnostic.CA3002.severity = warning      # Review code for XSS
+dotnet_diagnostic.CA3003.severity = warning      # Review code for file path injection
+dotnet_diagnostic.CA5350.severity = warning      # Do not use weak cryptographic algorithms
+dotnet_diagnostic.CA5351.severity = warning      # Do not use broken cryptographic algorithms

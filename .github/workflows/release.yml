@@ -105,6 +105,30 @@ jobs:
           Compress-Archive -Path "./publish/${{ matrix.rid }}/*" -DestinationPath "./$archiveName"
           echo "ARCHIVE_NAME=$archiveName" >> $env:GITHUB_OUTPUT
 
+      - name: Code Sign Executable
+        if: env.SIGNING_CERTIFICATE != ''
+        env:
+          SIGNING_CERTIFICATE: ${{ secrets.SIGNING_CERTIFICATE }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        shell: pwsh
+        run: |
+          # Decode certificate from base64 secret
+          $certBytes = [Convert]::FromBase64String($env:SIGNING_CERTIFICATE)
+          $certPath = [IO.Path]::GetTempFileName() + ".pfx"
+          [IO.File]::WriteAllBytes($certPath, $certBytes)
+          
+          # Sign the main executable
+          $exePath = "./publish/${{ matrix.rid }}/GTAngel.exe"
+          if (Test-Path $exePath) {
+            & signtool sign /f $certPath /p $env:SIGNING_PASSWORD `
+              /tr http://timestamp.digicert.com /td sha256 /fd sha256 `
+              /d "GTAngel AI Training Platform" $exePath
+            Write-Host "✓ Code signing successful"
+          }
+          
+          # Clean up
+          Remove-Item $certPath -Force
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -293,6 +317,13 @@ jobs:
           cd ./release-files
           sha256sum * > SHA256SUMS.txt
           cat SHA256SUMS.txt
+
+      - name: Generate SBOM (Software Bill of Materials)
+        shell: bash
+        run: |
+          dotnet tool install --global CycloneDX
+          dotnet CycloneDX GTAngel/GTAngel.csproj -o ./release-files -f sbom.json --json
+          echo "✓ SBOM generated"
 
       - name: Generate Release Notes
         id: release_notes
