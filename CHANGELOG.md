@@ -13,10 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WiX MSI installer project
 - GitHub Actions release workflow
 - Environment-specific configuration (Development, Production)
+- CodeQL security scanning workflow
+- Roslyn static analyzers with .editorconfig rules
+- Code signing scaffold in release workflow
+- SBOM (Software Bill of Materials) generation via CycloneDX
+- Auto-update service (Velopack integration scaffold)
+- Model integrity verification service (SHA-256 checksums)
+- Asset validation post-build MSBuild target
+- User documentation (docs/user-guide/)
+- Serilog configuration-based logging (reads from appsettings)
 
 ### Changed
 - Updated GTAngel.csproj with production publishing settings
 - Added Microsoft.SourceLink.GitHub for improved crash diagnostics
+- Serilog now uses ReadFrom.Configuration instead of hardcoded settings
+- appsettings files now include Serilog configuration sections
 
 ## [1.84.3] - 2026-07-02
 

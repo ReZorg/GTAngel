@@ -1,4 +1,5 @@
 using System.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -24,10 +25,20 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        // Configure Serilog (replaces Android Log + Sentry)
+        // Determine environment (DOTNET_ENVIRONMENT or default to Production)
+        var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+
+        // Build configuration from appsettings files
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: false)
+            .Build();
+
+        // Configure Serilog from appsettings (environment-aware logging)
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .WriteTo.File("logs/gta3de-.log", rollingInterval: RollingInterval.Day)
+            .ReadFrom.Configuration(configuration)
+            .Enrich.WithProperty("Environment", environment)
             .CreateLogger();
 
         // Build DI container (replaces manual singleton wiring in Rockstar.setup)
@@ -79,6 +90,14 @@ public partial class App : Application
         Log.Information("GTAngel — Guardian Angel Cognitive Orchestrator — Initialized");
         Log.Information("Composition: /dte-ksm-evo-autogenesis ( /gta3-ue5-wpf ) → GTAngel");
         Log.Information("KSM Cycle 5: DteCognitiveCoreService wired into ESN + TrainingLoop");
+
+        // Production services: model integrity and auto-updates
+        var modelIntegrity = _serviceProvider.GetRequiredService<ModelIntegrityService>();
+        _ = modelIntegrity.ValidateAllAsync(); // Fire-and-forget; logs warnings if issues found
+
+        var updateService = _serviceProvider.GetRequiredService<UpdateService>();
+        updateService.Initialize();
+        _ = updateService.CheckForUpdatesAsync(); // Background update check
     }
 
     private static void ConfigureServices(IServiceCollection services)
@@ -143,6 +162,10 @@ public partial class App : Application
         services.AddSingleton<SubscriptionService>();
         services.AddSingleton<GtaPlusService>();
         services.AddSingleton<LicenseService>();
+
+        // Production Services
+        services.AddSingleton<UpdateService>();
+        services.AddSingleton<ModelIntegrityService>();
 
         // ViewModels
         services.AddTransient<MainWindowViewModel>();

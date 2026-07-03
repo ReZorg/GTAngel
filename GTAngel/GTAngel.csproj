@@ -31,6 +31,10 @@
     <!-- Source Link for crash analysis -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    
+    <!-- Static Analysis -->
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <!-- Source Link package for better crash diagnostics -->
@@ -39,6 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc4.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
@@ -47,8 +55,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2535.41" />
     <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.4" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Velopack" Version="0.0.942" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.8" />
@@ -89,5 +99,17 @@
     <Resource Include="Assets\Images\bg.vertical.png" />
     <Resource Include="Assets\Images\gtapluslogo.png" />
   </ItemGroup>
+
+  <!-- Post-publish validation: verify critical files exist in publish output -->
+  <Target Name="ValidatePublishAssets" AfterTargets="Publish">
+    <PropertyGroup>
+      <_PublishOutputDir>$(PublishDir)</_PublishOutputDir>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(_PublishOutputDir)appsettings.json')"
+           Text="PUBLISH VALIDATION FAILED: appsettings.json missing from publish output." />
+    <Error Condition="!Exists('$(_PublishOutputDir)appsettings.Production.json')"
+           Text="PUBLISH VALIDATION FAILED: appsettings.Production.json missing from publish output." />
+    <Message Importance="high" Text="✓ Publish asset validation passed." />
+  </Target>
 
 </Project>
