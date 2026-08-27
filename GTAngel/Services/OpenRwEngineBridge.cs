@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -47,7 +48,9 @@ public sealed class OpenRwEngineBridge : IDisposable
 
     // IPC for training control
     private string? _ipcPipeName;
-    private System.IO.Pipes.NamedPipeServerStream? _ipcServer;
+    private NamedPipeServerStream? _ipcServer;
+    private readonly object _ipcLock = new();
+    private Task? _ipcConnectionTask;
 
     public enum EngineType
     {
@@ -151,6 +154,15 @@ public sealed class OpenRwEngineBridge : IDisposable
     public EngineType DetectEngines()
     {
         _logger.LogInformation("Scanning for GTA3 game engines...");
+
+        // If the caller already configured a specific engine path (e.g. via
+        // AutonomousTrainingService from appsettings), keep that selection instead
+        // of overwriting it with auto-detection.
+        if (DetectedEngine != EngineType.None && !string.IsNullOrEmpty(EnginePath) && File.Exists(EnginePath))
+        {
+            _logger.LogInformation("Using configured engine: {Path} ({Engine})", EnginePath, DetectedEngine);
+            return DetectedEngine;
+        }
 
         // 1. Check for OpenRW
         var openrwPath = FindExecutable("openrw", new[]
@@ -288,6 +300,8 @@ public sealed class OpenRwEngineBridge : IDisposable
         {
             // Set up IPC pipe for training control
             _ipcPipeName = $"angelclaw_gta3_training_{Process.GetCurrentProcess().Id}";
+
+            StartIpcServer(_ipcPipeName);
 
             var args = BuildLaunchArguments(config);
             _logger.LogInformation("Launching {Engine} with args: {Args}", DetectedEngine, args);
@@ -542,90 +556,110 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
 
     private GameState ReadGameStateFromIpc()
     {
-        // Phase 5.4: Parse 22-dim game state from named IPC pipe
-        // Protocol: the engine sends a JSON line with fields matching GameState properties
-        // Falls back to a default state if the pipe is not connected or read fails
+        // Phase 5.4: Parse 22-dim game state from named IPC pipe.
+        // Protocol: the engine sends JSON lines with fields matching GameState properties.
+        // Falls back to a default state if the pipe is not connected or read fails.
         if (_ipcServer == null)
             return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-        try
-        {
-            if (!_ipcServer.IsConnected)
-                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
-
-            // Use a 4KB buffer to handle realistic JSON message sizes
-            var buffer = new byte[4096];
-
-            // NamedPipeServerStream.InBufferSize reports the configured pipe capacity,
-            // not the bytes currently available, so it cannot be used as a non-blocking
-            // peek. Instead, issue a ReadAsync bound by a CancellationToken so that on
-            // timeout the underlying read is actually cancelled — abandoning the task
-            // would leak it and start a concurrent ReadAsync on the next call, which
-            // violates Stream's contract and silently drops data.
-            const int readTimeoutMs = 50;
-            int bytesRead;
-            using (var cts = new CancellationTokenSource(readTimeoutMs))
-            {
-                try
-                {
-                    bytesRead = _ipcServer.ReadAsync(buffer, 0, buffer.Length, cts.Token)
-                                          .GetAwaiter().GetResult();
-                }
-                catch (OperationCanceledException)
-                {
-                    return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
-                }
-            }
-            if (bytesRead == 0)
-                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
-
-            // Find the end of the first complete JSON object so concatenated messages
-            // (e.g. "{\"x\":1}\n{\"y\":2}") parse the first one cleanly instead of
-            // including trailing content that JsonDocument.Parse rejects. Uses a
-            // brace-depth tracker that respects string literals and escapes so nested
-            // objects (e.g. "{\"pos\":{\"x\":1}}") and strings containing '}' parse
-            // correctly even if the protocol grows beyond flat scalars.
-            var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            int jsonEnd = FindFirstJsonObjectEnd(raw);
-            if (jsonEnd < 0)
-                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
-
-            var json = raw[..(jsonEnd + 1)];
-            using var doc = System.Text.Json.JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            return new GameState
-            {
-                PlayerX          = root.TryGetProperty("x",        out var px)  ? px.GetSingle()  : 0f,
-                PlayerY          = root.TryGetProperty("y",        out var py)  ? py.GetSingle()  : 0f,
-                PlayerZ          = root.TryGetProperty("z",        out var pz)  ? pz.GetSingle()  : 0f,
-                PlayerHeading    = root.TryGetProperty("heading",  out var ph)  ? ph.GetSingle()  : 0f,
-                PlayerHealth     = root.TryGetProperty("health",   out var hlt) ? hlt.GetSingle() : 100f,
-                PlayerArmor      = root.TryGetProperty("armor",    out var arm) ? arm.GetSingle() : 0f,
-                PlayerMoney      = root.TryGetProperty("money",    out var mon) ? mon.GetInt32()  : 0,
-                WantedLevel      = root.TryGetProperty("wanted",   out var wnt) ? wnt.GetInt32()  : 0,
-                CurrentWeapon    = root.TryGetProperty("weapon",   out var wpn) ? wpn.GetInt32()  : 0,
-                InVehicle        = root.TryGetProperty("inVehicle",out var inv) && inv.GetBoolean(),
-                VehicleHealth    = root.TryGetProperty("vehHealth",out var vh)  ? vh.GetSingle()  : 0f,
-                VehicleSpeed     = root.TryGetProperty("vehSpeed", out var vs)  ? vs.GetSingle()  : 0f,
-                VelocityX        = root.TryGetProperty("velX",     out var vx)  ? vx.GetSingle()  : 0f,
-                VelocityY        = root.TryGetProperty("velY",     out var vy)  ? vy.GetSingle()  : 0f,
-                VelocityZ        = root.TryGetProperty("velZ",     out var vz2) ? vz2.GetSingle() : 0f,
-                CurrentIsland    = root.TryGetProperty("island",   out var isl) ? isl.GetString() ?? "Portland" : "Portland",
-                GameHour         = root.TryGetProperty("hour",     out var hr)  ? hr.GetInt32()   : 12,
-                GameMinute       = root.TryGetProperty("minute",   out var mn)  ? mn.GetInt32()   : 0,
-                Weather          = root.TryGetProperty("weather",  out var wx)  ? wx.GetString() ?? "Sunny" : "Sunny",
-                IsDead           = root.TryGetProperty("isDead",   out var id2) && id2.GetBoolean(),
-                IsArrested       = root.TryGetProperty("arrested", out var arr) && arr.GetBoolean(),
-                MissionIndex     = root.TryGetProperty("mission",  out var mis) ? mis.GetInt32()  : 0,
-                DistanceTraveled = root.TryGetProperty("dist",     out var dst) ? dst.GetSingle() : 0f,
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "IPC GameState parse failed — using defaults");
+        if (!_ipcServer.IsConnected)
             return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+        const int readTimeoutMs = 5; // keep well under the frame budget
+        byte[] buffer;
+        int bytesRead;
+
+        lock (_ipcLock)
+        {
+            if (_ipcServer == null || !_ipcServer.IsConnected)
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+            buffer = new byte[4096];
+            try
+            {
+                using var cts = new CancellationTokenSource(readTimeoutMs);
+                bytesRead = _ipcServer.ReadAsync(buffer, 0, buffer.Length, cts.Token)
+                                      .GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "IPC GameState read failed — using defaults");
+                return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+            }
         }
+
+        if (bytesRead == 0)
+            return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+
+        var raw = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
+        return ParseLatestIpcState(raw);
+    }
+
+    private GameState ParseLatestIpcState(string raw)
+    {
+        // If the engine queued multiple state updates, advance through each complete
+        // JSON object and keep the last valid one, discarding any trailing partial.
+        GameState state = new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
+        int i = 0;
+        while (i < raw.Length)
+        {
+            while (i < raw.Length && raw[i] != '{') i++;
+            if (i >= raw.Length) break;
+
+            int end = FindFirstJsonObjectEnd(raw[i..]);
+            if (end < 0) break;
+
+            var json = raw.Substring(i, end + 1);
+            try
+            {
+                state = ParseGameStateJson(json);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "IPC GameState parse failed for one object");
+            }
+
+            i += end + 1;
+        }
+
+        return state;
+    }
+
+    private GameState ParseGameStateJson(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        return new GameState
+        {
+            PlayerX          = root.TryGetProperty("x",        out var px)  ? px.GetSingle()  : 0f,
+            PlayerY          = root.TryGetProperty("y",        out var py)  ? py.GetSingle()  : 0f,
+            PlayerZ          = root.TryGetProperty("z",        out var pz)  ? pz.GetSingle()  : 0f,
+            PlayerHeading    = root.TryGetProperty("heading",  out var ph)  ? ph.GetSingle()  : 0f,
+            PlayerHealth     = root.TryGetProperty("health",   out var hlt) ? hlt.GetSingle() : 100f,
+            PlayerArmor      = root.TryGetProperty("armor",    out var arm) ? arm.GetSingle() : 0f,
+            PlayerMoney      = root.TryGetProperty("money",    out var mon) ? mon.GetInt32()  : 0,
+            WantedLevel      = root.TryGetProperty("wanted",   out var wnt) ? wnt.GetInt32()  : 0,
+            CurrentWeapon    = root.TryGetProperty("weapon",   out var wpn) ? wpn.GetInt32()  : 0,
+            InVehicle        = root.TryGetProperty("inVehicle",out var inv) && inv.GetBoolean(),
+            VehicleHealth    = root.TryGetProperty("vehHealth",out var vh)  ? vh.GetSingle()  : 0f,
+            VehicleSpeed     = root.TryGetProperty("vehSpeed", out var vs)  ? vs.GetSingle()  : 0f,
+            VelocityX        = root.TryGetProperty("velX",     out var vx)  ? vx.GetSingle()  : 0f,
+            VelocityY        = root.TryGetProperty("velY",     out var vy)  ? vy.GetSingle()  : 0f,
+            VelocityZ        = root.TryGetProperty("velZ",     out var vz2) ? vz2.GetSingle() : 0f,
+            CurrentIsland    = root.TryGetProperty("island",   out var isl) ? isl.GetString() ?? "Portland" : "Portland",
+            GameHour         = root.TryGetProperty("hour",     out var hr)  ? hr.GetInt32()   : 12,
+            GameMinute       = root.TryGetProperty("minute",   out var mn)  ? mn.GetInt32()   : 0,
+            Weather          = root.TryGetProperty("weather",  out var wx)  ? wx.GetString() ?? "Sunny" : "Sunny",
+            IsDead           = root.TryGetProperty("isDead",   out var id2) && id2.GetBoolean(),
+            IsArrested       = root.TryGetProperty("arrested", out var arr) && arr.GetBoolean(),
+            MissionIndex     = root.TryGetProperty("mission",  out var mis) ? mis.GetInt32()  : 0,
+            DistanceTraveled = root.TryGetProperty("dist",     out var dst) ? dst.GetSingle() : 0f,
+        };
     }
 
     /// <summary>
@@ -661,6 +695,47 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
             }
         }
         return -1;
+    }
+
+    private void StartIpcServer(string pipeName)
+    {
+        if (_disposed)
+            return;
+
+        try
+        {
+            _ipcServer?.Dispose();
+            _ipcServer = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1,
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous);
+
+            _ipcConnectionTask = WaitForIpcClientAsync(_ipcServer);
+            _logger.LogInformation("IPC server listening on {Pipe}", pipeName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start IPC server");
+        }
+    }
+
+    private async Task WaitForIpcClientAsync(NamedPipeServerStream server)
+    {
+        try
+        {
+            await server.WaitForConnectionAsync(CancellationToken.None);
+            _logger.LogInformation("IPC client connected");
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogDebug("IPC server wait cancelled");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "IPC client wait failed");
+        }
     }
 
     [DllImport("kernel32.dll")]
@@ -764,11 +839,31 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
         return null;
     }
 
-    private async Task SendIpcCommandAsync(string command)
+    private Task SendIpcCommandAsync(string command)
     {
-        // In production, sends command via named pipe to the engine
         _logger.LogDebug("IPC command: {Command}", command);
-        await Task.CompletedTask;
+
+        if (_ipcServer == null)
+            return Task.CompletedTask;
+
+        lock (_ipcLock)
+        {
+            if (_ipcServer == null || !_ipcServer.IsConnected)
+                return Task.CompletedTask;
+
+            try
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(command + "\n");
+                _ipcServer.Write(bytes, 0, bytes.Length);
+                _ipcServer.Flush();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to send IPC command");
+            }
+        }
+
+        return Task.CompletedTask;
     }
 
     #endregion
@@ -779,7 +874,25 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
         _disposed = true;
 
         Stop();
-        _ipcServer?.Dispose();
+
+        try
+        {
+            _ipcServer?.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            _ipcConnectionTask?.Wait(TimeSpan.FromSeconds(2));
+        }
+        catch
+        {
+            // ignored
+        }
+
         _engineProcess?.Dispose();
 
         _logger.LogInformation("OpenRwEngineBridge disposed");

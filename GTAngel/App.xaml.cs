@@ -44,7 +44,7 @@ public partial class App : Application
 
         // Build DI container (replaces manual singleton wiring in Rockstar.setup)
         var services = new ServiceCollection();
-        ConfigureServices(services);
+        ConfigureServices(services, configuration);
         _serviceProvider = services.BuildServiceProvider();
         Services = _serviceProvider;
 
@@ -92,6 +92,13 @@ public partial class App : Application
         Log.Information("Composition: /dte-ksm-evo-autogenesis ( /gta3-ue5-wpf ) → GTAngel");
         Log.Information("KSM Cycle 5: DteCognitiveCoreService wired into ESN + TrainingLoop");
 
+        // Phase 8: Optionally begin autonomous training against an external re3 engine
+        if (configuration.GetValue<bool>("AutonomousTraining:AutoStart"))
+        {
+            var autoTrain = _serviceProvider.GetRequiredService<AutonomousTrainingService>();
+            _ = Task.Run(async () => await autoTrain.StartAsync());
+        }
+
         // Production services: model integrity and auto-updates
         var modelIntegrity = _serviceProvider.GetRequiredService<ModelIntegrityService>();
         _ = modelIntegrity.ValidateAllAsync(); // Fire-and-forget; logs warnings if issues found
@@ -101,13 +108,17 @@ public partial class App : Application
         _ = updateService.CheckForUpdatesAsync(); // Background update check
     }
 
-    private static void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         // Logging
         services.AddLogging(builder =>
         {
             builder.AddSerilog();
         });
+
+        // Configuration + Autonomous Training orchestration
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton<AutonomousTrainingService>();
 
         // Core Services (replaces Rockstar singleton fields)
         services.AddSingleton<AppConfiguration>();
@@ -194,6 +205,9 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         Log.Information("GTAngel — Shutting down");
+
+        // Gracefully stop autonomous training loop
+        _serviceProvider?.GetService<AutonomousTrainingService>()?.StopAsync().Wait(TimeSpan.FromSeconds(3));
 
         // Gracefully stop GTAngel autogenesis loop
         _serviceProvider?.GetService<GTAngelService>()?.StopAsync().Wait(TimeSpan.FromSeconds(3));
