@@ -64,6 +64,15 @@ public sealed class EmbodiedDecisionLoop
     public IPerceptionPolicy        Policy     => _policy;
 
     /// <summary>
+    /// Feed the scalar reward from the training/exploration loop back into the
+    /// perception policy so it can adapt its parameters.
+    /// </summary>
+    public void UpdateReward(float reward)
+    {
+        _policy.UpdateReward(reward, LastField, LastIntent);
+    }
+
+    /// <summary>
     /// Run a single Perceive → Remember → Decide → Act cycle and return the
     /// action to be dispatched (or <c>null</c> if the policy chose Idle).
     ///

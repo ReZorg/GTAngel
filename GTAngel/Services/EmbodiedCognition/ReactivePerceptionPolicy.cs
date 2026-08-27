@@ -42,9 +42,15 @@ public sealed class ReactivePerceptionPolicy : IPerceptionPolicy
 
         /// <summary>Approach magnitude when heading toward a visual target.</summary>
         public float ApproachMagnitude { get; set; } = 0.85f;
+
+        /// <summary>Magnitude scale for orienting toward a sound source.</summary>
+        public float OrientToMagnitude { get; set; } = 1.0f;
     }
 
     public Config Settings { get; set; } = new();
+
+    /// <summary>Exponential moving-average reward baseline used for credit assignment.</summary>
+    public float MeanReward { get; private set; }
 
     public MotorIntent? Decide(PerceptualField field, IReadOnlyList<SpatialMemoryEntry> memory)
     {
@@ -81,7 +87,7 @@ public sealed class ReactivePerceptionPolicy : IPerceptionPolicy
             {
                 Type = MotorIntentType.TurnTo,
                 TargetWorld = (float[])sound.WorldLocation.Clone(),
-                Magnitude = MathF.Min(1f, sound.Loudness * 1.5f),
+                Magnitude = MathF.Min(1f, sound.Loudness * 1.5f) * Settings.OrientToMagnitude,
                 Source = $"Reactive:OrientTo:{sound.Tag}"
             };
         }
@@ -122,4 +128,54 @@ public sealed class ReactivePerceptionPolicy : IPerceptionPolicy
             Source = "Reactive:Wander"
         };
     }
+
+    /// <summary>
+    /// Adapt thresholds and magnitudes based on the scalar reward from the
+    /// training loop. Positive reward relative to the running mean lowers
+    /// thresholds / raises magnitudes (encourage the behavior); negative
+    /// reward raises thresholds / lowers magnitudes (discourage it).
+    /// </summary>
+    public void UpdateReward(float reward, PerceptualField? field, MotorIntent? intent)
+    {
+        const float baselineAlpha = 0.1f;
+        const float learningRate = 0.05f;
+
+        MeanReward = baselineAlpha * reward + (1f - baselineAlpha) * MeanReward;
+        if (intent == null || intent.Type == MotorIntentType.Idle) return;
+
+        float delta = reward - MeanReward;
+        string source = intent.Source ?? string.Empty;
+
+        if (source.StartsWith("Reactive:Approach", StringComparison.Ordinal))
+        {
+            // Positive reward → lower threshold so we approach more readily,
+            // and raise magnitude to move toward targets more decisively.
+            Settings.ApproachVisualThreshold = Clamp(
+                Settings.ApproachVisualThreshold - learningRate * delta, 0.03f, 0.95f);
+            Settings.ApproachMagnitude = Clamp(
+                Settings.ApproachMagnitude + learningRate * delta * 0.5f, 0.15f, 1.0f);
+        }
+        else if (source.StartsWith("Reactive:OrientTo", StringComparison.Ordinal))
+        {
+            Settings.OrientToSoundThreshold = Clamp(
+                Settings.OrientToSoundThreshold - learningRate * delta, 0.03f, 0.95f);
+            Settings.OrientToMagnitude = Clamp(
+                Settings.OrientToMagnitude + learningRate * delta * 0.5f, 0.15f, 1.0f);
+        }
+        else if (source.StartsWith("Reactive:Revisit", StringComparison.Ordinal))
+        {
+            Settings.MemoryRevisitThreshold = Clamp(
+                Settings.MemoryRevisitThreshold - learningRate * delta, 0.03f, 0.95f);
+            Settings.WanderMagnitude = Clamp(
+                Settings.WanderMagnitude + learningRate * delta * 0.5f, 0.1f, 1.0f);
+        }
+        else // Wander or unrecognized
+        {
+            Settings.WanderMagnitude = Clamp(
+                Settings.WanderMagnitude + learningRate * delta * 0.5f, 0.1f, 1.0f);
+        }
+    }
+
+    private static float Clamp(float value, float min, float max)
+        => value < min ? min : (value > max ? max : value);
 }

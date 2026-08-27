@@ -456,7 +456,7 @@ GTAngel/
 - [x] SpatialMemory with decay
 - [x] ReactivePerceptionPolicy
 - [x] MotorController for action execution
-- [ ] Full policy integration with training loop
+- [x] Full policy integration with training loop
 
 #### UE5 Plugin Development
 - [ ] Complete Archecho plugin compilation for UE5.4
