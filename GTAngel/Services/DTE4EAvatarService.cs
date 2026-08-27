@@ -335,6 +335,11 @@ public class DTE4EAvatarService : IDisposable
                 TotalReward += reward;
                 TotalStepsTaken++;
 
+                // Phase 7: feed reward back into the embodied cognition policy.
+                // The policy uses the running mean to assign credit and adapt
+                // the thresholds / magnitudes that produced the action.
+                _embodiedLoop?.UpdateReward(reward);
+
                 // Update exploration coverage (unique cells visited)
                 UpdateExplorationCoverage(obs);
 

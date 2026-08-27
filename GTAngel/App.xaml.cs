@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using GTAngel.Interop;
 using GTAngel.Services;
+using GTAngel.Services.EmbodiedCognition;
 using GTAngel.ViewModels;
 
 namespace GTAngel;
@@ -131,6 +132,16 @@ public partial class App : Application
         services.AddSingleton<OnnxCnnFeatureExtractor>();
         services.AddSingleton<DteTrainingLoop>();
         services.AddSingleton<MultiAgentTrainer>();
+
+        // Phase 7: Embodied Cognition — perception-limited policy pipeline
+        // AvatarObservation → SensoryPerceptionService → SpatialMemory →
+        // IPerceptionPolicy → MotorController → AvatarAction
+        services.AddSingleton<SensoryPerceptionService>();
+        services.AddSingleton<SpatialMemory>();
+        services.AddSingleton<MotorController>();
+        services.AddSingleton<ReactivePerceptionPolicy>();
+        services.AddSingleton<IPerceptionPolicy>(sp => sp.GetRequiredService<ReactivePerceptionPolicy>());
+        services.AddSingleton<EmbodiedDecisionLoop>();
 
         // ── GTAngel: Guardian Angel Cognitive Orchestrator ──────────────────────
         // Composition: /dte-ksm-evo-autogenesis ( /gta3-ue5-wpf ) → "GTAngel"

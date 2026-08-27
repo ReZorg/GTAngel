@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using GTAngel.Interop;
 using GTAngel.Services;
+using GTAngel.Services.EmbodiedCognition;
 
 namespace GTAngel.ViewModels;
 
@@ -354,6 +355,12 @@ public partial class AvatarViewModel : ObservableObject
                 loggerFactory.CreateLogger<DTE4EAvatarService>(),
                 _ue5, esn, _mlVision, _embodiment, _navigation);
             _avatarService.SetPlayerAiBridge(_playerAiBridge);
+
+            // Phase 7: wire the embodied cognition loop into the 4E exploration loop.
+            // This routes observations through a perception-limited policy and feeds
+            // the observed reward back so the policy can learn from exploration.
+            var embodiedLoop = App.Services.GetRequiredService<EmbodiedDecisionLoop>();
+            _avatarService.SetEmbodiedDecisionLoop(embodiedLoop);
 
             // KSM Cycle 5: wire the cognitive core into the exploration loop too — without
             // this, ECAN STI and MOSES patterns never advance in the 4E avatar path and

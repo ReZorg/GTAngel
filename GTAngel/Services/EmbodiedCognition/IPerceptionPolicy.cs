@@ -20,4 +20,14 @@ public interface IPerceptionPolicy
     /// <param name="memory">What the avatar remembers about previously perceived objects.</param>
     /// <returns>A motor intent, or <c>null</c> for an idle tick.</returns>
     MotorIntent? Decide(PerceptualField field, IReadOnlyList<SpatialMemoryEntry> memory);
+
+    /// <summary>
+    /// Optional reward feedback from the training loop. Policies that support
+    /// learning can use this to adapt parameters; the default implementation
+    /// is a no-op so existing reactive policies stay compatible.
+    /// </summary>
+    /// <param name="reward">Reward observed after the most recent decision.</param>
+    /// <param name="field">The perceptual field that was current when the decision was made.</param>
+    /// <param name="intent">The motor intent that was dispatched (or <c>null</c> if idle).</param>
+    void UpdateReward(float reward, PerceptualField? field, MotorIntent? intent) { }
 }

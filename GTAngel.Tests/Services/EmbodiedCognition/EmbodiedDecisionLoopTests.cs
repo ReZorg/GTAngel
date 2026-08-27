@@ -26,6 +26,7 @@ public sealed class EmbodiedDecisionLoopTests
     {
         public List<PerceptualField> SeenFields { get; } = new();
         public List<IReadOnlyList<SpatialMemoryEntry>> SeenMemories { get; } = new();
+        public List<(float Reward, PerceptualField? Field, MotorIntent? Intent)> RewardCalls { get; } = new();
         public Func<PerceptualField, IReadOnlyList<SpatialMemoryEntry>, MotorIntent?> Behaviour { get; set; }
             = (_, _) => MotorIntent.IdleIntent;
 
@@ -35,6 +36,9 @@ public sealed class EmbodiedDecisionLoopTests
             SeenMemories.Add(memory);
             return Behaviour(field, memory);
         }
+
+        public void UpdateReward(float reward, PerceptualField? field, MotorIntent? intent)
+            => RewardCalls.Add((reward, field, intent));
     }
 
     private static AvatarObservation MakeObs(double t, params PerceivedObject[] objects)
@@ -250,5 +254,21 @@ public sealed class EmbodiedDecisionLoopTests
         loop.Step(MakeObs(0.0, Obj("Pickup", 400f, 0f)));
 
         Assert.NotNull(captured);
+    }
+
+    [Fact]
+    public void UpdateReward_ForwardsRewardAndLastContextToPolicy()
+    {
+        var policy = new RecordingPolicy();
+        var loop = MakeLoop(policy);
+
+        loop.Step(MakeObs(0.0, Obj("Pickup", 400f, 0f)));
+        loop.UpdateReward(0.75f);
+
+        Assert.Single(policy.RewardCalls);
+        var call = policy.RewardCalls[0];
+        Assert.Equal(0.75f, call.Reward, 3);
+        Assert.NotNull(call.Field);
+        Assert.NotNull(call.Intent);
     }
 }
