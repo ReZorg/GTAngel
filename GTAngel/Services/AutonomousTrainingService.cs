@@ -71,6 +71,8 @@ public sealed class AutonomousTrainingService : IDisposable
             options.TrainingMode = mode;
         if (bool.TryParse(section["InitializeDtePipeline"], out var initPipeline))
             options.InitializeDtePipeline = initPipeline;
+        if (bool.TryParse(section["AutoStart"], out var autoStart))
+            options.AutoStart = autoStart;
 
         return options;
     }
@@ -139,6 +141,15 @@ public sealed class AutonomousTrainingService : IDisposable
             AttachEventHandlers();
 
             _trainingLoop.Start();
+
+            if (!_trainingLoop.State.IsRunning)
+            {
+                DetachEventHandlers();
+                const string message = "DTE training loop could not start";
+                _logger.LogWarning(message);
+                State.LastError = message;
+                return false;
+            }
 
             State.IsRunning = true;
             State.EngineType = _engine.DetectedEngine.ToString();
@@ -236,9 +247,12 @@ public sealed class AutonomousTrainingService : IDisposable
         if (_disposed) return;
         _disposed = true;
 
+        if (!State.IsRunning) return;
+
         try
         {
-            StopAsync().GetAwaiter().GetResult();
+            // Avoid blocking the caller's synchronization context.
+            Task.Run(async () => await StopAsync()).Wait(TimeSpan.FromSeconds(5));
         }
         catch (Exception ex)
         {
@@ -263,6 +277,7 @@ public class AutonomousTrainingOptions
     public int MaxEpisodes { get; set; } = 0;
     public DteTrainingMode TrainingMode { get; set; } = DteTrainingMode.Hybrid;
     public bool InitializeDtePipeline { get; set; } = true;
+    public bool AutoStart { get; set; }
 }
 
 /// <summary>

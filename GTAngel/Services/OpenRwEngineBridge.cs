@@ -565,7 +565,7 @@ add_definitions(-DRENDER_HEIGHT=${{OPENRW_DEFAULT_HEIGHT}})
         if (!_ipcServer.IsConnected)
             return new GameState { PlayerHealth = 100, CurrentIsland = "Portland" };
 
-        const int readTimeoutMs = 50;
+        const int readTimeoutMs = 5; // keep well under the frame budget
         byte[] buffer;
         int bytesRead;
 

@@ -92,6 +92,13 @@ public partial class App : Application
         Log.Information("Composition: /dte-ksm-evo-autogenesis ( /gta3-ue5-wpf ) → GTAngel");
         Log.Information("KSM Cycle 5: DteCognitiveCoreService wired into ESN + TrainingLoop");
 
+        // Phase 8: Optionally begin autonomous training against an external re3 engine
+        if (configuration.GetValue<bool>("AutonomousTraining:AutoStart"))
+        {
+            var autoTrain = _serviceProvider.GetRequiredService<AutonomousTrainingService>();
+            _ = Task.Run(async () => await autoTrain.StartAsync());
+        }
+
         // Production services: model integrity and auto-updates
         var modelIntegrity = _serviceProvider.GetRequiredService<ModelIntegrityService>();
         _ = modelIntegrity.ValidateAllAsync(); // Fire-and-forget; logs warnings if issues found
