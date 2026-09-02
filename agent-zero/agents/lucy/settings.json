@@ -1,0 +1,8 @@
+﻿{
+  "chat_model": {
+    "provider": "anthropic",
+    "name": "claude-sonnet-4"
+  },
+  "context_window": 128000,
+  "persona_bridge": "agent-zero/tools/gamer_persona_bridge.js"
+}

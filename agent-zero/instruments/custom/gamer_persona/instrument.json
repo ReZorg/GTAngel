@@ -1,0 +1,24 @@
+﻿{
+  "name": "gamer_persona",
+  "description": "Run training iterations against Lucy, the hyper-chaotic gamer-girl persona engine, and inspect her traits, skills, endocrine mode, and facial expression state.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["train_step", "trigger_event", "get_state", "get_expression", "list_events", "reset"],
+        "description": "Operation to perform on the persona engine."
+      },
+      "event": {
+        "type": "string",
+        "enum": ["CLUTCH_MOMENT", "VICTORY_ROYALE", "EPIC_PLAY", "GETTING_TILTED", "TRASH_TALKING", "FLOW_STATE", "SURPRISE_ATTACK", "TEAM_CARRY", "RAGE_QUIT_RESIST", "BORED_STOMPING"],
+        "description": "Gameplay emotion event (required for trigger_event, optional for train_step)."
+      },
+      "full": {
+        "type": "boolean",
+        "description": "Return full state dump for get_state."
+      }
+    },
+    "required": ["action"]
+  }
+}
