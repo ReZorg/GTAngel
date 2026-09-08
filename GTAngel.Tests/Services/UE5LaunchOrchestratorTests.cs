@@ -1,4 +1,5 @@
 using GTAngel.Services;
+using GTAngel.Interop;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -18,7 +19,9 @@ public class UE5LaunchOrchestratorTests : IDisposable
     public UE5LaunchOrchestratorTests()
     {
         _svc = new UE5LaunchOrchestrator(
-            NullLogger<UE5LaunchOrchestrator>.Instance, _config);
+            NullLogger<UE5LaunchOrchestrator>.Instance,
+            _config,
+            new UE5ProcessManager(NullLogger<UE5ProcessManager>.Instance));
     }
 
     // ── Initial state ─────────────────────────────────────────────────────────
@@ -193,7 +196,9 @@ public class UE5LaunchOrchestratorTests : IDisposable
     {
         var config2 = new AppConfiguration(NullLogger<AppConfiguration>.Instance);
         var svc2 = new UE5LaunchOrchestrator(
-            NullLogger<UE5LaunchOrchestrator>.Instance, config2);
+            NullLogger<UE5LaunchOrchestrator>.Instance,
+            config2,
+            new UE5ProcessManager(NullLogger<UE5ProcessManager>.Instance));
         var ex = Record.Exception(() => svc2.Dispose());
         Assert.Null(ex);
     }

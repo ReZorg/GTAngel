@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "1.0",
+  "id": "arc-angel-echo",
+  "name": "Arc Angel Echo",
+  "version": "1.0.0",
+  "source": "Meshy AI user-supplied avatar package",
+  "description": "Neon cyber-angel embodiment for the GTAngel Deep Tree Echo cognitive avatar.",
+  "license": "User supplied; preserve the source platform terms associated with the original generation.",
+  "heightCentimeters": 170.0,
+  "coordinateSystem": "Y-up, FBX armature rotated -90 degrees around X",
+  "assets": [
+    {
+      "key": "Mesh",
+      "role": "SkeletalMesh",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_Character_output.fbx",
+      "sha256": "101deb1fa7fb8c0ab2a4573f17a14d0f39f3f6c4c55dcbb5371dfa4a4189337e",
+      "sizeBytes": 57227580
+    },
+    {
+      "key": "Walk",
+      "role": "Animation",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_Animation_Walking_frame_rate_60.fbx",
+      "sha256": "a45c00873bb648029e3aabe95c98f39179a6066fd1f75c418408d06323718809",
+      "sizeBytes": 51882076,
+      "frameRate": 60
+    },
+    {
+      "key": "Run",
+      "role": "Animation",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_Animation_Running_frame_rate_60.fbx",
+      "sha256": "48c9cd18dc53778883321f6545309ab1e37d73cd243e5d59aa73c95f68bf8775",
+      "sizeBytes": 51867852,
+      "frameRate": 60
+    },
+    {
+      "key": "BaseColor",
+      "role": "Texture.BaseColor",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_texture_0.png",
+      "sha256": "adb2aea86f34a6671acd23c2d51bfd39602a1960e6b6b42ae559a7c04158d7f8",
+      "sizeBytes": 22518090
+    },
+    {
+      "key": "Normal",
+      "role": "Texture.Normal",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_texture_0_normal.png",
+      "sha256": "5d1acf3cd307bfc86786e37b215ff4021787618d86b841d6b7c0efde0add53d8",
+      "sizeBytes": 13845004
+    },
+    {
+      "key": "Metallic",
+      "role": "Texture.Metallic",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_texture_0_metallic.png",
+      "sha256": "2acc27a1316845f9f55862c2731e228f0409127a2e591de9fb814f83dfac3061",
+      "sizeBytes": 2438531
+    },
+    {
+      "key": "Roughness",
+      "role": "Texture.Roughness",
+      "path": "source/Meshy_AI_Neon_Angel_Awe_Head_biped_texture_0_roughness.png",
+      "sha256": "c791fc665a1609f84ea1b4f03b9a7f0a1c2955be878fec79c1c8b6ade14fe1b6",
+      "sizeBytes": 3953730
+    }
+  ],
+  "rig": {
+    "skeletonName": "ArcAngelEcho_Biped",
+    "boneCount": 22,
+    "meshCount": 1,
+    "vertexCount": 453319,
+    "triangleCount": 578861,
+    "hasSkinWeights": true,
+    "hasFacialBones": false,
+    "hasMorphTargets": false,
+    "hasRootMotion": false,
+    "bones": [
+      "Hips",
+      "LeftUpLeg",
+      "LeftLeg",
+      "LeftFoot",
+      "LeftToeBase",
+      "RightUpLeg",
+      "RightLeg",
+      "RightFoot",
+      "RightToeBase",
+      "Spine02",
+      "Spine01",
+      "Spine",
+      "LeftShoulder",
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "RightShoulder",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "neck",
+      "Head"
+    ]
+  },
+  "material": {
+    "baseColorAssetKey": "BaseColor",
+    "normalAssetKey": "Normal",
+    "metallicAssetKey": "Metallic",
+    "roughnessAssetKey": "Roughness",
+    "emissiveSourceAssetKey": "BaseColor",
+    "emissiveIntensity": 0.35,
+    "twoSided": true
+  },
+  "expression": {
+    "mode": "SkeletalAuraFallback",
+    "supportsFacs": false,
+    "headBone": "Head",
+    "gazeBone": "headfront",
+    "jawBone": "",
+    "driveEmissiveAura": true
+  },
+  "ue5Import": {
+    "skeletonPolicy": "CreateNew",
+    "importMesh": true,
+    "importAnimations": true,
+    "importMorphTargets": false,
+    "preserveLocalTransform": true,
+    "useT0AsReferencePose": true,
+    "convertSceneUnit": true,
+    "uniformScale": 1.0,
+    "destinationPath": "/Game/GTAngel/Avatars/ArcAngelEcho"
+  }
+}

@@ -1,5 +1,9 @@
+using GTAngel.Models;
 using GTAngel.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.IO;
+using System.IO.Pipes;
+using System.Text.Json;
 using Xunit;
 
 namespace GTAngel.Tests.Services;
@@ -245,6 +249,98 @@ public sealed class AvatarEmbodimentServiceTests : IAsyncLifetime
         // Both happiness (AU12) and anger (AU4) should activate
         Assert.True(aus[12] > 0f, "Happiness AU12 should activate");
         Assert.True(aus[4]  > 0f, "Anger AU4 should activate");
+    }
+
+    [Fact]
+    public void BuildAvatarActivationPlan_ArcAngelProfile_CoversRendererPipeline()
+    {
+        var manifest = new AvatarAssetManifest
+        {
+            Id = "arc-angel-echo",
+            Name = "Arc Angel Echo",
+            Version = "1.0.0",
+            HeightCentimeters = 170f,
+            Rig = new AvatarRigProfile { BoneCount = 22, HasSkinWeights = true },
+            Expression = new AvatarExpressionProfile
+            {
+                Mode = "SkeletalAuraFallback",
+                SupportsFacs = false
+            },
+            Assets =
+            {
+                new AvatarAssetFile { Key = "Walk", FrameRate = 60 },
+                new AvatarAssetFile { Key = "Run", FrameRate = 60 }
+            }
+        };
+        var paths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Mesh"] = "/avatar/character.fbx",
+            ["Walk"] = "/avatar/walk.fbx",
+            ["Run"] = "/avatar/run.fbx",
+            ["BaseColor"] = "/avatar/base.png",
+            ["Normal"] = "/avatar/normal.png",
+            ["Metallic"] = "/avatar/metal.png",
+            ["Roughness"] = "/avatar/rough.png"
+        };
+        var profile = new AvatarRuntimeProfile(manifest, "/avatar", paths);
+
+        var plan = AvatarEmbodimentService.BuildAvatarActivationPlan(profile);
+
+        Assert.Collection(plan,
+            command => Assert.Equal(("Avatar3DComponent", "LoadAssetProfile"), (command.Module, command.Command)),
+            command => Assert.Equal(("Avatar3DComponent", "ConfigureLocomotion"), (command.Module, command.Command)),
+            command => Assert.Equal(("Avatar3DComponent", "ConfigurePbrMaterial"), (command.Module, command.Command)),
+            command => Assert.Equal(("Avatar3DComponent", "ConfigureExpressionDriver"), (command.Module, command.Command)));
+    }
+
+    [Fact]
+    public async Task ActivateAvatarProfile_BeforePipeConnect_IsDeliveredAndThenPublished()
+    {
+        var manifest = new AvatarAssetManifest
+        {
+            Id = "arc-angel-echo",
+            Name = "Arc Angel Echo",
+            Version = "1.0.0",
+            HeightCentimeters = 170f,
+            Rig = new AvatarRigProfile { BoneCount = 22, HasSkinWeights = true },
+            Expression = new AvatarExpressionProfile
+            {
+                Mode = "SkeletalAuraFallback",
+                SupportsFacs = false
+            }
+        };
+        var paths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Mesh"] = "/avatar/character.fbx",
+            ["Walk"] = "/avatar/walk.fbx",
+            ["Run"] = "/avatar/run.fbx",
+            ["BaseColor"] = "/avatar/base.png",
+            ["Normal"] = "/avatar/normal.png",
+            ["Metallic"] = "/avatar/metal.png",
+            ["Roughness"] = "/avatar/rough.png"
+        };
+        var profile = new AvatarRuntimeProfile(manifest, "/avatar", paths);
+        var activated = new TaskCompletionSource<AvatarRuntimeProfile>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _svc.OnAvatarProfileActivated += (_, value) => activated.TrySetResult(value);
+
+        await _svc.StartAsync();
+        await _svc.ActivateAvatarProfileAsync(profile);
+        Assert.Null(_svc.ActiveProfile);
+
+        using var server = new NamedPipeServerStream(
+            "GTAngel_Embodiment_IPC", PipeDirection.In, 1,
+            PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        await server.WaitForConnectionAsync(cts.Token);
+        using var reader = new StreamReader(server);
+        string? line = await reader.ReadLineAsync(cts.Token);
+
+        Assert.False(string.IsNullOrWhiteSpace(line));
+        using var json = JsonDocument.Parse(line!);
+        Assert.Equal(4, json.RootElement.GetProperty("Commands").GetArrayLength());
+        Assert.Same(profile, await activated.Task.WaitAsync(cts.Token));
+        Assert.Same(profile, _svc.ActiveProfile);
     }
 
     [Fact]

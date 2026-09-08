@@ -5,10 +5,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Text.Json;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GTAngel.Interop;
 using Microsoft.Extensions.Logging;
 
 namespace GTAngel.Services;
@@ -44,18 +44,18 @@ public sealed class UE5LaunchOrchestrator : IDisposable
     // ── Constants ─────────────────────────────────────────────────────────────
     private const string DefaultEnginePath   = @".\Engine";
     private const string EditorBinary        = @"Engine\Binaries\Win64\UnrealEditor.exe";
-    private const string CognitivePipePrefix = "GTAngel_MLVision_IPC";
     private const int    MlVisionWidth       = 768;
     private const int    MlVisionHeight      = 768;
     private const int    IpcConnectTimeoutMs = 15_000;
     private const int    LaunchTimeoutMs     = 60_000;
+    private static readonly TimeSpan ImportTimeout = TimeSpan.FromMinutes(10);
 
     // ── State ─────────────────────────────────────────────────────────────────
     private readonly ILogger<UE5LaunchOrchestrator> _logger;
     private readonly AppConfiguration _config;
+    private readonly UE5ProcessManager _processManager;
     private CancellationTokenSource? _cts;
     private Process? _ueProcess;
-    private NamedPipeClientStream? _ipcPipe;
     private volatile UE5LaunchStage _currentStage = UE5LaunchStage.Idle;
     private volatile bool _isReady;
 
@@ -75,10 +75,14 @@ public sealed class UE5LaunchOrchestrator : IDisposable
     public string EnginePath => _config.Ue5EnginePath ?? DefaultEnginePath;
     public Process? UEProcess => _ueProcess;
 
-    public UE5LaunchOrchestrator(ILogger<UE5LaunchOrchestrator> logger, AppConfiguration config)
+    public UE5LaunchOrchestrator(
+        ILogger<UE5LaunchOrchestrator> logger,
+        AppConfiguration config,
+        UE5ProcessManager processManager)
     {
         _logger = logger;
         _config = config;
+        _processManager = processManager;
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -107,6 +111,14 @@ public sealed class UE5LaunchOrchestrator : IDisposable
             if (!buildResult.success)
                 return Fail(UE5LaunchStage.Building, buildResult.message, sw.Elapsed);
 
+            SetStage(UE5LaunchStage.Building, "Ensuring Arc Angel Unreal assets are imported...");
+            var importResult = await EnsureArcAngelAssetsAsync(ct);
+            if (!importResult.success)
+                return Fail(UE5LaunchStage.Building, importResult.message, sw.Elapsed);
+
+            await _processManager.EnsureIpcServerAsync(ct);
+            Log("✓ Shared GTAngel_UE5_IPC command/observation server started");
+
             // ── Stage 3: Launch ───────────────────────────────────────────────
             SetStage(UE5LaunchStage.Launching, "Launching UnrealEditor with ML Vision pipeline...");
             var launchResult = await LaunchEditorAsync(ct);
@@ -115,13 +127,13 @@ public sealed class UE5LaunchOrchestrator : IDisposable
 
             // ── Stage 4: Connect ──────────────────────────────────────────────
             SetStage(UE5LaunchStage.Connecting, "Connecting DTE cognitive IPC pipe...");
-            var connectResult = await ConnectIpcPipeAsync(ct);
+            var connectResult = await WaitForSharedIpcAsync(ct);
             if (!connectResult.success)
                 return Fail(UE5LaunchStage.Connecting, connectResult.message, sw.Elapsed);
 
             // ── Ready ─────────────────────────────────────────────────────────
             _isReady = true;
-            SetStage(UE5LaunchStage.Ready, $"UE5 ready — ML Vision {MlVisionWidth}×{MlVisionHeight} active");
+            SetStage(UE5LaunchStage.Ready, "UE5 ready — Arc Angel command/observation transport connected");
             var result = new UE5LaunchResult(true, UE5LaunchStage.Ready,
                 "UE5 launched and connected successfully", sw.Elapsed);
             OnLaunchComplete?.Invoke(result);
@@ -143,7 +155,6 @@ public sealed class UE5LaunchOrchestrator : IDisposable
     {
         _cts?.Cancel();
         _isReady = false;
-        try { _ipcPipe?.Close(); } catch { }
         try
         {
             if (_ueProcess is { HasExited: false })
@@ -159,28 +170,12 @@ public sealed class UE5LaunchOrchestrator : IDisposable
     /// <summary>Send a command to UE5 via the IPC pipe.</summary>
     public async Task SendCommandAsync(string commandType, string payload, string? extra = null)
     {
-        if (_ipcPipe is not { IsConnected: true })
+        if (!_processManager.IsIpcConnected)
         {
             _logger.LogWarning("Cannot send command — IPC pipe not connected");
             return;
         }
-        try
-        {
-            var msg = JsonSerializer.Serialize(new
-            {
-                Type = commandType,
-                Payload = payload,
-                Extras = extra != null ? new[] { extra } : Array.Empty<string>(),
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-            });
-            var bytes = System.Text.Encoding.UTF8.GetBytes(msg + "\n");
-            await _ipcPipe.WriteAsync(bytes);
-            await _ipcPipe.FlushAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "IPC send error");
-        }
+        await _processManager.SendExternalCommandAsync(commandType, payload, extra);
     }
 
     // ── Stage Implementations ─────────────────────────────────────────────────
@@ -209,6 +204,15 @@ public sealed class UE5LaunchOrchestrator : IDisposable
 
         Log($"✓ Engine binary: {editorExe}");
 
+        string projectPath = GetGamefaceProjectPath();
+        if (!File.Exists(projectPath))
+        {
+            var msg = $"Gameface project not found: {projectPath}";
+            Log($"✗ {msg}");
+            return (false, msg);
+        }
+        Log($"✓ Gameface project: {projectPath}");
+
         // Check for cognitive source modules
         var sourceDir = Path.Combine(enginePath, "Source");
         var modules = new[] { "Avatar", "Neurochemical", "Personality", "Environment" };
@@ -230,6 +234,7 @@ public sealed class UE5LaunchOrchestrator : IDisposable
         // Check for pre-built plugin binaries
         var pluginPaths = new[]
         {
+            Path.Combine(AppContext.BaseDirectory, "Assets", "Gameface", "Plugins", "GTAngelRuntime"),
             Path.Combine(EnginePath, "Plugins", "GTAngelCognitive"),
             Path.Combine(EnginePath, "Plugins", "DTEReservoir"),
             Path.Combine(EnginePath, "Plugins", "MLVisionPipe"),
@@ -256,10 +261,15 @@ public sealed class UE5LaunchOrchestrator : IDisposable
     private async Task<(bool success, string message)> LaunchEditorAsync(CancellationToken ct)
     {
         var editorExe = Path.Combine(EnginePath, EditorBinary);
+        var projectPath = GetGamefaceProjectPath();
+        if (!File.Exists(projectPath))
+            return (false, $"Gameface project not found: {projectPath}");
 
         // Build launch arguments with UE5 cognitive flags
         var args = string.Join(" ", new[]
         {
+            $"\"{projectPath}\"",
+            "\"/Engine/Maps/Entry?game=/Script/Engine.GameModeBase\"",
             "-game",
             "-dx12",
             "-SM6",
@@ -273,7 +283,10 @@ public sealed class UE5LaunchOrchestrator : IDisposable
             $"-ResY=720",
             $"-MLResX={MlVisionWidth}",
             $"-MLResY={MlVisionHeight}",
-            $"-MLVisionPipe={CognitivePipePrefix}",
+            $"-GTAngel_Pipe={UE5ProcessManager.PipeName}",
+            $"-GTAngel_AvatarPipe={UE5ProcessManager.AvatarPipeName}",
+            "-GTAngel_DTE_Avatar=1",
+            "-GTAngel_EmbodiedCognition=1",
             "-DTECognitive",
             "-log",
             "-unattended",
@@ -318,44 +331,98 @@ public sealed class UE5LaunchOrchestrator : IDisposable
         }
         catch (Exception ex)
         {
-            // If the binary doesn't exist (dev machine without UE5), log and continue in stub mode
-            Log($"⚠ UE5 launch failed: {ex.Message}");
-            Log("  Running in stub mode — IPC pipe will use loopback simulation");
-            return (true, "Stub mode (UE5 binary not available)");
+            Log($"✗ UE5 launch failed: {ex.Message}");
+            return (false, ex.Message);
         }
     }
 
-    private async Task<(bool success, string message)> ConnectIpcPipeAsync(CancellationToken ct)
+    private async Task<(bool success, string message)> EnsureArcAngelAssetsAsync(CancellationToken ct)
     {
-        Log($"Connecting to IPC pipe: {CognitivePipePrefix}...");
+        string projectPath = GetGamefaceProjectPath();
+        string projectDirectory = Path.GetDirectoryName(projectPath)!;
+        string contentDirectory = Path.Combine(
+            projectDirectory, "Content", "GTAngel", "Avatars", "ArcAngelEcho");
+        string meshAsset = Path.Combine(contentDirectory, "SK_ArcAngelEcho.uasset");
+        string walkAsset = Path.Combine(contentDirectory, "A_ArcAngelEcho_Walk.uasset");
+        string runAsset = Path.Combine(contentDirectory, "A_ArcAngelEcho_Run.uasset");
+        if (File.Exists(meshAsset) && File.Exists(walkAsset) && File.Exists(runAsset))
+        {
+            Log("✓ Arc Angel Unreal assets already imported");
+            return (true, "Arc Angel assets present");
+        }
 
+        string importer = Path.Combine(
+            projectDirectory, "Plugins", "GTAngelRuntime", "Content", "Python",
+            "import_arc_angel_echo.py");
+        if (!File.Exists(importer))
+            return (false, $"Arc Angel importer not found: {importer}");
+
+        string editorExe = Path.Combine(EnginePath, EditorBinary);
+        var psi = new ProcessStartInfo(editorExe)
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+        };
+        psi.ArgumentList.Add(projectPath);
+        psi.ArgumentList.Add("-run=pythonscript");
+        psi.ArgumentList.Add($"-script={importer}");
+        psi.ArgumentList.Add("-unattended");
+        psi.ArgumentList.Add("-nullrhi");
+        psi.ArgumentList.Add("-nosplash");
+        psi.ArgumentList.Add("-stdout");
+        psi.ArgumentList.Add("-FullStdOutLogOutput");
+
+        Log("Importing Arc Angel FBX, animations and PBR textures into Gameface...");
+        using var process = new Process { StartInfo = psi };
+        process.Start();
+        Task<string> stdout = process.StandardOutput.ReadToEndAsync(ct);
+        Task<string> stderr = process.StandardError.ReadToEndAsync(ct);
         try
         {
-            _ipcPipe = new NamedPipeClientStream(".", CognitivePipePrefix,
-                PipeDirection.InOut, PipeOptions.Asynchronous);
-
-            using var timeoutCts = new CancellationTokenSource(IpcConnectTimeoutMs);
-            using var linkedCts  = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
-
-            await _ipcPipe.ConnectAsync(linkedCts.Token);
-            Log($"✓ IPC pipe connected");
-            return (true, "IPC pipe connected");
+            await process.WaitForExitAsync(ct).WaitAsync(ImportTimeout, ct);
         }
-        catch (OperationCanceledException)
+        catch (TimeoutException)
         {
-            // Pipe not available — run in disconnected mode (UE5 not running)
-            Log("⚠ IPC pipe not available — running in disconnected mode");
-            Log("  DTE cognitive state will be simulated locally");
-            return (true, "Disconnected mode (no UE5 IPC)");
+            try { process.Kill(entireProcessTree: true); } catch { }
+            return (false, $"Arc Angel import exceeded {ImportTimeout.TotalMinutes:F0} minutes");
         }
-        catch (Exception ex)
+
+        string output = await stdout;
+        string errors = await stderr;
+        foreach (string line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries).TakeLast(20))
+            Log(line.TrimEnd());
+        if (process.ExitCode != 0)
         {
-            Log($"⚠ IPC connect error: {ex.Message} — continuing in disconnected mode");
-            return (true, "Disconnected mode (IPC error)");
+            string detail = errors.Split('\n', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()
+                ?? "No error output";
+            return (false, $"Arc Angel importer failed with exit code {process.ExitCode}: {detail}");
         }
+
+        if (!File.Exists(meshAsset) || !File.Exists(walkAsset) || !File.Exists(runAsset))
+            return (false, "Arc Angel importer exited successfully but required UE assets were not generated");
+
+        Log("✓ Arc Angel mesh, locomotion and PBR assets imported");
+        return (true, "Arc Angel assets imported");
+    }
+
+    private async Task<(bool success, string message)> WaitForSharedIpcAsync(CancellationToken ct)
+    {
+        Log($"Waiting for IPC client: {UE5ProcessManager.PipeName}...");
+        bool connected = await _processManager.WaitForIpcConnectionAsync(
+            TimeSpan.FromMilliseconds(IpcConnectTimeoutMs), ct);
+        if (!connected)
+            return (false, $"Timed out waiting for {UE5ProcessManager.PipeName}");
+
+        Log("✓ Shared GTAngel IPC connected");
+        return (true, "Shared GTAngel IPC connected");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static string GetGamefaceProjectPath() => Path.Combine(
+        AppContext.BaseDirectory, "Assets", "Gameface", "Gameface.uproject");
 
     private void SetStage(UE5LaunchStage stage, string message)
     {
@@ -383,7 +450,6 @@ public sealed class UE5LaunchOrchestrator : IDisposable
     {
         Stop();
         _cts?.Dispose();
-        _ipcPipe?.Dispose();
         _ueProcess?.Dispose();
     }
 }

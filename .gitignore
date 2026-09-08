@@ -46,6 +46,7 @@ Archecho/*/DerivedDataCache/
 *.txt
 *.ps1
 *.py
+!GTAngel/Assets/Gameface/Plugins/GTAngelRuntime/Content/Python/import_arc_angel_echo.py
 *.bat
 
 # --- IDE ---

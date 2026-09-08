@@ -1,6 +1,7 @@
 using System.IO;
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,10 @@ public class UE5ProcessManager : IDisposable
     private StreamReader? _pipeReader;
     private CancellationTokenSource? _cts;
     private Task? _messageLoopTask;
+    private Task? _pipeAcceptLoopTask;
+    private readonly SemaphoreSlim _pipeWriteLock = new(1, 1);
+    private readonly object _pipeStateLock = new();
+    private TaskCompletionSource<bool> _pipeConnected = NewConnectionSource();
 
     // ── IPC pipe names ──────────────────────────────────────────────────────
     public const string PipeName        = "GTAngel_UE5_IPC";
@@ -53,6 +58,7 @@ public class UE5ProcessManager : IDisposable
     public UEProcessState State { get; private set; } = UEProcessState.NotStarted;
     public IntPtr EngineWindowHandle { get; private set; }
     public int ProcessId => _engineProcess?.Id ?? 0;
+    public bool IsIpcConnected => _pipeServer?.IsConnected == true && _pipeWriter != null;
 
     // ── UE5 feature flags ───────────────────────────────────────────────────
     public bool UseLumen         { get; set; } = true;
@@ -94,7 +100,7 @@ public class UE5ProcessManager : IDisposable
 
         try
         {
-            await StartPipeServerAsync();
+            await EnsureIpcServerAsync(_cts.Token);
 
             var args = BuildUE5CommandLine(extraArgs);
 
@@ -228,7 +234,7 @@ public class UE5ProcessManager : IDisposable
         {
             Action  = "AvatarAction",
             Key     = action.InputAction,
-            Value   = action.Magnitude.ToString("F3"),
+            Value   = action.Magnitude.ToString("F3", CultureInfo.InvariantCulture),
             Extras  = new[] { System.Text.Json.JsonSerializer.Serialize(action) }
         };
         await SendCommandAsync(cmd);
@@ -339,39 +345,112 @@ public class UE5ProcessManager : IDisposable
 
     // ── Internal helpers ─────────────────────────────────────────────────────
 
-    private async Task SendCommandAsync(UEMessage msg)
+    /// <summary>
+    /// Start the duplex GTAngel_UE5_IPC server without launching another engine
+    /// process. Used by UE5LaunchOrchestrator so its editor process and the DTE
+    /// avatar share this single command/observation transport.
+    /// </summary>
+    public Task EnsureIpcServerAsync(CancellationToken cancellationToken = default)
     {
-        if (_pipeWriter == null) return;
+        if (_pipeAcceptLoopTask is { IsCompleted: false }) return Task.CompletedTask;
+        if (_cts == null || _cts.IsCancellationRequested)
+        {
+            _cts?.Dispose();
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _pipeConnected = NewConnectionSource();
+        }
+        _pipeAcceptLoopTask = Task.Run(() => PipeAcceptLoopAsync(_cts.Token), _cts.Token);
+        return Task.CompletedTask;
+    }
+
+    public async Task<bool> WaitForIpcConnectionAsync(
+        TimeSpan timeout,
+        CancellationToken cancellationToken = default)
+    {
+        if (IsIpcConnected) return true;
         try
         {
+            return await _pipeConnected.Task.WaitAsync(timeout, cancellationToken).ConfigureAwait(false);
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
+
+    public Task SendExternalCommandAsync(string action, string payload, string? extra = null) =>
+        SendCommandAsync(new UEMessage
+        {
+            Action = action,
+            Value = payload,
+            Extras = extra == null ? Array.Empty<string>() : new[] { extra }
+        });
+
+    private async Task SendCommandAsync(UEMessage msg)
+    {
+        await _pipeWriteLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            var writer = _pipeWriter;
+            if (writer == null || !IsIpcConnected) return;
             var json = JsonSerializer.Serialize(msg);
-            await _pipeWriter.WriteLineAsync(json);
+            await writer.WriteLineAsync(json).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to send command to UE5 engine");
         }
+        finally
+        {
+            _pipeWriteLock.Release();
+        }
     }
 
-    private async Task StartPipeServerAsync()
+    private async Task PipeAcceptLoopAsync(CancellationToken ct)
     {
-        _pipeServer = new NamedPipeServerStream(
-            PipeName, PipeDirection.InOut, 1,
-            PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-
-        _ = Task.Run(async () =>
+        while (!ct.IsCancellationRequested)
         {
+            NamedPipeServerStream? server = null;
             try
             {
-                await _pipeServer.WaitForConnectionAsync(_cts!.Token);
-                _pipeWriter = new StreamWriter(_pipeServer, Encoding.UTF8) { AutoFlush = true };
-                _pipeReader = new StreamReader(_pipeServer, Encoding.UTF8);
+                server = new NamedPipeServerStream(
+                    PipeName, PipeDirection.InOut, 1,
+                    PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+                lock (_pipeStateLock)
+                {
+                    _pipeServer = server;
+                }
+
+                await server.WaitForConnectionAsync(ct).ConfigureAwait(false);
+                lock (_pipeStateLock)
+                {
+                    _pipeWriter = new StreamWriter(server, new UTF8Encoding(false), leaveOpen: true)
+                    {
+                        AutoFlush = true
+                    };
+                    _pipeReader = new StreamReader(server, Encoding.UTF8, leaveOpen: true);
+                    _pipeConnected.TrySetResult(true);
+                }
                 _logger.LogInformation("UE5 engine connected via named pipe");
-                await MessageLoopAsync(_cts.Token);
+                await MessageLoopAsync(ct).ConfigureAwait(false);
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { break; }
             catch (Exception ex) { _logger.LogError(ex, "UE5 pipe server error"); }
-        });
+            finally
+            {
+                lock (_pipeStateLock)
+                {
+                    _pipeWriter?.Dispose();
+                    _pipeReader?.Dispose();
+                    _pipeWriter = null;
+                    _pipeReader = null;
+                    _pipeServer = null;
+                    if (!ct.IsCancellationRequested)
+                        _pipeConnected = NewConnectionSource();
+                }
+                server?.Dispose();
+            }
+        }
     }
 
     private async Task MessageLoopAsync(CancellationToken ct)
@@ -389,7 +468,7 @@ public class UE5ProcessManager : IDisposable
                 // Handle ML vision observations
                 if (msg.Action == "MLVisionFrame")
                 {
-                    var obsJson = msg.Extras.Length > 0 ? msg.Extras[0] : "{}";
+                    var obsJson = msg.Extras?.Length > 0 ? msg.Extras[0] : "{}";
                     var obs = JsonSerializer.Deserialize<AvatarObservation>(obsJson);
                     if (obs != null) AvatarObservationReceived?.Invoke(this, obs);
                 }
@@ -399,7 +478,11 @@ public class UE5ProcessManager : IDisposable
                 }
             }
             catch (OperationCanceledException) { break; }
-            catch (Exception ex) { _logger.LogWarning(ex, "Message loop error"); }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Message loop ended after pipe error");
+                break;
+            }
         }
     }
 
@@ -433,6 +516,9 @@ public class UE5ProcessManager : IDisposable
         Cleanup();
     }
 
+    private static TaskCompletionSource<bool> NewConnectionSource() =>
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
+
     private void Cleanup()
     {
         _cts?.Cancel();
@@ -442,6 +528,7 @@ public class UE5ProcessManager : IDisposable
         _pipeWriter = null;
         _pipeReader = null;
         _pipeServer = null;
+        _pipeConnected.TrySetCanceled();
     }
 
     public void Dispose()
@@ -449,6 +536,7 @@ public class UE5ProcessManager : IDisposable
         Cleanup();
         _engineProcess?.Dispose();
         _cts?.Dispose();
+        _pipeWriteLock.Dispose();
     }
 }
 

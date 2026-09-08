@@ -6,6 +6,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using GTAngel.Interop;
+using GTAngel.Models;
 using Microsoft.Extensions.Logging;
 
 namespace GTAngel.Services;
@@ -99,6 +101,7 @@ public sealed class AvatarEmbodimentService : IDisposable
     public event EventHandler<NeurochemicalState>? OnNeurochemicalStateUpdated;
     public event EventHandler<PersonalityTraits>?  OnPersonalityTraitsUpdated;
     public event EventHandler<float[]>?            OnFACSAUsUpdated;   // 46-element AU array [0..1]
+    public event EventHandler<AvatarRuntimeProfile>? OnAvatarProfileActivated;
     public event EventHandler<string>?             OnEmbodimentLog;
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -106,20 +109,19 @@ public sealed class AvatarEmbodimentService : IDisposable
     private NeurochemicalState _currentNeuro       = new();
     private PersonalityTraits  _currentPersonality = new();
     private float[]            _currentAUs         = new float[47]; // AU1..AU46
+    private AvatarRuntimeProfile? _activeProfile;
 
     private readonly ILogger<AvatarEmbodimentService> _logger;
-    private readonly ConcurrentQueue<string>          _ipcCommandQueue = new();
-
-    // Named pipe for neurochemical readback
-    private NamedPipeClientStream? _neuroPipe;
-    private CancellationTokenSource? _neuroCts;
-    private Task? _neuroReadbackTask;
+    private readonly ConcurrentQueue<string> _ipcCommandQueue = new();
+    private readonly SemaphoreSlim _queueSignal = new(0);
+    private CancellationTokenSource? _workerCts;
+    private Task? _embodimentWorkerTask;
+    private string? _pendingActivationBatch;
+    private AvatarRuntimeProfile? _pendingActivationProfile;
+    private bool _disposed;
 
     // Named pipe for sending FACS/IK commands to UE5
     private NamedPipeClientStream? _embodimentPipe;
-    private readonly SemaphoreSlim _pipeLock = new(1, 1);
-
-    private const string NeuroPipeName      = "GTAngel_Neuro_IPC";
     private const string EmbodimentPipeName = "GTAngel_Embodiment_IPC";
 
     public AvatarEmbodimentService(ILogger<AvatarEmbodimentService> logger)
@@ -131,14 +133,13 @@ public sealed class AvatarEmbodimentService : IDisposable
 
     public async Task StartAsync(CancellationToken ct = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_embodimentWorkerTask is { IsCompleted: false }) return;
         Log("AvatarEmbodimentService starting — FACS+IK+Neuro+Personality pipeline");
 
-        // Start neurochemical readback loop
-        _neuroCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        _neuroReadbackTask = Task.Run(() => NeuroReadbackLoopAsync(_neuroCts.Token), ct);
-
-        // Try to connect embodiment pipe (non-blocking — UE5 may not be running yet)
-        _ = Task.Run(() => ConnectEmbodimentPipeAsync(ct), ct);
+        _workerCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        _embodimentWorkerTask = Task.Run(
+            () => EmbodimentWorkerAsync(_workerCts.Token), _workerCts.Token);
 
         Log("AvatarEmbodimentService ready");
         await Task.CompletedTask;
@@ -146,13 +147,89 @@ public sealed class AvatarEmbodimentService : IDisposable
 
     public async Task StopAsync()
     {
-        _neuroCts?.Cancel();
-        if (_neuroReadbackTask != null)
-            await _neuroReadbackTask.WaitAsync(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
-
-        _neuroPipe?.Dispose();
+        _workerCts?.Cancel();
         _embodimentPipe?.Dispose();
+        if (_embodimentWorkerTask != null)
+        {
+            try
+            {
+                await _embodimentWorkerTask.WaitAsync(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) { }
+            catch (TimeoutException) { }
+        }
+        _embodimentPipe = null;
         Log("AvatarEmbodimentService stopped");
+    }
+
+    // ── Avatar asset profile activation ───────────────────────────────────────
+
+    /// <summary>
+    /// Build the renderer activation plan for a validated, versioned avatar
+    /// package. This is public so the exact UE5 contract can be unit tested
+    /// without requiring a running named-pipe endpoint.
+    /// </summary>
+    public static IReadOnlyList<AvatarModuleCommand> BuildAvatarActivationPlan(
+        AvatarRuntimeProfile profile)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        var manifest = profile.Manifest;
+        var commands = new List<AvatarModuleCommand>
+        {
+            new("Avatar3DComponent", "LoadAssetProfile", new
+            {
+                ProfileId = manifest.Id,
+                manifest.Name,
+                manifest.Version,
+                MeshPath = profile.GetAssetPath("Mesh"),
+                manifest.HeightCentimeters,
+                manifest.CoordinateSystem,
+                Rig = manifest.Rig,
+                Import = manifest.Ue5Import,
+            }),
+            new("Avatar3DComponent", "ConfigureLocomotion", new
+            {
+                WalkAnimationPath = profile.AssetPaths.GetValueOrDefault("Walk"),
+                RunAnimationPath = profile.AssetPaths.GetValueOrDefault("Run"),
+                WalkFrameRate = manifest.Assets.FirstOrDefault(a => a.Key.Equals("Walk", StringComparison.OrdinalIgnoreCase))?.FrameRate,
+                RunFrameRate = manifest.Assets.FirstOrDefault(a => a.Key.Equals("Run", StringComparison.OrdinalIgnoreCase))?.FrameRate,
+                IdleMode = profile.AssetPaths.ContainsKey("Idle") ? "Animation" : "ReferencePoseBreathing",
+            }),
+            new("Avatar3DComponent", "ConfigurePbrMaterial", new
+            {
+                BaseColorPath = profile.GetAssetPath(manifest.Material.BaseColorAssetKey),
+                NormalPath = profile.GetAssetPath(manifest.Material.NormalAssetKey),
+                MetallicPath = profile.GetAssetPath(manifest.Material.MetallicAssetKey),
+                RoughnessPath = profile.GetAssetPath(manifest.Material.RoughnessAssetKey),
+                EmissiveSourcePath = profile.GetAssetPath(manifest.Material.EmissiveSourceAssetKey),
+                manifest.Material.EmissiveIntensity,
+                manifest.Material.TwoSided,
+            }),
+            new("Avatar3DComponent", "ConfigureExpressionDriver", new
+            {
+                manifest.Expression.Mode,
+                manifest.Expression.SupportsFacs,
+                manifest.Expression.HeadBone,
+                manifest.Expression.GazeBone,
+                manifest.Expression.JawBone,
+                manifest.Expression.DriveEmissiveAura,
+            }),
+        };
+
+        return commands;
+    }
+
+    /// <summary>Activate a validated avatar and transmit its UE5 import/runtime plan.</summary>
+    public async Task ActivateAvatarProfileAsync(AvatarRuntimeProfile profile)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        var plan = BuildAvatarActivationPlan(profile);
+        _pendingActivationProfile = profile;
+        Interlocked.Exchange(ref _pendingActivationBatch, SerializeBatch(plan));
+        _queueSignal.Release();
+        Log($"Avatar profile queued: {profile.Manifest.Name} v{profile.Manifest.Version} " +
+            $"({profile.Manifest.Expression.Mode})");
+        await Task.CompletedTask;
     }
 
     // ── Step 1: Synthesize EmotionalState from ESN reservoir output ───────────
@@ -226,42 +303,65 @@ public sealed class AvatarEmbodimentService : IDisposable
 
     public async Task SendFACSCommandsAsync(float[] aus)
     {
-        // Build batch of Live2D SetParameterValue commands
+        // Build a native FACS/Live2D batch when the active rig supports it.
+        // Arc Angel Echo has no facial deformation channels, so its cognitive
+        // expression is projected through head/gaze pose and the neon aura.
         var commands = new List<object>();
-        foreach (var (au, paramName) in AuToLive2DParam)
+        bool useFacialParameters = _activeProfile?.Manifest.Expression.SupportsFacs ?? true;
+        if (useFacialParameters)
         {
-            if (au >= aus.Length) continue;
+            foreach (var (au, paramName) in AuToLive2DParam)
+            {
+                if (au >= aus.Length) continue;
+                commands.Add(new
+                {
+                    Module    = "Live2DCubismAvatarComponent",
+                    Command   = "SetParameterValue",
+                    Parameter = paramName,
+                    Value     = aus[au],
+                });
+            }
+        }
+        else
+        {
+            float valence = Clamp01(_currentEmotion.Happiness -
+                0.5f * (_currentEmotion.Sadness + _currentEmotion.Anger) + 0.5f);
+            float arousal = Clamp01(Math.Max(_currentEmotion.Surprise,
+                Math.Max(_currentEmotion.Anger, _currentEmotion.Fear)));
             commands.Add(new
             {
-                Module    = "Live2DCubismAvatarComponent",
-                Command   = "SetParameterValue",
-                Parameter = paramName,
-                Value     = aus[au],
+                Module = "Avatar3DComponent",
+                Command = "SetSkeletalAuraExpression",
+                Parameters = new
+                {
+                    HeadBone = _activeProfile?.Manifest.Expression.HeadBone ?? "Head",
+                    GazeBone = _activeProfile?.Manifest.Expression.GazeBone ?? "headfront",
+                    HeadPitch = (_currentEmotion.Surprise - _currentEmotion.Sadness) * 8f,
+                    HeadYaw = (_currentEmotion.Happiness - _currentEmotion.Anger) * 5f,
+                    GazeIntensity = Clamp01(0.35f + arousal * 0.65f),
+                    AuraIntensity = Clamp01(0.2f + valence * 0.45f + arousal * 0.35f),
+                    AuraValence = valence,
+                    AuraArousal = arousal,
+                },
             });
         }
 
-        // Also send ExpressionSynthesizer.SynthesizeExpression
-        commands.Add(new
+        if (useFacialParameters)
         {
-            Module  = "ExpressionSynthesizer",
-            Command = "SynthesizeExpression",
-            Emotion = new
+            commands.Add(new
             {
-                Happiness = _currentEmotion.Happiness,
-                Surprise  = _currentEmotion.Surprise,
-                Sadness   = _currentEmotion.Sadness,
-                Anger     = _currentEmotion.Anger,
-                Fear      = _currentEmotion.Fear,
-            },
-        });
-
-        // Trigger PhysicsDeformer for hair/cloth simulation
-        commands.Add(new
-        {
-            Module  = "PhysicsDeformer",
-            Command = "UpdatePhysicsSimulation",
-            DeltaTime = 0.033f,
-        });
+                Module  = "ExpressionSynthesizer",
+                Command = "SynthesizeExpression",
+                Emotion = new
+                {
+                    Happiness = _currentEmotion.Happiness,
+                    Surprise  = _currentEmotion.Surprise,
+                    Sadness   = _currentEmotion.Sadness,
+                    Anger     = _currentEmotion.Anger,
+                    Fear      = _currentEmotion.Fear,
+                },
+            });
+        }
 
         await SendEmbodimentBatchAsync(commands);
     }
@@ -318,97 +418,40 @@ public sealed class AvatarEmbodimentService : IDisposable
 
         var personalityCommand = new
         {
-            Module  = "SuperHotGirlPersonality",
+            Module  = "Avatar3DComponent",
             Command = "ApplyPersonality",
-            Traits  = new
+            Parameters = new
             {
-                Confidence  = _currentPersonality.Confidence,
-                Charm       = _currentPersonality.Charm,
-                Playfulness = _currentPersonality.Playfulness,
-                Wit         = _currentPersonality.Wit,
-                Sass        = _currentPersonality.Sass,
+                Traits = new
+                {
+                    Confidence  = _currentPersonality.Confidence,
+                    Charm       = _currentPersonality.Charm,
+                    Playfulness = _currentPersonality.Playfulness,
+                    Wit         = _currentPersonality.Wit,
+                    Sass        = _currentPersonality.Sass,
+                },
             },
         };
 
         await SendEmbodimentBatchAsync(new List<object> { personalityCommand });
     }
 
-    // ── Neurochemical readback loop ───────────────────────────────────────────
+    // ── Neurochemical readback from main AvatarObservation transport ──────────
 
-    private async Task NeuroReadbackLoopAsync(CancellationToken ct)
+    public void UpdateNeurochemicalState(NeurochemicalSnapshot? snapshot)
     {
-        Log("Neurochemical readback loop starting — connecting to GTAngel_Neuro_IPC");
-
-        while (!ct.IsCancellationRequested)
-        {
-            try
-            {
-                using var pipe = new NamedPipeClientStream(".", NeuroPipeName,
-                    PipeDirection.In, PipeOptions.Asynchronous);
-
-                await pipe.ConnectAsync(3000, ct);
-                Log("Connected to GTAngel_Neuro_IPC neurochemical readback pipe");
-
-                var buffer = new byte[4096];
-                var sb = new StringBuilder();
-
-                while (!ct.IsCancellationRequested && pipe.IsConnected)
-                {
-                    int bytesRead = await pipe.ReadAsync(buffer, ct);
-                    if (bytesRead == 0) break;
-
-                    sb.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
-                    string data = sb.ToString();
-                    int newline;
-                    while ((newline = data.IndexOf('\n')) >= 0)
-                    {
-                        string line = data[..newline].Trim();
-                        data = data[(newline + 1)..];
-                        if (!string.IsNullOrEmpty(line))
-                            ProcessNeuroReadback(line);
-                    }
-                    sb.Clear();
-                    sb.Append(data);
-                }
-            }
-            catch (OperationCanceledException) { break; }
-            catch (Exception ex)
-            {
-                _logger.LogDebug("Neuro pipe reconnecting: {Msg}", ex.Message);
-                await Task.Delay(2000, ct).ConfigureAwait(false);
-            }
-        }
-    }
-
-    private void ProcessNeuroReadback(string json)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            _currentNeuro = new NeurochemicalState(
-                Curiosity:   GetFloat(root, "CuriosityModule",       _currentNeuro.Curiosity),
-                Endorphin:   GetFloat(root, "EndorphinJelly",        _currentNeuro.Endorphin),
-                Chaos:       GetFloat(root, "ChaosController",       _currentNeuro.Chaos),
-                Homeostasis: GetFloat(root, "HomeostasisRegulator",  _currentNeuro.Homeostasis)
-            );
-
-            OnNeurochemicalStateUpdated?.Invoke(this, _currentNeuro);
-        }
-        catch (JsonException) { /* malformed packet — skip */ }
-    }
-
-    private static float GetFloat(JsonElement root, string key, float fallback)
-    {
-        if (root.TryGetProperty(key, out var el) && el.TryGetSingle(out float v))
-            return Math.Max(0f, Math.Min(1f, v));
-        return fallback;
+        if (snapshot == null) return;
+        _currentNeuro = new NeurochemicalState(
+            Curiosity: Clamp01(snapshot.Curiosity),
+            Endorphin: Clamp01(snapshot.Endorphin),
+            Chaos: Clamp01(snapshot.ChaosIntensity),
+            Homeostasis: Clamp01(snapshot.Homeostasis));
+        OnNeurochemicalStateUpdated?.Invoke(this, _currentNeuro);
     }
 
     // ── IPC send helpers ──────────────────────────────────────────────────────
 
-    private async Task ConnectEmbodimentPipeAsync(CancellationToken ct)
+    private async Task EmbodimentWorkerAsync(CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
         {
@@ -416,41 +459,81 @@ public sealed class AvatarEmbodimentService : IDisposable
             {
                 var pipe = new NamedPipeClientStream(".", EmbodimentPipeName,
                     PipeDirection.Out, PipeOptions.Asynchronous);
-                await pipe.ConnectAsync(3000, ct);
+                await pipe.ConnectAsync(3000, ct).ConfigureAwait(false);
                 _embodimentPipe = pipe;
                 Log($"Connected to {EmbodimentPipeName} embodiment IPC pipe");
-                return;
+
+                while (!ct.IsCancellationRequested && pipe.IsConnected)
+                {
+                    await SendPendingActivationAsync(pipe, ct).ConfigureAwait(false);
+                    while (_ipcCommandQueue.TryDequeue(out string? batch))
+                    {
+                        try
+                        {
+                            await WriteBatchAsync(pipe, batch, ct).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            _ipcCommandQueue.Enqueue(batch);
+                            throw;
+                        }
+                    }
+                    await _queueSignal.WaitAsync(ct).ConfigureAwait(false);
+                }
             }
-            catch (OperationCanceledException) { return; }
-            catch
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
+            catch (Exception ex)
             {
+                _logger.LogDebug("Embodiment IPC reconnecting: {Msg}", ex.Message);
+                _embodimentPipe?.Dispose();
+                _embodimentPipe = null;
                 await Task.Delay(2000, ct).ConfigureAwait(false);
             }
         }
     }
 
-    private async Task SendEmbodimentBatchAsync(IEnumerable<object> commands)
+    private async Task SendPendingActivationAsync(
+        NamedPipeClientStream pipe,
+        CancellationToken cancellationToken)
     {
-        if (_embodimentPipe == null || !_embodimentPipe.IsConnected) return;
+        string? activation = Volatile.Read(ref _pendingActivationBatch);
+        if (activation == null) return;
 
-        await _pipeLock.WaitAsync();
-        try
+        var profile = _pendingActivationProfile;
+        await WriteBatchAsync(pipe, activation, cancellationToken).ConfigureAwait(false);
+        if (!ReferenceEquals(
+            Interlocked.CompareExchange(ref _pendingActivationBatch, null, activation),
+            activation))
         {
-            string json = JsonSerializer.Serialize(new { Commands = commands }) + "\n";
-            byte[] bytes = Encoding.UTF8.GetBytes(json);
-            await _embodimentPipe.WriteAsync(bytes);
-            await _embodimentPipe.FlushAsync();
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogDebug("Embodiment IPC send failed: {Msg}", ex.Message);
-            _embodimentPipe?.Dispose();
-            _embodimentPipe = null;
-        }
-        finally
-        {
-            _pipeLock.Release();
-        }
+
+        _pendingActivationProfile = null;
+        if (profile == null) return;
+        _activeProfile = profile;
+        OnAvatarProfileActivated?.Invoke(this, profile);
+        Log($"Avatar profile activated: {profile.Manifest.Name} v{profile.Manifest.Version} " +
+            $"({profile.Manifest.Expression.Mode})");
+    }
+
+    private Task SendEmbodimentBatchAsync(IEnumerable<object> commands)
+    {
+        _ipcCommandQueue.Enqueue(SerializeBatch(commands));
+        _queueSignal.Release();
+        return Task.CompletedTask;
+    }
+
+    private static string SerializeBatch(IEnumerable<object> commands) =>
+        JsonSerializer.Serialize(new { Commands = commands }) + "\n";
+
+    private static async Task WriteBatchAsync(
+        NamedPipeClientStream pipe,
+        string batch,
+        CancellationToken cancellationToken)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(batch);
+        await pipe.WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
+        await pipe.FlushAsync(cancellationToken).ConfigureAwait(false);
     }
 
     // ── Public accessors ──────────────────────────────────────────────────────
@@ -459,6 +542,7 @@ public sealed class AvatarEmbodimentService : IDisposable
     public NeurochemicalState CurrentNeuro       => _currentNeuro;
     public PersonalityTraits  CurrentPersonality => _currentPersonality;
     public float[]            CurrentAUs         => _currentAUs;
+    public AvatarRuntimeProfile? ActiveProfile   => _activeProfile;
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -472,10 +556,10 @@ public sealed class AvatarEmbodimentService : IDisposable
 
     public void Dispose()
     {
-        _neuroCts?.Cancel();
-        _neuroCts?.Dispose();
-        _neuroPipe?.Dispose();
-        _embodimentPipe?.Dispose();
-        _pipeLock.Dispose();
+        if (_disposed) return;
+        _disposed = true;
+        StopAsync().GetAwaiter().GetResult();
+        _workerCts?.Dispose();
+        _queueSignal.Dispose();
     }
 }

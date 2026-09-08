@@ -133,6 +133,7 @@ public partial class App : Application
 
         // UE Engine Integration (replaces NativeActivity + JNI bridge)
         services.AddSingleton<UEProcessManager>();
+        services.AddSingleton<UE5ProcessManager>();
 
         // AngelClaw DTE Training Services
         services.AddSingleton<DxgiFrameCaptureService>();
@@ -167,6 +168,7 @@ public partial class App : Application
         services.AddSingleton<UE5LaunchOrchestrator>();
         // KSM Cycle 3 — UE5 Avatar Embodiment — FACS+IK+Neuro+Personality pipeline
         // /echo-wpf-ksm-evolve → weakest centre: UE5 Avatar Embodiment
+        services.AddSingleton<AvatarAssetProfileService>();
         services.AddSingleton<AvatarEmbodimentService>();
         // KSM Cycle 4 — Game World Navigation — A* pathfinding + POI curiosity + district coverage
         // /echo-wpf-ksm-evolve → weakest centre: Game World Navigation
