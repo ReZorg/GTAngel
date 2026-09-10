@@ -66,10 +66,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- UnrealBuildTool module rules are C# source for UBT, not for the WPF assembly. -->
+    <Compile Remove="Assets\Gameface\**\*.cs" />
     <None Remove="Assets\**\*" />
     <Content Include="Assets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- The archived Gameface Content tree contains .uexp sidecars without their
+         matching .uasset/.umap packages; exclude it from the minimal UE5 host.
+         The committed importer regenerates Arc Angel assets in the output tree. -->
+    <Content Remove="Assets\Gameface\Content\**\*" />
   </ItemGroup>
 
   <!-- Embed Archecho UE5 AI training modules into the build output -->

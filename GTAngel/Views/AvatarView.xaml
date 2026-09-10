@@ -40,9 +40,15 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="🤖" FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="🪽" FontSize="22" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <StackPanel>
-                        <TextBlock Text="DTE 4E Embodied Cognition Avatar" FontSize="16" FontWeight="Bold"
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding AvatarProfileName}" FontSize="16" FontWeight="Bold"
+                                       Foreground="{StaticResource Gold}"/>
+                            <TextBlock Text="{Binding AvatarProfileVersion}" FontSize="10" Margin="8,0,0,1"
+                                       Foreground="{StaticResource Cyan}" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                        <TextBlock Text="DTE 4E Embodied Cognition Avatar" FontSize="10"
                                    Foreground="{StaticResource Gold}"/>
                         <TextBlock Text="{Binding AvatarStatusText}" FontSize="11"
                                    Foreground="{StaticResource TextSec}"/>
@@ -81,6 +87,23 @@
                     <StackPanel>
                         <TextBlock Text="AVATAR CONTROLS" FontSize="10" FontWeight="Bold"
                                    Foreground="{StaticResource Gold}" Margin="0,0,0,8"/>
+                        <Border Background="#0D0D1A" CornerRadius="4" Padding="7" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="ARC ANGEL ASSET PROFILE" FontSize="9" FontWeight="Bold"
+                                           Foreground="#E879F9"/>
+                                <Border Height="150" Background="#03040A" CornerRadius="4" Margin="0,5,0,5"
+                                        BorderBrush="#3B2D55" BorderThickness="1">
+                                    <Image Source="Assets/Avatars/ArcAngelEcho/Preview/ArcAngelEcho.png"
+                                           Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Border>
+                                <TextBlock Text="{Binding AvatarRigSummary}" FontSize="9" Foreground="#B0B0D0"
+                                           Margin="0,3,0,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding AvatarExpressionMode}" FontSize="9" Foreground="#67E8F9"
+                                           Margin="0,2,0,0"/>
+                                <TextBlock Text="{Binding AvatarAssetState}" FontSize="8" Foreground="#80809A"
+                                           Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
                         <Button Content="▶  START EXPLORATION"
                                 Command="{Binding StartAvatarCommand}"
                                 Visibility="{Binding IsAvatarNotRunning, Converter={StaticResource BoolToVis}}"

@@ -1,0 +1,20 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "GTAngel Runtime",
+  "Description": "Arc Angel Echo avatar profile, cognitive expression, and GTAngel IPC runtime bridge.",
+  "Category": "AI",
+  "CreatedBy": "ReZorg AI",
+  "CanContainContent": true,
+  "IsBetaVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "GTAngelRuntime",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "PlatformAllowList": ["Win64"]
+    }
+  ]
+}

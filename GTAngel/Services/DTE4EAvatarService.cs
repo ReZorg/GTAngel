@@ -11,10 +11,10 @@ namespace GTAngel.Services;
 /// DTE 4E Embodied Cognition Avatar Service for GTAngel.
 ///
 /// Implements the 4E Cognition framework:
-///   Embodied  — avatar has a physical body in the UE5 world (UAvatar3DComponent)
-///   Embedded  — avatar is embedded in Liberty City environment (UVirtualEnvironmentManager)
-///   Enacted   — avatar acts through motor control (UE5 Enhanced Input → virtual player controls)
-///   Extended  — avatar's mind extends into the DTE ESN reservoir + NeurochemicalSystem
+///   Embodied  — Arc Angel has a skinned physical body in the UE5 world
+///   Embedded  — the avatar receives position, velocity and world observations
+///   Enacted   — the avatar acts through the native character motor bridge
+///   Extended  — its cognition extends into the DTE ESN and WPF embodiment model
 ///
 /// Architecture:
 ///   WPF (GTAngelService) ←→ DTE4EAvatarService ←→ UE5ProcessManager (UE5)
@@ -25,12 +25,8 @@ namespace GTAngel.Services;
 ///                                    ↕
 ///                          768×768 ML Vision frames
 ///
-/// UE5 Cognitive Modules used (from E:\u9n\UnrealEngine\Source\):
-///   Avatar/Avatar3DComponent         — skeletal mesh + facial/gesture/aura/viz
-///   Neurochemical/NeurochemicalSystem — curiosity, endorphin, chaos, homeostasis
-///   Personality/SuperHotGirlPersonality — avatar personality traits
-///   Environment/VirtualEnvironmentManager — dynamic lighting + particles
-///   Live2DCubism/Live2DCubismAvatarComponent — 2D expression overlay
+/// UE5 runtime: GTAngelRuntime/ArcAngelEchoComponent provides mesh loading,
+/// locomotion, posture/aura expression, motor actions and duplex JSONL IPC.
 /// </summary>
 public class DTE4EAvatarService : IDisposable
 {
@@ -39,6 +35,7 @@ public class DTE4EAvatarService : IDisposable
     private readonly EsnReservoirPipeline _esn;
     private readonly MlVisionCaptureService? _mlVision;       // KSM Cycle 1: real 768×768 frames
     private readonly AvatarEmbodimentService? _embodiment;    // KSM Cycle 3: FACS+IK+Neuro+Personality
+    private readonly AvatarAssetProfileService? _avatarProfiles; // Arc Angel: validated versioned asset package
     private readonly GameWorldNavigationService? _navigation;   // KSM Cycle 4: POI-directed navigation
     private Ue5PlayerAiBridgeService? _playerAiBridge;          // KSM Cycle 6: Player↔AI Bridge
     private DteCognitiveCoreService? _cognitiveCore;            // KSM Cycle 5: ECAN attention / MOSES patterns
@@ -62,15 +59,6 @@ public class DTE4EAvatarService : IDisposable
     public event EventHandler<AvatarObservation>?    ObservationReceived;
     public event EventHandler<AvatarAction>?         ActionDispatched;
     public event EventHandler<string>?               ExplorationLog;
-
-    // ── UE5 Module paths (from E:\u9n\UnrealEngine\Source\) ─────────────────
-    public const string UE5EnginePath       = @"E:\u9n\UnrealEngine";
-    public const string AvatarModulePath    = @"E:\u9n\UnrealEngine\Source\Avatar";
-    public const string NeuroModulePath     = @"E:\u9n\UnrealEngine\Source\Neurochemical";
-    public const string PersonalityPath     = @"E:\u9n\UnrealEngine\Source\Personality";
-    public const string EnvironmentPath     = @"E:\u9n\UnrealEngine\Source\Environment";
-    public const string Live2DPath          = @"E:\u9n\UnrealEngine\Source\Live2DCubism";
-    public const string AssetMgmtPath       = @"E:\u9n\UnrealEngine\Source\AssetManagement";
 
     // ── ML Vision ────────────────────────────────────────────────────────────
     public const int MLVisionWidth  = 768;
@@ -97,7 +85,8 @@ public class DTE4EAvatarService : IDisposable
         EsnReservoirPipeline esn,
         MlVisionCaptureService? mlVision = null,
         AvatarEmbodimentService? embodiment = null,
-        GameWorldNavigationService? navigation = null)
+        GameWorldNavigationService? navigation = null,
+        AvatarAssetProfileService? avatarProfiles = null)
     {
         _logger   = logger;
         _ue5      = ue5;
@@ -105,16 +94,14 @@ public class DTE4EAvatarService : IDisposable
         _mlVision    = mlVision;
         _embodiment  = embodiment;
         _navigation  = navigation;
+        _avatarProfiles = avatarProfiles;
         _policy      = new AvatarExplorationPolicy(logger, navigation);
 
         // Wire up UE5 observation events
         _ue5.AvatarObservationReceived += OnAvatarObservation;
 
         _logger.LogInformation("DTE 4E Avatar Service initialized");
-        _logger.LogInformation("  UE5 Avatar module:        {Path}", AvatarModulePath);
-        _logger.LogInformation("  UE5 Neurochemical module: {Path}", NeuroModulePath);
-        _logger.LogInformation("  UE5 Personality module:   {Path}", PersonalityPath);
-        _logger.LogInformation("  UE5 Environment module:   {Path}", EnvironmentPath);
+        _logger.LogInformation("  UE5 runtime: GTAngelRuntime/ArcAngelEchoComponent");
         _logger.LogInformation("  ML Vision: {W}×{H}", MLVisionWidth, MLVisionHeight);
     }
 
@@ -165,63 +152,44 @@ public class DTE4EAvatarService : IDisposable
     // ── UE5 Avatar Initialization ─────────────────────────────────────────────
 
     /// <summary>
-    /// Initialize the UE5 avatar with all cognitive modules.
-    /// Activates: Avatar3DComponent, NeurochemicalSystem, SuperHotGirlPersonality,
-    ///            VirtualEnvironmentManager, Live2DCubismAvatarComponent
+    /// Validate and queue the Arc Angel profile. The GTAngelRuntime module owns
+    /// actor spawning; embodiment commands own expression, IK and personality.
     /// </summary>
     private async Task InitializeUE5AvatarAsync()
     {
         _logger.LogInformation("Initializing UE5 DTE Avatar with cognitive modules...");
 
-        // Spawn the avatar actor with Avatar3DComponent
-        await _ue5.SendAvatarActionAsync(new AvatarAction
+        // Validate and activate the concrete Arc Angel Echo mesh package before
+        // enabling cognitive expression. Failure is explicit but non-fatal so a
+        // development build can still exercise cognition without LFS assets.
+        if (_avatarProfiles != null && _embodiment != null)
         {
-            InputAction = "IA_SpawnAvatar",
-            Source      = "Script",
-            Magnitude   = 1.0f
-        });
+            var avatarLoad = await _avatarProfiles.LoadDefaultAsync(verifyHashes: true);
+            if (avatarLoad.Profile != null)
+            {
+                await _embodiment.ActivateAvatarProfileAsync(avatarLoad.Profile);
+                ExplorationLog?.Invoke(this,
+                    $"🪽 {avatarLoad.Profile.Manifest.Name} v{avatarLoad.Profile.Manifest.Version} validated and queued — " +
+                    $"{avatarLoad.Profile.Manifest.Rig.BoneCount}-bone biped, " +
+                    $"{avatarLoad.Profile.Manifest.Expression.Mode}");
+                foreach (var warning in avatarLoad.Validation.Warnings)
+                    _logger.LogWarning("Arc Angel profile: {Warning}", warning);
+            }
+            else
+            {
+                foreach (var error in avatarLoad.Validation.Errors)
+                    _logger.LogError("Arc Angel profile: {Error}", error);
+                ExplorationLog?.Invoke(this,
+                    "⚠ Arc Angel Echo assets failed validation; cognitive loop continues with renderer fallback");
+            }
+        }
 
-        // Activate NeurochemicalSystem (curiosity, endorphin, chaos, homeostasis)
-        await SendUE5ModuleCommandAsync("NeurochemicalSystem", "Activate", new
-        {
-            CuriosityBaseline    = 0.7f,
-            EndorphinBaseline    = 0.5f,
-            ChaosIntensityMax    = 0.8f,
-            HomeostasisTarget    = 0.6f,
-            AbundanceThreshold   = 0.4f,
-            ScarcityThreshold    = 0.2f
-        });
-
-        // Apply SuperHotGirlPersonality traits
-        await SendUE5ModuleCommandAsync("SuperHotGirlPersonality", "Apply", new
-        {
-            Confidence  = 0.8f,
-            Charm       = 0.9f,
-            Playfulness = 0.7f,
-            Wit         = 0.8f,
-            Sass        = 0.6f
-        });
-
-        // Initialize VirtualEnvironmentManager (Lumen lighting + Niagara particles)
-        await SendUE5ModuleCommandAsync("VirtualEnvironmentManager", "Initialize", new
-        {
-            UseLumen   = true,
-            UseNiagara = true,
-            TimeOfDay  = 14.0f  // 2 PM Liberty City time
-        });
-
-        // Enable Live2D expression overlay
-        await SendUE5ModuleCommandAsync("Live2DCubismAvatarComponent", "Enable", new
-        {
-            ExpressionMode = "Cognitive",
-            BlendWeight    = 0.6f
-        });
-
-        // Enable ML Vision capture at 768×768
+        // Request immediate telemetry; the runtime also emits observations at 4 Hz.
         await _ue5.RequestMLVisionFrameAsync();
 
-        ExplorationLog?.Invoke(this, "✅ UE5 Avatar initialized: Avatar3D + NeurochemicalSystem + Personality + Environment + Live2D");
-        _logger.LogInformation("UE5 Avatar initialization complete");
+        ExplorationLog?.Invoke(this,
+            "Arc Angel Echo profile validated and queued; runtime activation follows UE5 IPC connection");
+        _logger.LogInformation("Arc Angel Echo activation plan queued for UE5 delivery");
     }
 
     // ── Exploration Loop ──────────────────────────────────────────────────────
@@ -320,7 +288,14 @@ public class DTE4EAvatarService : IDisposable
                         humanAction = new AvatarAction { InputAction = "IA_Move", AxisX = 0, AxisY = 0, Magnitude = 0, Source = "Human" };
                     }
                     
-                    finalAction = _playerAiBridge.ArbitrateInput(humanAction, action);
+                    finalAction = _playerAiBridge.ArbitrateInput(
+                        humanAction ?? new AvatarAction
+                        {
+                            InputAction = "IA_None",
+                            Magnitude = 0f,
+                            Source = "Human"
+                        },
+                        action);
                 }
 
                 // Send the action to UE5 via the Enhanced Input System
@@ -358,14 +333,14 @@ public class DTE4EAvatarService : IDisposable
                     // Compute FACS Action Units from emotional state
                     var aus = _embodiment.ComputeFACSActionUnits(emotionalState);
 
-                    // Send FACS commands + ExpressionSynthesizer + PhysicsDeformer to UE5
-                    _ = _embodiment.SendFACSCommandsAsync(aus);
+                    // Queue renderer commands in deterministic expression → IK → personality order.
+                    await _embodiment.SendFACSCommandsAsync(aus);
 
                     // Send IK pose blend from ESN action dims [12..17]
-                    _ = _embodiment.SendIKPoseBlendAsync(actionProbs);
+                    await _embodiment.SendIKPoseBlendAsync(actionProbs);
 
-                    // Apply SuperHotGirlPersonality traits based on cognitive state
-                    _ = _embodiment.ApplyPersonalityTraitsAsync(
+                    // Apply Arc Angel personality posture/aura based on cognitive state
+                    await _embodiment.ApplyPersonalityTraitsAsync(
                         CognitiveState.AutonomyScore,
                         CognitiveState.Coherence,
                         neuroState);
@@ -402,6 +377,7 @@ public class DTE4EAvatarService : IDisposable
     {
         LastObservation = obs;
         _observationQueue.Enqueue(obs);
+        _embodiment?.UpdateNeurochemicalState(obs.NeurochemicalState);
 
         // KSM Cycle 6: Observation Fusion
         if (_mlVision != null && _playerAiBridge != null)
@@ -599,26 +575,6 @@ public class DTE4EAvatarService : IDisposable
         ExplorationCoverage = Math.Min(_visitedCells.Count / 3600f, 1f);
     }
 
-    // ── UE5 Module Commands ───────────────────────────────────────────────────
-
-    private async Task SendUE5ModuleCommandAsync(string module, string command, object parameters)
-    {
-        var msg = new UEMessage
-        {
-            Action = $"Module.{module}.{command}",
-            Key    = module,
-            Value  = command,
-            Extras = new[] { System.Text.Json.JsonSerializer.Serialize(parameters) }
-        };
-        await _ue5.SendAvatarActionAsync(new AvatarAction
-        {
-            InputAction = $"IA_Module_{module}_{command}",
-            Source      = "Script",
-            Magnitude   = 1.0f
-        });
-        _logger.LogDebug("UE5 module command: {Module}.{Command}", module, command);
-    }
-
     public void SetPlayerAiBridge(Ue5PlayerAiBridgeService bridge)
     {
         _playerAiBridge = bridge;
@@ -674,7 +630,7 @@ public class AvatarCognitiveState
     public float[] EnactedVelocity   { get; set; } = new float[3];
     public float   ExtendedESNNorm   { get; set; }
 
-    // Neurochemical (from UE5 NeurochemicalSystem)
+    // Neurochemical projection derived from Arc Angel observation/expression state
     public float Curiosity      { get; set; }
     public float Endorphin      { get; set; }
     public float ChaosIntensity { get; set; }
@@ -713,8 +669,6 @@ public class AvatarExplorationPolicy
 
     // Human-like behavior parameters
     private const float WaypointReachThreshold = 100f;  // UU
-    private float[]? _currentWaypoint;
-    private int _waypointStepsRemaining;
     private float _explorationTemperature = 0.7f;  // curiosity-modulated
 
     // Human-like action distribution (approximate)

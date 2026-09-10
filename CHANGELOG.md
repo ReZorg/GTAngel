@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Arc Angel Echo v1 avatar profile with SHA-256-validated Meshy FBX, 22-bone biped rig, 60 fps walk/run clips, and PBR textures
+- Reusable `AvatarAssetProfileService` manifest/integrity pipeline for future GTAngel avatar packages
+- `GTAngelRuntime` Unreal plugin with Arc Angel character auto-spawn, skeletal locomotion, neon-aura expression fallback, and embodiment named-pipe receiver
+- Reproducible Unreal Editor Python importer for generating Arc Angel skeletal, animation, material, and texture assets from Git LFS sources
+- Minimal stock-UE5.3 Gameface host with automatic import verification, fallback engine map, third-person Arc Angel camera, and duplex command/observation IPC
 - Production deployment infrastructure
 - Self-contained publish profiles for win-x64 and win-arm64
 - WiX MSI installer project
@@ -24,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Serilog configuration-based logging (reads from appsettings)
 
 ### Changed
+- Replaced descriptor-only legacy Rockstar plugin dependencies with a self-contained Arc Angel runtime profile; licensed GTA maps can be layered in separately
 - Updated GTAngel.csproj with production publishing settings
 - Added Microsoft.SourceLink.GitHub for improved crash diagnostics
 - Serilog now uses ReadFrom.Configuration instead of hardcoded settings
