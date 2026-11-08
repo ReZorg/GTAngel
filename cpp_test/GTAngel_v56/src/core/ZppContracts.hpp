@@ -94,6 +94,8 @@ struct CdReadInfo_ZppContract {
     bool bReading{false}; // Z++: 𝔹
     int32_t nStatus{0}; // Z++: ℤ
     int32_t pDoneSemaphore{0}; // Z++: HANDLE
+    int32_t hFile{0}; // Z++: HANDLE
+    int32_t Overlapped{0}; // Z++: OVERLAPPED
     constexpr bool checkInvariant() const {
         return (nSectorOffset >= 0)
             && (nSectorsToRead >= 0);
@@ -119,6 +121,8 @@ struct CClock_ZppContract {
     int64_t ms_Stored_nGameClockSeconds{0}; // Z++: ℕ
     int64_t ms_nMillisecondsPerGameMinute{0}; // Z++: ℕ
     int64_t ms_nLastClockTick{0}; // Z++: ℕ
+    bool ms_bClockHasBeenStored{false}; // Z++: 𝔹
+    float ms_EnvMapTimeMultiplicator{0.0f}; // Z++: ℝ
     constexpr bool checkInvariant() const {
         return (ms_nGameClockHours >= 0)
             && (ms_nGameClockMinutes >= 0)
@@ -204,6 +208,173 @@ struct ColHeader_ZppContract {
             && (size >= 0);
     }
 };
+// State Schema Contract from zpp/core/FileMgr.zpp
+struct myFILE_ZppContract {
+    bool isText{false}; // Z++: 𝔹
+    uint8_t file_card{0u}; // Z++: Ref[FILE]
+    constexpr bool checkInvariant() const {
+        return (file_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/core/Fire.zpp
+struct CFire_ZppContract {
+    bool m_bIsOngoing{false}; // Z++: 𝔹
+    bool m_bIsScriptFire{false}; // Z++: 𝔹
+    bool m_bPropagationFlag{false}; // Z++: 𝔹
+    bool m_bAudioSet{false}; // Z++: 𝔹
+    int32_t m_vecPos{0}; // Z++: CVector
+    uint8_t m_pEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pSource_card{0u}; // Z++: Ref[CEntity]
+    int64_t m_nExtinguishTime{0}; // Z++: ℕ
+    int64_t m_nStartTime{0}; // Z++: ℕ
+    int64_t m_nNextTimeToAddFlames{0}; // Z++: ℕ
+    float m_fStrength{0.0f}; // Z++: ℝ
+    float m_fWaterExtinguishCountdown{0.0f}; // Z++: ℝ
+    bool m_bExtinguishedWithWater{false}; // Z++: 𝔹
+    int32_t field_20{0}; // Z++: ℤ
+    int64_t m_nFiremenPuttingOut{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (m_pEntity_card <= 1u)
+            && (m_pSource_card <= 1u)
+            && (m_nExtinguishTime >= 0)
+            && (m_nStartTime >= 0)
+            && (m_nNextTimeToAddFlames >= 0)
+            && (m_nFiremenPuttingOut >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CTriggerCaller_ZppContract {
+    bool bHasTrigger{false}; // Z++: 𝔹
+    int32_t pTrigger{0}; // Z++: ADDRESS
+    int32_t field_C{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableText_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    int32_t m_color{0}; // Z++: CRGBA
+    int32_t m_text{0}; // Z++: seq CHAR
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableTextTwoLines_ZppContract {
+    int32_t m_line1{0}; // Z++: CPlaceableText
+    int32_t m_line2{0}; // Z++: CPlaceableText
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CShadowInfo_ZppContract {
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CSelectable_ZppContract {
+    bool m_bSelected{false}; // Z++: 𝔹
+    int32_t m_selectedColor{0}; // Z++: CRGBA
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableSprite_ZppContract {
+    uint8_t m_pSprite_card{0u}; // Z++: Ref[CSprite2d]
+    int32_t m_position{0}; // Z++: CVector2D
+    int32_t m_size{0}; // Z++: CVector2D
+    int32_t m_color{0}; // Z++: CRGBA
+    constexpr bool checkInvariant() const {
+        return (m_pSprite_card <= 1u);
+    }
+};
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == 12) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockSeconds == 0) && (post.ms_nMillisecondsPerGameMinute == 1) && (post.ms_nLastClockTick == 1) && (post.ms_bClockHasBeenStored == false);
+}
+constexpr CClock_ZppContract apply_CClock_Initialise(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nGameClockHours = 12;
+    post.ms_nGameClockMinutes = 0;
+    post.ms_nGameClockSeconds = 0;
+    post.ms_nMillisecondsPerGameMinute = 1;
+    post.ms_nLastClockTick = 1;
+    post.ms_bClockHasBeenStored = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_Update(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nLastClockTick == 1) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockHours == 0);
+}
+constexpr CClock_ZppContract apply_CClock_Update(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nLastClockTick = 1;
+    post.ms_nGameClockMinutes = 0;
+    post.ms_nGameClockHours = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_SetGameClock(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockMinutes == 1) && (post.ms_nGameClockHours == 1) && (post.ms_nGameClockSeconds == 0) && (post.ms_nLastClockTick == 1);
+}
+constexpr CClock_ZppContract apply_CClock_SetGameClock(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nGameClockMinutes = 1;
+    post.ms_nGameClockHours = 1;
+    post.ms_nGameClockSeconds = 0;
+    post.ms_nLastClockTick = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_StoreClock(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_Stored_nGameClockHours == pre.ms_nGameClockHours) && (post.ms_Stored_nGameClockMinutes == pre.ms_nGameClockMinutes) && (post.ms_Stored_nGameClockSeconds == pre.ms_nGameClockSeconds) && (post.ms_bClockHasBeenStored == true);
+}
+constexpr CClock_ZppContract apply_CClock_StoreClock(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_Stored_nGameClockHours = pre.ms_nGameClockHours;
+    post.ms_Stored_nGameClockMinutes = pre.ms_nGameClockMinutes;
+    post.ms_Stored_nGameClockSeconds = pre.ms_nGameClockSeconds;
+    post.ms_bClockHasBeenStored = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_RestoreClock(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == pre.ms_Stored_nGameClockHours) && (post.ms_nGameClockMinutes == pre.ms_Stored_nGameClockMinutes) && (post.ms_nGameClockSeconds == pre.ms_Stored_nGameClockSeconds);
+}
+constexpr CClock_ZppContract apply_CClock_RestoreClock(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nGameClockHours = pre.ms_Stored_nGameClockHours;
+    post.ms_nGameClockMinutes = pre.ms_Stored_nGameClockMinutes;
+    post.ms_nGameClockSeconds = pre.ms_Stored_nGameClockSeconds;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCFire) from zpp/core/Fire.zpp
+constexpr bool op_CFire_CFire(const CFire_ZppContract& pre, const CFire_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_bIsOngoing == false) && (post.m_bIsScriptFire == false) && (post.m_bPropagationFlag == true) && (post.m_bAudioSet == true) && (post.m_vecPos == 1) && (post.m_nExtinguishTime == 0);
+}
+constexpr CFire_ZppContract apply_CFire_CFire(const CFire_ZppContract& pre) {
+    CFire_ZppContract post = pre;
+    post.m_bIsOngoing = false;
+    post.m_bIsScriptFire = false;
+    post.m_bPropagationFlag = true;
+    post.m_bAudioSet = true;
+    post.m_vecPos = 1;
+    post.m_nExtinguishTime = 0;
+    return post;
+}
 constexpr bool verify_core_zpp_invariants() {
     {
         CAccident_ZppContract valid{};
@@ -317,8 +488,251 @@ constexpr bool verify_core_zpp_invariants() {
         bad.ident = -1;
         if (bad.checkInvariant()) return false;
     }
+    {
+        myFILE_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        myFILE_ZppContract bad{};
+        bad.file_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CFire_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CFire_ZppContract bad{};
+        bad.m_pEntity_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTriggerCaller_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTriggerCaller_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableText_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableText_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableTextTwoLines_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableTextTwoLines_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CShadowInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CShadowInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CSelectable_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CSelectable_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableSprite_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableSprite_ZppContract bad{};
+        bad.m_pSprite_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nGameClockHours = 0;
+        pre.ms_nGameClockMinutes = 1;
+        pre.ms_nGameClockSeconds = 1;
+        pre.ms_nMillisecondsPerGameMinute = 0;
+        pre.ms_nLastClockTick = 0;
+        pre.ms_bClockHasBeenStored = true;
+        const auto post = apply_CClock_Initialise(pre);
+        if (!op_CClock_Initialise(pre, post)) return false;
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockHours = 0;
+            if (op_CClock_Initialise(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockMinutes = 1;
+            if (op_CClock_Initialise(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockSeconds = 1;
+            if (op_CClock_Initialise(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nMillisecondsPerGameMinute = 0;
+            if (op_CClock_Initialise(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nLastClockTick = 0;
+            if (op_CClock_Initialise(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_bClockHasBeenStored = true;
+            if (op_CClock_Initialise(pre, badPost)) return false;
+        }
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nLastClockTick = 0;
+        pre.ms_nGameClockMinutes = 1;
+        pre.ms_nGameClockHours = 1;
+        const auto post = apply_CClock_Update(pre);
+        if (!op_CClock_Update(pre, post)) return false;
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nLastClockTick = 0;
+            if (op_CClock_Update(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockMinutes = 1;
+            if (op_CClock_Update(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockHours = 1;
+            if (op_CClock_Update(pre, badPost)) return false;
+        }
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nGameClockMinutes = 0;
+        pre.ms_nGameClockHours = 0;
+        pre.ms_nGameClockSeconds = 1;
+        pre.ms_nLastClockTick = 0;
+        const auto post = apply_CClock_SetGameClock(pre);
+        if (!op_CClock_SetGameClock(pre, post)) return false;
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockMinutes = 0;
+            if (op_CClock_SetGameClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockHours = 0;
+            if (op_CClock_SetGameClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockSeconds = 1;
+            if (op_CClock_SetGameClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nLastClockTick = 0;
+            if (op_CClock_SetGameClock(pre, badPost)) return false;
+        }
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nGameClockHours = 7; pre.ms_Stored_nGameClockHours = 0;
+        pre.ms_nGameClockMinutes = 7; pre.ms_Stored_nGameClockMinutes = 0;
+        pre.ms_nGameClockSeconds = 7; pre.ms_Stored_nGameClockSeconds = 0;
+        pre.ms_bClockHasBeenStored = false;
+        const auto post = apply_CClock_StoreClock(pre);
+        if (!op_CClock_StoreClock(pre, post)) return false;
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_Stored_nGameClockHours = pre.ms_nGameClockHours + 1;
+            if (op_CClock_StoreClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_Stored_nGameClockMinutes = pre.ms_nGameClockMinutes + 1;
+            if (op_CClock_StoreClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_Stored_nGameClockSeconds = pre.ms_nGameClockSeconds + 1;
+            if (op_CClock_StoreClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_bClockHasBeenStored = false;
+            if (op_CClock_StoreClock(pre, badPost)) return false;
+        }
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_Stored_nGameClockHours = 7; pre.ms_nGameClockHours = 0;
+        pre.ms_Stored_nGameClockMinutes = 7; pre.ms_nGameClockMinutes = 0;
+        pre.ms_Stored_nGameClockSeconds = 7; pre.ms_nGameClockSeconds = 0;
+        const auto post = apply_CClock_RestoreClock(pre);
+        if (!op_CClock_RestoreClock(pre, post)) return false;
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockHours = pre.ms_Stored_nGameClockHours + 1;
+            if (op_CClock_RestoreClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockMinutes = pre.ms_Stored_nGameClockMinutes + 1;
+            if (op_CClock_RestoreClock(pre, badPost)) return false;
+        }
+        {
+            CClock_ZppContract badPost = post;
+            badPost.ms_nGameClockSeconds = pre.ms_Stored_nGameClockSeconds + 1;
+            if (op_CClock_RestoreClock(pre, badPost)) return false;
+        }
+    }
+    {
+        CFire_ZppContract pre{};
+        pre.m_bIsOngoing = true;
+        pre.m_bIsScriptFire = true;
+        pre.m_bPropagationFlag = false;
+        pre.m_bAudioSet = false;
+        pre.m_vecPos = 0;
+        pre.m_nExtinguishTime = 1;
+        const auto post = apply_CFire_CFire(pre);
+        if (!op_CFire_CFire(pre, post)) return false;
+        {
+            CFire_ZppContract badPost = post;
+            badPost.m_bIsOngoing = true;
+            if (op_CFire_CFire(pre, badPost)) return false;
+        }
+        {
+            CFire_ZppContract badPost = post;
+            badPost.m_bIsScriptFire = true;
+            if (op_CFire_CFire(pre, badPost)) return false;
+        }
+        {
+            CFire_ZppContract badPost = post;
+            badPost.m_bPropagationFlag = false;
+            if (op_CFire_CFire(pre, badPost)) return false;
+        }
+        {
+            CFire_ZppContract badPost = post;
+            badPost.m_bAudioSet = false;
+            if (op_CFire_CFire(pre, badPost)) return false;
+        }
+        {
+            CFire_ZppContract badPost = post;
+            badPost.m_vecPos = 0;
+            if (op_CFire_CFire(pre, badPost)) return false;
+        }
+        {
+            CFire_ZppContract badPost = post;
+            badPost.m_nExtinguishTime = 1;
+            if (op_CFire_CFire(pre, badPost)) return false;
+        }
+    }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_core_zpp_invariants(), "Z++ formal contract invariant failed for core");
+static_assert(op_CClock_Initialise(CClock_ZppContract{}, apply_CClock_Initialise(CClock_ZppContract{})), "CClock_Initialise delta contract must hold");
 } // namespace zpp_core_spec
 #endif // GTANGEL_ZPP_CORE_SPEC_GUARD

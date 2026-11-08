@@ -40,6 +40,37 @@ struct CCivilianPed_ZppContract {
             && (m_nLookForVacantCarsCounter >= 0);
     }
 };
+// State Schema Contract from zpp/peds/CopPed.zpp
+struct CCopPed_ZppContract {
+    uint8_t m_nRoadblockVeh_card{0u}; // Z++: Ref[CVehicle]
+    float m_fDistanceToTarget{0.0f}; // Z++: ℝ
+    bool m_bIsInPursuit{false}; // Z++: 𝔹
+    bool m_bIsDisabledCop{false}; // Z++: 𝔹
+    int32_t field_5FE{0}; // Z++: ℤ
+    bool m_bBeatingSuspect{false}; // Z++: 𝔹
+    bool m_bStopAndShootDisabledZone{false}; // Z++: 𝔹
+    bool m_bDragsPlayerFromCar{false}; // Z++: 𝔹
+    bool m_bZoneDisabled{false}; // Z++: 𝔹
+    float m_fAbseilPos{0.0f}; // Z++: ℝ
+    int32_t m_nCopType{0}; // Z++: eCopType
+    bool m_bThrowsSpikeTrap{false}; // Z++: 𝔹
+    uint8_t m_pRopeEntity_card{0u}; // Z++: Ref[CEntity]
+    int64_t m_nRopeID{0}; // Z++: ℕ
+    int64_t m_nHassleTimer{0}; // Z++: ℕ
+    int64_t field_61C{0}; // Z++: ℕ
+    int32_t field_624{0}; // Z++: ℤ
+    int32_t field_628{0}; // Z++: ℤ
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    int32_t field_1350{0}; // Z++: ℤ
+    int32_t field_1364{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (m_nRoadblockVeh_card <= 1u)
+            && (m_pRopeEntity_card <= 1u)
+            && (m_nRopeID >= 0)
+            && (m_nHassleTimer >= 0)
+            && (field_61C >= 0);
+    }
+};
 // State Schema Contract from zpp/peds/DummyPed.zpp
 struct CDummyPed_ZppContract {
     int32_t pedType{0}; // Z++: ℤ
@@ -97,6 +128,23 @@ struct PedAudioData_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/peds/Ped.zpp
+struct FightMove_ZppContract {
+    int32_t animId{0}; // Z++: AnimationId
+    float startFireTime{0.0f}; // Z++: ℝ
+    float endFireTime{0.0f}; // Z++: ℝ
+    float comboFollowOnTime{0.0f}; // Z++: ℝ
+    float strikeRadius{0.0f}; // Z++: ℝ
+    float extendReachMultiplier{0.0f}; // Z++: ℝ
+    int64_t hitLevel{0}; // Z++: ℕ
+    int64_t damage{0}; // Z++: ℕ
+    int64_t flags{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (hitLevel >= 0)
+            && (damage >= 0)
+            && (flags >= 0);
+    }
+};
 // State Schema Contract from zpp/peds/PedAI.zpp
 struct PedAIModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -144,6 +192,12 @@ struct CPedAttractor_ZppContract {
     float m_fTimeInWaitQueue{0.0f}; // Z++: ℝ
     float m_fTimeInApproachingQueue{0.0f}; // Z++: ℝ
     float m_fDistanceToUseAttractor{0.0f}; // Z++: ℝ
+    float m_fAcceptableHeading{0.0f}; // Z++: ℝ
+    float m_fMaxPositionDisplacement{0.0f}; // Z++: ℝ
+    float m_fMaxHeadingDisplacement{0.0f}; // Z++: ℝ
+    int32_t vecEffectPos{0}; // Z++: CVector
+    int32_t vecQueueDir{0}; // Z++: CVector
+    int32_t vecUseDir{0}; // Z++: CVector
     constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
@@ -202,6 +256,86 @@ struct LimbMovementInfo_ZppContract {
     float maxPitch{0.0f}; // Z++: ℝ
     float minPitch{0.0f}; // Z++: ℝ
     float pitchD{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedIK.zpp
+struct CPedIK_ZppContract {
+    uint8_t m_ped_card{0u}; // Z++: Ref[CPed_Const]
+    int32_t m_headOrient{0}; // Z++: LimbOrientation
+    int32_t m_torsoOrient{0}; // Z++: LimbOrientation
+    int32_t m_upperArmOrient{0}; // Z++: LimbOrientation
+    int32_t m_lowerArmOrient{0}; // Z++: LimbOrientation
+    int32_t m_flags{0}; // Z++: ℤ
+    int32_t ms_torsoInfo{0}; // Z++: LimbMovementInfo
+    int32_t ms_headInfo{0}; // Z++: LimbMovementInfo
+    int32_t ms_headRestoreInfo{0}; // Z++: LimbMovementInfo
+    int32_t ms_upperArmInfo{0}; // Z++: LimbMovementInfo
+    int32_t ms_lowerArmInfo{0}; // Z++: LimbMovementInfo
+    constexpr bool checkInvariant() const {
+        return (m_ped_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/peds/PedPlacement.zpp
+struct CPedPlacement_ZppContract {
+    int32_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedRoutes.zpp
+struct CRouteNode_ZppContract {
+    int32_t m_route{0}; // Z++: ℤ
+    int32_t m_pos{0}; // Z++: CVector
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedType.zpp
+struct CPedType_ZppContract {
+    int64_t m_flag{0}; // Z++: ℕ
+    float unknown1{0.0f}; // Z++: ℝ
+    float unknown2{0.0f}; // Z++: ℝ
+    float unknown3{0.0f}; // Z++: ℝ
+    float unknown4{0.0f}; // Z++: ℝ
+    float unknown5{0.0f}; // Z++: ℝ
+    int64_t m_threats{0}; // Z++: ℕ
+    int64_t m_avoid{0}; // Z++: ℕ
+    std::array<int32_t, 23> ms_apPedType{}; // Z++: seq Ref[CPedType]  -- bounded array [NUM_PEDTYPES]
+    size_t ms_apPedType_len{23u}; // Z++ cardinality #ms_apPedType
+    constexpr bool checkInvariant() const {
+        return (ms_apPedType_len == 23u && ms_apPedType.size() == 23u)
+            && (m_flag >= 0)
+            && (m_threats >= 0)
+            && (m_avoid >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PlayerPed.zpp
+struct animAndGroup_ZppContract {
+    int32_t animId{0}; // Z++: AnimationId
+    int32_t groupId{0}; // Z++: AssocGroupId
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/Population.zpp
+struct RegenerationPoint_ZppContract {
+    int32_t srcLevel{0}; // Z++: eLevelName
+    int32_t destLevel{0}; // Z++: eLevelName
+    float x1{0.0f}; // Z++: ℝ
+    float x2{0.0f}; // Z++: ℝ
+    float y1{0.0f}; // Z++: ℝ
+    float y2{0.0f}; // Z++: ℝ
+    float z1{0.0f}; // Z++: ℝ
+    float z2{0.0f}; // Z++: ℝ
+    int32_t destPosA{0}; // Z++: RwV3d
+    int32_t destPosB{0}; // Z++: RwV3d
+    int32_t srcPosA{0}; // Z++: RwV3d
+    int32_t srcPosB{0}; // Z++: RwV3d
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -303,12 +437,33 @@ constexpr bool op_CPedShelterAttractor_UpdatePedStateOnDeparture_3(const CPedShe
 constexpr bool op_CPedShelterAttractor_IsAtHeadOfQueue_4(const CPedShelterAttractor_ZppContract& state) {
     return state.checkInvariant();
 }
+// Delta Operation Schema Contract (ΔCPedType) from zpp/peds/PedType.zpp
+constexpr bool op_CPedType_Initialise(const CPedType_ZppContract& pre, const CPedType_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_flag == 1) && (post.unknown1 == 0.0f) && (post.unknown2 == 0.0f) && (post.unknown4 == 0.0f) && (post.unknown5 == 0.0f) && (post.m_threats == 0);
+}
+constexpr CPedType_ZppContract apply_CPedType_Initialise(const CPedType_ZppContract& pre) {
+    CPedType_ZppContract post = pre;
+    post.m_flag = 1;
+    post.unknown1 = 0.0f;
+    post.unknown2 = 0.0f;
+    post.unknown4 = 0.0f;
+    post.unknown5 = 0.0f;
+    post.m_threats = 0;
+    return post;
+}
 constexpr bool verify_peds_zpp_invariants() {
     {
         CCivilianPed_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CCivilianPed_ZppContract bad{};
         bad.m_nStealWishList_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CCopPed_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCopPed_ZppContract bad{};
+        bad.m_nRoadblockVeh_card = 2u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -344,6 +499,13 @@ constexpr bool verify_peds_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         PedAudioData_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        FightMove_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        FightMove_ZppContract bad{};
+        bad.hitLevel = -1;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -413,6 +575,48 @@ constexpr bool verify_peds_zpp_invariants() {
         LimbMovementInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         LimbMovementInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedIK_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedIK_ZppContract bad{};
+        bad.m_ped_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedPlacement_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedPlacement_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CRouteNode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CRouteNode_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedType_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedType_ZppContract bad{};
+        bad.ms_apPedType_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        animAndGroup_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        animAndGroup_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RegenerationPoint_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RegenerationPoint_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
@@ -511,6 +715,47 @@ constexpr bool verify_peds_zpp_invariants() {
     {
         const CPedShelterAttractor_ZppContract st{};
         if (!op_CPedShelterAttractor_IsAtHeadOfQueue_4(st)) return false;
+    }
+    {
+        CPedType_ZppContract pre{};
+        pre.m_flag = 0;
+        pre.unknown1 = 1.0f;
+        pre.unknown2 = 1.0f;
+        pre.unknown4 = 1.0f;
+        pre.unknown5 = 1.0f;
+        pre.m_threats = 1;
+        const auto post = apply_CPedType_Initialise(pre);
+        if (!op_CPedType_Initialise(pre, post)) return false;
+        {
+            CPedType_ZppContract badPost = post;
+            badPost.m_flag = 0;
+            if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
+        {
+            CPedType_ZppContract badPost = post;
+            badPost.unknown1 = 1.0f;
+            if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
+        {
+            CPedType_ZppContract badPost = post;
+            badPost.unknown2 = 1.0f;
+            if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
+        {
+            CPedType_ZppContract badPost = post;
+            badPost.unknown4 = 1.0f;
+            if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
+        {
+            CPedType_ZppContract badPost = post;
+            badPost.unknown5 = 1.0f;
+            if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
+        {
+            CPedType_ZppContract badPost = post;
+            badPost.m_threats = 1;
+            if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

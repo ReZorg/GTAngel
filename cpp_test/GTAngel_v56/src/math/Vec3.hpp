@@ -217,12 +217,58 @@ constexpr CMatrix_ZppContract apply_CMatrix_CMatrix_3(const CMatrix_ZppContract&
     return post;
 }
 // Delta Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_Attach(const CMatrix_ZppContract& pre, const CMatrix_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_attachment_card == 1u) && (post.m_hasRwMatrix == true);
+}
+constexpr CMatrix_ZppContract apply_CMatrix_Attach(const CMatrix_ZppContract& pre) {
+    CMatrix_ZppContract post = pre;
+    post.m_attachment_card = 1u;
+    post.m_hasRwMatrix = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_AttachRW(const CMatrix_ZppContract& pre, const CMatrix_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_attachment_card == 1u) && (post.m_hasRwMatrix == true);
+}
+constexpr CMatrix_ZppContract apply_CMatrix_AttachRW(const CMatrix_ZppContract& pre) {
+    CMatrix_ZppContract post = pre;
+    post.m_attachment_card = 1u;
+    post.m_hasRwMatrix = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
 constexpr bool op_CMatrix_Detach(const CMatrix_ZppContract& pre, const CMatrix_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_attachment_card == 0u);
 }
 constexpr CMatrix_ZppContract apply_CMatrix_Detach(const CMatrix_ZppContract& pre) {
     CMatrix_ZppContract post = pre;
     post.m_attachment_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCompressedMatrixNotAligned) from zpp/math/Matrix.zpp
+constexpr bool op_CCompressedMatrixNotAligned_CompressFromFullMatrix(const CCompressedMatrixNotAligned_ZppContract& pre, const CCompressedMatrixNotAligned_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_rightX == 1) && (post.m_rightY == 1) && (post.m_rightZ == 1) && (post.m_upX == 1) && (post.m_upY == 1) && (post.m_upZ == 1);
+}
+constexpr CCompressedMatrixNotAligned_ZppContract apply_CCompressedMatrixNotAligned_CompressFromFullMatrix(const CCompressedMatrixNotAligned_ZppContract& pre) {
+    CCompressedMatrixNotAligned_ZppContract post = pre;
+    post.m_rightX = 1;
+    post.m_rightY = 1;
+    post.m_rightZ = 1;
+    post.m_upX = 1;
+    post.m_upY = 1;
+    post.m_upZ = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCRect) from zpp/math/Rect.zpp
+constexpr bool op_CRect_CRect_2(const CRect_ZppContract& pre, const CRect_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.left == 1.0f) && (post.top == 1.0f) && (post.right == 1.0f) && (post.bottom == 1.0f);
+}
+constexpr CRect_ZppContract apply_CRect_CRect_2(const CRect_ZppContract& pre) {
+    CRect_ZppContract post = pre;
+    post.left = 1.0f;
+    post.top = 1.0f;
+    post.right = 1.0f;
+    post.bottom = 1.0f;
     return post;
 }
 constexpr bool verify_math_zpp_invariants() {
@@ -414,6 +460,40 @@ constexpr bool verify_math_zpp_invariants() {
     }
     {
         CMatrix_ZppContract pre{};
+        pre.m_attachment_card = 0u;
+        pre.m_hasRwMatrix = false;
+        const auto post = apply_CMatrix_Attach(pre);
+        if (!op_CMatrix_Attach(pre, post)) return false;
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_attachment_card = 0u;
+            if (op_CMatrix_Attach(pre, badPost)) return false;
+        }
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_hasRwMatrix = false;
+            if (op_CMatrix_Attach(pre, badPost)) return false;
+        }
+    }
+    {
+        CMatrix_ZppContract pre{};
+        pre.m_attachment_card = 0u;
+        pre.m_hasRwMatrix = false;
+        const auto post = apply_CMatrix_AttachRW(pre);
+        if (!op_CMatrix_AttachRW(pre, post)) return false;
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_attachment_card = 0u;
+            if (op_CMatrix_AttachRW(pre, badPost)) return false;
+        }
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_hasRwMatrix = false;
+            if (op_CMatrix_AttachRW(pre, badPost)) return false;
+        }
+    }
+    {
+        CMatrix_ZppContract pre{};
         pre.m_attachment_card = 1u;
         const auto post = apply_CMatrix_Detach(pre);
         if (!op_CMatrix_Detach(pre, post)) return false;
@@ -421,6 +501,76 @@ constexpr bool verify_math_zpp_invariants() {
             CMatrix_ZppContract badPost = post;
             badPost.m_attachment_card = 1u;
             if (op_CMatrix_Detach(pre, badPost)) return false;
+        }
+    }
+    {
+        CCompressedMatrixNotAligned_ZppContract pre{};
+        pre.m_rightX = 0;
+        pre.m_rightY = 0;
+        pre.m_rightZ = 0;
+        pre.m_upX = 0;
+        pre.m_upY = 0;
+        pre.m_upZ = 0;
+        const auto post = apply_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre);
+        if (!op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, post)) return false;
+        {
+            CCompressedMatrixNotAligned_ZppContract badPost = post;
+            badPost.m_rightX = 0;
+            if (op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, badPost)) return false;
+        }
+        {
+            CCompressedMatrixNotAligned_ZppContract badPost = post;
+            badPost.m_rightY = 0;
+            if (op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, badPost)) return false;
+        }
+        {
+            CCompressedMatrixNotAligned_ZppContract badPost = post;
+            badPost.m_rightZ = 0;
+            if (op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, badPost)) return false;
+        }
+        {
+            CCompressedMatrixNotAligned_ZppContract badPost = post;
+            badPost.m_upX = 0;
+            if (op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, badPost)) return false;
+        }
+        {
+            CCompressedMatrixNotAligned_ZppContract badPost = post;
+            badPost.m_upY = 0;
+            if (op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, badPost)) return false;
+        }
+        {
+            CCompressedMatrixNotAligned_ZppContract badPost = post;
+            badPost.m_upZ = 0;
+            if (op_CCompressedMatrixNotAligned_CompressFromFullMatrix(pre, badPost)) return false;
+        }
+    }
+    {
+        CRect_ZppContract pre{};
+        pre.left = 0.0f;
+        pre.top = 0.0f;
+        pre.right = 0.0f;
+        pre.bottom = 0.0f;
+        const auto post = apply_CRect_CRect_2(pre);
+        if (!op_CRect_CRect_2(pre, post)) return false;
+        {
+            CRect_ZppContract badPost = post;
+            badPost.left = 0.0f;
+            if (op_CRect_CRect_2(pre, badPost)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.top = 0.0f;
+            if (op_CRect_CRect_2(pre, badPost)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.right = 0.0f;
+            if (op_CRect_CRect_2(pre, badPost)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.bottom = 0.0f;
+            if (op_CRect_CRect_2(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

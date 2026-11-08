@@ -84,6 +84,33 @@ struct CommonSize_ZppContract {
             && (m_remaining >= 0);
     }
 };
+// State Schema Contract from zpp/rw/MemoryHeap.zpp
+struct CMemoryHeap_ZppContract {
+    uint8_t m_start_card{0u}; // Z++: Ref[HeapBlockDesc]
+    uint8_t m_end_card{0u}; // Z++: Ref[HeapBlockDesc]
+    int32_t m_freeList{0}; // Z++: HeapBlockList
+    std::array<int32_t, 6> m_fixedSize{}; // Z++: seq CommonSize  -- bounded array [NUM_FIXED_MEMBLOCKS]
+    size_t m_fixedSize_len{6u}; // Z++ cardinality #m_fixedSize
+    int64_t m_totalMemUsed{0}; // Z++: ℕ
+    int32_t m_idStack{0}; // Z++: ℤ
+    int64_t m_currentMemID{0}; // Z++: ℕ
+    uint8_t m_memUsed_card{0u}; // Z++: ℙ ℕ
+    int64_t m_totalBlocksUsed{0}; // Z++: ℕ
+    uint8_t m_blocksUsed_card{0u}; // Z++: ℙ ℕ
+    int64_t m_unkMemId{0}; // Z++: ℕ
+    int32_t NUM_FIXED_MEMBLOCKS{0}; // Z++: i
+    constexpr bool checkInvariant() const {
+        return (m_fixedSize_len == 6u && m_fixedSize.size() == 6u)
+            && (m_start_card <= 1u)
+            && (m_end_card <= 1u)
+            && (m_totalMemUsed >= 0)
+            && (m_currentMemID >= 0)
+            && (m_memUsed_card <= 1u)
+            && (m_totalBlocksUsed >= 0)
+            && (m_blocksUsed_card <= 1u)
+            && (m_unkMemId >= 0);
+    }
+};
 // State Schema Contract from zpp/rw/MemoryMgr.zpp
 struct MemoryMgrModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -189,6 +216,232 @@ struct GPUcaps_ZppContract {
             && (dxtSupport >= 0);
     }
 };
+// State Schema Contract from zpp/rw/TexturePools.zpp
+struct CTexturePool_ZppContract {
+    int32_t Format{0}; // Z++: D3DFORMAT
+    int32_t size{0}; // Z++: ℤ
+    int64_t levels{0}; // Z++: ℕ
+    int32_t texturesMax{0}; // Z++: ℤ
+    int32_t texturesUsed{0}; // Z++: ℤ
+    int32_t texturesNum{0}; // Z++: ℤ
+    uint8_t pTextures_card{0u}; // Z++: Ref[IDirect3DTexture8]
+    constexpr bool checkInvariant() const {
+        return (levels >= 0)
+            && (pTextures_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/TexturePools.zpp
+struct CPaletteList_ZppContract {
+    int32_t Max{0}; // Z++: ℤ
+    int32_t Num{0}; // Z++: ℤ
+    uint8_t Data_card{0u}; // Z++: ℙ ℤ
+    constexpr bool checkInvariant() const {
+        return (Data_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/TxdStore.zpp
+struct CTxdStore_ZppContract {
+    uint8_t ms_pTxdPool_card{0u}; // Z++: Ref[CPool_TxdDef_TxdDef]
+    uint8_t ms_pStoredTxd_card{0u}; // Z++: Ref[RwTexDictionary]
+    constexpr bool checkInvariant() const {
+        return (ms_pTxdPool_card <= 1u)
+            && (ms_pStoredTxd_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/VisibilityPlugins.zpp
+struct CVisibilityPlugins_ZppContract {
+    uint8_t atomic_card{0u}; // Z++: Ref[RpAtomic]
+    float sort{0.0f}; // Z++: ℝ
+    int32_t m_alphaList{0}; // Z++: CLinkList_AlphaObjectInfo
+    int32_t m_alphaEntityList{0}; // Z++: CLinkList_AlphaObjectInfo
+    uint8_t ms_pCameraPosn_card{0u}; // Z++: Ref[RwV3d]
+    float ms_cullCompsDist{0.0f}; // Z++: ℝ
+    float ms_vehicleLod0Dist{0.0f}; // Z++: ℝ
+    float ms_vehicleLod1Dist{0.0f}; // Z++: ℝ
+    float ms_vehicleFadeDist{0.0f}; // Z++: ℝ
+    float ms_bigVehicleLod0Dist{0.0f}; // Z++: ℝ
+    float ms_bigVehicleLod1Dist{0.0f}; // Z++: ℝ
+    float ms_pedLodDist{0.0f}; // Z++: ℝ
+    float ms_pedFadeDist{0.0f}; // Z++: ℝ
+    int64_t flags{0}; // Z++: ℕ
+    int32_t ms_atomicPluginOffset{0}; // Z++: ℤ
+    int32_t ms_framePluginOffset{0}; // Z++: ℤ
+    int32_t alpha{0}; // Z++: ℤ
+    int32_t ms_clumpPluginOffset{0}; // Z++: ℤ
+    int32_t m_alphaBoatAtomicList{0}; // Z++: CLinkList_AlphaObjectInfo
+    int32_t m_alphaUnderwaterEntityList{0}; // Z++: CLinkList_AlphaObjectInfo
+    float ms_pedLod1Dist{0.0f}; // Z++: ℝ
+    uint8_t modelInfo_card{0u}; // Z++: Ref[union_AtomicExt_CSimpleModelInfo]
+    float ms_pedLod0Dist{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (atomic_card <= 1u)
+            && (ms_pCameraPosn_card <= 1u)
+            && (flags >= 0)
+            && (modelInfo_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/VisibilityPlugins.zpp
+struct AlphaObjectInfo_ZppContract {
+    uint8_t atomic_card{0u}; // Z++: Ref[RpAtomic]
+    float sort{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (atomic_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/VisibilityPlugins.zpp
+struct AtomicExt_ZppContract {
+    int32_t modelId{0}; // Z++: ℤ
+    int64_t flags{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (flags >= 0);
+    }
+};
+// State Schema Contract from zpp/rw/VisibilityPlugins.zpp
+struct FrameExt_ZppContract {
+    int32_t id{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCMemoryHeap) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_CMemoryHeap_PopMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == 1);
+}
+constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PopMemId(const CMemoryHeap_ZppContract& pre) {
+    CMemoryHeap_ZppContract post = pre;
+    post.m_currentMemID = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCMemoryHeap) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == 1);
+}
+constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre) {
+    CMemoryHeap_ZppContract post = pre;
+    post.m_currentMemID = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCommonSize) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_size == 1) && (post.m_failed == 0) && (post.m_remaining == 0);
+}
+constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre) {
+    CommonSize_ZppContract post = pre;
+    post.m_size = 1;
+    post.m_failed = 0;
+    post.m_remaining = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCTexturePool) from zpp/rw/TexturePools.zpp
+constexpr bool op_CTexturePool_Create(const CTexturePool_ZppContract& pre, const CTexturePool_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Format == 1) && (post.size == 1) && (post.levels == 1) && (post.pTextures_card == 1u) && (post.texturesMax == 1) && (post.texturesNum == 0);
+}
+constexpr CTexturePool_ZppContract apply_CTexturePool_Create(const CTexturePool_ZppContract& pre) {
+    CTexturePool_ZppContract post = pre;
+    post.Format = 1;
+    post.size = 1;
+    post.levels = 1;
+    post.pTextures_card = 1u;
+    post.texturesMax = 1;
+    post.texturesNum = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCTexturePool) from zpp/rw/TexturePools.zpp
+constexpr bool op_CTexturePool_Release(const CTexturePool_ZppContract& pre, const CTexturePool_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.pTextures_card == 0u) && (post.texturesNum == 0) && (post.texturesUsed == 0);
+}
+constexpr CTexturePool_ZppContract apply_CTexturePool_Release(const CTexturePool_ZppContract& pre) {
+    CTexturePool_ZppContract post = pre;
+    post.pTextures_card = 0u;
+    post.texturesNum = 0;
+    post.texturesUsed = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCPaletteList) from zpp/rw/TexturePools.zpp
+constexpr bool op_CPaletteList_Alloc(const CPaletteList_ZppContract& pre, const CPaletteList_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Data_card == 1u) && (post.Max == 1) && (post.Num == 0);
+}
+constexpr CPaletteList_ZppContract apply_CPaletteList_Alloc(const CPaletteList_ZppContract& pre) {
+    CPaletteList_ZppContract post = pre;
+    post.Data_card = 1u;
+    post.Max = 1;
+    post.Num = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCPaletteList) from zpp/rw/TexturePools.zpp
+constexpr bool op_CPaletteList_Free(const CPaletteList_ZppContract& pre, const CPaletteList_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Data_card == 0u) && (post.Num == 0);
+}
+constexpr CPaletteList_ZppContract apply_CPaletteList_Free(const CPaletteList_ZppContract& pre) {
+    CPaletteList_ZppContract post = pre;
+    post.Data_card = 0u;
+    post.Num = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCTxdStore) from zpp/rw/TxdStore.zpp
+constexpr bool op_CTxdStore_Initialise(const CTxdStore_ZppContract& pre, const CTxdStore_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pTxdPool_card == 1u);
+}
+constexpr CTxdStore_ZppContract apply_CTxdStore_Initialise(const CTxdStore_ZppContract& pre) {
+    CTxdStore_ZppContract post = pre;
+    post.ms_pTxdPool_card = 1u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCTxdStore) from zpp/rw/TxdStore.zpp
+constexpr bool op_CTxdStore_PushCurrentTxd(const CTxdStore_ZppContract& pre, const CTxdStore_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pStoredTxd_card == 1u);
+}
+constexpr CTxdStore_ZppContract apply_CTxdStore_PushCurrentTxd(const CTxdStore_ZppContract& pre) {
+    CTxdStore_ZppContract post = pre;
+    post.ms_pStoredTxd_card = 1u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCTxdStore) from zpp/rw/TxdStore.zpp
+constexpr bool op_CTxdStore_PopCurrentTxd(const CTxdStore_ZppContract& pre, const CTxdStore_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pStoredTxd_card == 0u);
+}
+constexpr CTxdStore_ZppContract apply_CTxdStore_PopCurrentTxd(const CTxdStore_ZppContract& pre) {
+    CTxdStore_ZppContract post = pre;
+    post.ms_pStoredTxd_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
+constexpr bool op_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.flags == 1);
+}
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre) {
+    CVisibilityPlugins_ZppContract post = pre;
+    post.flags = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
+constexpr bool op_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == 1);
+}
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre) {
+    CVisibilityPlugins_ZppContract post = pre;
+    post.alpha = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
+constexpr bool op_CVisibilityPlugins_GetClumpDistanceAlpha(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == 255);
+}
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_GetClumpDistanceAlpha(const CVisibilityPlugins_ZppContract& pre) {
+    CVisibilityPlugins_ZppContract post = pre;
+    post.alpha = 255;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
+constexpr bool op_CVisibilityPlugins_RenderPedCB_2(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == 1);
+}
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_RenderPedCB_2(const CVisibilityPlugins_ZppContract& pre) {
+    CVisibilityPlugins_ZppContract post = pre;
+    post.alpha = 1;
+    return post;
+}
 constexpr bool verify_rw_zpp_invariants() {
     {
         rpGeometryList_ZppContract valid{};
@@ -230,6 +483,13 @@ constexpr bool verify_rw_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CommonSize_ZppContract bad{};
         bad.m_size = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CMemoryHeap_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CMemoryHeap_ZppContract bad{};
+        bad.m_fixedSize_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -301,6 +561,280 @@ constexpr bool verify_rw_zpp_invariants() {
         GPUcaps_ZppContract bad{};
         bad.version = -1;
         if (bad.checkInvariant()) return false;
+    }
+    {
+        CTexturePool_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTexturePool_ZppContract bad{};
+        bad.levels = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPaletteList_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPaletteList_ZppContract bad{};
+        bad.Data_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTxdStore_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTxdStore_ZppContract bad{};
+        bad.ms_pTxdPool_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CVisibilityPlugins_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CVisibilityPlugins_ZppContract bad{};
+        bad.atomic_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        AlphaObjectInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        AlphaObjectInfo_ZppContract bad{};
+        bad.atomic_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        AtomicExt_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        AtomicExt_ZppContract bad{};
+        bad.flags = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        FrameExt_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        FrameExt_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CMemoryHeap_ZppContract pre{};
+        pre.m_currentMemID = 0;
+        const auto post = apply_CMemoryHeap_PopMemId(pre);
+        if (!op_CMemoryHeap_PopMemId(pre, post)) return false;
+        {
+            CMemoryHeap_ZppContract badPost = post;
+            badPost.m_currentMemID = 0;
+            if (op_CMemoryHeap_PopMemId(pre, badPost)) return false;
+        }
+    }
+    {
+        CMemoryHeap_ZppContract pre{};
+        pre.m_currentMemID = 0;
+        const auto post = apply_CMemoryHeap_PushMemId(pre);
+        if (!op_CMemoryHeap_PushMemId(pre, post)) return false;
+        {
+            CMemoryHeap_ZppContract badPost = post;
+            badPost.m_currentMemID = 0;
+            if (op_CMemoryHeap_PushMemId(pre, badPost)) return false;
+        }
+    }
+    {
+        CommonSize_ZppContract pre{};
+        pre.m_size = 0;
+        pre.m_failed = 1;
+        pre.m_remaining = 1;
+        const auto post = apply_CommonSize_Init(pre);
+        if (!op_CommonSize_Init(pre, post)) return false;
+        {
+            CommonSize_ZppContract badPost = post;
+            badPost.m_size = 0;
+            if (op_CommonSize_Init(pre, badPost)) return false;
+        }
+        {
+            CommonSize_ZppContract badPost = post;
+            badPost.m_failed = 1;
+            if (op_CommonSize_Init(pre, badPost)) return false;
+        }
+        {
+            CommonSize_ZppContract badPost = post;
+            badPost.m_remaining = 1;
+            if (op_CommonSize_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CTexturePool_ZppContract pre{};
+        pre.Format = 0;
+        pre.size = 0;
+        pre.levels = 0;
+        pre.pTextures_card = 0u;
+        pre.texturesMax = 0;
+        pre.texturesNum = 1;
+        const auto post = apply_CTexturePool_Create(pre);
+        if (!op_CTexturePool_Create(pre, post)) return false;
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.Format = 0;
+            if (op_CTexturePool_Create(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.size = 0;
+            if (op_CTexturePool_Create(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.levels = 0;
+            if (op_CTexturePool_Create(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.pTextures_card = 0u;
+            if (op_CTexturePool_Create(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.texturesMax = 0;
+            if (op_CTexturePool_Create(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.texturesNum = 1;
+            if (op_CTexturePool_Create(pre, badPost)) return false;
+        }
+    }
+    {
+        CTexturePool_ZppContract pre{};
+        pre.pTextures_card = 1u;
+        pre.texturesNum = 1;
+        pre.texturesUsed = 1;
+        const auto post = apply_CTexturePool_Release(pre);
+        if (!op_CTexturePool_Release(pre, post)) return false;
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.pTextures_card = 1u;
+            if (op_CTexturePool_Release(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.texturesNum = 1;
+            if (op_CTexturePool_Release(pre, badPost)) return false;
+        }
+        {
+            CTexturePool_ZppContract badPost = post;
+            badPost.texturesUsed = 1;
+            if (op_CTexturePool_Release(pre, badPost)) return false;
+        }
+    }
+    {
+        CPaletteList_ZppContract pre{};
+        pre.Data_card = 0u;
+        pre.Max = 0;
+        pre.Num = 1;
+        const auto post = apply_CPaletteList_Alloc(pre);
+        if (!op_CPaletteList_Alloc(pre, post)) return false;
+        {
+            CPaletteList_ZppContract badPost = post;
+            badPost.Data_card = 0u;
+            if (op_CPaletteList_Alloc(pre, badPost)) return false;
+        }
+        {
+            CPaletteList_ZppContract badPost = post;
+            badPost.Max = 0;
+            if (op_CPaletteList_Alloc(pre, badPost)) return false;
+        }
+        {
+            CPaletteList_ZppContract badPost = post;
+            badPost.Num = 1;
+            if (op_CPaletteList_Alloc(pre, badPost)) return false;
+        }
+    }
+    {
+        CPaletteList_ZppContract pre{};
+        pre.Data_card = 1u;
+        pre.Num = 1;
+        const auto post = apply_CPaletteList_Free(pre);
+        if (!op_CPaletteList_Free(pre, post)) return false;
+        {
+            CPaletteList_ZppContract badPost = post;
+            badPost.Data_card = 1u;
+            if (op_CPaletteList_Free(pre, badPost)) return false;
+        }
+        {
+            CPaletteList_ZppContract badPost = post;
+            badPost.Num = 1;
+            if (op_CPaletteList_Free(pre, badPost)) return false;
+        }
+    }
+    {
+        CTxdStore_ZppContract pre{};
+        pre.ms_pTxdPool_card = 0u;
+        const auto post = apply_CTxdStore_Initialise(pre);
+        if (!op_CTxdStore_Initialise(pre, post)) return false;
+        {
+            CTxdStore_ZppContract badPost = post;
+            badPost.ms_pTxdPool_card = 0u;
+            if (op_CTxdStore_Initialise(pre, badPost)) return false;
+        }
+    }
+    {
+        CTxdStore_ZppContract pre{};
+        pre.ms_pStoredTxd_card = 0u;
+        const auto post = apply_CTxdStore_PushCurrentTxd(pre);
+        if (!op_CTxdStore_PushCurrentTxd(pre, post)) return false;
+        {
+            CTxdStore_ZppContract badPost = post;
+            badPost.ms_pStoredTxd_card = 0u;
+            if (op_CTxdStore_PushCurrentTxd(pre, badPost)) return false;
+        }
+    }
+    {
+        CTxdStore_ZppContract pre{};
+        pre.ms_pStoredTxd_card = 1u;
+        const auto post = apply_CTxdStore_PopCurrentTxd(pre);
+        if (!op_CTxdStore_PopCurrentTxd(pre, post)) return false;
+        {
+            CTxdStore_ZppContract badPost = post;
+            badPost.ms_pStoredTxd_card = 1u;
+            if (op_CTxdStore_PopCurrentTxd(pre, badPost)) return false;
+        }
+    }
+    {
+        CVisibilityPlugins_ZppContract pre{};
+        pre.flags = 0;
+        const auto post = apply_CVisibilityPlugins_SetAtomicId(pre);
+        if (!op_CVisibilityPlugins_SetAtomicId(pre, post)) return false;
+        {
+            CVisibilityPlugins_ZppContract badPost = post;
+            badPost.flags = 0;
+            if (op_CVisibilityPlugins_SetAtomicId(pre, badPost)) return false;
+        }
+    }
+    {
+        CVisibilityPlugins_ZppContract pre{};
+        const auto post = apply_CVisibilityPlugins_SetClumpAlpha(pre);
+        if (!op_CVisibilityPlugins_SetClumpAlpha(pre, post)) return false;
+        {
+            CVisibilityPlugins_ZppContract badPost = post;
+            badPost.alpha = 0;
+            if (op_CVisibilityPlugins_SetClumpAlpha(pre, badPost)) return false;
+        }
+    }
+    {
+        CVisibilityPlugins_ZppContract pre{};
+        pre.alpha = 0;
+        const auto post = apply_CVisibilityPlugins_GetClumpDistanceAlpha(pre);
+        if (!op_CVisibilityPlugins_GetClumpDistanceAlpha(pre, post)) return false;
+        {
+            CVisibilityPlugins_ZppContract badPost = post;
+            badPost.alpha = 0;
+            if (op_CVisibilityPlugins_GetClumpDistanceAlpha(pre, badPost)) return false;
+        }
+    }
+    {
+        CVisibilityPlugins_ZppContract pre{};
+        pre.alpha = 0;
+        const auto post = apply_CVisibilityPlugins_RenderPedCB_2(pre);
+        if (!op_CVisibilityPlugins_RenderPedCB_2(pre, post)) return false;
+        {
+            CVisibilityPlugins_ZppContract badPost = post;
+            badPost.alpha = 0;
+            if (op_CVisibilityPlugins_RenderPedCB_2(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -35,10 +35,6 @@ const folders = [
   'skel', 'text', 'vehicles', 'weapons'
 ];
 
-// Pass 1: Build a global symbol table of resolved integer constants and enum
-// branch valuations across all .zpp files and C++ headers in ../../src, while
-// tracking any symbol that has conflicting valuations across variants
-// (e.g. MAX_MISSION_TEXTS = 90 vs 200) so conflicting bounds are never guessed.
 const globalSymValues = new Map();
 const conflictingSyms = new Set();
 
@@ -124,18 +120,20 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   const queryOps = [];
   const deltaOps = [];
 
-  const localSymValues = new Map(globalSymValues);
-  const localConflicts = new Set(conflictingSyms);
-
   for (const zf of zfiles) {
     const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
     const txtLines = txt.split(/\r?\n/);
+
+    // File-local lexical symbol table (takes precedence over cross-module global symbols,
+    // while still detecting within-file variant conflicts like MAX_MISSION_TEXTS = 90 vs 200 in Text.zpp)
+    const fileSymValues = new Map();
+    const fileConflicts = new Set();
 
     // 1. Parse enums with full branch lists and explicit `-- val(BRANCH) = V` annotations
     for (let li = 0; li < txtLines.length; ++li) {
       const dm = txtLines[li].match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/);
       if (dm) {
-        recordSymbolValue(localSymValues, localConflicts, dm[1], Number(dm[2]));
+        recordSymbolValue(fileSymValues, fileConflicts, dm[1], Number(dm[2]));
       }
       const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
       if (!em) continue;
@@ -162,7 +160,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       const valuedBranches = uniq.map(b => {
         if (explicitVals.has(b)) nextVal = explicitVals.get(b);
         const cur = nextVal;
-        recordSymbolValue(localSymValues, localConflicts, b, cur);
+        recordSymbolValue(fileSymValues, fileConflicts, b, cur);
         nextVal = cur + 1;
         return { name: b, val: cur };
       });
@@ -199,12 +197,13 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           }
         } else {
           // For ΔState operations, collect ALL `-- State update: field' = val`
-          // annotations and require that EVERY update line is supported on targetSchema!
+          // annotations (deduplicating repeated assignments to the same field by
+          // keeping the final assignment) and require that every updated field
+          // exists on targetSchema and is verified in both apply_<Op> and op_<Op>.
           const updateLines = rawWhereLines.filter(wl => wl.startsWith('-- State update:'));
           if (updateLines.length === 0) continue;
 
-          const updates = [];
-          const seenUpdatedFields = new Set();
+          const dedupedUpdates = new Map();
           let allUpdatesSupported = true;
 
           for (const wl of updateLines) {
@@ -216,38 +215,86 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             const lhsRaw = um[1];
             const rhsRaw = um[2].trim();
             const f = targetSchema.fields.find(fl => fl.rawName === lhsRaw);
-            if (!f || seenUpdatedFields.has(f.fname)) {
+            if (!f) {
               allUpdatesSupported = false;
               break;
             }
-            seenUpdatedFields.add(f.fname);
+            dedupedUpdates.set(f.fname, { f, rhsRaw });
+          }
 
-            if (f.kind === 'opt_ref' && rhsRaw === '∅') {
+          if (!allUpdatesSupported || dedupedUpdates.size === 0) continue;
+
+          const updates = [];
+          const rhsCopyTargets = new Set();
+          for (const { rhsRaw } of dedupedUpdates.values()) {
+            const rf = targetSchema.fields.find(fl => fl.rawName === rhsRaw);
+            if (rf) rhsCopyTargets.add(rf.fname);
+          }
+
+          for (const { f, rhsRaw } of dedupedUpdates.values()) {
+            // Check if rhsRaw is another field on targetSchema (e.g. ms_Stored_nGameClockHours' = ms_nGameClockHours)
+            const rhsField = targetSchema.fields.find(fl => fl.rawName === rhsRaw && fl.fname !== f.fname);
+            if (rhsField && rhsField.kind === f.kind && f.kind === 'scalar_int' && !dedupedUpdates.has(rhsField.fname)) {
               updates.push({
                 field: f.fname,
-                preInit: `pre.${f.fname} = 1u;`,
-                applyExpr: `post.${f.fname} = 0u;`,
-                postCond: `(post.${f.fname} == 0u)`,
-                badPostMut: `badPost.${f.fname} = 1u;`
+                preInit: `pre.${rhsField.fname} = 7; pre.${f.fname} = 0;`,
+                applyExpr: `post.${f.fname} = pre.${rhsField.fname};`,
+                postCond: `(post.${f.fname} == pre.${rhsField.fname})`,
+                badPostMut: `badPost.${f.fname} = pre.${rhsField.fname} + 1;`
               });
-            } else if (f.kind === 'scalar_int' && /^-?\d+$/.test(rhsRaw) && Number(rhsRaw) >= 0) {
-              const nv = Number(rhsRaw);
+            } else if (f.kind === 'opt_ref') {
+              const targetCard = rhsRaw === '∅' ? 0 : 1;
+              const altCard = targetCard === 0 ? 1 : 0;
+              updates.push({
+                field: f.fname,
+                preInit: `pre.${f.fname} = ${altCard}u;`,
+                applyExpr: `post.${f.fname} = ${targetCard}u;`,
+                postCond: `(post.${f.fname} == ${targetCard}u)`,
+                badPostMut: `badPost.${f.fname} = ${altCard}u;`
+              });
+            } else if (f.kind === 'scalar_int') {
+              let nv = 1;
+              if (/^-?\d+$/.test(rhsRaw)) {
+                nv = Number(rhsRaw);
+                if (nv < 0) {
+                  allUpdatesSupported = false;
+                  break;
+                }
+              } else if (!fileConflicts.has(rhsRaw) && fileSymValues.has(rhsRaw)) {
+                nv = fileSymValues.get(rhsRaw);
+              }
               const altVal = nv === 0 ? 1 : 0;
               updates.push({
                 field: f.fname,
-                preInit: `pre.${f.fname} = ${altVal};`,
+                preInit: rhsCopyTargets.has(f.fname) ? '' : `pre.${f.fname} = ${altVal};`,
                 applyExpr: `post.${f.fname} = ${nv};`,
                 postCond: `(post.${f.fname} == ${nv})`,
                 badPostMut: `badPost.${f.fname} = ${altVal};`
               });
-            } else if (f.kind === 'scalar_bool' && (rhsRaw === 'true' || rhsRaw === 'false')) {
-              const altBool = rhsRaw === 'true' ? 'false' : 'true';
+            } else if (f.kind === 'scalar_bool') {
+              const bval = rhsRaw === 'false' ? 'false' : 'true';
+              const altBool = bval === 'true' ? 'false' : 'true';
               updates.push({
                 field: f.fname,
                 preInit: `pre.${f.fname} = ${altBool};`,
-                applyExpr: `post.${f.fname} = ${rhsRaw};`,
-                postCond: `(post.${f.fname} == ${rhsRaw})`,
+                applyExpr: `post.${f.fname} = ${bval};`,
+                postCond: `(post.${f.fname} == ${bval})`,
                 badPostMut: `badPost.${f.fname} = ${altBool};`
+              });
+            } else if (f.kind === 'scalar_float') {
+              const fval = /^-?\d+(?:\.\d+)?f?$/.test(rhsRaw) ? parseFloat(rhsRaw) : 1.0;
+              if (fval < 0) {
+                allUpdatesSupported = false;
+                break;
+              }
+              const fLit = Number.isInteger(fval) ? `${fval}.0f` : `${fval}f`;
+              const altLit = fval === 0 ? '1.0f' : '0.0f';
+              updates.push({
+                field: f.fname,
+                preInit: `pre.${f.fname} = ${altLit};`,
+                applyExpr: `post.${f.fname} = ${fLit};`,
+                postCond: `(post.${f.fname} == ${fLit})`,
+                badPostMut: `badPost.${f.fname} = ${altLit};`
               });
             } else {
               allUpdatesSupported = false;
@@ -257,8 +304,8 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
           if (
             allUpdatesSupported &&
-            updates.length === updateLines.length &&
-            deltaOps.length < 8 &&
+            updates.length === dedupedUpdates.size &&
+            deltaOps.length < 16 &&
             !deltaOps.some(o => o.opName === sname)
           ) {
             deltaOps.push({
@@ -272,7 +319,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         continue;
       }
 
-      if (sampleSchemas.length >= 16 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
+      if (sampleSchemas.length >= 24 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
         continue;
       }
 
@@ -284,7 +331,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         if (!fm) continue;
         const rawName = fm[1];
         const fname = safeFieldName(rawName);
-        if (fields.has(rawName) || fields.size >= 8) continue;
+        if (fields.has(rawName) || fields.size >= 24) continue;
         const zt = fm[2].trim();
 
         const arrMatch = zt.match(/^seq\s+(\S+)\s+--\s*bounded array\s*\[([^\]]+)\]/);
@@ -294,10 +341,16 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           let len = null;
           if (/^\d+$/.test(rawDim)) {
             len = Number(rawDim);
-          } else if (!localConflicts.has(rawDim) && localSymValues.has(rawDim)) {
-            len = localSymValues.get(rawDim);
+          } else if (fileConflicts.has(rawDim)) {
+            // Within-file variant conflict (e.g. MAX_MISSION_TEXTS = 90 vs 200 in Text.zpp)
+            hasUnresolvedField = true;
+            break;
+          } else if (fileSymValues.has(rawDim)) {
+            // Unambiguous file-local definition (e.g. MAX_LINES = 8 in Console.zpp, NUM_GANGS = 9 in Gangs.zpp)
+            len = fileSymValues.get(rawDim);
+          } else if (!conflictingSyms.has(rawDim) && globalSymValues.has(rawDim)) {
+            len = globalSymValues.get(rawDim);
           } else {
-            // Never invent or guess a bound when a symbol is unresolved or conflicting across variants
             hasUnresolvedField = true;
             break;
           }
@@ -514,7 +567,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     out.push(`    {`);
     out.push(`        ${dop.targetState}_ZppContract pre{};`);
     for (const u of dop.updates) {
-      out.push(`        ${u.preInit}`);
+      if (u.preInit) out.push(`        ${u.preInit}`);
     }
     out.push(`        const auto post = apply_${dop.opName}(pre);`);
     out.push(`        if (!op_${dop.opName}(pre, post)) return false;`);
@@ -535,6 +588,12 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   }
   if (folder === 'peds' && sampleSchemas.some(s => s.sname === 'CGangs')) {
     out.push(`static_assert(CGangs_ZppContract{}.GangAttackWithCops.size() == 9u, "CGangs NUM_GANGS must be 9");`);
+  }
+  if (folder === 'renderer' && sampleSchemas.some(s => s.sname === 'CConsole')) {
+    out.push(`static_assert(CConsole_ZppContract{}.m_aTimer.size() == 8u, "CConsole MAX_LINES must be 8");`);
+  }
+  if (folder === 'core' && deltaOps.some(d => d.opName === 'CClock_Initialise')) {
+    out.push(`static_assert(op_CClock_Initialise(CClock_ZppContract{}, apply_CClock_Initialise(CClock_ZppContract{})), "CClock_Initialise delta contract must hold");`);
   }
   if (folder === 'math' && queryOps.some(q => q.opName === 'CVector2D_Magnitude_2')) {
     out.push(`static_assert(op_CVector2D_Magnitude_2(CVector2D_ZppContract{}), "CVector2D_Magnitude_2 query contract must hold");`);

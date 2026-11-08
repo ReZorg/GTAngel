@@ -84,6 +84,9 @@ struct RsGlobalType_ZppContract {
     int32_t maxFPS{0}; // Z++: ℤ
     bool quit{false}; // Z++: 𝔹
     int32_t ps{0}; // Z++: ADDRESS
+    int32_t keyboard{0}; // Z++: RsInputDevice
+    int32_t mouse{0}; // Z++: RsInputDevice
+    int32_t pad{0}; // Z++: RsInputDevice
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);

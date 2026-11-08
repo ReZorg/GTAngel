@@ -173,6 +173,9 @@ struct RwFileFunctions_ZppContract {
     int32_t rwfgets{0}; // Z++: rwFnFgets
     int32_t rwfputs{0}; // Z++: rwFnFputs
     int32_t rwfeof{0}; // Z++: rwFnFeof
+    int32_t rwfseek{0}; // Z++: rwFnFseek
+    int32_t rwfflush{0}; // Z++: rwFnFflush
+    int32_t rwftell{0}; // Z++: rwFnFtell
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);

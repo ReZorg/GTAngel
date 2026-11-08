@@ -38,6 +38,31 @@ struct CBulletInfo_ZppContract {
         return (m_pSource_card <= 1u);
     }
 };
+// State Schema Contract from zpp/weapons/Explosion.zpp
+struct CExplosion_ZppContract {
+    int32_t m_ExplosionType{0}; // Z++: eExplosionType
+    int32_t m_vecPosition{0}; // Z++: CVector
+    float m_fRadius{0.0f}; // Z++: ℝ
+    float m_fPropagationRate{0.0f}; // Z++: ℝ
+    uint8_t m_pCreatorEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pVictimEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fStopTime{0.0f}; // Z++: ℝ
+    int64_t m_nIteration{0}; // Z++: ℕ
+    int64_t m_nActiveCounter{0}; // Z++: ℕ
+    bool m_bIsBoat{false}; // Z++: 𝔹
+    bool m_bMakeSound{false}; // Z++: 𝔹
+    float m_fStartTime{0.0f}; // Z++: ℝ
+    int64_t m_nParticlesExpireTime{0}; // Z++: ℕ
+    float m_fPower{0.0f}; // Z++: ℝ
+    float m_fZshift{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (m_pCreatorEntity_card <= 1u)
+            && (m_pVictimEntity_card <= 1u)
+            && (m_nIteration >= 0)
+            && (m_nActiveCounter >= 0)
+            && (m_nParticlesExpireTime >= 0);
+    }
+};
 // State Schema Contract from zpp/weapons/ShotInfo.zpp
 struct CShotInfo_ZppContract {
     int32_t m_weapon{0}; // Z++: eWeaponType
@@ -93,6 +118,94 @@ struct WeaponTypeModuleState_ZppContract {
             && (source_lines == 99);
     }
 };
+// Delta Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
+constexpr bool op_CBulletInfo_AddBullet(const CBulletInfo_ZppContract& pre, const CBulletInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_pSource_card == 1u) && (post.m_eWeaponType == 1) && (post.m_nDamage == 1) && (post.m_vecPosition == 1) && (post.m_vecSpeed == 1) && (post.m_fTimer == 1.0f);
+}
+constexpr CBulletInfo_ZppContract apply_CBulletInfo_AddBullet(const CBulletInfo_ZppContract& pre) {
+    CBulletInfo_ZppContract post = pre;
+    post.m_pSource_card = 1u;
+    post.m_eWeaponType = 1;
+    post.m_nDamage = 1;
+    post.m_vecPosition = 1;
+    post.m_vecSpeed = 1;
+    post.m_fTimer = 1.0f;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCExplosion) from zpp/weapons/Explosion.zpp
+constexpr bool op_CExplosion_Initialise(const CExplosion_ZppContract& pre, const CExplosion_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_ExplosionType == 1) && (post.m_vecPosition == 1) && (post.m_fRadius == 1.0f) && (post.m_fPropagationRate == 0.0f) && (post.m_fZshift == 0.0f) && (post.m_pCreatorEntity_card == 0u);
+}
+constexpr CExplosion_ZppContract apply_CExplosion_Initialise(const CExplosion_ZppContract& pre) {
+    CExplosion_ZppContract post = pre;
+    post.m_ExplosionType = 1;
+    post.m_vecPosition = 1;
+    post.m_fRadius = 1.0f;
+    post.m_fPropagationRate = 0.0f;
+    post.m_fZshift = 0.0f;
+    post.m_pCreatorEntity_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCExplosion) from zpp/weapons/Explosion.zpp
+constexpr bool op_CExplosion_ClearAllExplosions(const CExplosion_ZppContract& pre, const CExplosion_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_ExplosionType == 1) && (post.m_vecPosition == 1) && (post.m_fRadius == 1.0f) && (post.m_fPropagationRate == 0.0f) && (post.m_fZshift == 0.0f) && (post.m_pCreatorEntity_card == 0u);
+}
+constexpr CExplosion_ZppContract apply_CExplosion_ClearAllExplosions(const CExplosion_ZppContract& pre) {
+    CExplosion_ZppContract post = pre;
+    post.m_ExplosionType = 1;
+    post.m_vecPosition = 1;
+    post.m_fRadius = 1.0f;
+    post.m_fPropagationRate = 0.0f;
+    post.m_fZshift = 0.0f;
+    post.m_pCreatorEntity_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCExplosion) from zpp/weapons/Explosion.zpp
+constexpr bool op_CExplosion_ResetExplosionActiveCounter(const CExplosion_ZppContract& pre, const CExplosion_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nActiveCounter == 0);
+}
+constexpr CExplosion_ZppContract apply_CExplosion_ResetExplosionActiveCounter(const CExplosion_ZppContract& pre) {
+    CExplosion_ZppContract post = pre;
+    post.m_nActiveCounter = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCExplosion) from zpp/weapons/Explosion.zpp
+constexpr bool op_CExplosion_RemoveAllExplosionsInArea(const CExplosion_ZppContract& pre, const CExplosion_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nIteration == 0);
+}
+constexpr CExplosion_ZppContract apply_CExplosion_RemoveAllExplosionsInArea(const CExplosion_ZppContract& pre) {
+    CExplosion_ZppContract post = pre;
+    post.m_nIteration = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCShotInfo) from zpp/weapons/ShotInfo.zpp
+constexpr bool op_CShotInfo_Initialise(const CShotInfo_ZppContract& pre, const CShotInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_inUse == false) && (post.m_weapon == 1) && (post.m_startPos == 1) && (post.m_areaAffected == 1) && (post.m_radius == 1.0f) && (post.m_sourceEntity_card == 0u);
+}
+constexpr CShotInfo_ZppContract apply_CShotInfo_Initialise(const CShotInfo_ZppContract& pre) {
+    CShotInfo_ZppContract post = pre;
+    post.m_inUse = false;
+    post.m_weapon = 1;
+    post.m_startPos = 1;
+    post.m_areaAffected = 1;
+    post.m_radius = 1.0f;
+    post.m_sourceEntity_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCWeapon) from zpp/weapons/Weapon.zpp
+constexpr bool op_CWeapon_CWeapon(const CWeapon_ZppContract& pre, const CWeapon_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_eWeaponType == 1) && (post.m_eWeaponState == 1) && (post.m_nAmmoTotal == 1) && (post.m_nAmmoInClip == 0) && (post.m_nTimer == 0) && (post.m_bAddRotOffset == false);
+}
+constexpr CWeapon_ZppContract apply_CWeapon_CWeapon(const CWeapon_ZppContract& pre) {
+    CWeapon_ZppContract post = pre;
+    post.m_eWeaponType = 1;
+    post.m_eWeaponState = 1;
+    post.m_nAmmoTotal = 1;
+    post.m_nAmmoInClip = 0;
+    post.m_nTimer = 0;
+    post.m_bAddRotOffset = false;
+    return post;
+}
 // Delta Operation Schema Contract (ΔCWeapon) from zpp/weapons/Weapon.zpp
 constexpr bool op_CWeapon_InitialiseWeapons(const CWeapon_ZppContract& pre, const CWeapon_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.bPhotographHasBeenTaken == false);
@@ -102,12 +215,29 @@ constexpr CWeapon_ZppContract apply_CWeapon_InitialiseWeapons(const CWeapon_ZppC
     post.bPhotographHasBeenTaken = false;
     return post;
 }
+// Delta Operation Schema Contract (ΔCWeapon) from zpp/weapons/Weapon.zpp
+constexpr bool op_CWeapon_FireFromCar(const CWeapon_ZppContract& pre, const CWeapon_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_eWeaponState == 1) && (post.m_nTimer == 1);
+}
+constexpr CWeapon_ZppContract apply_CWeapon_FireFromCar(const CWeapon_ZppContract& pre) {
+    CWeapon_ZppContract post = pre;
+    post.m_eWeaponState = 1;
+    post.m_nTimer = 1;
+    return post;
+}
 constexpr bool verify_weapons_zpp_invariants() {
     {
         CBulletInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CBulletInfo_ZppContract bad{};
         bad.m_pSource_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CExplosion_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CExplosion_ZppContract bad{};
+        bad.m_pCreatorEntity_card = 2u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -139,6 +269,233 @@ constexpr bool verify_weapons_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CBulletInfo_ZppContract pre{};
+        pre.m_pSource_card = 0u;
+        pre.m_eWeaponType = 0;
+        pre.m_nDamage = 0;
+        pre.m_vecPosition = 0;
+        pre.m_vecSpeed = 0;
+        pre.m_fTimer = 0.0f;
+        const auto post = apply_CBulletInfo_AddBullet(pre);
+        if (!op_CBulletInfo_AddBullet(pre, post)) return false;
+        {
+            CBulletInfo_ZppContract badPost = post;
+            badPost.m_pSource_card = 0u;
+            if (op_CBulletInfo_AddBullet(pre, badPost)) return false;
+        }
+        {
+            CBulletInfo_ZppContract badPost = post;
+            badPost.m_eWeaponType = 0;
+            if (op_CBulletInfo_AddBullet(pre, badPost)) return false;
+        }
+        {
+            CBulletInfo_ZppContract badPost = post;
+            badPost.m_nDamage = 0;
+            if (op_CBulletInfo_AddBullet(pre, badPost)) return false;
+        }
+        {
+            CBulletInfo_ZppContract badPost = post;
+            badPost.m_vecPosition = 0;
+            if (op_CBulletInfo_AddBullet(pre, badPost)) return false;
+        }
+        {
+            CBulletInfo_ZppContract badPost = post;
+            badPost.m_vecSpeed = 0;
+            if (op_CBulletInfo_AddBullet(pre, badPost)) return false;
+        }
+        {
+            CBulletInfo_ZppContract badPost = post;
+            badPost.m_fTimer = 0.0f;
+            if (op_CBulletInfo_AddBullet(pre, badPost)) return false;
+        }
+    }
+    {
+        CExplosion_ZppContract pre{};
+        pre.m_ExplosionType = 0;
+        pre.m_vecPosition = 0;
+        pre.m_fRadius = 0.0f;
+        pre.m_fPropagationRate = 1.0f;
+        pre.m_fZshift = 1.0f;
+        pre.m_pCreatorEntity_card = 1u;
+        const auto post = apply_CExplosion_Initialise(pre);
+        if (!op_CExplosion_Initialise(pre, post)) return false;
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_ExplosionType = 0;
+            if (op_CExplosion_Initialise(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_vecPosition = 0;
+            if (op_CExplosion_Initialise(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_fRadius = 0.0f;
+            if (op_CExplosion_Initialise(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_fPropagationRate = 1.0f;
+            if (op_CExplosion_Initialise(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_fZshift = 1.0f;
+            if (op_CExplosion_Initialise(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_pCreatorEntity_card = 1u;
+            if (op_CExplosion_Initialise(pre, badPost)) return false;
+        }
+    }
+    {
+        CExplosion_ZppContract pre{};
+        pre.m_ExplosionType = 0;
+        pre.m_vecPosition = 0;
+        pre.m_fRadius = 0.0f;
+        pre.m_fPropagationRate = 1.0f;
+        pre.m_fZshift = 1.0f;
+        pre.m_pCreatorEntity_card = 1u;
+        const auto post = apply_CExplosion_ClearAllExplosions(pre);
+        if (!op_CExplosion_ClearAllExplosions(pre, post)) return false;
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_ExplosionType = 0;
+            if (op_CExplosion_ClearAllExplosions(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_vecPosition = 0;
+            if (op_CExplosion_ClearAllExplosions(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_fRadius = 0.0f;
+            if (op_CExplosion_ClearAllExplosions(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_fPropagationRate = 1.0f;
+            if (op_CExplosion_ClearAllExplosions(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_fZshift = 1.0f;
+            if (op_CExplosion_ClearAllExplosions(pre, badPost)) return false;
+        }
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_pCreatorEntity_card = 1u;
+            if (op_CExplosion_ClearAllExplosions(pre, badPost)) return false;
+        }
+    }
+    {
+        CExplosion_ZppContract pre{};
+        pre.m_nActiveCounter = 1;
+        const auto post = apply_CExplosion_ResetExplosionActiveCounter(pre);
+        if (!op_CExplosion_ResetExplosionActiveCounter(pre, post)) return false;
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_nActiveCounter = 1;
+            if (op_CExplosion_ResetExplosionActiveCounter(pre, badPost)) return false;
+        }
+    }
+    {
+        CExplosion_ZppContract pre{};
+        pre.m_nIteration = 1;
+        const auto post = apply_CExplosion_RemoveAllExplosionsInArea(pre);
+        if (!op_CExplosion_RemoveAllExplosionsInArea(pre, post)) return false;
+        {
+            CExplosion_ZppContract badPost = post;
+            badPost.m_nIteration = 1;
+            if (op_CExplosion_RemoveAllExplosionsInArea(pre, badPost)) return false;
+        }
+    }
+    {
+        CShotInfo_ZppContract pre{};
+        pre.m_inUse = true;
+        pre.m_weapon = 0;
+        pre.m_startPos = 0;
+        pre.m_areaAffected = 0;
+        pre.m_radius = 0.0f;
+        pre.m_sourceEntity_card = 1u;
+        const auto post = apply_CShotInfo_Initialise(pre);
+        if (!op_CShotInfo_Initialise(pre, post)) return false;
+        {
+            CShotInfo_ZppContract badPost = post;
+            badPost.m_inUse = true;
+            if (op_CShotInfo_Initialise(pre, badPost)) return false;
+        }
+        {
+            CShotInfo_ZppContract badPost = post;
+            badPost.m_weapon = 0;
+            if (op_CShotInfo_Initialise(pre, badPost)) return false;
+        }
+        {
+            CShotInfo_ZppContract badPost = post;
+            badPost.m_startPos = 0;
+            if (op_CShotInfo_Initialise(pre, badPost)) return false;
+        }
+        {
+            CShotInfo_ZppContract badPost = post;
+            badPost.m_areaAffected = 0;
+            if (op_CShotInfo_Initialise(pre, badPost)) return false;
+        }
+        {
+            CShotInfo_ZppContract badPost = post;
+            badPost.m_radius = 0.0f;
+            if (op_CShotInfo_Initialise(pre, badPost)) return false;
+        }
+        {
+            CShotInfo_ZppContract badPost = post;
+            badPost.m_sourceEntity_card = 1u;
+            if (op_CShotInfo_Initialise(pre, badPost)) return false;
+        }
+    }
+    {
+        CWeapon_ZppContract pre{};
+        pre.m_eWeaponType = 0;
+        pre.m_eWeaponState = 0;
+        pre.m_nAmmoTotal = 0;
+        pre.m_nAmmoInClip = 1;
+        pre.m_nTimer = 1;
+        pre.m_bAddRotOffset = true;
+        const auto post = apply_CWeapon_CWeapon(pre);
+        if (!op_CWeapon_CWeapon(pre, post)) return false;
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_eWeaponType = 0;
+            if (op_CWeapon_CWeapon(pre, badPost)) return false;
+        }
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_eWeaponState = 0;
+            if (op_CWeapon_CWeapon(pre, badPost)) return false;
+        }
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_nAmmoTotal = 0;
+            if (op_CWeapon_CWeapon(pre, badPost)) return false;
+        }
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_nAmmoInClip = 1;
+            if (op_CWeapon_CWeapon(pre, badPost)) return false;
+        }
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_nTimer = 1;
+            if (op_CWeapon_CWeapon(pre, badPost)) return false;
+        }
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_bAddRotOffset = true;
+            if (op_CWeapon_CWeapon(pre, badPost)) return false;
+        }
+    }
+    {
         CWeapon_ZppContract pre{};
         pre.bPhotographHasBeenTaken = true;
         const auto post = apply_CWeapon_InitialiseWeapons(pre);
@@ -147,6 +504,23 @@ constexpr bool verify_weapons_zpp_invariants() {
             CWeapon_ZppContract badPost = post;
             badPost.bPhotographHasBeenTaken = true;
             if (op_CWeapon_InitialiseWeapons(pre, badPost)) return false;
+        }
+    }
+    {
+        CWeapon_ZppContract pre{};
+        pre.m_eWeaponState = 0;
+        pre.m_nTimer = 0;
+        const auto post = apply_CWeapon_FireFromCar(pre);
+        if (!op_CWeapon_FireFromCar(pre, post)) return false;
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_eWeaponState = 0;
+            if (op_CWeapon_FireFromCar(pre, badPost)) return false;
+        }
+        {
+            CWeapon_ZppContract badPost = post;
+            badPost.m_nTimer = 0;
+            if (op_CWeapon_FireFromCar(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

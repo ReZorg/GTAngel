@@ -35,11 +35,30 @@ struct cAudioCollision_ZppContract {
     float m_fIntensity2{0.0f}; // Z++: ℝ
     int32_t m_vecPosition{0}; // Z++: CVector
     float m_fDistance{0.0f}; // Z++: ℝ
+    int32_t m_nBaseVolume{0}; // Z++: ℤ
     constexpr bool checkInvariant() const {
         return (m_pEntity1_card <= 1u)
             && (m_pEntity2_card <= 1u)
             && (m_bSurface1 >= 0)
             && (m_bSurface2 >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/AudioCollision.zpp
+struct cAudioCollisionManager_ZppContract {
+    std::array<int32_t, 10> m_asCollisions1{}; // Z++: seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
+    size_t m_asCollisions1_len{10u}; // Z++ cardinality #m_asCollisions1
+    std::array<int32_t, 10> m_asCollisions2{}; // Z++: seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
+    size_t m_asCollisions2_len{10u}; // Z++ cardinality #m_asCollisions2
+    std::array<uint32_t, 10> m_bIndicesTable{}; // Z++: seq ℕ  -- bounded array [NUMAUDIOCOLLISIONS]
+    size_t m_bIndicesTable_len{10u}; // Z++ cardinality #m_bIndicesTable
+    int64_t m_bCollisionsInQueue{0}; // Z++: ℕ
+    int32_t m_sQueue{0}; // Z++: cAudioCollision
+    int32_t NUMAUDIOCOLLISIONS{0}; // Z++: i
+    constexpr bool checkInvariant() const {
+        return (m_asCollisions1_len == 10u && m_asCollisions1.size() == 10u)
+            && (m_asCollisions2_len == 10u && m_asCollisions2.size() == 10u)
+            && (m_bIndicesTable_len == 10u && m_bIndicesTable.size() == 10u)
+            && (m_bCollisionsInQueue >= 0);
     }
 };
 // State Schema Contract from zpp/audio/AudioLogic.zpp
@@ -83,6 +102,32 @@ struct tHelicopterSampleData_ZppContract {
     int64_t m_bBaseVolume{0}; // Z++: ℕ
     constexpr bool checkInvariant() const {
         return (m_bBaseVolume >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/AudioManager.zpp
+struct tSound_ZppContract {
+    int32_t m_nEntityIndex{0}; // Z++: ℤ
+    int64_t m_nBankIndex{0}; // Z++: ℕ
+    int32_t m_bIs2D{0}; // Z++: bool8
+    int64_t m_nPriority{0}; // Z++: ℕ
+    int64_t m_nFrequency{0}; // Z++: ℕ
+    int64_t m_nVolume{0}; // Z++: ℕ
+    float m_fDistance{0.0f}; // Z++: ℝ
+    int64_t m_nLoopCount{0}; // Z++: ℕ
+    int32_t m_nLoopEnd{0}; // Z++: ℤ
+    int32_t m_vecPos{0}; // Z++: CVector
+    int32_t m_bReverb{0}; // Z++: bool8
+    int32_t m_bReflections{0}; // Z++: bool8
+    int32_t m_bIsPlayingFinished{0}; // Z++: bool8
+    int32_t m_nVolumeChange{0}; // Z++: ℤ
+    int64_t field_51_lcs{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (m_nBankIndex >= 0)
+            && (m_nPriority >= 0)
+            && (m_nFrequency >= 0)
+            && (m_nVolume >= 0)
+            && (m_nLoopCount >= 0)
+            && (field_51_lcs >= 0);
     }
 };
 // State Schema Contract from zpp/audio/AudioManager.zpp
@@ -211,12 +256,39 @@ struct tMP3Entry_ZppContract {
             && (pNext_card <= 1u);
     }
 };
+// State Schema Contract from zpp/audio/soundlist.zpp
+struct soundlistModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{433}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 433);
+    }
+};
+// Delta Operation Schema Contract (ΔcAudioScriptObject) from zpp/audio/AudioScriptObject.zpp
+constexpr bool op_cAudioScriptObject_Reset(const cAudioScriptObject_ZppContract& pre, const cAudioScriptObject_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.AudioId == 1) && (post.Posn == 1) && (post.AudioEntity == 1);
+}
+constexpr cAudioScriptObject_ZppContract apply_cAudioScriptObject_Reset(const cAudioScriptObject_ZppContract& pre) {
+    cAudioScriptObject_ZppContract post = pre;
+    post.AudioId = 1;
+    post.Posn = 1;
+    post.AudioEntity = 1;
+    return post;
+}
 constexpr bool verify_audio_zpp_invariants() {
     {
         cAudioCollision_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         cAudioCollision_ZppContract bad{};
         bad.m_pEntity1_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cAudioCollisionManager_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cAudioCollisionManager_ZppContract bad{};
+        bad.m_asCollisions1_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -245,6 +317,13 @@ constexpr bool verify_audio_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         tHelicopterSampleData_ZppContract bad{};
         bad.m_bBaseVolume = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tSound_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tSound_ZppContract bad{};
+        bad.m_nBankIndex = -1;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -323,6 +402,36 @@ constexpr bool verify_audio_zpp_invariants() {
         tMP3Entry_ZppContract bad{};
         bad.nTrackLength = -1;
         if (bad.checkInvariant()) return false;
+    }
+    {
+        soundlistModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        soundlistModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cAudioScriptObject_ZppContract pre{};
+        pre.AudioId = 0;
+        pre.Posn = 0;
+        pre.AudioEntity = 0;
+        const auto post = apply_cAudioScriptObject_Reset(pre);
+        if (!op_cAudioScriptObject_Reset(pre, post)) return false;
+        {
+            cAudioScriptObject_ZppContract badPost = post;
+            badPost.AudioId = 0;
+            if (op_cAudioScriptObject_Reset(pre, badPost)) return false;
+        }
+        {
+            cAudioScriptObject_ZppContract badPost = post;
+            badPost.Posn = 0;
+            if (op_cAudioScriptObject_Reset(pre, badPost)) return false;
+        }
+        {
+            cAudioScriptObject_ZppContract badPost = post;
+            badPost.AudioEntity = 0;
+            if (op_cAudioScriptObject_Reset(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

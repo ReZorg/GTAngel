@@ -44,6 +44,45 @@ struct CCarAI_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/control/CarCtrl.zpp
+struct CCarCtrl_ZppContract {
+    int32_t NumLawEnforcerCars{0}; // Z++: ℤ
+    int32_t NumAmbulancesOnDuty{0}; // Z++: ℤ
+    int32_t NumFiretrucksOnDuty{0}; // Z++: ℤ
+    int32_t NumRandomCars{0}; // Z++: ℤ
+    int32_t NumMissionCars{0}; // Z++: ℤ
+    int32_t NumParkedCars{0}; // Z++: ℤ
+    int32_t NumPermanentCars{0}; // Z++: ℤ
+    bool bCarsGeneratedAroundCamera{false}; // Z++: 𝔹
+    float CarDensityMultiplier{0.0f}; // Z++: ℝ
+    int32_t CountDownToCarsAtStart{0}; // Z++: ℤ
+    int32_t MaxNumberOfCarsInUse{0}; // Z++: ℤ
+    int64_t LastTimeLawEnforcerCreated{0}; // Z++: ℕ
+    int64_t LastTimeFireTruckCreated{0}; // Z++: ℕ
+    int64_t LastTimeAmbulanceCreated{0}; // Z++: ℕ
+    std::array<int32_t, 28> TotalNumOfCarsOfRating{}; // Z++: seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+    size_t TotalNumOfCarsOfRating_len{28u}; // Z++ cardinality #TotalNumOfCarsOfRating
+    int32_t MiamiViceCycle{0}; // Z++: ℤ
+    int64_t LastTimeMiamiViceGenerated{0}; // Z++: ℕ
+    std::array<int32_t, 28> NumRequestsOfCarRating{}; // Z++: seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+    size_t NumRequestsOfCarRating_len{28u}; // Z++ cardinality #NumRequestsOfCarRating
+    std::array<int32_t, 28> NumOfLoadedCarsOfRating{}; // Z++: seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+    size_t NumOfLoadedCarsOfRating_len{28u}; // Z++ cardinality #NumOfLoadedCarsOfRating
+    bool scriptControlsMpCarLimit{false}; // Z++: 𝔹
+    int32_t angle{0}; // Z++: return
+    std::array<int32_t, 28> NextCarOfRating{}; // Z++: seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+    size_t NextCarOfRating_len{28u}; // Z++ cardinality #NextCarOfRating
+    constexpr bool checkInvariant() const {
+        return (TotalNumOfCarsOfRating_len == 28u && TotalNumOfCarsOfRating.size() == 28u)
+            && (NumRequestsOfCarRating_len == 28u && NumRequestsOfCarRating.size() == 28u)
+            && (NumOfLoadedCarsOfRating_len == 28u && NumOfLoadedCarsOfRating.size() == 28u)
+            && (NextCarOfRating_len == 28u && NextCarOfRating.size() == 28u)
+            && (LastTimeLawEnforcerCreated >= 0)
+            && (LastTimeFireTruckCreated >= 0)
+            && (LastTimeAmbulanceCreated >= 0)
+            && (LastTimeMiamiViceGenerated >= 0);
+    }
+};
 // State Schema Contract from zpp/control/Curves.zpp
 struct CCurves_ZppContract {
     int32_t instance_addr{0}; // Z++: ADDRESS
@@ -61,6 +100,15 @@ struct CStoredCar_ZppContract {
     float m_fForwardY{0.0f}; // Z++: ℝ
     float m_fForwardZ{0.0f}; // Z++: ℝ
     float m_fTractionMultiplier{0.0f}; // Z++: ℝ
+    int32_t m_nFlags{0}; // Z++: ℤ
+    int32_t m_nPrimaryColor{0}; // Z++: ℤ
+    int32_t m_nSecondaryColor{0}; // Z++: ℤ
+    int32_t m_nRadioStation{0}; // Z++: ℤ
+    int32_t m_nVariationA{0}; // Z++: ℤ
+    int32_t m_nVariationB{0}; // Z++: ℤ
+    int32_t m_nCarBombType{0}; // Z++: ℤ
+    int32_t m_vecPos{0}; // Z++: CVector
+    int32_t m_vecAngle{0}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -98,6 +146,8 @@ struct CTempNode_ZppContract {
     int32_t numLeftLanes{0}; // Z++: ℤ
     int32_t numRightLanes{0}; // Z++: ℤ
     int64_t width{0}; // Z++: ℕ
+    bool isCross{false}; // Z++: 𝔹
+    int32_t linkState{0}; // Z++: ℤ
     constexpr bool checkInvariant() const {
         return (width >= 0);
     }
@@ -120,6 +170,48 @@ struct CRoute_ZppContract {
     size_t m_node_len{8u}; // Z++ cardinality #m_node
     constexpr bool checkInvariant() const {
         return (m_node_len == 8u && m_node.size() == 8u);
+    }
+};
+// State Schema Contract from zpp/control/PathFind.zpp
+struct CPathFind_ZppContract {
+    std::array<int32_t, 1309> m_pathNodes{}; // Z++: seq CPathNode  -- bounded array [NUM_PATHNODES]
+    size_t m_pathNodes_len{1309u}; // Z++ cardinality #m_pathNodes
+    std::array<int32_t, 1310> m_carPathLinks{}; // Z++: seq CCarPathLink  -- bounded array [NUM_CARPATHLINKS]
+    size_t m_carPathLinks_len{1310u}; // Z++ cardinality #m_carPathLinks
+    std::array<int32_t, 1311> m_mapObjects{}; // Z++: seq Ref[CTreadable]  -- bounded array [NUM_MAPOBJECTS]
+    size_t m_mapObjects_len{1311u}; // Z++ cardinality #m_mapObjects
+    std::array<uint32_t, 1312> m_connections{}; // Z++: seq ℕ  -- bounded array [NUM_PATHCONNECTIONS]
+    size_t m_connections_len{1312u}; // Z++ cardinality #m_connections
+    std::array<uint32_t, 1312> m_distances{}; // Z++: seq ℕ  -- bounded array [NUM_PATHCONNECTIONS]
+    size_t m_distances_len{1312u}; // Z++ cardinality #m_distances
+    std::array<int32_t, 1312> m_carPathConnections{}; // Z++: seq ℤ  -- bounded array [NUM_PATHCONNECTIONS]
+    size_t m_carPathConnections_len{1312u}; // Z++ cardinality #m_carPathConnections
+    int32_t m_numPathNodes{0}; // Z++: ℤ
+    int32_t m_numCarPathNodes{0}; // Z++: ℤ
+    int32_t m_numPedPathNodes{0}; // Z++: ℤ
+    int32_t m_numMapObjects{0}; // Z++: ℤ
+    int32_t m_numConnections{0}; // Z++: ℤ
+    int32_t m_numCarPathLinks{0}; // Z++: ℤ
+    int32_t unk{0}; // Z++: ℤ
+    std::array<uint32_t, 2> m_numGroups{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_numGroups_len{2u}; // Z++ cardinality #m_numGroups
+    std::array<int32_t, 512> m_searchNodes{}; // Z++: seq CPathNode  -- bounded array [512]
+    size_t m_searchNodes_len{512u}; // Z++ cardinality #m_searchNodes
+    std::array<uint32_t, 1311> m_objectFlags{}; // Z++: seq ℕ  -- bounded array [NUM_MAPOBJECTS]
+    size_t m_objectFlags_len{1311u}; // Z++ cardinality #m_objectFlags
+    std::array<int32_t, 1312> m_connectionFlags{}; // Z++: seq CConnectionFlags  -- bounded array [NUM_PATHCONNECTIONS]
+    size_t m_connectionFlags_len{1312u}; // Z++ cardinality #m_connectionFlags
+    constexpr bool checkInvariant() const {
+        return (m_pathNodes_len == 1309u && m_pathNodes.size() == 1309u)
+            && (m_carPathLinks_len == 1310u && m_carPathLinks.size() == 1310u)
+            && (m_mapObjects_len == 1311u && m_mapObjects.size() == 1311u)
+            && (m_connections_len == 1312u && m_connections.size() == 1312u)
+            && (m_distances_len == 1312u && m_distances.size() == 1312u)
+            && (m_carPathConnections_len == 1312u && m_carPathConnections.size() == 1312u)
+            && (m_numGroups_len == 2u && m_numGroups.size() == 2u)
+            && (m_searchNodes_len == 512u && m_searchNodes.size() == 512u)
+            && (m_objectFlags_len == 1311u && m_objectFlags.size() == 1311u)
+            && (m_connectionFlags_len == 1312u && m_connectionFlags.size() == 1312u);
     }
 };
 // State Schema Contract from zpp/control/PathFind.zpp
@@ -188,11 +280,211 @@ struct CCarStateEachFrame_ZppContract {
     int32_t rightZ{0}; // Z++: ℤ
     int32_t forwardX{0}; // Z++: ℤ
     int32_t forwardY{0}; // Z++: ℤ
+    int32_t forwardZ{0}; // Z++: ℤ
+    int32_t wheel{0}; // Z++: ℤ
+    int32_t gas{0}; // Z++: ℤ
+    int32_t brake{0}; // Z++: ℤ
+    bool handbrake{false}; // Z++: 𝔹
+    int32_t pos{0}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/control/Record.zpp
+struct CRecordDataForChase_ZppContract {
+    int64_t Status{0}; // Z++: ℕ
+    int32_t PositionChanges{0}; // Z++: ℤ
+    int64_t CurrentCar{0}; // Z++: ℕ
+    float AnimTime{0.0f}; // Z++: ℝ
+    int64_t AnimStartTime{0}; // Z++: ℕ
+    std::array<int32_t, 20> pBaseMemForCar{}; // Z++: seq Ref[CCarStateEachFrame]  -- bounded array [NUM_CHASE_CARS]
+    size_t pBaseMemForCar_len{20u}; // Z++ cardinality #pBaseMemForCar
+    float TimeMultiplier{0.0f}; // Z++: ℝ
+    int32_t FId2{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (pBaseMemForCar_len == 20u && pBaseMemForCar.size() == 20u)
+            && (Status >= 0)
+            && (CurrentCar >= 0)
+            && (AnimStartTime >= 0);
+    }
+};
+// State Schema Contract from zpp/control/Record.zpp
+struct tGameBuffer_ZppContract {
+    float m_fTimeStep{0.0f}; // Z++: ℝ
+    int64_t m_nTimeInMilliseconds{0}; // Z++: ℕ
+    std::array<uint32_t, 2> m_nSizeOfPads{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_nSizeOfPads_len{2u}; // Z++ cardinality #m_nSizeOfPads
+    int64_t m_nChecksum{0}; // Z++: ℕ
+    std::array<uint32_t, 116> m_ControllerBuffer{}; // Z++: seq ℕ  -- bounded array [116]
+    size_t m_ControllerBuffer_len{116u}; // Z++ cardinality #m_ControllerBuffer
+    constexpr bool checkInvariant() const {
+        return (m_nSizeOfPads_len == 2u && m_nSizeOfPads.size() == 2u)
+            && (m_ControllerBuffer_len == 116u && m_ControllerBuffer.size() == 116u)
+            && (m_nTimeInMilliseconds >= 0)
+            && (m_nChecksum >= 0);
+    }
+};
+// State Schema Contract from zpp/control/Record.zpp
+struct CRecordDataForGame_ZppContract {
+    int64_t RecordingState{0}; // Z++: ℕ
+    uint8_t pDataBuffer_card{0u}; // Z++: ℙ ℕ
+    uint8_t pDataBufferPointer_card{0u}; // Z++: ℙ ℕ
+    int32_t FId{0}; // Z++: ℤ
+    int32_t pDataBufferForFrame{0}; // Z++: tGameBuffer
+    constexpr bool checkInvariant() const {
+        return (RecordingState >= 0)
+            && (pDataBuffer_card <= 1u)
+            && (pDataBufferPointer_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/control/Remote.zpp
+struct CRemote_ZppContract {
+    int32_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/control/Replay.zpp
+struct CAddressInReplayBuffer_ZppContract {
+    int64_t m_nOffset{0}; // Z++: ℕ
+    uint8_t m_pBase_card{0u}; // Z++: ℙ ℕ
+    int64_t m_bSlot{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (m_nOffset >= 0)
+            && (m_pBase_card <= 1u)
+            && (m_bSlot >= 0);
+    }
+};
+// State Schema Contract from zpp/control/Replay.zpp
+struct CStoredAnimationState_ZppContract {
+    int64_t animId{0}; // Z++: ℕ
+    int64_t time{0}; // Z++: ℕ
+    int64_t speed{0}; // Z++: ℕ
+    int64_t groupId{0}; // Z++: ℕ
+    int64_t secAnimId{0}; // Z++: ℕ
+    int64_t secTime{0}; // Z++: ℕ
+    int64_t secSpeed{0}; // Z++: ℕ
+    int64_t secGroupId{0}; // Z++: ℕ
+    int64_t blendAmount{0}; // Z++: ℕ
+    int64_t partAnimId{0}; // Z++: ℕ
+    int64_t partAnimTime{0}; // Z++: ℕ
+    int64_t partAnimSpeed{0}; // Z++: ℕ
+    int64_t partBlendAmount{0}; // Z++: ℕ
+    int64_t partGroupId{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (animId >= 0)
+            && (time >= 0)
+            && (speed >= 0)
+            && (groupId >= 0)
+            && (secAnimId >= 0)
+            && (secTime >= 0)
+            && (secSpeed >= 0)
+            && (secGroupId >= 0)
+            && (blendAmount >= 0)
+            && (partAnimId >= 0)
+            && (partAnimTime >= 0)
+            && (partAnimSpeed >= 0)
+            && (partBlendAmount >= 0)
+            && (partGroupId >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCCarCtrl) from zpp/control/CarCtrl.zpp
+constexpr bool op_CCarCtrl_Init(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.NumRandomCars == 0) && (post.NumLawEnforcerCars == 0) && (post.NumMissionCars == 0) && (post.NumParkedCars == 0) && (post.NumPermanentCars == 0) && (post.NumAmbulancesOnDuty == 0);
+}
+constexpr CCarCtrl_ZppContract apply_CCarCtrl_Init(const CCarCtrl_ZppContract& pre) {
+    CCarCtrl_ZppContract post = pre;
+    post.NumRandomCars = 0;
+    post.NumLawEnforcerCars = 0;
+    post.NumMissionCars = 0;
+    post.NumParkedCars = 0;
+    post.NumPermanentCars = 0;
+    post.NumAmbulancesOnDuty = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCarCtrl) from zpp/control/CarCtrl.zpp
+constexpr bool op_CCarCtrl_ReInit(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.NumRandomCars == 0) && (post.NumLawEnforcerCars == 0) && (post.NumMissionCars == 0) && (post.NumParkedCars == 0) && (post.NumPermanentCars == 0) && (post.NumAmbulancesOnDuty == 0);
+}
+constexpr CCarCtrl_ZppContract apply_CCarCtrl_ReInit(const CCarCtrl_ZppContract& pre) {
+    CCarCtrl_ZppContract post = pre;
+    post.NumRandomCars = 0;
+    post.NumLawEnforcerCars = 0;
+    post.NumMissionCars = 0;
+    post.NumParkedCars = 0;
+    post.NumPermanentCars = 0;
+    post.NumAmbulancesOnDuty = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCarCtrl) from zpp/control/CarCtrl.zpp
+constexpr bool op_CCarCtrl_UpdateCarCount(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.NumLawEnforcerCars == 0) && (post.NumRandomCars == 0) && (post.NumMissionCars == 0) && (post.NumParkedCars == 0) && (post.NumPermanentCars == 0);
+}
+constexpr CCarCtrl_ZppContract apply_CCarCtrl_UpdateCarCount(const CCarCtrl_ZppContract& pre) {
+    CCarCtrl_ZppContract post = pre;
+    post.NumLawEnforcerCars = 0;
+    post.NumRandomCars = 0;
+    post.NumMissionCars = 0;
+    post.NumParkedCars = 0;
+    post.NumPermanentCars = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCarCtrl) from zpp/control/CarCtrl.zpp
+constexpr bool op_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.scriptControlsMpCarLimit == true);
+}
+constexpr CCarCtrl_ZppContract apply_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre) {
+    CCarCtrl_ZppContract post = pre;
+    post.scriptControlsMpCarLimit = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCRecordDataForGame) from zpp/control/Record.zpp
+constexpr bool op_CRecordDataForGame_Init(const CRecordDataForGame_ZppContract& pre, const CRecordDataForGame_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.RecordingState == 1) && (post.pDataBufferPointer_card == 0u) && (post.pDataBuffer_card == 0u) && (post.FId == 1);
+}
+constexpr CRecordDataForGame_ZppContract apply_CRecordDataForGame_Init(const CRecordDataForGame_ZppContract& pre) {
+    CRecordDataForGame_ZppContract post = pre;
+    post.RecordingState = 1;
+    post.pDataBufferPointer_card = 0u;
+    post.pDataBuffer_card = 0u;
+    post.FId = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCRecordDataForChase) from zpp/control/Record.zpp
+constexpr bool op_CRecordDataForChase_Init(const CRecordDataForChase_ZppContract& pre, const CRecordDataForChase_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Status == 1) && (post.PositionChanges == 0) && (post.CurrentCar == 0) && (post.AnimStartTime == 0);
+}
+constexpr CRecordDataForChase_ZppContract apply_CRecordDataForChase_Init(const CRecordDataForChase_ZppContract& pre) {
+    CRecordDataForChase_ZppContract post = pre;
+    post.Status = 1;
+    post.PositionChanges = 0;
+    post.CurrentCar = 0;
+    post.AnimStartTime = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCRecordDataForChase) from zpp/control/Record.zpp
+constexpr bool op_CRecordDataForChase_StartChaseScene(const CRecordDataForChase_ZppContract& pre, const CRecordDataForChase_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Status == 1) && (post.AnimTime == 1.0f) && (post.AnimStartTime == 1) && (post.FId2 == 1) && (post.TimeMultiplier == 0.0f);
+}
+constexpr CRecordDataForChase_ZppContract apply_CRecordDataForChase_StartChaseScene(const CRecordDataForChase_ZppContract& pre) {
+    CRecordDataForChase_ZppContract post = pre;
+    post.Status = 1;
+    post.AnimTime = 1.0f;
+    post.AnimStartTime = 1;
+    post.FId2 = 1;
+    post.TimeMultiplier = 0.0f;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCRecordDataForChase) from zpp/control/Record.zpp
+constexpr bool op_CRecordDataForChase_CleanUpChaseScene(const CRecordDataForChase_ZppContract& pre, const CRecordDataForChase_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Status == 1);
+}
+constexpr CRecordDataForChase_ZppContract apply_CRecordDataForChase_CleanUpChaseScene(const CRecordDataForChase_ZppContract& pre) {
+    CRecordDataForChase_ZppContract post = pre;
+    post.Status = 1;
+    return post;
+}
 constexpr bool verify_control_zpp_invariants() {
     {
         CBridge_ZppContract valid{};
@@ -206,6 +498,13 @@ constexpr bool verify_control_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CCarAI_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CCarCtrl_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCarCtrl_ZppContract bad{};
+        bad.TotalNumOfCarsOfRating_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -258,6 +557,13 @@ constexpr bool verify_control_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CPathFind_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPathFind_ZppContract bad{};
+        bad.m_pathNodes_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CTempDetachedNode_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CTempDetachedNode_ZppContract bad{};
@@ -305,6 +611,280 @@ constexpr bool verify_control_zpp_invariants() {
         CCarStateEachFrame_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
+    }
+    {
+        CRecordDataForChase_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CRecordDataForChase_ZppContract bad{};
+        bad.pBaseMemForCar_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tGameBuffer_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tGameBuffer_ZppContract bad{};
+        bad.m_nSizeOfPads_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CRecordDataForGame_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CRecordDataForGame_ZppContract bad{};
+        bad.RecordingState = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CRemote_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CRemote_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CAddressInReplayBuffer_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CAddressInReplayBuffer_ZppContract bad{};
+        bad.m_nOffset = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CStoredAnimationState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CStoredAnimationState_ZppContract bad{};
+        bad.animId = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CCarCtrl_ZppContract pre{};
+        pre.NumRandomCars = 1;
+        pre.NumLawEnforcerCars = 1;
+        pre.NumMissionCars = 1;
+        pre.NumParkedCars = 1;
+        pre.NumPermanentCars = 1;
+        pre.NumAmbulancesOnDuty = 1;
+        const auto post = apply_CCarCtrl_Init(pre);
+        if (!op_CCarCtrl_Init(pre, post)) return false;
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumRandomCars = 1;
+            if (op_CCarCtrl_Init(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumLawEnforcerCars = 1;
+            if (op_CCarCtrl_Init(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumMissionCars = 1;
+            if (op_CCarCtrl_Init(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumParkedCars = 1;
+            if (op_CCarCtrl_Init(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumPermanentCars = 1;
+            if (op_CCarCtrl_Init(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumAmbulancesOnDuty = 1;
+            if (op_CCarCtrl_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CCarCtrl_ZppContract pre{};
+        pre.NumRandomCars = 1;
+        pre.NumLawEnforcerCars = 1;
+        pre.NumMissionCars = 1;
+        pre.NumParkedCars = 1;
+        pre.NumPermanentCars = 1;
+        pre.NumAmbulancesOnDuty = 1;
+        const auto post = apply_CCarCtrl_ReInit(pre);
+        if (!op_CCarCtrl_ReInit(pre, post)) return false;
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumRandomCars = 1;
+            if (op_CCarCtrl_ReInit(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumLawEnforcerCars = 1;
+            if (op_CCarCtrl_ReInit(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumMissionCars = 1;
+            if (op_CCarCtrl_ReInit(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumParkedCars = 1;
+            if (op_CCarCtrl_ReInit(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumPermanentCars = 1;
+            if (op_CCarCtrl_ReInit(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumAmbulancesOnDuty = 1;
+            if (op_CCarCtrl_ReInit(pre, badPost)) return false;
+        }
+    }
+    {
+        CCarCtrl_ZppContract pre{};
+        pre.NumLawEnforcerCars = 1;
+        pre.NumRandomCars = 1;
+        pre.NumMissionCars = 1;
+        pre.NumParkedCars = 1;
+        pre.NumPermanentCars = 1;
+        const auto post = apply_CCarCtrl_UpdateCarCount(pre);
+        if (!op_CCarCtrl_UpdateCarCount(pre, post)) return false;
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumLawEnforcerCars = 1;
+            if (op_CCarCtrl_UpdateCarCount(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumRandomCars = 1;
+            if (op_CCarCtrl_UpdateCarCount(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumMissionCars = 1;
+            if (op_CCarCtrl_UpdateCarCount(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumParkedCars = 1;
+            if (op_CCarCtrl_UpdateCarCount(pre, badPost)) return false;
+        }
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.NumPermanentCars = 1;
+            if (op_CCarCtrl_UpdateCarCount(pre, badPost)) return false;
+        }
+    }
+    {
+        CCarCtrl_ZppContract pre{};
+        pre.scriptControlsMpCarLimit = false;
+        const auto post = apply_CCarCtrl_ToggleScriptControlsMpCarLimit(pre);
+        if (!op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, post)) return false;
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.scriptControlsMpCarLimit = false;
+            if (op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, badPost)) return false;
+        }
+    }
+    {
+        CRecordDataForGame_ZppContract pre{};
+        pre.RecordingState = 0;
+        pre.pDataBufferPointer_card = 1u;
+        pre.pDataBuffer_card = 1u;
+        pre.FId = 0;
+        const auto post = apply_CRecordDataForGame_Init(pre);
+        if (!op_CRecordDataForGame_Init(pre, post)) return false;
+        {
+            CRecordDataForGame_ZppContract badPost = post;
+            badPost.RecordingState = 0;
+            if (op_CRecordDataForGame_Init(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForGame_ZppContract badPost = post;
+            badPost.pDataBufferPointer_card = 1u;
+            if (op_CRecordDataForGame_Init(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForGame_ZppContract badPost = post;
+            badPost.pDataBuffer_card = 1u;
+            if (op_CRecordDataForGame_Init(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForGame_ZppContract badPost = post;
+            badPost.FId = 0;
+            if (op_CRecordDataForGame_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CRecordDataForChase_ZppContract pre{};
+        pre.Status = 0;
+        pre.PositionChanges = 1;
+        pre.CurrentCar = 1;
+        pre.AnimStartTime = 1;
+        const auto post = apply_CRecordDataForChase_Init(pre);
+        if (!op_CRecordDataForChase_Init(pre, post)) return false;
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.Status = 0;
+            if (op_CRecordDataForChase_Init(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.PositionChanges = 1;
+            if (op_CRecordDataForChase_Init(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.CurrentCar = 1;
+            if (op_CRecordDataForChase_Init(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.AnimStartTime = 1;
+            if (op_CRecordDataForChase_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CRecordDataForChase_ZppContract pre{};
+        pre.Status = 0;
+        pre.AnimTime = 0.0f;
+        pre.AnimStartTime = 0;
+        pre.FId2 = 0;
+        pre.TimeMultiplier = 1.0f;
+        const auto post = apply_CRecordDataForChase_StartChaseScene(pre);
+        if (!op_CRecordDataForChase_StartChaseScene(pre, post)) return false;
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.Status = 0;
+            if (op_CRecordDataForChase_StartChaseScene(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.AnimTime = 0.0f;
+            if (op_CRecordDataForChase_StartChaseScene(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.AnimStartTime = 0;
+            if (op_CRecordDataForChase_StartChaseScene(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.FId2 = 0;
+            if (op_CRecordDataForChase_StartChaseScene(pre, badPost)) return false;
+        }
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.TimeMultiplier = 1.0f;
+            if (op_CRecordDataForChase_StartChaseScene(pre, badPost)) return false;
+        }
+    }
+    {
+        CRecordDataForChase_ZppContract pre{};
+        pre.Status = 0;
+        const auto post = apply_CRecordDataForChase_CleanUpChaseScene(pre);
+        if (!op_CRecordDataForChase_CleanUpChaseScene(pre, post)) return false;
+        {
+            CRecordDataForChase_ZppContract badPost = post;
+            badPost.Status = 0;
+            if (op_CRecordDataForChase_CleanUpChaseScene(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
