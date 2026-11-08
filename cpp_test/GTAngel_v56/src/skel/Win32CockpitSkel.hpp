@@ -608,7 +608,7 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
             g_agi.phasor.invariants().t8Coherence ? "OK" : "NO",
             g_agi.phasor.invariants().budget7E5R ? "OK" : "NO");
         DrawText(hdc, bx + 8, by + 40, eb, COL_GOLD, g_hFontSmall);
-        const int ksmCyc6 = ((std::max(1, g_agi.echoSnap.cycle) - 1) % 6) + 1;
+        const int ksmCyc6 = g_agi.echoField.activeKsmCycle();
         const int wkP = g_agi.echoField.weakestProperty(), stP = g_agi.echoField.strongestProperty();
         snprintf(eb, sizeof(eb), "Echo KSM C%d s=%d (%s) A15:+%s(%.2f) Target:%s(%.2f) Keep=%d/%d",
             ksmCyc6, g_agi.echoSnap.step,
