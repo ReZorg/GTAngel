@@ -13,6 +13,11 @@ namespace zpp_weapons_spec {
 static constexpr int kZppModuleCount = 8;
 static constexpr int kZppSchemaCount = 171;
 static constexpr int kZppEnumCount   = 8;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/weapons/Explosion.zpp
 enum class eExplosionType : int32_t { EXPLOSION_GRENADE_v = 0, EXPLOSION_MOLOTOV_v = 1, EXPLOSION_ROCKET_v = 2, EXPLOSION_CAR_v = 3, EXPLOSION_CAR_QUICK_v = 4, EXPLOSION_BOAT_v = 5, EXPLOSION_HELI_v = 6, EXPLOSION_HELI2_v = 7, EXPLOSION_MINE_v = 8, EXPLOSION_BARREL_v = 9, EXPLOSION_TANK_GRENADE_v = 10, EXPLOSION_HELI_BOMB_v = 11 };
 // Free Type from zpp/weapons/WeaponInfo.zpp
@@ -31,8 +36,8 @@ struct CBulletInfo_ZppContract {
     uint8_t m_pSource_card{0u}; // Z++: Ref[CEntity]
     float m_fTimer{0.0f}; // Z++: ℝ
     bool m_bInUse{false}; // Z++: 𝔹
-    int32_t m_vecPosition{0}; // Z++: CVector
-    int32_t m_vecSpeed{0}; // Z++: CVector
+    ZppVec3 m_vecPosition{}; // Z++: CVector
+    ZppVec3 m_vecSpeed{}; // Z++: CVector
     int32_t m_nDamage{0}; // Z++: ℤ
     constexpr bool checkInvariant() const {
         return (m_pSource_card <= 1u);
@@ -41,7 +46,7 @@ struct CBulletInfo_ZppContract {
 // State Schema Contract from zpp/weapons/Explosion.zpp
 struct CExplosion_ZppContract {
     int32_t m_ExplosionType{0}; // Z++: eExplosionType
-    int32_t m_vecPosition{0}; // Z++: CVector
+    ZppVec3 m_vecPosition{}; // Z++: CVector
     float m_fRadius{0.0f}; // Z++: ℝ
     float m_fPropagationRate{0.0f}; // Z++: ℝ
     uint8_t m_pCreatorEntity_card{0u}; // Z++: Ref[CEntity]
@@ -66,8 +71,8 @@ struct CExplosion_ZppContract {
 // State Schema Contract from zpp/weapons/ShotInfo.zpp
 struct CShotInfo_ZppContract {
     int32_t m_weapon{0}; // Z++: eWeaponType
-    int32_t m_startPos{0}; // Z++: CVector
-    int32_t m_areaAffected{0}; // Z++: CVector
+    ZppVec3 m_startPos{}; // Z++: CVector
+    ZppVec3 m_areaAffected{}; // Z++: CVector
     float m_radius{0.0f}; // Z++: ℝ
     uint8_t m_sourceEntity_card{0u}; // Z++: Ref[CEntity]
     float m_timeout{0.0f}; // Z++: ℝ
@@ -95,7 +100,7 @@ struct CWeapon_ZppContract {
 // State Schema Contract from zpp/weapons/WeaponEffects.zpp
 struct CWeaponEffects_ZppContract {
     bool m_bActive{false}; // Z++: 𝔹
-    int32_t m_vecPos{0}; // Z++: CVector
+    ZppVec3 m_vecPos{}; // Z++: CVector
     int64_t m_nRed{0}; // Z++: ℕ
     int64_t m_nGreen{0}; // Z++: ℕ
     int64_t m_nBlue{0}; // Z++: ℕ
@@ -109,6 +114,46 @@ struct CWeaponEffects_ZppContract {
             && (m_nAlpha >= 0);
     }
 };
+// State Schema Contract from zpp/weapons/WeaponInfo.zpp
+struct CWeaponInfo_ZppContract {
+    std::array<uint32_t, 37> ms_aReloadSampleTime{}; // Z++: seq ℕ  -- bounded array [WEAPONTYPE_TOTALWEAPONS]
+    size_t ms_aReloadSampleTime_len{37u}; // Z++ cardinality #ms_aReloadSampleTime
+    std::array<int32_t, 37> ms_aMaxAmmoForWeapon{}; // Z++: seq ℤ  -- bounded array [WEAPONTYPE_TOTALWEAPONS]
+    size_t ms_aMaxAmmoForWeapon_len{37u}; // Z++ cardinality #ms_aMaxAmmoForWeapon
+    int32_t m_eWeaponFire{0}; // Z++: eWeaponFire
+    float m_fRange{0.0f}; // Z++: ℝ
+    int64_t m_nFiringRate{0}; // Z++: ℕ
+    int64_t m_nReload{0}; // Z++: ℕ
+    int32_t m_nAmountofAmmunition{0}; // Z++: ℤ
+    int64_t m_nDamage{0}; // Z++: ℕ
+    float m_fSpeed{0.0f}; // Z++: ℝ
+    float m_fRadius{0.0f}; // Z++: ℝ
+    float m_fLifespan{0.0f}; // Z++: ℝ
+    float m_fSpread{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecFireOffset{}; // Z++: CVector
+    int32_t m_AnimToPlay{0}; // Z++: AssocGroupId
+    float m_fAnimLoopStart{0.0f}; // Z++: ℝ
+    float m_fAnimLoopEnd{0.0f}; // Z++: ℝ
+    float m_fAnimFrameFire{0.0f}; // Z++: ℝ
+    float m_fAnim2LoopStart{0.0f}; // Z++: ℝ
+    float m_fAnim2LoopEnd{0.0f}; // Z++: ℝ
+    float m_fAnim2FrameFire{0.0f}; // Z++: ℝ
+    float m_fAnimBreakout{0.0f}; // Z++: ℝ
+    int32_t m_nModelId{0}; // Z++: ℤ
+    int32_t m_nModel2Id{0}; // Z++: ℤ
+    int64_t m_Flags{0}; // Z++: ℕ
+    int64_t m_nWeaponSlot{0}; // Z++: ℕ
+    int32_t m_Anim2ToPlay{0}; // Z++: AnimationId
+    constexpr bool checkInvariant() const {
+        return (ms_aReloadSampleTime_len == 37u && ms_aReloadSampleTime.size() == 37u)
+            && (ms_aMaxAmmoForWeapon_len == 37u && ms_aMaxAmmoForWeapon.size() == 37u)
+            && (m_nFiringRate >= 0)
+            && (m_nReload >= 0)
+            && (m_nDamage >= 0)
+            && (m_Flags >= 0)
+            && (m_nWeaponSlot >= 0);
+    }
+};
 // State Schema Contract from zpp/weapons/WeaponType.zpp
 struct WeaponTypeModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -118,6 +163,10 @@ struct WeaponTypeModuleState_ZppContract {
             && (source_lines == 99);
     }
 };
+// Query Operation Schema Contract (ΞCWeaponInfo) from zpp/weapons/WeaponInfo.zpp
+constexpr bool op_CWeaponInfo_IsFlagSet_8(const CWeaponInfo_ZppContract& state) {
+    return state.checkInvariant();
+}
 // Delta Operation Schema Contract (ΔCExplosion) from zpp/weapons/Explosion.zpp
 constexpr bool op_CExplosion_ResetExplosionActiveCounter(const CExplosion_ZppContract& pre, const CExplosion_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_nActiveCounter == 0);
@@ -182,11 +231,22 @@ constexpr bool verify_weapons_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CWeaponInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CWeaponInfo_ZppContract bad{};
+        bad.ms_aReloadSampleTime_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         WeaponTypeModuleState_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         WeaponTypeModuleState_ZppContract bad{};
         bad.module_loaded = false;
         if (bad.checkInvariant()) return false;
+    }
+    {
+        const CWeaponInfo_ZppContract st{};
+        if (!op_CWeaponInfo_IsFlagSet_8(st)) return false;
     }
     {
         CExplosion_ZppContract pre{};

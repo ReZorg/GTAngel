@@ -13,6 +13,11 @@ namespace zpp_peds_spec {
 static constexpr int kZppModuleCount = 17;
 static constexpr int kZppSchemaCount = 673;
 static constexpr int kZppEnumCount   = 31;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/peds/CopPed.zpp
 enum class eCopType : int32_t { COP_STREET_v = 0, COP_FBI_v = 1, COP_SWAT_v = 2, COP_HELI_SWAT_v = 3, COP_ARMY_v = 4, COP_MIAMIVICE_v = 5 };
 // Free Type from zpp/peds/EmergencyPed.zpp
@@ -195,9 +200,9 @@ struct CPedAttractor_ZppContract {
     float m_fAcceptableHeading{0.0f}; // Z++: ℝ
     float m_fMaxPositionDisplacement{0.0f}; // Z++: ℝ
     float m_fMaxHeadingDisplacement{0.0f}; // Z++: ℝ
-    int32_t vecEffectPos{0}; // Z++: CVector
-    int32_t vecQueueDir{0}; // Z++: CVector
-    int32_t vecUseDir{0}; // Z++: CVector
+    ZppVec3 vecEffectPos{}; // Z++: CVector
+    ZppVec3 vecQueueDir{}; // Z++: CVector
+    ZppVec3 vecUseDir{}; // Z++: CVector
     constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
@@ -288,7 +293,7 @@ struct CPedPlacement_ZppContract {
 // State Schema Contract from zpp/peds/PedRoutes.zpp
 struct CRouteNode_ZppContract {
     int32_t m_route{0}; // Z++: ℤ
-    int32_t m_pos{0}; // Z++: CVector
+    ZppVec3 m_pos{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -322,6 +327,70 @@ struct animAndGroup_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/peds/PlayerPed.zpp
+struct CPlayerPed_ZppContract {
+    uint8_t m_pWanted_card{0u}; // Z++: Ref[CWanted]
+    uint8_t m_pArrestingCop_card{0u}; // Z++: Ref[CCopPed]
+    float m_fMoveSpeed{0.0f}; // Z++: ℝ
+    float m_fCurrentStamina{0.0f}; // Z++: ℝ
+    float m_fMaxStamina{0.0f}; // Z++: ℝ
+    float m_fStaminaProgress{0.0f}; // Z++: ℝ
+    int32_t m_nSelectedWepSlot{0}; // Z++: ℤ
+    bool m_bSpeedTimerFlag{false}; // Z++: 𝔹
+    int64_t m_nEvadeAmount{0}; // Z++: ℕ
+    int64_t m_nSpeedTimer{0}; // Z++: ℕ
+    int64_t m_nHitAnimDelayTimer{0}; // Z++: ℕ
+    float m_fAttackButtonCounter{0.0f}; // Z++: ℝ
+    bool m_bHaveTargetSelected{false}; // Z++: 𝔹
+    uint8_t m_pEvadingFrom_card{0u}; // Z++: Ref[CEntity]
+    std::array<int32_t, 4> m_nTargettableObjects{}; // Z++: seq ℤ  -- bounded array [4]
+    size_t m_nTargettableObjects_len{4u}; // Z++ cardinality #m_nTargettableObjects
+    int64_t m_nAdrenalineTime{0}; // Z++: ℕ
+    int64_t m_nDrunkenness{0}; // Z++: ℕ
+    int64_t m_nFadeDrunkenness{0}; // Z++: ℕ
+    int64_t m_nDrunkCountdown{0}; // Z++: ℕ
+    bool m_bAdrenalineActive{false}; // Z++: 𝔹
+    bool m_bHasLockOnTarget{false}; // Z++: 𝔹
+    bool m_bCanBeDamaged{false}; // Z++: 𝔹
+    bool m_bNoPosForMeleeAttack{false}; // Z++: 𝔹
+    bool unk1{false}; // Z++: 𝔹
+    std::array<ZppVec3, 6> m_vecSafePos{}; // Z++: seq CVector  -- bounded array [6]
+    size_t m_vecSafePos_len{6u}; // Z++ cardinality #m_vecSafePos
+    std::array<int32_t, 6> m_pPedAtSafePos{}; // Z++: seq Ref[CPed]  -- bounded array [6]
+    size_t m_pPedAtSafePos_len{6u}; // Z++ cardinality #m_pPedAtSafePos
+    std::array<int32_t, 6> m_pMeleeList{}; // Z++: seq Ref[CPed]  -- bounded array [6]
+    size_t m_pMeleeList_len{6u}; // Z++ cardinality #m_pMeleeList
+    int32_t m_nAttackDirToCheck{0}; // Z++: ℤ
+    float m_fWalkAngle{0.0f}; // Z++: ℝ
+    float m_fFPSMoveHeading{0.0f}; // Z++: ℝ
+    uint8_t m_pMinigunTopAtomic_card{0u}; // Z++: Ref[RpAtomic]
+    float m_fGunSpinSpeed{0.0f}; // Z++: ℝ
+    float m_fGunSpinAngle{0.0f}; // Z++: ℝ
+    int32_t m_nPadDownPressedInMilliseconds{0}; // Z++: ℤ
+    int32_t m_nLastBusFareCollected{0}; // Z++: ℤ
+    ZppVec3 m_cachedCamSource{}; // Z++: CVector
+    ZppVec3 m_cachedCamFront{}; // Z++: CVector
+    ZppVec3 m_cachedCamUp{}; // Z++: CVector
+    int32_t field_1367{0}; // Z++: ℤ
+    int32_t field_1413{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (m_nTargettableObjects_len == 4u && m_nTargettableObjects.size() == 4u)
+            && (m_vecSafePos_len == 6u && m_vecSafePos.size() == 6u)
+            && (m_pPedAtSafePos_len == 6u && m_pPedAtSafePos.size() == 6u)
+            && (m_pMeleeList_len == 6u && m_pMeleeList.size() == 6u)
+            && (m_pWanted_card <= 1u)
+            && (m_pArrestingCop_card <= 1u)
+            && (m_nEvadeAmount >= 0)
+            && (m_nSpeedTimer >= 0)
+            && (m_nHitAnimDelayTimer >= 0)
+            && (m_pEvadingFrom_card <= 1u)
+            && (m_nAdrenalineTime >= 0)
+            && (m_nDrunkenness >= 0)
+            && (m_nFadeDrunkenness >= 0)
+            && (m_nDrunkCountdown >= 0)
+            && (m_pMinigunTopAtomic_card <= 1u);
+    }
+};
 // State Schema Contract from zpp/peds/Population.zpp
 struct RegenerationPoint_ZppContract {
     int32_t srcLevel{0}; // Z++: eLevelName
@@ -332,10 +401,10 @@ struct RegenerationPoint_ZppContract {
     float y2{0.0f}; // Z++: ℝ
     float z1{0.0f}; // Z++: ℝ
     float z2{0.0f}; // Z++: ℝ
-    int32_t destPosA{0}; // Z++: RwV3d
-    int32_t destPosB{0}; // Z++: RwV3d
-    int32_t srcPosA{0}; // Z++: RwV3d
-    int32_t srcPosB{0}; // Z++: RwV3d
+    ZppVec3 destPosA{}; // Z++: RwV3d
+    ZppVec3 destPosB{}; // Z++: RwV3d
+    ZppVec3 srcPosA{}; // Z++: RwV3d
+    ZppVec3 srcPosB{}; // Z++: RwV3d
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -437,6 +506,66 @@ constexpr bool op_CPedShelterAttractor_UpdatePedStateOnDeparture_3(const CPedShe
 constexpr bool op_CPedShelterAttractor_IsAtHeadOfQueue_4(const CPedShelterAttractor_ZppContract& state) {
     return state.checkInvariant();
 }
+// Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedShelterAttractor_ComputeAttractPos_5(const CPedShelterAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedShelterAttractor_ComputeAttractHeading_6(const CPedShelterAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedShelterAttractor_GetDisplacement_8(const CPedShelterAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCVehicleToEffect) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CVehicleToEffect_ChooseEffect(const CVehicleToEffect_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCVehicleToEffect) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CVehicleToEffect_HasThisEffect(const CVehicleToEffect_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_ComputeDeltaHeading(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_ComputeDeltaPos(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_ComputeAttractTime(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_ComputeAttractPos(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedShelterAttractor_GetDisplacement(const CPedShelterAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedShelterAttractor_ComputeAttractPos(const CPedShelterAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_ComputeAttractHeading(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedShelterAttractor_ComputeAttractHeading(const CPedShelterAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_IsRegisteredWithPed(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAttractor_IsInQueue(const CPedAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
 // Delta Operation Schema Contract (ΔCPedType) from zpp/peds/PedType.zpp
 constexpr bool op_CPedType_Initialise(const CPedType_ZppContract& pre, const CPedType_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_flag == 1) && (post.unknown1 == 0.0f) && (post.unknown2 == 0.0f) && (post.unknown4 == 0.0f) && (post.unknown5 == 0.0f) && (post.m_threats == 0);
@@ -449,6 +578,15 @@ constexpr CPedType_ZppContract apply_CPedType_Initialise(const CPedType_ZppContr
     post.unknown4 = 0.0f;
     post.unknown5 = 0.0f;
     post.m_threats = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCPlayerPed) from zpp/peds/PlayerPed.zpp
+constexpr bool op_CPlayerPed_ClearAdrenaline(const CPlayerPed_ZppContract& pre, const CPlayerPed_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nAdrenalineTime == 0);
+}
+constexpr CPlayerPed_ZppContract apply_CPlayerPed_ClearAdrenaline(const CPlayerPed_ZppContract& pre) {
+    CPlayerPed_ZppContract post = pre;
+    post.m_nAdrenalineTime = 0;
     return post;
 }
 constexpr bool verify_peds_zpp_invariants() {
@@ -614,6 +752,13 @@ constexpr bool verify_peds_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CPlayerPed_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlayerPed_ZppContract bad{};
+        bad.m_nTargettableObjects_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         RegenerationPoint_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         RegenerationPoint_ZppContract bad{};
@@ -717,6 +862,66 @@ constexpr bool verify_peds_zpp_invariants() {
         if (!op_CPedShelterAttractor_IsAtHeadOfQueue_4(st)) return false;
     }
     {
+        const CPedShelterAttractor_ZppContract st{};
+        if (!op_CPedShelterAttractor_ComputeAttractPos_5(st)) return false;
+    }
+    {
+        const CPedShelterAttractor_ZppContract st{};
+        if (!op_CPedShelterAttractor_ComputeAttractHeading_6(st)) return false;
+    }
+    {
+        const CPedShelterAttractor_ZppContract st{};
+        if (!op_CPedShelterAttractor_GetDisplacement_8(st)) return false;
+    }
+    {
+        const CVehicleToEffect_ZppContract st{};
+        if (!op_CVehicleToEffect_ChooseEffect(st)) return false;
+    }
+    {
+        const CVehicleToEffect_ZppContract st{};
+        if (!op_CVehicleToEffect_HasThisEffect(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_ComputeDeltaHeading(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_ComputeDeltaPos(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_ComputeAttractTime(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_ComputeAttractPos(st)) return false;
+    }
+    {
+        const CPedShelterAttractor_ZppContract st{};
+        if (!op_CPedShelterAttractor_GetDisplacement(st)) return false;
+    }
+    {
+        const CPedShelterAttractor_ZppContract st{};
+        if (!op_CPedShelterAttractor_ComputeAttractPos(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_ComputeAttractHeading(st)) return false;
+    }
+    {
+        const CPedShelterAttractor_ZppContract st{};
+        if (!op_CPedShelterAttractor_ComputeAttractHeading(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_IsRegisteredWithPed(st)) return false;
+    }
+    {
+        const CPedAttractor_ZppContract st{};
+        if (!op_CPedAttractor_IsInQueue(st)) return false;
+    }
+    {
         CPedType_ZppContract pre{};
         pre.m_flag = 0;
         pre.unknown1 = 1.0f;
@@ -755,6 +960,17 @@ constexpr bool verify_peds_zpp_invariants() {
             CPedType_ZppContract badPost = post;
             badPost.m_threats = 1;
             if (op_CPedType_Initialise(pre, badPost)) return false;
+        }
+    }
+    {
+        CPlayerPed_ZppContract pre{};
+        pre.m_nAdrenalineTime = 1;
+        const auto post = apply_CPlayerPed_ClearAdrenaline(pre);
+        if (!op_CPlayerPed_ClearAdrenaline(pre, post)) return false;
+        {
+            CPlayerPed_ZppContract badPost = post;
+            badPost.m_nAdrenalineTime = 1;
+            if (op_CPlayerPed_ClearAdrenaline(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

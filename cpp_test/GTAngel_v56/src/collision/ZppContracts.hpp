@@ -13,14 +13,19 @@ namespace zpp_collision_spec {
 static constexpr int kZppModuleCount = 11;
 static constexpr int kZppSchemaCount = 250;
 static constexpr int kZppEnumCount   = 2;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/collision/ColTriangle.zpp
 enum class Direction : int32_t { DIR_X_POS_v = 0, DIR_X_NEG_v = 1, DIR_Y_POS_v = 2, DIR_Y_NEG_v = 3, DIR_Z_POS_v = 4, DIR_Z_NEG_v = 5 };
 // Free Type from zpp/collision/Collision.zpp
 enum class Collision_Enum_1 : int32_t { MAXNUMSPHERES_v = 128, MAXNUMBOXES_v = 32, MAXNUMLINES_v = 16, MAXNUMTRIS_v = 600 };
 // State Schema Contract from zpp/collision/ColBox.zpp
 struct CBox_ZppContract {
-    int32_t min_field{0}; // Z++: CVector
-    int32_t max_field{0}; // Z++: CVector
+    ZppVec3 min_field{}; // Z++: CVector
+    ZppVec3 max_field{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -28,8 +33,8 @@ struct CBox_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColBox.zpp
 struct CColBox_ZppContract {
-    int32_t min_field{0}; // Z++: CVector
-    int32_t max_field{0}; // Z++: CVector
+    ZppVec3 min_field{}; // Z++: CVector
+    ZppVec3 max_field{}; // Z++: CVector
     int64_t surface{0}; // Z++: ℕ
     int64_t piece{0}; // Z++: ℕ
     constexpr bool checkInvariant() const {
@@ -48,8 +53,8 @@ struct CColTriBBox_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColLine.zpp
 struct CColLine_ZppContract {
-    int32_t p0{0}; // Z++: CVector
-    int32_t p1{0}; // Z++: CVector
+    ZppVec3 p0{}; // Z++: CVector
+    ZppVec3 p1{}; // Z++: CVector
     int32_t pad0{0}; // Z++: ℤ
     int32_t pad1{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
@@ -88,9 +93,9 @@ struct CColModel_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColPoint.zpp
 struct CColPoint_ZppContract {
-    int32_t point{0}; // Z++: CVector
+    ZppVec3 point{}; // Z++: CVector
     int32_t pad1{0}; // Z++: ℤ
-    int32_t normal{0}; // Z++: CVector
+    ZppVec3 normal{}; // Z++: CVector
     int32_t pad2{0}; // Z++: ℤ
     int64_t surfaceA{0}; // Z++: ℕ
     int64_t pieceA{0}; // Z++: ℕ
@@ -108,7 +113,7 @@ struct CColPoint_ZppContract {
 struct CColSphere_ZppContract {
     int64_t surface{0}; // Z++: ℕ
     int64_t piece{0}; // Z++: ℕ
-    int32_t center{0}; // Z++: CVector
+    ZppVec3 center{}; // Z++: CVector
     float radius{0.0f}; // Z++: ℝ
     constexpr bool checkInvariant() const {
         return (surface >= 0)
@@ -117,7 +122,7 @@ struct CColSphere_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColSphere.zpp
 struct CSphere_ZppContract {
-    int32_t center{0}; // Z++: CVector
+    ZppVec3 center{}; // Z++: CVector
     float radius{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
@@ -269,22 +274,22 @@ constexpr bool op_CompressedVector_Get_4(const CompressedVector_ZppContract& sta
     return state.checkInvariant();
 }
 // Delta Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
-constexpr bool op_CColBox_Set(const CColBox_ZppContract& pre, const CColBox_ZppContract& post, int32_t min_field_in = 25, int32_t max_field_in = 25, int64_t surface_in = 25, int64_t piece_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.min_field == min_field_in) && (post.max_field == max_field_in) && (post.surface == surface_in) && (post.piece == piece_in);
+constexpr bool op_CColBox_Set(const CColBox_ZppContract& pre, const CColBox_ZppContract& post, ZppVec3 min_in = ZppVec3{1.0f, 2.0f, 3.0f}, ZppVec3 max_in = ZppVec3{1.0f, 2.0f, 3.0f}, int64_t surf_in = 25, int64_t piece_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.min_field == min_in) && (post.max_field == max_in) && (post.surface == (int64_t)surf_in) && (post.piece == (int64_t)piece_in);
 }
-constexpr CColBox_ZppContract apply_CColBox_Set(const CColBox_ZppContract& pre, int32_t min_field_in = 25, int32_t max_field_in = 25, int64_t surface_in = 25, int64_t piece_in = 25) {
+constexpr CColBox_ZppContract apply_CColBox_Set(const CColBox_ZppContract& pre, ZppVec3 min_in = ZppVec3{1.0f, 2.0f, 3.0f}, ZppVec3 max_in = ZppVec3{1.0f, 2.0f, 3.0f}, int64_t surf_in = 25, int64_t piece_in = 25) {
     CColBox_ZppContract post = pre;
-    post.min_field = min_field_in;
-    post.max_field = max_field_in;
-    post.surface = surface_in;
-    post.piece = piece_in;
+    post.min_field = min_in;
+    post.max_field = max_in;
+    post.surface = (int64_t)surf_in;
+    post.piece = (int64_t)piece_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCColLine) from zpp/collision/ColLine.zpp
-constexpr bool op_CColLine_Set(const CColLine_ZppContract& pre, const CColLine_ZppContract& post, int32_t p0_in = 25, int32_t p1_in = 25) {
+constexpr bool op_CColLine_Set(const CColLine_ZppContract& pre, const CColLine_ZppContract& post, ZppVec3 p0_in = ZppVec3{1.0f, 2.0f, 3.0f}, ZppVec3 p1_in = ZppVec3{1.0f, 2.0f, 3.0f}) {
     return pre.checkInvariant() && post.checkInvariant() && (post.p0 == p0_in) && (post.p1 == p1_in);
 }
-constexpr CColLine_ZppContract apply_CColLine_Set(const CColLine_ZppContract& pre, int32_t p0_in = 25, int32_t p1_in = 25) {
+constexpr CColLine_ZppContract apply_CColLine_Set(const CColLine_ZppContract& pre, ZppVec3 p0_in = ZppVec3{1.0f, 2.0f, 3.0f}, ZppVec3 p1_in = ZppVec3{1.0f, 2.0f, 3.0f}) {
     CColLine_ZppContract post = pre;
     post.p0 = p0_in;
     post.p1 = p1_in;
@@ -327,6 +332,18 @@ constexpr CColModel_ZppContract apply_CColModel_RemoveTrianglePlanes(const CColM
     post.trianglePlanes_card = 0u;
     return post;
 }
+// Delta Operation Schema Contract (ΔCColSphere) from zpp/collision/ColSphere.zpp
+constexpr bool op_CColSphere_Set(const CColSphere_ZppContract& pre, const CColSphere_ZppContract& post, float radius_in = 2.5f, ZppVec3 center_in = ZppVec3{1.0f, 2.0f, 3.0f}, int64_t surf_in = 25, int64_t piece_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.radius == radius_in) && (post.center == center_in) && (post.surface == (int64_t)surf_in) && (post.piece == (int64_t)piece_in);
+}
+constexpr CColSphere_ZppContract apply_CColSphere_Set(const CColSphere_ZppContract& pre, float radius_in = 2.5f, ZppVec3 center_in = ZppVec3{1.0f, 2.0f, 3.0f}, int64_t surf_in = 25, int64_t piece_in = 25) {
+    CColSphere_ZppContract post = pre;
+    post.radius = radius_in;
+    post.center = center_in;
+    post.surface = (int64_t)surf_in;
+    post.piece = (int64_t)piece_in;
+    return post;
+}
 // Delta Operation Schema Contract (ΔCColStore) from zpp/collision/ColStore.zpp
 constexpr bool op_CColStore_Shutdown(const CColStore_ZppContract& pre, const CColStore_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.ms_pColPool_card == 0u);
@@ -337,15 +354,15 @@ constexpr CColStore_ZppContract apply_CColStore_Shutdown(const CColStore_ZppCont
     return post;
 }
 // Delta Operation Schema Contract (ΔCColTriangle) from zpp/collision/ColTriangle.zpp
-constexpr bool op_CColTriangle_Set(const CColTriangle_ZppContract& pre, const CColTriangle_ZppContract& post, int64_t a_in = 25, int64_t b_in = 25, int64_t c_in = 25, int64_t surface_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.a == a_in) && (post.b == b_in) && (post.c == c_in) && (post.surface == surface_in);
+constexpr bool op_CColTriangle_Set(const CColTriangle_ZppContract& pre, const CColTriangle_ZppContract& post, int64_t a_in = 25, int64_t b_in = 25, int64_t c_in = 25, int64_t surf_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.a == (int64_t)a_in) && (post.b == (int64_t)b_in) && (post.c == (int64_t)c_in) && (post.surface == (int64_t)surf_in);
 }
-constexpr CColTriangle_ZppContract apply_CColTriangle_Set(const CColTriangle_ZppContract& pre, int64_t a_in = 25, int64_t b_in = 25, int64_t c_in = 25, int64_t surface_in = 25) {
+constexpr CColTriangle_ZppContract apply_CColTriangle_Set(const CColTriangle_ZppContract& pre, int64_t a_in = 25, int64_t b_in = 25, int64_t c_in = 25, int64_t surf_in = 25) {
     CColTriangle_ZppContract post = pre;
-    post.a = a_in;
-    post.b = b_in;
-    post.c = c_in;
-    post.surface = surface_in;
+    post.a = (int64_t)a_in;
+    post.b = (int64_t)b_in;
+    post.c = (int64_t)c_in;
+    post.surface = (int64_t)surf_in;
     return post;
 }
 constexpr bool verify_collision_zpp_invariants() {
@@ -522,48 +539,48 @@ constexpr bool verify_collision_zpp_invariants() {
     }
     {
         CColBox_ZppContract pre{};
-        const int32_t min_field_in = 25;
-        const int32_t max_field_in = 25;
-        const int64_t surface_in = 25;
+        const ZppVec3 min_in = ZppVec3{1.0f, 2.0f, 3.0f};
+        const ZppVec3 max_in = ZppVec3{1.0f, 2.0f, 3.0f};
+        const int64_t surf_in = 25;
         const int64_t piece_in = 25;
         pre.surface = 0;
-        const auto post = apply_CColBox_Set(pre, min_field_in, max_field_in, surface_in, piece_in);
-        if (!op_CColBox_Set(pre, post, min_field_in, max_field_in, surface_in, piece_in)) return false;
+        const auto post = apply_CColBox_Set(pre, min_in, max_in, surf_in, piece_in);
+        if (!op_CColBox_Set(pre, post, min_in, max_in, surf_in, piece_in)) return false;
         {
             CColBox_ZppContract badPost = post;
-            badPost.min_field = min_field_in + 1;
-            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
+            badPost.min_field = ZppVec3{min_in.x + 1.0f, min_in.y, min_in.z};
+            if (op_CColBox_Set(pre, badPost, min_in, max_in, surf_in, piece_in)) return false;
         }
         {
             CColBox_ZppContract badPost = post;
-            badPost.max_field = max_field_in + 1;
-            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
+            badPost.max_field = ZppVec3{max_in.x + 1.0f, max_in.y, max_in.z};
+            if (op_CColBox_Set(pre, badPost, min_in, max_in, surf_in, piece_in)) return false;
         }
         {
             CColBox_ZppContract badPost = post;
-            badPost.surface = surface_in + 1;
-            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
+            badPost.surface = (int64_t)(surf_in + 1);
+            if (op_CColBox_Set(pre, badPost, min_in, max_in, surf_in, piece_in)) return false;
         }
         {
             CColBox_ZppContract badPost = post;
-            badPost.piece = piece_in + 1;
-            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
+            badPost.piece = (int64_t)(piece_in + 1);
+            if (op_CColBox_Set(pre, badPost, min_in, max_in, surf_in, piece_in)) return false;
         }
     }
     {
         CColLine_ZppContract pre{};
-        const int32_t p0_in = 25;
-        const int32_t p1_in = 25;
+        const ZppVec3 p0_in = ZppVec3{1.0f, 2.0f, 3.0f};
+        const ZppVec3 p1_in = ZppVec3{1.0f, 2.0f, 3.0f};
         const auto post = apply_CColLine_Set(pre, p0_in, p1_in);
         if (!op_CColLine_Set(pre, post, p0_in, p1_in)) return false;
         {
             CColLine_ZppContract badPost = post;
-            badPost.p0 = p0_in + 1;
+            badPost.p0 = ZppVec3{p0_in.x + 1.0f, p0_in.y, p0_in.z};
             if (op_CColLine_Set(pre, badPost, p0_in, p1_in)) return false;
         }
         {
             CColLine_ZppContract badPost = post;
-            badPost.p1 = p1_in + 1;
+            badPost.p1 = ZppVec3{p1_in.x + 1.0f, p1_in.y, p1_in.z};
             if (op_CColLine_Set(pre, badPost, p0_in, p1_in)) return false;
         }
     }
@@ -661,6 +678,36 @@ constexpr bool verify_collision_zpp_invariants() {
         }
     }
     {
+        CColSphere_ZppContract pre{};
+        const float radius_in = 2.5f;
+        const ZppVec3 center_in = ZppVec3{1.0f, 2.0f, 3.0f};
+        const int64_t surf_in = 25;
+        const int64_t piece_in = 25;
+        pre.surface = 0;
+        const auto post = apply_CColSphere_Set(pre, radius_in, center_in, surf_in, piece_in);
+        if (!op_CColSphere_Set(pre, post, radius_in, center_in, surf_in, piece_in)) return false;
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.radius = radius_in + 1.0f;
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surf_in, piece_in)) return false;
+        }
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.center = ZppVec3{center_in.x + 1.0f, center_in.y, center_in.z};
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surf_in, piece_in)) return false;
+        }
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.surface = (int64_t)(surf_in + 1);
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surf_in, piece_in)) return false;
+        }
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.piece = (int64_t)(piece_in + 1);
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surf_in, piece_in)) return false;
+        }
+    }
+    {
         CColStore_ZppContract pre{};
         pre.ms_pColPool_card = 1u;
         const auto post = apply_CColStore_Shutdown(pre);
@@ -676,33 +723,34 @@ constexpr bool verify_collision_zpp_invariants() {
         const int64_t a_in = 25;
         const int64_t b_in = 25;
         const int64_t c_in = 25;
-        const int64_t surface_in = 25;
+        const int64_t surf_in = 25;
         pre.surface = 0;
-        const auto post = apply_CColTriangle_Set(pre, a_in, b_in, c_in, surface_in);
-        if (!op_CColTriangle_Set(pre, post, a_in, b_in, c_in, surface_in)) return false;
+        const auto post = apply_CColTriangle_Set(pre, a_in, b_in, c_in, surf_in);
+        if (!op_CColTriangle_Set(pre, post, a_in, b_in, c_in, surf_in)) return false;
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.a = a_in + 1;
-            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
+            badPost.a = (int64_t)(a_in + 1);
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surf_in)) return false;
         }
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.b = b_in + 1;
-            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
+            badPost.b = (int64_t)(b_in + 1);
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surf_in)) return false;
         }
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.c = c_in + 1;
-            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
+            badPost.c = (int64_t)(c_in + 1);
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surf_in)) return false;
         }
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.surface = surface_in + 1;
-            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
+            badPost.surface = (int64_t)(surf_in + 1);
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surf_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_collision_zpp_invariants(), "Z++ formal contract invariant failed for collision");
+static_assert(op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(CColSphere_ZppContract{}, 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5), 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5) && !op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(CColSphere_ZppContract{}, 2.5f, ZppVec3{4.0f, 5.0f, 6.0f}, 4, 5), 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5), "CColSphere_Set must verify 3D CVector center");
 } // namespace zpp_collision_spec
 #endif // GTANGEL_ZPP_COLLISION_SPEC_GUARD

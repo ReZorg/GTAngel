@@ -13,6 +13,11 @@ namespace zpp_rw_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 395;
 static constexpr int kZppEnumCount   = 4;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/rw/MemoryHeap.zpp
 enum class MemoryHeap_Enum_1 : int32_t { MEMID_FREE_v = 0, MEMID_GAME_v = 1, MEMID_WORLD_v = 2, MEMID_ANIMATION_v = 3, MEMID_POOLS_v = 4, MEMID_DEF_MODELS_v = 5, MEMID_STREAM_v = 6, MEMID_STREAM_MODELS_v = 7, MEMID_STREAM_LODS_v = 8, MEMID_STREAM_TEXUTRES_v = 9, MEMID_STREAM_COLLISION_v = 10, MEMID_STREAM_ANIMATION_v = 11, MEMID_TEXTURES_v = 12, MEMID_COLLISION_v = 13, MEMID_PRE_ALLOC_v = 14, MEMID_GAME_PROCESS_v = 15, MEMID_SCRIPT_v = 16, MEMID_CARS_v = 17, MEMID_RENDER_v = 18, MEMID_PED_ATTR_v = 19, NUM_MEMIDS_v = 20, NUM_FIXED_MEMBLOCKS_v = 6 };
 // Free Type from zpp/rw/MemoryHeap.zpp
@@ -304,22 +309,31 @@ struct FrameExt_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/rw/VisibilityPlugins.zpp
+struct ClumpExt_ZppContract {
+    int32_t visibilityCB{0}; // Z++: ClumpVisibilityCB
+    int32_t alpha{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // Delta Operation Schema Contract (ΔCMemoryHeap) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post, int64_t m_currentMemID_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == m_currentMemID_in);
+constexpr bool op_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post, int64_t id_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == (int64_t)id_in);
 }
-constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, int64_t m_currentMemID_in = 25) {
+constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, int64_t id_in = 25) {
     CMemoryHeap_ZppContract post = pre;
-    post.m_currentMemID = m_currentMemID_in;
+    post.m_currentMemID = (int64_t)id_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCommonSize) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post, int64_t m_size_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_size == m_size_in) && (post.m_failed == 0) && (post.m_remaining == 0);
+constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post, int64_t size_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_size == (int64_t)size_in) && (post.m_failed == 0) && (post.m_remaining == 0);
 }
-constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre, int64_t m_size_in = 25) {
+constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre, int64_t size_in = 25) {
     CommonSize_ZppContract post = pre;
-    post.m_size = m_size_in;
+    post.m_size = (int64_t)size_in;
     post.m_failed = 0;
     post.m_remaining = 0;
     return post;
@@ -355,21 +369,21 @@ constexpr CTxdStore_ZppContract apply_CTxdStore_PopCurrentTxd(const CTxdStore_Zp
     return post;
 }
 // Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
-constexpr bool op_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post, int64_t flags_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.flags == flags_in);
+constexpr bool op_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post, int64_t id_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.flags == (int64_t)id_in);
 }
-constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, int64_t flags_in = 25) {
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, int64_t id_in = 25) {
     CVisibilityPlugins_ZppContract post = pre;
-    post.flags = flags_in;
+    post.flags = (int64_t)id_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
 constexpr bool op_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post, int32_t alpha_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == alpha_in);
+    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == (int32_t)alpha_in);
 }
 constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre, int32_t alpha_in = 25) {
     CVisibilityPlugins_ZppContract post = pre;
-    post.alpha = alpha_in;
+    post.alpha = (int32_t)alpha_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
@@ -551,39 +565,46 @@ constexpr bool verify_rw_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        ClumpExt_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ClumpExt_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CMemoryHeap_ZppContract pre{};
-        const int64_t m_currentMemID_in = 25;
+        const int64_t id_in = 25;
         pre.m_currentMemID = 0;
-        const auto post = apply_CMemoryHeap_PushMemId(pre, m_currentMemID_in);
-        if (!op_CMemoryHeap_PushMemId(pre, post, m_currentMemID_in)) return false;
+        const auto post = apply_CMemoryHeap_PushMemId(pre, id_in);
+        if (!op_CMemoryHeap_PushMemId(pre, post, id_in)) return false;
         {
             CMemoryHeap_ZppContract badPost = post;
-            badPost.m_currentMemID = m_currentMemID_in + 1;
-            if (op_CMemoryHeap_PushMemId(pre, badPost, m_currentMemID_in)) return false;
+            badPost.m_currentMemID = (int64_t)(id_in + 1);
+            if (op_CMemoryHeap_PushMemId(pre, badPost, id_in)) return false;
         }
     }
     {
         CommonSize_ZppContract pre{};
-        const int64_t m_size_in = 25;
+        const int64_t size_in = 25;
         pre.m_size = 0;
         pre.m_failed = 1;
         pre.m_remaining = 1;
-        const auto post = apply_CommonSize_Init(pre, m_size_in);
-        if (!op_CommonSize_Init(pre, post, m_size_in)) return false;
+        const auto post = apply_CommonSize_Init(pre, size_in);
+        if (!op_CommonSize_Init(pre, post, size_in)) return false;
         {
             CommonSize_ZppContract badPost = post;
-            badPost.m_size = m_size_in + 1;
-            if (op_CommonSize_Init(pre, badPost, m_size_in)) return false;
+            badPost.m_size = (int64_t)(size_in + 1);
+            if (op_CommonSize_Init(pre, badPost, size_in)) return false;
         }
         {
             CommonSize_ZppContract badPost = post;
             badPost.m_failed = 1;
-            if (op_CommonSize_Init(pre, badPost, m_size_in)) return false;
+            if (op_CommonSize_Init(pre, badPost, size_in)) return false;
         }
         {
             CommonSize_ZppContract badPost = post;
             badPost.m_remaining = 1;
-            if (op_CommonSize_Init(pre, badPost, m_size_in)) return false;
+            if (op_CommonSize_Init(pre, badPost, size_in)) return false;
         }
     }
     {
@@ -639,14 +660,14 @@ constexpr bool verify_rw_zpp_invariants() {
     }
     {
         CVisibilityPlugins_ZppContract pre{};
-        const int64_t flags_in = 25;
+        const int64_t id_in = 25;
         pre.flags = 0;
-        const auto post = apply_CVisibilityPlugins_SetAtomicId(pre, flags_in);
-        if (!op_CVisibilityPlugins_SetAtomicId(pre, post, flags_in)) return false;
+        const auto post = apply_CVisibilityPlugins_SetAtomicId(pre, id_in);
+        if (!op_CVisibilityPlugins_SetAtomicId(pre, post, id_in)) return false;
         {
             CVisibilityPlugins_ZppContract badPost = post;
-            badPost.flags = flags_in + 1;
-            if (op_CVisibilityPlugins_SetAtomicId(pre, badPost, flags_in)) return false;
+            badPost.flags = (int64_t)(id_in + 1);
+            if (op_CVisibilityPlugins_SetAtomicId(pre, badPost, id_in)) return false;
         }
     }
     {
@@ -656,7 +677,7 @@ constexpr bool verify_rw_zpp_invariants() {
         if (!op_CVisibilityPlugins_SetClumpAlpha(pre, post, alpha_in)) return false;
         {
             CVisibilityPlugins_ZppContract badPost = post;
-            badPost.alpha = alpha_in + 1;
+            badPost.alpha = (int32_t)(alpha_in + 1);
             if (op_CVisibilityPlugins_SetClumpAlpha(pre, badPost, alpha_in)) return false;
         }
     }

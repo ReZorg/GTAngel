@@ -13,6 +13,11 @@ namespace zpp_animation_spec {
 static constexpr int kZppModuleCount = 14;
 static constexpr int kZppSchemaCount = 398;
 static constexpr int kZppEnumCount   = 14;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/animation/AnimBlendAssociation.zpp
 enum class AnimBlendAssociation_Enum_1 : int32_t { ASSOC_RUNNING_v = 1, ASSOC_REPEAT_v = 2, ASSOC_DELETEFADEDOUT_v = 4, ASSOC_FADEOUTWHENDONE_v = 8, ASSOC_PARTIAL_v = 16, ASSOC_MOVEMENT_v = 32, ASSOC_HAS_TRANSLATION_v = 64, ASSOC_HAS_X_TRANSLATION_v = 128, ASSOC_WALK_v = 256, ASSOC_IDLE_v = 512, ASSOC_NOWALK_v = 1024, ASSOC_BLOCK_v = 2048, ASSOC_FRONTAL_v = 4096, ASSOC_DRIVING_v = 8192 };
 // Free Type from zpp/animation/AnimBlendAssociation.zpp
@@ -61,7 +66,7 @@ struct CAnimBlendAssociation_ZppContract {
 // State Schema Contract from zpp/animation/AnimBlendClumpData.zpp
 struct AnimBlendFrameData_ZppContract {
     int64_t flag{0}; // Z++: ℕ
-    int32_t resetPos{0}; // Z++: RwV3d
+    ZppVec3 resetPos{}; // Z++: RwV3d
     uint8_t hanimFrame_card{0u}; // Z++: ℙ ℤ
     int32_t nodeID{0}; // Z++: ℤ
     constexpr bool checkInvariant() const {
@@ -114,7 +119,7 @@ struct KeyFrame_ZppContract {
 };
 // State Schema Contract from zpp/animation/AnimBlendSequence.zpp
 struct KeyFrameTrans_ZppContract {
-    int32_t translation{0}; // Z++: CVector
+    ZppVec3 translation{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -226,6 +231,77 @@ struct sAttachInfo_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/animation/CutsceneMgr.zpp
+struct CCutsceneMgr_ZppContract {
+    bool ms_running{false}; // Z++: 𝔹
+    std::array<int32_t, 1305> ms_pCutsceneObjects{}; // Z++: seq Ref[CCutsceneObject]  -- bounded array [NUMCUTSCENEOBJECTS]
+    size_t ms_pCutsceneObjects_len{1305u}; // Z++ cardinality #ms_pCutsceneObjects
+    int32_t ms_numCutsceneObjs{0}; // Z++: ℤ
+    bool ms_loaded{false}; // Z++: 𝔹
+    bool ms_animLoaded{false}; // Z++: 𝔹
+    bool ms_useLodMultiplier{false}; // Z++: 𝔹
+    int32_t ms_cutsceneName{0}; // Z++: seq CHAR
+    int32_t ms_cutsceneAssociations{0}; // Z++: CAnimBlendAssocGroup
+    ZppVec3 ms_cutsceneOffset{}; // Z++: CVector
+    float ms_cutsceneTimer{0.0f}; // Z++: ℝ
+    bool ms_wasCutsceneSkipped{false}; // Z++: 𝔹
+    bool ms_cutsceneProcessing{false}; // Z++: 𝔹
+    bool ms_useCutsceneShadows{false}; // Z++: 𝔹
+    bool ms_hasFileInfo{false}; // Z++: 𝔹
+    int32_t ms_numLoadObjectNames{0}; // Z++: ℤ
+    int32_t ms_numAppendObjectNames{0}; // Z++: ℤ
+    uint8_t ms_pCutsceneDir_card{0u}; // Z++: Ref[CDirectory]
+    int64_t ms_cutsceneLoadStatus{0}; // Z++: ℕ
+    bool mCutsceneSkipFading{false}; // Z++: 𝔹
+    int32_t mCutsceneSkipFadeTime{0}; // Z++: ℤ
+    float m_fPrevCarDensity{0.0f}; // Z++: ℝ
+    float m_fPrevPedDensity{0.0f}; // Z++: ℝ
+    bool m_PrevExtraColourOn{false}; // Z++: 𝔹
+    int64_t m_PrevExtraColour{0}; // Z++: ℕ
+    int64_t ms_iNumParticleEffects{0}; // Z++: ℕ
+    std::array<int32_t, 8> ms_pParticleEffects{}; // Z++: seq sParticleEffect  -- bounded array [NUM_CUTS_PARTICLE_EFFECTS]
+    size_t ms_pParticleEffects_len{8u}; // Z++ cardinality #ms_pParticleEffects
+    std::array<int32_t, 1305> ms_crToHideItems{}; // Z++: seq sToHideItem  -- bounded array [NUMCUTSCENEOBJECTS]
+    size_t ms_crToHideItems_len{1305u}; // Z++ cardinality #ms_crToHideItems
+    int64_t ms_iNumHiddenEntities{0}; // Z++: ℕ
+    std::array<int32_t, 1305> ms_pHiddenEntities{}; // Z++: seq Ref[CEntity]  -- bounded array [NUMCUTSCENEOBJECTS]
+    size_t ms_pHiddenEntities_len{1305u}; // Z++ cardinality #ms_pHiddenEntities
+    int32_t ms_numAttachObjectToBones{0}; // Z++: ℤ
+    std::array<bool, 1305> ms_bRepeatObject{}; // Z++: seq 𝔹  -- bounded array [NUMCUTSCENEOBJECTS]
+    size_t ms_bRepeatObject_len{1305u}; // Z++ cardinality #ms_bRepeatObject
+    std::array<int32_t, 1305> ms_iAttachObjectToBone{}; // Z++: seq sAttachInfo  -- bounded array [NUMCUTSCENEOBJECTS]
+    size_t ms_iAttachObjectToBone_len{1305u}; // Z++ cardinality #ms_iAttachObjectToBone
+    int64_t ms_numUncompressedCutsceneAnims{0}; // Z++: ℕ
+    std::array<uint32_t, 64> ms_iTextDuration{}; // Z++: seq ℕ  -- bounded array [NUM_CUTS_MAX_TEXTS]
+    size_t ms_iTextDuration_len{64u}; // Z++ cardinality #ms_iTextDuration
+    std::array<uint32_t, 64> ms_iTextStartTime{}; // Z++: seq ℕ  -- bounded array [NUM_CUTS_MAX_TEXTS]
+    size_t ms_iTextStartTime_len{64u}; // Z++ cardinality #ms_iTextStartTime
+    int64_t ms_currTextOutput{0}; // Z++: ℕ
+    int64_t ms_numTextOutput{0}; // Z++: ℕ
+    std::array<uint32_t, 1305> ms_iModelIndex{}; // Z++: seq ℕ  -- bounded array [NUMCUTSCENEOBJECTS]
+    size_t ms_iModelIndex_len{1305u}; // Z++ cardinality #ms_iModelIndex
+    int64_t ms_cutscenePlayStatus{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (ms_pCutsceneObjects_len == 1305u && ms_pCutsceneObjects.size() == 1305u)
+            && (ms_pParticleEffects_len == 8u && ms_pParticleEffects.size() == 8u)
+            && (ms_crToHideItems_len == 1305u && ms_crToHideItems.size() == 1305u)
+            && (ms_pHiddenEntities_len == 1305u && ms_pHiddenEntities.size() == 1305u)
+            && (ms_bRepeatObject_len == 1305u && ms_bRepeatObject.size() == 1305u)
+            && (ms_iAttachObjectToBone_len == 1305u && ms_iAttachObjectToBone.size() == 1305u)
+            && (ms_iTextDuration_len == 64u && ms_iTextDuration.size() == 64u)
+            && (ms_iTextStartTime_len == 64u && ms_iTextStartTime.size() == 64u)
+            && (ms_iModelIndex_len == 1305u && ms_iModelIndex.size() == 1305u)
+            && (ms_pCutsceneDir_card <= 1u)
+            && (ms_cutsceneLoadStatus >= 0)
+            && (m_PrevExtraColour >= 0)
+            && (ms_iNumParticleEffects >= 0)
+            && (ms_iNumHiddenEntities >= 0)
+            && (ms_numUncompressedCutsceneAnims >= 0)
+            && (ms_currTextOutput >= 0)
+            && (ms_numTextOutput >= 0)
+            && (ms_cutscenePlayStatus >= 0);
+    }
+};
 // State Schema Contract from zpp/animation/FrameUpdate.zpp
 struct FrameUpdateModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -268,13 +344,56 @@ constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_CAnimBle
     post.timeStep = 0.0f;
     return post;
 }
-// Delta Operation Schema Contract (ΔCAnimBlendClumpData) from zpp/animation/AnimBlendClumpData.zpp
-constexpr bool op_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, const CAnimBlendClumpData_ZppContract& post, int32_t numFrames_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.numFrames == numFrames_in);
+// Delta Operation Schema Contract (ΔCAnimBlendAssociation) from zpp/animation/AnimBlendAssociation.zpp
+constexpr bool op_CAnimBlendAssociation_SetBlend(const CAnimBlendAssociation_ZppContract& pre, const CAnimBlendAssociation_ZppContract& post, float amount_in = 2.5f, float delta_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.blendAmount == amount_in) && (post.blendDelta == delta_in);
 }
-constexpr CAnimBlendClumpData_ZppContract apply_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, int32_t numFrames_in = 25) {
+constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_SetBlend(const CAnimBlendAssociation_ZppContract& pre, float amount_in = 2.5f, float delta_in = 2.5f) {
+    CAnimBlendAssociation_ZppContract post = pre;
+    post.blendAmount = amount_in;
+    post.blendDelta = delta_in;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCAnimBlendClumpData) from zpp/animation/AnimBlendClumpData.zpp
+constexpr bool op_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, const CAnimBlendClumpData_ZppContract& post, int32_t n_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.numFrames == (int32_t)n_in);
+}
+constexpr CAnimBlendClumpData_ZppContract apply_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, int32_t n_in = 25) {
     CAnimBlendClumpData_ZppContract post = pre;
-    post.numFrames = numFrames_in;
+    post.numFrames = (int32_t)n_in;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCutsceneMgr) from zpp/animation/CutsceneMgr.zpp
+constexpr bool op_CCutsceneMgr_Initialise(const CCutsceneMgr_ZppContract& pre, const CCutsceneMgr_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_numCutsceneObjs == 0) && (post.ms_loaded == false) && (post.ms_wasCutsceneSkipped == false) && (post.ms_running == false) && (post.ms_useLodMultiplier == false) && (post.ms_animLoaded == false);
+}
+constexpr CCutsceneMgr_ZppContract apply_CCutsceneMgr_Initialise(const CCutsceneMgr_ZppContract& pre) {
+    CCutsceneMgr_ZppContract post = pre;
+    post.ms_numCutsceneObjs = 0;
+    post.ms_loaded = false;
+    post.ms_wasCutsceneSkipped = false;
+    post.ms_running = false;
+    post.ms_useLodMultiplier = false;
+    post.ms_animLoaded = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCutsceneMgr) from zpp/animation/CutsceneMgr.zpp
+constexpr bool op_CCutsceneMgr_SetupCutsceneToStart(const CCutsceneMgr_ZppContract& pre, const CCutsceneMgr_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_running == true) && (post.ms_cutsceneTimer == 0.0f);
+}
+constexpr CCutsceneMgr_ZppContract apply_CCutsceneMgr_SetupCutsceneToStart(const CCutsceneMgr_ZppContract& pre) {
+    CCutsceneMgr_ZppContract post = pre;
+    post.ms_running = true;
+    post.ms_cutsceneTimer = 0.0f;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCCutsceneMgr) from zpp/animation/CutsceneMgr_overlay.zpp
+constexpr bool op_CCutsceneMgr_StartCutscene(const CCutsceneMgr_ZppContract& pre, const CCutsceneMgr_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_cutscenePlayStatus == 1);
+}
+constexpr CCutsceneMgr_ZppContract apply_CCutsceneMgr_StartCutscene(const CCutsceneMgr_ZppContract& pre) {
+    CCutsceneMgr_ZppContract post = pre;
+    post.ms_cutscenePlayStatus = 1;
     return post;
 }
 constexpr bool verify_animation_zpp_invariants() {
@@ -405,6 +524,13 @@ constexpr bool verify_animation_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CCutsceneMgr_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCutsceneMgr_ZppContract bad{};
+        bad.ms_pCutsceneObjects_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         FrameUpdateModuleState_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         FrameUpdateModuleState_ZppContract bad{};
@@ -477,15 +603,103 @@ constexpr bool verify_animation_zpp_invariants() {
         }
     }
     {
+        CAnimBlendAssociation_ZppContract pre{};
+        const float amount_in = 2.5f;
+        const float delta_in = 2.5f;
+        pre.blendAmount = 0.0f;
+        pre.blendDelta = 0.0f;
+        const auto post = apply_CAnimBlendAssociation_SetBlend(pre, amount_in, delta_in);
+        if (!op_CAnimBlendAssociation_SetBlend(pre, post, amount_in, delta_in)) return false;
+        {
+            CAnimBlendAssociation_ZppContract badPost = post;
+            badPost.blendAmount = amount_in + 1.0f;
+            if (op_CAnimBlendAssociation_SetBlend(pre, badPost, amount_in, delta_in)) return false;
+        }
+        {
+            CAnimBlendAssociation_ZppContract badPost = post;
+            badPost.blendDelta = delta_in + 1.0f;
+            if (op_CAnimBlendAssociation_SetBlend(pre, badPost, amount_in, delta_in)) return false;
+        }
+    }
+    {
         CAnimBlendClumpData_ZppContract pre{};
-        const int32_t numFrames_in = 25;
+        const int32_t n_in = 25;
         pre.numFrames = 0;
-        const auto post = apply_CAnimBlendClumpData_SetNumberOfFrames(pre, numFrames_in);
-        if (!op_CAnimBlendClumpData_SetNumberOfFrames(pre, post, numFrames_in)) return false;
+        const auto post = apply_CAnimBlendClumpData_SetNumberOfFrames(pre, n_in);
+        if (!op_CAnimBlendClumpData_SetNumberOfFrames(pre, post, n_in)) return false;
         {
             CAnimBlendClumpData_ZppContract badPost = post;
-            badPost.numFrames = numFrames_in + 1;
-            if (op_CAnimBlendClumpData_SetNumberOfFrames(pre, badPost, numFrames_in)) return false;
+            badPost.numFrames = (int32_t)(n_in + 1);
+            if (op_CAnimBlendClumpData_SetNumberOfFrames(pre, badPost, n_in)) return false;
+        }
+    }
+    {
+        CCutsceneMgr_ZppContract pre{};
+        pre.ms_numCutsceneObjs = 1;
+        pre.ms_loaded = true;
+        pre.ms_wasCutsceneSkipped = true;
+        pre.ms_running = true;
+        pre.ms_useLodMultiplier = true;
+        pre.ms_animLoaded = true;
+        const auto post = apply_CCutsceneMgr_Initialise(pre);
+        if (!op_CCutsceneMgr_Initialise(pre, post)) return false;
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_numCutsceneObjs = 1;
+            if (op_CCutsceneMgr_Initialise(pre, badPost)) return false;
+        }
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_loaded = true;
+            if (op_CCutsceneMgr_Initialise(pre, badPost)) return false;
+        }
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_wasCutsceneSkipped = true;
+            if (op_CCutsceneMgr_Initialise(pre, badPost)) return false;
+        }
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_running = true;
+            if (op_CCutsceneMgr_Initialise(pre, badPost)) return false;
+        }
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_useLodMultiplier = true;
+            if (op_CCutsceneMgr_Initialise(pre, badPost)) return false;
+        }
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_animLoaded = true;
+            if (op_CCutsceneMgr_Initialise(pre, badPost)) return false;
+        }
+    }
+    {
+        CCutsceneMgr_ZppContract pre{};
+        pre.ms_running = false;
+        pre.ms_cutsceneTimer = 1.0f;
+        const auto post = apply_CCutsceneMgr_SetupCutsceneToStart(pre);
+        if (!op_CCutsceneMgr_SetupCutsceneToStart(pre, post)) return false;
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_running = false;
+            if (op_CCutsceneMgr_SetupCutsceneToStart(pre, badPost)) return false;
+        }
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_cutsceneTimer = 1.0f;
+            if (op_CCutsceneMgr_SetupCutsceneToStart(pre, badPost)) return false;
+        }
+    }
+    {
+        CCutsceneMgr_ZppContract pre{};
+        pre.ms_cutscenePlayStatus = 0;
+        const auto post = apply_CCutsceneMgr_StartCutscene(pre);
+        if (!op_CCutsceneMgr_StartCutscene(pre, post)) return false;
+        {
+            CCutsceneMgr_ZppContract badPost = post;
+            badPost.ms_cutscenePlayStatus = 0;
+            if (op_CCutsceneMgr_StartCutscene(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

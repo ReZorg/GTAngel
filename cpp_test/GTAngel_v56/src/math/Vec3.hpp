@@ -13,6 +13,11 @@ namespace zpp_math_spec {
 static constexpr int kZppModuleCount = 8;
 static constexpr int kZppSchemaCount = 264;
 static constexpr int kZppEnumCount   = 0;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CMatrix_ZppContract {
     uint8_t m_attachment_card{0u}; // Z++: Ref[RwMatrix]
@@ -27,7 +32,7 @@ struct CMatrix_ZppContract {
 };
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CCompressedMatrixNotAligned_ZppContract {
-    int32_t m_vecPos{0}; // Z++: CVector
+    ZppVec3 m_vecPos{}; // Z++: CVector
     int32_t m_rightX{0}; // Z++: ℤ
     int32_t m_rightY{0}; // Z++: ℤ
     int32_t m_rightZ{0}; // Z++: ℤ
@@ -223,6 +228,18 @@ constexpr bool op_CMatrix_Detach(const CMatrix_ZppContract& pre, const CMatrix_Z
 constexpr CMatrix_ZppContract apply_CMatrix_Detach(const CMatrix_ZppContract& pre) {
     CMatrix_ZppContract post = pre;
     post.m_attachment_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCRect) from zpp/math/Rect.zpp
+constexpr bool op_CRect_CRect_2(const CRect_ZppContract& pre, const CRect_ZppContract& post, float l_in = 2.5f, float t_in = 2.5f, float r_in = 2.5f, float b_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.left == l_in) && (post.top == t_in) && (post.right == r_in) && (post.bottom == b_in);
+}
+constexpr CRect_ZppContract apply_CRect_CRect_2(const CRect_ZppContract& pre, float l_in = 2.5f, float t_in = 2.5f, float r_in = 2.5f, float b_in = 2.5f) {
+    CRect_ZppContract post = pre;
+    post.left = l_in;
+    post.top = t_in;
+    post.right = r_in;
+    post.bottom = b_in;
     return post;
 }
 constexpr bool verify_math_zpp_invariants() {
@@ -421,6 +438,39 @@ constexpr bool verify_math_zpp_invariants() {
             CMatrix_ZppContract badPost = post;
             badPost.m_attachment_card = 1u;
             if (op_CMatrix_Detach(pre, badPost)) return false;
+        }
+    }
+    {
+        CRect_ZppContract pre{};
+        const float l_in = 2.5f;
+        const float t_in = 2.5f;
+        const float r_in = 2.5f;
+        const float b_in = 2.5f;
+        pre.left = 0.0f;
+        pre.top = 0.0f;
+        pre.right = 0.0f;
+        pre.bottom = 0.0f;
+        const auto post = apply_CRect_CRect_2(pre, l_in, t_in, r_in, b_in);
+        if (!op_CRect_CRect_2(pre, post, l_in, t_in, r_in, b_in)) return false;
+        {
+            CRect_ZppContract badPost = post;
+            badPost.left = l_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.top = t_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.right = r_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.bottom = b_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

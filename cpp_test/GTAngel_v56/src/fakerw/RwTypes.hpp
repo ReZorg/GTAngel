@@ -13,6 +13,11 @@ namespace zpp_fakerw_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 146;
 static constexpr int kZppEnumCount   = 31;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/fakerw/rphanim.zpp
 enum class RpHAnimHierarchyFlag : int32_t { rpHANIMHIERARCHYSUBHIERARCHY_v = 0, rpHANIMHIERARCHYNOMATRICES_v = 1, rpHANIMHIERARCHYUPDATEMODELLINGMATRICES_v = 2, rpHANIMHIERARCHYUPDATELTMS_v = 3, rpHANIMHIERARCHYLOCALSPACEMATRICES_v = 4 };
 // Free Type from zpp/fakerw/rpmatfx.zpp
@@ -48,7 +53,7 @@ struct RpHAnimStdKeyFrame_ZppContract {
     uint8_t prevFrame_card{0u}; // Z++: Ref[RpHAnimStdKeyFrame]
     float time{0.0f}; // Z++: ℝ
     int32_t q{0}; // Z++: RtQuat
-    int32_t t{0}; // Z++: RwV3d
+    ZppVec3 t{}; // Z++: RwV3d
     constexpr bool checkInvariant() const {
         return (prevFrame_card <= 1u);
     }
@@ -58,7 +63,7 @@ struct RpHAnimStdInterpFrame_ZppContract {
     uint8_t keyFrame1_card{0u}; // Z++: Ref[RpHAnimStdKeyFrame]
     uint8_t keyFrame2_card{0u}; // Z++: Ref[RpHAnimStdKeyFrame]
     int32_t q{0}; // Z++: RtQuat
-    int32_t t{0}; // Z++: RwV3d
+    ZppVec3 t{}; // Z++: RwV3d
     constexpr bool checkInvariant() const {
         return (keyFrame1_card <= 1u)
             && (keyFrame2_card <= 1u);
