@@ -2,9 +2,15 @@
     static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {
         return zpp_objects_spec::CObjectInfo_ZppContract{};
     }
+    bool verifyLiveWorld_questShard_zpp(const avatar3d::GameWorld& world) const {
+        zpp_objects_spec::CObjectInfo_ZppContract c{};
+        const bool shardFinite = std::isfinite(world.questShard.x) && std::isfinite(world.questShard.y) && std::isfinite(world.questShard.z);
+        c.m_nCollisionDamageEffect = shardFinite ? 1 : -1;
+        return c.checkInvariant();
+    }
     static_assert(makeQuestShardObjectContract().checkInvariant(), "QuestShard CObjectInfo Z++ contract must hold");
     void buildQuestShard(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_objects_zpp(world)) return;
+        if (!verifyLiveWorld_questShard_zpp(world)) return;
         if (!world.questShardVisible) return;
         const auto ticks = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();

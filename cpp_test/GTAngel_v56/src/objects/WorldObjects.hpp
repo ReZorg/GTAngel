@@ -5,12 +5,10 @@
         return zpp_objects_spec::verify_objects_zpp_invariants() && (zpp_objects_spec::CCutsceneHead_ZppContract{}.checkInvariant()) && (zpp_objects_spec::op_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{}, zpp_objects_spec::apply_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{})));
     }
     bool verifyLiveWorld_objects_zpp(const avatar3d::GameWorld& world) const {
-        for (size_t i = 0; i < world.pickups.size(); ++i) {
-            zpp_objects_spec::CObjectInfo_ZppContract c{};
-            c.m_nCollisionDamageEffect = (world.pickups[i].phase >= 0.0f) ? (int64_t)i : -1;
-            if (!c.checkInvariant()) return false;
-        }
-        return true;
+        zpp_objects_spec::CObjectInfo_ZppContract c{};
+        const bool goalFinite = std::isfinite(world.goal.x) && std::isfinite(world.goal.y) && std::isfinite(world.goal.z);
+        c.m_nCollisionDamageEffect = goalFinite ? 1 : -1;
+        return c.checkInvariant();
     }
     static_assert(verifyComponent_objects_zpp(), "RasterEngine component Z++ binding failed for objects");
     void buildGoal(const avatar3d::GameWorld& world) {

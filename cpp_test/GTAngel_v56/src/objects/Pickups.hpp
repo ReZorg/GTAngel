@@ -2,9 +2,19 @@
     static constexpr zpp_objects_spec::CParticleObject_ZppContract makePickupParticleContract() {
         return zpp_objects_spec::apply_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{});
     }
+    bool verifyLiveWorld_pickups_zpp(const avatar3d::GameWorld& world) const {
+        for (size_t i = 0; i < world.pickups.size(); ++i) {
+            const auto& pk = world.pickups[i];
+            zpp_objects_spec::CObjectInfo_ZppContract c{};
+            const bool ok = std::isfinite(pk.pos.x) && std::isfinite(pk.pos.y) && std::isfinite(pk.pos.z) && std::isfinite(pk.phase);
+            c.m_nCollisionDamageEffect = ok ? (int64_t)i : -1;
+            if (!c.checkInvariant()) return false;
+        }
+        return true;
+    }
     static_assert(zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, makePickupParticleContract()), "Pickups CParticleObject Z++ contract must hold");
     void buildPickups(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_objects_zpp(world)) return;
+        if (!verifyLiveWorld_pickups_zpp(world)) return;
         for (const auto& pk : world.pickups) {
             if (pk.collected) continue;
             const Vec3 c = pk.pos;

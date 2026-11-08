@@ -721,12 +721,10 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       );
     } else if (folder === 'objects') {
       liveWorldLines.push(
-        `        for (size_t i = 0; i < world.pickups.size(); ++i) {`,
-        `            zpp_objects_spec::CObjectInfo_ZppContract c{};`,
-        `            c.m_nCollisionDamageEffect = (world.pickups[i].phase >= 0.0f) ? (int64_t)i : -1;`,
-        `            if (!c.checkInvariant()) return false;`,
-        `        }`,
-        `        return true;`
+        `        zpp_objects_spec::CObjectInfo_ZppContract c{};`,
+        `        const bool goalFinite = std::isfinite(world.goal.x) && std::isfinite(world.goal.y) && std::isfinite(world.goal.z);`,
+        `        c.m_nCollisionDamageEffect = goalFinite ? 1 : -1;`,
+        `        return c.checkInvariant();`
       );
     } else if (folder === 'leeds') {
       liveWorldLines.push(
@@ -1006,26 +1004,51 @@ for (const rootDir of ['src']) {
     '    static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {',
     '        return zpp_entities_spec::CDummy_ZppContract{};',
     '    }',
+    '    bool verifyLiveWorld_props_zpp(const avatar3d::GameWorld& world) const {',
+    '        for (size_t i = 0; i < world.props.size(); ++i) {',
+    '            const auto& p = world.props[i].pos;',
+    '            zpp_entities_spec::CDummy_ZppContract c{};',
+    '            c.instance_addr = (std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z)) ? (int64_t)(i + 1) : -1;',
+    '            if (!c.checkInvariant()) return false;',
+    '        }',
+    '        return true;',
+    '    }',
     '    static_assert(makeStreetPropDummyContract().checkInvariant(), "Props CDummy Z++ contract must hold");',
     ''
-  ].join('\n') + injectLiveCheck(sliceLines(L_buildProps, L_buildAvatar - 1), '    void buildProps(const avatar3d::GameWorld& world) {', 'entities'));
+  ].join('\n') + injectLiveCheck(sliceLines(L_buildProps, L_buildAvatar - 1), '    void buildProps(const avatar3d::GameWorld& world) {', 'props'));
   writeMod('objects/WorldObjects.hpp', buildZppCppContractBlock('objects', true) + injectLiveCheck(sliceLines(L_buildGoal, L_buildWalkers - 1), '    void buildGoal(const avatar3d::GameWorld& world) {', 'objects'));
   writeMod('objects/QuestShard.hpp', [
     '    // Component-specific Z++ quest shard CObjectInfo contract binding (from objects/ZppContracts.hpp)',
     '    static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {',
     '        return zpp_objects_spec::CObjectInfo_ZppContract{};',
     '    }',
+    '    bool verifyLiveWorld_questShard_zpp(const avatar3d::GameWorld& world) const {',
+    '        zpp_objects_spec::CObjectInfo_ZppContract c{};',
+    '        const bool shardFinite = std::isfinite(world.questShard.x) && std::isfinite(world.questShard.y) && std::isfinite(world.questShard.z);',
+    '        c.m_nCollisionDamageEffect = shardFinite ? 1 : -1;',
+    '        return c.checkInvariant();',
+    '    }',
     '    static_assert(makeQuestShardObjectContract().checkInvariant(), "QuestShard CObjectInfo Z++ contract must hold");',
     ''
-  ].join('\n') + injectLiveCheck(sliceLines(L_buildShard, L_drawCoupe - 1), '    void buildQuestShard(const avatar3d::GameWorld& world) {', 'objects'));
+  ].join('\n') + injectLiveCheck(sliceLines(L_buildShard, L_drawCoupe - 1), '    void buildQuestShard(const avatar3d::GameWorld& world) {', 'questShard'));
   writeMod('objects/Pickups.hpp', [
     '    // Component-specific Z++ pickup CParticleObject contract binding (from objects/ZppContracts.hpp)',
     '    static constexpr zpp_objects_spec::CParticleObject_ZppContract makePickupParticleContract() {',
     '        return zpp_objects_spec::apply_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{});',
     '    }',
+    '    bool verifyLiveWorld_pickups_zpp(const avatar3d::GameWorld& world) const {',
+    '        for (size_t i = 0; i < world.pickups.size(); ++i) {',
+    '            const auto& pk = world.pickups[i];',
+    '            zpp_objects_spec::CObjectInfo_ZppContract c{};',
+    '            const bool ok = std::isfinite(pk.pos.x) && std::isfinite(pk.pos.y) && std::isfinite(pk.pos.z) && std::isfinite(pk.phase);',
+    '            c.m_nCollisionDamageEffect = ok ? (int64_t)i : -1;',
+    '            if (!c.checkInvariant()) return false;',
+    '        }',
+    '        return true;',
+    '    }',
     '    static_assert(zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, makePickupParticleContract()), "Pickups CParticleObject Z++ contract must hold");',
     ''
-  ].join('\n') + injectLiveCheck(sliceLines(L_buildPickups, L_buildProps - 1), '    void buildPickups(const avatar3d::GameWorld& world) {', 'objects'));
+  ].join('\n') + injectLiveCheck(sliceLines(L_buildPickups, L_buildProps - 1), '    void buildPickups(const avatar3d::GameWorld& world) {', 'pickups'));
   writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + injectLiveCheck(sliceLines(L_buildWalkers, L_buildShard - 1), '    void buildWalkers(const avatar3d::GameWorld& world) {', 'peds'));
   writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + injectLiveCheck(sliceLines(L_drawCoupe, L_buildPickups - 1), '    void buildTraffic(const avatar3d::GameWorld& world) {', 'vehicles'));
   writeMod('renderer/SoftwareRasterizer.hpp', buildZppCppContractBlock('renderer', true) + sliceLines(L_buildAvatar, L_v16motor - 1) + buildZppCppContractBlock('renderer', false));
