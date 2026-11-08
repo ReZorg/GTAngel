@@ -1600,10 +1600,45 @@ struct CognitiveSnapshot {
     std::vector<std::string> insights;
 };
 
-// ── Aesthetic Field ──
+// ── Christopher Alexander's 15 Properties of Living Structure (P0..P14) ──
+struct AlexanderPropertyDef {
+    int id;
+    const char* name;
+    const char* description;
+    uint8_t cycleMask; // Bitmask for Primary KSM Cycles 1..6 (bit c = Cycle c)
+};
+
+static constexpr AlexanderPropertyDef ALEXANDER_15_PROPERTIES[15] = {
+    { 0, "Levels of Scale",        "Hierarchical nesting of centers",       (1u << 4)},
+    { 1, "Strong Centers",         "Distinct focal points",                 (1u << 2) | (1u << 5)},
+    { 2, "Boundaries",             "Thick boundaries that unite/separate",  (1u << 4)},
+    { 3, "Alternating Repetition", "Rhythmic alternation",                  (1u << 4)},
+    { 4, "Positive Space",         "Every part positively shaped",          (1u << 2) | (1u << 6)},
+    { 5, "Good Shape",             "Clear, definite shapes",                (1u << 1) | (1u << 3)},
+    { 6, "Local Symmetries",       "Local, not global symmetry",            (1u << 4) | (1u << 6)},
+    { 7, "Deep Interlock",         "Centers hook into each other",          (1u << 5)},
+    { 8, "Contrast",               "Unity through contrast",                (1u << 1) | (1u << 2) | (1u << 3) | (1u << 4) | (1u << 5) | (1u << 6)},
+    { 9, "Gradients",              "Gradual transitions",                   (1u << 4)},
+    {10, "Roughness",              "Irregularity that gives life",          (1u << 4)},
+    {11, "Echoes",                 "Deep similarities",                     (1u << 3) | (1u << 5)},
+    {12, "The Void",               "Empty calm at center",                  (1u << 2) | (1u << 3)},
+    {13, "Simplicity",             "Geometric simplicity",                  (1u << 1) | (1u << 6)},
+    {14, "Not-Separateness",       "Connected to the world",                (1u << 2) | (1u << 3) | (1u << 5)}
+};
+
+// ── Aesthetic Field (with Alexander's 15 Properties Fitness Evaluator) ──
 class AestheticField {
 public:
     AestheticField() = default;
+    float propScores_[15]{0.85f,0.90f,0.82f,0.80f,0.82f,0.86f,0.82f,0.85f,0.84f,0.80f,0.78f,0.88f,0.82f,0.80f,0.86f};
+    int weakestProp_{12};
+    int strongestProp_{1};
+    int activeKsmCycle_{1};
+
+    float propScore(int idx) const { return (idx >= 0 && idx < 15) ? propScores_[idx] : 0.0f; }
+    int weakestProperty() const { return weakestProp_; }
+    int strongestProperty() const { return strongestProp_; }
+    int activeKsmCycle() const { return activeKsmCycle_; }
 
     float evaluate(const std::vector<std::vector<float>>& grid) {
         // Compute coherence as inverse of variance + coverage bonus
@@ -1627,6 +1662,54 @@ public:
                 if (v > 0.3f) occupied++;
         float coverage = (float)occupied / count;
         coherence = coherence * 0.7f + coverage * 0.3f;
+        // Evaluate all 15 Properties of Living Structure from the spatial field
+        const int R = (int)grid.size(), C = R > 0 ? (int)grid[0].size() : 0;
+        float minV = 1.0f, maxV = 0.0f, gradAcc = 0.0f, altAcc = 0.0f, symAcc = 0.0f, interlockAcc = 0.0f, echoAcc = 0.0f;
+        int pairs = 0;
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                const float v = grid[r][c];
+                if (v < minV) minV = v;
+                if (v > maxV) maxV = v;
+                if (r + 1 < R) {
+                    const float dv = std::fabs(v - grid[r + 1][c]);
+                    gradAcc += 1.0f / (1.0f + dv * 3.0f);
+                    interlockAcc += std::min(v, grid[r + 1][c]);
+                    ++pairs;
+                }
+                if (c + 1 < C) {
+                    const float dv = std::fabs(v - grid[r][c + 1]);
+                    gradAcc += 1.0f / (1.0f + dv * 3.0f);
+                    if (c + 2 < C) altAcc += 1.0f - std::min(1.0f, std::fabs(v - grid[r][c + 2]));
+                    ++pairs;
+                }
+                if (c > 0 && c + 1 < C) symAcc += 1.0f - std::min(1.0f, std::fabs(grid[r][c - 1] - grid[r][c + 1]));
+                if (r < R / 2 && c < C / 2) echoAcc += 1.0f - std::min(1.0f, std::fabs(v - grid[R - 1 - r][C - 1 - c]));
+            }
+        }
+        const float normPairs = pairs > 0 ? (float)pairs : 1.0f;
+        const float normCells = count > 0 ? (float)count : 1.0f;
+        const float centerCalm = (R >= 4 && C >= 4) ? (1.0f - 0.5f * std::fabs(grid[R/2][C/2] - mean)) : 0.82f;
+        propScores_[ 0] = std::clamp(0.55f + 0.42f * coherence, 0.0f, 1.0f);                          // 0 Levels of Scale
+        propScores_[ 1] = std::clamp(0.58f + 0.40f * maxV, 0.0f, 1.0f);                               // 1 Strong Centers
+        propScores_[ 2] = std::clamp(0.52f + 0.44f * (gradAcc / normPairs), 0.0f, 1.0f);              // 2 Boundaries
+        propScores_[ 3] = std::clamp(0.50f + 0.45f * (altAcc / normCells), 0.0f, 1.0f);               // 3 Alternating Repetition
+        propScores_[ 4] = std::clamp(0.48f + 0.48f * coverage, 0.0f, 1.0f);                           // 4 Positive Space
+        propScores_[ 5] = std::clamp(0.56f + 0.40f * coherence, 0.0f, 1.0f);                          // 5 Good Shape
+        propScores_[ 6] = std::clamp(0.52f + 0.44f * (symAcc / normCells), 0.0f, 1.0f);               // 6 Local Symmetries
+        propScores_[ 7] = std::clamp(0.54f + 0.44f * (interlockAcc / normPairs), 0.0f, 1.0f);         // 7 Deep Interlock
+        propScores_[ 8] = std::clamp(0.52f + 0.45f * (maxV - minV), 0.0f, 1.0f);                      // 8 Contrast
+        propScores_[ 9] = std::clamp(0.50f + 0.46f * (gradAcc / normPairs), 0.0f, 1.0f);              // 9 Gradients
+        propScores_[10] = std::clamp(0.52f + 0.42f * (1.0f - std::fabs(variance - 0.08f)), 0.0f, 1.0f); // 10 Roughness
+        propScores_[11] = std::clamp(0.56f + 0.42f * (echoAcc * 4.0f / normCells), 0.0f, 1.0f);       // 11 Echoes
+        propScores_[12] = std::clamp(0.45f + 0.50f * centerCalm, 0.0f, 1.0f);                         // 12 The Void
+        propScores_[13] = std::clamp(0.54f + 0.42f * (1.0f / (1.0f + variance * 2.0f)), 0.0f, 1.0f);  // 13 Simplicity
+        propScores_[14] = std::clamp(0.56f + 0.42f * (0.5f * coherence + 0.5f * coverage), 0.0f, 1.0f); // 14 Not-Separateness
+        weakestProp_ = 0; strongestProp_ = 0;
+        for (int p = 1; p < 15; ++p) {
+            if (propScores_[p] < propScores_[weakestProp_]) weakestProp_ = p;
+            if (propScores_[p] > propScores_[strongestProp_]) strongestProp_ = p;
+        }
         lastCoherence_ = coherence;
         return coherence;
     }
