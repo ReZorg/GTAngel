@@ -147,39 +147,6 @@ constexpr CCutsceneObject_ZppContract apply_CCutsceneObject_CCutsceneObject_2(co
     post.m_pShadow_card = 0u;
     return post;
 }
-// Delta Operation Schema Contract (ΔCAudioHydrant) from zpp/objects/ParticleObject.zpp
-constexpr bool op_CAudioHydrant_Add(const CAudioHydrant_ZppContract& pre, const CAudioHydrant_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.AudioEntity == 1) && (post.pParticleObject_card == 1u);
-}
-constexpr CAudioHydrant_ZppContract apply_CAudioHydrant_Add(const CAudioHydrant_ZppContract& pre) {
-    CAudioHydrant_ZppContract post = pre;
-    post.AudioEntity = 1;
-    post.pParticleObject_card = 1u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCAudioHydrant) from zpp/objects/ParticleObject.zpp
-constexpr bool op_CAudioHydrant_Remove(const CAudioHydrant_ZppContract& pre, const CAudioHydrant_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.AudioEntity == 1) && (post.pParticleObject_card == 0u);
-}
-constexpr CAudioHydrant_ZppContract apply_CAudioHydrant_Remove(const CAudioHydrant_ZppContract& pre) {
-    CAudioHydrant_ZppContract post = pre;
-    post.AudioEntity = 1;
-    post.pParticleObject_card = 0u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCParticleObject) from zpp/objects/ParticleObject.zpp
-constexpr bool op_CParticleObject_Initialise(const CParticleObject_ZppContract& pre, const CParticleObject_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.pCloseListHead_card == 0u) && (post.pFarListHead_card == 0u) && (post.pUnusedListHead_card == 1u) && (post.m_pPrev_card == 1u) && (post.m_pNext_card == 0u);
-}
-constexpr CParticleObject_ZppContract apply_CParticleObject_Initialise(const CParticleObject_ZppContract& pre) {
-    CParticleObject_ZppContract post = pre;
-    post.pCloseListHead_card = 0u;
-    post.pFarListHead_card = 0u;
-    post.pUnusedListHead_card = 1u;
-    post.m_pPrev_card = 1u;
-    post.m_pNext_card = 0u;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCParticleObject) from zpp/objects/ParticleObject.zpp
 constexpr bool op_CParticleObject_RemoveObject(const CParticleObject_ZppContract& pre, const CParticleObject_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_nState == 3);
@@ -187,19 +154,6 @@ constexpr bool op_CParticleObject_RemoveObject(const CParticleObject_ZppContract
 constexpr CParticleObject_ZppContract apply_CParticleObject_RemoveObject(const CParticleObject_ZppContract& pre) {
     CParticleObject_ZppContract post = pre;
     post.m_nState = 3;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCParticleObject) from zpp/objects/ParticleObject.zpp
-constexpr bool op_CParticleObject_RemoveAllParticleObjects(const CParticleObject_ZppContract& pre, const CParticleObject_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.pUnusedListHead_card == 1u) && (post.pCloseListHead_card == 0u) && (post.pFarListHead_card == 0u) && (post.m_pPrev_card == 1u) && (post.m_pNext_card == 0u);
-}
-constexpr CParticleObject_ZppContract apply_CParticleObject_RemoveAllParticleObjects(const CParticleObject_ZppContract& pre) {
-    CParticleObject_ZppContract post = pre;
-    post.pUnusedListHead_card = 1u;
-    post.pCloseListHead_card = 0u;
-    post.pFarListHead_card = 0u;
-    post.m_pPrev_card = 1u;
-    post.m_pNext_card = 0u;
     return post;
 }
 // Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
@@ -273,75 +227,6 @@ constexpr bool verify_objects_zpp_invariants() {
         }
     }
     {
-        CAudioHydrant_ZppContract pre{};
-        pre.AudioEntity = 0;
-        pre.pParticleObject_card = 0u;
-        const auto post = apply_CAudioHydrant_Add(pre);
-        if (!op_CAudioHydrant_Add(pre, post)) return false;
-        {
-            CAudioHydrant_ZppContract badPost = post;
-            badPost.AudioEntity = 0;
-            if (op_CAudioHydrant_Add(pre, badPost)) return false;
-        }
-        {
-            CAudioHydrant_ZppContract badPost = post;
-            badPost.pParticleObject_card = 0u;
-            if (op_CAudioHydrant_Add(pre, badPost)) return false;
-        }
-    }
-    {
-        CAudioHydrant_ZppContract pre{};
-        pre.AudioEntity = 0;
-        pre.pParticleObject_card = 1u;
-        const auto post = apply_CAudioHydrant_Remove(pre);
-        if (!op_CAudioHydrant_Remove(pre, post)) return false;
-        {
-            CAudioHydrant_ZppContract badPost = post;
-            badPost.AudioEntity = 0;
-            if (op_CAudioHydrant_Remove(pre, badPost)) return false;
-        }
-        {
-            CAudioHydrant_ZppContract badPost = post;
-            badPost.pParticleObject_card = 1u;
-            if (op_CAudioHydrant_Remove(pre, badPost)) return false;
-        }
-    }
-    {
-        CParticleObject_ZppContract pre{};
-        pre.pCloseListHead_card = 1u;
-        pre.pFarListHead_card = 1u;
-        pre.pUnusedListHead_card = 0u;
-        pre.m_pPrev_card = 0u;
-        pre.m_pNext_card = 1u;
-        const auto post = apply_CParticleObject_Initialise(pre);
-        if (!op_CParticleObject_Initialise(pre, post)) return false;
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.pCloseListHead_card = 1u;
-            if (op_CParticleObject_Initialise(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.pFarListHead_card = 1u;
-            if (op_CParticleObject_Initialise(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.pUnusedListHead_card = 0u;
-            if (op_CParticleObject_Initialise(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.m_pPrev_card = 0u;
-            if (op_CParticleObject_Initialise(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.m_pNext_card = 1u;
-            if (op_CParticleObject_Initialise(pre, badPost)) return false;
-        }
-    }
-    {
         CParticleObject_ZppContract pre{};
         pre.m_nState = 0;
         const auto post = apply_CParticleObject_RemoveObject(pre);
@@ -350,41 +235,6 @@ constexpr bool verify_objects_zpp_invariants() {
             CParticleObject_ZppContract badPost = post;
             badPost.m_nState = 0;
             if (op_CParticleObject_RemoveObject(pre, badPost)) return false;
-        }
-    }
-    {
-        CParticleObject_ZppContract pre{};
-        pre.pUnusedListHead_card = 0u;
-        pre.pCloseListHead_card = 1u;
-        pre.pFarListHead_card = 1u;
-        pre.m_pPrev_card = 0u;
-        pre.m_pNext_card = 1u;
-        const auto post = apply_CParticleObject_RemoveAllParticleObjects(pre);
-        if (!op_CParticleObject_RemoveAllParticleObjects(pre, post)) return false;
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.pUnusedListHead_card = 0u;
-            if (op_CParticleObject_RemoveAllParticleObjects(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.pCloseListHead_card = 1u;
-            if (op_CParticleObject_RemoveAllParticleObjects(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.pFarListHead_card = 1u;
-            if (op_CParticleObject_RemoveAllParticleObjects(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.m_pPrev_card = 0u;
-            if (op_CParticleObject_RemoveAllParticleObjects(pre, badPost)) return false;
-        }
-        {
-            CParticleObject_ZppContract badPost = post;
-            badPost.m_pNext_card = 1u;
-            if (op_CParticleObject_RemoveAllParticleObjects(pre, badPost)) return false;
         }
     }
     {

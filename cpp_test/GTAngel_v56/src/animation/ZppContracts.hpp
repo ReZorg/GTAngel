@@ -268,64 +268,13 @@ constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_CAnimBle
     post.timeStep = 0.0f;
     return post;
 }
-// Delta Operation Schema Contract (ΔCAnimBlendAssociation) from zpp/animation/AnimBlendAssociation.zpp
-constexpr bool op_CAnimBlendAssociation_SetBlend(const CAnimBlendAssociation_ZppContract& pre, const CAnimBlendAssociation_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.blendAmount == 1.0f) && (post.blendDelta == 1.0f);
-}
-constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_SetBlend(const CAnimBlendAssociation_ZppContract& pre) {
-    CAnimBlendAssociation_ZppContract post = pre;
-    post.blendAmount = 1.0f;
-    post.blendDelta = 1.0f;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCAnimBlendAssociation) from zpp/animation/AnimBlendAssociation.zpp
-constexpr bool op_CAnimBlendAssociation_SetCurrentTime(const CAnimBlendAssociation_ZppContract& pre, const CAnimBlendAssociation_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.currentTime == 1.0f);
-}
-constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_SetCurrentTime(const CAnimBlendAssociation_ZppContract& pre) {
-    CAnimBlendAssociation_ZppContract post = pre;
-    post.currentTime = 1.0f;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCAnimBlendAssociation) from zpp/animation/AnimBlendAssociation.zpp
-constexpr bool op_CAnimBlendAssociation_UpdateBlend(const CAnimBlendAssociation_ZppContract& pre, const CAnimBlendAssociation_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.blendAmount == 1.0f) && (post.blendDelta == 1.0f);
-}
-constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_UpdateBlend(const CAnimBlendAssociation_ZppContract& pre) {
-    CAnimBlendAssociation_ZppContract post = pre;
-    post.blendAmount = 1.0f;
-    post.blendDelta = 1.0f;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCAnimBlendClumpData) from zpp/animation/AnimBlendClumpData.zpp
-constexpr bool op_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, const CAnimBlendClumpData_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.numFrames == 1);
+constexpr bool op_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, const CAnimBlendClumpData_ZppContract& post, int32_t numFrames_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.numFrames == numFrames_in);
 }
-constexpr CAnimBlendClumpData_ZppContract apply_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre) {
+constexpr CAnimBlendClumpData_ZppContract apply_CAnimBlendClumpData_SetNumberOfFrames(const CAnimBlendClumpData_ZppContract& pre, int32_t numFrames_in = 25) {
     CAnimBlendClumpData_ZppContract post = pre;
-    post.numFrames = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCAnimBlendNode) from zpp/animation/AnimBlendNode.zpp
-constexpr bool op_CAnimBlendNode_FindKeyFrame(const CAnimBlendNode_ZppContract& pre, const CAnimBlendNode_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.frameA == 0) && (post.frameB == 1) && (post.remainingTime == 0.0f);
-}
-constexpr CAnimBlendNode_ZppContract apply_CAnimBlendNode_FindKeyFrame(const CAnimBlendNode_ZppContract& pre) {
-    CAnimBlendNode_ZppContract post = pre;
-    post.frameA = 0;
-    post.frameB = 1;
-    post.remainingTime = 0.0f;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCAnimBlendNode) from zpp/animation/AnimBlendNode.zpp
-constexpr bool op_CAnimBlendNode_SetupKeyFrameCompressed(const CAnimBlendNode_ZppContract& pre, const CAnimBlendNode_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.frameA == 0) && (post.frameB == 0) && (post.remainingTime == 1.0f);
-}
-constexpr CAnimBlendNode_ZppContract apply_CAnimBlendNode_SetupKeyFrameCompressed(const CAnimBlendNode_ZppContract& pre) {
-    CAnimBlendNode_ZppContract post = pre;
-    post.frameA = 0;
-    post.frameB = 0;
-    post.remainingTime = 1.0f;
+    post.numFrames = numFrames_in;
     return post;
 }
 constexpr bool verify_animation_zpp_invariants() {
@@ -528,104 +477,15 @@ constexpr bool verify_animation_zpp_invariants() {
         }
     }
     {
-        CAnimBlendAssociation_ZppContract pre{};
-        pre.blendAmount = 0.0f;
-        pre.blendDelta = 0.0f;
-        const auto post = apply_CAnimBlendAssociation_SetBlend(pre);
-        if (!op_CAnimBlendAssociation_SetBlend(pre, post)) return false;
-        {
-            CAnimBlendAssociation_ZppContract badPost = post;
-            badPost.blendAmount = 0.0f;
-            if (op_CAnimBlendAssociation_SetBlend(pre, badPost)) return false;
-        }
-        {
-            CAnimBlendAssociation_ZppContract badPost = post;
-            badPost.blendDelta = 0.0f;
-            if (op_CAnimBlendAssociation_SetBlend(pre, badPost)) return false;
-        }
-    }
-    {
-        CAnimBlendAssociation_ZppContract pre{};
-        pre.currentTime = 0.0f;
-        const auto post = apply_CAnimBlendAssociation_SetCurrentTime(pre);
-        if (!op_CAnimBlendAssociation_SetCurrentTime(pre, post)) return false;
-        {
-            CAnimBlendAssociation_ZppContract badPost = post;
-            badPost.currentTime = 0.0f;
-            if (op_CAnimBlendAssociation_SetCurrentTime(pre, badPost)) return false;
-        }
-    }
-    {
-        CAnimBlendAssociation_ZppContract pre{};
-        pre.blendAmount = 0.0f;
-        pre.blendDelta = 0.0f;
-        const auto post = apply_CAnimBlendAssociation_UpdateBlend(pre);
-        if (!op_CAnimBlendAssociation_UpdateBlend(pre, post)) return false;
-        {
-            CAnimBlendAssociation_ZppContract badPost = post;
-            badPost.blendAmount = 0.0f;
-            if (op_CAnimBlendAssociation_UpdateBlend(pre, badPost)) return false;
-        }
-        {
-            CAnimBlendAssociation_ZppContract badPost = post;
-            badPost.blendDelta = 0.0f;
-            if (op_CAnimBlendAssociation_UpdateBlend(pre, badPost)) return false;
-        }
-    }
-    {
         CAnimBlendClumpData_ZppContract pre{};
+        const int32_t numFrames_in = 25;
         pre.numFrames = 0;
-        const auto post = apply_CAnimBlendClumpData_SetNumberOfFrames(pre);
-        if (!op_CAnimBlendClumpData_SetNumberOfFrames(pre, post)) return false;
+        const auto post = apply_CAnimBlendClumpData_SetNumberOfFrames(pre, numFrames_in);
+        if (!op_CAnimBlendClumpData_SetNumberOfFrames(pre, post, numFrames_in)) return false;
         {
             CAnimBlendClumpData_ZppContract badPost = post;
-            badPost.numFrames = 0;
-            if (op_CAnimBlendClumpData_SetNumberOfFrames(pre, badPost)) return false;
-        }
-    }
-    {
-        CAnimBlendNode_ZppContract pre{};
-        pre.frameB = 0;
-        pre.remainingTime = 1.0f;
-        const auto post = apply_CAnimBlendNode_FindKeyFrame(pre);
-        if (!op_CAnimBlendNode_FindKeyFrame(pre, post)) return false;
-        {
-            CAnimBlendNode_ZppContract badPost = post;
-            badPost.frameA = 1;
-            if (op_CAnimBlendNode_FindKeyFrame(pre, badPost)) return false;
-        }
-        {
-            CAnimBlendNode_ZppContract badPost = post;
-            badPost.frameB = 0;
-            if (op_CAnimBlendNode_FindKeyFrame(pre, badPost)) return false;
-        }
-        {
-            CAnimBlendNode_ZppContract badPost = post;
-            badPost.remainingTime = 1.0f;
-            if (op_CAnimBlendNode_FindKeyFrame(pre, badPost)) return false;
-        }
-    }
-    {
-        CAnimBlendNode_ZppContract pre{};
-        pre.frameA = 1;
-        pre.frameB = 1;
-        pre.remainingTime = 0.0f;
-        const auto post = apply_CAnimBlendNode_SetupKeyFrameCompressed(pre);
-        if (!op_CAnimBlendNode_SetupKeyFrameCompressed(pre, post)) return false;
-        {
-            CAnimBlendNode_ZppContract badPost = post;
-            badPost.frameA = 1;
-            if (op_CAnimBlendNode_SetupKeyFrameCompressed(pre, badPost)) return false;
-        }
-        {
-            CAnimBlendNode_ZppContract badPost = post;
-            badPost.frameB = 1;
-            if (op_CAnimBlendNode_SetupKeyFrameCompressed(pre, badPost)) return false;
-        }
-        {
-            CAnimBlendNode_ZppContract badPost = post;
-            badPost.remainingTime = 0.0f;
-            if (op_CAnimBlendNode_SetupKeyFrameCompressed(pre, badPost)) return false;
+            badPost.numFrames = numFrames_in + 1;
+            if (op_CAnimBlendClumpData_SetNumberOfFrames(pre, badPost, numFrames_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

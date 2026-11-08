@@ -305,46 +305,23 @@ struct FrameExt_ZppContract {
     }
 };
 // Delta Operation Schema Contract (ΔCMemoryHeap) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CMemoryHeap_PopMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == 1);
+constexpr bool op_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post, int64_t m_currentMemID_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == m_currentMemID_in);
 }
-constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PopMemId(const CMemoryHeap_ZppContract& pre) {
+constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, int64_t m_currentMemID_in = 25) {
     CMemoryHeap_ZppContract post = pre;
-    post.m_currentMemID = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCMemoryHeap) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == 1);
-}
-constexpr CMemoryHeap_ZppContract apply_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre) {
-    CMemoryHeap_ZppContract post = pre;
-    post.m_currentMemID = 1;
+    post.m_currentMemID = m_currentMemID_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCommonSize) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_size == 1) && (post.m_failed == 0) && (post.m_remaining == 0);
+constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post, int64_t m_size_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_size == m_size_in) && (post.m_failed == 0) && (post.m_remaining == 0);
 }
-constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre) {
+constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre, int64_t m_size_in = 25) {
     CommonSize_ZppContract post = pre;
-    post.m_size = 1;
+    post.m_size = m_size_in;
     post.m_failed = 0;
     post.m_remaining = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCTexturePool) from zpp/rw/TexturePools.zpp
-constexpr bool op_CTexturePool_Create(const CTexturePool_ZppContract& pre, const CTexturePool_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.Format == 1) && (post.size == 1) && (post.levels == 1) && (post.pTextures_card == 1u) && (post.texturesMax == 1) && (post.texturesNum == 0);
-}
-constexpr CTexturePool_ZppContract apply_CTexturePool_Create(const CTexturePool_ZppContract& pre) {
-    CTexturePool_ZppContract post = pre;
-    post.Format = 1;
-    post.size = 1;
-    post.levels = 1;
-    post.pTextures_card = 1u;
-    post.texturesMax = 1;
-    post.texturesNum = 0;
     return post;
 }
 // Delta Operation Schema Contract (ΔCTexturePool) from zpp/rw/TexturePools.zpp
@@ -359,17 +336,6 @@ constexpr CTexturePool_ZppContract apply_CTexturePool_Release(const CTexturePool
     return post;
 }
 // Delta Operation Schema Contract (ΔCPaletteList) from zpp/rw/TexturePools.zpp
-constexpr bool op_CPaletteList_Alloc(const CPaletteList_ZppContract& pre, const CPaletteList_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.Data_card == 1u) && (post.Max == 1) && (post.Num == 0);
-}
-constexpr CPaletteList_ZppContract apply_CPaletteList_Alloc(const CPaletteList_ZppContract& pre) {
-    CPaletteList_ZppContract post = pre;
-    post.Data_card = 1u;
-    post.Max = 1;
-    post.Num = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCPaletteList) from zpp/rw/TexturePools.zpp
 constexpr bool op_CPaletteList_Free(const CPaletteList_ZppContract& pre, const CPaletteList_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.Data_card == 0u) && (post.Num == 0);
 }
@@ -377,24 +343,6 @@ constexpr CPaletteList_ZppContract apply_CPaletteList_Free(const CPaletteList_Zp
     CPaletteList_ZppContract post = pre;
     post.Data_card = 0u;
     post.Num = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCTxdStore) from zpp/rw/TxdStore.zpp
-constexpr bool op_CTxdStore_Initialise(const CTxdStore_ZppContract& pre, const CTxdStore_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pTxdPool_card == 1u);
-}
-constexpr CTxdStore_ZppContract apply_CTxdStore_Initialise(const CTxdStore_ZppContract& pre) {
-    CTxdStore_ZppContract post = pre;
-    post.ms_pTxdPool_card = 1u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCTxdStore) from zpp/rw/TxdStore.zpp
-constexpr bool op_CTxdStore_PushCurrentTxd(const CTxdStore_ZppContract& pre, const CTxdStore_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pStoredTxd_card == 1u);
-}
-constexpr CTxdStore_ZppContract apply_CTxdStore_PushCurrentTxd(const CTxdStore_ZppContract& pre) {
-    CTxdStore_ZppContract post = pre;
-    post.ms_pStoredTxd_card = 1u;
     return post;
 }
 // Delta Operation Schema Contract (ΔCTxdStore) from zpp/rw/TxdStore.zpp
@@ -407,21 +355,21 @@ constexpr CTxdStore_ZppContract apply_CTxdStore_PopCurrentTxd(const CTxdStore_Zp
     return post;
 }
 // Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
-constexpr bool op_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.flags == 1);
+constexpr bool op_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post, int64_t flags_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.flags == flags_in);
 }
-constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre) {
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetAtomicId(const CVisibilityPlugins_ZppContract& pre, int64_t flags_in = 25) {
     CVisibilityPlugins_ZppContract post = pre;
-    post.flags = 1;
+    post.flags = flags_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
-constexpr bool op_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == 1);
+constexpr bool op_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post, int32_t alpha_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == alpha_in);
 }
-constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre) {
+constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_SetClumpAlpha(const CVisibilityPlugins_ZppContract& pre, int32_t alpha_in = 25) {
     CVisibilityPlugins_ZppContract post = pre;
-    post.alpha = 1;
+    post.alpha = alpha_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
@@ -431,15 +379,6 @@ constexpr bool op_CVisibilityPlugins_GetClumpDistanceAlpha(const CVisibilityPlug
 constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_GetClumpDistanceAlpha(const CVisibilityPlugins_ZppContract& pre) {
     CVisibilityPlugins_ZppContract post = pre;
     post.alpha = 255;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCVisibilityPlugins) from zpp/rw/VisibilityPlugins.zpp
-constexpr bool op_CVisibilityPlugins_RenderPedCB_2(const CVisibilityPlugins_ZppContract& pre, const CVisibilityPlugins_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.alpha == 1);
-}
-constexpr CVisibilityPlugins_ZppContract apply_CVisibilityPlugins_RenderPedCB_2(const CVisibilityPlugins_ZppContract& pre) {
-    CVisibilityPlugins_ZppContract post = pre;
-    post.alpha = 1;
     return post;
 }
 constexpr bool verify_rw_zpp_invariants() {
@@ -613,88 +552,38 @@ constexpr bool verify_rw_zpp_invariants() {
     }
     {
         CMemoryHeap_ZppContract pre{};
+        const int64_t m_currentMemID_in = 25;
         pre.m_currentMemID = 0;
-        const auto post = apply_CMemoryHeap_PopMemId(pre);
-        if (!op_CMemoryHeap_PopMemId(pre, post)) return false;
+        const auto post = apply_CMemoryHeap_PushMemId(pre, m_currentMemID_in);
+        if (!op_CMemoryHeap_PushMemId(pre, post, m_currentMemID_in)) return false;
         {
             CMemoryHeap_ZppContract badPost = post;
-            badPost.m_currentMemID = 0;
-            if (op_CMemoryHeap_PopMemId(pre, badPost)) return false;
-        }
-    }
-    {
-        CMemoryHeap_ZppContract pre{};
-        pre.m_currentMemID = 0;
-        const auto post = apply_CMemoryHeap_PushMemId(pre);
-        if (!op_CMemoryHeap_PushMemId(pre, post)) return false;
-        {
-            CMemoryHeap_ZppContract badPost = post;
-            badPost.m_currentMemID = 0;
-            if (op_CMemoryHeap_PushMemId(pre, badPost)) return false;
+            badPost.m_currentMemID = m_currentMemID_in + 1;
+            if (op_CMemoryHeap_PushMemId(pre, badPost, m_currentMemID_in)) return false;
         }
     }
     {
         CommonSize_ZppContract pre{};
+        const int64_t m_size_in = 25;
         pre.m_size = 0;
         pre.m_failed = 1;
         pre.m_remaining = 1;
-        const auto post = apply_CommonSize_Init(pre);
-        if (!op_CommonSize_Init(pre, post)) return false;
+        const auto post = apply_CommonSize_Init(pre, m_size_in);
+        if (!op_CommonSize_Init(pre, post, m_size_in)) return false;
         {
             CommonSize_ZppContract badPost = post;
-            badPost.m_size = 0;
-            if (op_CommonSize_Init(pre, badPost)) return false;
+            badPost.m_size = m_size_in + 1;
+            if (op_CommonSize_Init(pre, badPost, m_size_in)) return false;
         }
         {
             CommonSize_ZppContract badPost = post;
             badPost.m_failed = 1;
-            if (op_CommonSize_Init(pre, badPost)) return false;
+            if (op_CommonSize_Init(pre, badPost, m_size_in)) return false;
         }
         {
             CommonSize_ZppContract badPost = post;
             badPost.m_remaining = 1;
-            if (op_CommonSize_Init(pre, badPost)) return false;
-        }
-    }
-    {
-        CTexturePool_ZppContract pre{};
-        pre.Format = 0;
-        pre.size = 0;
-        pre.levels = 0;
-        pre.pTextures_card = 0u;
-        pre.texturesMax = 0;
-        pre.texturesNum = 1;
-        const auto post = apply_CTexturePool_Create(pre);
-        if (!op_CTexturePool_Create(pre, post)) return false;
-        {
-            CTexturePool_ZppContract badPost = post;
-            badPost.Format = 0;
-            if (op_CTexturePool_Create(pre, badPost)) return false;
-        }
-        {
-            CTexturePool_ZppContract badPost = post;
-            badPost.size = 0;
-            if (op_CTexturePool_Create(pre, badPost)) return false;
-        }
-        {
-            CTexturePool_ZppContract badPost = post;
-            badPost.levels = 0;
-            if (op_CTexturePool_Create(pre, badPost)) return false;
-        }
-        {
-            CTexturePool_ZppContract badPost = post;
-            badPost.pTextures_card = 0u;
-            if (op_CTexturePool_Create(pre, badPost)) return false;
-        }
-        {
-            CTexturePool_ZppContract badPost = post;
-            badPost.texturesMax = 0;
-            if (op_CTexturePool_Create(pre, badPost)) return false;
-        }
-        {
-            CTexturePool_ZppContract badPost = post;
-            badPost.texturesNum = 1;
-            if (op_CTexturePool_Create(pre, badPost)) return false;
+            if (op_CommonSize_Init(pre, badPost, m_size_in)) return false;
         }
     }
     {
@@ -722,29 +611,6 @@ constexpr bool verify_rw_zpp_invariants() {
     }
     {
         CPaletteList_ZppContract pre{};
-        pre.Data_card = 0u;
-        pre.Max = 0;
-        pre.Num = 1;
-        const auto post = apply_CPaletteList_Alloc(pre);
-        if (!op_CPaletteList_Alloc(pre, post)) return false;
-        {
-            CPaletteList_ZppContract badPost = post;
-            badPost.Data_card = 0u;
-            if (op_CPaletteList_Alloc(pre, badPost)) return false;
-        }
-        {
-            CPaletteList_ZppContract badPost = post;
-            badPost.Max = 0;
-            if (op_CPaletteList_Alloc(pre, badPost)) return false;
-        }
-        {
-            CPaletteList_ZppContract badPost = post;
-            badPost.Num = 1;
-            if (op_CPaletteList_Alloc(pre, badPost)) return false;
-        }
-    }
-    {
-        CPaletteList_ZppContract pre{};
         pre.Data_card = 1u;
         pre.Num = 1;
         const auto post = apply_CPaletteList_Free(pre);
@@ -762,28 +628,6 @@ constexpr bool verify_rw_zpp_invariants() {
     }
     {
         CTxdStore_ZppContract pre{};
-        pre.ms_pTxdPool_card = 0u;
-        const auto post = apply_CTxdStore_Initialise(pre);
-        if (!op_CTxdStore_Initialise(pre, post)) return false;
-        {
-            CTxdStore_ZppContract badPost = post;
-            badPost.ms_pTxdPool_card = 0u;
-            if (op_CTxdStore_Initialise(pre, badPost)) return false;
-        }
-    }
-    {
-        CTxdStore_ZppContract pre{};
-        pre.ms_pStoredTxd_card = 0u;
-        const auto post = apply_CTxdStore_PushCurrentTxd(pre);
-        if (!op_CTxdStore_PushCurrentTxd(pre, post)) return false;
-        {
-            CTxdStore_ZppContract badPost = post;
-            badPost.ms_pStoredTxd_card = 0u;
-            if (op_CTxdStore_PushCurrentTxd(pre, badPost)) return false;
-        }
-    }
-    {
-        CTxdStore_ZppContract pre{};
         pre.ms_pStoredTxd_card = 1u;
         const auto post = apply_CTxdStore_PopCurrentTxd(pre);
         if (!op_CTxdStore_PopCurrentTxd(pre, post)) return false;
@@ -795,23 +639,25 @@ constexpr bool verify_rw_zpp_invariants() {
     }
     {
         CVisibilityPlugins_ZppContract pre{};
+        const int64_t flags_in = 25;
         pre.flags = 0;
-        const auto post = apply_CVisibilityPlugins_SetAtomicId(pre);
-        if (!op_CVisibilityPlugins_SetAtomicId(pre, post)) return false;
+        const auto post = apply_CVisibilityPlugins_SetAtomicId(pre, flags_in);
+        if (!op_CVisibilityPlugins_SetAtomicId(pre, post, flags_in)) return false;
         {
             CVisibilityPlugins_ZppContract badPost = post;
-            badPost.flags = 0;
-            if (op_CVisibilityPlugins_SetAtomicId(pre, badPost)) return false;
+            badPost.flags = flags_in + 1;
+            if (op_CVisibilityPlugins_SetAtomicId(pre, badPost, flags_in)) return false;
         }
     }
     {
         CVisibilityPlugins_ZppContract pre{};
-        const auto post = apply_CVisibilityPlugins_SetClumpAlpha(pre);
-        if (!op_CVisibilityPlugins_SetClumpAlpha(pre, post)) return false;
+        const int32_t alpha_in = 25;
+        const auto post = apply_CVisibilityPlugins_SetClumpAlpha(pre, alpha_in);
+        if (!op_CVisibilityPlugins_SetClumpAlpha(pre, post, alpha_in)) return false;
         {
             CVisibilityPlugins_ZppContract badPost = post;
-            badPost.alpha = 0;
-            if (op_CVisibilityPlugins_SetClumpAlpha(pre, badPost)) return false;
+            badPost.alpha = alpha_in + 1;
+            if (op_CVisibilityPlugins_SetClumpAlpha(pre, badPost, alpha_in)) return false;
         }
     }
     {
@@ -823,17 +669,6 @@ constexpr bool verify_rw_zpp_invariants() {
             CVisibilityPlugins_ZppContract badPost = post;
             badPost.alpha = 0;
             if (op_CVisibilityPlugins_GetClumpDistanceAlpha(pre, badPost)) return false;
-        }
-    }
-    {
-        CVisibilityPlugins_ZppContract pre{};
-        pre.alpha = 0;
-        const auto post = apply_CVisibilityPlugins_RenderPedCB_2(pre);
-        if (!op_CVisibilityPlugins_RenderPedCB_2(pre, post)) return false;
-        {
-            CVisibilityPlugins_ZppContract badPost = post;
-            badPost.alpha = 0;
-            if (op_CVisibilityPlugins_RenderPedCB_2(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

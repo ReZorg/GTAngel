@@ -71,17 +71,17 @@ constexpr CDate_ZppContract apply_CDate_CDate(const CDate_ZppContract& pre) {
     return post;
 }
 // Delta Operation Schema Contract (ΔCDate) from zpp/save/Date.zpp
-constexpr bool op_CDate_PopulateDateFields(const CDate_ZppContract& pre, const CDate_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nSecond == 1) && (post.m_nMinute == 1) && (post.m_nHour == 1) && (post.m_nDay == 1) && (post.m_nMonth == 1) && (post.m_nYear == 1);
+constexpr bool op_CDate_PopulateDateFields(const CDate_ZppContract& pre, const CDate_ZppContract& post, int32_t m_nSecond_in = 25, int32_t m_nMinute_in = 25, int32_t m_nHour_in = 25, int32_t m_nDay_in = 25, int32_t m_nMonth_in = 25, int32_t m_nYear_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nSecond == m_nSecond_in) && (post.m_nMinute == m_nMinute_in) && (post.m_nHour == m_nHour_in) && (post.m_nDay == m_nDay_in) && (post.m_nMonth == m_nMonth_in) && (post.m_nYear == m_nYear_in);
 }
-constexpr CDate_ZppContract apply_CDate_PopulateDateFields(const CDate_ZppContract& pre) {
+constexpr CDate_ZppContract apply_CDate_PopulateDateFields(const CDate_ZppContract& pre, int32_t m_nSecond_in = 25, int32_t m_nMinute_in = 25, int32_t m_nHour_in = 25, int32_t m_nDay_in = 25, int32_t m_nMonth_in = 25, int32_t m_nYear_in = 25) {
     CDate_ZppContract post = pre;
-    post.m_nSecond = 1;
-    post.m_nMinute = 1;
-    post.m_nHour = 1;
-    post.m_nDay = 1;
-    post.m_nMonth = 1;
-    post.m_nYear = 1;
+    post.m_nSecond = m_nSecond_in;
+    post.m_nMinute = m_nMinute_in;
+    post.m_nHour = m_nHour_in;
+    post.m_nDay = m_nDay_in;
+    post.m_nMonth = m_nMonth_in;
+    post.m_nYear = m_nYear_in;
     return post;
 }
 constexpr bool verify_save_zpp_invariants() {
@@ -149,43 +149,49 @@ constexpr bool verify_save_zpp_invariants() {
     }
     {
         CDate_ZppContract pre{};
+        const int32_t m_nSecond_in = 25;
+        const int32_t m_nMinute_in = 25;
+        const int32_t m_nHour_in = 25;
+        const int32_t m_nDay_in = 25;
+        const int32_t m_nMonth_in = 25;
+        const int32_t m_nYear_in = 25;
         pre.m_nSecond = 0;
         pre.m_nMinute = 0;
         pre.m_nHour = 0;
         pre.m_nDay = 0;
         pre.m_nMonth = 0;
         pre.m_nYear = 0;
-        const auto post = apply_CDate_PopulateDateFields(pre);
-        if (!op_CDate_PopulateDateFields(pre, post)) return false;
+        const auto post = apply_CDate_PopulateDateFields(pre, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in);
+        if (!op_CDate_PopulateDateFields(pre, post, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         {
             CDate_ZppContract badPost = post;
-            badPost.m_nSecond = 0;
-            if (op_CDate_PopulateDateFields(pre, badPost)) return false;
+            badPost.m_nSecond = m_nSecond_in + 1;
+            if (op_CDate_PopulateDateFields(pre, badPost, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         }
         {
             CDate_ZppContract badPost = post;
-            badPost.m_nMinute = 0;
-            if (op_CDate_PopulateDateFields(pre, badPost)) return false;
+            badPost.m_nMinute = m_nMinute_in + 1;
+            if (op_CDate_PopulateDateFields(pre, badPost, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         }
         {
             CDate_ZppContract badPost = post;
-            badPost.m_nHour = 0;
-            if (op_CDate_PopulateDateFields(pre, badPost)) return false;
+            badPost.m_nHour = m_nHour_in + 1;
+            if (op_CDate_PopulateDateFields(pre, badPost, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         }
         {
             CDate_ZppContract badPost = post;
-            badPost.m_nDay = 0;
-            if (op_CDate_PopulateDateFields(pre, badPost)) return false;
+            badPost.m_nDay = m_nDay_in + 1;
+            if (op_CDate_PopulateDateFields(pre, badPost, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         }
         {
             CDate_ZppContract badPost = post;
-            badPost.m_nMonth = 0;
-            if (op_CDate_PopulateDateFields(pre, badPost)) return false;
+            badPost.m_nMonth = m_nMonth_in + 1;
+            if (op_CDate_PopulateDateFields(pre, badPost, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         }
         {
             CDate_ZppContract badPost = post;
-            badPost.m_nYear = 0;
-            if (op_CDate_PopulateDateFields(pre, badPost)) return false;
+            badPost.m_nYear = m_nYear_in + 1;
+            if (op_CDate_PopulateDateFields(pre, badPost, m_nSecond_in, m_nMinute_in, m_nHour_in, m_nDay_in, m_nMonth_in, m_nYear_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

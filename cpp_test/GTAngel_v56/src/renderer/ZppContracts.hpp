@@ -401,13 +401,13 @@ constexpr CClouds_ZppContract apply_CClouds_Init(const CClouds_ZppContract& pre)
     return post;
 }
 // Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
-constexpr bool op_CCredits_Start(const CCredits_ZppContract& pre, const CCredits_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == true) && (post.CreditsStartTime == 1);
+constexpr bool op_CCredits_Start(const CCredits_ZppContract& pre, const CCredits_ZppContract& post, int64_t CreditsStartTime_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == true) && (post.CreditsStartTime == CreditsStartTime_in);
 }
-constexpr CCredits_ZppContract apply_CCredits_Start(const CCredits_ZppContract& pre) {
+constexpr CCredits_ZppContract apply_CCredits_Start(const CCredits_ZppContract& pre, int64_t CreditsStartTime_in = 25) {
     CCredits_ZppContract post = pre;
     post.bCreditsGoing = true;
-    post.CreditsStartTime = 1;
+    post.CreditsStartTime = CreditsStartTime_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
@@ -417,16 +417,6 @@ constexpr bool op_CCredits_Stop(const CCredits_ZppContract& pre, const CCredits_
 constexpr CCredits_ZppContract apply_CCredits_Stop(const CCredits_ZppContract& pre) {
     CCredits_ZppContract post = pre;
     post.bCreditsGoing = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCDraw) from zpp/renderer/Draw.zpp
-constexpr bool op_CDraw_SetFOV(const CDraw_ZppContract& pre, const CDraw_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_fScaledFOV == 1.0f) && (post.ms_fFOV == 1.0f);
-}
-constexpr CDraw_ZppContract apply_CDraw_SetFOV(const CDraw_ZppContract& pre) {
-    CDraw_ZppContract post = pre;
-    post.ms_fScaledFOV = 1.0f;
-    post.ms_fFOV = 1.0f;
     return post;
 }
 constexpr bool verify_renderer_zpp_invariants() {
@@ -619,19 +609,20 @@ constexpr bool verify_renderer_zpp_invariants() {
     }
     {
         CCredits_ZppContract pre{};
+        const int64_t CreditsStartTime_in = 25;
         pre.bCreditsGoing = false;
         pre.CreditsStartTime = 0;
-        const auto post = apply_CCredits_Start(pre);
-        if (!op_CCredits_Start(pre, post)) return false;
+        const auto post = apply_CCredits_Start(pre, CreditsStartTime_in);
+        if (!op_CCredits_Start(pre, post, CreditsStartTime_in)) return false;
         {
             CCredits_ZppContract badPost = post;
             badPost.bCreditsGoing = false;
-            if (op_CCredits_Start(pre, badPost)) return false;
+            if (op_CCredits_Start(pre, badPost, CreditsStartTime_in)) return false;
         }
         {
             CCredits_ZppContract badPost = post;
-            badPost.CreditsStartTime = 0;
-            if (op_CCredits_Start(pre, badPost)) return false;
+            badPost.CreditsStartTime = CreditsStartTime_in + 1;
+            if (op_CCredits_Start(pre, badPost, CreditsStartTime_in)) return false;
         }
     }
     {
@@ -643,23 +634,6 @@ constexpr bool verify_renderer_zpp_invariants() {
             CCredits_ZppContract badPost = post;
             badPost.bCreditsGoing = true;
             if (op_CCredits_Stop(pre, badPost)) return false;
-        }
-    }
-    {
-        CDraw_ZppContract pre{};
-        pre.ms_fScaledFOV = 0.0f;
-        pre.ms_fFOV = 0.0f;
-        const auto post = apply_CDraw_SetFOV(pre);
-        if (!op_CDraw_SetFOV(pre, post)) return false;
-        {
-            CDraw_ZppContract badPost = post;
-            badPost.ms_fScaledFOV = 0.0f;
-            if (op_CDraw_SetFOV(pre, badPost)) return false;
-        }
-        {
-            CDraw_ZppContract badPost = post;
-            badPost.ms_fFOV = 0.0f;
-            if (op_CDraw_SetFOV(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

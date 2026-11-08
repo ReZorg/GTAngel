@@ -269,37 +269,25 @@ constexpr bool op_CompressedVector_Get_4(const CompressedVector_ZppContract& sta
     return state.checkInvariant();
 }
 // Delta Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
-constexpr bool op_CColBox_Set(const CColBox_ZppContract& pre, const CColBox_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.min_field == 1) && (post.max_field == 1) && (post.surface == 1) && (post.piece == 1);
+constexpr bool op_CColBox_Set(const CColBox_ZppContract& pre, const CColBox_ZppContract& post, int32_t min_field_in = 25, int32_t max_field_in = 25, int64_t surface_in = 25, int64_t piece_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.min_field == min_field_in) && (post.max_field == max_field_in) && (post.surface == surface_in) && (post.piece == piece_in);
 }
-constexpr CColBox_ZppContract apply_CColBox_Set(const CColBox_ZppContract& pre) {
+constexpr CColBox_ZppContract apply_CColBox_Set(const CColBox_ZppContract& pre, int32_t min_field_in = 25, int32_t max_field_in = 25, int64_t surface_in = 25, int64_t piece_in = 25) {
     CColBox_ZppContract post = pre;
-    post.min_field = 1;
-    post.max_field = 1;
-    post.surface = 1;
-    post.piece = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
-constexpr bool op_CColBox_operator(const CColBox_ZppContract& pre, const CColBox_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.min_field == 1) && (post.max_field == 1) && (post.surface == 1) && (post.piece == 1);
-}
-constexpr CColBox_ZppContract apply_CColBox_operator(const CColBox_ZppContract& pre) {
-    CColBox_ZppContract post = pre;
-    post.min_field = 1;
-    post.max_field = 1;
-    post.surface = 1;
-    post.piece = 1;
+    post.min_field = min_field_in;
+    post.max_field = max_field_in;
+    post.surface = surface_in;
+    post.piece = piece_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCColLine) from zpp/collision/ColLine.zpp
-constexpr bool op_CColLine_Set(const CColLine_ZppContract& pre, const CColLine_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.p0 == 1) && (post.p1 == 1);
+constexpr bool op_CColLine_Set(const CColLine_ZppContract& pre, const CColLine_ZppContract& post, int32_t p0_in = 25, int32_t p1_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.p0 == p0_in) && (post.p1 == p1_in);
 }
-constexpr CColLine_ZppContract apply_CColLine_Set(const CColLine_ZppContract& pre) {
+constexpr CColLine_ZppContract apply_CColLine_Set(const CColLine_ZppContract& pre, int32_t p0_in = 25, int32_t p1_in = 25) {
     CColLine_ZppContract post = pre;
-    post.p0 = 1;
-    post.p1 = 1;
+    post.p0 = p0_in;
+    post.p1 = p1_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCColModel) from zpp/collision/ColModel.zpp
@@ -339,65 +327,6 @@ constexpr CColModel_ZppContract apply_CColModel_RemoveTrianglePlanes(const CColM
     post.trianglePlanes_card = 0u;
     return post;
 }
-// Delta Operation Schema Contract (ΔCColModel) from zpp/collision/ColModel.zpp
-constexpr bool op_CColModel_operator(const CColModel_ZppContract& pre, const CColModel_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.boundingSphere == 1) && (post.boundingBox == 1) && (post.numTriBBoxes == 0) && (post.triBBoxes_card == 0u);
-}
-constexpr CColModel_ZppContract apply_CColModel_operator(const CColModel_ZppContract& pre) {
-    CColModel_ZppContract post = pre;
-    post.boundingSphere = 1;
-    post.boundingBox = 1;
-    post.numTriBBoxes = 0;
-    post.triBBoxes_card = 0u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCColModel) from zpp/collision/ColModel.zpp
-constexpr bool op_CColModel_operator_2(const CColModel_ZppContract& pre, const CColModel_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.boundingSphere == 1) && (post.boundingBox == 1) && (post.numSpheres == 0) && (post.spheres_card == 0u);
-}
-constexpr CColModel_ZppContract apply_CColModel_operator_2(const CColModel_ZppContract& pre) {
-    CColModel_ZppContract post = pre;
-    post.boundingSphere = 1;
-    post.boundingBox = 1;
-    post.numSpheres = 0;
-    post.spheres_card = 0u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCColPoint) from zpp/collision/ColPoint.zpp
-constexpr bool op_CColPoint_operator(const CColPoint_ZppContract& pre, const CColPoint_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.point == 1) && (post.normal == 1) && (post.surfaceA == 1) && (post.pieceA == 1) && (post.surfaceB == 1) && (post.pieceB == 1);
-}
-constexpr CColPoint_ZppContract apply_CColPoint_operator(const CColPoint_ZppContract& pre) {
-    CColPoint_ZppContract post = pre;
-    post.point = 1;
-    post.normal = 1;
-    post.surfaceA = 1;
-    post.pieceA = 1;
-    post.surfaceB = 1;
-    post.pieceB = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCColSphere) from zpp/collision/ColSphere.zpp
-constexpr bool op_CColSphere_Set(const CColSphere_ZppContract& pre, const CColSphere_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.radius == 1.0f) && (post.center == 1) && (post.surface == 1) && (post.piece == 1);
-}
-constexpr CColSphere_ZppContract apply_CColSphere_Set(const CColSphere_ZppContract& pre) {
-    CColSphere_ZppContract post = pre;
-    post.radius = 1.0f;
-    post.center = 1;
-    post.surface = 1;
-    post.piece = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCColStore) from zpp/collision/ColStore.zpp
-constexpr bool op_CColStore_Initialise(const CColStore_ZppContract& pre, const CColStore_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pColPool_card == 1u);
-}
-constexpr CColStore_ZppContract apply_CColStore_Initialise(const CColStore_ZppContract& pre) {
-    CColStore_ZppContract post = pre;
-    post.ms_pColPool_card = 1u;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCColStore) from zpp/collision/ColStore.zpp
 constexpr bool op_CColStore_Shutdown(const CColStore_ZppContract& pre, const CColStore_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.ms_pColPool_card == 0u);
@@ -407,35 +336,16 @@ constexpr CColStore_ZppContract apply_CColStore_Shutdown(const CColStore_ZppCont
     post.ms_pColPool_card = 0u;
     return post;
 }
-// Delta Operation Schema Contract (ΔCColStore) from zpp/collision/ColStore.zpp
-constexpr bool op_CColStore_Load(const CColStore_ZppContract& pre, const CColStore_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_pColPool_card == 1u) && (post.m_onlyBB == true);
-}
-constexpr CColStore_ZppContract apply_CColStore_Load(const CColStore_ZppContract& pre) {
-    CColStore_ZppContract post = pre;
-    post.ms_pColPool_card = 1u;
-    post.m_onlyBB = true;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCColTriangle) from zpp/collision/ColTriangle.zpp
-constexpr bool op_CColTriangle_Set(const CColTriangle_ZppContract& pre, const CColTriangle_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.a == 1) && (post.b == 1) && (post.c == 1) && (post.surface == 1);
+constexpr bool op_CColTriangle_Set(const CColTriangle_ZppContract& pre, const CColTriangle_ZppContract& post, int64_t a_in = 25, int64_t b_in = 25, int64_t c_in = 25, int64_t surface_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.a == a_in) && (post.b == b_in) && (post.c == c_in) && (post.surface == surface_in);
 }
-constexpr CColTriangle_ZppContract apply_CColTriangle_Set(const CColTriangle_ZppContract& pre) {
+constexpr CColTriangle_ZppContract apply_CColTriangle_Set(const CColTriangle_ZppContract& pre, int64_t a_in = 25, int64_t b_in = 25, int64_t c_in = 25, int64_t surface_in = 25) {
     CColTriangle_ZppContract post = pre;
-    post.a = 1;
-    post.b = 1;
-    post.c = 1;
-    post.surface = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCCollision) from zpp/collision/Collision.zpp
-constexpr bool op_CCollision_Init(const CCollision_ZppContract& pre, const CCollision_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_collisionInMemory == 1);
-}
-constexpr CCollision_ZppContract apply_CCollision_Init(const CCollision_ZppContract& pre) {
-    CCollision_ZppContract post = pre;
-    post.ms_collisionInMemory = 1;
+    post.a = a_in;
+    post.b = b_in;
+    post.c = c_in;
+    post.surface = surface_in;
     return post;
 }
 constexpr bool verify_collision_zpp_invariants() {
@@ -612,72 +522,49 @@ constexpr bool verify_collision_zpp_invariants() {
     }
     {
         CColBox_ZppContract pre{};
+        const int32_t min_field_in = 25;
+        const int32_t max_field_in = 25;
+        const int64_t surface_in = 25;
+        const int64_t piece_in = 25;
         pre.surface = 0;
-        const auto post = apply_CColBox_Set(pre);
-        if (!op_CColBox_Set(pre, post)) return false;
+        const auto post = apply_CColBox_Set(pre, min_field_in, max_field_in, surface_in, piece_in);
+        if (!op_CColBox_Set(pre, post, min_field_in, max_field_in, surface_in, piece_in)) return false;
         {
             CColBox_ZppContract badPost = post;
-            badPost.min_field = 0;
-            if (op_CColBox_Set(pre, badPost)) return false;
+            badPost.min_field = min_field_in + 1;
+            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
         }
         {
             CColBox_ZppContract badPost = post;
-            badPost.max_field = 0;
-            if (op_CColBox_Set(pre, badPost)) return false;
+            badPost.max_field = max_field_in + 1;
+            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
         }
         {
             CColBox_ZppContract badPost = post;
-            badPost.surface = 0;
-            if (op_CColBox_Set(pre, badPost)) return false;
+            badPost.surface = surface_in + 1;
+            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
         }
         {
             CColBox_ZppContract badPost = post;
-            badPost.piece = 0;
-            if (op_CColBox_Set(pre, badPost)) return false;
-        }
-    }
-    {
-        CColBox_ZppContract pre{};
-        pre.min_field = 0;
-        pre.max_field = 0;
-        pre.surface = 0;
-        pre.piece = 0;
-        const auto post = apply_CColBox_operator(pre);
-        if (!op_CColBox_operator(pre, post)) return false;
-        {
-            CColBox_ZppContract badPost = post;
-            badPost.min_field = 0;
-            if (op_CColBox_operator(pre, badPost)) return false;
-        }
-        {
-            CColBox_ZppContract badPost = post;
-            badPost.max_field = 0;
-            if (op_CColBox_operator(pre, badPost)) return false;
-        }
-        {
-            CColBox_ZppContract badPost = post;
-            badPost.surface = 0;
-            if (op_CColBox_operator(pre, badPost)) return false;
-        }
-        {
-            CColBox_ZppContract badPost = post;
-            badPost.piece = 0;
-            if (op_CColBox_operator(pre, badPost)) return false;
+            badPost.piece = piece_in + 1;
+            if (op_CColBox_Set(pre, badPost, min_field_in, max_field_in, surface_in, piece_in)) return false;
         }
     }
     {
         CColLine_ZppContract pre{};
-        const auto post = apply_CColLine_Set(pre);
-        if (!op_CColLine_Set(pre, post)) return false;
+        const int32_t p0_in = 25;
+        const int32_t p1_in = 25;
+        const auto post = apply_CColLine_Set(pre, p0_in, p1_in);
+        if (!op_CColLine_Set(pre, post, p0_in, p1_in)) return false;
         {
             CColLine_ZppContract badPost = post;
-            badPost.p0 = 0;
-            if (op_CColLine_Set(pre, badPost)) return false;
+            badPost.p0 = p0_in + 1;
+            if (op_CColLine_Set(pre, badPost, p0_in, p1_in)) return false;
         }
         {
             CColLine_ZppContract badPost = post;
-            badPost.p1 = 0;
-            if (op_CColLine_Set(pre, badPost)) return false;
+            badPost.p1 = p1_in + 1;
+            if (op_CColLine_Set(pre, badPost, p0_in, p1_in)) return false;
         }
     }
     {
@@ -774,143 +661,6 @@ constexpr bool verify_collision_zpp_invariants() {
         }
     }
     {
-        CColModel_ZppContract pre{};
-        pre.boundingSphere = 0;
-        pre.boundingBox = 0;
-        pre.numTriBBoxes = 1;
-        pre.triBBoxes_card = 1u;
-        const auto post = apply_CColModel_operator(pre);
-        if (!op_CColModel_operator(pre, post)) return false;
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.boundingSphere = 0;
-            if (op_CColModel_operator(pre, badPost)) return false;
-        }
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.boundingBox = 0;
-            if (op_CColModel_operator(pre, badPost)) return false;
-        }
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.numTriBBoxes = 1;
-            if (op_CColModel_operator(pre, badPost)) return false;
-        }
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.triBBoxes_card = 1u;
-            if (op_CColModel_operator(pre, badPost)) return false;
-        }
-    }
-    {
-        CColModel_ZppContract pre{};
-        pre.boundingSphere = 0;
-        pre.boundingBox = 0;
-        pre.numSpheres = 1;
-        pre.spheres_card = 1u;
-        const auto post = apply_CColModel_operator_2(pre);
-        if (!op_CColModel_operator_2(pre, post)) return false;
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.boundingSphere = 0;
-            if (op_CColModel_operator_2(pre, badPost)) return false;
-        }
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.boundingBox = 0;
-            if (op_CColModel_operator_2(pre, badPost)) return false;
-        }
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.numSpheres = 1;
-            if (op_CColModel_operator_2(pre, badPost)) return false;
-        }
-        {
-            CColModel_ZppContract badPost = post;
-            badPost.spheres_card = 1u;
-            if (op_CColModel_operator_2(pre, badPost)) return false;
-        }
-    }
-    {
-        CColPoint_ZppContract pre{};
-        pre.point = 0;
-        pre.normal = 0;
-        pre.surfaceA = 0;
-        pre.pieceA = 0;
-        pre.surfaceB = 0;
-        pre.pieceB = 0;
-        const auto post = apply_CColPoint_operator(pre);
-        if (!op_CColPoint_operator(pre, post)) return false;
-        {
-            CColPoint_ZppContract badPost = post;
-            badPost.point = 0;
-            if (op_CColPoint_operator(pre, badPost)) return false;
-        }
-        {
-            CColPoint_ZppContract badPost = post;
-            badPost.normal = 0;
-            if (op_CColPoint_operator(pre, badPost)) return false;
-        }
-        {
-            CColPoint_ZppContract badPost = post;
-            badPost.surfaceA = 0;
-            if (op_CColPoint_operator(pre, badPost)) return false;
-        }
-        {
-            CColPoint_ZppContract badPost = post;
-            badPost.pieceA = 0;
-            if (op_CColPoint_operator(pre, badPost)) return false;
-        }
-        {
-            CColPoint_ZppContract badPost = post;
-            badPost.surfaceB = 0;
-            if (op_CColPoint_operator(pre, badPost)) return false;
-        }
-        {
-            CColPoint_ZppContract badPost = post;
-            badPost.pieceB = 0;
-            if (op_CColPoint_operator(pre, badPost)) return false;
-        }
-    }
-    {
-        CColSphere_ZppContract pre{};
-        pre.radius = 0.0f;
-        pre.surface = 0;
-        const auto post = apply_CColSphere_Set(pre);
-        if (!op_CColSphere_Set(pre, post)) return false;
-        {
-            CColSphere_ZppContract badPost = post;
-            badPost.radius = 0.0f;
-            if (op_CColSphere_Set(pre, badPost)) return false;
-        }
-        {
-            CColSphere_ZppContract badPost = post;
-            badPost.center = 0;
-            if (op_CColSphere_Set(pre, badPost)) return false;
-        }
-        {
-            CColSphere_ZppContract badPost = post;
-            badPost.surface = 0;
-            if (op_CColSphere_Set(pre, badPost)) return false;
-        }
-        {
-            CColSphere_ZppContract badPost = post;
-            badPost.piece = 0;
-            if (op_CColSphere_Set(pre, badPost)) return false;
-        }
-    }
-    {
-        CColStore_ZppContract pre{};
-        pre.ms_pColPool_card = 0u;
-        const auto post = apply_CColStore_Initialise(pre);
-        if (!op_CColStore_Initialise(pre, post)) return false;
-        {
-            CColStore_ZppContract badPost = post;
-            badPost.ms_pColPool_card = 0u;
-            if (op_CColStore_Initialise(pre, badPost)) return false;
-        }
-    }
-    {
         CColStore_ZppContract pre{};
         pre.ms_pColPool_card = 1u;
         const auto post = apply_CColStore_Shutdown(pre);
@@ -922,57 +672,33 @@ constexpr bool verify_collision_zpp_invariants() {
         }
     }
     {
-        CColStore_ZppContract pre{};
-        pre.ms_pColPool_card = 0u;
-        pre.m_onlyBB = false;
-        const auto post = apply_CColStore_Load(pre);
-        if (!op_CColStore_Load(pre, post)) return false;
-        {
-            CColStore_ZppContract badPost = post;
-            badPost.ms_pColPool_card = 0u;
-            if (op_CColStore_Load(pre, badPost)) return false;
-        }
-        {
-            CColStore_ZppContract badPost = post;
-            badPost.m_onlyBB = false;
-            if (op_CColStore_Load(pre, badPost)) return false;
-        }
-    }
-    {
         CColTriangle_ZppContract pre{};
+        const int64_t a_in = 25;
+        const int64_t b_in = 25;
+        const int64_t c_in = 25;
+        const int64_t surface_in = 25;
         pre.surface = 0;
-        const auto post = apply_CColTriangle_Set(pre);
-        if (!op_CColTriangle_Set(pre, post)) return false;
+        const auto post = apply_CColTriangle_Set(pre, a_in, b_in, c_in, surface_in);
+        if (!op_CColTriangle_Set(pre, post, a_in, b_in, c_in, surface_in)) return false;
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.a = 0;
-            if (op_CColTriangle_Set(pre, badPost)) return false;
+            badPost.a = a_in + 1;
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
         }
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.b = 0;
-            if (op_CColTriangle_Set(pre, badPost)) return false;
+            badPost.b = b_in + 1;
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
         }
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.c = 0;
-            if (op_CColTriangle_Set(pre, badPost)) return false;
+            badPost.c = c_in + 1;
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
         }
         {
             CColTriangle_ZppContract badPost = post;
-            badPost.surface = 0;
-            if (op_CColTriangle_Set(pre, badPost)) return false;
-        }
-    }
-    {
-        CCollision_ZppContract pre{};
-        pre.ms_collisionInMemory = 0;
-        const auto post = apply_CCollision_Init(pre);
-        if (!op_CCollision_Init(pre, post)) return false;
-        {
-            CCollision_ZppContract badPost = post;
-            badPost.ms_collisionInMemory = 0;
-            if (op_CCollision_Init(pre, badPost)) return false;
+            badPost.surface = surface_in + 1;
+            if (op_CColTriangle_Set(pre, badPost, a_in, b_in, c_in, surface_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

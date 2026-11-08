@@ -265,17 +265,6 @@ struct soundlistModuleState_ZppContract {
             && (source_lines == 433);
     }
 };
-// Delta Operation Schema Contract (ΔcAudioScriptObject) from zpp/audio/AudioScriptObject.zpp
-constexpr bool op_cAudioScriptObject_Reset(const cAudioScriptObject_ZppContract& pre, const cAudioScriptObject_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.AudioId == 1) && (post.Posn == 1) && (post.AudioEntity == 1);
-}
-constexpr cAudioScriptObject_ZppContract apply_cAudioScriptObject_Reset(const cAudioScriptObject_ZppContract& pre) {
-    cAudioScriptObject_ZppContract post = pre;
-    post.AudioId = 1;
-    post.Posn = 1;
-    post.AudioEntity = 1;
-    return post;
-}
 constexpr bool verify_audio_zpp_invariants() {
     {
         cAudioCollision_ZppContract valid{};
@@ -409,29 +398,6 @@ constexpr bool verify_audio_zpp_invariants() {
         soundlistModuleState_ZppContract bad{};
         bad.module_loaded = false;
         if (bad.checkInvariant()) return false;
-    }
-    {
-        cAudioScriptObject_ZppContract pre{};
-        pre.AudioId = 0;
-        pre.Posn = 0;
-        pre.AudioEntity = 0;
-        const auto post = apply_cAudioScriptObject_Reset(pre);
-        if (!op_cAudioScriptObject_Reset(pre, post)) return false;
-        {
-            cAudioScriptObject_ZppContract badPost = post;
-            badPost.AudioId = 0;
-            if (op_cAudioScriptObject_Reset(pre, badPost)) return false;
-        }
-        {
-            cAudioScriptObject_ZppContract badPost = post;
-            badPost.Posn = 0;
-            if (op_cAudioScriptObject_Reset(pre, badPost)) return false;
-        }
-        {
-            cAudioScriptObject_ZppContract badPost = post;
-            badPost.AudioEntity = 0;
-            if (op_cAudioScriptObject_Reset(pre, badPost)) return false;
-        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

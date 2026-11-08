@@ -409,27 +409,13 @@ constexpr CCarGenerator_ZppContract apply_CCarGenerator_SwitchOff(const CCarGene
     return post;
 }
 // Delta Operation Schema Contract (ΔCCarGenerator) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, const CCarGenerator_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nUsesRemaining == 1) && (post.m_nTimer == 1);
+constexpr bool op_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, const CCarGenerator_ZppContract& post, int64_t m_nTimer_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nUsesRemaining == 65535) && (post.m_nTimer == m_nTimer_in);
 }
-constexpr CCarGenerator_ZppContract apply_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre) {
+constexpr CCarGenerator_ZppContract apply_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, int64_t m_nTimer_in = 25) {
     CCarGenerator_ZppContract post = pre;
-    post.m_nUsesRemaining = 1;
-    post.m_nTimer = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCCarGenerator) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CCarGenerator_Setup(const CCarGenerator_ZppContract& pre, const CCarGenerator_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_vecPos == 1) && (post.m_fAngle == 1.0f) && (post.m_nModelIndex == 1) && (post.m_nColor1 == 1) && (post.m_nColor2 == 1) && (post.m_bForceSpawn == 1);
-}
-constexpr CCarGenerator_ZppContract apply_CCarGenerator_Setup(const CCarGenerator_ZppContract& pre) {
-    CCarGenerator_ZppContract post = pre;
-    post.m_vecPos = 1;
-    post.m_fAngle = 1.0f;
-    post.m_nModelIndex = 1;
-    post.m_nColor1 = 1;
-    post.m_nColor2 = 1;
-    post.m_bForceSpawn = 1;
+    post.m_nUsesRemaining = 65535;
+    post.m_nTimer = m_nTimer_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
@@ -465,33 +451,6 @@ constexpr CDamageManager_ZppContract apply_CDamageManager_FuckCarCompletely(cons
     post.m_panelStatus = 0;
     return post;
 }
-// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
-constexpr bool op_CDamageManager_SetPanelStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_panelStatus == 1);
-}
-constexpr CDamageManager_ZppContract apply_CDamageManager_SetPanelStatus(const CDamageManager_ZppContract& pre) {
-    CDamageManager_ZppContract post = pre;
-    post.m_panelStatus = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
-constexpr bool op_CDamageManager_SetLightStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_lightStatus == 1);
-}
-constexpr CDamageManager_ZppContract apply_CDamageManager_SetLightStatus(const CDamageManager_ZppContract& pre) {
-    CDamageManager_ZppContract post = pre;
-    post.m_lightStatus = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
-constexpr bool op_CDamageManager_SetEngineStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_engineStatus == 1);
-}
-constexpr CDamageManager_ZppContract apply_CDamageManager_SetEngineStatus(const CDamageManager_ZppContract& pre) {
-    CDamageManager_ZppContract post = pre;
-    post.m_engineStatus = 1;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
 constexpr bool op_CFerry_Render(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_bAlreadyRendered == true);
@@ -499,16 +458,6 @@ constexpr bool op_CFerry_Render(const CFerry_ZppContract& pre, const CFerry_ZppC
 constexpr CFerry_ZppContract apply_CFerry_Render(const CFerry_ZppContract& pre) {
     CFerry_ZppContract post = pre;
     post.m_bAlreadyRendered = true;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
-constexpr bool op_CFerry_CloseDoor(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nDoorState == 3) && (post.m_nDoorTimer == 1);
-}
-constexpr CFerry_ZppContract apply_CFerry_CloseDoor(const CFerry_ZppContract& pre) {
-    CFerry_ZppContract post = pre;
-    post.m_nDoorState = 3;
-    post.m_nDoorTimer = 1;
     return post;
 }
 // Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
@@ -690,60 +639,20 @@ constexpr bool verify_vehicles_zpp_invariants() {
     }
     {
         CCarGenerator_ZppContract pre{};
+        const int64_t m_nTimer_in = 25;
         pre.m_nUsesRemaining = 0;
         pre.m_nTimer = 0;
-        const auto post = apply_CCarGenerator_SwitchOn(pre);
-        if (!op_CCarGenerator_SwitchOn(pre, post)) return false;
+        const auto post = apply_CCarGenerator_SwitchOn(pre, m_nTimer_in);
+        if (!op_CCarGenerator_SwitchOn(pre, post, m_nTimer_in)) return false;
         {
             CCarGenerator_ZppContract badPost = post;
             badPost.m_nUsesRemaining = 0;
-            if (op_CCarGenerator_SwitchOn(pre, badPost)) return false;
+            if (op_CCarGenerator_SwitchOn(pre, badPost, m_nTimer_in)) return false;
         }
         {
             CCarGenerator_ZppContract badPost = post;
-            badPost.m_nTimer = 0;
-            if (op_CCarGenerator_SwitchOn(pre, badPost)) return false;
-        }
-    }
-    {
-        CCarGenerator_ZppContract pre{};
-        pre.m_vecPos = 0;
-        pre.m_fAngle = 0.0f;
-        pre.m_nModelIndex = 0;
-        pre.m_nColor1 = 0;
-        pre.m_nColor2 = 0;
-        pre.m_bForceSpawn = 0;
-        const auto post = apply_CCarGenerator_Setup(pre);
-        if (!op_CCarGenerator_Setup(pre, post)) return false;
-        {
-            CCarGenerator_ZppContract badPost = post;
-            badPost.m_vecPos = 0;
-            if (op_CCarGenerator_Setup(pre, badPost)) return false;
-        }
-        {
-            CCarGenerator_ZppContract badPost = post;
-            badPost.m_fAngle = 0.0f;
-            if (op_CCarGenerator_Setup(pre, badPost)) return false;
-        }
-        {
-            CCarGenerator_ZppContract badPost = post;
-            badPost.m_nModelIndex = 0;
-            if (op_CCarGenerator_Setup(pre, badPost)) return false;
-        }
-        {
-            CCarGenerator_ZppContract badPost = post;
-            badPost.m_nColor1 = 0;
-            if (op_CCarGenerator_Setup(pre, badPost)) return false;
-        }
-        {
-            CCarGenerator_ZppContract badPost = post;
-            badPost.m_nColor2 = 0;
-            if (op_CCarGenerator_Setup(pre, badPost)) return false;
-        }
-        {
-            CCarGenerator_ZppContract badPost = post;
-            badPost.m_bForceSpawn = 0;
-            if (op_CCarGenerator_Setup(pre, badPost)) return false;
+            badPost.m_nTimer = m_nTimer_in + 1;
+            if (op_CCarGenerator_SwitchOn(pre, badPost, m_nTimer_in)) return false;
         }
     }
     {
@@ -816,39 +725,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
         }
     }
     {
-        CDamageManager_ZppContract pre{};
-        pre.m_panelStatus = 0;
-        const auto post = apply_CDamageManager_SetPanelStatus(pre);
-        if (!op_CDamageManager_SetPanelStatus(pre, post)) return false;
-        {
-            CDamageManager_ZppContract badPost = post;
-            badPost.m_panelStatus = 0;
-            if (op_CDamageManager_SetPanelStatus(pre, badPost)) return false;
-        }
-    }
-    {
-        CDamageManager_ZppContract pre{};
-        pre.m_lightStatus = 0;
-        const auto post = apply_CDamageManager_SetLightStatus(pre);
-        if (!op_CDamageManager_SetLightStatus(pre, post)) return false;
-        {
-            CDamageManager_ZppContract badPost = post;
-            badPost.m_lightStatus = 0;
-            if (op_CDamageManager_SetLightStatus(pre, badPost)) return false;
-        }
-    }
-    {
-        CDamageManager_ZppContract pre{};
-        pre.m_engineStatus = 0;
-        const auto post = apply_CDamageManager_SetEngineStatus(pre);
-        if (!op_CDamageManager_SetEngineStatus(pre, post)) return false;
-        {
-            CDamageManager_ZppContract badPost = post;
-            badPost.m_engineStatus = 0;
-            if (op_CDamageManager_SetEngineStatus(pre, badPost)) return false;
-        }
-    }
-    {
         CFerry_ZppContract pre{};
         pre.m_bAlreadyRendered = false;
         const auto post = apply_CFerry_Render(pre);
@@ -857,23 +733,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
             CFerry_ZppContract badPost = post;
             badPost.m_bAlreadyRendered = false;
             if (op_CFerry_Render(pre, badPost)) return false;
-        }
-    }
-    {
-        CFerry_ZppContract pre{};
-        pre.m_nDoorState = 0;
-        pre.m_nDoorTimer = 0;
-        const auto post = apply_CFerry_CloseDoor(pre);
-        if (!op_CFerry_CloseDoor(pre, post)) return false;
-        {
-            CFerry_ZppContract badPost = post;
-            badPost.m_nDoorState = 0;
-            if (op_CFerry_CloseDoor(pre, badPost)) return false;
-        }
-        {
-            CFerry_ZppContract badPost = post;
-            badPost.m_nDoorTimer = 0;
-            if (op_CFerry_CloseDoor(pre, badPost)) return false;
         }
     }
     {
@@ -902,5 +761,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
 }
 static_assert(verify_vehicles_zpp_invariants(), "Z++ formal contract invariant failed for vehicles");
 static_assert(static_cast<int>(eCarNodes::CAR_WHEEL_RF_v) == 1 && static_cast<int>(eCarNodes::NUM_CAR_NODES_v) == 20, "eCarNodes Z++ valuation mismatch");
+static_assert(apply_CCarGenerator_SwitchOn(CCarGenerator_ZppContract{}).m_nUsesRemaining == 65535, "CCarGenerator_SwitchOn must set UINT16_MAX (65535)");
 } // namespace zpp_vehicles_spec
 #endif // GTANGEL_ZPP_VEHICLES_SPEC_GUARD

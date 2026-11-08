@@ -282,43 +282,6 @@ constexpr CBaseModelInfo_ZppContract apply_CBaseModelInfo_Init2dEffects(const CB
     post.m_num2dEffects = 0;
     return post;
 }
-// Delta Operation Schema Contract (ΔCBaseModelInfo) from zpp/modelinfo/BaseModelInfo.zpp
-constexpr bool op_CBaseModelInfo_Add2dEffect(const CBaseModelInfo_ZppContract& pre, const CBaseModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_2dEffectsID == 1) && (post.m_num2dEffects == 1);
-}
-constexpr CBaseModelInfo_ZppContract apply_CBaseModelInfo_Add2dEffect(const CBaseModelInfo_ZppContract& pre) {
-    CBaseModelInfo_ZppContract post = pre;
-    post.m_2dEffectsID = 1;
-    post.m_num2dEffects = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCBaseModelInfo) from zpp/modelinfo/BaseModelInfo.zpp
-constexpr bool op_CBaseModelInfo_SetModelName(const CBaseModelInfo_ZppContract& pre, const CBaseModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nameKey == 1);
-}
-constexpr CBaseModelInfo_ZppContract apply_CBaseModelInfo_SetModelName(const CBaseModelInfo_ZppContract& pre) {
-    CBaseModelInfo_ZppContract post = pre;
-    post.m_nameKey = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCBaseModelInfo) from zpp/modelinfo/BaseModelInfo.zpp
-constexpr bool op_CBaseModelInfo_DeleteChunk(const CBaseModelInfo_ZppContract& pre, const CBaseModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_chunk == 1);
-}
-constexpr CBaseModelInfo_ZppContract apply_CBaseModelInfo_DeleteChunk(const CBaseModelInfo_ZppContract& pre) {
-    CBaseModelInfo_ZppContract post = pre;
-    post.m_chunk = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCBaseModelInfo) from zpp/modelinfo/BaseModelInfo.zpp
-constexpr bool op_CBaseModelInfo_Write(const CBaseModelInfo_ZppContract& pre, const CBaseModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_chunk == 1);
-}
-constexpr CBaseModelInfo_ZppContract apply_CBaseModelInfo_Write(const CBaseModelInfo_ZppContract& pre) {
-    CBaseModelInfo_ZppContract post = pre;
-    post.m_chunk = 1;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
 constexpr bool op_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContract& pre, const CClumpModelInfo_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_clump_card == 0u);
@@ -326,34 +289,6 @@ constexpr bool op_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContra
 constexpr CClumpModelInfo_ZppContract apply_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContract& pre) {
     CClumpModelInfo_ZppContract post = pre;
     post.m_clump_card = 0u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_SetAnimFile(const CClumpModelInfo_ZppContract& pre, const CClumpModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_animFileName == 1);
-}
-constexpr CClumpModelInfo_ZppContract apply_CClumpModelInfo_SetAnimFile(const CClumpModelInfo_ZppContract& pre) {
-    CClumpModelInfo_ZppContract post = pre;
-    post.m_animFileName = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCModelInfo) from zpp/modelinfo/ModelInfo.zpp
-constexpr bool op_CModelInfo_Load(const CModelInfo_ZppContract& pre, const CModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.msNumModelInfos == 1) && (post.ms_modelInfoPtrs_card == 1u);
-}
-constexpr CModelInfo_ZppContract apply_CModelInfo_Load(const CModelInfo_ZppContract& pre) {
-    CModelInfo_ZppContract post = pre;
-    post.msNumModelInfos = 1;
-    post.ms_modelInfoPtrs_card = 1u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCWeaponModelInfo) from zpp/modelinfo/WeaponModelInfo.zpp
-constexpr bool op_CWeaponModelInfo_SetAnimFile(const CWeaponModelInfo_ZppContract& pre, const CWeaponModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_animFileName == 1);
-}
-constexpr CWeaponModelInfo_ZppContract apply_CWeaponModelInfo_SetAnimFile(const CWeaponModelInfo_ZppContract& pre) {
-    CWeaponModelInfo_ZppContract post = pre;
-    post.m_animFileName = 1;
     return post;
 }
 constexpr bool verify_modelinfo_zpp_invariants() {
@@ -509,56 +444,6 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         }
     }
     {
-        CBaseModelInfo_ZppContract pre{};
-        pre.m_2dEffectsID = 0;
-        pre.m_num2dEffects = 0;
-        const auto post = apply_CBaseModelInfo_Add2dEffect(pre);
-        if (!op_CBaseModelInfo_Add2dEffect(pre, post)) return false;
-        {
-            CBaseModelInfo_ZppContract badPost = post;
-            badPost.m_2dEffectsID = 0;
-            if (op_CBaseModelInfo_Add2dEffect(pre, badPost)) return false;
-        }
-        {
-            CBaseModelInfo_ZppContract badPost = post;
-            badPost.m_num2dEffects = 0;
-            if (op_CBaseModelInfo_Add2dEffect(pre, badPost)) return false;
-        }
-    }
-    {
-        CBaseModelInfo_ZppContract pre{};
-        pre.m_nameKey = 0;
-        const auto post = apply_CBaseModelInfo_SetModelName(pre);
-        if (!op_CBaseModelInfo_SetModelName(pre, post)) return false;
-        {
-            CBaseModelInfo_ZppContract badPost = post;
-            badPost.m_nameKey = 0;
-            if (op_CBaseModelInfo_SetModelName(pre, badPost)) return false;
-        }
-    }
-    {
-        CBaseModelInfo_ZppContract pre{};
-        pre.m_chunk = 0;
-        const auto post = apply_CBaseModelInfo_DeleteChunk(pre);
-        if (!op_CBaseModelInfo_DeleteChunk(pre, post)) return false;
-        {
-            CBaseModelInfo_ZppContract badPost = post;
-            badPost.m_chunk = 0;
-            if (op_CBaseModelInfo_DeleteChunk(pre, badPost)) return false;
-        }
-    }
-    {
-        CBaseModelInfo_ZppContract pre{};
-        pre.m_chunk = 0;
-        const auto post = apply_CBaseModelInfo_Write(pre);
-        if (!op_CBaseModelInfo_Write(pre, post)) return false;
-        {
-            CBaseModelInfo_ZppContract badPost = post;
-            badPost.m_chunk = 0;
-            if (op_CBaseModelInfo_Write(pre, badPost)) return false;
-        }
-    }
-    {
         CClumpModelInfo_ZppContract pre{};
         pre.m_clump_card = 1u;
         const auto post = apply_CClumpModelInfo_DeleteRwObject(pre);
@@ -567,45 +452,6 @@ constexpr bool verify_modelinfo_zpp_invariants() {
             CClumpModelInfo_ZppContract badPost = post;
             badPost.m_clump_card = 1u;
             if (op_CClumpModelInfo_DeleteRwObject(pre, badPost)) return false;
-        }
-    }
-    {
-        CClumpModelInfo_ZppContract pre{};
-        pre.m_animFileName = 0;
-        const auto post = apply_CClumpModelInfo_SetAnimFile(pre);
-        if (!op_CClumpModelInfo_SetAnimFile(pre, post)) return false;
-        {
-            CClumpModelInfo_ZppContract badPost = post;
-            badPost.m_animFileName = 0;
-            if (op_CClumpModelInfo_SetAnimFile(pre, badPost)) return false;
-        }
-    }
-    {
-        CModelInfo_ZppContract pre{};
-        pre.msNumModelInfos = 0;
-        pre.ms_modelInfoPtrs_card = 0u;
-        const auto post = apply_CModelInfo_Load(pre);
-        if (!op_CModelInfo_Load(pre, post)) return false;
-        {
-            CModelInfo_ZppContract badPost = post;
-            badPost.msNumModelInfos = 0;
-            if (op_CModelInfo_Load(pre, badPost)) return false;
-        }
-        {
-            CModelInfo_ZppContract badPost = post;
-            badPost.ms_modelInfoPtrs_card = 0u;
-            if (op_CModelInfo_Load(pre, badPost)) return false;
-        }
-    }
-    {
-        CWeaponModelInfo_ZppContract pre{};
-        pre.m_animFileName = 0;
-        const auto post = apply_CWeaponModelInfo_SetAnimFile(pre);
-        if (!op_CWeaponModelInfo_SetAnimFile(pre, post)) return false;
-        {
-            CWeaponModelInfo_ZppContract badPost = post;
-            badPost.m_animFileName = 0;
-            if (op_CWeaponModelInfo_SetAnimFile(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

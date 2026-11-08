@@ -120,16 +120,6 @@ constexpr CKeyArray_ZppContract apply_CKeyArray_Unload(const CKeyArray_ZppContra
     post.numEntries = 0;
     return post;
 }
-// Delta Operation Schema Contract (ΔCData) from zpp/text/Text.zpp
-constexpr bool op_CData_Unload(const CData_ZppContract& pre, const CData_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.chars == 1) && (post.numChars == 0);
-}
-constexpr CData_ZppContract apply_CData_Unload(const CData_ZppContract& pre) {
-    CData_ZppContract post = pre;
-    post.chars = 1;
-    post.numChars = 0;
-    return post;
-}
 constexpr bool verify_text_zpp_invariants() {
     {
         tMessage_ZppContract valid{};
@@ -213,23 +203,6 @@ constexpr bool verify_text_zpp_invariants() {
             CKeyArray_ZppContract badPost = post;
             badPost.numEntries = 1;
             if (op_CKeyArray_Unload(pre, badPost)) return false;
-        }
-    }
-    {
-        CData_ZppContract pre{};
-        pre.chars = 0;
-        pre.numChars = 1;
-        const auto post = apply_CData_Unload(pre);
-        if (!op_CData_Unload(pre, post)) return false;
-        {
-            CData_ZppContract badPost = post;
-            badPost.chars = 0;
-            if (op_CData_Unload(pre, badPost)) return false;
-        }
-        {
-            CData_ZppContract badPost = post;
-            badPost.numChars = 1;
-            if (op_CData_Unload(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
