@@ -1,3 +1,4 @@
+#pragma once
 // ── Egocentric software renderer ──
 // Renders the world from the avatar's perspective into a 64x64 framebuffer
 // with z-buffering. Output is the SAME buffer consumed by the cognitive stack.

@@ -1,3 +1,4 @@
+#pragma once
 struct GTAngelAGI {
     // mech0 integration
     mech0::SimpleLanguageModel llm{1000, 64};
