@@ -5420,13 +5420,48 @@ private:
                 Colour{110, 88, 44, 255}, ObjectGround);
         addQuad(local(-0.26f, 0.57f, 0.62f), local(0.26f, 0.57f, 0.62f),
                 local( 0.24f, 0.53f, 0.84f), local(-0.24f, 0.53f, 0.84f), darkTrim, id);
-        // Angled side-window glass inset + body-colored B-pillar divider & wing mirrors
+        // Angled side-window glass inset + A/B/C pillars, wing mirrors, amber indicators & brake calipers
         for (float s : {-1.0f, 1.0f}) {
             addQuad(local(s*0.565f, 0.67f, -0.62f), local(s*0.565f, 0.67f, 0.42f),
                     local(s*0.465f, 1.01f,  0.12f), local(s*0.465f, 1.01f, -0.30f), glass, id);
+            // B-pillar, A-pillar frame & C-pillar buttress
             addQuad(local(s*0.572f, 0.66f, -0.14f), local(s*0.572f, 0.66f, -0.04f),
                     local(s*0.462f, 1.02f, -0.06f), local(s*0.462f, 1.02f, -0.14f), cab, id);
-            boxZ(0.05f, 0.04f, 0.66f, 0.73f, 0.28f, 0.36f, cab, hoodTop);
+            addTaperedBone(local(s*0.56f, 0.64f, 0.43f), local(s*0.44f, 1.05f, 0.12f), 0.032f, 0.026f, cab, id);
+            addTaperedBone(local(s*0.56f, 0.64f, -0.74f), local(s*0.44f, 1.05f, -0.31f), 0.038f, 0.030f, cab, id);
+            // Sculpted side mirror stalk + housing
+            addTaperedBone(local(s*0.56f, 0.66f, 0.30f), local(s*0.68f, 0.72f, 0.26f), 0.025f, 0.038f, cab, id);
+            // Amber corner turn-signal lenses (front +z and rear -z)
+            addQuad(local(s*0.54f, 0.36f, 1.155f), local(s*0.62f, 0.36f, 1.155f),
+                    local(s*0.62f, 0.46f, 1.155f), local(s*0.54f, 0.46f, 1.155f), Colour{45, 175, 255, 255}, id);
+            addQuad(local(s*0.52f, 0.42f, -1.165f), local(s*0.62f, 0.42f, -1.165f),
+                    local(s*0.62f, 0.52f, -1.165f), local(s*0.52f, 0.52f, -1.165f), Colour{45, 175, 255, 255}, id);
+            // Crimson brake calipers + CAR_WING_LF/RF/LR/RR flared 3D fender arches + CAR_DOOR_LF/RF shut-lines
+            for (float wz : {-0.72f, 0.72f}) {
+                addJoint(local(s*0.72f, 0.34f, wz + 0.09f), 0.055f, Colour{48, 52, 225, 255}, id);
+                addTaperedBone(local(s*0.69f, 0.48f, wz - 0.26f), local(s*0.71f, 0.56f, wz), 0.036f, 0.042f, hoodTop, id);
+                addTaperedBone(local(s*0.71f, 0.56f, wz), local(s*0.69f, 0.48f, wz + 0.26f), 0.042f, 0.036f, hoodTop, id);
+            }
+            // Door vertical shut-line seams (CAR_DOOR_LF / CAR_DOOR_RF) + chrome beltline molding
+            addTaperedBone(local(s*0.682f, 0.22f,  0.34f), local(s*0.585f, 0.65f,  0.34f), 0.012f, 0.012f, darkTrim, id);
+            addTaperedBone(local(s*0.682f, 0.22f, -0.22f), local(s*0.585f, 0.65f, -0.22f), 0.012f, 0.012f, darkTrim, id);
+            addTaperedBone(local(s*0.580f, 0.655f, -0.62f), local(s*0.580f, 0.655f, 0.42f), 0.014f, 0.014f, Colour{210, 218, 228, 255}, id);
+        }
+        // CAR_BONNET raised two-tone power-dome stripe (m_currentColour2) + CAR_WINDSCREEN wiper blades
+        addQuad(local(-0.16f, 0.648f, 0.38f), local(0.16f, 0.648f, 0.38f),
+                local( 0.12f, 0.492f, 1.11f), local(-0.12f, 0.492f, 1.11f), cab, id);
+        addTaperedBone(local(-0.34f, 0.65f, 0.42f), local(-0.04f, 0.72f, 0.34f), 0.014f, 0.010f, darkTrim, id);
+        addTaperedBone(local( 0.02f, 0.65f, 0.42f), local( 0.32f, 0.72f, 0.34f), 0.014f, 0.010f, darkTrim, id);
+        // CVehicle::SetUpDriver & SetupPassenger (example_vehicle.cpp:1788): seated pDriver + steering wheel + dashboard
+        addTaperedBone(local(-0.22f, 0.56f, -0.18f), local(-0.22f, 0.80f, -0.14f), 0.11f, 0.09f, darkTrim, id);
+        addJoint(local(-0.22f, 0.88f, -0.12f), 0.082f, Colour{168, 182, 218, 255}, id);
+        addJoint(local(-0.22f, 0.72f,  0.14f), 0.068f, Colour{32, 34, 42, 255}, id);
+        addTaperedBone(local( 0.22f, 0.56f, -0.18f), local( 0.22f, 0.78f, -0.14f), 0.10f, 0.08f, darkTrim, id);
+        // CVehicle::DoSunGlare (example_vehicle.cpp:2222): 4-point star specular glare corona on roof/windshield crown
+        {
+            const Vec3 gl = local(0.26f, 1.06f, 0.10f);
+            addTriangle(gl + Vec3{-0.14f, 0.01f, 0.0f}, gl + Vec3{0.14f, 0.01f, 0.0f}, gl + Vec3{0.0f, 0.01f, 0.04f}, Colour{235, 250, 255, 255}, id);
+            addTriangle(gl + Vec3{0.0f, 0.01f, -0.14f}, gl + Vec3{0.0f, 0.01f, 0.14f}, gl + Vec3{0.04f, 0.01f, 0.0f}, Colour{235, 250, 255, 255}, id);
         }
         // Front radiator grille + rear license plate + dual chrome exhaust tips
         addQuad(local(-0.32f, 0.28f, 1.165f), local(0.32f, 0.28f, 1.165f),
@@ -5541,6 +5576,25 @@ private:
                                 rotor + Vec3{ sinf(a)*0.07f, 0.02f,-cosf(a)*0.07f},
                                 tip, Colour{140,148,162,255}, ObjectTraffic);
                 }
+                // LW48: helicopter port/starboard navigation strobes + ground searchlight pool
+                addJoint(local(-0.54f, 0.42f, 0.15f), 0.075f, Colour{60, 65, 255, 255}, ObjectTraffic);
+                addJoint(local( 0.54f, 0.42f, 0.15f), 0.075f, Colour{85, 245, 95, 255}, ObjectTraffic);
+                for (int si = 0; si < 10; ++si) {
+                    const float sa0 = 6.2831853f * si / 10.0f, sa1 = 6.2831853f * (si + 1) / 10.0f;
+                    const Vec3 sp{centre.x + sh * 2.5f, 0.020f, centre.z + ch * 2.5f};
+                    addTriangle(sp, {sp.x + cosf(sa0)*1.35f, 0.020f, sp.z + sinf(sa0)*1.35f},
+                                    {sp.x + cosf(sa1)*1.35f, 0.020f, sp.z + sinf(sa1)*1.35f},
+                                Colour{95, 115, 130, 255}, ObjectGround);
+                }
+                // LW49: CVehicle::HeliDustGenerate (example_vehicle.cpp:2098) swirling tarmac rotor-wash dust ring
+                for (int di = 0; di < 16; ++di) {
+                    const float da = 6.2831853f * di / 16.0f + world.trafficTime * 2.4f;
+                    const float rIn = 1.95f, rOut = 2.45f;
+                    const Vec3 d0{centre.x + cosf(da)*rIn,  0.021f, centre.z + sinf(da)*rIn};
+                    const Vec3 d1{centre.x + cosf(da)*rOut, 0.021f, centre.z + sinf(da)*rOut};
+                    const Vec3 d2{centre.x + cosf(da + 0.22f)*rOut, 0.021f, centre.z + sinf(da + 0.22f)*rOut};
+                    addTriangle(d0, d1, d2, Colour{88, 94, 104, 255}, ObjectGround);
+                }
                 const Vec3 tailRotor = local(0.10f, 1.18f, -1.98f);
                 const float tspin = world.trafficTime * 30.0f;
                 for (int i = 0; i < 3; ++i) {
@@ -5611,6 +5665,12 @@ private:
                     addTaperedBone(local(sx, 0.28f, 0.58f), local(sx, 0.92f, 0.34f), 0.025f, 0.028f, darkMetal, ObjectTraffic);
                 addTaperedBone(local(-0.28f, 0.94f, 0.32f), local(0.28f, 0.94f, 0.32f), 0.022f, 0.022f, darkMetal, ObjectTraffic);
                 addJoint(local(0, 0.80f, 0.64f), 0.065f, Colour{195, 245, 255, 255}, ObjectTraffic);
+                // LW48: sport-bike tinted windscreen bubble + chrome exhaust + headlight cone + taillight
+                addTaperedBone(local(0, 0.86f, 0.52f), local(0, 1.04f, 0.28f), 0.095f, 0.075f, Colour{215, 185, 115, 255}, ObjectTraffic);
+                addTaperedBone(local(0.12f, 0.34f, -0.10f), local(0.14f, 0.46f, -0.58f), 0.038f, 0.045f, Colour{185, 195, 210, 255}, ObjectTraffic);
+                addJoint(local(0, 0.76f, -0.64f), 0.048f, Colour{55, 65, 250, 255}, ObjectTraffic);
+                addTriangle(local(0, 0.019f, 0.72f), local(-0.34f, 0.019f, 2.25f), local(0.34f, 0.019f, 2.25f),
+                            Colour{72, 96, 118, 255}, ObjectGround);
                 // Anatomical rider: hips, forward-leaning jacket torso, arms to bars, legs, helmet + visor
                 const Vec3 rHip = local(0, 0.72f, -0.18f), rSh = local(0, 1.18f, 0.08f), rHead = local(0, 1.38f, 0.16f);
                 addTaperedBone(rHip, rSh, 0.13f, 0.14f, jacket, ObjectTraffic);
@@ -5644,9 +5704,29 @@ private:
             static const Colour cabins[5] = {
                 {174,80,42,255}, {44,84,130,255}, {46,46,110,255},
                 {66,96,70,255}, {40,130,160,255}};
-            const Colour body = liveries[vIndex % 5], cab = cabins[vIndex % 5];
+            const bool isPolice = (vIndex == 0);
+            const bool isTaxi   = (vIndex == 1);
+            const Colour body = isPolice ? Colour{230, 232, 238, 255}
+                              : (isTaxi  ? Colour{42, 195, 248, 255} : liveries[vIndex % 5]);
+            const Colour cab  = isPolice ? Colour{34, 38, 48, 255}
+                              : (isTaxi  ? Colour{32, 155, 215, 255} : cabins[vIndex % 5]);
             drawSculptedCoupe(centre, ch, sh, world.trafficTime * (v.dir > 0 ? 8.0f : -8.0f),
                               body, cab, ObjectTraffic);
+            if (isPolice) {
+                // CVehicle::UsesSiren (MI_POLICE): roof lightbar + alternating red/blue siren strobes
+                const bool sSwap = (((int)(world.trafficTime * 7.5f)) & 1) != 0;
+                const Colour sL = sSwap ? Colour{55, 55, 255, 255} : Colour{255, 130, 45, 255};
+                const Colour sR = sSwap ? Colour{255, 130, 45, 255} : Colour{55, 55, 255, 255};
+                boxZ(0.36f, 0.36f, 1.05f, 1.15f, -0.18f, -0.02f, Colour{40, 44, 52, 255}, ObjectTraffic);
+                addJoint(local(-0.24f, 1.13f, -0.10f), 0.075f, sL, ObjectTraffic);
+                addJoint(local( 0.24f, 1.13f, -0.10f), 0.075f, sR, ObjectTraffic);
+                addQuad(local(-1.35f, 0.020f, -0.95f), local(0.0f, 0.020f, -0.95f),
+                        local( 0.0f, 0.020f,  0.95f), local(-1.35f, 0.020f,  0.95f),
+                        sSwap ? Colour{48, 48, 128, 255} : Colour{128, 72, 38, 255}, ObjectGround);
+            } else if (isTaxi) {
+                // CVehicle::IsTaxi (MI_TAXI): illuminated roof TAXI sign (m_aExtras[0]) + checker stripe
+                boxZ(0.22f, 0.20f, 1.05f, 1.18f, -0.18f, 0.02f, Colour{95, 232, 255, 255}, ObjectTraffic);
+            }
         }
     }
     // re3 CObject pickups: bobbing diamonds with a soft glow ring.
