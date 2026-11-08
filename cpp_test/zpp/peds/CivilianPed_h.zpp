@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CivilianPed (peds)
+-- Source File(s): peds/CivilianPed.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCivilianPed
+  CPed  -- inherits base schema
+  m_bLookForVacantCars : 𝔹
+  m_nLookForVacantCarsCounter : ℕ
+  m_bStealCarEvenIfThereIsSomeoneInIt : 𝔹
+  m_bJustStoleACar : 𝔹
+  m_nStealWishList : seq ℕ  -- bounded array [16]
+  m_bAttractorUnk : 𝔹
+  m_nAttractorCycleState : ℤ
+where
+  m_nLookForVacantCarsCounter ≥ 0
+  #m_nStealWishList = 16
+end
+
+schema CCivilianPed_CCivilianPed
+  ΔCCivilianPed
+  arg_1? : ePedType
+  arg_2? : ℕ
+where
+  -- Declared member operation CCivilianPed::CCivilianPed(ePedType, uint32)
+  true
+end
+
+schema CCivilianPed_CCivilianPed_2
+  ΔCCivilianPed
+  result! : ANY
+where
+  -- Declared member operation CCivilianPed::CCivilianPed(void)
+  true
+end
+
+schema CCivilianPed_ProcessControl_3
+  ΔCCivilianPed
+where
+  -- Declared member operation CCivilianPed::ProcessControl(void)
+  true
+end
+
+schema CCivilianPed_UseNearbyAttractors_4
+  ΔCCivilianPed
+where
+  -- Declared member operation CCivilianPed::UseNearbyAttractors(void)
+  true
+end
+
+schema CCivilianPed_FindNearbyAttractorsSectorList_5
+  ΔCCivilianPed
+  arg_1? : CPtrList
+  arg_2? : ℝ
+  arg_3? : Ref[C2dEffect]
+  arg_4? : Ref[CEntity]
+where
+  -- Declared member operation CCivilianPed::FindNearbyAttractorsSectorList(CPtrList&, float&, C2dEffect*&, CEntity*&)
+  true
+end
+
+schema CCivilianPed_IsAttractedTo_6
+  ΔCCivilianPed
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CCivilianPed::IsAttractedTo(int8)
+  true
+end
+
+schema CCivilianPed_EnterVacantNearbyCars_7
+  ΔCCivilianPed
+where
+  -- Declared member operation CCivilianPed::EnterVacantNearbyCars(void)
+  true
+end
+
+schema CCivilianPed_IsOnStealWishList_8
+  ΔCCivilianPed
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CCivilianPed::IsOnStealWishList(int32)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CivilianPed_CCivilianPed
+  ΔCivilianPedModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

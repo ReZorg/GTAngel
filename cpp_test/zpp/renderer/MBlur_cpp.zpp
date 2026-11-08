@@ -1,0 +1,204 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MBlur (renderer)
+-- Source File(s): renderer/MBlur.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include d3d8caps.zpp  (from "d3d8caps.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include postfx.zpp  (from "postfx.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #endif
+NUM_RENDER_FX : ℕ  -- #define NUM_RENDER_FX 64
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMBlur_MotionBlurOpen
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+where
+  -- State update: rect' = {0, 0, 0, 0}
+  -- State update: BlurOn' = true
+  -- State update: rect.w' = RwRasterGetWidth(RwCameraGetRaster(cam))
+  -- State update: rect.h' = RwRasterGetHeight(RwCameraGetRaster(cam))
+  -- State update: pFrontBuffer' = ∅
+  -- State update: rect' = { 0, 0, 0, 0 }
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CPostFX::Open
+  true
+end
+
+schema CMBlur_MotionBlurClose
+  ΔCMBlur
+where
+  -- State update: pFrontBuffer' = ∅
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CPostFX::Close
+  true
+end
+
+schema CMBlur_CreateImmediateModeData
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+where
+  -- State update: zero' = HALFPX
+  -- State update: xmax' = rect.w + HALFPX
+  -- State update: ymax' = rect.h + HALFPX
+  -- State update: zero' = -HALFPX
+  -- State update: xmax' = rect.w - HALFPX
+  -- State update: ymax' = rect.h - HALFPX
+  true
+end
+
+schema CMBlur_CreateImmediateModeData_2
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  verts? : Ref[RwIm2DVertex]
+  color? : RwRGBA
+  u1Off? : ℝ
+  v1Off? : ℝ
+  u2Off? : ℝ
+  v2Off? : ℝ
+  z? : ℝ
+  fullTexture? : ℤ
+where
+  -- State update: x1' = rect.x
+  -- State update: y1' = rect.y
+  -- State update: x2' = rect.w
+  -- State update: y2' = rect.h
+  -- State update: u1' = 0.0f
+  -- State update: v1' = 0.0f
+  true
+end
+
+schema CMBlur_MotionBlurRender
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- State update: ms_bJustInitialised' = false
+  -- Invokes: CPostFX::Render
+  true
+end
+
+schema CMBlur_OverlayRender
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  raster? : Ref[RwRaster]
+  color? : RwRGBA
+  type? : ℤ
+  bluralpha? : ℤ
+where
+  -- State update: r' = color.red
+  -- State update: g' = color.green
+  -- State update: b' = color.blue
+  -- State update: a' = color.alpha
+  -- State update: r' = 0
+  -- State update: g' = 255
+  true
+end
+
+schema CMBlur_SetDrunkBlur
+  ΔCMBlur
+  drunkness? : ℝ
+where
+  -- State update: Drunkness' = Clamp(drunkness, 0.0f, 1.0f)
+  true
+end
+
+schema CMBlur_ClearDrunkBlur
+  ΔCMBlur
+where
+  -- State update: Drunkness' = 0.0f
+  -- Invokes: CTimer::SetTimeScale
+  true
+end
+
+schema CMBlur_PosInside
+  ΔCMBlur
+  rect? : Ref[RwRect]
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMBlur_AddRenderFx
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  z? : ℝ
+  type? : FxType
+where
+  -- State update: rect.x' = Max(rect.x, 0)
+  -- State update: rect.y' = Max(rect.y, 0)
+  -- State update: rect.w' = Min(rect.w, SCREEN_WIDTH)
+  -- State update: rect.h' = Min(rect.h, SCREEN_HEIGHT)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CMBlur_OverlayRenderFx
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  frontBuf? : Ref[RwRaster]
+where
+  -- State update: drawWaterDrops' = false
+  -- State update: red' = Clamp(red, 0, 255)
+  -- State update: green' = Clamp(green, 0, 255)
+  -- State update: blue' = Clamp(blue, 0, 255)
+  -- State update: drawWaterDrops' = true
+  -- State update: u1Off' = (fxRect[i].w - fxRect[i].x)/width
+  -- Invokes: CTimeCycle::GetDirectionalRed, CTimeCycle::GetAmbientRed, CTimeCycle::GetDirectionalGreen, CTimeCycle::GetAmbientGreen, CTimeCycle::GetDirectionalBlue
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MBlurModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 847
+end

@@ -1,0 +1,164 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CivilianPed (peds)
+-- Source File(s): peds/CivilianPed.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include General.zpp  (from "General.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include Object.zpp  (from "Object.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include float.zpp  (from "float.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCivilianPed_CivilianAI
+  ΔCCivilianPed
+where
+  -- State update: closestThreatFlag' = ScanForThreats()
+  -- State update: closestThreatFlag' = ScanForThreats()
+  -- State update: threatPed' = (CPed*)m_threatEntity
+  -- State update: investigateDeadPed' = true
+  -- State update: killerOfDeadPed' = ((CPed*)m_pEventEntity).m_threatEntity
+  -- State update: killerPos' = killerOfDeadPed.GetPosition()
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pedInObjective->IsPlayer, CGeneral::GetRadianAngleBetweenPoints, m_threatEntity->IsPed, m_threatEntity->GetPosition
+  true
+end
+
+schema CCivilianPed_ProcessControl
+  ΔCCivilianPed
+where
+  -- State update: m_vecSeekPos' = m_pSeekTarget.GetPosition()
+  -- State update: m_pNextPathNode' = ∅
+  -- State update: m_phoneId' = -1
+  -- State update: m_nState' = PHONE_STATE_REPORTING_CRIME
+  -- State update: m_fRotationDest' = m_pedInObjective.m_fRotationCur
+  -- State update: pedsInSameState' = 0
+  -- Invokes: CPed::ProcessControl, m_pSeekTarget->GetPosition, m_moved.Magnitude, CGeneral::GetRandomNumber, nearPed->SetPedState
+  true
+end
+
+schema CPed_RunToReportCrime
+  ΔCPed
+  crimeToReport? : eCrimeType
+where
+  -- State update: m_phoneId' = -1
+  -- State update: bIsRunning' = false
+  -- State update: pos' = GetPosition()
+  -- State update: phoneId' = gPhoneInfo.FindNearestFreePhone(&pos)
+  -- State update: phone' = &gPhoneInfo.m_aPhones[phoneId]
+  -- State update: bRunningToPhone' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: gPhoneInfo.FindNearestFreePhone, m_pEntity->GetMatrix, m_pEntity->GetForward
+  true
+end
+
+schema CCivilianPed_FindNearbyAttractorsSectorList
+  ΔCCivilianPed
+  list? : CPtrList
+  minDistance? : ℝ
+  pClosestAttractor? : Ref[C2dEffect]
+  pAttractorEntity? : Ref[CEntity]
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity*)pNode.item
+  -- State update: pModelInfo' = CModelInfo::GetModelInfo(pEntity.GetModelIndex())
+  -- State update: pEffect' = pModelInfo.Get2dEffect(i)
+  -- State update: pManager' = GetPedAttractorManager()
+  -- State update: pClosestAttractor' = pEffect
+  -- Invokes: pEntity->IsObject, pEntity->GetIsStatic, CModelInfo::GetModelInfo, pEntity->GetModelIndex, pModelInfo->GetNum2dEffects
+  true
+end
+
+schema CCivilianPed_UseNearbyAttractors
+  ΔCCivilianPed
+where
+  -- State update: m_nAttractorCycleState' = 0
+  -- State update: left' = GetPosition().x - gDistanceToSeekAttractors
+  -- State update: right' = GetPosition().x + gDistanceToSeekAttractors
+  -- State update: top' = GetPosition().y - gDistanceToSeekAttractors
+  -- State update: bottom' = GetPosition().y + gDistanceToSeekAttractors
+  -- State update: xstart' = Max(0, CWorld::GetSectorIndexX(left))
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector, pAttractorEntity->GetMatrix
+  true
+end
+
+schema CCivilianPed_IsAttractedTo
+  ΔCCivilianPed
+  type? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCivilianPed_EnterVacantNearbyCars
+  ΔCCivilianPed
+where
+  -- State update: m_bJustStoleACar' = false
+  -- State update: m_pMyVehicle.AutoPilot.m_nCarMission' = MISSION_CRUISE
+  -- State update: m_pMyVehicle.AutoPilot.m_nCruiseSpeed' = 10
+  -- State update: m_pMyVehicle.bEngineOn' = true
+  -- State update: m_nLookForVacantCarsCounter' = 0
+  -- State update: foundCar' = ∅
+  -- Invokes: m_pMyVehicle->SetStatus, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector, veh->IsCar
+  true
+end
+
+schema CCivilianPed_IsOnStealWishList
+  ΔCCivilianPed
+  model? : ℤ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CivilianPed_EventTypeToCrimeType
+  ΔCivilianPedModuleState
+  event? : eEventType
+where
+  -- State update: crime' = CRIME_HIT_PED
+  -- State update: crime' = CRIME_RUN_REDLIGHT
+  -- State update: crime' = CRIME_HIT_COP
+  -- State update: crime' = CRIME_POSSESSION_GUN
+  -- State update: crime' = CRIME_STEAL_CAR
+  -- State update: crime' = CRIME_RUNOVER_PED
+  -- Return postcondition: result! = crime
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CivilianPedModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 693
+end

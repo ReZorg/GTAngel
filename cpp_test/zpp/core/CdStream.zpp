@@ -1,0 +1,234 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CdStream (core)
+-- Source File(s): core/CdStream.cpp, core/CdStream.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+CDSTREAM_SECTOR_SIZE : ℕ  -- #define CDSTREAM_SECTOR_SIZE 2048
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CdStream_Enum_1 ::= STREAM_NONE | STREAM_SUCCESS | STREAM_READING | STREAM_ERROR | STREAM_ERROR_NOCD | STREAM_ERROR_WRONGCD | STREAM_ERROR_OPENCD | STREAM_WAITING
+  -- val(STREAM_NONE) = uint8( 0)
+  -- val(STREAM_SUCCESS) = uint8( 1)
+  -- val(STREAM_READING) = uint8(-1)
+  -- val(STREAM_ERROR) = uint8(-2)
+  -- val(STREAM_ERROR_NOCD) = uint8(-3)
+  -- val(STREAM_ERROR_WRONGCD) = uint8(-4)
+  -- val(STREAM_ERROR_OPENCD) = uint8(-5)
+  -- val(STREAM_WAITING) = uint8(-6)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CdReadInfo
+  nSectorOffset : ℕ
+  nSectorsToRead : ℕ
+  pBuffer : ADDRESS
+  field_C : seq CHAR
+  bLocked : 𝔹
+  bReading : 𝔹
+  nStatus : ℤ
+  pDoneSemaphore : HANDLE
+  hFile : HANDLE
+  Overlapped : OVERLAPPED
+where
+  nSectorOffset ≥ 0
+  nSectorsToRead ≥ 0
+end
+
+schema Queue
+  items : ℙ ℤ
+  head : ℤ
+  tail : ℤ
+  size : ℤ
+where
+  #items ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CdStream_CdStreamInitThread
+  ΔCdStreamModuleState
+where
+  -- State update: pDoneSemaphore' = CreateSemaphore(∅, 0, 2, ∅)
+  -- State update: gChannelRequestQ.head' = 0
+  -- State update: gChannelRequestQ.tail' = 0
+  -- State update: gChannelRequestQ.size' = gNumChannels + 1
+  -- State update: gCdStreamSema' = CreateSemaphore(∅, 0, 5, ∅)
+  -- State update: gCdStreamSema' = CreateSemaphore(∅, 0, 5, "CdStream")
+  true
+end
+
+schema CdStream_CdStreamInit
+  ΔCdStreamModuleState
+  numChannels? : ℤ
+where
+  -- State update: _gdwCdStreamFlags' = 0
+  -- State update: _gbCdStreamOverlapped' = TRUE
+  -- State update: _gbCdStreamAsync' = FALSE
+  -- State update: pBuffer' = (void *)RwMallocAlign(CDSTREAM_SECTOR_SIZE, BytesPerSector)
+  -- State update: gNumImages' = 0
+  -- State update: gNumChannels' = numChannels
+  true
+end
+
+schema CdStream_GetGTA3ImgSize
+  ΔCdStreamModuleState
+where
+  -- Return postcondition: result! = (uint32)GetFileSize(gImgFiles[0], nil)
+  true
+end
+
+schema CdStream_CdStreamShutdown
+  ΔCdStreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CdStream_CdStreamRead
+  ΔCdStreamModuleState
+  channel? : ℤ
+  buffer? : ADDRESS
+  offset? : ℕ
+  size? : ℕ
+where
+  -- State update: lastPosnRead' = size + offset
+  -- State update: hImage' = gImgFiles[_GET_INDEX(offset)]
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: pChannel.hFile' = hImage
+  -- State update: pChannel.nStatus' = STREAM_NONE
+  -- State update: pChannel.nSectorOffset' = _GET_OFFSET(offset)
+  -- Return postcondition: result! = STREAM_NONE
+  -- Return postcondition: result! = STREAM_SUCCESS
+  -- Return postcondition: result! = STREAM_NONE
+  true
+end
+
+schema CdStream_CdStreamGetStatus
+  ΔCdStreamModuleState
+  channel? : ℤ
+where
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: status' = pChannel.nStatus
+  -- State update: pChannel.nStatus' = STREAM_NONE
+  -- Return postcondition: result! = STREAM_READING
+  -- Return postcondition: result! = STREAM_WAITING
+  -- Return postcondition: result! = status
+  true
+end
+
+schema CdStream_CdStreamGetLastPosn
+  ΔCdStreamModuleState
+where
+  -- Return postcondition: result! = lastPosnRead
+  true
+end
+
+schema CdStream_CdStreamSync
+  ΔCdStreamModuleState
+  channel? : ℤ
+where
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: pChannel.bLocked' = true
+  -- State update: pChannel.bLocked' = false
+  -- State update: pChannel.bReading' = false
+  -- Return postcondition: result! = pChannel->nStatus
+  -- Return postcondition: result! = STREAM_NONE
+  -- Return postcondition: result! = STREAM_ERROR
+  true
+end
+
+schema CdStream_AddToQueue
+  ΔCdStreamModuleState
+  queue? : Ref[Queue]
+  item? : ℤ
+where
+  -- State update: queue.tail' = (queue.tail + 1) % queue.size
+  true
+end
+
+schema CdStream_GetFirstInQueue
+  ΔCdStreamModuleState
+  queue? : Ref[Queue]
+where
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = queue->items[queue->head]
+  true
+end
+
+schema CdStream_RemoveFirstInQueue
+  ΔCdStreamModuleState
+  queue? : Ref[Queue]
+where
+  -- State update: queue.head' = (queue.head + 1) % queue.size
+  true
+end
+
+schema CdStream_CdStreamThread
+  ΔCdStreamModuleState
+  lpThreadParameter? : LPVOID
+  result! : WINAPI
+where
+  -- State update: channel' = GetFirstInQueue(&gChannelRequestQ)
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: pChannel.bReading' = true
+  -- State update: pChannel.Overlapped.Offset' = pChannel.nSectorOffset * CDSTREAM_SECTOR_SIZE
+  -- State update: pChannel.nStatus' = STREAM_NONE
+  -- State update: pChannel.nStatus' = STREAM_NONE
+  true
+end
+
+schema CdStream_CdStreamAddImage
+  ΔCdStreamModuleState
+  path? : seq CHAR
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CdStream_CdStreamGetImageName
+  ΔCdStreamModuleState
+  cd? : ℤ
+where
+  -- Return postcondition: result! = gCdImageNames[cd]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CdStream_CdStreamRemoveImages
+  ΔCdStreamModuleState
+where
+  -- State update: gNumImages' = 0
+  true
+end
+
+schema CdStream_CdStreamGetNumImages
+  ΔCdStreamModuleState
+where
+  -- Return postcondition: result! = gNumImages
+  true
+end

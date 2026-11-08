@@ -1,0 +1,257 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedFight (peds)
+-- Source File(s): peds/PedFight.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include General.zpp  (from "General.h")
+-- include Object.zpp  (from "Object.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PedFight_Enum_1 ::= S33 | S34 | S35 | S36 | S37 | S38 | S39 | S40 | S41 | S42 | S43 | S44 | NO_SND
+  -- val(S33) = SOUND_FIGHT_PUNCH_33
+  -- val(S34) = SOUND_FIGHT_KICK_34
+  -- val(S35) = SOUND_FIGHT_HEADBUTT_35
+  -- val(S36) = SOUND_FIGHT_PUNCH_36
+  -- val(S37) = SOUND_FIGHT_PUNCH_37
+  -- val(S38) = SOUND_FIGHT_CLOSE_PUNCH_38
+  -- val(S39) = SOUND_FIGHT_PUNCH_39
+  -- val(S40) = SOUND_FIGHT_PUNCH_OR_KICK_BELOW_40
+  -- val(S41) = SOUND_FIGHT_PUNCH_41
+  -- val(S42) = SOUND_FIGHT_PUNCH_FROM_BEHIND_42
+  -- val(S43) = SOUND_FIGHT_KNEE_OR_KICK_43
+  -- val(S44) = SOUND_FIGHT_KICK_44
+  -- val(NO_SND) = SOUND_NO_SOUND
+
+PedFight_Enum_2 ::= S37 | S38 | S39 | S40 | S41 | S42 | S43 | S44 | S45 | S46 | S47 | S48 | NO_SND
+  -- val(S37) = SOUND_FIGHT_37
+  -- val(S38) = SOUND_FIGHT_38
+  -- val(S39) = SOUND_FIGHT_39
+  -- val(S40) = SOUND_FIGHT_40
+  -- val(S41) = SOUND_FIGHT_41
+  -- val(S42) = SOUND_FIGHT_42
+  -- val(S43) = SOUND_FIGHT_43
+  -- val(S44) = SOUND_FIGHT_44
+  -- val(S45) = SOUND_FIGHT_45
+  -- val(S46) = SOUND_FIGHT_46
+  -- val(S47) = SOUND_FIGHT_47
+  -- val(S48) = SOUND_FIGHT_48
+  -- val(NO_SND) = SOUND_NO_SOUND
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PedFight_CheckForPedsOnGroundToAttack
+  ΔPedFightModuleState
+  attacker? : Ref[CPed]
+  pedOnGround? : Ref[CPed]
+where
+  -- State update: currentPed' = ∅
+  -- State update: pedOnTheFloor' = ∅
+  -- State update: deadPed' = ∅
+  -- State update: pedBelow' = ∅
+  -- State update: foundDead' = false
+  -- State update: foundOnTheFloor' = false
+  -- Return postcondition: result! = NO_PED
+  -- Return postcondition: result! = stateToReturn
+  -- Invokes: currentPed->GetPosition, attacker->GetPosition, posDifference.Magnitude, CGeneral::GetRadianAngleBetweenPoints, CGeneral::LimitRadianAngle
+  true
+end
+
+schema CPed_SetPointGunAt
+  ΔCPed
+  to? : Ref[CEntity]
+where
+  -- State update: curWeapon' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: bIsPointingGunAt' = true
+  -- State update: aimAssoc.blendAmount' = 0.0f
+  -- State update: aimAssoc.blendDelta' = 8.0f
+  -- Invokes: CWeaponInfo::GetWeaponInfo, CAnimManager::BlendAnimation, CAnimManager::AddAnimation
+  true
+end
+
+schema CPed_PointGunAt
+  ΔCPed
+where
+  -- State update: weaponInfo' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: animLoopStart' = weaponInfo.m_fAnimLoopStart
+  -- State update: animLoopStart' = weaponInfo.m_fAnim2LoopStart
+  -- Invokes: CWeaponInfo::GetWeaponInfo, weaponInfo->IsFlagSet, weaponAssoc->SetCurrentTime
+  true
+end
+
+schema CPed_ClearPointGunAt
+  ΔCPed
+where
+  -- State update: bIsPointingGunAt' = false
+  -- State update: weaponInfo' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: animAssoc.blendDelta' = -4.0f
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_SetAttack
+  ΔCPed
+  victim? : Ref[CEntity]
+where
+  -- State update: victimPed' = ∅
+  -- State update: curWeapon' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: victimPed' = (CPed*)victim
+  -- State update: bIsAttacking' = false
+  -- State update: bIsAttacking' = true
+  -- State update: bIsAttacking' = false
+  -- Invokes: CWeaponInfo::GetWeaponInfo, victim->IsPed, CTimer::GetTimeInMilliseconds, curWeapon->IsFlagSet, CAnimManager::BlendAnimation
+  true
+end
+
+schema CPed_ClearAttack
+  ΔCPed
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPed_ClearAttackByRemovingAnim
+  ΔCPed
+where
+  -- State update: weapon' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: weaponAssoc.blendDelta' = -8.0f
+  -- Invokes: CWeaponInfo::GetWeaponInfo, weaponAssoc->SetDeleteCallback
+  true
+end
+
+schema CPed_FinishedAttackCB
+  ΔCPed
+  attackAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: reloadAnimAssoc' = ∅
+  -- State update: ped' = (CPed*)arg
+  -- State update: currentWeapon' = CWeaponInfo::GetWeaponInfo(ped.GetWeapon().m_eWeaponType)
+  -- State update: attackAssoc.blendDelta' = -1000.0f
+  -- State update: attackAssoc.blendDelta' = -1000.0
+  -- State update: groundAnim' = GetFireAnimGround(currentWeapon)
+  -- Invokes: CWeaponInfo::GetWeaponInfo, ped->GetWeapon, ped->IsPedInControl, ped->GetClump, CAnimManager::BlendAnimation
+  true
+end
+
+schema CPed_FinishedReloadCB
+  ΔCPed
+  reloadAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: weapon' = CWeaponInfo::GetWeaponInfo(ped.GetWeapon().m_eWeaponType)
+  -- State update: crouchFireAssoc' = ∅
+  -- Invokes: CWeaponInfo::GetWeaponInfo, ped->GetWeapon, ped->DyingOrDead, weapon->IsFlagSet, ped->GetClump
+  true
+end
+
+schema CPed_CheckForPointBlankPeds
+  ΔCPed
+  pedToVerify? : Ref[CPed]
+where
+  -- State update: pbDistance' = 1.1f
+  -- State update: pbDistance' = 1.6f
+  -- State update: nearPed' = m_nearPeds[i]
+  -- State update: diff' = nearPed.GetPosition() - GetPosition()
+  -- State update: neededAngle' = CGeneral::LimitRadianAngle(neededAngle)
+  -- State update: m_fRotationCur' = CGeneral::LimitRadianAngle(m_fRotationCur)
+  -- Return postcondition: result! = NO_POINT_BLANK_PED
+  -- Return postcondition: result! = POINT_BLANK_FOR_WANTED_PED
+  -- Return postcondition: result! = POINT_BLANK_FOR_SOMEONE_ELSE
+  -- Invokes: nearPed->GetPosition, diff.MagnitudeSqr, CGeneral::GetRadianAngleBetweenPoints, CGeneral::LimitRadianAngle
+  true
+end
+
+schema CPed_Attack
+  ΔCPed
+where
+  -- State update: ourWeapon' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: weaponAnimAssoc' = ∅
+  -- State update: attackShouldContinue' = !!bIsAttacking
+  -- State update: reloadAnimAssoc' = ∅
+  -- State update: throwAssoc' = ∅
+  -- State update: animLoopStart' = ourWeapon.m_fAnimLoopStart
+  -- Invokes: CWeaponInfo::GetWeaponInfo, reloadAnimAssoc->IsRunning, CTimer::GetTimeInMilliseconds, CAnimManager::BlendAnimation, CGeneral::GetRandomNumber
+  true
+end
+
+schema CPed_StartFightAttack
+  ΔCPed
+  buttonPressure? : ℕ
+where
+  -- State update: m_fightButtonPressure' = buttonPressure
+  -- State update: m_nStoredMoveState' = PEDMOVE_NONE
+  -- State update: fightWithWeapon' = false
+  -- State update: weaponInfo' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: fightWithWeapon' = true
+  -- State update: m_lastFightMove' = FIGHTMOVE_IDLE
+  -- Invokes: CTimer::GetTimeInMilliseconds, CWeaponInfo::GetWeaponInfo, CAnimManager::BlendAnimation, animAssoc->SetCurrentTime, animAssoc->SetFinishCallback
+  true
+end
+
+schema CPed_StartFightDefend
+  ΔCPed
+  direction? : ℕ
+  hitLevel? : ℕ
+  unk? : ℕ
+where
+  -- State update: headPos' = GetNodePosition(PED_HEAD)
+  -- State update: bloodPos' = headPos - 0.2f * GetForward()
+  -- State update: shotAnim' = ANIM_STD_HITBYGUN_LEFT
+  -- State update: shotAnim' = ANIM_STD_HITBYGUN_BACK
+  -- State update: shotAnim' = ANIM_STD_HITBYGUN_RIGHT
+  -- State update: shotAnim' = ANIM_STD_HITBYGUN_FRONT
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CAnimManager::BlendAnimation, floorHitAssoc->SetCurrentTime, floorHitAssoc->SetRun, CParticle::AddParticle, CGeneral::GetRandomNumber
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PedFightModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 6501
+end

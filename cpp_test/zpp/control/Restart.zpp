@@ -1,0 +1,229 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Restart (control)
+-- Source File(s): control/Restart.cpp, control/Restart.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include PathFind.zpp  (from "PathFind.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUM_RESTART_POINTS : ℕ  -- #define NUM_RESTART_POINTS 8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRestart
+  OverrideHospitalLevel : ℕ
+  OverridePoliceStationLevel : ℕ
+  bFadeInAfterNextArrest : 𝔹
+  bFadeInAfterNextDeath : 𝔹
+  bOverrideRestart : 𝔹
+  OverridePosition : CVector
+  OverrideHeading : ℝ
+  HospitalRestartPoints : seq CVector  -- bounded array [NUM_RESTART_POINTS]
+  HospitalRestartHeadings : seq ℝ  -- bounded array [NUM_RESTART_POINTS]
+  NumberOfHospitalRestarts : ℕ
+  PoliceRestartPoints : seq CVector  -- bounded array [NUM_RESTART_POINTS]
+  PoliceRestartHeadings : seq ℝ  -- bounded array [NUM_RESTART_POINTS]
+  NumberOfPoliceRestarts : ℕ
+where
+  OverrideHospitalLevel ≥ 0
+  OverridePoliceStationLevel ≥ 0
+  NumberOfHospitalRestarts ≥ 0
+  NumberOfPoliceRestarts ≥ 0
+end
+
+schema CRestart_AddPoliceRestartPoint
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CRestart::AddPoliceRestartPoint(const CVector&, float)
+  true
+end
+
+schema CRestart_AddHospitalRestartPoint_2
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CRestart::AddHospitalRestartPoint(const CVector&, float)
+  true
+end
+
+schema CRestart_OverrideNextRestart_3
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CRestart::OverrideNextRestart(const CVector&, float)
+  true
+end
+
+schema CRestart_FindClosestHospitalRestartPoint_4
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : Ref[CVector]
+  arg_3? : ℙ ℝ
+where
+  -- Declared member operation CRestart::FindClosestHospitalRestartPoint(const CVector &, CVector *, float *)
+  true
+end
+
+schema CRestart_FindClosestPoliceRestartPoint_5
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : Ref[CVector]
+  arg_3? : ℙ ℝ
+where
+  -- Declared member operation CRestart::FindClosestPoliceRestartPoint(const CVector &, CVector *, float *)
+  true
+end
+
+schema CRestart_Initialise_6
+  ΔCRestart
+where
+  -- Declared member operation CRestart::Initialise()
+  true
+end
+
+schema CRestart_CancelOverrideRestart_7
+  ΔCRestart
+where
+  -- Declared member operation CRestart::CancelOverrideRestart()
+  true
+end
+
+schema CRestart_LoadAllRestartPoints_8
+  ΔCRestart
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CRestart::LoadAllRestartPoints(uint8 *buf, uint32 size)
+  true
+end
+
+schema CRestart_SaveAllRestartPoints_9
+  ΔCRestart
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CRestart::SaveAllRestartPoints(uint8 *buf, uint32 *size)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRestart_Initialise
+  ΔCRestart
+where
+  -- State update: OverridePoliceStationLevel' = LEVEL_GENERIC
+  -- State update: OverrideHospitalLevel' = LEVEL_GENERIC
+  -- State update: bFadeInAfterNextArrest' = true
+  -- State update: bFadeInAfterNextDeath' = true
+  -- State update: OverrideHeading' = 0.0f
+  -- State update: OverridePosition' = CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema CRestart_AddHospitalRestartPoint
+  ΔCRestart
+  pos? : CVector
+  heading? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRestart_AddPoliceRestartPoint
+  ΔCRestart
+  pos? : CVector
+  heading? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRestart_OverrideNextRestart
+  ΔCRestart
+  pos? : CVector
+  heading? : ℝ
+where
+  -- State update: bOverrideRestart' = true
+  -- State update: OverridePosition' = pos
+  -- State update: OverrideHeading' = heading
+  true
+end
+
+schema CRestart_CancelOverrideRestart
+  ΔCRestart
+where
+  -- State update: bOverrideRestart' = false
+  true
+end
+
+schema CRestart_FindClosestHospitalRestartPoint
+  ΔCRestart
+  pos? : CVector
+  outPos? : Ref[CVector]
+  outHeading? : ℙ ℝ
+where
+  -- State update: outPos' = OverridePosition
+  -- State update: outHeading' = OverrideHeading
+  -- State update: curlevel' = CTheZones::GetLevelFromPosition(&pos)
+  -- State update: fMinDist' = SQR(4000.0f)
+  -- State update: closestPoint' = NUM_RESTART_POINTS
+  -- State update: dist' = (pos - HospitalRestartPoints[i]).MagnitudeSqr()
+  -- Invokes: CTheZones::GetLevelFromPosition, ThePaths.FindNodeClosestToCoors
+  true
+end
+
+schema CRestart_FindClosestPoliceRestartPoint
+  ΔCRestart
+  pos? : CVector
+  outPos? : Ref[CVector]
+  outHeading? : ℙ ℝ
+where
+  -- State update: outPos' = OverridePosition
+  -- State update: outHeading' = OverrideHeading
+  -- State update: curlevel' = CTheZones::GetLevelFromPosition(&pos)
+  -- State update: fMinDist' = SQR(4000.0f)
+  -- State update: closestPoint' = NUM_RESTART_POINTS
+  -- State update: dist' = (pos - PoliceRestartPoints[i]).MagnitudeSqr()
+  -- Invokes: CTheZones::GetLevelFromPosition, ThePaths.FindNodeClosestToCoors
+  true
+end
+
+schema CRestart_LoadAllRestartPoints
+  ΔCRestart
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRestart_SaveAllRestartPoints
+  ΔCRestart
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

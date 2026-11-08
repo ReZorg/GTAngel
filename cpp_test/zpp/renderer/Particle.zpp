@@ -1,0 +1,604 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Particle (renderer)
+-- Source File(s): renderer/Particle.cpp, renderer/Particle.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include World.zpp  (from "World.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include ParticleMgr.zpp  (from "ParticleMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_PARTICLES_ON_SCREEN : seq CHAR  -- #define MAX_PARTICLES_ON_SCREEN (750)
+MAX_SMOKE_FILES : seq CHAR  -- #define MAX_SMOKE_FILES ARRAY_SIZE(SmokeFiles)
+MAX_RUBBER_FILES : seq CHAR  -- #define MAX_RUBBER_FILES ARRAY_SIZE(RubberFiles)
+MAX_RAINSPLASH_FILES : seq CHAR  -- #define MAX_RAINSPLASH_FILES ARRAY_SIZE(RainSplashFiles)
+MAX_WATERSPRAY_FILES : seq CHAR  -- #define MAX_WATERSPRAY_FILES ARRAY_SIZE(WatersprayFiles)
+MAX_EXPLOSIONMEDIUM_FILES : seq CHAR  -- #define MAX_EXPLOSIONMEDIUM_FILES ARRAY_SIZE(ExplosionMediumFiles)
+MAX_GUNFLASH_FILES : seq CHAR  -- #define MAX_GUNFLASH_FILES ARRAY_SIZE(GunFlashFiles)
+MAX_RAINSPLASHUP_FILES : seq CHAR  -- #define MAX_RAINSPLASHUP_FILES ARRAY_SIZE(RainSplashupFiles)
+MAX_BIRDFRONT_FILES : seq CHAR  -- #define MAX_BIRDFRONT_FILES ARRAY_SIZE(BirdfrontFiles)
+MAX_BOAT_FILES : seq CHAR  -- #define MAX_BOAT_FILES ARRAY_SIZE(BoatFiles)
+MAX_CARDEBRIS_FILES : seq CHAR  -- #define MAX_CARDEBRIS_FILES ARRAY_SIZE(CardebrisFiles)
+MAX_CARSPLASH_FILES : seq CHAR  -- #define MAX_CARSPLASH_FILES ARRAY_SIZE(CarsplashFiles)
+MAX_RAINDRIP_FILES : seq CHAR  -- #define MAX_RAINDRIP_FILES (2)
+MAX_LEAF_FILES : seq CHAR  -- #define MAX_LEAF_FILES (2)
+MAX_SMOKE2_FILES : seq CHAR  -- #define MAX_SMOKE2_FILES ARRAY_SIZE(Smoke2Files)
+MAX_RAINDROP_FILES : seq CHAR  -- #define MAX_RAINDROP_FILES ARRAY_SIZE(RaindropFiles)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Particle_Enum_1 ::= RAND_TABLE_SIZE | SIN_COS_TABLE_SIZE
+  -- val(RAND_TABLE_SIZE) = 20
+  -- val(SIN_COS_TABLE_SIZE) = 1024
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CParticle
+  m_vecPosition : CVector
+  m_vecVelocity : CVector
+  m_nTimeWhenWillBeDestroyed : ℕ
+  m_nTimeWhenColorWillBeChanged : ℕ
+  m_fZGround : ℝ
+  m_vecParticleMovementOffset : CVector
+  m_nCurrentZRotation : ℤ
+  m_nZRotationTimer : ℕ
+  m_fCurrentZRadius : ℝ
+  m_nZRadiusTimer : ℕ
+  m_nColorIntensity : ℕ
+  m_nAlpha : ℕ
+  m_fSize : ℝ
+  m_fExpansionRate : ℝ
+  m_nFadeToBlackTimer : ℤ
+  m_nFadeAlphaTimer : ℤ
+  m_nAnimationSpeedTimer : ℤ
+  m_nRotationStep : ℤ
+  m_nRotation : ℤ
+  m_nCurrentFrame : ℕ
+  m_Color : RwRGBA
+  m_pNext : Ref[CParticle]
+  m_pUnusedListHead : Ref[CParticle]
+  m_SinTable : seq ℝ  -- bounded array [SIN_COS_TABLE_SIZE]
+  m_CosTable : seq ℝ  -- bounded array [SIN_COS_TABLE_SIZE]
+  field_4C : ℤ
+  m_vecScreenPosition : CVector
+where
+  m_nTimeWhenWillBeDestroyed ≥ 0
+  m_nTimeWhenColorWillBeChanged ≥ 0
+  m_nZRotationTimer ≥ 0
+  m_nZRadiusTimer ≥ 0
+  m_nColorIntensity ≥ 0
+  m_nAlpha ≥ 0
+  m_nCurrentFrame ≥ 0
+  #m_pNext ≤ 1
+  #m_pUnusedListHead ≤ 1
+end
+
+schema CParticle_CParticle
+  ΔCParticle
+where
+  -- Declared member operation CParticle::CParticle()
+  true
+end
+
+schema CParticle_CParticle_2
+  ΔCParticle
+  result! : ANY
+where
+  -- Declared member operation CParticle::CParticle()
+  true
+end
+
+schema CParticle_Sin_3
+  ΔCParticle
+  value? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CParticle::Sin(int32 value)
+  true
+end
+
+schema CParticle_Cos_4
+  ΔCParticle
+  value? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CParticle::Cos(int32 value)
+  true
+end
+
+schema CParticle_ReloadConfig_5
+  ΔCParticle
+  result! : void
+where
+  -- Declared member operation CParticle::ReloadConfig()
+  true
+end
+
+schema CParticle_Initialise_6
+  ΔCParticle
+where
+  -- Declared member operation CParticle::Initialise()
+  true
+end
+
+schema CParticle_Shutdown_7
+  ΔCParticle
+where
+  -- Declared member operation CParticle::Shutdown()
+  true
+end
+
+schema CParticle_AddParticlesAlongLine_8
+  ΔCParticle
+  type? : tParticleType
+  vecStart? : CVector
+  vecEnd? : CVector
+  vecDir? : CVector
+  fPower? : ℝ
+  pEntity? : Ref[CEntity]
+  fSize? : ℝ
+  nRotationSpeed? : ℤ
+  nRotation? : ℤ
+  nCurFrame? : ℤ
+  nLifeSpan? : ℤ
+where
+  -- Declared member operation CParticle::AddParticlesAlongLine(tParticleType type, CVector const &vecStart, CVector const &vecEnd, CVector const &vecDir, float fPower, CEntity *pEntity = nil, float fSize = 0.0f, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0)
+  true
+end
+
+schema CParticle_AddParticlesAlongLine_9
+  ΔCParticle
+  type? : tParticleType
+  vecStart? : CVector
+  vecEnd? : CVector
+  vecDir? : CVector
+  fPower? : ℝ
+  pEntity? : Ref[CEntity]
+  fSize? : ℝ
+  color? : RwRGBA
+  nRotationSpeed? : ℤ
+  nRotation? : ℤ
+  nCurFrame? : ℤ
+  nLifeSpan? : ℤ
+where
+  -- Declared member operation CParticle::AddParticlesAlongLine(tParticleType type, CVector const &vecStart, CVector const &vecEnd, CVector const &vecDir, float fPower, CEntity *pEntity, float fSize, RwRGBA const&color, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0)
+  true
+end
+
+schema CParticle_AddParticle_10
+  ΔCParticle
+  type? : tParticleType
+  vecPos? : CVector
+  vecDir? : CVector
+  pEntity? : Ref[CEntity]
+  fSize? : ℝ
+  nRotationSpeed? : ℤ
+  nRotation? : ℤ
+  nCurFrame? : ℤ
+  nLifeSpan? : ℤ
+  result! : Ref[CParticle]
+where
+  -- Declared member operation CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity = nil, float fSize = 0.0f, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0)
+  true
+end
+
+schema CParticle_AddParticle_11
+  ΔCParticle
+  type? : tParticleType
+  vecPos? : CVector
+  vecDir? : CVector
+  pEntity? : Ref[CEntity]
+  fSize? : ℝ
+  color? : RwRGBA
+  nRotationSpeed? : ℤ
+  nRotation? : ℤ
+  nCurFrame? : ℤ
+  nLifeSpan? : ℤ
+  result! : Ref[CParticle]
+where
+  -- Declared member operation CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity, float fSize, RwRGBA const &color, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0)
+  true
+end
+
+schema CParticle_Update_12
+  ΔCParticle
+where
+  -- Declared member operation CParticle::Update()
+  true
+end
+
+schema CParticle_Render_13
+  ΔCParticle
+where
+  -- Declared member operation CParticle::Render()
+  true
+end
+
+schema CParticle_RemovePSystem_14
+  ΔCParticle
+  type? : tParticleType
+where
+  -- Declared member operation CParticle::RemovePSystem(tParticleType type)
+  true
+end
+
+schema CParticle_RemoveParticle_15
+  ΔCParticle
+  pParticle? : Ref[CParticle]
+  pPrevParticle? : Ref[CParticle]
+  pPSystemData? : Ref[tParticleSystemData]
+where
+  -- Declared member operation CParticle::RemoveParticle(CParticle *pParticle, CParticle *pPrevParticle, tParticleSystemData *pPSystemData)
+  true
+end
+
+schema CParticle_Next_16
+  ΔCParticle
+  pParticle? : Ref[CParticle]
+  pPrevParticle? : Ref[CParticle]
+  pPSystemData? : Ref[tParticleSystemData]
+  bRemoveParticle? : 𝔹
+where
+  -- Declared member operation CParticle::_Next(CParticle *&pParticle, CParticle *&pPrevParticle, tParticleSystemData *pPSystemData, bool bRemoveParticle)
+  true
+end
+
+schema CParticle_if_17
+  ΔCParticle
+  arg_1? : pPrevParticle
+where
+  -- Declared member operation CParticle::if(pPrevParticle)
+  true
+end
+
+schema CParticle_AddJetExplosion_18
+  ΔCParticle
+  vecPos? : CVector
+  fPower? : ℝ
+  fSize? : ℝ
+  result! : void
+where
+  -- Declared member operation CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize)
+  true
+end
+
+schema CParticle_AddYardieDoorSmoke_19
+  ΔCParticle
+  vecPos? : CVector
+  matMatrix? : CMatrix
+where
+  -- Declared member operation CParticle::AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix)
+  true
+end
+
+schema CParticle_CalWindDir_20
+  ΔCParticle
+  vecDirIn? : Ref[CVector]
+  vecDirOut? : Ref[CVector]
+where
+  -- Declared member operation CParticle::CalWindDir(CVector *vecDirIn, CVector *vecDirOut)
+  true
+end
+
+schema CParticle_HandleShipsAtHorizonStuff_21
+  ΔCParticle
+where
+  -- Declared member operation CParticle::HandleShipsAtHorizonStuff()
+  true
+end
+
+schema CParticle_HandleShootableBirdsStuff_22
+  ΔCParticle
+  entity? : Ref[CEntity]
+  camPos? : CVector
+where
+  -- Declared member operation CParticle::HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos)
+  true
+end
+
+schema CParticle_SetPixelData_23
+  ΔCParticle
+where
+  -- Declared member operation CParticle::SetPixelData()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CParticle_ReloadConfig
+  ΔCParticle
+where
+  -- State update: m_pUnusedListHead' = gParticleArray
+  -- State update: m_pNext' = ∅
+  -- State update: m_pNext' = &gParticleArray[i + 1]
+  -- State update: m_vecPosition' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_vecVelocity' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_nTimeWhenWillBeDestroyed' = 0
+  -- Invokes: mod_ParticleSystemManager.Initialise
+  true
+end
+
+schema CParticle_Initialise
+  ΔCParticle
+where
+  -- State update: randVal' = -1.0f
+  -- State update: angle' = DEGTORAD(float(i) * float(360.0f / SIN_COS_TABLE_SIZE))
+  -- State update: slot' = CTxdStore::FindTxdSlot("particle")
+  -- State update: gpSmoke2Tex' = RwTextureRead("smokeII_3", ∅)
+  -- State update: gpSmoke2Raster' = RwTextureGetRaster(gpSmoke2Tex)
+  -- State update: gpRainDropTex' = RwTextureRead("raindrop4", ∅)
+  -- Invokes: CParticleObject::Initialise, CTxdStore::FindTxdSlot, CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CParticle_Shutdown
+  ΔCParticle
+where
+  -- State update: gpFlame1Tex' = ∅
+  -- State update: gpFlame5Tex' = ∅
+  -- State update: gpRainDropSmallTex' = ∅
+  -- State update: gpBloodTex' = ∅
+  -- State update: gpLeafTex' = ∅
+  -- State update: gpCloudTex1' = ∅
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::RemoveTxdSlot
+  true
+end
+
+schema CParticle_AddParticlesAlongLine
+  ΔCParticle
+  type? : tParticleType
+  vecStart? : CVector
+  vecEnd? : CVector
+  vecDir? : CVector
+  fPower? : ℝ
+  pEntity? : Ref[CEntity]
+  fSize? : ℝ
+  nRotationSpeed? : ℤ
+  nRotation? : ℤ
+  nCurFrame? : ℤ
+  nLifeSpan? : ℤ
+where
+  -- State update: vecDist' = vecEnd - vecStart
+  -- State update: fDist' = vecDist.Magnitude()
+  -- State update: fSteps' = Max(fDist / fPower, 1.0f)
+  -- State update: nSteps' = (int32)fSteps
+  -- State update: vecStep' = vecDist * (1.0f / (float)nSteps)
+  -- State update: vecPos' = float(i) * vecStep + vecStart
+  -- Invokes: vecDist.Magnitude
+  true
+end
+
+schema CParticle_AddParticlesAlongLine_2
+  ΔCParticle
+  type? : tParticleType
+  vecStart? : CVector
+  vecEnd? : CVector
+  vecDir? : CVector
+  fPower? : ℝ
+  pEntity? : Ref[CEntity]
+  fSize? : ℝ
+  color? : RwRGBA
+  nRotationSpeed? : ℤ
+  nRotation? : ℤ
+  nCurFrame? : ℤ
+  nLifeSpan? : ℤ
+where
+  -- State update: vecDist' = vecEnd - vecStart
+  -- State update: fDist' = vecDist.Magnitude()
+  -- State update: fSteps' = Max(fDist / fPower, 1.0f)
+  -- State update: nSteps' = (int32)fSteps
+  -- State update: vecStep' = vecDist * (1.0f / (float)nSteps)
+  -- State update: vecPos' = float(i) * vecStep + vecStart
+  -- Invokes: vecDist.Magnitude
+  true
+end
+
+schema CParticle_Update
+  ΔCParticle
+where
+  -- State update: fFricDeccel50' = pow(0.50f, CTimer::GetTimeStep())
+  -- State update: fFricDeccel80' = pow(0.80f, CTimer::GetTimeStep())
+  -- State update: fFricDeccel90' = pow(0.90f, CTimer::GetTimeStep())
+  -- State update: fFricDeccel95' = pow(0.95f, CTimer::GetTimeStep())
+  -- State update: fFricDeccel96' = pow(0.96f, CTimer::GetTimeStep())
+  -- State update: fFricDeccel99' = pow(0.99f, CTimer::GetTimeStep())
+  -- Invokes: CTimer::GetIsPaused, CTimer::GetTimeStep, CParticleObject::UpdateAll, CGame::IsInInterior, vecMoveStep.Magnitude
+  true
+end
+
+schema CParticle_Render
+  ΔCParticle
+where
+  -- State update: flags' = DRAW_OPAQUE
+  -- State update: prevFrame' = ∅
+  -- State update: psystem' = &mod_ParticleSystemManager.m_aParticles[i]
+  -- State update: particleBanned' = false
+  -- State update: particle' = psystem.m_pParticles
+  -- State update: frames' = psystem.m_ppRaster
+  -- Invokes: CSprite::InitSpriteBuffer2D, CSprite::FlushSpriteBuffer, CDraw::GetNearClipZ, CSprite::GetFarScreenZ, CSprite::GetNearScreenZ
+  true
+end
+
+schema CParticle_RemovePSystem
+  ΔCParticle
+  type? : tParticleType
+where
+  -- State update: psystemdata' = &mod_ParticleSystemManager.m_aParticles[type]
+  -- State update: particle' = psystemdata.m_pParticles
+  true
+end
+
+schema CParticle_RemoveParticle
+  ΔCParticle
+  pParticle? : Ref[CParticle]
+  pPrevParticle? : Ref[CParticle]
+  pPSystemData? : Ref[tParticleSystemData]
+where
+  -- State update: pPrevParticle.m_pNext' = pParticle.m_pNext
+  -- State update: pPSystemData.m_pParticles' = pParticle.m_pNext
+  -- State update: pParticle.m_pNext' = m_pUnusedListHead
+  -- State update: m_pUnusedListHead' = pParticle
+  true
+end
+
+schema CParticle_AddJetExplosion
+  ΔCParticle
+  vecPos? : CVector
+  fPower? : ℝ
+  fSize? : ℝ
+where
+  -- State update: fPower' = 1.0f
+  -- State update: vecStepPos' = vecPos
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CParticle_AddYardieDoorSmoke
+  ΔCParticle
+  vecPos? : CVector
+  matMatrix? : CMatrix
+where
+  -- State update: vecBasePos' = matMatrix * (invMat * vecPos + CVector(0.0f, -1.0f, 0.5f))
+  -- State update: pos' = vecBasePos
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CParticle_CalWindDir
+  ΔCParticle
+  vecDirIn? : Ref[CVector]
+  vecDirOut? : Ref[CVector]
+where
+  -- State update: vecDirOut.x' = (Cos(128) * vecDirIn.x) + (Sin(128) * vecDirIn.y)
+  true
+end
+
+schema CParticle_HandleShipsAtHorizonStuff
+  ΔCParticle
+where
+  -- State update: psystemdata' = &mod_ParticleSystemManager.m_aParticles[PARTICLE_SHIP_SIDE]
+  -- State update: particle' = psystemdata.m_pParticles
+  -- State update: particle.m_nAlpha' = Min(particle.m_nAlpha + 1, 96)
+  -- State update: particle.m_nFadeAlphaTimer' = 1
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CParticle_HandleShootableBirdsStuff
+  ΔCParticle
+  entity? : Ref[CEntity]
+  camPos? : CVector
+where
+  -- State update: fHeadingRad' = entity.GetForward().Heading()
+  -- State update: fHeading' = RADTODEG(fHeadingRad)
+  -- State update: fBirdAngle' = ::Cos(DEGTORAD(1.5f))
+  -- State update: particle' = psystem.m_pParticles
+  -- State update: prevParticle' = ∅
+  -- State update: bRemoveParticle' = false
+  -- Invokes: entity->GetForward, vecDist.Normalise, vecDir.Normalise, CGeneral::GetRandomNumberInRange, CGeneral::GetRandomNumber
+  true
+end
+
+schema CEntity_AddSteamsFromGround
+  ΔCEntity
+  unused? : Ref[CVector]
+where
+  -- State update: effect' = CModelInfo::GetModelInfo(GetModelIndex()).Get2dEffect(i)
+  -- State update: pos' = GetMatrix() * effect.pos
+  -- Invokes: CModelInfo::GetModelInfo, CParticleObject::AddObject
+  true
+end
+
+schema CParticle_SetPixelData
+  ΔCParticle
+where
+  -- State update: entry' = &mod_ParticleSystemManager.m_aParticles[i]
+  -- State update: entry.m_ppRaster' = &gpRainDropSmallRaster
+  -- State update: entry.m_ppRaster' = &gpRainDropSmallRaster
+  -- State update: entry.m_ppRaster' = &gpSparkRaster
+  -- State update: entry.m_ppRaster' = &gpSmoke2Raster
+  -- State update: entry.m_ppRaster' = &gpSmoke2Raster
+  true
+end
+
+schema Particle_CParticle
+  ΔParticleModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Particle_CParticle_2
+  ΔParticleModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Particle_Sin
+  ΔParticleModuleState
+  value? : ℤ
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_SinTable[value]
+  true
+end
+
+schema Particle_Cos
+  ΔParticleModuleState
+  value? : ℤ
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_CosTable[value]
+  true
+end
+
+schema Particle_Next
+  ΔParticleModuleState
+  pParticle? : Ref[CParticle]
+  pPrevParticle? : Ref[CParticle]
+  pPSystemData? : Ref[tParticleSystemData]
+  bRemoveParticle? : 𝔹
+where
+  -- State update: pParticle' = pPrevParticle.m_pNext
+  -- State update: pParticle' = pPSystemData.m_pParticles
+  -- State update: pPrevParticle' = pParticle
+  -- State update: pParticle' = pParticle.m_pNext
+  true
+end

@@ -1,0 +1,80 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Console (renderer)
+-- Source File(s): renderer/Console.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Console_Enum_1 ::= MAX_LINES | MAX_STR_LEN
+  -- val(MAX_LINES) = 8
+  -- val(MAX_STR_LEN) = 40
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CConsole
+  m_nLineCount : ℕ
+  m_nCurrentLine : ℕ
+  m_aTimer : seq ℕ  -- bounded array [MAX_LINES]
+  m_aRed : seq ℕ  -- bounded array [MAX_LINES]
+  m_aGreen : seq ℕ  -- bounded array [MAX_LINES]
+  m_aBlue : seq ℕ  -- bounded array [MAX_LINES]
+where
+  m_nLineCount ≥ 0
+  m_nCurrentLine ≥ 0
+end
+
+schema CConsole_AddLine
+  ΔCConsole
+  s? : seq CHAR
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+where
+  -- Declared member operation CConsole::AddLine(char *s, uint8 r, uint8 g, uint8 b)
+  true
+end
+
+schema CConsole_AddOneLine_2
+  ΔCConsole
+  s? : seq CHAR
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+where
+  -- Declared member operation CConsole::AddOneLine(char *s, uint8 r, uint8 g, uint8 b)
+  true
+end
+
+schema CConsole_Display_3
+  ΔCConsole
+where
+  -- Declared member operation CConsole::Display()
+  true
+end
+
+schema CConsole_Init_4
+  ΔCConsole
+where
+  -- Declared member operation CConsole::Init()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Console_Init
+  ΔConsoleModuleState
+where
+  -- State update: m_nCurrentLine' = 0
+  -- State update: m_nLineCount' = 0
+  true
+end

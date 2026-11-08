@@ -1,0 +1,214 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: DamageManager (vehicles)
+-- Source File(s): vehicles/DamageManager.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include DamageManager.zpp  (from "DamageManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDamageManager_CDamageManager
+  ΔCDamageManager
+where
+  -- State update: m_fWheelDamageEffect' = 0.65f
+  -- State update: m_bSmashedDoorDoesntClose' = false
+  -- State update: field_18' = 1
+  true
+end
+
+schema CDamageManager_ResetDamageStatus
+  ΔCDamageManager
+where
+  -- State update: m_fWheelDamageEffect' = 0.0f
+  -- State update: m_engineStatus' = 0
+  -- State update: m_lightStatus' = 0
+  -- State update: m_panelStatus' = 0
+  true
+end
+
+schema CDamageManager_FuckCarCompletely
+  ΔCDamageManager
+where
+  -- State update: m_lightStatus' = 0
+  -- State update: m_panelStatus' = 0
+  true
+end
+
+schema CDamageManager_ApplyDamage
+  ΔCDamageManager
+  component? : tComponent
+  damage? : ℝ
+  unused? : ℝ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CDamageManager_GetComponentGroup
+  ΔCDamageManager
+  component? : tComponent
+  componentGroup? : Ref[tComponentGroup]
+  subComp? : ℙ ℕ
+where
+  -- State update: subComp' = -2
+  -- State update: componentGroup' = COMPGROUP_BUMPER
+  -- State update: componentGroup' = COMPGROUP_PANEL
+  -- State update: subComp' = component - COMPONENT_PANEL_FRONT_LEFT
+  -- State update: componentGroup' = COMPGROUP_BONNET
+  -- State update: componentGroup' = COMPGROUP_BOOT
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDamageManager_SetDoorStatus
+  ΔCDamageManager
+  door? : ℤ
+  status? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDamageManager_GetDoorStatus
+  ΔCDamageManager
+  door? : ℤ
+where
+  -- Return postcondition: result! = m_doorStatus[door]
+  true
+end
+
+schema CDamageManager_ProgressDoorDamage
+  ΔCDamageManager
+  door? : ℕ
+where
+  -- State update: status' = GetDoorStatus(door)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDamageManager_SetPanelStatus
+  ΔCDamageManager
+  panel? : ℤ
+  status? : ℕ
+where
+  -- State update: m_panelStatus' = dpb(status, panel*4, 4, m_panelStatus)
+  true
+end
+
+schema CDamageManager_GetPanelStatus
+  ΔCDamageManager
+  panel? : ℤ
+where
+  -- Return postcondition: result! = ldb(panel*4, 4, m_panelStatus)
+  true
+end
+
+schema CDamageManager_ProgressPanelDamage
+  ΔCDamageManager
+  panel? : ℕ
+where
+  -- State update: status' = GetPanelStatus(panel)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDamageManager_SetLightStatus
+  ΔCDamageManager
+  light? : eLights
+  status? : ℕ
+where
+  -- State update: m_lightStatus' = dpb(status, light*2, 2, m_lightStatus)
+  true
+end
+
+schema CDamageManager_GetLightStatus
+  ΔCDamageManager
+  light? : eLights
+where
+  -- Return postcondition: result! = ldb(light*2, 2, m_lightStatus)
+  true
+end
+
+schema CDamageManager_SetWheelStatus
+  ΔCDamageManager
+  wheel? : ℤ
+  status? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDamageManager_GetWheelStatus
+  ΔCDamageManager
+  wheel? : ℤ
+where
+  -- Return postcondition: result! = m_wheelStatus[wheel]
+  true
+end
+
+schema CDamageManager_ProgressWheelDamage
+  ΔCDamageManager
+  wheel? : ℕ
+where
+  -- State update: status' = GetWheelStatus(wheel)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDamageManager_SetEngineStatus
+  ΔCDamageManager
+  status? : ℕ
+where
+  -- State update: m_engineStatus' = 250
+  -- State update: m_engineStatus' = status
+  true
+end
+
+schema CDamageManager_GetEngineStatus
+  ΔCDamageManager
+where
+  -- Return postcondition: result! = m_engineStatus
+  true
+end
+
+schema CDamageManager_ProgressEngineDamage
+  ΔCDamageManager
+where
+  -- State update: status' = GetEngineStatus()
+  -- State update: newstatus' = status + 32 + (CGeneral::GetRandomNumber() & 0x1F)
+  -- State update: newstatus' = ENGINE_STATUS_ON_FIRE-1
+  -- Return postcondition: result! = true
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DamageManagerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 263
+end

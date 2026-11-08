@@ -1,0 +1,399 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WaterLevel (renderer)
+-- Source File(s): renderer/WaterLevel.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WATER_X_OFFSET : ℝ  -- #define WATER_X_OFFSET (400.0f)
+WATER_Z_OFFSET : ℝ  -- #define WATER_Z_OFFSET (0.5f)
+NO_WATER : seq CHAR  -- #define NO_WATER -128
+MAX_SMALL_SECTORS : ℕ  -- #define MAX_SMALL_SECTORS 128
+MAX_LARGE_SECTORS : ℕ  -- #define MAX_LARGE_SECTORS 64
+MAX_HUGE_SECTORS : ℕ  -- #define MAX_HUGE_SECTORS 32
+MAX_EXTRAHUGE_SECTORS : ℕ  -- #define MAX_EXTRAHUGE_SECTORS 16
+SMALL_SECTOR_SIZE : ℕ  -- #define SMALL_SECTOR_SIZE 32
+LARGE_SECTOR_SIZE : ℕ  -- #define LARGE_SECTOR_SIZE 64
+HUGE_SECTOR_SIZE : ℕ  -- #define HUGE_SECTOR_SIZE 128
+EXTRAHUGE_SECTOR_SIZE : ℕ  -- #define EXTRAHUGE_SECTOR_SIZE 256
+WATER_START_X : ℝ  -- #define WATER_START_X -2048.0f
+WATER_END_X : ℝ  -- #define WATER_END_X 2048.0f
+WATER_START_Y : ℝ  -- #define WATER_START_Y -2048.0f
+WATER_END_Y : ℝ  -- #define WATER_END_Y 2048.0f
+WATER_WIDTH : seq CHAR  -- #define WATER_WIDTH ((WATER_END_X - WATER_START_X))
+WATER_HEIGHT : seq CHAR  -- #define WATER_HEIGHT ((WATER_END_Y - WATER_START_Y))
+MAX_BOAT_WAKES : ℕ  -- #define MAX_BOAT_WAKES 8
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eBeachToy ::= BEACHTOY_0 | BEACHTOY_BALL | BEACHTOY_LOUNGE_WOOD_UP | BEACHTOY_LOUNGE_TOWEL_UP | BEACHTOY_LOUNGE_WOOD_ON | BEACHTOY_ANY_LOUNGE | BEACHTOY_LOTION | BEACHTOY_TOWEL1 | BEACHTOY_TOWEL2 | BEACHTOY_TOWEL3 | BEACHTOY_TOWEL4 | BEACHTOY_ANY_TOWEL
+  -- val(BEACHTOY_0) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ColData
+  SurfaceType : ℕ
+  PieceType : ℕ
+where
+  SurfaceType ≥ 0
+  PieceType ≥ 0
+end
+
+schema CWaterLevel
+  ms_nNoOfWaterLevels : ℤ
+  ms_aWaterZs : seq ℝ  -- bounded array [48]
+  ms_aWaterRects : seq CRect  -- bounded array [48]
+  WavesCalculatedThisFrame : 𝔹
+  RequireWavySector : 𝔹
+  MaskCalculatedThisFrame : 𝔹
+  PreCalculatedMaskPosn : CVector
+  m_bRenderSeaBed : 𝔹
+  m_nRenderWaterLayers : ℤ
+  ms_pWavyAtomic : Ref[RpAtomic]
+  ms_pMaskAtomic : Ref[RpAtomic]
+  apGeomArray : seq Ref[RpGeometry]  -- bounded array [MAX_BOAT_WAKES]
+  nGeomUsed : ℤ
+where
+  #ms_aWaterZs = 48
+  #ms_aWaterRects = 48
+  #ms_pWavyAtomic ≤ 1
+  #ms_pMaskAtomic ≤ 1
+end
+
+schema CWaterLevel_Initialise
+  ΔCWaterLevel
+  pWaterDat? : seq CHAR
+where
+  -- Declared member operation CWaterLevel::Initialise(Const char *pWaterDat)
+  true
+end
+
+schema CWaterLevel_Shutdown_2
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::Shutdown()
+  true
+end
+
+schema CWaterLevel_CreateWavyAtomic_3
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::CreateWavyAtomic()
+  true
+end
+
+schema CWaterLevel_DestroyWavyAtomic_4
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::DestroyWavyAtomic()
+  true
+end
+
+schema CWaterLevel_AddWaterLevel_5
+  ΔCWaterLevel
+  fXLeft? : ℝ
+  fYBottom? : ℝ
+  fXRight? : ℝ
+  fYTop? : ℝ
+  fLevel? : ℝ
+where
+  -- Declared member operation CWaterLevel::AddWaterLevel(float fXLeft, float fYBottom, float fXRight, float fYTop, float fLevel)
+  true
+end
+
+schema CWaterLevel_WaterLevelAccordingToRectangles_6
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  pfOutLevel? : ℙ ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::WaterLevelAccordingToRectangles(float fX, float fY, float *pfOutLevel = nil)
+  true
+end
+
+schema CWaterLevel_TestVisibilityForFineWaterBlocks_7
+  ΔCWaterLevel
+  worldPos? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::TestVisibilityForFineWaterBlocks(const CVector &worldPos)
+  true
+end
+
+schema CWaterLevel_RemoveIsolatedWater_8
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::RemoveIsolatedWater()
+  true
+end
+
+schema CWaterLevel_GetWaterLevel_9
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  pfOutLevel? : ℙ ℝ
+  bDontCheckZ? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool bDontCheckZ)
+  true
+end
+
+schema CWaterLevel_GetWaterLevel_10
+  ΔCWaterLevel
+  coors? : CVector
+  pfOutLevel? : ℙ ℝ
+  bDontCheckZ? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::GetWaterLevel(CVector coors, float *pfOutLevel, bool bDontCheckZ)
+  true
+end
+
+schema CWaterLevel_GetWaterLevelNoWaves_11
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  pfOutLevel? : ℙ ℝ
+  result! : bool
+where
+  -- Declared member operation CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLevel)
+  true
+end
+
+schema CWaterLevel_GetWaterWavesOnly_12
+  ΔCWaterLevel
+  x? : ℤ
+  y? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CWaterLevel::GetWaterWavesOnly(short x, short y)
+  true
+end
+
+schema CWaterLevel_GetWaterNormal_13
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  result! : CVector
+where
+  -- Declared member operation CWaterLevel::GetWaterNormal(float fX, float fY)
+  true
+end
+
+schema CWaterLevel_RenderWater_14
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::RenderWater()
+  true
+end
+
+schema CWaterLevel_RenderTransparentWater_15
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::RenderTransparentWater(void)
+  true
+end
+
+schema CWaterLevel_RenderOneFlatSmallWaterPoly_16
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- Declared member operation CWaterLevel::RenderOneFlatSmallWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+  true
+end
+
+schema CWaterLevel_RenderOneFlatLargeWaterPoly_17
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- Declared member operation CWaterLevel::RenderOneFlatLargeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+  true
+end
+
+schema CWaterLevel_RenderOneFlatHugeWaterPoly_18
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- Declared member operation CWaterLevel::RenderOneFlatHugeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+  true
+end
+
+schema CWaterLevel_RenderOneFlatExtraHugeWaterPoly_19
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- Declared member operation CWaterLevel::RenderOneFlatExtraHugeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+  true
+end
+
+schema CWaterLevel_RenderOneWavySector_20
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+  bDontRender? : 𝔹
+where
+  -- Declared member operation CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &color, bool bDontRender = false)
+  true
+end
+
+schema CWaterLevel_PreCalcWavySector_21
+  ΔCWaterLevel
+  color? : RwRGBA
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::PreCalcWavySector(RwRGBA const &color)
+  true
+end
+
+schema CWaterLevel_PreCalcWavyMask_22
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  fSectorX? : ℝ
+  fSectorY? : ℝ
+  fCamPosX? : ℝ
+  fCamPosY? : ℝ
+  fCamDirX? : ℝ
+  fCamDirY? : ℝ
+  color? : RwRGBA
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ, float fSectorX, float fSectorY, float fCamPosX, float fCamPosY, float fCamDirX, float fCamDirY, RwRGBA const&color)
+  true
+end
+
+schema CWaterLevel_RenderWakeSegment_23
+  ΔCWaterLevel
+  vecA? : CVector2D
+  vecB? : CVector2D
+  vecC? : CVector2D
+  vecD? : CVector2D
+  fSizeA? : ℝ
+  fSizeB? : ℝ
+  fAlphaA? : ℝ
+  fAlphaB? : ℝ
+  fWakeZ? : ℝ
+where
+  -- Declared member operation CWaterLevel::RenderWakeSegment(CVector2D &vecA, CVector2D &vecB, CVector2D &vecC, CVector2D &vecD, float &fSizeA, float &fSizeB, float &fAlphaA, float &fAlphaB, float &fWakeZ)
+  true
+end
+
+schema CWaterLevel_RenderOneSlopedUnderWaterPoly_24
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- Declared member operation CWaterLevel::RenderOneSlopedUnderWaterPoly(float fX, float fY, float fZ, RwRGBA const&color)
+  true
+end
+
+schema CWaterLevel_RenderOneFlatSmallWaterPolyBlended_25
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  fCamX? : ℝ
+  fCamY? : ℝ
+  color? : RwRGBA
+  colorTrans? : RwRGBA
+  fDrawDist? : ℝ
+where
+  -- Declared member operation CWaterLevel::RenderOneFlatSmallWaterPolyBlended(float fX, float fY, float fZ, float fCamX, float fCamY, RwRGBA const &color, RwRGBA const &colorTrans, float fDrawDist)
+  true
+end
+
+schema CWaterLevel_CalcDistanceToWater_26
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CWaterLevel::CalcDistanceToWater(float fX, float fY)
+  true
+end
+
+schema CWaterLevel_RenderAndEmptyRenderBuffer_27
+  ΔCWaterLevel
+where
+  -- Declared member operation CWaterLevel::RenderAndEmptyRenderBuffer()
+  true
+end
+
+schema CWaterLevel_GetGroundLevel_28
+  ΔCWaterLevel
+  vecPosn? : CVector
+  pfOutLevel? : ℙ ℝ
+  pData? : Ref[ColData]
+  fDistance? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::GetGroundLevel(CVector const &vecPosn, float *pfOutLevel, ColData *pData, float fDistance)
+  true
+end
+
+schema CWaterLevel_IsLocationOutOfWorldBounds_WS_29
+  ΔCWaterLevel
+  vecPosn? : CVector
+  nOffset? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::IsLocationOutOfWorldBounds_WS(CVector const &vecPosn, int nOffset)
+  true
+end
+
+schema CWaterLevel_GetGroundLevel_WS_30
+  ΔCWaterLevel
+  vecPosn? : CVector
+  pfOutLevel? : ℙ ℝ
+  pData? : Ref[ColData]
+  fDistance? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWaterLevel::GetGroundLevel_WS(CVector const & vecPosn, float *pfOutLevel, ColData *pData, float fDistance)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema WaterLevel_GetWaterLevel
+  ΔWaterLevelModuleState
+  coors? : CVector
+  pfOutLevel? : ℙ ℝ
+  bDontCheckZ? : 𝔹
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GetWaterLevel(coors.x, coors.y, coors.z, pfOutLevel, bDontCheckZ)
+  true
+end

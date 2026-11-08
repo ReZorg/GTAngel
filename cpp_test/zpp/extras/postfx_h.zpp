@@ -1,0 +1,188 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: postfx (extras)
+-- Source File(s): extras/postfx.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+postfx_Enum_1 ::= POSTFX_OFF | POSTFX_PSP | POSTFX_PS2 | POSTFX_SIMPLE | POSTFX_MOBILE
+  -- val(POSTFX_SIMPLE) = -1
+  -- val(POSTFX_MOBILE) = -2
+
+postfx_Enum_2 ::= NUMAVERAGE
+  -- val(NUMAVERAGE) = 20
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPostFX
+  pFrontBuffer : Ref[RwRaster]
+  pBackBuffer : Ref[RwRaster]
+  bJustInitialised : 𝔹
+  EffectSwitch : ℤ
+  BlurOn : 𝔹
+  MotionBlurOn : 𝔹
+  Intensity : ℝ
+  Next : ℤ
+  NumValues : ℤ
+where
+  #pFrontBuffer ≤ 1
+  #pBackBuffer ≤ 1
+end
+
+schema CPostFX_InitOnce
+  ΔCPostFX
+where
+  -- Declared member operation CPostFX::InitOnce(void)
+  true
+end
+
+schema CPostFX_Open_2
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+where
+  -- Declared member operation CPostFX::Open(RwCamera *cam)
+  true
+end
+
+schema CPostFX_Close_3
+  ΔCPostFX
+where
+  -- Declared member operation CPostFX::Close(void)
+  true
+end
+
+schema CPostFX_RenderOverlayBlur_4
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Declared member operation CPostFX::RenderOverlayBlur(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+schema CPostFX_RenderOverlaySniper_5
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Declared member operation CPostFX::RenderOverlaySniper(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+schema CPostFX_RenderOverlayShader_6
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Declared member operation CPostFX::RenderOverlayShader(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+schema CPostFX_RenderMotionBlur_7
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  blur? : ℕ
+where
+  -- Declared member operation CPostFX::RenderMotionBlur(RwCamera *cam, uint32 blur)
+  true
+end
+
+schema CPostFX_Render_8
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- Declared member operation CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
+  true
+end
+
+schema CPostFX_SmoothColor_9
+  ΔCPostFX
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+where
+  -- Declared member operation CPostFX::SmoothColor(uint32 red, uint32 green, uint32 blue, uint32 alpha)
+  true
+end
+
+schema CPostFX_NeedBackBuffer_10
+  ΔCPostFX
+  result! : 𝔹
+where
+  -- Declared member operation CPostFX::NeedBackBuffer(void)
+  true
+end
+
+schema CPostFX_NeedFrontBuffer_11
+  ΔCPostFX
+  type? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPostFX::NeedFrontBuffer(int32 type)
+  true
+end
+
+schema CPostFX_GetBackBuffer_12
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+where
+  -- Declared member operation CPostFX::GetBackBuffer(RwCamera *cam)
+  true
+end
+
+schema CPostFX_UseBlurColours_13
+  ΔCPostFX
+  result! : 𝔹
+where
+  -- Declared member operation CPostFX::UseBlurColours(void)
+  true
+end
+
+schema CPostFX_RenderOverlaySimple_14
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+  result! : POSTFX_SIMPLE__POSTFX_NORMAL__POSTFX_MOBILE__void
+where
+  -- Declared member operation CPostFX::RenderOverlaySimple(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema postfx_UseBlurColours
+  ΔpostfxModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = EffectSwitch != POSTFX_SIMPLE
+  true
+end

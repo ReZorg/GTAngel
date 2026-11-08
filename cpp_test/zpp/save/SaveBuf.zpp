@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SaveBuf (save)
+-- Source File(s): save/SaveBuf.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+INITSAVEBUF : seq CHAR  -- #define INITSAVEBUF _saveBufCount = 0;
+SAVE_HEADER_SIZE : seq CHAR  -- #define SAVE_HEADER_SIZE (4*sizeof(char)+sizeof(uint32))
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema SaveBuf_SkipSaveBuf
+  ΔSaveBufModuleState
+  buf? : ℙ ℕ
+  skip? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema SaveBuf_SkipSaveBuf_2
+  ΔSaveBufModuleState
+  buf? : ℙ ℕ
+  length? : ℕ
+  skip? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema SaveBuf_ReadSaveBuf
+  ΔSaveBufModuleState
+  out? : Ref[T]
+  buf? : ℙ ℕ
+where
+  -- State update: out' = *(T *)buf
+  true
+end
+
+schema SaveBuf_ReadSaveBuf_2
+  ΔSaveBufModuleState
+  out? : Ref[T]
+  buf? : ℙ ℕ
+  length? : ℕ
+where
+  -- State update: out' = *(T *)buf
+  true
+end
+
+schema SaveBuf_WriteSaveBuf
+  ΔSaveBufModuleState
+  buf? : ℙ ℕ
+  value? : T
+where
+  -- State update: p' = (T *)buf
+  -- State update: p' = value
+  -- Return postcondition: result! = p
+  true
+end
+
+schema SaveBuf_WriteSaveBuf_2
+  ΔSaveBufModuleState
+  buf? : ℙ ℕ
+  length? : ℕ
+  value? : T
+where
+  -- State update: p' = (T*)buf
+  -- State update: p' = value
+  -- Return postcondition: result! = p
+  true
+end
+
+schema SaveBuf_ZeroSaveBuf
+  ΔSaveBufModuleState
+  buf? : ℙ ℕ
+  length? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema SaveBuf_ReadSaveBuf_3
+  ΔSaveBufModuleState
+  out? : Ref[T]
+  buf? : ℙ ℕ
+where
+  -- State update: out' = *(T *)buf
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SaveBufModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 164
+end

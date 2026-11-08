@@ -1,0 +1,173 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Train (vehicles)
+-- Source File(s): vehicles/Train.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Door.zpp  (from "Door.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Train_Enum_1 ::= TRACK_ELTRAIN | TRACK_SUBWAY
+
+Train_Enum_2 ::= TRAIN_DOOR_CLOSED | TRAIN_DOOR_OPENING | TRAIN_DOOR_OPEN | TRAIN_DOOR_CLOSING
+
+eTrainNodes ::= TRAIN_DOOR_LHS | TRAIN_DOOR_RHS | NUM_TRAIN_NODES
+  -- val(TRAIN_DOOR_LHS) = 1
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTrainNode
+  p : CVector
+  t : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTrainInterpolationLine
+  type : ℕ
+  time : ℝ
+  position : ℝ
+  speed : ℝ
+  acceleration : ℝ
+where
+  type ≥ 0
+end
+
+schema CTrain
+  CVehicle  -- inherits base schema
+  m_fWagonPosition : ℝ
+  m_nWagonId : ℤ
+  m_isFarAway : ℤ
+  m_nCurTrackNode : ℤ
+  m_nWagonGroup : ℤ
+  m_fSpeed : ℝ
+  m_bProcessDoor : 𝔹
+  m_bTrainStopping : 𝔹
+  m_bIsFirstWagon : 𝔹
+  m_bIsLastWagon : 𝔹
+  m_nTrackId : ℕ
+  m_nDoorTimer : ℕ
+  m_nDoorState : ℤ
+  Doors : seq CTrainDoor  -- bounded array [2]
+  m_aTrainNodes : seq Ref[RwFrame]  -- bounded array [NUM_TRAIN_NODES]
+  aStationCoors : seq CVector  -- bounded array [3]
+  aStationCoors_S : seq CVector  -- bounded array [4]
+where
+  m_nTrackId ≥ 0
+  m_nDoorTimer ≥ 0
+  #Doors = 2
+  #aStationCoors = 3
+  #aStationCoors_S = 4
+end
+
+schema CTrain_CTrain
+  ΔCTrain
+  id? : ℤ
+  CreatedBy? : ℕ
+where
+  -- Declared member operation CTrain::CTrain(int32 id, uint8 CreatedBy)
+  true
+end
+
+schema CTrain_SetModelIndex_2
+  ΔCTrain
+  id? : ℕ
+where
+  -- Declared member operation CTrain::SetModelIndex(uint32 id)
+  true
+end
+
+schema CTrain_ProcessControl_3
+  ΔCTrain
+where
+  -- Declared member operation CTrain::ProcessControl(void)
+  true
+end
+
+schema CTrain_PreRender_4
+  ΔCTrain
+where
+  -- Declared member operation CTrain::PreRender(void)
+  true
+end
+
+schema CTrain_Render_5
+  ΔCTrain
+where
+  -- Declared member operation CTrain::Render(void)
+  true
+end
+
+schema CTrain_AddPassenger_6
+  ΔCTrain
+  ped? : Ref[CPed]
+where
+  -- Declared member operation CTrain::AddPassenger(CPed *ped)
+  true
+end
+
+schema CTrain_OpenTrainDoor_7
+  ΔCTrain
+  ratio? : ℝ
+where
+  -- Declared member operation CTrain::OpenTrainDoor(float ratio)
+  true
+end
+
+schema CTrain_TrainHitStuff_8
+  ΔCTrain
+  list? : CPtrList
+where
+  -- Declared member operation CTrain::TrainHitStuff(CPtrList &list)
+  true
+end
+
+schema CTrain_InitTrains_9
+  ΔCTrain
+where
+  -- Declared member operation CTrain::InitTrains(void)
+  true
+end
+
+schema CTrain_Shutdown_10
+  ΔCTrain
+where
+  -- Declared member operation CTrain::Shutdown(void)
+  true
+end
+
+schema CTrain_ReadAndInterpretTrackFile_11
+  ΔCTrain
+  filename? : seq CHAR
+  nodes? : Ref[CTrainNode]
+  numNodes? : ℙ ℤ
+  numStations? : ℤ
+  stationDists? : ℙ ℝ
+  totalLength? : ℙ ℝ
+  totalDuration? : ℙ ℝ
+  interpLines? : ℙ ℤ
+  rightRail? : 𝔹
+where
+  -- Declared member operation CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int16 *numNodes, int32 numStations, float *stationDists, float *totalLength, float *totalDuration, CTrainInterpolationLine *interpLines, bool rightRail)
+  true
+end
+
+schema CTrain_UpdateTrains_12
+  ΔCTrain
+where
+  -- Declared member operation CTrain::UpdateTrains(void)
+  true
+end

@@ -1,0 +1,114 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Automobile (vehicles)
+-- Source File(s): vehicles/Automobile.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include Antennas.zpp  (from "Antennas.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include WaterCannon.zpp  (from "WaterCannon.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include World.zpp  (from "World.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Record.zpp  (from "Record.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include Population.zpp  (from "Population.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Object.zpp  (from "Object.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include sampman.zpp  (from "sampman.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SAND_SLOWDOWN : ℝ  -- #define SAND_SLOWDOWN (0.01f)
+HYDRAULIC_UPPER_EXT : ℝ  -- #define HYDRAULIC_UPPER_EXT (-0.16f)
+HYDRAULIC_LOWER_EXT : ℝ  -- #define HYDRAULIC_LOWER_EXT (0.16f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAutomobile_SetModelIndex
+  ΔCAutomobile
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex
+  true
+end
+
+schema CAutomobile_ProcessControl
+  ΔCAutomobile
+where
+  -- State update: brake' = 0.0f
+  -- State update: colModel' = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel
+  -- State update: colModel' = GetColModel()
+  -- State update: drivingInSand' = false
+  -- State update: bWarnedPeds' = false
+  -- State update: m_doingBurnout' = 0
+  -- Return postcondition: result! = numCollisions
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 0
+  -- Invokes: CReplay::IsPlayingBack, CWindModifiers::RegisterOne, m_pWanted->GetWantedLevel, m_vecMoveSpeed.Magnitude, pDriver->IsPlayer
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AutomobileModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 10638
+end

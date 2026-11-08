@@ -1,0 +1,538 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Font (renderer)
+-- Source File(s): renderer/Font.cpp, renderer/Font.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Font.zpp  (from "Font.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include main.zpp  (from "main.h")
+-- include Frontend.zpp  (from "Frontend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+JAP_TERMINATION : seq CHAR  -- #define JAP_TERMINATION (0x8000 | '~')
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Font_Enum_1 ::= FONT_BANK | FONT_STANDARD | FONT_HEADING | MAX_FONTS
+
+Font_Enum_2 ::= ALIGN_LEFT | ALIGN_CENTER | ALIGN_RIGHT
+
+Font_Enum_3 ::= FONT_LANGSET_EFIGS | FONT_LANGSET_RUSSIAN | FONT_LANGSET_POLISH | FONT_LANGSET_JAPANESE | LANGSET_MAX
+
+Font_Enum_4 ::= BUTTON_NONE | BUTTON_UP | BUTTON_DOWN | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_CROSS | BUTTON_CIRCLE | BUTTON_SQUARE | BUTTON_TRIANGLE | BUTTON_L1 | BUTTON_L2 | BUTTON_L3 | BUTTON_R1 | BUTTON_R2 | BUTTON_R3 | BUTTON_RSTICK_UP | BUTTON_RSTICK_DOWN | BUTTON_RSTICK_LEFT | BUTTON_RSTICK_RIGHT | MAX_BUTTON_ICONS
+  -- val(BUTTON_NONE) = -1
+
+Font_Enum_5 ::= FONT_BANK | FONT_STANDARD | FONT_HEADING
+
+Font_Enum_6 ::= FONT_BANK | FONT_PAGER | FONT_HEADING
+
+Font_Enum_7 ::= BUTTON_NONE | BUTTON_DOWN | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_CIRCLE | BUTTON_SQUARE | BUTTON_TRIANGLE | BUTTON_L1 | BUTTON_L2 | BUTTON_L3 | BUTTON_R1 | BUTTON_R2 | BUTTON_R3 | MAX_BUTTON_ICONS
+  -- val(BUTTON_NONE) = -1
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFontDetails
+  color : CRGBA
+  scaleX : ℝ
+  scaleY : ℝ
+  slant : ℝ
+  slantRefX : ℝ
+  slantRefY : ℝ
+  justify : bool8
+  centre : bool8
+  rightJustify : bool8
+  background : bool8
+  backgroundOnlyText : bool8
+  proportional : bool8
+  bIsShadow : bool8
+  bFlash : bool8
+  bBold : bool8
+  alphaFade : ℝ
+  backgroundColor : CRGBA
+  wrapX : ℝ
+  centreSize : ℝ
+  rightJustifyWrap : ℝ
+  style : ℤ
+  bFontHalfTexture : bool8
+  bank : ℕ
+  dropShadowPosition : ℤ
+  dropColor : CRGBA
+  bFlashState : bool8
+  nFlashTimer : ℤ
+  anonymous_23 : bool8
+  anonymous_25 : ℕ
+  outlineColor : CRGBA
+  bOutlineOn : ℤ
+  line : ℤ
+where
+  bank ≥ 0
+  anonymous_25 ≥ 0
+end
+
+schema CFontRenderState
+  anonymous_0 : ℕ
+  fTextPosX : ℝ
+  fTextPosY : ℝ
+  scaleX : ℝ
+  scaleY : ℝ
+  color : CRGBA
+  fExtraSpace : ℝ
+  slant : ℝ
+  slantRefX : ℝ
+  slantRefY : ℝ
+  bIsShadow : bool8
+  bFontHalfTexture : bool8
+  proportional : bool8
+  anonymous_14 : bool8
+  style : ℤ
+  bOutlineOn : ℤ
+  line : ℤ
+  rightJustify : bool8
+where
+  anonymous_0 ≥ 0
+end
+
+schema CFont
+  LanguageSet : ℕ
+  Slot : ℤ
+  Sprite : seq CSprite2d  -- bounded array [MAX_FONTS]
+  Details : CFontDetails
+  RenderState : CFontRenderState
+  ButtonSprite : seq CSprite2d  -- bounded array [MAX_BUTTON_ICONS]
+  PS2Symbol : ℤ
+where
+  LanguageSet ≥ 0
+end
+
+schema CFont_LoadButtons
+  ΔCFont
+  txdPath? : seq CHAR
+where
+  -- Declared member operation CFont::LoadButtons(const char *txdPath)
+  true
+end
+
+schema CFont_DrawButton_2
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CFont::DrawButton(float x, float y)
+  true
+end
+
+schema CFont_Shutdown_3
+  ΔCFont
+where
+  -- Declared member operation CFont::Shutdown(void)
+  true
+end
+
+schema CFont_InitPerFrame_4
+  ΔCFont
+where
+  -- Declared member operation CFont::InitPerFrame(void)
+  true
+end
+
+schema CFont_PrintChar_5
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+  c? : seq CHAR
+where
+  -- Declared member operation CFont::PrintChar(float x, float y, wchar c)
+  true
+end
+
+schema CFont_PrintString_6
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+  s? : seq CHAR
+where
+  -- Declared member operation CFont::PrintString(float x, float y, wchar *s)
+  true
+end
+
+schema CFont_GetTextRect_7
+  ΔCFont
+  rect? : Ref[CRect]
+  xstart? : ℝ
+  ystart? : ℝ
+  s? : seq CHAR
+where
+  -- Declared member operation CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
+  true
+end
+
+schema CFont_PrintString_8
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+  arg_3? : ℕ
+  start? : seq CHAR
+  end? : seq CHAR
+  spwidth? : ℝ
+where
+  -- Declared member operation CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth)
+  true
+end
+
+schema CFont_PrintStringFromBottom_9
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+  str? : seq CHAR
+where
+  -- Declared member operation CFont::PrintStringFromBottom(float x, float y, wchar *str)
+  true
+end
+
+schema CFont_GetCharacterWidth_10
+  ΔCFont
+  c? : seq CHAR
+  forceProportional? : 𝔹
+  result! : ℝ
+where
+  -- Declared member operation CFont::GetCharacterWidth(wchar c, bool forceProportional = false)
+  true
+end
+
+schema CFont_GetCharacterSize_11
+  ΔCFont
+  c? : seq CHAR
+  result! : ℝ
+where
+  -- Declared member operation CFont::GetCharacterSize(wchar c)
+  true
+end
+
+schema CFont_GetStringWidth_12
+  ΔCFont
+  s? : seq CHAR
+  spaces? : 𝔹
+  result! : ℝ
+where
+  -- Declared member operation CFont::GetStringWidth(wchar *s, bool spaces = false)
+  true
+end
+
+schema CFont_ParseToken_13
+  ΔCFont
+  s? : seq CHAR
+  result! : ℙ ℕ
+where
+  -- Declared member operation CFont::ParseToken(wchar *s)
+  true
+end
+
+schema CFont_ParseToken_14
+  ΔCFont
+  s? : seq CHAR
+  color? : CRGBA
+  flash? : 𝔹
+  bold? : 𝔹
+  result! : ℙ ℕ
+where
+  -- Declared member operation CFont::ParseToken(wchar *s, CRGBA &color, bool &flash, bool &bold)
+  true
+end
+
+schema CFont_DrawFonts_15
+  ΔCFont
+where
+  -- Declared member operation CFont::DrawFonts(void)
+  true
+end
+
+schema CFont_RenderFontBuffer_16
+  ΔCFont
+where
+  -- Declared member operation CFont::RenderFontBuffer(void)
+  true
+end
+
+schema CFont_character_code_17
+  ΔCFont
+  c? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation CFont::character_code(uint8 c)
+  true
+end
+
+schema CFont_SetScale_18
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CFont::SetScale(float x, float y)
+  true
+end
+
+schema CFont_SetSlantRefPoint_19
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CFont::SetSlantRefPoint(float x, float y)
+  true
+end
+
+schema CFont_SetSlant_20
+  ΔCFont
+  s? : ℝ
+where
+  -- Declared member operation CFont::SetSlant(float s)
+  true
+end
+
+schema CFont_SetJustifyOn_21
+  ΔCFont
+where
+  -- Declared member operation CFont::SetJustifyOn(void)
+  true
+end
+
+schema CFont_SetJustifyOff_22
+  ΔCFont
+where
+  -- Declared member operation CFont::SetJustifyOff(void)
+  true
+end
+
+schema CFont_SetRightJustifyOn_23
+  ΔCFont
+where
+  -- Declared member operation CFont::SetRightJustifyOn(void)
+  true
+end
+
+schema CFont_SetRightJustifyOff_24
+  ΔCFont
+where
+  -- Declared member operation CFont::SetRightJustifyOff(void)
+  true
+end
+
+schema CFont_SetCentreOn_25
+  ΔCFont
+where
+  -- Declared member operation CFont::SetCentreOn(void)
+  true
+end
+
+schema CFont_SetCentreOff_26
+  ΔCFont
+where
+  -- Declared member operation CFont::SetCentreOff(void)
+  true
+end
+
+schema CFont_SetWrapx_27
+  ΔCFont
+  x? : ℝ
+where
+  -- Declared member operation CFont::SetWrapx(float x)
+  true
+end
+
+schema CFont_SetCentreSize_28
+  ΔCFont
+  s? : ℝ
+where
+  -- Declared member operation CFont::SetCentreSize(float s)
+  true
+end
+
+schema CFont_SetBackgroundOn_29
+  ΔCFont
+where
+  -- Declared member operation CFont::SetBackgroundOn(void)
+  true
+end
+
+schema CFont_SetBackgroundOff_30
+  ΔCFont
+where
+  -- Declared member operation CFont::SetBackgroundOff(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Font_AsciiToUnicode
+  ΔFontModuleState
+  src? : seq CHAR
+  dst? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Font_UnicodeStrcat
+  ΔFontModuleState
+  dst? : seq CHAR
+  append? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Font_UnicodeStrcpy
+  ΔFontModuleState
+  dst? : seq CHAR
+  src? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Font_UnicodeStrlen
+  ΔFontModuleState
+  str? : seq CHAR
+where
+  -- State update: len' = 0
+  -- Return postcondition: result! = len
+  true
+end
+
+schema Font_UnicodeMakeUpperCase
+  ΔFontModuleState
+  dst? : seq CHAR
+  src? : seq CHAR
+where
+  -- State update: dst' = *src
+  -- State update: dst' = *src - 32
+  -- State update: dst' = '\0'
+  true
+end
+
+schema Font_Align
+  ΔFontModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFont_Initialise
+  ΔCFont
+where
+  -- State update: slot' = CTxdStore::AddTxdSlot("fonts")
+  -- State update: Slot' = slot
+  -- Invokes: CTxdStore::AddTxdSlot, CTxdStore::LoadTxd, CTxdStore::AddRef, CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd
+  true
+end
+
+schema CFont_LoadButtons
+  ΔCFont
+  txdPath? : seq CHAR
+where
+  -- State update: ButtonsSlot' = CTxdStore::AddTxdSlot("buttons")
+  -- State update: ButtonsSlot' = -1
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile, CTxdStore::AddTxdSlot, CTxdStore::RemoveTxd, CTxdStore::LoadTxd
+  true
+end
+
+schema CFont_ReloadFonts
+  ΔCFont
+  set? : ℕ
+where
+  -- State update: LanguageSet' = set
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::RemoveTxd, CTxdStore::LoadTxd, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CFont_Shutdown
+  ΔCFont
+where
+  -- State update: ButtonsSlot' = -1
+  -- State update: Slot' = -1
+  -- Invokes: CTxdStore::RemoveTxdSlot, CTxdStore::FindTxdSlot
+  true
+end
+
+schema CFont_InitPerFrame
+  ΔCFont
+where
+  -- State update: RenderState.style' = -1
+  -- State update: Details.anonymous_25' = 0
+  -- State update: FontRenderStatePointer.pRenderState' = (CFontRenderState*)FontRenderStateBuf
+  -- State update: NewLine' = false
+  -- State update: PS2Symbol' = BUTTON_NONE
+  true
+end
+
+schema CFont_DrawButton
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: rect.left' = x
+  -- State update: rect.top' = RenderState.scaleY + RenderState.scaleY + y
+  -- State update: rect.right' = RenderState.scaleY * 17.0f + x
+  -- State update: rect.bottom' = RenderState.scaleY * 19.0f + y
+  true
+end
+
+schema CFont_PrintChar
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+  c? : seq CHAR
+where
+  -- State update: bDontPrint' = false
+  -- State update: w' = GetCharacterWidth(c) / 32.0f
+  -- State update: c' = '\0'
+  -- State update: xoff' = c % 16
+  -- State update: yoff' = c / 16
+  -- State update: w' = 21.0f
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CSprite2d::AddToBuffer, CFont::IsJapanesePunctuation, CFont::IsAnsiCharacter, CFont::RenderFontBuffer, tmpPointer.Align
+  true
+end
+
+schema Font_IsJapanese
+  ΔFontModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = LanguageSet == FONT_LANGSET_JAPANESE
+  true
+end
+
+schema Font_IsJapaneseFont
+  ΔFontModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = IsJapanese() && (Details.style == FONT_JAPANESE)
+  true
+end
+
+schema Font_IsJapaneseFont_2
+  ΔFontModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

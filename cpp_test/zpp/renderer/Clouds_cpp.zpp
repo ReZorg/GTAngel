@@ -1,0 +1,127 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Clouds (renderer)
+-- Source File(s): renderer/Clouds.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include General.zpp  (from "General.h")
+-- include Game.zpp  (from "Game.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Clouds.zpp  (from "Clouds.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SMALLSTRIPHEIGHT : ℝ  -- #define SMALLSTRIPHEIGHT 4.0f
+HORIZSTRIPHEIGHT : ℝ  -- #define HORIZSTRIPHEIGHT 48.0f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CClouds_Init
+  ΔCClouds
+where
+  -- State update: CloudRotation' = 0.0f
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::FindTxdSlot, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CClouds_Shutdown
+  ΔCClouds
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CClouds_Update
+  ΔCClouds
+where
+  -- State update: s' = Sin(TheCamera.Orientation - 0.85f)
+  -- Invokes: CTimer::GetTimeStepFix, CTimer::GetTimeStep
+  true
+end
+
+schema CClouds_Render
+  ΔCClouds
+where
+  -- State update: SunBlockedByClouds' = false
+  -- State update: campos' = TheCamera.GetPosition()
+  -- State update: moonfadeout' = Abs(minute - 180.0f)
+  -- State update: coverage' = Max(CWeather::Foggyness, CWeather::CloudCoverage)
+  -- State update: brightness' = (1.0f - coverage) * (180 - (int)moonfadeout)
+  -- State update: pos' = { 0.0f, -100.0f, 15.0f }
+  -- Invokes: CGame::CanSeeOutSideFromCurrArea, CSprite::InitSpriteBuffer, CClock::GetHours, CClock::GetMinutes, CClock::GetSeconds
+  true
+end
+
+schema Clouds_UseDarkBackground
+  ΔCloudsModuleState
+where
+  -- Return postcondition: result! = TheCamera.GetForward().z < -0.9f || gbShowCollisionPolys
+  -- Invokes: TheCamera.GetForward
+  true
+end
+
+schema CClouds_RenderBackground
+  ΔCClouds
+  topred? : ℤ
+  topgreen? : ℤ
+  topblue? : ℤ
+  botred? : ℤ
+  botgreen? : ℤ
+  botblue? : ℤ
+  alpha? : ℤ
+where
+  -- State update: right' = CrossProduct(TheCamera.GetUp(), TheCamera.GetForward())
+  -- State update: c' = right.Magnitude2D()
+  -- State update: c' = 1.0f
+  -- State update: ms_cameraRoll' = Acos(c)
+  -- State update: ms_cameraRoll' = -ms_cameraRoll
+  -- State update: ms_HorizonTilt' = SCREEN_WIDTH/2.0f * Tan(ms_cameraRoll)
+  -- Invokes: TheCamera.GetUp, TheCamera.GetForward, right.Normalise, right.Magnitude2D, CTimer::GetFrameCounter
+  true
+end
+
+schema CClouds_RenderHorizon
+  ΔCClouds
+where
+  -- State update: ms_colourBottom.a' = 230
+  -- State update: ms_colourTop.a' = 80
+  -- State update: topright' = ms_horizonZ - ms_HorizonTilt
+  -- State update: topleft' = ms_horizonZ + ms_HorizonTilt
+  -- State update: botright' = topright + SMALLSTRIPHEIGHT
+  -- State update: botleft' = topleft + SMALLSTRIPHEIGHT
+  -- Invokes: CSprite2d::DrawAnyRect, CTimeCycle::GetAmbientRed, CTimeCycle::GetAmbientGreen, CTimeCycle::GetAmbientBlue
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CloudsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 530
+end

@@ -1,0 +1,1343 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pad (core)
+-- Source File(s): core/Pad.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include platform.zpp  (from "platform.h")
+-- include xinput.zpp  (from "xinput.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Game.zpp  (from "Game.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Font.zpp  (from "Font.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Text.zpp  (from "Text.h")
+-- include Record.zpp  (from "Record.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Population.zpp  (from "Population.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include General.zpp  (from "General.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include eetypes.zpp  (from "eetypes.h")
+-- include libpad.zpp  (from "libpad.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHDINPUT : seq CHAR  -- #define WITHDINPUT #include "common.h"
+CURMODE : seq CHAR  -- #define CURMODE (IsAffectedByController ? Mode : 0)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Pad_PickUpChicksCheat
+  ΔPadModuleState
+where
+  -- State update: vehicle' = FindPlayerVehicle()
+  -- Invokes: CWorld::TestSphereAgainstWorld, vehicle->GetPosition, CHud::SetHelpMessage, TheText.Get, someoneElse->SetObjective
+  true
+end
+
+schema Pad_PickUpChicksCheat_2
+  ΔPadModuleState
+where
+  -- State update: vehicle' = FindPlayerVehicle()
+  -- Invokes: CWorld::TestSphereAgainstWorld, vehicle->GetPosition, CHud::SetHelpMessage, TheText.Get, someoneElse->SetObjective
+  true
+end
+
+schema Pad_WeaponCheat1
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CStreaming::SetModelIsDeletable
+  true
+end
+
+schema Pad_WeaponCheat2
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CStreaming::SetModelIsDeletable
+  true
+end
+
+schema Pad_WeaponCheat3
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CStreaming::SetModelIsDeletable
+  true
+end
+
+schema Pad_HealthCheat
+  ΔPadModuleState
+where
+  -- State update: m_fHealth' = CWorld::Players[0].m_nMaxHealth
+  -- State update: m_fHealth' = 1000.0f
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, Damage.SetEngineStatus, Damage.SetWheelStatus
+  true
+end
+
+schema Pad_VehicleCheat
+  ΔPadModuleState
+  model? : ℤ
+where
+  -- State update: vehicle' = new CAutomobile(model, RANDOM_VEHICLE)
+  -- State update: vehicle' = new CAutomobile(model, MISSION_VEHICLE)
+  -- State update: pos' = ThePaths.m_pathNodes[node].GetPosition()
+  -- State update: vehicle.m_nDoorLock' = CARLOCK_UNLOCKED
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CStreaming::SetModelIsDeletable
+  true
+end
+
+schema Pad_BlowUpCarsCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CPools::GetVehiclePool, veh->BlowUpCar
+  true
+end
+
+schema Pad_ChangePlayerCheat
+  ΔPadModuleState
+where
+  -- State update: ped' = FindPlayerPed()
+  -- State update: AnimGrp' = ped.m_animGroup
+  -- State update: modelId' = CGeneral::GetRandomNumberInRange(0, MI_GANG18)
+  -- State update: anotherModelId' = modelId+1
+  -- State update: flags' = CStreaming::ms_aInfoForModel[anotherModelId].m_flags
+  -- State update: ped.m_modelIndex' = -1
+  -- Invokes: CModelInfo::GetModelInfo, CHud::SetHelpMessage, TheText.Get, CGeneral::GetRandomNumberInRange, ped->DeleteRwObject
+  true
+end
+
+schema Pad_ChangePlayerModel
+  ΔPadModuleState
+  name? : seq CHAR
+where
+  -- Invokes: CStreaming::LoadAllRequestedModels
+  true
+end
+
+schema Pad_MayhemCheat
+  ΔPadModuleState
+where
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CPedType::SetThreats
+  true
+end
+
+schema Pad_EverybodyAttacksPlayerCheat
+  ΔPadModuleState
+where
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CPedType::AddThreat
+  true
+end
+
+schema Pad_WeaponsForAllCheat
+  ΔPadModuleState
+where
+  -- State update: ms_bGivePedsWeapons' = !CPopulation::ms_bGivePedsWeapons
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_FastTimeCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CTimer::GetTimeScale, CTimer::SetTimeScale
+  true
+end
+
+schema Pad_SlowTimeCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CTimer::GetTimeScale, CTimer::SetTimeScale
+  true
+end
+
+schema Pad_MoneyCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_ArmourCheat
+  ΔPadModuleState
+where
+  -- State update: m_fArmour' = CWorld::Players[0].m_nMaxArmour
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_WantedLevelUpCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, m_pWanted->CheatWantedLevel, m_pWanted->GetWantedLevel
+  true
+end
+
+schema Pad_WantedLevelDownCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, m_pWanted->CheatWantedLevel
+  true
+end
+
+schema Pad_SunnyWeatherCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CWeather::ForceWeatherNow
+  true
+end
+
+schema Pad_ExtraSunnyWeatherCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CWeather::ForceWeatherNow
+  true
+end
+
+schema Pad_CloudyWeatherCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CWeather::ForceWeatherNow
+  true
+end
+
+schema Pad_RainyWeatherCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CWeather::ForceWeatherNow
+  true
+end
+
+schema Pad_FoggyWeatherCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CWeather::ForceWeatherNow
+  true
+end
+
+schema Pad_FastWeatherCheat
+  ΔPadModuleState
+where
+  -- State update: gbFastTime' = !gbFastTime
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_OnlyRenderWheelsCheat
+  ΔPadModuleState
+where
+  -- State update: bWheelsOnlyCheat' = !CVehicle::bWheelsOnlyCheat
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_ChittyChittyBangBangCheat
+  ΔPadModuleState
+where
+  -- State update: bAllDodosCheat' = !CVehicle::bAllDodosCheat
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_StrongGripCheat
+  ΔPadModuleState
+where
+  -- State update: bCheat3' = !CVehicle::bCheat3
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_FannyMagnetCheat
+  ΔPadModuleState
+where
+  -- State update: bFannyMagnetCheat' = !CPed::bFannyMagnetCheat
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_BlackCarsCheat
+  ΔPadModuleState
+where
+  -- State update: gbBlackCars' = true
+  -- State update: gbPinkCars' = false
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_PinkCarsCheat
+  ΔPadModuleState
+where
+  -- State update: gbBlackCars' = false
+  -- State update: gbPinkCars' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_TrafficLightsCheat
+  ΔPadModuleState
+where
+  -- State update: bGreenLightsCheat' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_MadCarsCheat
+  ΔPadModuleState
+where
+  -- State update: bMadDriversCheat' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_NoSeaBedCheat
+  ΔPadModuleState
+where
+  -- State update: m_bRenderSeaBed' = !CWaterLevel::m_bRenderSeaBed
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_RenderWaterLayersCheat
+  ΔPadModuleState
+where
+  -- State update: m_nRenderWaterLayers' = 0
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_BackToTheFuture
+  ΔPadModuleState
+where
+  -- State update: bHoverCheat' = !CVehicle::bHoverCheat
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_SuicideCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_DoChicksWithGunsCheat
+  ΔPadModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_KangarooCheat
+  ΔPadModuleState
+where
+  -- State update: playerPed' = FindPlayerPed()
+  -- State update: string' = TheText.Get("CHEATOF")
+  -- State update: m_fMass' = 70.0f
+  -- State update: string' = TheText.Get("CHEAT1")
+  -- State update: m_fMass' = 15.0f
+  -- State update: playerPed.m_ped_flagI80' = !playerPed.m_ped_flagI80
+  -- Invokes: TheText.Get, CHud::SetHelpMessage
+  true
+end
+
+schema Pad_AllCarsHeliCheat
+  ΔPadModuleState
+where
+  -- State update: string' = TheText.Get("CHEATOF")
+  -- State update: bAllCarCheat' = false
+  -- State update: string' = TheText.Get("CHEAT1")
+  -- State update: bAllCarCheat' = true
+  -- Invokes: TheText.Get, CHud::SetHelpMessage
+  true
+end
+
+schema Pad_WallClimbingCheat
+  ΔPadModuleState
+where
+  -- State update: string' = TheText.Get("CHEATOF")
+  -- State update: gGravityCheat' = false
+  -- State update: string' = TheText.Get("CHEAT1")
+  -- State update: gGravityCheat' = true
+  -- Invokes: TheText.Get, CHud::SetHelpMessage
+  true
+end
+
+schema Pad_FlyingFishCheat
+  ΔPadModuleState
+where
+  -- State update: bCheat8' = !CVehicle::bCheat8
+  -- State update: bHasPlayerCheated' = true
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_DoShowChaseStatCheat
+  ΔPadModuleState
+where
+  -- State update: ShowChaseStatOnScreen' = 1
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema CControllerState_CheckForInput
+  ΔCControllerState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerState_Clear
+  ΔCControllerState
+where
+  -- State update: RightStickY' = 0
+  -- State update: RightShoulder2' = 0
+  -- State update: DPadRight' = 0
+  -- State update: Select' = 0
+  -- State update: Circle' = 0
+  -- State update: RightShock' = 0
+  true
+end
+
+schema CKeyboardState_Clear
+  ΔCKeyboardState
+where
+  -- State update: PGDN' = 0
+  -- State update: RIGHT' = 0
+  -- State update: NUMLOCK' = 0
+  -- State update: ADD' = 0
+  -- State update: NUM4' = 0
+  -- State update: NUM8' = 0
+  true
+end
+
+schema CPad_Initialise
+  ΔCPad
+where
+  -- State update: Mode' = 0
+  -- State update: bObsoleteControllerMessage' = false
+  -- State update: bOldDisplayNoControllerMessage' = false
+  -- State update: bDisplayNoControllerMessage' = false
+  -- State update: m_bMapPadOneToPadTwo' = false
+  -- State update: m_bDebugCamPCOn' = false
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPad_Clear
+  ΔCPad
+  bResetPlayerControls? : 𝔹
+where
+  -- State update: Phase' = 0
+  -- State update: ShakeFreq' = 0
+  -- State update: ShakeDur' = 0
+  -- State update: DrunkDrivingBufferUsed' = 0
+  -- State update: DisablePlayerControls' = PLAYERCONTROL_ENABLED
+  -- State update: JustOutOfFrontend' = 0
+  -- Invokes: NewState.Clear, OldState.Clear, PCTempKeyState.Clear, PCTempJoyState.Clear, PCTempMouseState.Clear
+  true
+end
+
+schema CPad_InputHowLongAgo
+  ΔCPad
+  result! : ℕ
+where
+  -- Return postcondition: result! = CTimer::GetTimeInMilliseconds() - LastTimeTouched
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPad_ClearMouseHistory
+  ΔCPad
+where
+  -- Invokes: PCTempMouseControllerState.Clear, NewMouseControllerState.Clear, OldMouseControllerState.Clear
+  true
+end
+
+schema CPad_ClearKeyBoardHistory
+  ΔCPad
+where
+  -- Invokes: NewKeyState.Clear, OldKeyState.Clear, TempKeyState.Clear
+  true
+end
+
+schema CMouseControllerState_CMouseControllerState
+  ΔCMouseControllerState
+where
+  -- State update: LMB' = 0
+  -- State update: RMB' = 0
+  -- State update: MMB' = 0
+  -- State update: WHEELUP' = 0
+  -- State update: WHEELDN' = 0
+  -- State update: MXB1' = 0
+  true
+end
+
+schema CMouseControllerState_Clear
+  ΔCMouseControllerState
+where
+  -- State update: LMB' = 0
+  -- State update: RMB' = 0
+  -- State update: MMB' = 0
+  -- State update: WHEELUP' = 0
+  -- State update: WHEELDN' = 0
+  -- State update: MXB1' = 0
+  true
+end
+
+schema CMousePointerStateHelper_GetMouseSetUp
+  ΔCMousePointerStateHelper
+  result! : CMouseControllerState
+where
+  -- State update: devCaps.dwSize' = sizeof(DIDEVCAPS)
+  -- State update: state.MMB' = true
+  -- State update: state.RMB' = true
+  -- State update: state.LMB' = true
+  -- State update: state.WHEELDN' = true
+  -- State update: state.WHEELUP' = true
+  -- Return postcondition: result! = state
+  true
+end
+
+schema CPad_UpdateMouse
+  ΔCPad
+where
+  -- State update: signX' = 1
+  -- State update: signy' = 1
+  -- State update: signy' = -1
+  -- State update: signX' = -1
+  -- State update: PCTempMouseControllerState.x' = (float)(signX * state.lX)
+  -- State update: PCTempMouseControllerState.y' = (float)(signy * state.lY)
+  -- Invokes: PCTempMouseControllerState.Clear
+  true
+end
+
+schema CPad_ReconcileTwoControllersInput
+  ΔCPad
+  State1? : CControllerState
+  State2? : CControllerState
+  result! : CControllerState
+where
+  -- State update: ReconState.button' = 255
+  -- State update: ReconState.axis' = Max(State1.axis, State2.axis)
+  -- State update: ReconState.axis' = Min(State1.axis, State2.axis)
+  -- State update: ReconState.axis' = 0
+  -- State update: ReconState.pos' = 0
+  -- State update: ReconState.neg' = 0
+  -- Return postcondition: result! = ReconState
+  -- Invokes: ReconState.Clear
+  true
+end
+
+schema CPad_StartShake
+  ΔCPad
+  nDur? : ℤ
+  nFreq? : ℕ
+where
+  -- State update: ShakeDur' = 0
+  -- State update: ShakeFreq' = 0
+  -- State update: ShakeDur' = nDur
+  -- State update: ShakeFreq' = nFreq
+  -- Invokes: CCutsceneMgr::IsRunning
+  true
+end
+
+schema CPad_StartShake_Distance
+  ΔCPad
+  nDur? : ℤ
+  nFreq? : ℕ
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+where
+  -- State update: ShakeDur' = 0
+  -- State update: ShakeFreq' = 0
+  -- State update: ShakeDur' = nDur
+  -- State update: ShakeFreq' = nFreq
+  -- Invokes: CCutsceneMgr::IsRunning, TheCamera.GetPosition
+  true
+end
+
+schema CPad_StartShake_Train
+  ΔCPad
+  fX? : ℝ
+  fY? : ℝ
+where
+  -- State update: freq' = (int32)((70.0f - fDist) * 70.0f / 70.0f + 30.0f)
+  -- State update: ShakeDur' = 100
+  -- State update: ShakeFreq' = freq
+  -- Invokes: CCutsceneMgr::IsRunning, TheCamera.GetPosition
+  true
+end
+
+schema CPad_AddToCheatString
+  ΔCPad
+  c? : seq CHAR
+where
+  -- Invokes: CPed::SwitchDebugDisplay
+  true
+end
+
+schema Pad_Cheat_strncmp
+  ΔPadModuleState
+  sourceStr? : seq CHAR
+  origCheatStr? : seq CHAR
+  result! : ℤ
+where
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema CPad_AddToPCCheatString
+  ΔCPad
+  c? : seq CHAR
+where
+  -- State update: gfTommyFatness' = 0.26f
+  -- State update: gfTommyFatness' = -0.3f
+  -- State update: CigOn' = !CSmokeTrails::CigOn
+  -- Invokes: CPed::SwitchDebugDisplay
+  true
+end
+
+schema CPad_AffectFromXinput
+  ΔCPad
+  pad? : ℕ
+where
+  -- State update: PCTempJoyState.Circle' = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 255 : 0
+  -- State update: PCTempJoyState.Cross' = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 255 : 0
+  -- State update: PCTempJoyState.Square' = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 255 : 0
+  -- State update: PCTempJoyState.Triangle' = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 255 : 0
+  -- State update: PCTempJoyState.LeftShoulder2' = xstate.Gamepad.bLeftTrigger
+  -- State update: PCTempJoyState.RightShoulder2' = xstate.Gamepad.bRightTrigger
+  -- Invokes: CTimer::GetTimeStepInMilliseconds
+  true
+end
+
+schema CPad_UpdatePads
+  ΔCPad
+where
+  -- State update: bUpdate' = true
+  -- State update: OldKeyState' = NewKeyState
+  -- State update: NewKeyState' = TempKeyState
+  -- State update: IsAffectedByController' = true
+  -- State update: IsAffectedByController' = false
+  -- State update: bUpdate' = false
+  -- Invokes: PCTempJoyState.CheckForInput, ControlsManager.ClearSimButtonPressCheckers, ControlsManager.AffectPadFromKeyBoard, ControlsManager.AffectPadFromMouse, PCTempKeyState.CheckForInput
+  true
+end
+
+schema CPad_ProcessPCSpecificStuff
+  ΔCPad
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPad_Update
+  ΔCPad
+  pad? : ℤ
+where
+  -- State update: OldState' = NewState
+  -- State update: bObsoleteControllerMessage' = false
+  -- State update: ext_id' = 0
+  -- State update: rterm_id' = 0
+  -- State update: state' = scePadGetState(pad, 0)
+  -- State update: id' = scePadInfoMode(pad, 0, InfoModeCurID, 0)
+  -- Invokes: CTimer::GetTimeStepInMilliseconds, NewState.Clear, CRecordDataForGame::IsPlayingBack, CRecordDataForChase::ShouldThisPadBeLeftAlone, NewState.IsAnyButtonPressed
+  true
+end
+
+schema CPad_DoCheats
+  ΔCPad
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPad_DoCheats_2
+  ΔCPad
+  unk? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPad_StopPadsShaking
+  ΔCPad
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPad_StopShaking
+  ΔCPad
+  pad? : ℤ
+where
+  -- State update: ShakeFreq' = 0
+  -- State update: ShakeDur' = 0
+  true
+end
+
+schema CPad_GetSteeringLeftRight
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickX
+  -- State update: dpad' = (NewState.DPadRight - NewState.DPadLeft) / 2
+  -- State update: value' = axis
+  -- State update: value' = dpad
+  -- State update: value' = SteeringLeftRightBuffer[DrunkDrivingBufferUsed]
+  -- State update: value' = SteeringLeftRightBuffer[DrunkDrivingBufferUsed]
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = value
+  true
+end
+
+schema CPad_GetSteeringUpDown
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickY
+  -- State update: dpad' = (NewState.DPadDown - NewState.DPadUp) / 2
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = axis
+  -- Return postcondition: result! = dpad
+  true
+end
+
+schema CPad_GetCarGunUpDown
+  ΔCPad
+  result! : ℤ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = NewState.RightStickY
+  -- Return postcondition: result! = (NewState.DPadUp - NewState.DPadDown) / 2
+  true
+end
+
+schema CPad_GetCarGunLeftRight
+  ΔCPad
+  result! : ℤ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = NewState.RightStickX
+  -- Return postcondition: result! = (NewState.DPadRight - NewState.DPadLeft) / 2
+  true
+end
+
+schema CPad_GetPedWalkLeftRight
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickX
+  -- State update: dpad' = (NewState.DPadRight - NewState.DPadLeft) / 2
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = axis
+  -- Return postcondition: result! = dpad
+  true
+end
+
+schema CPad_GetPedWalkUpDown
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickY
+  -- State update: dpad' = (NewState.DPadDown - NewState.DPadUp) / 2
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = axis
+  -- Return postcondition: result! = dpad
+  true
+end
+
+schema CPad_GetAnalogueUpDown
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickY
+  -- State update: dpad' = (NewState.DPadDown - NewState.DPadUp) / 2
+  -- Return postcondition: result! = axis
+  -- Return postcondition: result! = dpad
+  -- Return postcondition: result! = NewState.LeftStickY
+  true
+end
+
+schema CPad_GetAnalogueLeftRight
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickX
+  -- State update: dpad' = (NewState.DPadRight - NewState.DPadLeft) / 2
+  -- Return postcondition: result! = axis
+  -- Return postcondition: result! = dpad
+  -- Return postcondition: result! = NewState.LeftStickX
+  true
+end
+
+schema CPad_GetLookLeft
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShoulder2 && !NewState.RightShoulder2)
+  true
+end
+
+schema CPad_GetLookRight
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.RightShoulder2 && !NewState.LeftShoulder2)
+  true
+end
+
+schema CPad_GetLookBehindForCar
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.RightShoulder2 && NewState.LeftShoulder2)
+  true
+end
+
+schema CPad_GetLookBehindForPed
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.RightShock
+  true
+end
+
+schema CPad_GetHorn
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.LeftShock
+  -- Return postcondition: result! = !!NewState.LeftShoulder1
+  true
+end
+
+schema CPad_HornJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShock && !OldState.LeftShock)
+  -- Return postcondition: result! = !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1)
+  true
+end
+
+schema CPad_GetCarGunFired
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.Circle
+  -- Return postcondition: result! = !!NewState.RightShoulder1
+  true
+end
+
+schema CPad_CarGunJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.Circle && !OldState.Circle)
+  -- Return postcondition: result! = !!(NewState.RightShoulder1 && !OldState.RightShoulder1)
+  true
+end
+
+schema CPad_GetHandBrake
+  ΔCPad
+  result! : ℤ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = NewState.RightShoulder1
+  -- Return postcondition: result! = NewState.Triangle
+  true
+end
+
+schema CPad_GetBrake
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = 2 * NewState.RightStickY
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = NewState.Square
+  -- Return postcondition: result! = NewState.Square
+  true
+end
+
+schema CPad_GetExitVehicle
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.Triangle
+  true
+end
+
+schema CPad_ExitVehicleJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.Triangle && !OldState.Triangle)
+  true
+end
+
+schema CPad_GetWeapon
+  ΔCPad
+  result! : ℤ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = NewState.Circle
+  -- Return postcondition: result! = NewState.Cross
+  true
+end
+
+schema CPad_WeaponJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.Circle && !OldState.Circle)
+  -- Return postcondition: result! = !!(NewState.Cross && !OldState.Cross)
+  true
+end
+
+schema CPad_GetAccelerate
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = -2 * NewState.RightStickY
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = NewState.Cross
+  -- Return postcondition: result! = NewState.Cross
+  true
+end
+
+schema CPad_CycleCameraModeJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = result
+  true
+end
+
+schema CPad_CycleCameraModeUpJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Select && !OldState.Select)
+  -- Return postcondition: result! = !!(NewState.DPadUp && !OldState.DPadUp)
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPad_CycleCameraModeDownJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.DPadDown && !OldState.DPadDown)
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPad_ChangeStationJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1)
+  -- Return postcondition: result! = !!(NewState.Select && !OldState.Select)
+  true
+end
+
+schema CPad_CycleWeaponLeftJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2)
+  true
+end
+
+schema CPad_CycleWeaponRightJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.RightShoulder2 && !OldState.RightShoulder2)
+  true
+end
+
+schema CPad_GetTarget
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.RightShoulder1
+  -- Return postcondition: result! = !!NewState.LeftShoulder1
+  true
+end
+
+schema CPad_TargetJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.RightShoulder1 && !OldState.RightShoulder1)
+  -- Return postcondition: result! = !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1)
+  true
+end
+
+schema CPad_CollectPickupJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1)
+  -- Return postcondition: result! = !!(NewState.Triangle && !OldState.Triangle)
+  true
+end
+
+schema CPad_DuckJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShock && !OldState.LeftShock)
+  true
+end
+
+schema CPad_JumpJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.Square && !OldState.Square)
+  true
+end
+
+schema CPad_GetSprint
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.Cross
+  -- Return postcondition: result! = !!NewState.Circle
+  true
+end
+
+schema CPad_ShiftTargetLeftJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2)
+  true
+end
+
+schema CPad_ShiftTargetRightJustDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPad_GetAnaloguePadUp
+  ΔCPad
+  result! : 𝔹
+where
+  -- State update: oldfStickY' = 0
+  -- State update: leftStickY' = CPad::GetPad(0).GetLeftStickY()
+  -- State update: oldfStickY' = leftStickY
+  -- State update: oldfStickY' = leftStickY
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPad_GetAnaloguePadDown
+  ΔCPad
+  result! : 𝔹
+where
+  -- State update: oldfStickY' = 0
+  -- State update: leftStickY' = CPad::GetPad(0).GetLeftStickY()
+  -- State update: oldfStickY' = leftStickY
+  -- State update: oldfStickY' = leftStickY
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPad_GetAnaloguePadLeft
+  ΔCPad
+  result! : 𝔹
+where
+  -- State update: oldfStickX' = 0
+  -- State update: leftStickX' = CPad::GetPad(0).GetLeftStickX()
+  -- State update: oldfStickX' = leftStickX
+  -- State update: oldfStickX' = leftStickX
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPad_GetAnaloguePadRight
+  ΔCPad
+  result! : 𝔹
+where
+  -- State update: oldfStickX' = 0
+  -- State update: leftStickX' = CPad::GetPad(0).GetLeftStickX()
+  -- State update: oldfStickX' = leftStickX
+  -- State update: oldfStickX' = leftStickX
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPad_GetAnaloguePadLeftJustUp
+  ΔCPad
+  result! : 𝔹
+where
+  -- State update: oldfStickX' = 0
+  -- State update: X' = GetPad(0).GetPedWalkLeftRight()
+  -- State update: oldfStickX' = 0
+  -- State update: oldfStickX' = X
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPad_GetAnaloguePadRightJustUp
+  ΔCPad
+  result! : 𝔹
+where
+  -- State update: oldfStickX' = 0
+  -- State update: X' = GetPad(0).GetPedWalkLeftRight()
+  -- State update: oldfStickX' = 0
+  -- State update: oldfStickX' = X
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPad_ForceCameraBehindPlayer
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.LeftShoulder1
+  -- Return postcondition: result! = !!NewState.Triangle
+  true
+end
+
+schema CPad_SniperZoomIn
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.Square
+  -- Return postcondition: result! = !!NewState.Triangle
+  true
+end
+
+schema CPad_SniperZoomOut
+  ΔCPad
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!NewState.Cross
+  -- Return postcondition: result! = !!NewState.Square
+  true
+end
+
+schema CPad_SniperModeLookLeftRight
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickX
+  -- State update: dpad' = (NewState.DPadRight - NewState.DPadLeft) / 2
+  -- Return postcondition: result! = (axis > 0.f ? axis - 35.f : axis + 35.f) * (128.f / (128 - 35))
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = dpad
+  true
+end
+
+schema CPad_SniperModeLookUpDown
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = NewState.LeftStickY
+  -- State update: axis' = -axis
+  -- State update: axis' = -axis
+  -- State update: dpad' = (NewState.DPadDown - NewState.DPadUp) / 2
+  -- State update: dpad' = (NewState.DPadUp - NewState.DPadDown) / 2
+  -- Return postcondition: result! = (axis > 0.f ? axis - 35.f : axis + 35.f) * (128.f / (128 - 35))
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = dpad
+  true
+end
+
+schema CPad_LookAroundLeftRight
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = GetPad(0).NewState.RightStickX
+  -- Return postcondition: result! = (int16) ( (axis + ( ( axis > 0 ) ? -85 : 85) ) * (127.0f / 32.0f) )
+  -- Return postcondition: result! = (int16) ( (axis + ( ( axis > 0 ) ? -10 : 10) ) * (127.0f / 64.0f) )
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema CPad_LookAroundUpDown
+  ΔCPad
+  result! : ℤ
+where
+  -- State update: axis' = GetPad(0).NewState.RightStickY
+  -- State update: axis' = -axis
+  -- State update: axis' = -axis
+  -- Return postcondition: result! = (int16) ( (axis + ( ( axis > 0 ) ? -85 : 85) ) * (127.0f / 32.0f) )
+  -- Return postcondition: result! = (int16) ( (axis + ( ( axis > 0 ) ? -40 : 40) ) * (127.0f / 64.0f) )
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema CPad_ResetAverageWeapon
+  ΔCPad
+where
+  -- State update: AverageWeapon' = GetWeapon()
+  -- State update: AverageEntries' = 1
+  true
+end
+
+schema CPad_PrintErrorMessage
+  ΔCPad
+where
+  -- Invokes: CSprite2d::DrawRect, CFont::SetScale, CFont::SetJustifyOff, CFont::SetBackgroundOff, CFont::SetCentreSize
+  true
+end
+
+schema Pad_LittleTest
+  ΔPadModuleState
+where
+  -- State update: Cunt' = 0
+  true
+end
+
+schema CPad_ResetCheats
+  ΔCPad
+where
+  -- State update: gbFastTime' = false
+  -- State update: ms_bGivePedsWeapons' = false
+  -- State update: bWheelsOnlyCheat' = false
+  -- State update: bAllDodosCheat' = false
+  -- State update: bCheat3' = false
+  -- State update: bCheat4' = false
+  -- Invokes: CWeather::ReleaseWeather, CTimer::SetTimeScale
+  true
+end
+
+schema CPad_FixPadsAfterSave
+  ΔCPad
+where
+  -- State update: bObsoleteControllerMessage' = false
+  -- State update: Phase' = 0
+  true
+end
+
+schema Pad_WeaponCheat
+  ΔPadModuleState
+where
+  -- Invokes: CHud::SetHelpMessage, TheText.Get
+  true
+end
+
+schema Pad_TankCheat
+  ΔPadModuleState
+where
+  -- State update: tank' = new CAutomobile(MI_RHINO, RANDOM_VEHICLE)
+  -- State update: tank' = new CAutomobile(MI_RHINO, MISSION_VEHICLE)
+  -- State update: pos' = ThePaths.m_pathNodes[node].GetPosition()
+  -- State update: tank.m_nDoorLock' = CARLOCK_UNLOCKED
+  -- Invokes: CHud::SetHelpMessage, TheText.Get, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, ThePaths.FindNodeClosestToCoors
+  true
+end
+
+schema Pad_NastyLimbsCheat
+  ΔPadModuleState
+where
+  -- State update: bNastyLimbsCheat' = !CPed::bNastyLimbsCheat
+  true
+end
+
+schema Pad_AltDodoCheat
+  ΔPadModuleState
+where
+  -- State update: string' = TheText.Get("CHEATOF")
+  -- State update: bAltDodoCheat' = false
+  -- State update: string' = TheText.Get("CHEAT1")
+  -- State update: bAltDodoCheat' = true
+  -- Invokes: TheText.Get, CHud::SetHelpMessage
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PadModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3973
+end

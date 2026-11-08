@@ -1,0 +1,88 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: crossplatform (skel)
+-- Source File(s): skel/crossplatform.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include time.zpp  (from "time.h")
+-- include limits.zpp  (from "limits.h")
+-- include IntSafe.zpp  (from "IntSafe.h")
+-- include Windows.zpp  (from "Windows.h")
+-- include win.zpp  (from "win.h")
+-- include iostream.zpp  (from "iostream")
+-- include dirent.zpp  (from "dirent.h")
+-- include types.zpp  (from "sys/types.h")
+-- include stat.zpp  (from "sys/stat.h")
+-- include langinfo.zpp  (from "langinfo.h")
+-- include unistd.zpp  (from "unistd.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+fcaseopen : seq CHAR  -- #define fcaseopen fopen
+caserename : seq CHAR  -- #define caserename rename
+MAX_PATH : seq CHAR  -- #define MAX_PATH PATH_MAX
+DeleteFile : seq CHAR  -- #define DeleteFile unlink
+GetLocalTime : seq CHAR  -- #define GetLocalTime GetLocalTime_CP
+INVALID_HANDLE_VALUE : seq CHAR  -- #define INVALID_HANDLE_VALUE NULL
+LOCALE_USER_DEFAULT : ℕ  -- #define LOCALE_USER_DEFAULT 0
+DATE_SHORTDATE : ℕ  -- #define DATE_SHORTDATE 0
+GLFW_GAMEPAD_BUTTON_A : ℕ  -- #define GLFW_GAMEPAD_BUTTON_A 1
+GLFW_GAMEPAD_BUTTON_B : ℕ  -- #define GLFW_GAMEPAD_BUTTON_B 0
+GLFW_GAMEPAD_BUTTON_X : ℕ  -- #define GLFW_GAMEPAD_BUTTON_X 3
+GLFW_GAMEPAD_BUTTON_Y : ℕ  -- #define GLFW_GAMEPAD_BUTTON_Y 2
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eWinVersion ::= OS_WIN95 | OS_WIN98 | OS_WINNT | OS_WIN2000 | OS_WINXP
+  -- val(OS_WIN95) = 0
+
+crossplatform_Enum_2 ::= LANG_OTHER | LANG_GERMAN | LANG_FRENCH | LANG_ENGLISH | LANG_ITALIAN | LANG_SPANISH
+
+crossplatform_Enum_3 ::= SUBLANG_OTHER | SUBLANG_ENGLISH_AUS
+
+eGameState ::= GS_START_UP | GS_INIT_LOGO_MPEG | GS_LOGO_MPEG | GS_INIT_INTRO_MPEG | GS_INTRO_MPEG | GS_INIT_ONCE | GS_INIT_FRONTEND | GS_FRONTEND | GS_INIT_PLAYING_GAME | GS_PLAYING_GAME
+  -- val(GS_START_UP) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema SYSTEMTIME
+  wYear : ℕ
+  wMonth : ℕ
+  wDayOfWeek : ℕ
+  wDay : ℕ
+  wHour : ℕ
+  wMinute : ℕ
+  wSecond : ℕ
+  wMilliseconds : ℕ
+where
+  wYear ≥ 0
+  wMonth ≥ 0
+  wDayOfWeek ≥ 0
+  wDay ≥ 0
+  wHour ≥ 0
+  wMinute ≥ 0
+  wSecond ≥ 0
+  wMilliseconds ≥ 0
+end
+
+schema WIN32_FIND_DATA
+  extension : seq CHAR
+  folder : seq CHAR
+  cFileName : seq CHAR
+  ftLastWriteTime : time_t
+where
+  #extension = 32
+  #cFileName = 256
+end

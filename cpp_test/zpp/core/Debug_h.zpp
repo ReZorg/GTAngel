@@ -1,0 +1,107 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Debug (core)
+-- Source File(s): core/Debug.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Debug_Enum_1 ::= MAX_LINES | MAX_STR_LEN | MAX_SCREEN_STRS | MAX_DEBUG_LINES
+  -- val(MAX_LINES) = 15
+  -- val(MAX_STR_LEN) = 80
+  -- val(MAX_SCREEN_STRS) = 100
+  -- val(MAX_DEBUG_LINES) = 100
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDebug
+  ms_nCurrentTextLine : ℤ
+  str : seq CHAR
+  ms_aScreenStrs : seq ScreenStr  -- bounded array [MAX_SCREEN_STRS]
+  ms_nScreenStrs : ℤ
+  c2 : ℕ
+  ms_aLines : seq Line  -- bounded array [MAX_DEBUG_LINES]
+  ms_nLines : ℤ
+where
+  #str = 256
+  c2 ≥ 0
+end
+
+schema CDebug_DebugInitTextBuffer
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DebugInitTextBuffer()
+  true
+end
+
+schema CDebug_DebugDisplayTextBuffer_2
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DebugDisplayTextBuffer()
+  true
+end
+
+schema CDebug_DebugAddText_3
+  ΔCDebug
+  str? : seq CHAR
+where
+  -- Declared member operation CDebug::DebugAddText(const char *str)
+  true
+end
+
+schema CDebug_PrintAt_4
+  ΔCDebug
+  str? : seq CHAR
+  x? : ℤ
+  y? : ℤ
+where
+  -- Declared member operation CDebug::PrintAt(const char *str, int x, int y)
+  true
+end
+
+schema CDebug_DisplayScreenStrings_5
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DisplayScreenStrings()
+  true
+end
+
+schema CDebug_AddLine_6
+  ΔCDebug
+  p1? : CVector
+  p2? : CVector
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- Declared member operation CDebug::AddLine(CVector p1, CVector p2, uint32 c1, uint32 c2)
+  true
+end
+
+schema CDebug_DrawLines_7
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DrawLines(void)
+  true
+end
+
+schema ScreenStr
+  y : ℤ
+  str : seq CHAR
+where
+  #str = 256
+end
+
+schema Line
+  p2 : CVector_p1
+  c2 : ℕ
+where
+  c2 ≥ 0
+end

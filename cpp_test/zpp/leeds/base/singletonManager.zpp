@@ -1,0 +1,152 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: singletonManager (leeds)
+-- Source File(s): leeds/base/singletonManager.cpp, leeds/base/singletonManager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include singletonManager.zpp  (from "singletonManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cSingletonManager
+  head : Ref[cSingletonBase]
+  tail : Ref[cSingletonBase]
+where
+  #head ≤ 1
+  #tail ≤ 1
+end
+
+schema cSingletonManager_cSingletonManager
+  ΔcSingletonManager
+where
+  -- Declared member operation cSingletonManager::cSingletonManager()
+  true
+end
+
+schema cSingletonManager_Purge_2
+  ΔcSingletonManager
+where
+  -- Declared member operation cSingletonManager::Purge()
+  true
+end
+
+schema cSingletonManager_cSingletonManager_3
+  ΔcSingletonManager
+  result! : ANY
+where
+  -- Declared member operation cSingletonManager::cSingletonManager()
+  true
+end
+
+schema cSingletonBase
+  next : Ref[cSingletonBase]
+where
+  #next ≤ 1
+end
+
+schema cSingletonBase_cSingletonBase
+  ΔcSingletonBase
+  result! : ANY
+where
+  -- Declared member operation cSingletonBase::cSingletonBase()
+  true
+end
+
+schema cSingleton
+  cSingletonBase  -- inherits base schema
+  mspInstance : Ref[T]
+where
+  #mspInstance ≤ 1
+end
+
+schema cSingleton_CreateInstance
+  ΔcSingleton
+where
+  -- Declared member operation cSingleton::CreateInstance()
+  true
+end
+
+schema cSingleton_SingletonManager_2
+  ΔcSingleton
+where
+  -- Declared member operation cSingleton::SingletonManager()
+  true
+end
+
+schema cSingleton_Instance_3
+  ΔcSingleton
+  result! : Ref[public___T]
+where
+  -- Declared member operation cSingleton::Instance()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema singletonManager_SingletonManager
+  ΔsingletonManagerModuleState
+  result! : cSingletonManager
+where
+  -- Return postcondition: result! = manager
+  true
+end
+
+schema cSingletonManager_cSingletonManager
+  ΔcSingletonManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSingletonManager_Add
+  ΔcSingletonManager
+  node? : Ref[cSingletonBase]
+where
+  -- State update: node.next' = head
+  -- State update: tail' = node
+  -- State update: head' = node
+  true
+end
+
+schema cSingletonManager_Purge
+  ΔcSingletonManager
+where
+  -- State update: node' = tail
+  -- State update: tail' = node.next
+  true
+end
+
+schema singletonManager_cSingletonBase
+  ΔsingletonManagerModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema singletonManager_CreateInstance
+  ΔsingletonManagerModuleState
+where
+  -- State update: mspInstance' = new T()
+  true
+end
+
+schema singletonManager_Instance
+  ΔsingletonManagerModuleState
+  result! : Ref[T]
+where
+  -- Return postcondition: result! = mspInstance
+  true
+end

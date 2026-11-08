@@ -1,0 +1,4419 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FrontEndControls (core)
+-- Source File(s): core/FrontEndControls.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+FrontEndControls_Enum_1 ::= NUM_MULTICHOICE_OPTIONS | NUM_LINELISTER_LINES | NUM_LINELISTER_LINES_TOTAL | NUM_PAGE_WIDGETS
+  -- val(NUM_MULTICHOICE_OPTIONS) = 16
+  -- val(NUM_LINELISTER_LINES) = 50
+  -- val(NUM_LINELISTER_LINES_TOTAL) = NUM_LINELISTER_LINES + 15
+  -- val(NUM_PAGE_WIDGETS) = 10
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTriggerCaller
+  bHasTrigger : 𝔹
+  pTrigger : ADDRESS
+  field_C : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTriggerCaller_void
+  ΔCTriggerCaller
+  arg_1? : Ref[pFunc]
+where
+  -- Declared member operation CTriggerCaller::void(*pFunc)
+  true
+end
+
+schema CTriggerCaller_CTriggerCaller_2
+  ΔCTriggerCaller
+where
+  -- Declared member operation CTriggerCaller::CTriggerCaller()
+  true
+end
+
+schema CTriggerCaller_CallTrigger_3
+  ΔCTriggerCaller
+  result! : void
+where
+  -- Declared member operation CTriggerCaller::CallTrigger(void)
+  true
+end
+
+schema CTriggerCaller_CanCall_4
+  ΔCTriggerCaller
+  result! : bool
+where
+  -- Declared member operation CTriggerCaller::CanCall()
+  true
+end
+
+schema CPlaceableText
+  m_position : CVector2D
+  m_color : CRGBA
+  m_text : seq CHAR
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableText_CPlaceableText
+  ΔCPlaceableText
+where
+  -- Declared member operation CPlaceableText::CPlaceableText(void)
+  true
+end
+
+schema CPlaceableText_SetColor_2
+  ΔCPlaceableText
+  color? : CRGBA
+  result! : void
+where
+  -- Declared member operation CPlaceableText::SetColor(const CRGBA &color)
+  true
+end
+
+schema CPlaceableText_GetColor_3
+  ΔCPlaceableText
+  result! : CRGBA
+where
+  -- Declared member operation CPlaceableText::GetColor(void)
+  true
+end
+
+schema CPlaceableText_SetAlpha_4
+  ΔCPlaceableText
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableText::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableTextTwoLines
+  m_line1 : CPlaceableText
+  m_line2 : CPlaceableText
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableTextTwoLines_SetColor
+  ΔCPlaceableTextTwoLines
+  color? : CRGBA
+where
+  -- Declared member operation CPlaceableTextTwoLines::SetColor(const CRGBA &color)
+  true
+end
+
+schema CPlaceableTextTwoLines_SetColor_2
+  ΔCPlaceableTextTwoLines
+  arg_1? : color
+  result! : m_line2
+where
+  -- Declared member operation CPlaceableTextTwoLines::SetColor(color)
+  true
+end
+
+schema CPlaceableTextTwoLines_SetAlpha_3
+  ΔCPlaceableTextTwoLines
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableTextTwoLines::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableTextTwoLines_SetAlpha_4
+  ΔCPlaceableTextTwoLines
+  arg_1? : alpha
+  result! : m_line2
+where
+  -- Declared member operation CPlaceableTextTwoLines::SetAlpha(alpha)
+  true
+end
+
+schema CShadowInfo
+  m_bRightJustify : 𝔹
+  m_bDropShadow : 𝔹
+  m_shadowColor : CRGBA
+  m_shadowOffset : CVector2D
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CShadowInfo_CShadowInfo
+  ΔCShadowInfo
+where
+  -- Declared member operation CShadowInfo::CShadowInfo(void)
+  true
+end
+
+schema CShadowInfo_SetShadows_2
+  ΔCShadowInfo
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+  result! : void
+where
+  -- Declared member operation CShadowInfo::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CSelectable
+  m_bSelected : 𝔹
+  m_selectedColor : CRGBA
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSelectable_CSelectable
+  ΔCSelectable
+where
+  -- Declared member operation CSelectable::CSelectable(void)
+  true
+end
+
+schema CPlaceableShText
+  CPlaceableText  -- inherits base schema
+  CShadowInfo  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableShText_SetPosition
+  ΔCPlaceableShText
+  x? : ℝ
+  y? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- Declared member operation CPlaceableShText::SetPosition(float x, float y, bool bRightJustify)
+  true
+end
+
+schema CPlaceableShText_SetAlpha_2
+  ΔCPlaceableShText
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableShText::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableShText_SetAlpha_3
+  ΔCPlaceableShText
+  arg_1? : alpha
+  result! : CPlaceableText
+where
+  -- Declared member operation CPlaceableShText::SetAlpha(alpha)
+  true
+end
+
+schema CPlaceableShText_Draw_4
+  ΔCPlaceableShText
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CPlaceableShText::Draw(float x, float y)
+  true
+end
+
+schema CPlaceableShText_Draw_5
+  ΔCPlaceableShText
+  color? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CPlaceableShText::Draw(const CRGBA &color, float x, float y)
+  true
+end
+
+schema CPlaceableShText_DrawShWrap_6
+  ΔCPlaceableShText
+  x? : ℝ
+  y? : ℝ
+  wrapX? : ℝ
+  wrapY? : ℝ
+where
+  -- Declared member operation CPlaceableShText::DrawShWrap(float x, float y, float wrapX, float wrapY)
+  true
+end
+
+schema CPlaceableShTextTwoLines
+  CPlaceableTextTwoLines  -- inherits base schema
+  CShadowInfo  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableShTextTwoLines_SetAlpha
+  ΔCPlaceableShTextTwoLines
+  alpha? : ℕ
+where
+  -- Declared member operation CPlaceableShTextTwoLines::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableShTextTwoLines_SetAlpha_2
+  ΔCPlaceableShTextTwoLines
+  arg_1? : alpha
+  result! : CPlaceableTextTwoLines
+where
+  -- Declared member operation CPlaceableShTextTwoLines::SetAlpha(alpha)
+  true
+end
+
+schema CPlaceableShTextTwoLines_Draw_3
+  ΔCPlaceableShTextTwoLines
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CPlaceableShTextTwoLines::Draw(float x, float y)
+  true
+end
+
+schema CPlaceableShTextTwoLines_Draw_4
+  ΔCPlaceableShTextTwoLines
+  color? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CPlaceableShTextTwoLines::Draw(const CRGBA &color, float x, float y)
+  true
+end
+
+schema CPlaceableShOption
+  CPlaceableShText  -- inherits base schema
+  CSelectable  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableShOption_SetColors
+  ΔCPlaceableShOption
+  normal? : CRGBA
+  selection? : CRGBA
+where
+  -- Declared member operation CPlaceableShOption::SetColors(const CRGBA &normal, const CRGBA &selection)
+  true
+end
+
+schema CPlaceableShOption_SetAlpha_2
+  ΔCPlaceableShOption
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableShOption::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableShOption_SetAlpha_3
+  ΔCPlaceableShOption
+  arg_1? : alpha
+  result! : CPlaceableShText
+where
+  -- Declared member operation CPlaceableShOption::SetAlpha(alpha)
+  true
+end
+
+schema CPlaceableShOption_Draw_4
+  ΔCPlaceableShOption
+  highlightColor? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  bHighlight? : 𝔹
+where
+  -- Declared member operation CPlaceableShOption::Draw(const CRGBA &highlightColor, float x, float y, bool bHighlight)
+  true
+end
+
+schema CPlaceableShOptionTwoLines
+  CPlaceableShTextTwoLines  -- inherits base schema
+  CSelectable  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableShOptionTwoLines_SetColors
+  ΔCPlaceableShOptionTwoLines
+  normal? : CRGBA
+  selection? : CRGBA
+where
+  -- Declared member operation CPlaceableShOptionTwoLines::SetColors(const CRGBA &normal, const CRGBA &selection)
+  true
+end
+
+schema CPlaceableShOptionTwoLines_SetAlpha_2
+  ΔCPlaceableShOptionTwoLines
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableShOptionTwoLines::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableShOptionTwoLines_SetAlpha_3
+  ΔCPlaceableShOptionTwoLines
+  arg_1? : alpha
+  result! : CPlaceableShTextTwoLines
+where
+  -- Declared member operation CPlaceableShOptionTwoLines::SetAlpha(alpha)
+  true
+end
+
+schema CPlaceableShOptionTwoLines_Draw_4
+  ΔCPlaceableShOptionTwoLines
+  highlightColor? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  bHighlight? : 𝔹
+where
+  -- Declared member operation CPlaceableShOptionTwoLines::Draw(const CRGBA &highlightColor, float x, float y, bool bHighlight)
+  true
+end
+
+schema CPlaceableSprite
+  m_pSprite : Ref[CSprite2d]
+  m_position : CVector2D
+  m_size : CVector2D
+  m_color : CRGBA
+where
+  #m_pSprite ≤ 1
+end
+
+schema CPlaceableSprite_CPlaceableSprite
+  ΔCPlaceableSprite
+where
+  -- Declared member operation CPlaceableSprite::CPlaceableSprite(void)
+  true
+end
+
+schema CPlaceableSprite_SetAlpha_2
+  ΔCPlaceableSprite
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableSprite::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableSprite_Draw_3
+  ΔCPlaceableSprite
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CPlaceableSprite::Draw(float x, float y)
+  true
+end
+
+schema CPlaceableSprite_Draw_4
+  ΔCPlaceableSprite
+  color? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CPlaceableSprite::Draw(const CRGBA &color, float x, float y)
+  true
+end
+
+schema CPlaceableShSprite
+  m_sprite : CPlaceableSprite
+  m_shadow : CPlaceableSprite
+  m_bDropShadow : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceableShSprite_CPlaceableShSprite
+  ΔCPlaceableShSprite
+where
+  -- Declared member operation CPlaceableShSprite::CPlaceableShSprite(void)
+  true
+end
+
+schema CPlaceableShSprite_SetAlpha_2
+  ΔCPlaceableShSprite
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CPlaceableShSprite::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CPlaceableShSprite_SetAlpha_3
+  ΔCPlaceableShSprite
+  arg_1? : alpha
+  result! : m_shadow
+where
+  -- Declared member operation CPlaceableShSprite::SetAlpha(alpha)
+  true
+end
+
+schema CPlaceableShSprite_Draw_4
+  ΔCPlaceableShSprite
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CPlaceableShSprite::Draw(float x, float y)
+  true
+end
+
+schema CMenuBase
+  m_position : CVector2D
+  m_bTwoState : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuBase_CMenuBase
+  ΔCMenuBase
+where
+  -- Declared member operation CMenuBase::CMenuBase(void)
+  true
+end
+
+schema CMenuBase_Draw_2
+  ΔCMenuBase
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CMenuBase::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuBase_DrawNormal_3
+  ΔCMenuBase
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuBase::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuBase_DrawHighlighted_4
+  ΔCMenuBase
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuBase::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuBase_SetAlpha_5
+  ΔCMenuBase
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuBase::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuBase_SetShadows_6
+  ΔCMenuBase
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuBase::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuBase_GoNext_7
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoNext(void)
+  true
+end
+
+schema CMenuBase_GoPrev_8
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoPrev(void)
+  true
+end
+
+schema CMenuBase_GoDown_9
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoDown(void)
+  true
+end
+
+schema CMenuBase_GoUp_10
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoUp(void)
+  true
+end
+
+schema CMenuBase_GoDownStill_11
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoDownStill(void)
+  true
+end
+
+schema CMenuBase_GoUpStill_12
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoUpStill(void)
+  true
+end
+
+schema CMenuBase_GoLeft_13
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoLeft(void)
+  true
+end
+
+schema CMenuBase_GoRight_14
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoRight(void)
+  true
+end
+
+schema CMenuBase_GoLeftStill_15
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoLeftStill(void)
+  true
+end
+
+schema CMenuBase_GoRightStill_16
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoRightStill(void)
+  true
+end
+
+schema CMenuBase_GoFirst_17
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoFirst(void)
+  true
+end
+
+schema CMenuBase_GoLast_18
+  ΔCMenuBase
+  result! : 𝔹
+where
+  -- Declared member operation CMenuBase::GoLast(void)
+  true
+end
+
+schema CMenuBase_SelectCurrentOptionUnderCursor_19
+  ΔCMenuBase
+where
+  -- Declared member operation CMenuBase::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuBase_SelectDefaultCancelAction_20
+  ΔCMenuBase
+where
+  -- Declared member operation CMenuBase::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuBase_ActivateMenu_21
+  ΔCMenuBase
+  first? : 𝔹
+where
+  -- Declared member operation CMenuBase::ActivateMenu(bool first)
+  true
+end
+
+schema CMenuBase_DeactivateMenu_22
+  ΔCMenuBase
+where
+  -- Declared member operation CMenuBase::DeactivateMenu(void)
+  true
+end
+
+schema CMenuBase_GetMenuSelection_23
+  ΔCMenuBase
+  result! : ℤ
+where
+  -- Declared member operation CMenuBase::GetMenuSelection(void)
+  true
+end
+
+schema CMenuBase_SetMenuSelection_24
+  ΔCMenuBase
+  selection? : ℤ
+where
+  -- Declared member operation CMenuBase::SetMenuSelection(int selection)
+  true
+end
+
+schema CMenuDummy
+  CMenuBase  -- inherits base schema
+  m_bActive : 𝔹
+  false : return
+  true : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuDummy_Draw
+  ΔCMenuDummy
+  arg_1? : CRGBA
+  arg_2? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuDummy::Draw(const CRGBA &, const CRGBA &, float x, float y)
+  true
+end
+
+schema CMenuDummy_GoPrev_2
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoPrev(void)
+  true
+end
+
+schema CMenuDummy_GoDown_3
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoDown(void)
+  true
+end
+
+schema CMenuDummy_GoUp_4
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoUp(void)
+  true
+end
+
+schema CMenuDummy_GoDownStill_5
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoDownStill(void)
+  true
+end
+
+schema CMenuDummy_GoUpStill_6
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoUpStill(void)
+  true
+end
+
+schema CMenuDummy_GoLeft_7
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoLeft(void)
+  true
+end
+
+schema CMenuDummy_GoRight_8
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoRight(void)
+  true
+end
+
+schema CMenuDummy_GoLeftStill_9
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoLeftStill(void)
+  true
+end
+
+schema CMenuDummy_GoRightStill_10
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoRightStill(void)
+  true
+end
+
+schema CMenuDummy_GoFirst_11
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoFirst(void)
+  true
+end
+
+schema CMenuDummy_GoLast_12
+  ΔCMenuDummy
+  result! : bool
+where
+  -- Declared member operation CMenuDummy::GoLast(void)
+  true
+end
+
+schema CMenuDummy_SelectCurrentOptionUnderCursor_13
+  ΔCMenuDummy
+  result! : void
+where
+  -- Declared member operation CMenuDummy::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuDummy_DeactivateMenu_14
+  ΔCMenuDummy
+  result! : void
+where
+  -- Declared member operation CMenuDummy::DeactivateMenu(void)
+  true
+end
+
+schema CMenuDummy_GetMenuSelection_15
+  ΔCMenuDummy
+  result! : ℤ
+where
+  -- Declared member operation CMenuDummy::GetMenuSelection(void)
+  true
+end
+
+schema CMenuDummy_SetMenuSelection_16
+  ΔCMenuDummy
+  arg_1? : ℤ
+  result! : void
+where
+  -- Declared member operation CMenuDummy::SetMenuSelection(int)
+  true
+end
+
+schema CMenuPictureAndText
+  CMenuBase  -- inherits base schema
+  m_numSprites : ℤ
+  m_sprites : seq CPlaceableShSprite  -- bounded array [5]
+  m_numTexts : ℤ
+  m_texts : seq CPlaceableShText  -- bounded array [20]
+  m_oldTextScale : CVector2D
+  m_textScale : CVector2D
+  m_bSetTextScale : 𝔹
+  m_wrapX : ℝ
+  m_oldWrapx : ℝ
+  m_bWrap : 𝔹
+where
+  #m_sprites = 5
+  #m_texts = 20
+end
+
+schema CMenuPictureAndText_CMenuPictureAndText
+  ΔCMenuPictureAndText
+where
+  -- Declared member operation CMenuPictureAndText::CMenuPictureAndText(void)
+  true
+end
+
+schema CMenuPictureAndText_SetNewOldTextScale_2
+  ΔCMenuPictureAndText
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+where
+  -- Declared member operation CMenuPictureAndText::SetNewOldTextScale(bool bTextScale, const CVector2D &newScale, const CVector2D &oldScale)
+  true
+end
+
+schema CMenuPictureAndText_SetTextsColor_3
+  ΔCMenuPictureAndText
+  color? : CRGBA
+where
+  -- Declared member operation CMenuPictureAndText::SetTextsColor(const CRGBA &color)
+  true
+end
+
+schema CMenuPictureAndText_AddText_4
+  ΔCMenuPictureAndText
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  color? : CRGBA
+  bRightJustify? : 𝔹
+where
+  -- Declared member operation CMenuPictureAndText::AddText(wchar *text, float positionX, float positionY, const CRGBA &color, bool bRightJustify)
+  true
+end
+
+schema CMenuPictureAndText_AddPicture_5
+  ΔCMenuPictureAndText
+  sprite? : Ref[CSprite2d]
+  shadow? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  height? : ℝ
+  color? : CRGBA
+where
+  -- Declared member operation CMenuPictureAndText::AddPicture(CSprite2d *sprite, CSprite2d *shadow, float positionX, float positionY, float width, float height, const CRGBA &color)
+  true
+end
+
+schema CMenuPictureAndText_AddPicture_6
+  ΔCMenuPictureAndText
+  sprite? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  height? : ℝ
+  color? : CRGBA
+where
+  -- Declared member operation CMenuPictureAndText::AddPicture(CSprite2d *sprite, float positionX, float positionY, float width, float height, const CRGBA &color)
+  true
+end
+
+schema CMenuPictureAndText_Draw_7
+  ΔCMenuPictureAndText
+  arg_1? : CRGBA
+  arg_2? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuPictureAndText::Draw(const CRGBA &, const CRGBA &, float x, float y)
+  true
+end
+
+schema CMenuPictureAndText_DrawNormal_8
+  ΔCMenuPictureAndText
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuPictureAndText::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuPictureAndText_DrawHighlighted_9
+  ΔCMenuPictureAndText
+  arg_1? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CMenuPictureAndText::DrawHighlighted(const CRGBA &, float x, float y)
+  true
+end
+
+schema CMenuPictureAndText_SetAlpha_10
+  ΔCMenuPictureAndText
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CMenuPictureAndText::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuPictureAndText_SetShadows_11
+  ΔCMenuPictureAndText
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuPictureAndText::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuPictureAndText_GoNext_12
+  ΔCMenuPictureAndText
+  result! : 𝔹
+where
+  -- Declared member operation CMenuPictureAndText::GoNext(void)
+  true
+end
+
+schema CMenuPictureAndText_GoPrev_13
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoPrev(void)
+  true
+end
+
+schema CMenuPictureAndText_GoDown_14
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoDown(void)
+  true
+end
+
+schema CMenuPictureAndText_GoUp_15
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoUp(void)
+  true
+end
+
+schema CMenuPictureAndText_GoDownStill_16
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoDownStill(void)
+  true
+end
+
+schema CMenuPictureAndText_GoUpStill_17
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoUpStill(void)
+  true
+end
+
+schema CMenuPictureAndText_GoLeft_18
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoLeft(void)
+  true
+end
+
+schema CMenuPictureAndText_GoRight_19
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoRight(void)
+  true
+end
+
+schema CMenuPictureAndText_GoLeftStill_20
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoLeftStill(void)
+  true
+end
+
+schema CMenuPictureAndText_GoRightStill_21
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoRightStill(void)
+  true
+end
+
+schema CMenuPictureAndText_GoFirst_22
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoFirst(void)
+  true
+end
+
+schema CMenuPictureAndText_GoLast_23
+  ΔCMenuPictureAndText
+  result! : bool
+where
+  -- Declared member operation CMenuPictureAndText::GoLast(void)
+  true
+end
+
+schema CMenuPictureAndText_SelectCurrentOptionUnderCursor_24
+  ΔCMenuPictureAndText
+  result! : void
+where
+  -- Declared member operation CMenuPictureAndText::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuPictureAndText_SetMenuSelection_25
+  ΔCMenuPictureAndText
+  arg_1? : ℤ
+  result! : void
+where
+  -- Declared member operation CMenuPictureAndText::SetMenuSelection(int)
+  true
+end
+
+schema CMenuMultiChoice
+  CMenuBase  -- inherits base schema
+  m_numOptions : ℤ
+  m_title : CPlaceableShText
+  m_options : seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+  m_cursor : ℤ
+  m_oldTextScale : CVector2D
+  m_textScale : CVector2D
+  m_bSetTextScale : 𝔹
+  m_bSetTitleTextScale : 𝔹
+  true : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoice_CMenuMultiChoice
+  ΔCMenuMultiChoice
+where
+  -- Declared member operation CMenuMultiChoice::CMenuMultiChoice(void)
+  true
+end
+
+schema CMenuMultiChoice_AddOption_2
+  ΔCMenuMultiChoice
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+  result! : Ref[CPlaceableShOption]
+where
+  -- Declared member operation CMenuMultiChoice::AddOption(wchar *text, float positionX, float positionY, bool bSelected, bool bRightJustify)
+  true
+end
+
+schema CMenuMultiChoice_SetColors_3
+  ΔCMenuMultiChoice
+  title? : CRGBA
+  normal? : CRGBA
+  selected? : CRGBA
+where
+  -- Declared member operation CMenuMultiChoice::SetColors(const CRGBA &title, const CRGBA &normal, const CRGBA &selected)
+  true
+end
+
+schema CMenuMultiChoice_SetNewOldTextScale_4
+  ΔCMenuMultiChoice
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+  bTitleTextScale? : 𝔹
+where
+  -- Declared member operation CMenuMultiChoice::SetNewOldTextScale(bool bTextScale, const CVector2D &newScale, const CVector2D &oldScale, bool bTitleTextScale)
+  true
+end
+
+schema CMenuMultiChoice_Draw_5
+  ΔCMenuMultiChoice
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoice::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoice_DrawNormal_6
+  ΔCMenuMultiChoice
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoice::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuMultiChoice_DrawHighlighted_7
+  ΔCMenuMultiChoice
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoice::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoice_SetAlpha_8
+  ΔCMenuMultiChoice
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuMultiChoice::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuMultiChoice_SetShadows_9
+  ΔCMenuMultiChoice
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuMultiChoice::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuMultiChoice_GoNext_10
+  ΔCMenuMultiChoice
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoice::GoNext(void)
+  true
+end
+
+schema CMenuMultiChoice_GoPrev_11
+  ΔCMenuMultiChoice
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoice::GoPrev(void)
+  true
+end
+
+schema CMenuMultiChoice_GoDown_12
+  ΔCMenuMultiChoice
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoice::GoDown(void)
+  true
+end
+
+schema CMenuMultiChoice_GoUp_13
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoUp(void)
+  true
+end
+
+schema CMenuMultiChoice_GoDownStill_14
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoDownStill(void)
+  true
+end
+
+schema CMenuMultiChoice_GoUpStill_15
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoUpStill(void)
+  true
+end
+
+schema CMenuMultiChoice_GoLeft_16
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoLeft(void)
+  true
+end
+
+schema CMenuMultiChoice_GoRight_17
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoRight(void)
+  true
+end
+
+schema CMenuMultiChoice_GoLeftStill_18
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoLeftStill(void)
+  true
+end
+
+schema CMenuMultiChoice_GoRightStill_19
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoRightStill(void)
+  true
+end
+
+schema CMenuMultiChoice_GoFirst_20
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoFirst(void)
+  true
+end
+
+schema CMenuMultiChoice_GoLast_21
+  ΔCMenuMultiChoice
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoice::GoLast(void)
+  true
+end
+
+schema CMenuMultiChoice_SelectCurrentOptionUnderCursor_22
+  ΔCMenuMultiChoice
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoice::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuMultiChoice_SelectDefaultCancelAction_23
+  ΔCMenuMultiChoice
+where
+  -- Declared member operation CMenuMultiChoice::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuMultiChoice_DeactivateMenu_24
+  ΔCMenuMultiChoice
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoice::DeactivateMenu(void)
+  true
+end
+
+schema CMenuMultiChoice_GetMenuSelection_25
+  ΔCMenuMultiChoice
+  result! : ℤ
+where
+  -- Declared member operation CMenuMultiChoice::GetMenuSelection(void)
+  true
+end
+
+schema CMenuMultiChoice_SetMenuSelection_26
+  ΔCMenuMultiChoice
+  selection? : ℤ
+where
+  -- Declared member operation CMenuMultiChoice::SetMenuSelection(int selection)
+  true
+end
+
+schema CMenuMultiChoiceTriggered
+  CMenuMultiChoice  -- inherits base schema
+  m_triggers : seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+  m_defaultCancel : Trigger
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoiceTriggered_CMenuMultiChoiceTriggered
+  ΔCMenuMultiChoiceTriggered
+where
+  -- Declared member operation CMenuMultiChoiceTriggered::CMenuMultiChoiceTriggered(void)
+  true
+end
+
+schema CMenuMultiChoiceTriggered_Initialise_2
+  ΔCMenuMultiChoiceTriggered
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoiceTriggered::Initialise(void)
+  true
+end
+
+schema CMenuMultiChoiceTriggered_AddOption_3
+  ΔCMenuMultiChoiceTriggered
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  trigger? : Trigger
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+  result! : Ref[CPlaceableShOption]
+where
+  -- Declared member operation CMenuMultiChoiceTriggered::AddOption(wchar *text, float positionX, float positionY, Trigger trigger, bool bSelected, bool bRightJustify)
+  true
+end
+
+schema CMenuMultiChoiceTriggered_SelectCurrentOptionUnderCursor_4
+  ΔCMenuMultiChoiceTriggered
+where
+  -- Declared member operation CMenuMultiChoiceTriggered::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuMultiChoiceTriggered_SelectDefaultCancelAction_5
+  ΔCMenuMultiChoiceTriggered
+where
+  -- Declared member operation CMenuMultiChoiceTriggered::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuMultiChoiceTriggeredAlways
+  CMenuMultiChoiceTriggered  -- inherits base schema
+  m_alwaysNormalTrigger : Trigger
+  m_alwaysHighlightTrigger : Trigger
+  m_alwaysTrigger : Trigger
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoiceTriggeredAlways_CMenuMultiChoiceTriggeredAlways
+  ΔCMenuMultiChoiceTriggeredAlways
+where
+  -- Declared member operation CMenuMultiChoiceTriggeredAlways::CMenuMultiChoiceTriggeredAlways(void)
+  true
+end
+
+schema CMenuMultiChoiceTriggeredAlways_DrawNormal_2
+  ΔCMenuMultiChoiceTriggeredAlways
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoiceTriggeredAlways::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuMultiChoiceTriggeredAlways_DrawHighlighted_3
+  ΔCMenuMultiChoiceTriggeredAlways
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoiceTriggeredAlways::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoicePictured
+  CMenuMultiChoice  -- inherits base schema
+  m_sprites : seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+  m_bHasSprite : seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoicePictured_CMenuMultiChoicePictured
+  ΔCMenuMultiChoicePictured
+where
+  -- Declared member operation CMenuMultiChoicePictured::CMenuMultiChoicePictured(void)
+  true
+end
+
+schema CMenuMultiChoicePictured_Initialise_2
+  ΔCMenuMultiChoicePictured
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoicePictured::Initialise(void)
+  true
+end
+
+schema CMenuMultiChoicePictured_AddOption_3
+  ΔCMenuMultiChoicePictured
+  sprite? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  size? : CVector2D
+  bSelected? : 𝔹
+  result! : Ref[CPlaceableShOption]
+where
+  -- Declared member operation CMenuMultiChoicePictured::AddOption(CSprite2d *sprite, float positionX, float positionY, const CVector2D &size, bool bSelected)
+  true
+end
+
+schema CMenuMultiChoicePictured_Draw_4
+  ΔCMenuMultiChoicePictured
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoicePictured::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoicePictured_DrawNormal_5
+  ΔCMenuMultiChoicePictured
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoicePictured::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuMultiChoicePictured_DrawHighlighted_6
+  ΔCMenuMultiChoicePictured
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoicePictured::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoicePictured_SetAlpha_7
+  ΔCMenuMultiChoicePictured
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuMultiChoicePictured::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered
+  CMenuMultiChoicePictured  -- inherits base schema
+  m_triggers : seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+  m_defaultCancel : Trigger
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoicePicturedTriggered_CMenuMultiChoicePicturedTriggered
+  ΔCMenuMultiChoicePicturedTriggered
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggered::CMenuMultiChoicePicturedTriggered(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_Initialise_2
+  ΔCMenuMultiChoicePicturedTriggered
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggered::Initialise(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_AddOption_3
+  ΔCMenuMultiChoicePicturedTriggered
+  sprite? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  size? : CVector2D
+  trigger? : Trigger
+  bSelected? : 𝔹
+  result! : Ref[CPlaceableShOption]
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggered::AddOption(CSprite2d *sprite, float positionX, float positionY, const CVector2D &size, Trigger trigger, bool bSelected)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_SelectCurrentOptionUnderCursor_4
+  ΔCMenuMultiChoicePicturedTriggered
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggered::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_SelectDefaultCancelAction_5
+  ΔCMenuMultiChoicePicturedTriggered
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggered::SelectDefaultCancelAction(void)
+  true
+end
+
+schema FEC_MOVETAB
+  right : ℤ
+  left : ℤ
+  down : ℤ
+  up : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove
+  CMenuMultiChoicePicturedTriggered  -- inherits base schema
+  m_moveTab : seq FEC_MOVETAB  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_CMenuMultiChoicePicturedTriggeredAnyMove
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::CMenuMultiChoicePicturedTriggeredAnyMove(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_Initialise_2
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::Initialise(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_AddOption_3
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  sprite? : Ref[CSprite2d]
+  moveTab? : Ref[FEC_MOVETAB]
+  positionX? : ℝ
+  positionY? : ℝ
+  size? : CVector2D
+  trigger? : Trigger
+  bSelected? : 𝔹
+  result! : Ref[CPlaceableShOption]
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::AddOption(CSprite2d *sprite, FEC_MOVETAB *moveTab, float positionX, float positionY, const CVector2D &size, Trigger trigger, bool bSelected)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoDown_4
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::GoDown(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoUp_5
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::GoUp(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoLeft_6
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::GoLeft(void)
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoRight_7
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoicePicturedTriggeredAnyMove::GoRight(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines
+  CMenuBase  -- inherits base schema
+  m_numOptions : ℤ
+  m_title : CPlaceableShText
+  m_options : seq CPlaceableShOptionTwoLines  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+  m_cursor : ℤ
+  m_oldTextScale : CVector2D
+  m_textScale : CVector2D
+  m_bSetTextScale : 𝔹
+  m_bSetTitleTextScale : 𝔹
+  true : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoiceTwoLines_CMenuMultiChoiceTwoLines
+  ΔCMenuMultiChoiceTwoLines
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::CMenuMultiChoiceTwoLines(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_AddOption_2
+  ΔCMenuMultiChoiceTwoLines
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+  result! : Ref[CPlaceableShOptionTwoLines]
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::AddOption(wchar *text, float positionX, float positionY, bool bSelected, bool bRightJustify)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_AddOption_3
+  ΔCMenuMultiChoiceTwoLines
+  text1? : seq CHAR
+  positionX1? : ℝ
+  positionY1? : ℝ
+  text2? : seq CHAR
+  positionX2? : ℝ
+  positionY2? : ℝ
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+  result! : Ref[CPlaceableShOptionTwoLines]
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::AddOption(wchar *text1, float positionX1, float positionY1, wchar *text2, float positionX2, float positionY2, bool bSelected, bool bRightJustify)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetColors_4
+  ΔCMenuMultiChoiceTwoLines
+  title? : CRGBA
+  normal? : CRGBA
+  selected? : CRGBA
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SetColors(const CRGBA &title, const CRGBA &normal, const CRGBA &selected)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetNewOldTextScale_5
+  ΔCMenuMultiChoiceTwoLines
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+  bTitleTextScale? : 𝔹
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SetNewOldTextScale(bool bTextScale, const CVector2D &newScale, const CVector2D &oldScale, bool bTitleTextScale)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_Draw_6
+  ΔCMenuMultiChoiceTwoLines
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_DrawNormal_7
+  ΔCMenuMultiChoiceTwoLines
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_DrawHighlighted_8
+  ΔCMenuMultiChoiceTwoLines
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetAlpha_9
+  ΔCMenuMultiChoiceTwoLines
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetShadows_10
+  ΔCMenuMultiChoiceTwoLines
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoNext_11
+  ΔCMenuMultiChoiceTwoLines
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoNext(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoPrev_12
+  ΔCMenuMultiChoiceTwoLines
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoPrev(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoDown_13
+  ΔCMenuMultiChoiceTwoLines
+  result! : 𝔹
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoDown(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoUp_14
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoUp(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoDownStill_15
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoDownStill(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoUpStill_16
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoUpStill(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoLeft_17
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoLeft(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoRight_18
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoRight(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoLeftStill_19
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoLeftStill(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoRightStill_20
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoRightStill(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoFirst_21
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoFirst(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoLast_22
+  ΔCMenuMultiChoiceTwoLines
+  result! : bool
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GoLast(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SelectCurrentOptionUnderCursor_23
+  ΔCMenuMultiChoiceTwoLines
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SelectDefaultCancelAction_24
+  ΔCMenuMultiChoiceTwoLines
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_DeactivateMenu_25
+  ΔCMenuMultiChoiceTwoLines
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::DeactivateMenu(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GetMenuSelection_26
+  ΔCMenuMultiChoiceTwoLines
+  result! : ℤ
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::GetMenuSelection(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetMenuSelection_27
+  ΔCMenuMultiChoiceTwoLines
+  selection? : ℤ
+where
+  -- Declared member operation CMenuMultiChoiceTwoLines::SetMenuSelection(int selection)
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered
+  CMenuMultiChoiceTwoLines  -- inherits base schema
+  m_triggers : seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+  m_defaultCancel : Trigger
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_CMenuMultiChoiceTwoLinesTriggered
+  ΔCMenuMultiChoiceTwoLinesTriggered
+where
+  -- Declared member operation CMenuMultiChoiceTwoLinesTriggered::CMenuMultiChoiceTwoLinesTriggered(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_Initialise_2
+  ΔCMenuMultiChoiceTwoLinesTriggered
+  result! : void
+where
+  -- Declared member operation CMenuMultiChoiceTwoLinesTriggered::Initialise(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_AddOption_3
+  ΔCMenuMultiChoiceTwoLinesTriggered
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  trigger? : Trigger
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+  result! : Ref[CPlaceableShOptionTwoLines]
+where
+  -- Declared member operation CMenuMultiChoiceTwoLinesTriggered::AddOption(wchar *text, float positionX, float positionY, Trigger trigger, bool bSelected, bool bRightJustify)
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_AddOption_4
+  ΔCMenuMultiChoiceTwoLinesTriggered
+  text1? : seq CHAR
+  positionX1? : ℝ
+  positionY1? : ℝ
+  text2? : seq CHAR
+  positionX2? : ℝ
+  positionY2? : ℝ
+  trigger? : Trigger
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+  result! : Ref[CPlaceableShOptionTwoLines]
+where
+  -- Declared member operation CMenuMultiChoiceTwoLinesTriggered::AddOption(wchar *text1, float positionX1, float positionY1, wchar *text2, float positionX2, float positionY2, Trigger trigger, bool bSelected, bool bRightJustify)
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_SelectCurrentOptionUnderCursor_5
+  ΔCMenuMultiChoiceTwoLinesTriggered
+where
+  -- Declared member operation CMenuMultiChoiceTwoLinesTriggered::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_SelectDefaultCancelAction_6
+  ΔCMenuMultiChoiceTwoLinesTriggered
+where
+  -- Declared member operation CMenuMultiChoiceTwoLinesTriggered::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuOnOff
+  CMenuBase  -- inherits base schema
+  m_title : CPlaceableShOption
+  m_options : seq CPlaceableShText  -- bounded array [2]
+  m_bActive : 𝔹
+  m_bSetTextScale : 𝔹
+  m_bSetTitleTextScale : 𝔹
+  m_textScale : CVector2D
+  m_oldTextScale : CVector2D
+  m_type : ℤ
+  false : return
+  true : return
+where
+  #m_options = 2
+end
+
+schema CMenuOnOff_SetColors
+  ΔCMenuOnOff
+  title? : CRGBA
+  options? : CRGBA
+where
+  -- Declared member operation CMenuOnOff::SetColors(const CRGBA &title, const CRGBA &options)
+  true
+end
+
+schema CMenuOnOff_SetNewOldTextScale_2
+  ΔCMenuOnOff
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+  bTitleTextScale? : 𝔹
+where
+  -- Declared member operation CMenuOnOff::SetNewOldTextScale(bool bTextScale, const CVector2D &newScale, const CVector2D &oldScale, bool bTitleTextScale)
+  true
+end
+
+schema CMenuOnOff_SetOptionPosition_3
+  ΔCMenuOnOff
+  x? : ℝ
+  y? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- Declared member operation CMenuOnOff::SetOptionPosition(float x, float y, bool bRightJustify)
+  true
+end
+
+schema CMenuOnOff_AddTitle_4
+  ΔCMenuOnOff
+  text? : seq CHAR
+  bSelected? : 𝔹
+  positionX? : ℝ
+  positionY? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- Declared member operation CMenuOnOff::AddTitle(wchar *text, bool bSelected, float positionX, float positionY, bool bRightJustify)
+  true
+end
+
+schema CMenuOnOff_Draw_5
+  ΔCMenuOnOff
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuOnOff::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuOnOff_DrawNormal_6
+  ΔCMenuOnOff
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuOnOff::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuOnOff_DrawHighlighted_7
+  ΔCMenuOnOff
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuOnOff::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuOnOff_SetAlpha_8
+  ΔCMenuOnOff
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuOnOff::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuOnOff_SetShadows_9
+  ΔCMenuOnOff
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuOnOff::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuOnOff_GoNext_10
+  ΔCMenuOnOff
+  result! : 𝔹
+where
+  -- Declared member operation CMenuOnOff::GoNext(void)
+  true
+end
+
+schema CMenuOnOff_GoPrev_11
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoPrev(void)
+  true
+end
+
+schema CMenuOnOff_GoDown_12
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoDown(void)
+  true
+end
+
+schema CMenuOnOff_GoUp_13
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoUp(void)
+  true
+end
+
+schema CMenuOnOff_GoDownStill_14
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoDownStill(void)
+  true
+end
+
+schema CMenuOnOff_GoUpStill_15
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoUpStill(void)
+  true
+end
+
+schema CMenuOnOff_GoLeft_16
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoLeft(void)
+  true
+end
+
+schema CMenuOnOff_GoRight_17
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoRight(void)
+  true
+end
+
+schema CMenuOnOff_GoLeftStill_18
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoLeftStill(void)
+  true
+end
+
+schema CMenuOnOff_GoRightStill_19
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoRightStill(void)
+  true
+end
+
+schema CMenuOnOff_GoFirst_20
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoFirst(void)
+  true
+end
+
+schema CMenuOnOff_GoLast_21
+  ΔCMenuOnOff
+  result! : bool
+where
+  -- Declared member operation CMenuOnOff::GoLast(void)
+  true
+end
+
+schema CMenuOnOff_SelectCurrentOptionUnderCursor_22
+  ΔCMenuOnOff
+  result! : void
+where
+  -- Declared member operation CMenuOnOff::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuOnOff_SelectDefaultCancelAction_23
+  ΔCMenuOnOff
+  result! : void
+where
+  -- Declared member operation CMenuOnOff::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuOnOff_DeactivateMenu_24
+  ΔCMenuOnOff
+  result! : void
+where
+  -- Declared member operation CMenuOnOff::DeactivateMenu(void)
+  true
+end
+
+schema CMenuOnOff_GetMenuSelection_25
+  ΔCMenuOnOff
+  result! : ℤ
+where
+  -- Declared member operation CMenuOnOff::GetMenuSelection(void)
+  true
+end
+
+schema CMenuOnOff_SetMenuSelection_26
+  ΔCMenuOnOff
+  selection? : ℤ
+  result! : void
+where
+  -- Declared member operation CMenuOnOff::SetMenuSelection(int selection)
+  true
+end
+
+schema CMenuOnOffTriggered
+  CMenuOnOff  -- inherits base schema
+  m_trigger : Trigger
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuOnOffTriggered_SetOptionPosition
+  ΔCMenuOnOffTriggered
+  x? : ℝ
+  y? : ℝ
+  trigger? : Trigger
+  bRightJustify? : 𝔹
+where
+  -- Declared member operation CMenuOnOffTriggered::SetOptionPosition(float x, float y, Trigger trigger, bool bRightJustify)
+  true
+end
+
+schema CMenuOnOffTriggered_SelectCurrentOptionUnderCursor_2
+  ΔCMenuOnOffTriggered
+where
+  -- Declared member operation CMenuOnOffTriggered::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuSlider
+  CMenuBase  -- inherits base schema
+  m_title : CPlaceableShText
+  m_box : CPlaceableShText
+  m_colors : seq CRGBA  -- bounded array [2]
+  m_size : seq CVector2D  -- bounded array [2]
+  m_value : ℤ
+  m_percentageText : CPlaceableShText
+  m_bDrawPercentage : 𝔹
+  m_someAlpha : ℕ
+  m_bActive : 𝔹
+  m_style : ℤ
+  Buf8 : seq CHAR
+  Buf16 : seq CHAR
+  false : return
+  true : return
+where
+  #m_colors = 2
+  #m_size = 2
+  m_someAlpha ≥ 0
+  #Buf8 = 8
+  #Buf16 = 8
+end
+
+schema CMenuSlider_CMenuSlider
+  ΔCMenuSlider
+where
+  -- Declared member operation CMenuSlider::CMenuSlider(void)
+  true
+end
+
+schema CMenuSlider_SetColors_2
+  ΔCMenuSlider
+  title? : CRGBA
+  percentage? : CRGBA
+  left? : CRGBA
+  right? : CRGBA
+  result! : void
+where
+  -- Declared member operation CMenuSlider::SetColors(const CRGBA &title, const CRGBA &percentage, const CRGBA &left, const CRGBA &right)
+  true
+end
+
+schema CMenuSlider_DrawTicks_3
+  ΔCMenuSlider
+  position? : CVector2D
+  size? : CVector2D
+  heightRight? : ℝ
+  level? : ℝ
+  leftCol? : CRGBA
+  selCol? : CRGBA
+  rightCol? : CRGBA
+  bShadow? : 𝔹
+  shadowOffset? : CVector2D
+  shadowColor? : CRGBA
+where
+  -- Declared member operation CMenuSlider::DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &selCol, const CRGBA &rightCol, bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor)
+  true
+end
+
+schema CMenuSlider_DrawTicks_4
+  ΔCMenuSlider
+  position? : CVector2D
+  size? : CVector2D
+  heightRight? : ℝ
+  level? : ℝ
+  leftCol? : CRGBA
+  rightCol? : CRGBA
+  bShadow? : 𝔹
+  shadowOffset? : CVector2D
+  shadowColor? : CRGBA
+where
+  -- Declared member operation CMenuSlider::DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &rightCol, bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor)
+  true
+end
+
+schema CMenuSlider_AddTickBox_5
+  ΔCMenuSlider
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  heigthLeft? : ℝ
+  heightRight? : ℝ
+where
+  -- Declared member operation CMenuSlider::AddTickBox(float positionX, float positionY, float width, float heigthLeft, float heightRight)
+  true
+end
+
+schema CMenuSlider_AddTitle_6
+  ΔCMenuSlider
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+where
+  -- Declared member operation CMenuSlider::AddTitle(wchar *text, float positionX, float positionY)
+  true
+end
+
+schema CMenuSlider_Draw_7
+  ΔCMenuSlider
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuSlider::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuSlider_DrawNormal_8
+  ΔCMenuSlider
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuSlider::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuSlider_DrawHighlighted_9
+  ΔCMenuSlider
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuSlider::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuSlider_SetAlpha_10
+  ΔCMenuSlider
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuSlider::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuSlider_SetShadows_11
+  ΔCMenuSlider
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuSlider::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuSlider_GoNext_12
+  ΔCMenuSlider
+  result! : 𝔹
+where
+  -- Declared member operation CMenuSlider::GoNext(void)
+  true
+end
+
+schema CMenuSlider_GoPrev_13
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoPrev(void)
+  true
+end
+
+schema CMenuSlider_GoDown_14
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoDown(void)
+  true
+end
+
+schema CMenuSlider_GoUp_15
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoUp(void)
+  true
+end
+
+schema CMenuSlider_GoDownStill_16
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoDownStill(void)
+  true
+end
+
+schema CMenuSlider_GoUpStill_17
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoUpStill(void)
+  true
+end
+
+schema CMenuSlider_GoLeft_18
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoLeft(void)
+  true
+end
+
+schema CMenuSlider_GoRight_19
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoRight(void)
+  true
+end
+
+schema CMenuSlider_GoLeftStill_20
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoLeftStill(void)
+  true
+end
+
+schema CMenuSlider_if_21
+  ΔCMenuSlider
+  arg_1? : m_value___0
+where
+  -- Declared member operation CMenuSlider::if(m_value < 0)
+  true
+end
+
+schema CMenuSlider_GoRightStill_22
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoRightStill(void)
+  true
+end
+
+schema CMenuSlider_if_23
+  ΔCMenuSlider
+  arg_1? : m_value___1000
+where
+  -- Declared member operation CMenuSlider::if(m_value > 1000)
+  true
+end
+
+schema CMenuSlider_GoFirst_24
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoFirst(void)
+  true
+end
+
+schema CMenuSlider_GoLast_25
+  ΔCMenuSlider
+  result! : bool
+where
+  -- Declared member operation CMenuSlider::GoLast(void)
+  true
+end
+
+schema CMenuSlider_SelectCurrentOptionUnderCursor_26
+  ΔCMenuSlider
+  result! : void
+where
+  -- Declared member operation CMenuSlider::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuSlider_DeactivateMenu_27
+  ΔCMenuSlider
+  result! : void
+where
+  -- Declared member operation CMenuSlider::DeactivateMenu(void)
+  true
+end
+
+schema CMenuSlider_GetMenuSelection_28
+  ΔCMenuSlider
+  result! : ℤ
+where
+  -- Declared member operation CMenuSlider::GetMenuSelection(void)
+  true
+end
+
+schema CMenuSlider_SetMenuSelection_29
+  ΔCMenuSlider
+  selection? : ℤ
+  result! : void
+where
+  -- Declared member operation CMenuSlider::SetMenuSelection(int selection)
+  true
+end
+
+schema CMenuSliderTriggered
+  CMenuSlider  -- inherits base schema
+  m_trigger : Trigger
+  m_alwaysTrigger : Trigger
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuSliderTriggered_CMenuSliderTriggered
+  ΔCMenuSliderTriggered
+where
+  -- Declared member operation CMenuSliderTriggered::CMenuSliderTriggered(void)
+  true
+end
+
+schema CMenuSliderTriggered_Draw_2
+  ΔCMenuSliderTriggered
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuSliderTriggered::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuSliderTriggered_GoLeft_3
+  ΔCMenuSliderTriggered
+  result! : 𝔹
+where
+  -- Declared member operation CMenuSliderTriggered::GoLeft(void)
+  true
+end
+
+schema CMenuSliderTriggered_GoRight_4
+  ΔCMenuSliderTriggered
+  result! : 𝔹
+where
+  -- Declared member operation CMenuSliderTriggered::GoRight(void)
+  true
+end
+
+schema CMenuSliderTriggered_GoLeftStill_5
+  ΔCMenuSliderTriggered
+  result! : 𝔹
+where
+  -- Declared member operation CMenuSliderTriggered::GoLeftStill(void)
+  true
+end
+
+schema CMenuSliderTriggered_GoRightStill_6
+  ΔCMenuSliderTriggered
+  result! : 𝔹
+where
+  -- Declared member operation CMenuSliderTriggered::GoRightStill(void)
+  true
+end
+
+schema CMenuLineLister
+  CMenuBase  -- inherits base schema
+  m_width : ℝ
+  m_height : ℝ
+  m_numLines : ℤ
+  m_linesLeft : seq CPlaceableShText  -- bounded array [NUM_LINELISTER_LINES_TOTAL]
+  m_linesRight : seq CPlaceableShText  -- bounded array [NUM_LINELISTER_LINES_TOTAL]
+  m_lineAlphas : seq ℕ  -- bounded array [NUM_LINELISTER_LINES_TOTAL]
+  m_lineFade : seq ℤ  -- bounded array [NUM_LINELISTER_LINES_TOTAL]
+  m_scrollPosition : ℝ
+  m_scrollSpeed : ℝ
+  field_10E8 : ℤ
+  m_lineSpacing : ℝ
+  true : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuLineLister_CMenuLineLister
+  ΔCMenuLineLister
+where
+  -- Declared member operation CMenuLineLister::CMenuLineLister(void)
+  true
+end
+
+schema CMenuLineLister_SetLinesColor_2
+  ΔCMenuLineLister
+  color? : CRGBA
+where
+  -- Declared member operation CMenuLineLister::SetLinesColor(const CRGBA &color)
+  true
+end
+
+schema CMenuLineLister_ResetNumberOfTextLines_3
+  ΔCMenuLineLister
+where
+  -- Declared member operation CMenuLineLister::ResetNumberOfTextLines(void)
+  true
+end
+
+schema CMenuLineLister_AddTextLine_4
+  ΔCMenuLineLister
+  left? : seq CHAR
+  right? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CMenuLineLister::AddTextLine(wchar *left, wchar *right)
+  true
+end
+
+schema CMenuLineLister_GetLeftLine_5
+  ΔCMenuLineLister
+  i? : ℤ
+  result! : Ref[CPlaceableShText]
+where
+  -- Declared member operation CMenuLineLister::GetLeftLine(int i)
+  true
+end
+
+schema CMenuLineLister_GetRightLine_6
+  ΔCMenuLineLister
+  i? : ℤ
+  result! : Ref[CPlaceableShText]
+where
+  -- Declared member operation CMenuLineLister::GetRightLine(int i)
+  true
+end
+
+schema CMenuLineLister_Draw_7
+  ΔCMenuLineLister
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuLineLister::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuLineLister_DrawNormal_8
+  ΔCMenuLineLister
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuLineLister::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuLineLister_DrawHighlighted_9
+  ΔCMenuLineLister
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CMenuLineLister::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuLineLister_SetAlpha_10
+  ΔCMenuLineLister
+  alpha? : ℕ
+  result! : void
+where
+  -- Declared member operation CMenuLineLister::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuLineLister_SetShadows_11
+  ΔCMenuLineLister
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Declared member operation CMenuLineLister::SetShadows(bool bDropShadows, const CRGBA &shadowColor, const CVector2D &shadowOffset)
+  true
+end
+
+schema CMenuLineLister_GoNext_12
+  ΔCMenuLineLister
+  result! : 𝔹
+where
+  -- Declared member operation CMenuLineLister::GoNext(void)
+  true
+end
+
+schema CMenuLineLister_GoPrev_13
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoPrev(void)
+  true
+end
+
+schema CMenuLineLister_GoDown_14
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoDown(void)
+  true
+end
+
+schema CMenuLineLister_GoUp_15
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoUp(void)
+  true
+end
+
+schema CMenuLineLister_GoDownStill_16
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoDownStill(void)
+  true
+end
+
+schema CMenuLineLister_GoUpStill_17
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoUpStill(void)
+  true
+end
+
+schema CMenuLineLister_GoLeft_18
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoLeft(void)
+  true
+end
+
+schema CMenuLineLister_GoRight_19
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoRight(void)
+  true
+end
+
+schema CMenuLineLister_GoLeftStill_20
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoLeftStill(void)
+  true
+end
+
+schema CMenuLineLister_GoRightStill_21
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoRightStill(void)
+  true
+end
+
+schema CMenuLineLister_GoFirst_22
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoFirst(void)
+  true
+end
+
+schema CMenuLineLister_GoLast_23
+  ΔCMenuLineLister
+  result! : bool
+where
+  -- Declared member operation CMenuLineLister::GoLast(void)
+  true
+end
+
+schema CMenuLineLister_SelectCurrentOptionUnderCursor_24
+  ΔCMenuLineLister
+  result! : void
+where
+  -- Declared member operation CMenuLineLister::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuLineLister_SetMenuSelection_25
+  ΔCMenuLineLister
+  selection? : ℤ
+  result! : void
+where
+  -- Declared member operation CMenuLineLister::SetMenuSelection(int selection)
+  true
+end
+
+schema CMenuPage
+  m_controls : seq Ref[CMenuBase]  -- bounded array [NUM_PAGE_WIDGETS]
+  m_numControls : ℤ
+  m_pCurrentControl : Ref[CMenuBase]
+  m_cursor : ℤ
+where
+  #m_pCurrentControl ≤ 1
+end
+
+schema CMenuPage_CMenuPage
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::CMenuPage(void)
+  true
+end
+
+schema CMenuPage_Initialise_2
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::Initialise(void)
+  true
+end
+
+schema CMenuPage_AddMenu_3
+  ΔCMenuPage
+  widget? : Ref[CMenuBase]
+  result! : 𝔹
+where
+  -- Declared member operation CMenuPage::AddMenu(CMenuBase *widget)
+  true
+end
+
+schema CMenuPage_IsActiveMenuTwoState_4
+  ΔCMenuPage
+  result! : 𝔹
+where
+  -- Declared member operation CMenuPage::IsActiveMenuTwoState(void)
+  true
+end
+
+schema CMenuPage_ActiveMenuTwoState_SelectNextPosition_5
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::ActiveMenuTwoState_SelectNextPosition(void)
+  true
+end
+
+schema CMenuPage_Draw_6
+  ΔCMenuPage
+  arg_1? : CRGBA
+  arg_2? : CRGBA
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CMenuPage::Draw(const CRGBA &,const CRGBA &, float, float)
+  true
+end
+
+schema CMenuPage_DrawHighlighted_7
+  ΔCMenuPage
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuPage::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
+  true
+end
+
+schema CMenuPage_DrawNormal_8
+  ΔCMenuPage
+  x? : ℝ
+  y? : ℝ
+where
+  -- Declared member operation CMenuPage::DrawNormal(float x, float y)
+  true
+end
+
+schema CMenuPage_ActivatePage_9
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::ActivatePage(void)
+  true
+end
+
+schema CMenuPage_SetAlpha_10
+  ΔCMenuPage
+  alpha? : ℕ
+where
+  -- Declared member operation CMenuPage::SetAlpha(uint8 alpha)
+  true
+end
+
+schema CMenuPage_SetShadows_11
+  ΔCMenuPage
+  arg_1? : 𝔹
+  arg_2? : CRGBA
+  arg_3? : CVector2D
+where
+  -- Declared member operation CMenuPage::SetShadows(bool, const CRGBA &, const CVector2D &)
+  true
+end
+
+schema CMenuPage_GoPrev_12
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::GoPrev(void)
+  true
+end
+
+schema CMenuPage_GoNext_13
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoNext(void)
+  true
+end
+
+schema CMenuPage_GoLeft_14
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoLeft(void)
+  true
+end
+
+schema CMenuPage_GoRight_15
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoRight(void)
+  true
+end
+
+schema CMenuPage_GoUp_16
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoUp(void)
+  true
+end
+
+schema CMenuPage_GoDown_17
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoDown(void)
+  true
+end
+
+schema CMenuPage_GoLeftStill_18
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoLeftStill(void)
+  true
+end
+
+schema CMenuPage_GoRightStill_19
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoRightStill(void)
+  true
+end
+
+schema CMenuPage_GoUpStill_20
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoUpStill(void)
+  true
+end
+
+schema CMenuPage_GoDownStill_21
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoDownStill(void)
+  true
+end
+
+schema CMenuPage_SelectDefaultCancelAction_22
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::SelectDefaultCancelAction(void)
+  true
+end
+
+schema CMenuPage_SelectCurrentOptionUnderCursor_23
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::SelectCurrentOptionUnderCursor(void)
+  true
+end
+
+schema CMenuPage_GoUpMenuOnPage_24
+  ΔCMenuPage
+  result! : void
+where
+  -- Declared member operation CMenuPage::GoUpMenuOnPage(void)
+  true
+end
+
+schema CMenuPage_GoDownMenuOnPage_25
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::GoDownMenuOnPage(void)
+  true
+end
+
+schema CMenuPage_GoLeftMenuOnPage_26
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::GoLeftMenuOnPage(void)
+  true
+end
+
+schema CMenuPage_GoRightMenuOnPage_27
+  ΔCMenuPage
+where
+  -- Declared member operation CMenuPage::GoRightMenuOnPage(void)
+  true
+end
+
+schema CMenuPageAnyMove
+  CMenuPage  -- inherits base schema
+  m_moveTab : seq FEC_MOVETAB  -- bounded array [NUM_PAGE_WIDGETS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMenuPageAnyMove_CMenuPageAnyMove
+  ΔCMenuPageAnyMove
+where
+  -- Declared member operation CMenuPageAnyMove::CMenuPageAnyMove(void)
+  true
+end
+
+schema CMenuPageAnyMove_Initialise_2
+  ΔCMenuPageAnyMove
+  result! : void
+where
+  -- Declared member operation CMenuPageAnyMove::Initialise(void)
+  true
+end
+
+schema CMenuPageAnyMove_AddMenu_3
+  ΔCMenuPageAnyMove
+  widget? : Ref[CMenuBase]
+  moveTab? : Ref[FEC_MOVETAB]
+  result! : 𝔹
+where
+  -- Declared member operation CMenuPageAnyMove::AddMenu(CMenuBase *widget, FEC_MOVETAB *moveTab)
+  true
+end
+
+schema CMenuPageAnyMove_GoUpMenuOnPage_4
+  ΔCMenuPageAnyMove
+where
+  -- Declared member operation CMenuPageAnyMove::GoUpMenuOnPage(void)
+  true
+end
+
+schema CMenuPageAnyMove_GoDownMenuOnPage_5
+  ΔCMenuPageAnyMove
+where
+  -- Declared member operation CMenuPageAnyMove::GoDownMenuOnPage(void)
+  true
+end
+
+schema CMenuPageAnyMove_GoLeftMenuOnPage_6
+  ΔCMenuPageAnyMove
+where
+  -- Declared member operation CMenuPageAnyMove::GoLeftMenuOnPage(void)
+  true
+end
+
+schema CMenuPageAnyMove_GoRightMenuOnPage_7
+  ΔCMenuPageAnyMove
+where
+  -- Declared member operation CMenuPageAnyMove::GoRightMenuOnPage(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema FrontEndControls_SetTrigger
+  ΔFrontEndControlsModuleState
+  func? : ADDRESS
+  trigger? : ADDRESS
+where
+  -- State update: pFunc' = (void (*)(void *))func
+  -- State update: pTrigger' = trigger
+  -- State update: bHasTrigger' = true
+  true
+end
+
+schema FrontEndControls_CallTrigger
+  ΔFrontEndControlsModuleState
+where
+  -- State update: bHasTrigger' = false
+  -- State update: pFunc' = ∅
+  true
+end
+
+schema FrontEndControls_CanCall
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bHasTrigger
+  true
+end
+
+schema FrontEndControls_SetPosition
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_position.x' = x
+  -- State update: m_position.y' = y
+  true
+end
+
+schema FrontEndControls_SetColor
+  ΔFrontEndControlsModuleState
+  color? : CRGBA
+where
+  -- State update: m_color' = color
+  true
+end
+
+schema FrontEndControls_GetColor
+  ΔFrontEndControlsModuleState
+  result! : CRGBA
+where
+  -- Return postcondition: result! = m_color
+  true
+end
+
+schema FrontEndControls_SetAlpha
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- State update: m_color.alpha' = alpha
+  true
+end
+
+schema FrontEndControls_SetColor_2
+  ΔFrontEndControlsModuleState
+  color? : CRGBA
+where
+  -- Invokes: m_line1.SetColor, m_line2.SetColor
+  true
+end
+
+schema FrontEndControls_SetAlpha_2
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- Invokes: m_line1.SetAlpha, m_line2.SetAlpha
+  true
+end
+
+schema FrontEndControls_GetShadowColor
+  ΔFrontEndControlsModuleState
+  result! : CRGBA
+where
+  -- Return postcondition: result! = m_shadowColor
+  true
+end
+
+schema FrontEndControls_SetShadows
+  ΔFrontEndControlsModuleState
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- State update: m_bDropShadow' = bDropShadows
+  -- State update: m_shadowColor' = shadowColor
+  -- State update: m_shadowOffset' = shadowOffset
+  true
+end
+
+schema FrontEndControls_GetSelectedColor
+  ΔFrontEndControlsModuleState
+  result! : CRGBA
+where
+  -- Return postcondition: result! = m_selectedColor
+  true
+end
+
+schema FrontEndControls_SetPosition_2
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- State update: m_bRightJustify' = bRightJustify
+  true
+end
+
+schema FrontEndControls_SetAlpha_3
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- State update: m_shadowColor.alpha' = alpha
+  -- Invokes: CPlaceableText::SetAlpha
+  true
+end
+
+schema FrontEndControls_DrawShWrap
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+  wrapX? : ℝ
+  wrapY? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SetAlpha_4
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- State update: m_shadowColor.alpha' = alpha
+  -- Invokes: CPlaceableTextTwoLines::SetAlpha
+  true
+end
+
+schema FrontEndControls_SetColors
+  ΔFrontEndControlsModuleState
+  normal? : CRGBA
+  selection? : CRGBA
+where
+  -- State update: m_selectedColor' = selection
+  -- Invokes: CPlaceableShText::SetColor
+  true
+end
+
+schema FrontEndControls_SetAlpha_5
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- State update: m_selectedColor.alpha' = alpha
+  -- Invokes: CPlaceableShText::SetAlpha
+  true
+end
+
+schema FrontEndControls_SetColors_2
+  ΔFrontEndControlsModuleState
+  normal? : CRGBA
+  selection? : CRGBA
+where
+  -- State update: m_selectedColor' = selection
+  -- Invokes: CPlaceableShTextTwoLines::SetColor
+  true
+end
+
+schema FrontEndControls_SetAlpha_6
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- State update: m_selectedColor.alpha' = alpha
+  -- Invokes: CPlaceableShTextTwoLines::SetAlpha
+  true
+end
+
+schema FrontEndControls_SetPosition_3
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_position.x' = x
+  -- State update: m_position.y' = y
+  true
+end
+
+schema FrontEndControls_SetAlpha_7
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- State update: m_color.alpha' = alpha
+  true
+end
+
+schema FrontEndControls_SetShadows_2
+  ΔFrontEndControlsModuleState
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- State update: m_bDropShadow' = bDropShadows
+  -- State update: m_shadow.m_color' = shadowColor
+  -- State update: m_shadow.m_position' = shadowOffset
+  true
+end
+
+schema FrontEndControls_SetAlpha_8
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- Invokes: m_sprite.SetAlpha, m_shadow.SetAlpha
+  true
+end
+
+schema FrontEndControls_SetPosition_4
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_position.x' = x
+  -- State update: m_position.y' = y
+  true
+end
+
+schema FrontEndControls_Draw
+  ΔFrontEndControlsModuleState
+  arg_1? : CRGBA
+  arg_2? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DrawNormal
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DrawHighlighted
+  ΔFrontEndControlsModuleState
+  arg_1? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SetAlpha_9
+  ΔFrontEndControlsModuleState
+  alpha? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SetShadows_3
+  ΔFrontEndControlsModuleState
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoNext
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoPrev
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoDown
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoUpStill
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoLeft
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRight
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeftStill
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLast
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_SelectCurrentOptionUnderCursor
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- State update: m_bActive' = true
+  true
+end
+
+schema FrontEndControls_DeactivateMenu
+  ΔFrontEndControlsModuleState
+where
+  -- State update: m_bActive' = false
+  true
+end
+
+schema FrontEndControls_GetMenuSelection
+  ΔFrontEndControlsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema FrontEndControls_SetMenuSelection
+  ΔFrontEndControlsModuleState
+  arg_1? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DrawNormal_2
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DrawHighlighted_2
+  ΔFrontEndControlsModuleState
+  arg_1? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoNext_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoPrev_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoDown_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoUpStill_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoLeft_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRight_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeftStill_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoLast_2
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_SelectCurrentOptionUnderCursor_2
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_2
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu_2
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DeactivateMenu_2
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GetMenuSelection_2
+  ΔFrontEndControlsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema FrontEndControls_SetMenuSelection_2
+  ΔFrontEndControlsModuleState
+  arg_1? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoDown_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoUpStill_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoLeft_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoRight_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoLeftStill_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_cursor' = 0
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLast_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_cursor' = m_numOptions-1
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_3
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu_3
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- State update: m_cursor' = first ? 0 : m_numOptions-1
+  true
+end
+
+schema FrontEndControls_DeactivateMenu_3
+  ΔFrontEndControlsModuleState
+where
+  -- State update: m_cursor' = -1
+  true
+end
+
+schema FrontEndControls_CMenuMultiChoiceTriggered
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_CMenuMultiChoicePictured
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_CMenuMultiChoicePicturedTriggered
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_CMenuMultiChoicePicturedTriggeredAnyMove
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoDown_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoUpStill_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeft_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoRight_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoLeftStill_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_cursor' = 0
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLast_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_cursor' = m_numOptions-1
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_4
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu_4
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- State update: m_cursor' = first ? 0 : m_numOptions-1
+  true
+end
+
+schema FrontEndControls_DeactivateMenu_4
+  ΔFrontEndControlsModuleState
+where
+  -- State update: m_cursor' = -1
+  true
+end
+
+schema FrontEndControls_CMenuMultiChoiceTwoLinesTriggered
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoNext_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoPrev_3
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoDown_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoUpStill_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoLeft_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRight_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeftStill_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLast_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_SelectCurrentOptionUnderCursor_3
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_5
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu_5
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- State update: m_bActive' = true
+  true
+end
+
+schema FrontEndControls_DeactivateMenu_5
+  ΔFrontEndControlsModuleState
+where
+  -- State update: m_bActive' = false
+  true
+end
+
+schema FrontEndControls_GetMenuSelection_3
+  ΔFrontEndControlsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_title.m_bSelected
+  true
+end
+
+schema FrontEndControls_SetMenuSelection_3
+  ΔFrontEndControlsModuleState
+  selection? : ℤ
+where
+  -- State update: m_title.m_bSelected' = selection
+  true
+end
+
+schema FrontEndControls_GoNext_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoPrev_4
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoDown_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoUpStill_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoLeft_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_value' = 0
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRight_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_value' = 1000
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeftStill_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_value' = 0
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_value' = 1000
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLast_6
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_SelectCurrentOptionUnderCursor_4
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_6
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu_6
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- State update: m_bActive' = true
+  true
+end
+
+schema FrontEndControls_DeactivateMenu_6
+  ΔFrontEndControlsModuleState
+where
+  -- State update: m_bActive' = false
+  true
+end
+
+schema FrontEndControls_GetMenuSelection_4
+  ΔFrontEndControlsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_value/10
+  true
+end
+
+schema FrontEndControls_SetMenuSelection_4
+  ΔFrontEndControlsModuleState
+  selection? : ℤ
+where
+  -- State update: m_value' = selection*10
+  true
+end
+
+schema FrontEndControls_DrawNormal_3
+  ΔFrontEndControlsModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DrawHighlighted_3
+  ΔFrontEndControlsModuleState
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoNext_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoPrev_5
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema FrontEndControls_GoDown_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoNext()
+  true
+end
+
+schema FrontEndControls_GoUp_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GoPrev()
+  true
+end
+
+schema FrontEndControls_GoDownStill_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- State update: m_scrollSpeed' = 0.0f
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoUpStill_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeft_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRight_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLeftStill_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoRightStill_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoFirst_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_GoLast_7
+  ΔFrontEndControlsModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema FrontEndControls_SelectCurrentOptionUnderCursor_5
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_7
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_ActivateMenu_7
+  ΔFrontEndControlsModuleState
+  first? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_DeactivateMenu_7
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GetMenuSelection_5
+  ΔFrontEndControlsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema FrontEndControls_SetMenuSelection_5
+  ΔFrontEndControlsModuleState
+  selection? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_CMenuPage
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontEndControls_GoPrev_6
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoPrev, m_pCurrentControl->GoLast
+  true
+end
+
+schema FrontEndControls_GoNext_6
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoNext, m_pCurrentControl->GoFirst
+  true
+end
+
+schema FrontEndControls_GoLeft_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoLeft, m_pCurrentControl->GoLast
+  true
+end
+
+schema FrontEndControls_GoRight_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoRight, m_pCurrentControl->GoFirst
+  true
+end
+
+schema FrontEndControls_GoUp_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoUp, m_pCurrentControl->GoLast
+  true
+end
+
+schema FrontEndControls_GoDown_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoDown, m_pCurrentControl->GoFirst
+  true
+end
+
+schema FrontEndControls_GoLeftStill_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoLeftStill
+  true
+end
+
+schema FrontEndControls_GoRightStill_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoRightStill
+  true
+end
+
+schema FrontEndControls_GoUpStill_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoUpStill
+  true
+end
+
+schema FrontEndControls_GoDownStill_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->GoDownStill
+  true
+end
+
+schema FrontEndControls_SelectDefaultCancelAction_8
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->SelectDefaultCancelAction
+  true
+end
+
+schema FrontEndControls_SelectCurrentOptionUnderCursor_6
+  ΔFrontEndControlsModuleState
+where
+  -- Invokes: m_pCurrentControl->SelectCurrentOptionUnderCursor
+  true
+end
+
+schema FrontEndControls_CMenuPageAnyMove
+  ΔFrontEndControlsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

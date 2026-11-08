@@ -1,0 +1,173 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ScriptDebug (control)
+-- Source File(s): control/ScriptDebug.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include stdarg.zpp  (from "stdarg.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ScriptDebug_PrintToLog
+  ΔScriptDebugModuleState
+  format? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ScriptDebug_FlushLog
+  ΔScriptDebugModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ScriptDebug_GetPointerToScriptVariableForDebug
+  ΔScriptDebugModuleState
+  pScript? : Ref[CRunningScript]
+  pIp? : ℙ ℕ
+  buf? : seq CHAR
+  result! : ℙ ℤ
+where
+  -- State update: type' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_in_block' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_id' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: size' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_in_block' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_id' = CTheScripts::Read1ByteFromScript(pIp)
+  -- Invokes: CTheScripts::Read1ByteFromScript
+  true
+end
+
+schema CRunningScript_CollectParameterForDebug
+  ΔCRunningScript
+  buf? : seq CHAR
+  var? : 𝔹
+  result! : ℤ
+where
+  -- State update: var' = false
+  -- State update: varIndex' = CTheScripts::Read2BytesFromScript(&m_nIp)
+  -- State update: var' = true
+  -- State update: varIndex' = CTheScripts::Read2BytesFromScript(&m_nIp)
+  -- State update: var' = true
+  -- State update: tmp' = CTheScripts::ReadFloatFromScript(&m_nIp)
+  -- Return postcondition: result! = CTheScripts::Read4BytesFromScript(&m_nIp)
+  -- Return postcondition: result! = *((int32*)&CTheScripts::ScriptSpace[varIndex])
+  -- Return postcondition: result! = m_anLocalVariables[varIndex]
+  -- Invokes: CTheScripts::Read1ByteFromScript, CTheScripts::Read4BytesFromScript, CTheScripts::Read2BytesFromScript, CTheScripts::GetSizeOfVariableSpace, CTheScripts::ReadFloatFromScript
+  true
+end
+
+schema CRunningScript_GetStoredParameterForDebug
+  ΔCRunningScript
+  buf? : seq CHAR
+where
+  -- State update: varIndex' = CTheScripts::Read2BytesFromScript(&m_nIp)
+  -- State update: varIndex' = CTheScripts::Read2BytesFromScript(&m_nIp)
+  -- Invokes: CTheScripts::Read1ByteFromScript, CTheScripts::Read2BytesFromScript
+  true
+end
+
+schema CTheScripts_LogAfterScriptInitializing
+  ΔCTheScripts
+where
+  -- State update: dbg_log' = fopen("SCRDBG.LOG", "w")
+  -- State update: init_msg' = "Starting debug script log\n\n"
+  -- Invokes: CFileMgr::SetDirMyDocuments, CFileMgr::SetDir
+  true
+end
+
+schema CTheScripts_LogBeforeScriptProcessing
+  ΔCTheScripts
+where
+  -- State update: dbg_log' = fopen("SCRDBG.LOG", "w")
+  -- State update: init_msg' = "Starting debug script log\n\n"
+  -- Invokes: CFileMgr::SetDirMyDocuments, CFileMgr::SetDir, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CTheScripts_LogAfterScriptProcessing
+  ΔCTheScripts
+where
+  -- State update: dbg_log' = ∅
+  true
+end
+
+schema CRunningScript_LogOnStartProcessing
+  ΔCRunningScript
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRunningScript_LogBeforeProcessingCommand
+  ΔCRunningScript
+  command? : ℤ
+where
+  -- State update: storedIp' = m_nIp
+  -- State update: var' = false
+  -- State update: nInputParams' = CTheScripts::Read1ByteFromScript(&m_nIp)
+  -- State update: nOutputParameters' = CTheScripts::Read1ByteFromScript(&m_nIp)
+  -- State update: nLocalsOffset' = CTheScripts::Read1ByteFromScript(&m_nIp)
+  -- State update: value' = CollectParameterForDebug(commandInfo, var)
+  -- Invokes: CTheScripts::Read1ByteFromScript
+  true
+end
+
+schema CRunningScript_LogAfterProcessingCommand
+  ΔCRunningScript
+  command? : ℤ
+where
+  -- State update: t' = m_nIp
+  -- State update: m_nIp' = storedIp
+  -- State update: storedIp' = t
+  -- State update: m_nIp' = storedIp
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema CTheScripts_SwitchToMission
+  ΔCTheScripts
+  mission? : ℤ
+where
+  -- State update: pScript' = CTheScripts::pActiveScripts
+  -- State update: pScript.m_nIp' = pScript.m_anStack[pScript.m_nStackPointer]
+  -- State update: pScript.m_nWakeTime' = 0
+  -- State update: pScript.m_bDeatharrestExecuted' = true
+  -- State update: missionRetryScriptIndex' = mission
+  -- State update: offset' = CTheScripts::MultiScriptArray[mission] + 8
+  -- Invokes: pScript->GetNext, pScript->ProcessOneCommand, CMessages::ClearMessages, CTheScripts::MissionSupportsMissionReplay, CTimer::Suspend
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ScriptDebugModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 4692
+end

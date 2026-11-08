@@ -1,0 +1,872 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Vehicle (vehicles)
+-- Source File(s): vehicles/Vehicle.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Population.zpp  (from "Population.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include World.zpp  (from "World.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE : seq CHAR  -- #define DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE (MYRAND_MAX * 35 / 100)
+DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE : seq CHAR  -- #define DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE (MYRAND_MAX * 70 / 100)
+DAMAGE_HEALTH_TO_FLEE_ALWAYS : ℝ  -- #define DAMAGE_HEALTH_TO_FLEE_ALWAYS (200.0f)
+DAMAGE_HEALTH_TO_CATCH_FIRE : ℝ  -- #define DAMAGE_HEALTH_TO_CATCH_FIRE (250.0f)
+GLARE_MIN_DIST : ℝ  -- #define GLARE_MIN_DIST (13.0f)
+GLARE_FULL_DIST : ℝ  -- #define GLARE_FULL_DIST (30.0f)
+GLARE_MIN_ANGLE : ℝ  -- #define GLARE_MIN_ANGLE (0.99f)
+GLARE_FULL_ANGLE : ℝ  -- #define GLARE_FULL_ANGLE (0.995f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CVehicle_CVehicle
+  ΔCVehicle
+  CreatedBy? : ℕ
+where
+  -- State update: m_fGasPedal' = 0.0f
+  -- State update: m_fBrakePedal' = 0.0f
+  -- State update: m_fWheelSpin' = 0.0f
+  -- State update: bRewardVehicle' = false
+  -- State update: m_vehLCS_29E' = 0
+  -- State update: m_vehLCS_29C' = 0
+  -- Invokes: CCarCtrl::UpdateCarCount, CGeneral::GetRandomNumberInRange, DMAudio.CreateEntity, DMAudio.SetEntityStatus, CGeneral::GetRandomNumber
+  true
+end
+
+schema CVehicle_CVehicle_2
+  ΔCVehicle
+where
+  -- State update: m_nAlarmState' = 0
+  -- State update: m_audioEntityId' = -5
+  -- State update: bIsAmbulanceOnDuty' = false
+  -- State update: bIsFireTruckOnDuty' = false
+  -- Invokes: DMAudio.DestroyEntity, CRadar::ClearBlipForEntity, CPools::GetVehiclePool, pDriver->FlagToDestroyWhenNextProcessed, m_pCarFire->Extinguish
+  true
+end
+
+schema CVehicle_SetModelIndex
+  ΔCVehicle
+  id? : ℕ
+where
+  -- Invokes: CEntity::SetModelIndex, CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors
+  true
+end
+
+schema CVehicle_SetupLighting
+  ΔCVehicle
+where
+  -- State update: coors' = GetPosition()
+  -- State update: lighting' = CPointLights::GenerateLightsAffectingObject(&coors)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPointLights::GenerateLightsAffectingObject
+  true
+end
+
+schema CVehicle_RemoveLighting
+  ΔCVehicle
+  reset? : 𝔹
+where
+  -- Invokes: CRenderer::RemoveVehiclePedLights
+  true
+end
+
+schema CVehicle_IsClearToDriveAway
+  ΔCVehicle
+where
+  -- State update: length' = GetColModel().boundingBox.GetSize().y
+  -- State update: ent' = ∅
+  -- State update: front' = GetForward() * (length*0.5f + 3.0f)
+  -- Invokes: boundingBox.GetSize, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CVehicle_GetHeightAboveRoad
+  ΔCVehicle
+where
+  -- Return postcondition: result! = -1.0f * GetColModel()->boundingBox.min.z
+  true
+end
+
+schema CVehicle_FlyingControl
+  ΔCVehicle
+  flightModel? : eFlightModel
+where
+  -- State update: moveSpeed' = m_vecMoveSpeed.Magnitude()
+  -- State update: sideSpeed' = DotProduct(m_vecMoveSpeed, GetRight())
+  -- State update: sideImpulse' = -1.0f * sideSpeed / moveSpeed
+  -- State update: fwdSpeed' = DotProduct(m_vecMoveSpeed, GetForward())
+  -- State update: magic' = m_vecMoveSpeed.MagnitudeSqr() * sq(fwdSpeed)
+  -- State update: moveSpeed' = m_vecMoveSpeed.Magnitude()
+  -- Invokes: m_vecMoveSpeed.Magnitude, m_vecMoveSpeed.MagnitudeSqr, CTimer::GetTimeStep, CPad::GetPad, m_vecTurnSpeed.MagnitudeSqr
+  true
+end
+
+schema CVehicle_DoBladeCollision
+  ΔCVehicle
+  pos? : CVector
+  matrix? : CMatrix
+  rotorType? : ℤ
+  radius? : ℝ
+  damageMult? : ℝ
+where
+  -- State update: min.z' = -ROTOR_SEMI_THICKNESS
+  -- State update: max.z' = ROTOR_SEMI_THICKNESS
+  -- State update: min.y' = -ROTOR_SEMI_THICKNESS
+  -- State update: max.y' = ROTOR_SEMI_THICKNESS
+  -- State update: min.x' = -ROTOR_SEMI_THICKNESS
+  -- State update: max.x' = ROTOR_SEMI_THICKNESS
+  -- Return postcondition: result! = hadCollision
+  -- Invokes: boundingBox.Set, boundingSphere.Set, rotorColSphere.Set, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY
+  true
+end
+
+schema CVehicle_BladeColSectorList
+  ΔCVehicle
+  list? : CPtrList
+  rotorColModel? : CColModel
+  matrix? : CMatrix
+  rotorType? : ℤ
+  damageMult? : ℝ
+where
+  -- State update: turnSpeed.z' = -ROTOR_TURN_SPEED
+  -- State update: axis' = -matrix.GetUp()
+  -- State update: turnSpeed.z' = ROTOR_TURN_SPEED
+  -- State update: axis' = matrix.GetUp()
+  -- State update: turnSpeed.y' = -ROTOR_TURN_SPEED
+  -- State update: axis' = -matrix.GetForward()
+  -- Return postcondition: result! = false
+  -- Invokes: matrix.GetUp, matrix.GetForward, matrix.GetRight, CWorld::GetCurrentScanCode, entity->IsPed
+  true
+end
+
+schema CVehicle_ProcessWheel
+  ΔCVehicle
+  wheelFwd? : CVector
+  wheelRight? : CVector
+  wheelContactSpeed? : CVector
+  wheelContactPoint? : CVector
+  wheelsOnGround? : ℤ
+  thrust? : ℝ
+  brake? : ℝ
+  adhesion? : ℝ
+  wheelId? : ℤ
+  wheelSpeed? : ℙ ℝ
+  wheelState? : Ref[tWheelState]
+  wheelStatus? : ℕ
+where
+  -- State update: bAlreadySkidding' = false
+  -- State update: bAlreadySkidding' = false
+  -- State update: fwd' = 0.0f
+  -- State update: right' = 0.0f
+  -- State update: thrust' = 0.0f
+  -- State update: contactSpeedFwd' = DotProduct(wheelContactSpeed, wheelFwd)
+  -- Invokes: CTimer::GetTimeStep, CGeneral::GetRandomNumberInRange, pHandling->GetMass, CTimer::GetTimeStepFix, totalSpeed.Magnitude
+  true
+end
+
+schema CVehicle_ProcessBikeWheel
+  ΔCVehicle
+  wheelFwd? : CVector
+  wheelRight? : CVector
+  wheelContactSpeed? : CVector
+  wheelContactPoint? : CVector
+  wheelsOnGround? : ℤ
+  thrust? : ℝ
+  brake? : ℝ
+  adhesion? : ℝ
+  destabTraction? : ℝ
+  wheelId? : ℤ
+  wheelSpeed? : ℙ ℝ
+  wheelState? : Ref[tWheelState]
+  special? : eBikeWheelSpecial
+  wheelStatus? : ℕ
+where
+  -- State update: bAlreadySkidding' = false
+  -- State update: bAlreadySkidding' = false
+  -- State update: fwd' = 0.0f
+  -- State update: right' = 0.0f
+  -- State update: thrust' = 0.0f
+  -- State update: bReversing' = thrust < 0.0f
+  -- Invokes: CTimer::GetTimeStep, CGeneral::GetRandomNumberInRange, CTimer::GetTimeStepFix, direction.Magnitude, direction.Normalise
+  true
+end
+
+schema CVehicle_ProcessWheelRotation
+  ΔCVehicle
+  state? : tWheelState
+  fwd? : CVector
+  speed? : CVector
+  radius? : ℝ
+where
+  -- State update: angularVelocity' = -1.1f
+  -- State update: angularVelocity' = 0.0f
+  -- State update: angularVelocity' = -DotProduct(fwd, speed) / radius
+  -- Return postcondition: result! = angularVelocity * CTimer::GetTimeStep()
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CVehicle_FindTyreNearestPoint
+  ΔCVehicle
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: pos' = CVector(x - GetPosition().x, y - GetPosition().y, 0.0f)
+  -- State update: fwd' = DotProduct(GetForward(), pos)
+  -- State update: right' = DotProduct(GetRight(), pos)
+  -- State update: piece' = fwd > 0.0f ? CAR_PIECE_WHEEL_LF : CAR_PIECE_WHEEL_LR
+  -- Return postcondition: result! = piece - CAR_PIECE_WHEEL_LF
+  true
+end
+
+schema CVehicle_PedsShouldScreamOnDisembarking
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVehicle_OccupantsReactToDamage
+  ΔCVehicle
+  damagedBy? : Ref[CEntity]
+where
+  -- State update: time' = 200
+  -- State update: m_objectiveTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- State update: AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_PLOUGH_THROUGH
+  -- State update: pDriver.bFleeAfterExitingCar' = true
+  -- State update: time' = 200
+  -- State update: bFleeAfterExitingCar' = true
+  -- Invokes: pDriver->SetObjective, CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange, pDriver->Say
+  true
+end
+
+schema CVehicle_InflictDamage
+  ΔCVehicle
+  damagedBy? : Ref[CEntity]
+  weaponType? : eWeaponType
+  damage? : ℝ
+  pos? : CVector
+where
+  -- State update: bFrightensDriver' = false
+  -- State update: bFrightensDriver' = true
+  -- State update: bFrightensDriver' = true
+  -- State update: accuracy' = 0
+  -- State update: accuracy' = 10
+  -- State update: accuracy' = 64
+  -- Invokes: CStats::GetPercentageProgress, CGeneral::GetRandomNumberInRange, damagedBy->IsPed, TheCamera.Using1stPersonWeaponMode, CGeneral::GetRandomNumber
+  true
+end
+
+schema CVehicle_DoFixedMachineGuns
+  ΔCVehicle
+where
+  -- State update: dx' = GetForward().x
+  -- State update: dy' = GetForward().y
+  -- State update: len' = Sqrt(SQR(dx) + SQR(dy))
+  -- State update: len' = 0.1f
+  -- State update: m_nGunFiringTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: source' = GetMatrix() * CVector(2.0f, 2.5f, 1.0f)
+  -- Invokes: CPad::GetPad, CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumber, CWeapon::DoTankDoomAiming, DMAudio.PlayOneShot
+  true
+end
+
+schema CVehicle_FireFixedMachineGuns
+  ΔCVehicle
+where
+  -- State update: dx' = GetForward().x
+  -- State update: dy' = GetForward().y
+  -- State update: len' = Sqrt(SQR(dx) + SQR(dy))
+  -- State update: len' = 0.1f
+  -- State update: m_nGunFiringTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: source' = GetMatrix() * CVector(0.95f, 9.3f, 0.85f)
+  -- Invokes: CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumber, CWeapon::DoTankDoomAiming, DMAudio.PlayOneShot
+  true
+end
+
+schema CVehicle_ExtinguishCarFire
+  ΔCVehicle
+where
+  -- State update: m_fHealth' = Max(m_fHealth, 300.0f)
+  -- State update: car' = (CAutomobile*)this
+  -- State update: car.m_fFireBlowUpTimer' = 0.0f
+  -- Invokes: m_pCarFire->Extinguish, Damage.GetEngineStatus, Damage.SetEngineStatus
+  true
+end
+
+schema CVehicle_ShufflePassengersToMakeSpace
+  ΔCVehicle
+where
+  -- State update: m_vehDoor' = CAR_DOOR_RR
+  -- State update: m_vehDoor' = CAR_DOOR_RF
+  -- State update: m_vehDoor' = CAR_DOOR_LR
+  -- State update: m_vehDoor' = CAR_DOOR_RF
+  -- State update: m_vehDoor' = CAR_DOOR_LR
+  -- State update: m_vehDoor' = CAR_DOOR_RR
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVehicle_MakeNonDraggedPedsLeaveVehicle
+  ΔCVehicle
+  ped1? : Ref[CPed]
+  ped2? : Ref[CPed]
+  player? : Ref[CPlayerPed]
+  cop? : Ref[CCopPed]
+where
+  -- State update: player' = ∅
+  -- State update: cop' = ∅
+  -- State update: player' = (CPlayerPed*)ped1
+  -- State update: cop' = (CCopPed*)ped2
+  -- State update: numPeds' = 0
+  -- State update: numPeds2' = 0
+  -- Invokes: ped1->IsPlayer, m_pWanted->GetWantedLevel, CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange, CGeneral::GetRandomTrueFalse
+  true
+end
+
+schema CVehicle_ProcessDelayedExplosion
+  ΔCVehicle
+where
+  -- State update: tick' = CTimer::GetTimeStep()/60.0f*1000.0f
+  -- State update: prev' = m_nBombTimer
+  -- State update: m_nBombTimer' = 0
+  -- Invokes: CTimer::GetTimeStep, DMAudio.PlayOneShot
+  true
+end
+
+schema CVehicle_IsLawEnforcementVehicle
+  ΔCVehicle
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CVehicle_UsesSiren
+  ΔCVehicle
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CVehicle_IsVehicleNormal
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVehicle_CarHasRoof
+  ΔCVehicle
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = m_aExtras[0] == 0 || m_aExtras[1] == 0
+  true
+end
+
+schema CVehicle_IsUpsideDown
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVehicle_IsOnItsSide
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVehicle_CanBeDeleted
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: pDriver->GetPedState
+  true
+end
+
+schema CVehicle_CanPedOpenLocks
+  ΔCVehicle
+  ped? : Ref[CPed]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVehicle_CanDoorsBeDamaged
+  ΔCVehicle
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVehicle_CanPedEnterCar
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: m_vecMoveSpeed.MagnitudeSqr, m_vecTurnSpeed.MagnitudeSqr
+  true
+end
+
+schema CVehicle_CanPedExitCar
+  ΔCVehicle
+  jumpExit? : 𝔹
+where
+  -- State update: up' = GetUp()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: m_vecMoveSpeed.MagnitudeSqr
+  true
+end
+
+schema CVehicle_CanPedJumpOutCar
+  ΔCVehicle
+where
+  -- State update: speed' = m_vecMoveSpeed.MagnitudeSqr()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = speed < 0.1f || speed > 0.5f ? false : true
+  -- Invokes: m_vecMoveSpeed.MagnitudeSqr
+  true
+end
+
+schema CVehicle_CanPedJumpOffBike
+  ΔCVehicle
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = m_vecMoveSpeed.MagnitudeSqr() < 0.07f ? false : true
+  -- Invokes: m_vecMoveSpeed.MagnitudeSqr
+  true
+end
+
+schema CVehicle_ChangeLawEnforcerState
+  ΔCVehicle
+  enable? : ℕ
+where
+  -- State update: bIsLawEnforcer' = true
+  -- State update: bIsLawEnforcer' = false
+  true
+end
+
+schema CVehicle_SetUpDriver
+  ΔCVehicle
+where
+  -- State update: pDriver' = CPopulation::AddPedInCar(this, true)
+  -- State update: pDriver.m_pMyVehicle' = this
+  -- State update: pDriver.bInVehicle' = true
+  -- State update: pDriver.bRenderPedInCar' = false
+  -- Return postcondition: result! = pDriver
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pDriver
+  -- Invokes: CPopulation::AddPedInCar, m_pMyVehicle->RegisterReference, pDriver->SetPedState
+  true
+end
+
+schema CVehicle_SetupPassenger
+  ΔCVehicle
+  n? : ℤ
+where
+  -- State update: passenger' = CPopulation::AddPedInCar(this, false)
+  -- State update: passenger.m_pMyVehicle' = this
+  -- State update: passenger.bInVehicle' = true
+  -- State update: bRenderPedInCar' = false
+  -- Return postcondition: result! = pPassengers[n]
+  -- Return postcondition: result! = pPassengers[n]
+  -- Invokes: CPopulation::AddPedInCar, m_pMyVehicle->RegisterReference, passenger->SetPedState, passenger->GetModelIndex, CPopulation::RemovePed
+  true
+end
+
+schema CVehicle_SetDriver
+  ΔCVehicle
+  driver? : Ref[CPed]
+where
+  -- State update: m_vehLCS_258' = false
+  -- State update: bCraneMessageDone' = false
+  -- State update: pDriver' = driver
+  -- State update: bFreebies' = false
+  -- State update: bFreebies' = true
+  -- State update: driver.m_fArmour' = Max(driver.m_fArmour, CWorld::Players[0].m_nMaxArmour)
+  -- Invokes: pDriver->RegisterReference, CStreaming::RequestModel, driver->IsPlayer, driver->GetPosition
+  true
+end
+
+schema CVehicle_AddPassenger
+  ΔCVehicle
+  passenger? : Ref[CPed]
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: passenger->GetPosition
+  true
+end
+
+schema CVehicle_AddPassenger_2
+  ΔCVehicle
+  passenger? : Ref[CPed]
+  n? : ℕ
+where
+  -- Return postcondition: result! = AddPassenger(passenger)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: passenger->GetPosition
+  true
+end
+
+schema CVehicle_RemoveDriver
+  ΔCVehicle
+where
+  -- State update: m_vehLCS_259' = -1
+  -- State update: bFreebies' = false
+  -- State update: pDriver' = ∅
+  -- Invokes: CStreaming::HasModelLoaded, pDriver->GiveWeapon, pDriver->GrantAmmo, CStreaming::SetModelIsDeletable
+  true
+end
+
+schema CVehicle_RemovePassenger
+  ΔCVehicle
+  p? : Ref[CPed]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVehicle_IsDriver
+  ΔCVehicle
+  ped? : Ref[CPed]
+where
+  -- Return postcondition: result! = ped && ped == pDriver
+  true
+end
+
+schema CVehicle_IsDriver_2
+  ΔCVehicle
+  model? : ℤ
+where
+  -- Return postcondition: result! = pDriver && pDriver->GetModelIndex() == model
+  -- Invokes: pDriver->GetModelIndex
+  true
+end
+
+schema CVehicle_IsPassenger
+  ΔCVehicle
+  ped? : Ref[CPed]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CVehicle_IsPassenger_2
+  ΔCVehicle
+  model? : ℤ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CVehicle_UpdatePassengerList
+  ΔCVehicle
+where
+  -- State update: hasPassenger' = false
+  -- State update: hasPassenger' = true
+  -- State update: m_nNumPassengers' = 0
+  true
+end
+
+schema CVehicle_AreThereAnyPassengers
+  ΔCVehicle
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CVehicle_ProcessCarAlarm
+  ΔCVehicle
+where
+  -- State update: step' = CTimer::GetTimeStepInMilliseconds()
+  -- State update: m_nAlarmState' = 0
+  -- State update: m_nCarHornTimer' = 0
+  -- Invokes: CTimer::GetTimeStepInMilliseconds
+  true
+end
+
+schema CVehicle_IsSphereTouchingVehicle
+  ΔCVehicle
+  sx? : ℝ
+  sy? : ℝ
+  sz? : ℝ
+  radius? : ℝ
+where
+  -- State update: sph' = CVector(sx, sy, sz) - GetPosition()
+  -- State update: colmodel' = GetColModel()
+  -- State update: x' = DotProduct(sph, GetRight())
+  -- State update: y' = DotProduct(sph, GetForward())
+  -- State update: z' = DotProduct(sph, GetUp())
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Vehicle_SetCompAlphaCB
+  ΔVehicleModuleState
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: alpha' = (uint32)(uintptr)data
+  -- State update: col' = (RwRGBA*)RpMaterialGetColor(material)
+  -- State update: col.alpha' = alpha
+  -- Return postcondition: result! = material
+  true
+end
+
+schema CVehicle_SetComponentAtomicAlpha
+  ΔCVehicle
+  atomic? : Ref[RpAtomic]
+  alpha? : ℤ
+where
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  true
+end
+
+schema CVehicle_UpdateClumpAlpha
+  ΔCVehicle
+where
+  -- State update: clumpAlpha' = CVisibilityPlugins::GetClumpAlpha((RpClump*)m_rwObject)
+  -- State update: clumpAlpha' = 0
+  -- State update: clumpAlpha' = 255
+  -- Invokes: CVisibilityPlugins::GetClumpAlpha, CVisibilityPlugins::SetClumpAlpha
+  true
+end
+
+schema CVehicle_HeliDustGenerate
+  ΔCVehicle
+  heli? : Ref[CEntity]
+  radius? : ℝ
+  ground? : ℝ
+  rnd? : ℤ
+where
+  -- State update: surface' = SURFACE_TARMAC
+  -- State update: frm' = CTimer::GetFrameCounter() & 7
+  -- State update: testLowZ' = ground - 10.0f
+  -- State update: dustSize' = 0.0f
+  -- State update: baseSize' = 1.0f
+  -- State update: offset' = 1.0f
+  -- Invokes: CTimer::GetFrameCounter, heli->GetModelIndex, heli->GetPosition, heli->IsVehicle, heli->GetUp
+  true
+end
+
+schema CVehicle_KillPedsInVehicle
+  ΔCVehicle
+where
+  -- Invokes: CDarkel::RegisterKillByPlayer, pDriver->GetPedState, pDriver->SetDead, pDriver->IsPlayer, pDriver->FlagToDestroyWhenNextProcessed
+  true
+end
+
+schema Vehicle_DestroyVehicleAndDriverAndPassengers
+  ΔVehicleModuleState
+  pVehicle? : Ref[CVehicle]
+where
+  -- Invokes: CDarkel::RegisterKillByPlayer, pDriver->FlagToDestroyWhenNextProcessed, CWorld::Remove
+  true
+end
+
+schema CVehicle_Save
+  ΔCVehicle
+  buf? : ℙ ℕ
+where
+  -- State update: flags' = 0
+  -- Invokes: AutoPilot.Save
+  true
+end
+
+schema CVehicle_Load
+  ΔCVehicle
+  buf? : ℙ ℕ
+where
+  -- State update: m_matrix' = tmp
+  -- State update: bIsLawEnforcer' = !!(flags & BIT(0))
+  -- State update: bIsLocked' = !!(flags & BIT(3))
+  -- State update: bEngineOn' = !!(flags & BIT(4))
+  -- State update: bIsHandbrakeOn' = !!(flags & BIT(5))
+  -- State update: bLightsOn' = !!(flags & BIT(6))
+  -- Invokes: tmp.GetRight, tmp.GetForward, tmp.GetUp, tmp.GetPosition, AutoPilot.Load
+  true
+end
+
+schema CVehicle_GetVehicleAppearance
+  ΔCVehicle
+where
+  -- State update: flags' = pHandling.Flags & 0xF0000
+  -- Return postcondition: result! = VEHICLE_APPEARANCE_CAR
+  -- Return postcondition: result! = VEHICLE_APPEARANCE_BIKE
+  -- Return postcondition: result! = VEHICLE_APPEARANCE_HELI
+  true
+end
+
+schema Vehicle_IsVehiclePointerValid
+  ΔVehicleModuleState
+  pVehicle? : Ref[CVehicle]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CPools::GetVehiclePool
+  true
+end
+
+schema CVehicle_ActivateBomb
+  ΔCVehicle
+where
+  -- State update: m_bombType' = CARBOMB_TIMEDACTIVE
+  -- State update: m_nBombTimer' = 7000
+  -- State update: m_pBlowUpEntity' = FindPlayerPed()
+  -- State update: m_bombType' = CARBOMB_ONIGNITIONACTIVE
+  -- Invokes: CGarages::TriggerMessage, DMAudio.PlayOneShot
+  true
+end
+
+schema CVehicle_ActivateBombWhenEntered
+  ΔCVehicle
+where
+  -- State update: m_nBombTimer' = 1000
+  -- State update: m_pBlowUpEntity' = m_pBombRigger
+  -- State update: bDriverLastFrame' = true
+  -- State update: bDriverLastFrame' = false
+  -- Invokes: m_pBlowUpEntity->RegisterReference, DMAudio.PlayOneShot
+  true
+end
+
+schema CVehicle_KillPedsInVehicle_2
+  ΔCVehicle
+where
+  -- Invokes: CDarkel::RegisterKillByPlayer, pDriver->GetPedState, pDriver->SetDead, pDriver->IsPlayer, pDriver->FlagToDestroyWhenNextProcessed
+  true
+end
+
+schema CVehicle_ProcessBikeWheel_2
+  ΔCVehicle
+  wheelFwd? : CVector
+  wheelRight? : CVector
+  wheelContactSpeed? : CVector
+  wheelContactPoint? : CVector
+  wheelsOnGround? : ℤ
+  thrust? : ℝ
+  brake? : ℝ
+  adhesion? : ℝ
+  wheelId? : ℤ
+  wheelSpeed? : ℙ ℝ
+  wheelState? : Ref[tWheelState]
+  special? : eBikeWheelSpecial
+  wheelStatus? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVehicle_InflictDamage_2
+  ΔCVehicle
+  damagedBy? : Ref[CEntity]
+  weaponType? : eWeaponType
+  damage? : ℝ
+where
+  -- State update: bFrightensDriver' = false
+  -- State update: bFrightensDriver' = true
+  -- State update: bFrightensDriver' = true
+  -- State update: AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_AVOID_CARS
+  -- State update: m_nLastWeaponDamage' = weaponType
+  -- State update: oldHealth' = m_fHealth
+  -- Invokes: CCarCtrl::SwitchVehicleToRealPhysics, pDriver->SetObjective, Damage.SetEngineStatus, damagedBy->RegisterReference, CGeneral::GetRandomNumber
+  true
+end
+
+schema CVehicle_UsesSiren_2
+  ΔCVehicle
+  id? : ℕ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CVehicle_CanPedExitCar_2
+  ΔCVehicle
+where
+  -- State update: up' = GetUp()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: m_vecMoveSpeed.MagnitudeSqr
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema VehicleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3157
+end

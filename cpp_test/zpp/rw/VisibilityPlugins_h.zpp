@@ -1,0 +1,340 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VisibilityPlugins (rw)
+-- Source File(s): rw/VisibilityPlugins.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include templates.zpp  (from "templates.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CVisibilityPlugins
+  atomic : Ref[RpAtomic]
+  sort : ℝ
+  m_alphaList : CLinkList_AlphaObjectInfo
+  m_alphaEntityList : CLinkList_AlphaObjectInfo
+  ms_pCameraPosn : Ref[RwV3d]
+  ms_cullCompsDist : ℝ
+  ms_vehicleLod0Dist : ℝ
+  ms_vehicleLod1Dist : ℝ
+  ms_vehicleFadeDist : ℝ
+  ms_bigVehicleLod0Dist : ℝ
+  ms_bigVehicleLod1Dist : ℝ
+  ms_pedLodDist : ℝ
+  ms_pedFadeDist : ℝ
+  flags : ℕ
+  ms_atomicPluginOffset : ℤ
+  ms_framePluginOffset : ℤ
+  alpha : ℤ
+  ms_clumpPluginOffset : ℤ
+  m_alphaBoatAtomicList : CLinkList_AlphaObjectInfo
+  m_alphaUnderwaterEntityList : CLinkList_AlphaObjectInfo
+  ms_pedLod1Dist : ℝ
+  modelInfo : Ref[union_AtomicExt_CSimpleModelInfo]
+  ms_pedLod0Dist : ℝ
+where
+  #atomic ≤ 1
+  #ms_pCameraPosn ≤ 1
+  flags ≥ 0
+  #modelInfo ≤ 1
+end
+
+schema CVisibilityPlugins_Initialise
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::Initialise(void)
+  true
+end
+
+schema CVisibilityPlugins_Shutdown_2
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::Shutdown(void)
+  true
+end
+
+schema CVisibilityPlugins_InitAlphaEntityList_3
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::InitAlphaEntityList(void)
+  true
+end
+
+schema CVisibilityPlugins_InsertEntityIntoSortedList_4
+  ΔCVisibilityPlugins
+  e? : Ref[CEntity]
+  dist? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CVisibilityPlugins::InsertEntityIntoSortedList(CEntity *e, float dist)
+  true
+end
+
+schema CVisibilityPlugins_InitAlphaAtomicList_5
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::InitAlphaAtomicList(void)
+  true
+end
+
+schema CVisibilityPlugins_InsertAtomicIntoSortedList_6
+  ΔCVisibilityPlugins
+  a? : Ref[RpAtomic]
+  dist? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CVisibilityPlugins::InsertAtomicIntoSortedList(RpAtomic *a, float dist)
+  true
+end
+
+schema CVisibilityPlugins_SetRenderWareCamera_7
+  ΔCVisibilityPlugins
+  camera? : Ref[RwCamera]
+where
+  -- Declared member operation CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
+  true
+end
+
+schema CVisibilityPlugins_SetupVehicleVariables_8
+  ΔCVisibilityPlugins
+  vehicle? : Ref[RpClump]
+where
+  -- Declared member operation CVisibilityPlugins::SetupVehicleVariables(RpClump *vehicle)
+  true
+end
+
+schema CVisibilityPlugins_RenderWheelAtomicCB_9
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderWheelAtomicCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderObjNormalAtomic_10
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderAlphaAtomic_11
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  alpha? : ℤ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, int alpha)
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingAtomic_12
+  ΔCVisibilityPlugins
+  atm? : Ref[RpAtomic]
+  dist? : ℝ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atm, float dist)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_13
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailAlphaCB_14
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_BigVehicle_15
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailAlphaCB_BigVehicle_16
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_Boat_17
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB_Boat(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_Boat_Far_18
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB_Boat_Far(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat_19
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLoDetailCB_Boat(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat_Far_20
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLoDetailCB_Boat_Far(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLowDetailCB_BigVehicle_21
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLowDetailCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLowDetailAlphaCB_BigVehicle_22
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLowDetailAlphaCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleReallyLowDetailCB_23
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleReallyLowDetailCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleReallyLowDetailCB_BigVehicle_24
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderTrainHiDetailCB_25
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderTrainHiDetailAlphaCB_26
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleRotorAlphaCB_27
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleRotorAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleTailRotorAlphaCB_28
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleTailRotorAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderPedCB_29
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderAtomicList_30
+  ΔCVisibilityPlugins
+  list? : CLinkList_AlphaObjectInfo
+where
+  -- Declared member operation CVisibilityPlugins::RenderAtomicList(CLinkList<AlphaObjectInfo> &list)
+  true
+end
+
+schema AlphaObjectInfo
+  atomic : Ref[RpAtomic]
+  sort : ℝ
+where
+  #atomic ≤ 1
+end
+
+schema AtomicExt
+  modelId : ℤ
+  flags : ℕ
+where
+  flags ≥ 0
+end
+
+schema FrameExt
+  id : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema ClumpExt
+  visibilityCB : ClumpVisibilityCB
+  alpha : ℤ
+where
+  instance_addr ∈ ADDRESS
+end

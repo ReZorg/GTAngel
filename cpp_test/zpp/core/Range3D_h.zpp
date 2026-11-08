@@ -1,0 +1,55 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Range3D (core)
+-- Source File(s): core/Range3D.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRange3D
+  max : CVector_min
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRange3D_CRange3D
+  ΔCRange3D
+  _min? : CVector
+  _max? : CVector
+where
+  -- Declared member operation CRange3D::CRange3D(CVector _min, CVector _max)
+  true
+end
+
+schema CRange3D_IsInRange_2
+  ΔCRange3D
+  vec? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CRange3D::IsInRange(CVector vec)
+  true
+end
+
+schema CRange3D_DebugShowRange_3
+  ΔCRange3D
+  arg_1? : ℝ
+  arg_2? : ℤ
+where
+  -- Declared member operation CRange3D::DebugShowRange(float, int)
+  true
+end
+
+schema CRange3D_GetRandomPointInRange_4
+  ΔCRange3D
+  result! : CVector
+where
+  -- Declared member operation CRange3D::GetRandomPointInRange()
+  true
+end

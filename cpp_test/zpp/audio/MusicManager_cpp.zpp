@@ -1,0 +1,595 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MusicManager (audio)
+-- Source File(s): audio/MusicManager.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include time.zpp  (from "time.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Font.zpp  (from "Font.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Text.zpp  (from "Text.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include World.zpp  (from "World.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Script.zpp  (from "Script.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cMusicManager_cMusicManager
+  ΔcMusicManager
+where
+  -- State update: m_bIsInitialised' = FALSE
+  -- State update: m_bDisabled' = FALSE
+  -- State update: m_nFrontendTrack' = NO_TRACK
+  -- State update: m_nPlayingTrack' = NO_TRACK
+  -- State update: m_nUpcomingMusicMode' = MUSICMODE_DISABLED
+  -- State update: m_nMusicMode' = MUSICMODE_DISABLED
+  true
+end
+
+schema cMusicManager_ResetMusicAfterReload
+  ΔcMusicManager
+where
+  -- State update: m_bRadioSetByScript' = FALSE
+  -- State update: m_nRadioStationScript' = WILDSTYLE
+  -- State update: m_nRadioPosition' = -1
+  -- State update: m_nAnnouncement' = NO_TRACK
+  -- State update: m_bAnnouncementInProgress' = FALSE
+  -- State update: m_bSetNextStation' = FALSE
+  -- Invokes: CStats::GetFavoriteRadioStationList, CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_SetStartingTrackPositions
+  ΔcMusicManager
+  isNewGameTimer? : bool8
+where
+  -- State update: timevalue' = time(0)
+  -- State update: pos' = AudioManager.m_anRandomTable[0]
+  -- State update: pTm' = localtime(&timevalue)
+  -- State update: pTm.tm_sec' = AudioManager.m_anRandomTable[0]
+  -- State update: pTm.tm_min' = AudioManager.m_anRandomTable[1]
+  -- State update: pTm.tm_hour' = AudioManager.m_anRandomTable[2]
+  -- Invokes: SampleManager.GetStreamedFileLength, CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_Initialise
+  ΔcMusicManager
+where
+  -- State update: timevalue' = time(0)
+  -- State update: pos' = AudioManager.m_anRandomTable[0]
+  -- State update: pTm' = localtime(&timevalue)
+  -- State update: pTm.tm_sec' = AudioManager.m_anRandomTable[0]
+  -- State update: pTm.tm_min' = AudioManager.m_anRandomTable[1]
+  -- State update: pTm.tm_hour' = AudioManager.m_anRandomTable[2]
+  -- Return postcondition: result! = m_bIsInitialised
+  -- Invokes: SampleManager.GetStreamedFileLength, CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_Terminate
+  ΔcMusicManager
+where
+  -- State update: m_nNextTrack' = NO_TRACK
+  -- State update: m_nPlayingTrack' = NO_TRACK
+  -- State update: m_bIsInitialised' = FALSE
+  -- Invokes: SampleManager.IsStreamPlaying, SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_SetRadioChannelByScript
+  ΔcMusicManager
+  station? : ℕ
+  pos? : ℤ
+where
+  -- State update: station' = STREAMED_SOUND_CITY_AMBIENT
+  -- State update: m_bRadioSetByScript' = TRUE
+  -- State update: m_nRadioStationScript' = station
+  true
+end
+
+schema cMusicManager_PlayerInCar
+  ΔcMusicManager
+where
+  -- State update: State' = FindPlayerPed().m_nPedState
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema cMusicManager_GetRadioInCar
+  ΔcMusicManager
+where
+  -- State update: veh' = AudioManager.FindVehicleOfPlayer()
+  -- Return postcondition: result! = WILDSTYLE
+  -- Return postcondition: result! = STREAMED_SOUND_RADIO_POLICE
+  -- Return postcondition: result! = m_nRadioInCar
+  -- Invokes: AudioManager.FindVehicleOfPlayer, CReplay::IsPlayingBack
+  true
+end
+
+schema cMusicManager_SetRadioInCar
+  ΔcMusicManager
+  station? : ℕ
+where
+  -- State update: m_nRadioInCar' = station
+  -- State update: veh' = AudioManager.FindVehicleOfPlayer()
+  -- State update: m_nRadioInCar' = station
+  -- State update: veh.m_nRadioStation' = station
+  -- Invokes: AudioManager.FindVehicleOfPlayer
+  true
+end
+
+schema cMusicManager_RecordRadioStats
+  ΔcMusicManager
+where
+  -- State update: time' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_ChangeMusicMode
+  ΔcMusicManager
+  mode? : ℕ
+where
+  -- State update: mode2' = MUSICMODE_FRONTEND
+  -- State update: m_nPosition' = GetTrackStartPos(i)
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: mode2' = MUSICMODE_GAME
+  -- State update: mode2' = MUSICMODE_CUTSCENE
+  -- State update: mode2' = MUSICMODE_DISABLED
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, SampleManager.IsStreamPlaying, SampleManager.GetStreamedFilePosition, SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_ResetTimers
+  ΔcMusicManager
+  time? : ℕ
+where
+  -- State update: m_bResetTimers' = TRUE
+  -- State update: m_nResetTime' = time
+  true
+end
+
+schema cMusicManager_Service
+  ΔcMusicManager
+where
+  -- State update: m_bResetTimers' = FALSE
+  -- State update: m_nLastTrackServiceTime' = m_nResetTime
+  -- State update: bRadioStatsRecorded' = FALSE
+  -- State update: m_nMusicModeToBeSet' = m_nUpcomingMusicMode
+  -- State update: m_nMusicMode' = MUSICMODE_DISABLED
+  -- State update: m_bMusicModeChangeStarted' = TRUE
+  -- Invokes: SampleManager.SetStreamedVolumeAndPan, SampleManager.IsStreamPlaying, SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_ServiceFrontEndMode
+  ΔcMusicManager
+where
+  -- State update: bRadioStatsRecorded' = FALSE
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: g_bAnnouncementReadPosAlready' = FALSE
+  -- State update: m_nAnnouncement' = NO_TRACK
+  -- State update: m_bAnnouncementInProgress' = FALSE
+  -- State update: m_nNextTrack' = NO_TRACK
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, SampleManager.StopStreamedFile, SampleManager.IsStreamPlaying, SampleManager.SetStreamedVolumeAndPan, SampleManager.StartStreamedFile
+  true
+end
+
+schema cMusicManager_ServiceGameMode
+  ΔcMusicManager
+where
+  -- State update: ped' = FindPlayerPed()
+  -- State update: vehicle' = AudioManager.FindVehicleOfPlayer()
+  -- State update: m_bRadioStreamReady' = m_bGameplayAllowsRadio
+  -- State update: m_bGameplayAllowsRadio' = FALSE
+  -- State update: m_bGameplayAllowsRadio' = FALSE
+  -- State update: m_bGameplayAllowsRadio' = TRUE
+  -- Invokes: AudioManager.FindVehicleOfPlayer, SampleManager.GetMusicVolume, ped->DyingOrDead, SampleManager.IsMP3RadioChannelAvailable, ControlsManager.GetIsKeyboardKeyJustDown
+  true
+end
+
+schema cMusicManager_SetUpCorrectAmbienceTrack
+  ΔcMusicManager
+where
+  -- State update: m_nFrontendTrack' = STREAMED_SOUND_LAW4RIOT_AMBIENT
+  -- State update: m_nFrontendTrack' = STREAMED_SOUND_BEACH_AMBIENT
+  -- State update: m_nFrontendTrack' = STREAMED_SOUND_HAVANA_BEACH_AMBIENT
+  -- State update: m_nFrontendTrack' = STREAMED_SOUND_WATER_AMBIENT
+  -- State update: m_nFrontendTrack' = STREAMED_SOUND_HAVANA_WATER_AMBIENT
+  -- State update: m_nFrontendTrack' = STREAMED_SOUND_CITY_AMBIENT
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema MusicManager_GetHeightScale
+  ΔMusicManagerModuleState
+where
+  -- Return postcondition: result! = 1.0f - (TheCamera.GetPosition().z - 20.0f) / 30.0f
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = 1.0f
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema cMusicManager_ComputeAmbienceVol
+  ΔcMusicManager
+  reset? : bool8
+  outVolume? : ℕ
+where
+  -- State update: fVol' = 0.0f
+  -- State update: fHeightScale' = GetHeightScale()
+  -- State update: distToRiotSq' = (TheCamera.GetPosition() - vecRiotPosition).MagnitudeSqr()
+  -- State update: fVol' = 0.0f
+  -- State update: fVol' = Min(fVol, 60.0f)
+  -- State update: outVolume' = fVol
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema cMusicManager_ServiceAnnouncement
+  ΔcMusicManager
+where
+  -- State update: m_nPlayingTrack' = m_nNextTrack
+  -- State update: m_nAnnouncement' = NO_TRACK
+  -- State update: m_bAnnouncementInProgress' = FALSE
+  -- State update: m_nPlayingTrack' = NO_TRACK
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: g_bAnnouncementReadPosAlready' = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Invokes: SampleManager.IsStreamPlaying, SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.StopStreamedFile, SampleManager.SetStreamedFileLoopFlag
+  true
+end
+
+schema cMusicManager_ServiceTrack
+  ΔcMusicManager
+  veh? : Ref[CVehicle]
+  ped? : Ref[CPed]
+where
+  -- State update: bRadioStatsRecorded' = FALSE
+  -- State update: bRadioStatsRecorded2' = FALSE
+  -- State update: m_nNextTrack' = m_nFrontendTrack
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: bRadioStatsRecorded' = TRUE
+  -- Invokes: SampleManager.IsStreamPlaying, SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.SetStreamedVolumeAndPan, SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_PreloadCutSceneMusic
+  ΔcMusicManager
+  track? : ℕ
+where
+  -- State update: m_nPlayingTrack' = track
+  -- Invokes: AudioManager.ResetPoliceRadio, SampleManager.IsStreamPlaying, SampleManager.StopStreamedFile, SampleManager.PreloadStreamedFile, SampleManager.SetStreamedVolumeAndPan
+  true
+end
+
+schema cMusicManager_PlayPreloadedCutSceneMusic
+  ΔcMusicManager
+where
+  -- Invokes: SampleManager.StartPreloadedStreamedFile
+  true
+end
+
+schema cMusicManager_StopCutSceneMusic
+  ΔcMusicManager
+where
+  -- State update: m_nPlayingTrack' = NO_TRACK
+  -- Invokes: SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_PlayFrontEndTrack
+  ΔcMusicManager
+  track? : ℕ
+  loopFlag? : bool8
+where
+  -- State update: m_nFrontendTrack' = track
+  -- State update: m_FrontendLoopFlag' = loopFlag
+  -- State update: m_bEarlyFrontendTrack' = TRUE
+  true
+end
+
+schema cMusicManager_StopFrontEndTrack
+  ΔcMusicManager
+where
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: m_nPlayingTrack' = NO_TRACK
+  -- State update: m_nNextTrack' = NO_TRACK
+  -- Invokes: SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_PlayAnnouncement
+  ΔcMusicManager
+  announcement? : ℕ
+where
+  -- State update: m_nAnnouncement' = announcement
+  true
+end
+
+schema cMusicManager_GetNextCarTuning
+  ΔcMusicManager
+where
+  -- State update: veh' = FindPlayerVehicle()
+  -- State update: veh.m_nRadioStation' = RADIO_OFF
+  -- State update: veh.m_nRadioStation' = NUM_RADIOS
+  -- State update: veh.m_nRadioStation' = RADIO_OFF
+  -- State update: veh.m_nRadioStation' = HEAD_RADIO
+  -- State update: veh.m_nRadioStation' = RADIO_OFF
+  -- Return postcondition: result! = RADIO_OFF
+  -- Return postcondition: result! = POLICE_RADIO
+  -- Return postcondition: result! = veh->m_nRadioStation
+  -- Invokes: SampleManager.IsMP3RadioChannelAvailable
+  true
+end
+
+schema cMusicManager_GetCarTuning
+  ΔcMusicManager
+where
+  -- State update: veh' = AudioManager.FindVehicleOfPlayer()
+  -- State update: veh.m_nRadioStation' = AudioManager.m_anRandomTable[2] % USERTRACK
+  -- Return postcondition: result! = STREAMED_SOUND_CITY_AMBIENT
+  -- Return postcondition: result! = STREAMED_SOUND_RADIO_POLICE
+  -- Return postcondition: result! = STREAMED_SOUND_RADIO_TAXI
+  -- Invokes: AudioManager.FindVehicleOfPlayer, SampleManager.IsMP3RadioChannelAvailable
+  true
+end
+
+schema cMusicManager_GetListenTimeArray
+  ΔcMusicManager
+where
+  -- Return postcondition: result! = aListenTimeArray
+  true
+end
+
+schema cMusicManager_GetTrackStartPos
+  ΔcMusicManager
+  track? : ℕ
+where
+  -- State update: pos' = m_aTracks[track].m_nPosition
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = pos
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_GetRadioPosition
+  ΔcMusicManager
+  station? : ℕ
+where
+  -- Return postcondition: result! = GetTrackStartPos(station)
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cMusicManager_GetFavouriteRadioStation
+  ΔcMusicManager
+where
+  -- State update: favstation' = 0
+  -- State update: favstation' = i
+  -- Return postcondition: result! = favstation
+  true
+end
+
+schema cMusicManager_CheckForMusicInterruptions
+  ΔcMusicManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cMusicManager_SetMalibuClubTrackPos
+  ΔcMusicManager
+  scriptObject? : ℕ
+where
+  -- State update: m_nPosition' = 8640
+  -- State update: m_nPosition' = (AudioManager.m_anRandomTable[0] % 128) + 8640
+  -- State update: m_nPosition' = (AudioManager.m_anRandomTable[0] % 128) + 286720
+  -- State update: m_nPosition' = (AudioManager.m_anRandomTable[0] % 128) + 509120
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_SetStripClubTrackPos
+  ΔcMusicManager
+  scriptObject? : ℕ
+where
+  -- State update: m_nPosition' = 0
+  -- State update: m_nPosition' = AudioManager.m_anRandomTable[0] % 128
+  -- State update: m_nPosition' = (AudioManager.m_anRandomTable[0] % 128) + 320200
+  -- State update: m_nPosition' = (AudioManager.m_anRandomTable[0] % 128) + 672000
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_DisplayRadioStationName
+  ΔcMusicManager
+where
+  -- State update: pCurrentStation' = ∅
+  -- State update: cDisplay' = 0
+  -- State update: pCurrentStation' = ∅
+  -- State update: curRadio' = GetCarTuning()
+  -- State update: curRadio' = m_nNextTrack
+  -- State update: gStreamedSound' = curRadio
+  -- Invokes: CTimer::GetIsPaused, CReplay::IsPlayingBack, SampleManager.IsMP3RadioChannelAvailable, TheText.Get, CTimer::GetLogicalFramesPassed
+  true
+end
+
+schema cMusicManager_UsesPoliceRadio
+  ΔcMusicManager
+  veh? : Ref[CVehicle]
+where
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = veh->UsesSiren()
+  -- Invokes: veh->GetModelIndex, veh->UsesSiren
+  true
+end
+
+schema cMusicManager_UsesTaxiRadio
+  ΔcMusicManager
+  veh? : Ref[CVehicle]
+where
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = CTheScripts::bPlayerHasMetDebbieHarry
+  -- Invokes: veh->GetModelIndex
+  true
+end
+
+schema cMusicManager_ServiceAmbience
+  ΔcMusicManager
+where
+  -- State update: m_nAnnouncement' = NO_TRACK
+  -- State update: m_bAnnouncementInProgress' = FALSE
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: m_nNextTrack' = NO_TRACK
+  -- State update: m_nNextTrack' = RADIO_OFF
+  -- Invokes: SampleManager.IsStreamPlaying, SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.StopStreamedFile, SampleManager.SetStreamedVolumeAndPan
+  true
+end
+
+schema cMusicManager_ChangeRadioChannel
+  ΔcMusicManager
+where
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  -- Invokes: SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.SetStreamedVolumeAndPan, SampleManager.StopStreamedFile, SampleManager.IsStreamPlaying
+  true
+end
+
+schema cMusicManager_Enable
+  ΔcMusicManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cMusicManager_Disable
+  ΔcMusicManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cMusicManager_SetRadioChannelByScript_2
+  ΔcMusicManager
+  station? : ℕ
+  pos? : ℤ
+where
+  -- State update: m_bRadioSetByScript' = TRUE
+  -- State update: m_nRadioStationScript' = station
+  true
+end
+
+schema cMusicManager_PlayAnnouncement_2
+  ΔcMusicManager
+  announcement? : ℕ
+where
+  -- State update: m_nAnnouncement' = announcement
+  true
+end
+
+schema cMusicManager_PlayFrontEndTrack_2
+  ΔcMusicManager
+  track? : ℕ
+  bPlayInFrontend? : bool8
+where
+  -- State update: m_nAnnouncement' = NO_TRACK
+  -- State update: m_bAnnouncementInProgress' = FALSE
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: m_nPosition' = SampleManager.GetStreamedFilePosition()
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Invokes: SampleManager.GetStreamedFilePosition, CTimer::GetTimeInMillisecondsPauseMode, SampleManager.StopStreamedFile
+  true
+end
+
+schema cMusicManager_PreloadCutSceneMusic_2
+  ΔcMusicManager
+  track? : ℕ
+where
+  -- State update: m_nNextTrack' = track
+  -- Invokes: AudioManager.ResetPoliceRadio, SampleManager.IsStreamPlaying, SampleManager.StopStreamedFile, SampleManager.PreloadStreamedFile, SampleManager.SetStreamedVolumeAndPan
+  true
+end
+
+schema cMusicManager_GetTrackStartPos_2
+  ΔcMusicManager
+  track? : ℕ
+where
+  -- State update: pos' = m_aTracks[track].m_nPosition
+  -- State update: m_nLastPosCheckTimer' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- Return postcondition: result! = pos
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema cMusicManager_ComputeAmbienceVol_2
+  ΔcMusicManager
+  reset? : bool8
+  outVolume? : ℕ
+where
+  -- State update: fVol' = 0.0f
+  -- State update: fVol' = 0.0f
+  -- State update: outVolume' = fVol
+  -- State update: outVolume' = (TheCamera.DistanceToWater - 45.0f) / 25.0f * fVol
+  -- State update: outVolume' = (45.0f - TheCamera.DistanceToWater) / 25.0f * fVol
+  -- State update: outVolume' = fVol
+  true
+end
+
+schema cMusicManager_ServiceTrack_2
+  ΔcMusicManager
+where
+  -- Invokes: SampleManager.IsStreamPlaying, SampleManager.StartStreamedFile
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MusicManagerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1792
+end

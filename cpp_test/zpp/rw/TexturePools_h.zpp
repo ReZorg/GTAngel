@@ -1,0 +1,147 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TexturePools (rw)
+-- Source File(s): rw/TexturePools.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTexturePool
+  Format : D3DFORMAT
+  size : ℤ
+  levels : ℕ
+  texturesMax : ℤ
+  texturesUsed : ℤ
+  texturesNum : ℤ
+  pTextures : Ref[IDirect3DTexture8]
+where
+  levels ≥ 0
+  #pTextures ≤ 1
+end
+
+schema CTexturePool_CTexturePool
+  ΔCTexturePool
+where
+  -- Declared member operation CTexturePool::CTexturePool()
+  true
+end
+
+schema CTexturePool_Release_2
+  ΔCTexturePool
+where
+  -- Declared member operation CTexturePool::Release()
+  true
+end
+
+schema CTexturePool_FindTexture_3
+  ΔCTexturePool
+  result! : Ref[IDirect3DTexture8]
+where
+  -- Declared member operation CTexturePool::FindTexture()
+  true
+end
+
+schema CTexturePool_AddTexture_4
+  ΔCTexturePool
+  texture? : Ref[IDirect3DTexture8]
+  result! : 𝔹
+where
+  -- Declared member operation CTexturePool::AddTexture(IDirect3DTexture8 *texture)
+  true
+end
+
+schema CTexturePool_Resize_5
+  ΔCTexturePool
+  numTextures? : ℤ
+where
+  -- Declared member operation CTexturePool::Resize(int numTextures)
+  true
+end
+
+schema CTexturePool_GetSize_6
+  ΔCTexturePool
+  result! : ℝ
+where
+  -- Declared member operation CTexturePool::GetSize()
+  true
+end
+
+schema CPaletteList
+  Max : ℤ
+  Num : ℤ
+  Data : ℙ ℤ
+where
+  #Data ≤ 1
+end
+
+schema CPaletteList_Alloc
+  ΔCPaletteList
+  max? : ℤ
+where
+  -- Declared member operation CPaletteList::Alloc(int max)
+  true
+end
+
+schema CPaletteList_Free_2
+  ΔCPaletteList
+where
+  -- Declared member operation CPaletteList::Free()
+  true
+end
+
+schema CPaletteList_Find_3
+  ΔCPaletteList
+  result! : ℤ
+where
+  -- Declared member operation CPaletteList::Find()
+  true
+end
+
+schema CPaletteList_Add_4
+  ΔCPaletteList
+  item? : ℤ
+where
+  -- Declared member operation CPaletteList::Add(int item)
+  true
+end
+
+schema CPaletteList_Resize_5
+  ΔCPaletteList
+  max? : ℤ
+where
+  -- Declared member operation CPaletteList::Resize(int max)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema TexturePools_CTexturePool
+  ΔTexturePoolsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema TexturePools_GetSize
+  ΔTexturePoolsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = size
+  true
+end
+
+schema TexturePools_GetSize_2
+  ΔTexturePoolsModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = size
+  true
+end

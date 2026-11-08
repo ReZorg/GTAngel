@@ -1,0 +1,953 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: templates (core)
+-- Source File(s): core/templates.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+POOLFLAG_ID : seq CHAR  -- #define POOLFLAG_ID 0x7f
+POOLFLAG_ISFREE : seq CHAR  -- #define POOLFLAG_ISFREE 0x80
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStore
+  allocPtr : ℤ
+  store : seq T  -- bounded array [n]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CStore_Alloc
+  ΔCStore
+  result! : Ref[T]
+where
+  -- Declared member operation CStore::Alloc(void)
+  true
+end
+
+schema CStore_assert_2
+  ΔCStore
+  arg_1? : 0
+where
+  -- Declared member operation CStore::assert(0)
+  true
+end
+
+schema CStore_Clear_3
+  ΔCStore
+  result! : void
+where
+  -- Declared member operation CStore::Clear(void)
+  true
+end
+
+schema CStore_GetIndex_4
+  ΔCStore
+  item? : Ref[T]
+  result! : ℤ
+where
+  -- Declared member operation CStore::GetIndex(T *item)
+  true
+end
+
+schema CStore_assert_5
+  ΔCStore
+  store? : seq item  -- bounded array [n]
+where
+  -- Declared member operation CStore::assert(item < &store[n])
+  true
+end
+
+schema CStore_GetItem_6
+  ΔCStore
+  index? : ℤ
+  result! : Ref[T]
+where
+  -- Declared member operation CStore::GetItem(int32 index)
+  true
+end
+
+schema CStore_assert_7
+  ΔCStore
+  n? : index
+where
+  -- Declared member operation CStore::assert(index < n)
+  true
+end
+
+schema CPool
+  m_entries : Ref[U]
+  m_flags : ℙ ℕ
+  m_size : ℤ
+  m_allocPtr : ℤ
+  size : i
+  entry : return
+  index : return
+  n : return
+where
+  #m_entries ≤ 1
+  #m_flags ≤ 1
+end
+
+schema CPool_CPool
+  ΔCPool
+  size? : ℤ
+  name? : seq CHAR
+where
+  -- Declared member operation CPool::CPool(int32 size, const char *name)
+  true
+end
+
+schema CPool_SetId_2
+  ΔCPool
+  arg_1? : i
+  arg_2? : 0
+  result! : i
+where
+  -- Declared member operation CPool::SetId(i, 0)
+  true
+end
+
+schema CPool_SetIsFree_3
+  ΔCPool
+  arg_1? : i
+  arg_2? : true
+where
+  -- Declared member operation CPool::SetIsFree(i, true)
+  true
+end
+
+schema CPool_GetId_4
+  ΞCPool
+  i? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPool::GetId(int i)
+  true
+end
+
+schema CPool_GetIsFree_5
+  ΞCPool
+  i? : ℤ
+  result! : bool
+where
+  -- Declared member operation CPool::GetIsFree(int i)
+  true
+end
+
+schema CPool_SetId_6
+  ΔCPool
+  i? : ℤ
+  id? : ℤ
+  result! : void
+where
+  -- Declared member operation CPool::SetId(int i, int id)
+  true
+end
+
+schema CPool_SetIsFree_7
+  ΔCPool
+  i? : ℤ
+  isFree? : 𝔹
+  result! : void
+where
+  -- Declared member operation CPool::SetIsFree(int i, bool isFree)
+  true
+end
+
+schema CPool_CPool_8
+  ΔCPool
+  result! : ANY
+where
+  -- Declared member operation CPool::CPool()
+  true
+end
+
+schema CPool_Flush_9
+  ΔCPool
+  result! : void
+where
+  -- Declared member operation CPool::Flush()
+  true
+end
+
+schema CPool_GetSize_10
+  ΞCPool
+  result! : ℤ
+where
+  -- Declared member operation CPool::GetSize(void)
+  true
+end
+
+schema CPool_New_11
+  ΔCPool
+  result! : Ref[T]
+where
+  -- Declared member operation CPool::New(void)
+  true
+end
+
+schema CPool_if_12
+  ΔCPool
+  arg_1? : m_allocPtr
+  result! : do__ifdef_FIX_BUGS
+where
+  -- Declared member operation CPool::if(++m_allocPtr >= m_size)
+  true
+end
+
+schema CPool_if_13
+  ΔCPool
+  arg_1? : wrapped
+where
+  -- Declared member operation CPool::if(wrapped)
+  true
+end
+
+schema CPool_if_14
+  ΔCPool
+  m_allocPtr? : ANY
+  result! : else
+where
+  -- Declared member operation CPool::if(++m_allocPtr == m_size)
+  true
+end
+
+schema CPool_while_15
+  ΔCPool
+  m_allocPtr? : GetIsFree
+  result! : endif
+where
+  -- Declared member operation CPool::while(!GetIsFree(m_allocPtr)
+  true
+end
+
+schema CPool_SetIsFree_16
+  ΔCPool
+  arg_1? : m_allocPtr
+  arg_2? : false
+where
+  -- Declared member operation CPool::SetIsFree(m_allocPtr, false)
+  true
+end
+
+schema CPool_SetId_17
+  ΔCPool
+  arg_1? : m_allocPtr
+  m_allocPtr? : GetId
+where
+  -- Declared member operation CPool::SetId(m_allocPtr, GetId(m_allocPtr)
+  true
+end
+
+schema CPool_return_18
+  ΔCPool
+  arg_1? : Ref[T]
+where
+  -- Declared member operation CPool::return(T*)
+  true
+end
+
+schema CPool_New_19
+  ΔCPool
+  handle? : ℤ
+  result! : Ref[T]
+where
+  -- Declared member operation CPool::New(int32 handle)
+  true
+end
+
+schema CPool_SetNotFreeAt_20
+  ΔCPool
+  arg_1? : handle
+where
+  -- Declared member operation CPool::SetNotFreeAt(handle)
+  true
+end
+
+schema CPool_SetNotFreeAt_21
+  ΔCPool
+  handle? : ℤ
+  result! : void
+where
+  -- Declared member operation CPool::SetNotFreeAt(int32 handle)
+  true
+end
+
+schema CPool_SetIsFree_22
+  ΔCPool
+  arg_1? : idx
+  arg_2? : false
+where
+  -- Declared member operation CPool::SetIsFree(idx, false)
+  true
+end
+
+schema CPool_SetId_23
+  ΔCPool
+  arg_1? : idx
+  POOLFLAG_ID? : handle
+where
+  -- Declared member operation CPool::SetId(idx, handle & POOLFLAG_ID)
+  true
+end
+
+schema CPool_if_24
+  ΔCPool
+  m_allocPtr? : GetIsFree
+  result! : m_allocPtr
+where
+  -- Declared member operation CPool::if(GetIsFree(m_allocPtr)
+  true
+end
+
+schema CPool_Delete_25
+  ΔCPool
+  entry? : Ref[T]
+  result! : void
+where
+  -- Declared member operation CPool::Delete(T *entry)
+  true
+end
+
+schema CPool_SetIsFree_26
+  ΔCPool
+  arg_1? : i
+  arg_2? : true
+where
+  -- Declared member operation CPool::SetIsFree(i, true)
+  true
+end
+
+schema CPool_if_27
+  ΔCPool
+  m_allocPtr? : i
+where
+  -- Declared member operation CPool::if(i < m_allocPtr)
+  true
+end
+
+schema CPool_GetSlot_28
+  ΔCPool
+  i? : ℤ
+  result! : Ref[T]
+where
+  -- Declared member operation CPool::GetSlot(int i)
+  true
+end
+
+schema CPool_GetAt_29
+  ΔCPool
+  handle? : ℤ
+  result! : Ref[T]
+where
+  -- Declared member operation CPool::GetAt(int handle)
+  true
+end
+
+schema CPool_GetIndex_30
+  ΔCPool
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- Declared member operation CPool::GetIndex(T* entry)
+  true
+end
+
+schema CLink
+  item : T
+  prev : Ref[CLink_T]
+  next : Ref[CLink_T]
+where
+  #prev ≤ 1
+  #next ≤ 1
+end
+
+schema CLink_Insert
+  ΔCLink
+  link? : Ref[CLink_T]
+where
+  -- Declared member operation CLink::Insert(CLink<T> *link)
+  true
+end
+
+schema CLink_Remove_2
+  ΔCLink
+  result! : void
+where
+  -- Declared member operation CLink::Remove(void)
+  true
+end
+
+schema CLinkList
+  tail : CLink_T__head
+  freeTail : CLink_T__freeHead
+  links : Ref[CLink_T]
+  node : return
+  lnk : Ref[CLink_T]
+  n : return
+where
+  #links ≤ 1
+  #lnk ≤ 1
+end
+
+schema CLinkList_Init
+  ΔCLinkList
+  n? : ℤ
+where
+  -- Declared member operation CLinkList::Init(int n)
+  true
+end
+
+schema CLinkList_while_2
+  ΔCLinkList
+  arg_1? : n
+where
+  -- Declared member operation CLinkList::while(n--)
+  true
+end
+
+schema CLinkList_Shutdown_3
+  ΔCLinkList
+  result! : void
+where
+  -- Declared member operation CLinkList::Shutdown(void)
+  true
+end
+
+schema CLinkList_Clear_4
+  ΔCLinkList
+  result! : void
+where
+  -- Declared member operation CLinkList::Clear(void)
+  true
+end
+
+schema CLinkList_Insert_5
+  ΔCLinkList
+  item? : T
+  result! : Ref[CLink_T]
+where
+  -- Declared member operation CLinkList::Insert(T const &item)
+  true
+end
+
+schema CLinkList_if_6
+  ΔCLinkList
+  arg_1? : node
+where
+  -- Declared member operation CLinkList::if(node == &freeTail)
+  true
+end
+
+schema CLinkList_Remove_7
+  ΔCLinkList
+  result! : node
+where
+  -- Declared member operation CLinkList::Remove()
+  true
+end
+
+schema CLinkList_Insert_8
+  ΔCLinkList
+  arg_1? : node
+  result! : head
+where
+  -- Declared member operation CLinkList::Insert(node)
+  true
+end
+
+schema CLinkList_InsertSorted_9
+  ΔCLinkList
+  item? : T
+  result! : Ref[CLink_T]
+where
+  -- Declared member operation CLinkList::InsertSorted(T const &item)
+  true
+end
+
+schema CLinkList_if_10
+  ΔCLinkList
+  arg_1? : sort__item_sort
+  result! : sort___sort__next
+where
+  -- Declared member operation CLinkList::if(sort->item.sort >= item.sort)
+  true
+end
+
+schema CLinkList_if_11
+  ΔCLinkList
+  arg_1? : node
+where
+  -- Declared member operation CLinkList::if(node == &freeTail)
+  true
+end
+
+schema CLinkList_Remove_12
+  ΔCLinkList
+  result! : node
+where
+  -- Declared member operation CLinkList::Remove()
+  true
+end
+
+schema CLinkList_Insert_13
+  ΔCLinkList
+  arg_1? : node
+  result! : sort__prev
+where
+  -- Declared member operation CLinkList::Insert(node)
+  true
+end
+
+schema CLinkList_Remove_14
+  ΔCLinkList
+  link? : Ref[CLink_T]
+  result! : void
+where
+  -- Declared member operation CLinkList::Remove(CLink<T> *link)
+  true
+end
+
+schema CLinkList_Insert_15
+  ΔCLinkList
+  arg_1? : link
+  result! : freeHead
+where
+  -- Declared member operation CLinkList::Insert(link)
+  true
+end
+
+schema CLinkList_Count_16
+  ΔCLinkList
+  result! : ℤ
+where
+  -- Declared member operation CLinkList::Count(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema templates_Clear
+  ΔtemplatesModuleState
+where
+  -- State update: allocPtr' = 0
+  true
+end
+
+schema templates_GetIndex
+  ΔtemplatesModuleState
+  item? : Ref[T]
+  result! : ℤ
+where
+  -- Return postcondition: result! = item - store
+  true
+end
+
+schema templates_CPool
+  ΔtemplatesModuleState
+  size? : ℤ
+  name? : seq CHAR
+where
+  -- State update: m_entries' = (U*)new uint8[sizeof(U)*size]
+  -- State update: m_flags' = new uint8[size]
+  -- State update: m_size' = size
+  -- State update: m_allocPtr' = -1
+  true
+end
+
+schema templates_GetId
+  ΞtemplatesModuleState
+  i? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_flags[i] & POOLFLAG_ID
+  true
+end
+
+schema templates_GetIsFree
+  ΞtemplatesModuleState
+  i? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(m_flags[i] & POOLFLAG_ISFREE)
+  true
+end
+
+schema templates_SetId
+  ΔtemplatesModuleState
+  i? : ℤ
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_SetIsFree
+  ΔtemplatesModuleState
+  i? : ℤ
+  isFree? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_CPool_2
+  ΔtemplatesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_Flush
+  ΔtemplatesModuleState
+where
+  -- State update: m_entries' = ∅
+  -- State update: m_flags' = ∅
+  -- State update: m_size' = 0
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_GetSize
+  ΞtemplatesModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_size
+  true
+end
+
+schema templates_SetNotFreeAt
+  ΔtemplatesModuleState
+  handle? : ℤ
+where
+  -- State update: idx' = handle>>8
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_Delete
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+where
+  -- State update: m_allocPtr' = i
+  true
+end
+
+schema templates_GetIndex_2
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_flags[i] + (i<<8)
+  true
+end
+
+schema templates_GetJustIndex
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- State update: index' = GetJustIndex_NoFreeAssert(entry)
+  -- Return postcondition: result! = index
+  true
+end
+
+schema templates_GetJustIndex_NoFreeAssert
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- State update: index' = ((U*)entry - m_entries)
+  -- Return postcondition: result! = index
+  true
+end
+
+schema templates_GetNoOfUsedSpaces
+  ΞtemplatesModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = n
+  true
+end
+
+schema templates_ClearStorage
+  ΔtemplatesModuleState
+  flags? : ℙ ℕ
+  entries? : Ref[U]
+where
+  -- State update: flags' = ∅
+  -- State update: entries' = ∅
+  true
+end
+
+schema templates_GetMaxEntrySize
+  ΞtemplatesModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(U)
+  true
+end
+
+schema templates_CopyBack
+  ΔtemplatesModuleState
+  flags? : ℙ ℕ
+  entries? : Ref[U]
+where
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_Store
+  ΔtemplatesModuleState
+  flags? : ℙ ℕ
+  entries? : Ref[U]
+where
+  -- State update: flags' = (uint8*)new uint8[sizeof(uint8)*m_size]
+  -- State update: entries' = (U*)new uint8[sizeof(U)*m_size]
+  true
+end
+
+schema templates_GetNoOfFreeSpaces
+  ΞtemplatesModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetSize() - GetNoOfUsedSpaces()
+  true
+end
+
+schema templates_Insert
+  ΔtemplatesModuleState
+  link? : Ref[CLink_T]
+where
+  -- State update: link.next' = this.next
+  -- State update: next.prev' = link
+  -- State update: link.prev' = this
+  -- State update: next' = link
+  true
+end
+
+schema templates_Remove
+  ΔtemplatesModuleState
+where
+  -- State update: prev.next' = this.next
+  -- State update: next.prev' = this.prev
+  true
+end
+
+schema templates_Init
+  ΔtemplatesModuleState
+  n? : ℤ
+where
+  -- State update: links' = new CLink<T>[n]
+  -- State update: head.next' = &tail
+  -- State update: tail.prev' = &head
+  -- State update: freeHead.next' = &freeTail
+  -- State update: freeTail.prev' = &freeHead
+  -- Invokes: freeHead.Insert
+  true
+end
+
+schema templates_Shutdown
+  ΔtemplatesModuleState
+where
+  -- State update: links' = ∅
+  true
+end
+
+schema templates_Clear_2
+  ΔtemplatesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_Remove_2
+  ΔtemplatesModuleState
+  link? : Ref[CLink_T]
+where
+  -- Invokes: link->Remove, freeHead.Insert
+  true
+end
+
+schema templates_Count
+  ΔtemplatesModuleState
+  result! : ℤ
+where
+  -- State update: lnk' = head.next
+  -- Return postcondition: result! = n
+  true
+end
+
+schema templates_CPool_3
+  ΔtemplatesModuleState
+  size? : ℤ
+where
+  -- State update: m_entries' = (U*)new uint8[sizeof(U)*size]
+  -- State update: m_flags' = new uint8[size]
+  -- State update: m_size' = size
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_GetId_2
+  ΞtemplatesModuleState
+  i? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_flags[i] & POOLFLAG_ID
+  true
+end
+
+schema templates_GetIsFree_2
+  ΞtemplatesModuleState
+  i? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(m_flags[i] & POOLFLAG_ISFREE)
+  true
+end
+
+schema templates_SetId_2
+  ΔtemplatesModuleState
+  i? : ℤ
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_SetIsFree_2
+  ΔtemplatesModuleState
+  i? : ℤ
+  isFree? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_CPool_4
+  ΔtemplatesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema templates_Flush_2
+  ΔtemplatesModuleState
+where
+  -- State update: m_entries' = ∅
+  -- State update: m_flags' = ∅
+  -- State update: m_size' = 0
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_GetSize_2
+  ΞtemplatesModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_size
+  true
+end
+
+schema templates_SetNotFreeAt_2
+  ΔtemplatesModuleState
+  handle? : ℤ
+where
+  -- State update: idx' = handle>>8
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_Delete_2
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+where
+  -- State update: m_allocPtr' = i
+  true
+end
+
+schema templates_GetIndex_3
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_flags[i] + (i<<8)
+  true
+end
+
+schema templates_GetJustIndex_2
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- State update: index' = GetJustIndex_NoFreeAssert(entry)
+  -- Return postcondition: result! = index
+  true
+end
+
+schema templates_GetJustIndex_NoFreeAssert_2
+  ΔtemplatesModuleState
+  entry? : Ref[T]
+  result! : ℤ
+where
+  -- State update: index' = ((U*)entry - m_entries)
+  -- Return postcondition: result! = index
+  true
+end
+
+schema templates_GetNoOfUsedSpaces_2
+  ΞtemplatesModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = n
+  true
+end
+
+schema templates_ClearStorage_2
+  ΔtemplatesModuleState
+  flags? : ℙ ℕ
+  entries? : Ref[U]
+where
+  -- State update: flags' = ∅
+  -- State update: entries' = ∅
+  true
+end
+
+schema templates_GetMaxEntrySize_2
+  ΞtemplatesModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(U)
+  true
+end
+
+schema templates_CopyBack_2
+  ΔtemplatesModuleState
+  flags? : ℙ ℕ
+  entries? : Ref[U]
+where
+  -- State update: m_allocPtr' = 0
+  true
+end
+
+schema templates_Store_2
+  ΔtemplatesModuleState
+  flags? : ℙ ℕ
+  entries? : Ref[U]
+where
+  -- State update: flags' = (uint8*)new uint8[sizeof(uint8)*m_size]
+  -- State update: entries' = (U*)new uint8[sizeof(U)*m_size]
+  true
+end

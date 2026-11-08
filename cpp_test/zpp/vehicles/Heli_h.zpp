@@ -1,0 +1,263 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Heli (vehicles)
+-- Source File(s): vehicles/Heli.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Vehicle.zpp  (from "Vehicle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eHeliNodes ::= HELI_CHASSIS | HELI_TOPROTOR | HELI_BACKROTOR | HELI_TAIL | HELI_TOPKNOT | HELI_SKID_LEFT | HELI_SKID_RIGHT | NUM_HELI_NODES
+  -- val(HELI_CHASSIS) = 1
+
+Heli_Enum_2 ::= HELI_RANDOM0 | HELI_RANDOM1 | HELI_SCRIPT | HELI_CATALINA | NUM_HELIS
+
+Heli_Enum_3 ::= HELI_TYPE_RANDOM | HELI_TYPE_SCRIPT | HELI_TYPE_CATALINA
+
+Heli_Enum_4 ::= HELI_RANDOM0 | HELI_RANDOM1 | HELI_SCRIPT | HELI_CATALINA | NUM_HELIS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CHeli
+  CVehicle  -- inherits base schema
+  m_aHeliNodes : seq Ref[RwFrame]  -- bounded array [NUM_HELI_NODES]
+  m_heliStatus : ℤ
+  m_fSearchLightX : ℝ
+  m_fSearchLightY : ℝ
+  m_nExplosionTimer : ℕ
+  m_fRotation : ℝ
+  m_fAngularSpeed : ℝ
+  m_fTargetZ : ℝ
+  m_fSearchLightIntensity : ℝ
+  m_nHeliId : ℤ
+  m_heliType : ℤ
+  m_pathState : ℤ
+  m_numSwat : ℤ
+  m_aSwatState : seq ℕ  -- bounded array [4]
+  m_aSearchLightHistoryX : seq ℝ  -- bounded array [6]
+  m_aSearchLightHistoryY : seq ℝ  -- bounded array [6]
+  m_nSearchLightTimer : ℕ
+  m_nShootTimer : ℕ
+  m_nLastShotTime : ℕ
+  m_nBulletDamage : ℕ
+  m_fRotorRotation : ℝ
+  m_fHeliDustZ : seq ℝ  -- bounded array [8]
+  m_nPoliceShoutTimer : ℕ
+  m_fTargetOffset : ℝ
+  m_bTestRight : 𝔹
+  pHelis : seq Ref[CHeli]  -- bounded array [NUM_HELIS]
+  NumRandomHelis : ℤ
+  TestForNewRandomHelisTimer : ℕ
+  CatalinaHeliOn : 𝔹
+  CatalinaHasBeenShotDown : 𝔹
+  ScriptHeliOn : 𝔹
+  NumScriptHelis : ℤ
+where
+  m_nExplosionTimer ≥ 0
+  #m_aSwatState = 4
+  #m_aSearchLightHistoryX = 6
+  #m_aSearchLightHistoryY = 6
+  m_nSearchLightTimer ≥ 0
+  m_nShootTimer ≥ 0
+  m_nLastShotTime ≥ 0
+  m_nBulletDamage ≥ 0
+  #m_fHeliDustZ = 8
+  m_nPoliceShoutTimer ≥ 0
+  TestForNewRandomHelisTimer ≥ 0
+end
+
+schema CHeli_CHeli
+  ΔCHeli
+  id? : ℤ
+  CreatedBy? : ℕ
+where
+  -- Declared member operation CHeli::CHeli(int32 id, uint8 CreatedBy)
+  true
+end
+
+schema CHeli_SetModelIndex_2
+  ΔCHeli
+  id? : ℕ
+where
+  -- Declared member operation CHeli::SetModelIndex(uint32 id)
+  true
+end
+
+schema CHeli_ProcessControl_3
+  ΔCHeli
+where
+  -- Declared member operation CHeli::ProcessControl(void)
+  true
+end
+
+schema CHeli_PreRender_4
+  ΔCHeli
+where
+  -- Declared member operation CHeli::PreRender(void)
+  true
+end
+
+schema CHeli_Render_5
+  ΔCHeli
+where
+  -- Declared member operation CHeli::Render(void)
+  true
+end
+
+schema CHeli_PreRenderAlways_6
+  ΔCHeli
+where
+  -- Declared member operation CHeli::PreRenderAlways(void)
+  true
+end
+
+schema CHeli_SpawnFlyingComponent_7
+  ΔCHeli
+  component? : ℤ
+  result! : Ref[CObject]
+where
+  -- Declared member operation CHeli::SpawnFlyingComponent(int32 component)
+  true
+end
+
+schema CHeli_FindSwatPositionRelativeToHeli_8
+  ΔCHeli
+  n? : ℤ
+  result! : CVector
+where
+  -- Declared member operation CHeli::FindSwatPositionRelativeToHeli(int n)
+  true
+end
+
+schema CHeli_SendDownSwat_9
+  ΔCHeli
+  result! : 𝔹
+where
+  -- Declared member operation CHeli::SendDownSwat(void)
+  true
+end
+
+schema CHeli_InitHelis_10
+  ΔCHeli
+where
+  -- Declared member operation CHeli::InitHelis(void)
+  true
+end
+
+schema CHeli_GenerateHeli_11
+  ΔCHeli
+  catalina? : 𝔹
+  result! : Ref[CHeli]
+where
+  -- Declared member operation CHeli::GenerateHeli(bool catalina)
+  true
+end
+
+schema CHeli_UpdateHelis_12
+  ΔCHeli
+where
+  -- Declared member operation CHeli::UpdateHelis(void)
+  true
+end
+
+schema CHeli_SpecialHeliPreRender_13
+  ΔCHeli
+where
+  -- Declared member operation CHeli::SpecialHeliPreRender(void)
+  true
+end
+
+schema CHeli_TestRocketCollision_14
+  ΔCHeli
+  coors? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CHeli::TestRocketCollision(CVector *coors)
+  true
+end
+
+schema CHeli_TestBulletCollision_15
+  ΔCHeli
+  line0? : Ref[CVector]
+  line1? : Ref[CVector]
+  bulletPos? : Ref[CVector]
+  damage? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CHeli::TestBulletCollision(CVector *line0, CVector *line1, CVector *bulletPos, int32 damage)
+  true
+end
+
+schema CHeli_TestSniperCollision_16
+  ΔCHeli
+  line0? : Ref[CVector]
+  line1? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CHeli::TestSniperCollision(CVector *line0, CVector *line1)
+  true
+end
+
+schema CHeli_StartCatalinaFlyBy_17
+  ΔCHeli
+where
+  -- Declared member operation CHeli::StartCatalinaFlyBy(void)
+  true
+end
+
+schema CHeli_RemoveCatalinaHeli_18
+  ΔCHeli
+where
+  -- Declared member operation CHeli::RemoveCatalinaHeli(void)
+  true
+end
+
+schema CHeli_FindPointerToCatalinasHeli_19
+  ΔCHeli
+  result! : Ref[CHeli]
+where
+  -- Declared member operation CHeli::FindPointerToCatalinasHeli(void)
+  true
+end
+
+schema CHeli_CatalinaTakeOff_20
+  ΔCHeli
+where
+  -- Declared member operation CHeli::CatalinaTakeOff(void)
+  true
+end
+
+schema CHeli_MakeCatalinaHeliFlyAway_21
+  ΔCHeli
+where
+  -- Declared member operation CHeli::MakeCatalinaHeliFlyAway(void)
+  true
+end
+
+schema CHeli_HasCatalinaBeenShotDown_22
+  ΔCHeli
+  result! : 𝔹
+where
+  -- Declared member operation CHeli::HasCatalinaBeenShotDown(void)
+  true
+end
+
+schema CHeli_ActivateHeli_23
+  ΔCHeli
+  activate? : 𝔹
+where
+  -- Declared member operation CHeli::ActivateHeli(bool activate)
+  true
+end

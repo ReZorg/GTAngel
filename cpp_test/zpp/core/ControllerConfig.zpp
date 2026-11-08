@@ -1,0 +1,913 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ControllerConfig (core)
+-- Source File(s): core/ControllerConfig.cpp, core/ControllerConfig.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include platform.zpp  (from "platform.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Text.zpp  (from "Text.h")
+-- include Font.zpp  (from "Font.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include dinput.zpp  (from "dinput.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHDINPUT : seq CHAR  -- #define WITHDINPUT #include "common.h"
+UP : seq CHAR  -- #define UP "~U~"
+DOWN : seq CHAR  -- #define DOWN "~D~"
+LEFT : seq CHAR  -- #define LEFT "~<~"
+RIGHT : seq CHAR  -- #define RIGHT "~>~"
+PS2_TRIANGLE : seq CHAR  -- #define PS2_TRIANGLE "
+PS2_CIRCLE : seq CHAR  -- #define PS2_CIRCLE "|"
+PS2_CROSS : seq CHAR  -- #define PS2_CROSS "/"
+PS2_SQUARE : seq CHAR  -- #define PS2_SQUARE "^"
+DIRECTINPUT_VERSION : seq CHAR  -- #define DIRECTINPUT_VERSION 0x0800
+JOY_BUTTONS : ℕ  -- #define JOY_BUTTONS 16
+MAX_BUTTONS : seq CHAR  -- #define MAX_BUTTONS (JOY_BUTTONS+1)
+ACTIONNAME_LENGTH : ℕ  -- #define ACTIONNAME_LENGTH 40
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eControllerType ::= KEYBOARD | OPTIONAL_EXTRA | MOUSE | JOYSTICK | MAX_CONTROLLERTYPES
+  -- val(KEYBOARD) = 0
+
+e_ControllerAction ::= PED_FIREWEAPON | PED_CYCLE_WEAPON_RIGHT | PED_CYCLE_WEAPON_LEFT | GO_FORWARD | GO_BACK | GO_LEFT | GO_RIGHT | PED_SNIPER_ZOOM_IN | PED_SNIPER_ZOOM_OUT | VEHICLE_ENTER_EXIT | CAMERA_CHANGE_VIEW_ALL_SITUATIONS | PED_JUMPING | PED_SPRINT | PED_LOOKBEHIND | PED_DUCK | PED_ANSWER_PHONE | VEHICLE_BRAKE | VEHICLE_CHANGE_RADIO_STATION | VEHICLE_HORN | TOGGLE_SUBMISSIONS | VEHICLE_HANDBRAKE | PED_1RST_PERSON_LOOK_LEFT | PED_1RST_PERSON_LOOK_RIGHT | VEHICLE_LOOKLEFT | VEHICLE_LOOKRIGHT | VEHICLE_LOOKBEHIND | VEHICLE_TURRETLEFT | VEHICLE_TURRETRIGHT | VEHICLE_TURRETUP | VEHICLE_TURRETDOWN | PED_CYCLE_TARGET_LEFT | PED_CYCLE_TARGET_RIGHT | PED_CENTER_CAMERA_BEHIND_PLAYER | PED_LOCK_TARGET | NETWORK_TALK | PED_1RST_PERSON_LOOK_UP | PED_1RST_PERSON_LOOK_DOWN | _CONTROLLERACTION_36 | TOGGLE_DPAD | SWITCH_DEBUG_CAM_ON | TAKE_SCREEN_SHOT | SHOW_MOUSE_POINTER_TOGGLE | UNKNOWN_ACTION | MAX_CONTROLLERACTIONS
+  -- val(PED_FIREWEAPON) = 0
+
+e_ControllerActionType ::= ACTIONTYPE_1RSTPERSON | ACTIONTYPE_3RDPERSON | ACTIONTYPE_VEHICLE | ACTIONTYPE_VEHICLE_3RDPERSON | ACTIONTYPE_COMMON | ACTIONTYPE_1RST3RDPERSON | ACTIONTYPE_NONE
+  -- val(ACTIONTYPE_1RSTPERSON) = 0
+
+eContSetOrder ::= SETORDER_NONE | SETORDER_1 | SETORDER_2 | SETORDER_3 | SETORDER_4 | MAX_SETORDERS
+  -- val(SETORDER_NONE) = 0
+
+eSimCheckers ::= SIM_X1 | SIM_Y1 | SIM_X2 | SIM_Y2 | MAX_SIMS
+  -- val(SIM_X1) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema GlfwJoyState
+  id : ℤ
+  isGamepad : 𝔹
+  numButtons : ℕ
+  buttons : ℙ ℕ
+  mappedButtons : seq 𝔹  -- bounded array [17]
+where
+  numButtons ≥ 0
+  #buttons ≤ 1
+  #mappedButtons = 17
+end
+
+schema CControllerConfigManager
+  m_ContSetOrder : ℤ
+  m_bFirstCapture : 𝔹
+  m_NewState : GlfwJoyState
+  m_aButtonStates : seq 𝔹  -- bounded array [MAX_BUTTONS]
+  m_bMouseAssociated : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CControllerConfigManager_tControllerConfigBind
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::tControllerConfigBind()
+  true
+end
+
+schema CControllerConfigManager_MakeControllerActionsBlank_2
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::MakeControllerActionsBlank()
+  true
+end
+
+schema CControllerConfigManager_GetJoyButtonJustDown_3
+  ΔCControllerConfigManager
+  result! : ℤ
+where
+  -- Declared member operation CControllerConfigManager::GetJoyButtonJustDown()
+  true
+end
+
+schema CControllerConfigManager_SaveSettings_4
+  ΔCControllerConfigManager
+  file? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::SaveSettings(int32 file)
+  true
+end
+
+schema CControllerConfigManager_LoadSettings_5
+  ΔCControllerConfigManager
+  file? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::LoadSettings(int32 file)
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfiguration_6
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::InitDefaultControlConfiguration()
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfigMouse_7
+  ΔCControllerConfigManager
+  availableButtons? : CMouseControllerState
+where
+  -- Declared member operation CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerState const &availableButtons)
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfigJoyPad_8
+  ΔCControllerConfigManager
+  buttons? : ℕ
+where
+  -- Declared member operation CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
+  true
+end
+
+schema CControllerConfigManager_InitialiseControllerActionNameArray_9
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::InitialiseControllerActionNameArray()
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyInConfigMenus_ButtonDown_10
+  ΔCControllerConfigManager
+  button? : ℤ
+  padnumber? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, int32 padnumber)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_11
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown(int32 button, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_Driving_12
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_Driving(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_FirstPersonOnly_13
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_ThirdPersonOnly_14
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly_15
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_AllStates_16
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_AllStates(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_VehicleAndThirdPersonOnly_17
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_VehicleAndThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyInConfigMenus_ButtonUp_18
+  ΔCControllerConfigManager
+  button? : ℤ
+  padnumber? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(int32 button, int32 padnumber)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonUp_19
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonUp(int32 button, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonUp_All_Player_States_20
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonUp_All_Player_States(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectPadFromKeyBoard_21
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::AffectPadFromKeyBoard()
+  true
+end
+
+schema CControllerConfigManager_AffectPadFromMouse_22
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::AffectPadFromMouse()
+  true
+end
+
+schema CControllerConfigManager_ClearSimButtonPressCheckers_23
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::ClearSimButtonPressCheckers()
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyboardKeyDown_24
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyboardKeyJustDown_25
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_GetIsMouseButtonDown_26
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsMouseButtonDown(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_GetIsMouseButtonUp_27
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsMouseButtonUp(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_DeleteMatchingCommonControls_28
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::DeleteMatchingCommonControls(e_ControllerAction action, int32 key, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching3rdPersonControls_29
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::DeleteMatching3rdPersonControls(e_ControllerAction action, int32 key, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching1rst3rdPersonControls_30
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::DeleteMatching1rst3rdPersonControls(e_ControllerAction action, int32 key, eControllerType type)
+  true
+end
+
+schema tControllerConfigBind
+  m_Key : ℤ
+  m_ContSetOrder : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tControllerConfigBind_tControllerConfigBind
+  ΔtControllerConfigBind
+where
+  -- Declared member operation tControllerConfigBind::tControllerConfigBind()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CControllerConfigManager_CControllerConfigManager
+  ΔCControllerConfigManager
+where
+  -- State update: m_bFirstCapture' = false
+  -- State update: m_bMouseAssociated' = false
+  true
+end
+
+schema CControllerConfigManager_MakeControllerActionsBlank
+  ΔCControllerConfigManager
+where
+  -- State update: ms_padButtonsInited' = 0
+  true
+end
+
+schema ControllerConfig_MapIdToButtonId
+  ΔControllerConfigModuleState
+  mapId? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = 2
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 3
+  true
+end
+
+schema CControllerConfigManager_GetJoyButtonJustDown
+  ΔCControllerConfigManager
+  result! : ℤ
+where
+  -- Return postcondition: result! = i + 1
+  -- Return postcondition: result! = MapIdToButtonId(i)
+  -- Return postcondition: result! = i + 1
+  true
+end
+
+schema CControllerConfigManager_SaveSettings
+  ΔCControllerConfigManager
+  file? : ℤ
+where
+  -- Invokes: CFileMgr::Write
+  true
+end
+
+schema CControllerConfigManager_LoadSettings
+  ΔCControllerConfigManager
+  file? : ℤ
+where
+  -- State update: bValid' = true
+  -- State update: skipVehicleFireWeapon' = false
+  -- State update: bValid' = false
+  -- State update: fileSize' = 0, blockSize
+  -- State update: blockSize' = CFileMgr::Read(file, tempBuf, sizeof(tempBuf))
+  -- State update: skipVehicleFireWeapon' = true
+  -- Invokes: CFileMgr::Read, CFileMgr::Seek, ControlsManager.MakeControllerActionsBlank
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfiguration
+  ΔCControllerConfigManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfigMouse
+  ΔCControllerConfigManager
+  availableButtons? : CMouseControllerState
+where
+  -- State update: m_bMouseAssociated' = true
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfigJoyPad
+  ΔCControllerConfigManager
+  buttons? : ℕ
+where
+  -- State update: m_bFirstCapture' = true
+  -- State update: btn' = buttons
+  -- State update: btn' = 16
+  -- State update: buttonMin' = ms_padButtonsInited
+  -- State update: ms_padButtonsInited' = btn
+  true
+end
+
+schema CControllerConfigManager_InitialiseControllerActionNameArray
+  ΔCControllerConfigManager
+where
+  -- Invokes: CMessages::WideStringCopy
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyInConfigMenus_ButtonDown
+  ΔCControllerConfigManager
+  button? : ℤ
+  padnumber? : ℤ
+where
+  -- State update: pad' = CPad::GetPad(padnumber)
+  -- State update: pad.PCTempJoyState.DPadLeft' = 255
+  -- State update: pad.PCTempJoyState.DPadDown' = 255
+  -- State update: pad.PCTempJoyState.DPadRight' = 255
+  -- State update: pad.PCTempJoyState.DPadUp' = 255
+  -- State update: pad.PCTempJoyState.Start' = 255
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+where
+  -- State update: process' = true
+  -- State update: process' = false
+  -- State update: process' = false
+  -- State update: process' = false
+  -- State update: pad' = CPad::GetPad(PAD1)
+  -- State update: firstPerson' = false
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_Driving
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: state.Circle' = 255
+  -- State update: state.LeftShoulder2' = 255
+  -- State update: state.RightShoulder2' = 255
+  -- State update: state.LeftShoulder2' = 255
+  -- State update: state.RightShoulder2' = 255
+  -- State update: state.LeftShock' = 255
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_FirstPersonOnly
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: state.Square' = 255
+  -- State update: state.Cross' = 255
+  -- State update: state.LeftShock' = 255
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_ThirdPersonOnly
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: state.RightShock' = 255
+  -- State update: state.Square' = 255
+  -- State update: state.LeftShoulder1' = 255
+  -- State update: state.LeftShoulder2' = 255
+  -- State update: state.RightShoulder2' = 255
+  -- State update: state.Cross' = 255
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: pad' = CPad::GetPad(PAD1)
+  -- State update: state.Circle' = 255
+  -- State update: state.RightShoulder1' = 255
+  -- State update: state.DPadDown' = 0
+  -- State update: state.DPadUp' = 0
+  -- State update: state.DPadUp' = 255
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_AllStates
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: state.Select' = 255
+  -- State update: state.Circle' = 255
+  -- State update: state.DPadLeft' = 0
+  -- State update: state.DPadRight' = 0
+  -- State update: state.DPadLeft' = 255
+  -- State update: state.DPadLeft' = 0
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_VehicleAndThirdPersonOnly
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: state.Triangle' = 255
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyInConfigMenus_ButtonUp
+  ΔCControllerConfigManager
+  button? : ℤ
+  padnumber? : ℤ
+where
+  -- State update: pad' = CPad::GetPad(padnumber)
+  -- State update: pad.PCTempJoyState.DPadLeft' = 0
+  -- State update: pad.PCTempJoyState.DPadDown' = 0
+  -- State update: pad.PCTempJoyState.DPadRight' = 0
+  -- State update: pad.PCTempJoyState.DPadUp' = 0
+  -- State update: pad.PCTempJoyState.Start' = 0
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonUp
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+where
+  -- State update: process' = true
+  -- State update: process' = false
+  -- State update: process' = false
+  -- State update: process' = false
+  -- State update: state' = &CPad::GetPad(PAD1).PCTempKeyState
+  -- State update: state' = &CPad::GetPad(PAD1).PCTempMouseState
+  -- Invokes: CPad::GetPad, FrontEndMenuManager.GetIsMenuActive
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonUp_All_Player_States
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- State update: state.NetworkTalk' = 0
+  true
+end
+
+schema CControllerConfigManager_AffectPadFromKeyBoard
+  ΔCControllerConfigManager
+where
+  -- State update: processdown' = false
+  -- State update: processdown' = true
+  -- Invokes: FrontEndMenuManager.GetIsMenuActive
+  true
+end
+
+schema CControllerConfigManager_AffectPadFromMouse
+  ΔCControllerConfigManager
+where
+  -- State update: processdown' = false
+  -- State update: processdown' = true
+  -- Invokes: FrontEndMenuManager.GetIsMenuActive
+  true
+end
+
+schema CControllerConfigManager_ClearSimButtonPressCheckers
+  ΔCControllerConfigManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyboardKeyDown
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyboardKeyJustDown
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_GetIsMouseButtonDown
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_GetIsMouseButtonUp
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CControllerConfigManager_DeleteMatchingCommonControls
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching3rdPersonControls
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching1rst3rdPersonControls
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_DeleteMatchingVehicleControls
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_DeleteMatchingVehicle_3rdPersonControls
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching1rstPersonControls
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_IsAnyVehicleActionAssignedToMouseKey
+  ΔCControllerConfigManager
+  key? : ℤ
+  result! : 𝔹
+where
+  -- State update: type' = MOUSE
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CControllerConfigManager_DeleteMatchingActionInitiators
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyBlank
+  ΔCControllerConfigManager
+  key? : ℤ
+  type? : eControllerType
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CControllerConfigManager_GetActionType
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  result! : e_ControllerActionType
+where
+  -- Return postcondition: result! = ACTIONTYPE_COMMON
+  -- Return postcondition: result! = ACTIONTYPE_3RDPERSON
+  -- Return postcondition: result! = ACTIONTYPE_VEHICLE
+  true
+end
+
+schema CControllerConfigManager_ClearSettingsAssociatedWithAction
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  type? : eControllerType
+where
+  -- State update: m_Key' = rs∅
+  -- State update: m_ContSetOrder' = SETORDER_NONE
+  -- State update: m_Key' = rs∅
+  -- State update: m_ContSetOrder' = SETORDER_NONE
+  -- State update: m_Key' = 0
+  -- State update: m_ContSetOrder' = SETORDER_NONE
+  true
+end
+
+schema CControllerConfigManager_GetNumOfSettingsForAction
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  result! : ℤ
+where
+  -- State update: num' = 0
+  -- Return postcondition: result! = num
+  true
+end
+
+schema CControllerConfigManager_GetWideStringOfCommandKeys
+  ΔCControllerConfigManager
+  action? : ℕ
+  text? : seq CHAR
+  leight? : ℕ
+where
+  -- State update: Buttons' = PlayStationButtons_noIcons
+  -- State update: Buttons' = NintendoSwitchButtons_noIcons
+  -- State update: Buttons' = XboxButtons_noIcons
+  -- State update: nums' = GetNumOfSettingsForAction((e_ControllerAction)action)
+  -- State update: sets' = 0
+  -- State update: len' = CMessages::GetWideStringLength(text)
+  -- Invokes: CPad::GetPad, CMessages::WideStringCopy, ControlsManager.GetControllerSettingTextWithOrderNumber, CMessages::GetWideStringLength, TheText.Get
+  true
+end
+
+schema CControllerConfigManager_GetControllerKeyAssociatedWithAction
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  type? : eControllerType
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_aSettings[action][type].m_Key
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyButtonState
+  ΔCControllerConfigManager
+  padnumber? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CControllerConfigManager_GetIsActionAButtonCombo
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CControllerConfigManager_SetControllerKeyAssociatedWithAction
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- State update: numOfSettings' = GetNumOfSettingsForAction(action)
+  -- State update: m_Key' = key
+  -- State update: m_ContSetOrder' = numOfSettings + 1
+  true
+end
+
+schema CControllerConfigManager_GetMouseButtonAssociatedWithAction
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_aSettings[action][MOUSE].m_Key
+  true
+end
+
+schema CControllerConfigManager_SetMouseButtonAssociatedWithAction
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  button? : ℤ
+where
+  -- State update: numOfSettings' = GetNumOfSettingsForAction(action)
+  -- State update: m_Key' = button
+  -- State update: m_ContSetOrder' = numOfSettings + 1
+  true
+end
+
+schema CControllerConfigManager_ResetSettingOrder
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+where
+  -- State update: conttype' = KEYBOARD
+  -- State update: isexist' = false
+  -- State update: isexist' = true
+  -- State update: init' = false
+  -- State update: setorder' = m_aSettings[action][k].m_ContSetOrder
+  -- State update: conttype' = k
+  true
+end
+
+schema ControllerConfig_tControllerConfigBind
+  ΔControllerConfigModuleState
+where
+  -- State update: m_Key' = 0
+  -- State update: m_ContSetOrder' = 0
+  true
+end

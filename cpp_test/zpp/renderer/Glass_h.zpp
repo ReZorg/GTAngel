@@ -1,0 +1,265 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Glass (renderer)
+-- Source File(s): renderer/Glass.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Glass_Enum_1 ::= NUM_GLASSTRIANGLES
+  -- val(NUM_GLASSTRIANGLES) = 5
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFallingGlassPane
+  CMatrix  -- inherits base schema
+  m_vecMoveSpeed : CVector
+  m_vecTurn : CVector
+  m_nTimer : ℕ
+  m_fGroundZ : ℝ
+  m_fStep : ℝ
+  m_nTriIndex : ℕ
+  m_bActive : 𝔹
+  m_bShattered : 𝔹
+  m_bCarGlass : 𝔹
+where
+  m_nTimer ≥ 0
+  m_nTriIndex ≥ 0
+end
+
+schema CFallingGlassPane_CFallingGlassPane
+  ΔCFallingGlassPane
+where
+  -- Declared member operation CFallingGlassPane::CFallingGlassPane()
+  true
+end
+
+schema CFallingGlassPane_Render_2
+  ΔCFallingGlassPane
+where
+  -- Declared member operation CFallingGlassPane::Render(void)
+  true
+end
+
+schema CGlass
+  NumGlassEntities : ℕ
+  apEntitiesToBeRendered : seq Ref[CEntity]  -- bounded array [NUM_GLASSENTITIES]
+  aGlassPanes : seq CFallingGlassPane  -- bounded array [NUM_GLASSPANES]
+where
+  NumGlassEntities ≥ 0
+end
+
+schema CGlass_Init
+  ΔCGlass
+where
+  -- Declared member operation CGlass::Init(void)
+  true
+end
+
+schema CGlass_Update_2
+  ΔCGlass
+where
+  -- Declared member operation CGlass::Update(void)
+  true
+end
+
+schema CGlass_Render_3
+  ΔCGlass
+where
+  -- Declared member operation CGlass::Render(void)
+  true
+end
+
+schema CGlass_FindFreePane_4
+  ΔCGlass
+  result! : Ref[CFallingGlassPane]
+where
+  -- Declared member operation CGlass::FindFreePane(void)
+  true
+end
+
+schema CGlass_GeneratePanesForWindow_5
+  ΔCGlass
+  type? : ℕ
+  pos? : CVector
+  up? : CVector
+  right? : CVector
+  speed? : CVector
+  center? : CVector
+  moveSpeed? : ℝ
+  cracked? : 𝔹
+  explosion? : 𝔹
+  stepmul? : ℤ
+  carGlass? : 𝔹
+where
+  -- Declared member operation CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector up, CVector right, CVector speed, CVector center, float moveSpeed, bool cracked, bool explosion, int32 stepmul, bool carGlass)
+  true
+end
+
+schema CGlass_AskForObjectToBeRenderedInGlass_6
+  ΔCGlass
+  entity? : Ref[CEntity]
+where
+  -- Declared member operation CGlass::AskForObjectToBeRenderedInGlass(CEntity *entity)
+  true
+end
+
+schema CGlass_RenderEntityInGlass_7
+  ΔCGlass
+  entity? : Ref[CEntity]
+where
+  -- Declared member operation CGlass::RenderEntityInGlass(CEntity *entity)
+  true
+end
+
+schema CGlass_CalcAlphaWithNormal_8
+  ΔCGlass
+  normal? : Ref[CVector]
+  result! : ℤ
+where
+  -- Declared member operation CGlass::CalcAlphaWithNormal(CVector *normal)
+  true
+end
+
+schema CGlass_RenderHiLightPolys_9
+  ΔCGlass
+where
+  -- Declared member operation CGlass::RenderHiLightPolys(void)
+  true
+end
+
+schema CGlass_RenderShatteredPolys_10
+  ΔCGlass
+where
+  -- Declared member operation CGlass::RenderShatteredPolys(void)
+  true
+end
+
+schema CGlass_RenderReflectionPolys_11
+  ΔCGlass
+where
+  -- Declared member operation CGlass::RenderReflectionPolys(void)
+  true
+end
+
+schema CGlass_WindowRespondsToCollision_12
+  ΔCGlass
+  entity? : Ref[CEntity]
+  amount? : ℝ
+  speed? : CVector
+  point? : CVector
+  explosion? : 𝔹
+where
+  -- Declared member operation CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, CVector point, bool explosion)
+  true
+end
+
+schema CGlass_WindowRespondsToSoftCollision_13
+  ΔCGlass
+  entity? : Ref[CEntity]
+  amount? : ℝ
+where
+  -- Declared member operation CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
+  true
+end
+
+schema CGlass_WasGlassHitByBullet_14
+  ΔCGlass
+  entity? : Ref[CEntity]
+  point? : CVector
+where
+  -- Declared member operation CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
+  true
+end
+
+schema CGlass_WindowRespondsToExplosion_15
+  ΔCGlass
+  entity? : Ref[CEntity]
+  point? : CVector
+where
+  -- Declared member operation CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
+  true
+end
+
+schema CGlass_CarWindscreenShatters_16
+  ΔCGlass
+  vehicle? : Ref[CVehicle]
+  unk? : 𝔹
+where
+  -- Declared member operation CGlass::CarWindscreenShatters(CVehicle *vehicle, bool unk)
+  true
+end
+
+schema CGlass_HasGlassBeenShatteredAtCoors_17
+  ΔCGlass
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CGlass::HasGlassBeenShatteredAtCoors(float x, float y, float z)
+  true
+end
+
+schema CGlass_FindWindowSectorList_18
+  ΔCGlass
+  list? : CPtrList
+  dist? : ℙ ℝ
+  entity? : Ref[CEntity]
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CGlass::FindWindowSectorList(CPtrList &list, float *dist, CEntity **entity, float x, float y, float z)
+  true
+end
+
+schema CGlass_BreakGlassPhysically_19
+  ΔCGlass
+  pos? : CVector
+  radius? : ℝ
+where
+  -- Declared member operation CGlass::BreakGlassPhysically(CVector pos, float radius)
+  true
+end
+
+schema CGlass_GeneratePanesForWindow_20
+  ΔCGlass
+  type? : ℕ
+  pos? : CVector
+  up? : CVector
+  right? : CVector
+  speed? : CVector
+  point? : CVector
+  moveSpeed? : ℝ
+  cracked? : 𝔹
+  explosion? : 𝔹
+where
+  -- Declared member operation CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector up, CVector right, CVector speed, CVector point, float moveSpeed, bool cracked, bool explosion)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Glass_CFallingGlassPane
+  ΔGlassModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Glass_CFallingGlassPane_2
+  ΔGlassModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

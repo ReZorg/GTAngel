@@ -1,0 +1,279 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Text (text)
+-- Source File(s): text/Text.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Game.zpp  (from "Game.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Text.zpp  (from "Text.h")
+-- include Timer.zpp  (from "Timer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CText_CText
+  ΔCText
+where
+  -- State update: encoding' = 'e'
+  -- State update: bHasMissionTextOffsets' = false
+  -- State update: bIsMissionTextLoaded' = false
+  true
+end
+
+schema CText_Load
+  ΔCText
+where
+  -- State update: tdat_loaded' = false
+  -- State update: bIsMissionTextLoaded' = false
+  -- State update: bHasMissionTextOffsets' = false
+  -- State update: file' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: offset' = 0
+  -- State update: bHasMissionTextOffsets' = true
+  -- Invokes: CFileMgr::SetDir, CFileMgr::OpenFile, MissionTextOffsets.Load, keyArray.Load, data.Load
+  true
+end
+
+schema CText_Unload
+  ΔCText
+where
+  -- State update: bIsLoaded' = false
+  -- State update: bIsMissionTextLoaded' = false
+  -- Invokes: CMessages::ClearAllMessagesDisplayedByGame, keyArray.Unload, data.Unload, mission_keyArray.Unload, mission_data.Unload
+  true
+end
+
+schema CText_Get
+  ΔCText
+  key? : seq CHAR
+where
+  -- State update: outstr' = keyArray.Search(key, data.chars, &result)
+  -- State update: outstr' = keyArray.Search(key, &result)
+  -- State update: outstr' = mission_keyArray.Search(key, mission_data.chars, &result)
+  -- State update: outstr' = mission_keyArray.Search(key, &result)
+  -- Return postcondition: result! = outstr
+  -- Invokes: keyArray.Search, mission_keyArray.Search
+  true
+end
+
+schema CText_GetUpperCase
+  ΔCText
+  c? : seq CHAR
+where
+  -- Return postcondition: result! = c - 32
+  -- Return postcondition: result! = c - 32
+  -- Return postcondition: result! = FrenchUpperCaseTable[c-128]
+  true
+end
+
+schema CText_UpperCase
+  ΔCText
+  s? : seq CHAR
+where
+  -- State update: s' = GetUpperCase(*s)
+  true
+end
+
+schema CText_GetNameOfLoadedMissionText
+  ΔCText
+  outName? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CText_ReadChunkHeader
+  ΔCText
+  buf? : Ref[ChunkHeader]
+  file? : ℤ
+  offset? : ℙ ℕ
+where
+  -- State update: _buf' = (char*)buf
+  -- Invokes: CFileMgr::Read
+  true
+end
+
+schema CText_LoadMissionText
+  ΔCText
+  MissionTableName? : seq CHAR
+where
+  -- State update: search_result' = false
+  -- State update: missionTableId' = 0
+  -- State update: missionTableId' = 0
+  -- State update: search_result' = true
+  -- State update: file' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: tdat_loaded' = false
+  -- Invokes: CMessages::ClearAllMessagesDisplayedByGame, mission_keyArray.Unload, mission_data.Unload, CFileMgr::SetDir, CTimer::Suspend
+  true
+end
+
+schema CText_IsLoaded
+  ΔCText
+where
+  -- Return postcondition: result! = bIsLoaded
+  true
+end
+
+schema CKeyArray_Load
+  ΔCKeyArray
+  length? : ℕ
+  file? : ℤ
+  offset? : ℙ ℕ
+where
+  -- State update: numEntries' = (int)(length / sizeof(CKeyEntry))
+  -- State update: entries' = new CKeyEntry[numEntries]
+  -- State update: rawbytes' = (char*)entries
+  -- Invokes: CFileMgr::Read
+  true
+end
+
+schema CKeyArray_Unload
+  ΔCKeyArray
+where
+  -- State update: entries' = ∅
+  -- State update: numEntries' = 0
+  true
+end
+
+schema CKeyArray_Update
+  ΔCKeyArray
+  chars? : seq CHAR
+where
+  -- State update: value' = (wchar*)((uint8*)chars + (uintptr)entries[i].value)
+  true
+end
+
+schema CKeyArray_BinarySearch
+  ΔCKeyArray
+  key? : seq CHAR
+  entries? : Ref[CKeyEntry]
+  low? : ℤ
+  high? : ℤ
+where
+  -- State update: mid' = (low + high)/2
+  -- State update: diff' = strcmp(key, entries[mid].key)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = &entries[mid]
+  -- Return postcondition: result! = BinarySearch(key, entries, low, mid-1)
+  true
+end
+
+schema CData_Load
+  ΔCData
+  length? : ℕ
+  file? : ℤ
+  offset? : ℙ ℕ
+where
+  -- State update: numChars' = (int)(length / sizeof(wchar))
+  -- State update: chars' = new wchar[numChars]
+  -- State update: rawbytes' = (char*)chars
+  -- Invokes: CFileMgr::Read
+  true
+end
+
+schema CData_Unload
+  ΔCData
+where
+  -- State update: chars' = ∅
+  -- State update: numChars' = 0
+  true
+end
+
+schema CMissionTextOffsets_Load
+  ΔCMissionTextOffsets
+  table_size? : ℕ
+  file? : ℤ
+  offset? : ℙ ℕ
+  arg_4? : ℤ
+where
+  -- State update: num_of_entries' = table_size / sizeof(CMissionTextOffsets::Entry)
+  -- State update: mi' = 0
+  -- State update: _buf' = (char*)&data[mi].offset
+  -- State update: size' = (uint16)num_of_entries
+  -- State update: size' = (uint16) (table_size / sizeof(CMissionTextOffsets::Entry))
+  -- Invokes: CFileMgr::Read
+  true
+end
+
+schema Text_UnicodeToAscii
+  ΔTextModuleState
+  src? : seq CHAR
+where
+  -- State update: len' = 0
+  -- Return postcondition: result! = aStr
+  true
+end
+
+schema Text_UnicodeToAsciiForSaveLoad
+  ΔTextModuleState
+  src? : seq CHAR
+where
+  -- State update: len' = 0
+  -- Return postcondition: result! = aStr
+  true
+end
+
+schema Text_UnicodeToAsciiForMemoryCard
+  ΔTextModuleState
+  src? : seq CHAR
+where
+  -- State update: len' = 0
+  -- Return postcondition: result! = aStr
+  true
+end
+
+schema Text_TextCopy
+  ΔTextModuleState
+  dst? : seq CHAR
+  src? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CKeyArray_Load_2
+  ΔCKeyArray
+  length? : ℕ
+  data? : ℙ ℕ
+  offset? : ℙ ℕ
+where
+  -- State update: numEntries' = (int)(length / sizeof(CKeyEntry))
+  -- State update: entries' = new CKeyEntry[numEntries]
+  -- State update: rawbytes' = (uint8*)entries
+  true
+end
+
+schema CData_Load_2
+  ΔCData
+  length? : ℕ
+  data? : ℙ ℕ
+  offset? : ℙ ℕ
+where
+  -- State update: numChars' = (int)(length / sizeof(wchar))
+  -- State update: chars' = new wchar[numChars]
+  -- State update: rawbytes' = (uint8*)chars
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TextModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 638
+end

@@ -1,0 +1,22 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: screenDroplet_frag (extras)
+-- Source File(s): extras/shaders/obj/screenDroplet_frag.inc
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema screenDroplet_fragModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 20
+end

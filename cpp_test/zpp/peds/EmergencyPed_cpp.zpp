@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: EmergencyPed (peds)
+-- Source File(s): peds/EmergencyPed.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include EmergencyPed.zpp  (from "EmergencyPed.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include General.zpp  (from "General.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Accident.zpp  (from "Accident.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CEmergencyPed_InRange
+  ΔCEmergencyPed
+  victim? : Ref[CPed]
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: m_pMyVehicle->GetPosition, victim->GetPosition
+  true
+end
+
+schema CEmergencyPed_ProcessControl
+  ΔCEmergencyPed
+where
+  -- State update: m_vecSeekPos' = m_pSeekTarget.GetPosition()
+  -- Invokes: CPed::ProcessControl, m_moved.Magnitude, m_pSeekTarget->GetPosition
+  true
+end
+
+schema CEmergencyPed_FiremanAI
+  ΔCEmergencyPed
+where
+  -- State update: nearestFire' = gFireManager.FindNearestFire(GetPosition(), &fireDist)
+  -- State update: m_nEmergencyPedState' = EMERGENCY_PED_DETERMINE_NEXT_STATE
+  -- State update: m_pAttendedFire' = nearestFire
+  -- State update: bIsRunning' = true
+  -- State update: nearestFire' = gFireManager.FindNearestFire(GetPosition(), &fireDist)
+  -- State update: bIsRunning' = true
+  -- Invokes: gFireManager.FindNearestFire, CGeneral::GetRandomNumber
+  true
+end
+
+schema CEmergencyPed_MedicAI
+  ΔCEmergencyPed
+where
+  -- State update: m_threatFlags' = 0
+  -- State update: m_threatCheckTimer' = 0
+  -- State update: m_pMyVehicle.AutoPilot.m_nCarMission' = MISSION_NONE
+  -- State update: waitUntilMedicEntersCar' = false
+  -- State update: nearPed' = m_nearPeds[i]
+  -- State update: waitUntilMedicEntersCar' = true
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_threatEntity->IsPed, m_pMyVehicle->IsCar, gAccidentManager.FindNearestAccident, m_pMyVehicle->GetPosition
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema EmergencyPedModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 436
+end

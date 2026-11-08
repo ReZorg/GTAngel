@@ -1,0 +1,412 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: OnscreenTimer (control)
+-- Source File(s): control/OnscreenTimer.cpp, control/OnscreenTimer.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Script.zpp  (from "Script.h")
+-- include OnscreenTimer.zpp  (from "OnscreenTimer.h")
+-- include Camera.zpp  (from "Camera.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+OnscreenTimer_Enum_1 ::= COUNTER_DISPLAY_NUMBER | COUNTER_DISPLAY_BAR
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema COnscreenTimerEntry
+  m_nTimerOffset : ℕ
+  m_nCounterOffset : ℕ
+  m_aTimerText : seq CHAR
+  m_aCounterText : seq CHAR
+  m_nType : ℕ
+  m_bCounterBuffer : seq CHAR
+  m_bTimerBuffer : seq CHAR
+  m_bTimerProcessed : 𝔹
+  m_bCounterProcessed : 𝔹
+  m_nClockOffset : ℕ
+  m_aClockText : seq CHAR
+  m_aClockBuffer : seq CHAR
+  m_bClockProcessed : 𝔹
+  m_bClockGoingDown : 𝔹
+  m_aClockColour : CRGBA
+  m_bClockTickThisFrame : 𝔹
+where
+  m_nTimerOffset ≥ 0
+  m_nCounterOffset ≥ 0
+  #m_aTimerText = 10
+  #m_aCounterText = 10
+  m_nType ≥ 0
+  #m_bCounterBuffer = 42
+  #m_bTimerBuffer = 42
+  m_nClockOffset ≥ 0
+  #m_aClockText = 10
+  #m_aClockBuffer = 40
+end
+
+schema COnscreenTimerEntry_Process
+  ΔCOnscreenTimerEntry
+where
+  -- Declared member operation COnscreenTimerEntry::Process()
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplay_2
+  ΔCOnscreenTimerEntry
+  result! : 𝔹
+where
+  -- Declared member operation COnscreenTimerEntry::ProcessForDisplay()
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplayClock_3
+  ΔCOnscreenTimerEntry
+where
+  -- Declared member operation COnscreenTimerEntry::ProcessForDisplayClock()
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplayCounter_4
+  ΔCOnscreenTimerEntry
+where
+  -- Declared member operation COnscreenTimerEntry::ProcessForDisplayCounter()
+  true
+end
+
+schema COnscreenCounterEntry
+  m_nCounterOffset : ℕ
+  m_nTotal : ℤ
+  m_aCounterText1 : seq CHAR
+  m_aCounterText2 : seq CHAR
+  m_nTypeOfTotal : ℕ
+  m_nType : ℕ
+  m_aCounterBuffer : seq CHAR
+  m_bCounterProcessed : 𝔹
+  m_colour1 : CRGBA
+  m_colour2 : CRGBA
+  m_bAddDollarPrefix : 𝔹
+  m_aCounterText : seq CHAR
+where
+  m_nCounterOffset ≥ 0
+  #m_aCounterText1 = 10
+  #m_aCounterText2 = 10
+  m_nTypeOfTotal ≥ 0
+  m_nType ≥ 0
+  #m_aCounterBuffer = 40
+  #m_aCounterText = 10
+end
+
+schema COnscreenCounterEntry_ProcessForDisplayCounter
+  ΔCOnscreenCounterEntry
+where
+  -- Declared member operation COnscreenCounterEntry::ProcessForDisplayCounter()
+  true
+end
+
+schema COnscreenTimer
+  m_sClocks : seq COnscreenTimerEntry  -- bounded array [NUMONSCREENCLOCKS]
+  m_sCounters : seq COnscreenCounterEntry  -- bounded array [NUMONSCREENCOUNTERS]
+  m_bProcessed : 𝔹
+  m_bDisabled : 𝔹
+  m_sEntries : seq COnscreenTimerEntry  -- bounded array [NUMONSCREENTIMERENTRIES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema COnscreenTimer_Init
+  ΔCOnscreenTimer
+where
+  -- Declared member operation COnscreenTimer::Init()
+  true
+end
+
+schema COnscreenTimer_Process_2
+  ΔCOnscreenTimer
+where
+  -- Declared member operation COnscreenTimer::Process()
+  true
+end
+
+schema COnscreenTimer_ProcessForDisplay_3
+  ΔCOnscreenTimer
+where
+  -- Declared member operation COnscreenTimer::ProcessForDisplay()
+  true
+end
+
+schema COnscreenTimer_ClearCounter_4
+  ΔCOnscreenTimer
+  offset? : ℕ
+where
+  -- Declared member operation COnscreenTimer::ClearCounter(uint32 offset)
+  true
+end
+
+schema COnscreenTimer_ClearClock_5
+  ΔCOnscreenTimer
+  offset? : ℕ
+where
+  -- Declared member operation COnscreenTimer::ClearClock(uint32 offset)
+  true
+end
+
+schema COnscreenTimer_AddCounter_6
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+  pos? : ℕ
+  arg_5? : ℤ
+  arg_6? : seq CHAR
+  arg_7? : ℕ
+where
+  -- Declared member operation COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text, uint16 pos, int32, char*, uint16)
+  true
+end
+
+schema COnscreenTimer_AddClock_7
+  ΔCOnscreenTimer
+  offset? : ℕ
+  text? : seq CHAR
+  bGoingDown? : 𝔹
+where
+  -- Declared member operation COnscreenTimer::AddClock(uint32 offset, char* text, bool bGoingDown)
+  true
+end
+
+schema COnscreenTimer_ChangeCounterPrefix_8
+  ΔCOnscreenTimer
+  offset? : ℕ
+  bChange? : 𝔹
+where
+  -- Declared member operation COnscreenTimer::ChangeCounterPrefix(uint32 offset, bool bChange)
+  true
+end
+
+schema COnscreenTimer_AddCounter_9
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+  pos? : ℕ
+where
+  -- Declared member operation COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text, uint16 pos)
+  true
+end
+
+schema COnscreenTimer_AddCounter_10
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+where
+  -- Declared member operation COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text)
+  true
+end
+
+schema COnscreenTimer_AddClock_11
+  ΔCOnscreenTimer
+  offset? : ℕ
+  text? : seq CHAR
+where
+  -- Declared member operation COnscreenTimer::AddClock(uint32 offset, char* text)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema COnscreenTimer_Init
+  ΔCOnscreenTimer
+where
+  -- State update: m_bDisabled' = false
+  -- State update: m_nCounterOffset' = 0
+  -- State update: m_nTotal' = -1
+  -- State update: m_nType' = COUNTER_DISPLAY_NUMBER
+  -- State update: m_nTypeOfTotal' = 0
+  -- State update: m_bCounterProcessed' = false
+  true
+end
+
+schema COnscreenTimer_Process
+  ΔCOnscreenTimer
+where
+  -- Invokes: CReplay::IsPlayingBack
+  true
+end
+
+schema COnscreenTimer_ProcessForDisplay
+  ΔCOnscreenTimer
+where
+  -- State update: m_bProcessed' = false
+  -- State update: m_bClockProcessed' = false
+  -- State update: m_bClockProcessed' = true
+  -- State update: m_bProcessed' = true
+  -- State update: m_bCounterProcessed' = false
+  -- State update: m_bCounterProcessed' = true
+  true
+end
+
+schema COnscreenTimer_ClearCounter
+  ΔCOnscreenTimer
+  offset? : ℕ
+where
+  -- State update: m_nCounterOffset' = 0
+  -- State update: m_nTypeOfTotal' = 0
+  -- State update: m_nType' = COUNTER_DISPLAY_NUMBER
+  -- State update: m_bCounterProcessed' = false
+  -- State update: m_bAddDollarPrefix' = false
+  true
+end
+
+schema COnscreenTimer_ClearClock
+  ΔCOnscreenTimer
+  offset? : ℕ
+where
+  -- State update: m_nClockOffset' = 0
+  -- State update: m_bClockProcessed' = false
+  -- State update: m_bClockGoingDown' = true
+  -- State update: m_bClockTickThisFrame' = false
+  true
+end
+
+schema COnscreenTimer_AddCounter
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text1? : seq CHAR
+  pos? : ℕ
+  total? : ℤ
+  text2? : seq CHAR
+  totalType? : ℕ
+where
+  -- State update: m_nCounterOffset' = offset
+  -- State update: m_nTotal' = total
+  -- State update: m_nTypeOfTotal' = totalType
+  -- State update: m_nType' = type
+  -- State update: m_bAddDollarPrefix' = 0
+  -- State update: m_colour1' = CRGBA(112, 132, 157, 255)
+  true
+end
+
+schema COnscreenTimer_AddClock
+  ΔCOnscreenTimer
+  offset? : ℕ
+  text? : seq CHAR
+  bGoingDown? : 𝔹
+where
+  -- State update: m_nClockOffset' = offset
+  -- State update: m_bClockGoingDown' = bGoingDown
+  -- State update: m_bClockTickThisFrame' = false
+  -- State update: m_aClockColour' = CRGBA(244, 225, 91, 255)
+  -- State update: m_aClockColour' = gbColour
+  -- State update: gbColour' = CRGBA(255, 255, 255, 255)
+  true
+end
+
+schema COnscreenTimerEntry_Process
+  ΔCOnscreenTimerEntry
+where
+  -- State update: timerPtr' = CTheScripts::GetPointerToScriptVariable(m_nClockOffset)
+  -- State update: oldTime' = *timerPtr
+  -- State update: newTime' = oldTime - int32(CTimer::GetTimeStepInMilliseconds())
+  -- State update: timerPtr' = newTime
+  -- State update: timerPtr' = 0
+  -- State update: m_bClockProcessed' = 0
+  -- Invokes: CTheScripts::GetPointerToScriptVariable, CTimer::GetTimeStepInMilliseconds, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplayClock
+  ΔCOnscreenTimerEntry
+where
+  -- State update: time' = *CTheScripts::GetPointerToScriptVariable(m_nClockOffset)
+  -- Invokes: CTheScripts::GetPointerToScriptVariable
+  true
+end
+
+schema COnscreenCounterEntry_ProcessForDisplayCounter
+  ΔCOnscreenCounterEntry
+where
+  -- State update: counter' = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset)
+  -- State update: m_nTotal' = Min(99, m_nTotal)
+  -- Invokes: CTheScripts::GetPointerToScriptVariable
+  true
+end
+
+schema COnscreenTimer_ChangeCounterPrefix
+  ΔCOnscreenTimer
+  offset? : ℕ
+  bChange? : 𝔹
+where
+  -- State update: m_bAddDollarPrefix' = bChange
+  true
+end
+
+schema COnscreenTimer_AddCounter_2
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+  pos? : ℕ
+where
+  -- State update: m_nCounterOffset' = offset
+  -- State update: m_nType' = type
+  true
+end
+
+schema COnscreenTimer_AddCounter_3
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+where
+  -- State update: m_nCounterOffset' = offset
+  -- State update: m_nType' = type
+  true
+end
+
+schema COnscreenTimer_AddClock_2
+  ΔCOnscreenTimer
+  offset? : ℕ
+  text? : seq CHAR
+where
+  -- State update: m_nTimerOffset' = offset
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplay
+  ΔCOnscreenTimerEntry
+where
+  -- State update: m_bTimerProcessed' = false
+  -- State update: m_bCounterProcessed' = false
+  -- State update: m_bTimerProcessed' = true
+  -- State update: m_bCounterProcessed' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplayCounter
+  ΔCOnscreenTimerEntry
+where
+  -- State update: counter' = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset)
+  -- Invokes: CTheScripts::GetPointerToScriptVariable
+  true
+end

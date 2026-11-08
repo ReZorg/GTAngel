@@ -1,0 +1,23 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: screenDroplet_PS (extras)
+-- Source File(s): extras/shaders/screenDroplet_PS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VS_out
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+  TEXCOORD1 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end

@@ -1,0 +1,48 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: XtraCompsModelInfo (modelinfo)
+-- Source File(s): modelinfo/XtraCompsModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CXtraCompsModelInfo_RcWriteThis
+  ΔCXtraCompsModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CXtraCompsModelInfo_RcWriteEmpty
+  ΔCXtraCompsModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema XtraCompsModelInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 21
+end

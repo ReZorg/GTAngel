@@ -1,0 +1,178 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TrafficLights (control)
+-- Source File(s): control/TrafficLights.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include General.zpp  (from "General.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+TrafficLights_Enum_1 ::= SOME_FLAG
+  -- val(SOME_FLAG) = 0x80
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTrafficLights_DisplayActualLight
+  ΔCTrafficLights
+  ent? : Ref[CEntity]
+where
+  -- State update: phase' = LightForCars1_Visual()
+  -- State update: phase' = LightForCars2_Visual()
+  -- State update: m' = ent.GetModelIndex()
+  -- State update: mi' = CModelInfo::GetModelInfo(ent.GetModelIndex())
+  -- State update: x' = mi.Get2dEffect(0).pos.x
+  -- State update: yMin' = mi.Get2dEffect(0).pos.y
+  -- Invokes: ent->GetUp, ent->GetModelIndex, CModelInfo::GetModelInfo, mi->Get2dEffect, ent->GetMatrix
+  true
+end
+
+schema TrafficLights_DoesLineSegmentIntersect
+  ΔTrafficLightsModuleState
+  l1x1? : ℝ
+  l1y1? : ℝ
+  l1x2? : ℝ
+  l1y2? : ℝ
+  l2x1? : ℝ
+  l2y1? : ℝ
+  l2x2? : ℝ
+  l2y2? : ℝ
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTrafficLights_ScanForLightsOnMap
+  ΔCTrafficLights
+where
+  -- State update: x' = 0
+  -- State update: y' = 0
+  -- State update: list' = CWorld::GetSector(x, y).m_lists[ENTITYLIST_DUMMIES]
+  -- State update: node' = list.first
+  -- State update: light' = (CEntity*)node.item
+  -- State update: pos1' = light.GetMatrix() * CVector(17.0f, 0.0f, 0.0f)
+  -- Invokes: CWorld::GetSector, light->GetModelIndex, light->GetMatrix, ThePaths.ConnectedNode, light->GetPosition
+  true
+end
+
+schema CTrafficLights_ShouldCarStopForLight
+  ΔCTrafficLights
+  vehicle? : Ref[CVehicle]
+  alwaysStop? : 𝔹
+where
+  -- State update: node' = vehicle.AutoPilot.m_nNextPathNodeInfo
+  -- State update: type' = ThePaths.m_carPathLinks[node].trafficLightType
+  -- State update: direction' = ThePaths.m_carPathLinks[node].trafficLightDirection
+  -- State update: node' = vehicle.AutoPilot.m_nCurrentPathNodeInfo
+  -- State update: type' = ThePaths.m_carPathLinks[node].trafficLightType
+  -- State update: direction' = ThePaths.m_carPathLinks[node].trafficLightDirection
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: vehicle->GetPosition, vehicle->GetStatus
+  true
+end
+
+schema CTrafficLights_ShouldCarStopForBridge
+  ΔCTrafficLights
+  vehicle? : Ref[CVehicle]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CTrafficLights_FindTrafficLightType
+  ΔCTrafficLights
+  light? : Ref[CEntity]
+where
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 2
+  -- Invokes: CGeneral::GetATanOfXY, light->GetForward
+  true
+end
+
+schema CTrafficLights_LightForPeds
+  ΔCTrafficLights
+where
+  -- State update: period' = CTimer::GetTimeInMilliseconds() % 16384
+  -- Return postcondition: result! = PED_LIGHTS_DONT_WALK
+  -- Return postcondition: result! = PED_LIGHTS_WALK
+  -- Return postcondition: result! = PED_LIGHTS_WALK_BLINK
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CTrafficLights_LightForCars1
+  ΔCTrafficLights
+where
+  -- State update: period' = CTimer::GetTimeInMilliseconds() % 16384
+  -- Return postcondition: result! = CAR_LIGHTS_GREEN
+  -- Return postcondition: result! = CAR_LIGHTS_GREEN
+  -- Return postcondition: result! = CAR_LIGHTS_GREEN
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CTrafficLights_LightForCars2
+  ΔCTrafficLights
+where
+  -- State update: period' = CTimer::GetTimeInMilliseconds() % 16384
+  -- Return postcondition: result! = CAR_LIGHTS_GREEN
+  -- Return postcondition: result! = CAR_LIGHTS_GREEN
+  -- Return postcondition: result! = CAR_LIGHTS_RED
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CTrafficLights_LightForCars1_Visual
+  ΔCTrafficLights
+where
+  -- Return postcondition: result! = LightForCars1()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CTrafficLights_LightForCars2_Visual
+  ΔCTrafficLights
+where
+  -- Return postcondition: result! = LightForCars2()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TrafficLightsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 592
+end

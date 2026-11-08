@@ -1,0 +1,54 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: win (skel)
+-- Source File(s): skel/win/win.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eJoypads ::= JOYSTICK1 | JOYSTICK2 | MAX_JOYSTICKS
+  -- val(JOYSTICK1) = 0
+
+eJoypadState ::= JOYPAD_UNUSED | JOYPAD_ATTACHED
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tJoy
+  m_State : eJoypadState
+  m_bInitialised : 𝔹
+  m_bHasAxisZ : 𝔹
+  m_bHasAxisR : 𝔹
+  m_nVendorID : ℤ
+  m_nProductID : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CJoySticks
+  m_aJoys : seq tJoy  -- bounded array [MAX_JOYSTICKS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CJoySticks_CJoySticks
+  ΔCJoySticks
+where
+  -- Declared member operation CJoySticks::CJoySticks()
+  true
+end
+
+schema CJoySticks_ClearJoyInfo_2
+  ΔCJoySticks
+  joyID? : ℤ
+where
+  -- Declared member operation CJoySticks::ClearJoyInfo(int joyID)
+  true
+end

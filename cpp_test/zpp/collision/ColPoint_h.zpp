@@ -1,0 +1,122 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColPoint (collision)
+-- Source File(s): collision/ColPoint.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CColPoint
+  point : CVector
+  pad1 : ℤ
+  normal : CVector
+  pad2 : ℤ
+  surfaceA : ℕ
+  pieceA : ℕ
+  surfaceB : ℕ
+  pieceB : ℕ
+  depth : ℝ
+where
+  surfaceA ≥ 0
+  pieceA ≥ 0
+  surfaceB ≥ 0
+  pieceB ≥ 0
+end
+
+schema CColPoint_GetNormal
+  ΔCColPoint
+  result! : CVector
+where
+  -- Declared member operation CColPoint::GetNormal()
+  true
+end
+
+schema CColPoint_GetDepth_2
+  ΔCColPoint
+  result! : ℝ
+where
+  -- Declared member operation CColPoint::GetDepth()
+  true
+end
+
+schema CColPoint_Set_3
+  ΔCColPoint
+  depth? : ℝ
+  surfA? : ℕ
+  pieceA? : ℕ
+  surfB? : ℕ
+  pieceB? : ℕ
+  result! : void
+where
+  -- Declared member operation CColPoint::Set(float depth, uint8 surfA, uint8 pieceA, uint8 surfB, uint8 pieceB)
+  true
+end
+
+schema CColPoint_Set_4
+  ΔCColPoint
+  surfA? : ℕ
+  pieceA? : ℕ
+  surfB? : ℕ
+  pieceB? : ℕ
+  result! : void
+where
+  -- Declared member operation CColPoint::Set(uint8 surfA, uint8 pieceA, uint8 surfB, uint8 pieceB)
+  true
+end
+
+schema CColPoint_operator_5
+  ΔCColPoint
+  other? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CColPoint::operator=(const CColPoint &other)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ColPoint_GetDepth
+  ΔColPointModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = depth
+  true
+end
+
+schema ColPoint_Set
+  ΔColPointModuleState
+  depth? : ℝ
+  surfA? : ℕ
+  pieceA? : ℕ
+  surfB? : ℕ
+  pieceB? : ℕ
+where
+  -- State update: depth' = depth
+  -- State update: surfaceA' = surfA
+  -- State update: pieceA' = pieceA
+  -- State update: surfaceB' = surfB
+  -- State update: pieceB' = pieceB
+  true
+end
+
+schema ColPoint_Set_2
+  ΔColPointModuleState
+  surfA? : ℕ
+  pieceA? : ℕ
+  surfB? : ℕ
+  pieceB? : ℕ
+where
+  -- State update: surfaceA' = surfA
+  -- State update: pieceA' = pieceA
+  -- State update: surfaceB' = surfB
+  -- State update: pieceB' = pieceB
+  true
+end

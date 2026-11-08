@@ -1,0 +1,1341 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Shadows (renderer)
+-- Source File(s): renderer/Shadows.cpp, renderer/Shadows.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include World.zpp  (from "World.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Script.zpp  (from "Script.h")
+-- include TimeStep.zpp  (from "TimeStep.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include CutsceneObject.zpp  (from "CutsceneObject.h")
+-- include CutsceneShadow.zpp  (from "CutsceneShadow.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_STOREDSHADOWS : ℕ  -- #define MAX_STOREDSHADOWS 48
+MAX_POLYBUNCHES : ℕ  -- #define MAX_POLYBUNCHES 380
+MAX_STATICSHADOWS : ℕ  -- #define MAX_STATICSHADOWS 48
+MAX_PERMAMENTSHADOWS : ℕ  -- #define MAX_PERMAMENTSHADOWS 48
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eShadowType ::= SHADOWTYPE_NONE | SHADOWTYPE_DARK | SHADOWTYPE_ADDITIVE | SHADOWTYPE_INVCOLOR
+  -- val(SHADOWTYPE_NONE) = 0
+
+eShadowTextureType ::= SHADOWTEX_NONE | SHADOWTEX_CAR | SHADOWTEX_PED | SHADOWTEX_EXPLOSION | SHADOWTEX_HELI | SHADOWTEX_HEADLIGHTS | SHADOWTEX_BLOOD
+  -- val(SHADOWTEX_NONE) = 0
+
+VEH_SHD_TYPE ::= VEH_SHD_TYPE_CAR | VEH_SHD_TYPE_BIKE | VEH_SHD_TYPE_HELI | VEH_SHD_TYPE_SEAPLANE | VEH_SHD_TYPE_RCPLANE
+  -- val(VEH_SHD_TYPE_CAR) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema _ProjectionParam
+  at : RwV3d
+  invMatrix : RwMatrix
+  shadowValue : ℕ
+  fade : 𝔹
+  numIm3DBatch : ℕ
+  entityMatrix : RwMatrix
+where
+  shadowValue ≥ 0
+  numIm3DBatch ≥ 0
+end
+
+schema CStoredShadow
+  m_vecPos : CVector
+  m_vecFront : CVector2D
+  m_vecSide : CVector2D
+  m_fZDistance : ℝ
+  m_fScale : ℝ
+  m_pTexture : Ref[RwTexture]
+  m_pCutsceneShadow : Ref[CCutsceneShadow]
+  m_nIntensity : ℤ
+  m_ShadowType : ℕ
+  m_nRed : ℕ
+  m_nGreen : ℕ
+  m_nBlue : ℕ
+  bRendered : 𝔹
+  bDrawOnBuildings : 𝔹
+where
+  #m_pTexture ≤ 1
+  #m_pCutsceneShadow ≤ 1
+  m_ShadowType ≥ 0
+  m_nRed ≥ 0
+  m_nGreen ≥ 0
+  m_nBlue ≥ 0
+  #bRendered = 1
+  #bDrawOnBuildings = 1
+end
+
+schema CStoredShadow_CStoredShadow
+  ΔCStoredShadow
+where
+  -- Declared member operation CStoredShadow::CStoredShadow()
+  true
+end
+
+schema CPolyBunch
+  m_aVerts : seq CVector  -- bounded array [7]
+  m_pNext : Ref[CPolyBunch]
+  m_nNumVerts : ℤ
+  m_aU : seq ℕ  -- bounded array [7]
+  m_aV : seq ℕ  -- bounded array [7]
+where
+  #m_aVerts = 7
+  #m_pNext ≤ 1
+  #m_aU = 7
+  #m_aV = 7
+end
+
+schema CPolyBunch_CPolyBunch
+  ΔCPolyBunch
+where
+  -- Declared member operation CPolyBunch::CPolyBunch()
+  true
+end
+
+schema CStaticShadow
+  m_nId : ℕ
+  m_pPolyBunch : Ref[CPolyBunch]
+  m_nTimeCreated : ℕ
+  m_vecPosn : CVector
+  m_vecFront : CVector2D
+  m_vecSide : CVector2D
+  m_fZDistance : ℝ
+  m_fScale : ℝ
+  m_pTexture : Ref[RwTexture]
+  m_nIntensity : ℤ
+  m_nType : ℕ
+  m_nRed : ℕ
+  m_nGreen : ℕ
+  m_nBlue : ℕ
+  m_bJustCreated : 𝔹
+  m_bRendered : 𝔹
+  m_bTemp : 𝔹
+where
+  m_nId ≥ 0
+  #m_pPolyBunch ≤ 1
+  m_nTimeCreated ≥ 0
+  #m_pTexture ≤ 1
+  m_nType ≥ 0
+  m_nRed ≥ 0
+  m_nGreen ≥ 0
+  m_nBlue ≥ 0
+end
+
+schema CStaticShadow_CStaticShadow
+  ΔCStaticShadow
+where
+  -- Declared member operation CStaticShadow::CStaticShadow()
+  true
+end
+
+schema CPermanentShadow
+  m_vecPos : CVector
+  m_vecFront : CVector2D
+  m_vecSide : CVector2D
+  m_fZDistance : ℝ
+  m_fScale : ℝ
+  m_nTimeCreated : ℕ
+  m_nLifeTime : ℕ
+  m_pTexture : Ref[RwTexture]
+  m_nIntensity : ℤ
+  m_nType : ℕ
+  m_nRed : ℕ
+  m_nGreen : ℕ
+  m_nBlue : ℕ
+where
+  m_nTimeCreated ≥ 0
+  m_nLifeTime ≥ 0
+  #m_pTexture ≤ 1
+  m_nType ≥ 0
+  m_nRed ≥ 0
+  m_nGreen ≥ 0
+  m_nBlue ≥ 0
+end
+
+schema CPermanentShadow_CPermanentShadow
+  ΔCPermanentShadow
+where
+  -- Declared member operation CPermanentShadow::CPermanentShadow()
+  true
+end
+
+schema CShadows
+  ShadowsStoredToBeRendered : ℤ
+  pEmptyBunchList : Ref[CPolyBunch]
+  aPermanentShadows : seq CPermanentShadow  -- bounded array [MAX_PERMAMENTSHADOWS]
+where
+  #pEmptyBunchList ≤ 1
+end
+
+schema CShadows_Init
+  ΔCShadows
+where
+  -- Declared member operation CShadows::Init(void)
+  true
+end
+
+schema CShadows_Shutdown_2
+  ΔCShadows
+where
+  -- Declared member operation CShadows::Shutdown(void)
+  true
+end
+
+schema CShadows_AddPermanentShadow_3
+  ΔCShadows
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  nTime? : ℕ
+  fScale? : ℝ
+where
+  -- Declared member operation CShadows::AddPermanentShadow(uint8 ShadowType, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, uint32 nTime, float fScale)
+  true
+end
+
+schema CShadows_StoreStaticShadow_4
+  ΔCShadows
+  nID? : ℕ
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[Const_CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  fDrawDistance? : ℝ
+  bTempShadow? : 𝔹
+  fUpDistance? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, Const CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, float fDrawDistance, bool bTempShadow, float fUpDistance)
+  true
+end
+
+schema CShadows_StoreShadowToBeRendered_5
+  ΔCShadows
+  ShadowType? : ℕ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+where
+  -- Declared member operation CShadows::StoreShadowToBeRendered(uint8 ShadowType, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue)
+  true
+end
+
+schema CShadows_StoreShadowToBeRendered_6
+  ΔCShadows
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  bDrawOnWater? : 𝔹
+  fScale? : ℝ
+  pShadow? : Ref[CCutsceneShadow]
+  bDrawOnBuildings? : 𝔹
+where
+  -- Declared member operation CShadows::StoreShadowToBeRendered(uint8 ShadowType, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, bool bDrawOnWater, float fScale, CCutsceneShadow *pShadow, bool bDrawOnBuildings)
+  true
+end
+
+schema CShadows_StoreShadowForVehicle_7
+  ΔCShadows
+  pCar? : Ref[CVehicle]
+  type? : VEH_SHD_TYPE
+where
+  -- Declared member operation CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
+  true
+end
+
+schema CShadows_StoreCarLightShadow_8
+  ΔCShadows
+  pCar? : Ref[CVehicle]
+  nID? : ℤ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fMaxViewAngle? : ℝ
+  arg1? : 𝔹
+  arg2? : ℝ
+  arg3? : ℝ
+where
+  -- Declared member operation CShadows::StoreCarLightShadow(CVehicle *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, uint8 nRed, uint8 nGreen, uint8 nBlue, float fMaxViewAngle, bool arg1 = false, float arg2 = 0.0f, float arg3 = 1.0f)
+  true
+end
+
+schema CShadows_StoreShadowForPed_9
+  ΔCShadows
+  pPed? : Ref[CPed]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- Declared member operation CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacementY, float fFrontX, float fFrontY, float fSideX, float fSideY)
+  true
+end
+
+schema CShadows_StoreShadowForPedObject_10
+  ΔCShadows
+  pPedObject? : Ref[CEntity]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- Declared member operation CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, float fDisplacementY, float fFrontX, float fFrontY, float fSideX, float fSideY)
+  true
+end
+
+schema CShadows_StoreShadowForCutscenePedObject_11
+  ΔCShadows
+  pObject? : Ref[CCutsceneObject]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- Declared member operation CShadows::StoreShadowForCutscenePedObject(CCutsceneObject *pObject, float fDisplacementX, float fDisplacementY, float fFrontX, float fFrontY, float fSideX, float fSideY)
+  true
+end
+
+schema CShadows_StoreShadowForTree_12
+  ΔCShadows
+  pTree? : Ref[CEntity]
+where
+  -- Declared member operation CShadows::StoreShadowForTree(CEntity *pTree)
+  true
+end
+
+schema CShadows_StoreShadowForPole_13
+  ΔCShadows
+  pPole? : Ref[CEntity]
+  fOffsetX? : ℝ
+  fOffsetY? : ℝ
+  fOffsetZ? : ℝ
+  fPoleHeight? : ℝ
+  fPoleWidth? : ℝ
+  nID? : ℕ
+where
+  -- Declared member operation CShadows::StoreShadowForPole(CEntity *pPole, float fOffsetX, float fOffsetY, float fOffsetZ, float fPoleHeight, float fPoleWidth, uint32 nID)
+  true
+end
+
+schema CShadows_SetRenderModeForShadowType_14
+  ΔCShadows
+  ShadowType? : ℕ
+where
+  -- Declared member operation CShadows::SetRenderModeForShadowType(uint8 ShadowType)
+  true
+end
+
+schema CShadows_RenderStoredShadows_15
+  ΔCShadows
+where
+  -- Declared member operation CShadows::RenderStoredShadows(void)
+  true
+end
+
+schema CShadows_RenderStaticShadows_16
+  ΔCShadows
+where
+  -- Declared member operation CShadows::RenderStaticShadows(void)
+  true
+end
+
+schema CShadows_GeneratePolysForStaticShadow_17
+  ΔCShadows
+  nStaticShadowID? : ℤ
+where
+  -- Declared member operation CShadows::GeneratePolysForStaticShadow(int16 nStaticShadowID)
+  true
+end
+
+schema CShadows_CastShadowSectorList_18
+  ΔCShadows
+  PtrList? : CPtrList
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- Declared member operation CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
+  true
+end
+
+schema CShadows_CastPlayerShadowSectorList_19
+  ΔCShadows
+  PtrList? : CPtrList
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- Declared member operation CShadows::CastPlayerShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
+  true
+end
+
+schema CShadows_CastCutsceneShadowSectorList_20
+  ΔCShadows
+  PtrList? : CPtrList
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+  pShadow? : Ref[CCutsceneShadow]
+where
+  -- Declared member operation CShadows::CastCutsceneShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, CPolyBunch **ppPolyBunch, CCutsceneShadow *pShadow)
+  true
+end
+
+schema CShadows_CastShadowEntityXY_21
+  ΔCShadows
+  pEntity? : Ref[CEntity]
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- Declared member operation CShadows::CastShadowEntityXY(CEntity *pEntity, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
+  true
+end
+
+schema CShadows_CastShadowEntityXYZ_22
+  ΔCShadows
+  pEntity? : Ref[CEntity]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+  pShadow? : Ref[CCutsceneShadow]
+where
+  -- Declared member operation CShadows::CastShadowEntityXYZ(CEntity *pEntity, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, CPolyBunch **ppPolyBunch, CCutsceneShadow *pShadow)
+  true
+end
+
+schema CShadows_UpdateStaticShadows_23
+  ΔCShadows
+where
+  -- Declared member operation CShadows::UpdateStaticShadows(void)
+  true
+end
+
+schema CShadows_UpdatePermanentShadows_24
+  ΔCShadows
+where
+  -- Declared member operation CShadows::UpdatePermanentShadows(void)
+  true
+end
+
+schema CShadows_CalcPedShadowValues_25
+  ΔCShadows
+  vecLightDir? : CVector
+  pfFrontX? : ℙ ℝ
+  pfFrontY? : ℙ ℝ
+  pfSideX? : ℙ ℝ
+  pfSideY? : ℙ ℝ
+  pfDisplacementX? : ℙ ℝ
+  pfDisplacementY? : ℙ ℝ
+where
+  -- Declared member operation CShadows::CalcPedShadowValues(CVector vecLightDir, float *pfFrontX, float *pfFrontY, float *pfSideX, float *pfSideY, float *pfDisplacementX, float *pfDisplacementY)
+  true
+end
+
+schema CShadows_RenderExtraPlayerShadows_26
+  ΔCShadows
+where
+  -- Declared member operation CShadows::RenderExtraPlayerShadows(void)
+  true
+end
+
+schema CShadows_TidyUpShadows_27
+  ΔCShadows
+where
+  -- Declared member operation CShadows::TidyUpShadows(void)
+  true
+end
+
+schema CShadows_RenderIndicatorShadow_28
+  ΔCShadows
+  nID? : ℕ
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+where
+  -- Declared member operation CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity)
+  true
+end
+
+schema CShadows_StoreCarLightShadow_29
+  ΔCShadows
+  pCar? : Ref[CVehicle]
+  nID? : ℤ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fMaxViewAngle? : ℝ
+where
+  -- Declared member operation CShadows::StoreCarLightShadow(CVehicle *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, uint8 nRed, uint8 nGreen, uint8 nBlue, float fMaxViewAngle)
+  true
+end
+
+schema CShadows_StoreStaticShadow_30
+  ΔCShadows
+  nID? : ℕ
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[Const_CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  fDrawDistance? : ℝ
+  bTempShadow? : 𝔹
+  fUpDistance? : ℝ
+where
+  -- Declared member operation CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, Const CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, float fScale, float fDrawDistance, bool bTempShadow, float fUpDistance)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CShadows_Init
+  ΔCShadows
+where
+  -- State update: slut' = CTxdStore::FindTxdSlot("particle")
+  -- State update: gpShadowCarTex' = RwTextureRead("shad_car",     ∅)
+  -- State update: gpShadowPedTex' = RwTextureRead("shad_ped",     ∅)
+  -- State update: gpShadowHeliTex' = RwTextureRead("shad_heli",    ∅)
+  -- State update: gpShadowBikeTex' = RwTextureRead("shad_bike",    ∅)
+  -- State update: gpShadowBaronTex' = RwTextureRead("shad_rcbaron", ∅)
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::FindTxdSlot, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd, VarConsole.Add
+  true
+end
+
+schema CShadows_Shutdown
+  ΔCShadows
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CShadows_AddPermanentShadow
+  ΔCShadows
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  nTime? : ℕ
+  fScale? : ℝ
+where
+  -- State update: nSlot' = 0
+  -- State update: m_nType' = ShadowType
+  -- State update: m_pTexture' = pTexture
+  -- State update: m_vecPos' = *pPosn
+  -- State update: m_vecFront.x' = fFrontX
+  -- State update: m_vecFront.y' = fFrontY
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CShadows_StoreStaticShadow
+  ΔCShadows
+  nID? : ℕ
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[Const_CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  fDrawDistance? : ℝ
+  bTempShadow? : 𝔹
+  fUpDistance? : ℝ
+where
+  -- State update: fDistToCamSqr' = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nIntensity' = (int32)(nIntensity * fMult)
+  -- State update: nRed' = (int32)(nRed       * fMult)
+  -- State update: nGreen' = (int32)(nGreen     * fMult)
+  -- State update: nBlue' = (int32)(nBlue      * fMult)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = aStaticShadows[nSlot].m_pPolyBunch != nil
+  -- Invokes: TheCamera.GetPosition, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CShadows_StoreShadowToBeRendered
+  ΔCShadows
+  ShadowTexture? : ℕ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CShadows_StoreShadowToBeRendered_2
+  ΔCShadows
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  bDrawOnWater? : 𝔹
+  fScale? : ℝ
+  pShadow? : Ref[CCutsceneShadow]
+  bDrawOnBuildings? : 𝔹
+where
+  -- State update: m_ShadowType' = ShadowType
+  -- State update: m_pTexture' = pTexture
+  -- State update: m_vecPos' = *pPosn
+  -- State update: m_vecFront.x' = fFrontX
+  -- State update: m_vecFront.y' = fFrontY
+  -- State update: m_vecSide.x' = fSideX
+  true
+end
+
+schema CShadows_StoreShadowForVehicle
+  ΔCShadows
+  pCar? : Ref[CVehicle]
+  type? : VEH_SHD_TYPE
+where
+  -- State update: CarPos' = pCar.GetPosition()
+  -- State update: fDistToCamSqr' = (CarPos - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 144.0f
+  -- State update: fDrawDistance' = 144.0f
+  -- State update: fDrawDistance' = 18.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- Invokes: CTimeCycle::GetShadowStrength, pCar->GetPosition, TheCamera.GetPosition, CCutsceneMgr::IsRunning, pCar->GetColModel
+  true
+end
+
+schema CShadows_StoreCarLightShadow
+  ΔCShadows
+  pCar? : Ref[CVehicle]
+  nID? : ℤ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fMaxViewAngle? : ℝ
+  arg1? : 𝔹
+  arg2? : ℝ
+  arg3? : ℝ
+where
+  -- State update: fDistToCamSqr' = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 27.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nRed' = (int32)(nRed   * fMult)
+  -- State update: nGreen' = (int32)(nGreen * fMult)
+  -- State update: nBlue' = (int32)(nBlue  * fMult)
+  -- Invokes: TheCamera.GetPosition, CCutsceneMgr::IsRunning, m_vecMoveSpeed.Magnitude
+  true
+end
+
+schema Shadows_StoreShadowForCutscenePedObject
+  ΔShadowsModuleState
+  pObject? : Ref[CPed]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- State update: shadow' = pObject.m_pRTShadow
+  -- State update: pos' = pObject.GetPosition()
+  -- State update: fDistToCamSqr' = (pos - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 100.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nColorStrength' = (int32)(CTimeCycle::GetShadowStrength() * fMult)
+  -- Invokes: shadow->IsInitialized, pObject->GetPosition, TheCamera.GetPosition, TheCamera.IsSphereVisible, CTimeCycle::GetShadowStrength
+  true
+end
+
+schema CShadows_StoreShadowForPed
+  ΔCShadows
+  pPed? : Ref[CPed]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- State update: pShadow' = pPed.m_pRTShadow
+  -- Invokes: CTimeCycle::GetShadowStrength, pShadow->IsInitialized, pShadow->UpdateForCutscene
+  true
+end
+
+schema CShadows_StoreShadowForPedObject
+  ΔCShadows
+  pPedObject? : Ref[CEntity]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- State update: PedPos' = pPedObject.GetPosition()
+  -- State update: fDistToCamSqr' = (PedPos - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 26.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nColorStrength' = (int32)(CTimeCycle::GetShadowStrength() * fMult)
+  -- State update: nColorStrength' = CTimeCycle::GetShadowStrength()
+  -- Invokes: pPedObject->GetPosition, TheCamera.GetPosition, TheCamera.IsSphereVisible, CTimeCycle::GetShadowStrength
+  true
+end
+
+schema CShadows_StoreShadowForCutscenePedObject
+  ΔCShadows
+  pObject? : Ref[CCutsceneObject]
+  fDisplacementX? : ℝ
+  fDisplacementY? : ℝ
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+where
+  -- State update: shadow' = pObject.m_pShadow
+  -- State update: pos' = pObject.GetPosition()
+  -- State update: fDistToCamSqr' = (pos - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 100.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nColorStrength' = (int32)(CTimeCycle::GetShadowStrength() * fMult)
+  -- Invokes: shadow->IsInitialized, pObject->GetPosition, TheCamera.GetPosition, TheCamera.IsSphereVisible, CTimeCycle::GetShadowStrength
+  true
+end
+
+schema CShadows_StoreShadowForTree
+  ΔCShadows
+  pTree? : Ref[CEntity]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CShadows_StoreShadowForPole
+  ΔCShadows
+  pPole? : Ref[CEntity]
+  fOffsetX? : ℝ
+  fOffsetY? : ℝ
+  fOffsetZ? : ℝ
+  fPoleHeight? : ℝ
+  fPoleWidth? : ℝ
+  nID? : ℕ
+where
+  -- State update: PolePos' = pPole.GetPosition()
+  -- Invokes: CTimeCycle::GetShadowStrength, pPole->GetUp, pPole->GetPosition, pPole->GetRight, pPole->GetForward
+  true
+end
+
+schema CShadows_SetRenderModeForShadowType
+  ΔCShadows
+  ShadowType? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CShadows_RenderStoredShadows
+  ΔCShadows
+where
+  -- State update: m_nFlags.bRendered' = false
+  -- State update: shadowPos' = asShadowsStored[j].m_vecPos
+  -- State update: fStartX' = shadowPos.x - fWidth
+  -- State update: fEndX' = shadowPos.x + fWidth
+  -- State update: fStartY' = shadowPos.y - fHeight
+  -- State update: fEndY' = shadowPos.y + fHeight
+  -- Invokes: RenderBuffer::ClearRenderBuffer, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::AdvanceCurrentScanCode, CWorld::GetSector
+  true
+end
+
+schema CShadows_RenderStaticShadows
+  ΔCShadows
+where
+  -- State update: m_bRendered' = false
+  -- State update: bunch' = aStaticShadows[j].m_pPolyBunch
+  -- State update: m_bRendered' = true
+  -- Invokes: RenderBuffer::ClearRenderBuffer, RenderBuffer::StartStoring, RenderBuffer::StopStoring, RenderBuffer::RenderStuffInBuffer
+  true
+end
+
+schema CShadows_GeneratePolysForStaticShadow
+  ΔCShadows
+  nStaticShadowID? : ℤ
+where
+  -- State update: shadowPos' = aStaticShadows[nStaticShadowID].m_vecPosn
+  -- State update: fStartX' = shadowPos.x - fWidth
+  -- State update: fEndX' = shadowPos.x + fWidth
+  -- State update: fStartY' = shadowPos.y - fHeight
+  -- State update: fEndY' = shadowPos.y + fHeight
+  -- State update: nStartX' = Max(CWorld::GetSectorIndexX(fStartX), 0)
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::AdvanceCurrentScanCode, CWorld::GetSector
+  true
+end
+
+schema CShadows_CastShadowSectorList
+  ΔCShadows
+  PtrList? : CPtrList
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- State update: pNode' = PtrList.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: nScanCode' = pEntity.m_scanCode
+  -- State update: pNode' = pNode.next
+  -- State update: pEntity.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: Bound' = pEntity.GetBoundRect()
+  -- Invokes: CWorld::GetCurrentScanCode, pEntity->GetBoundRect, pEntity->GetPosition, pEntity->GetColModel
+  true
+end
+
+schema CShadows_CastPlayerShadowSectorList
+  ΔCShadows
+  PtrList? : CPtrList
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- State update: pNode' = PtrList.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: nScanCode' = pEntity.m_scanCode
+  -- State update: pNode' = pNode.next
+  -- State update: pEntity.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: Bound' = pEntity.GetBoundRect()
+  -- Invokes: CWorld::GetCurrentScanCode, pEntity->GetBoundRect, pEntity->GetPosition, pEntity->GetColModel
+  true
+end
+
+schema CShadows_CastCutsceneShadowSectorList
+  ΔCShadows
+  PtrList? : CPtrList
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+  pShadow? : Ref[CCutsceneShadow]
+where
+  -- State update: pNode' = PtrList.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: nScanCode' = pEntity.m_scanCode
+  -- State update: pNode' = pNode.next
+  -- State update: pEntity.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: Bound' = pEntity.GetBoundRect()
+  -- Invokes: CWorld::GetCurrentScanCode, pEntity->GetBoundRect, pEntity->GetPosition, pEntity->GetColModel
+  true
+end
+
+schema CShadows_CastShadowEntityXY
+  ΔCShadows
+  pEntity? : Ref[CEntity]
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- State update: pCol' = pEntity.GetColModel()
+  -- State update: x' = (fLengthRight   + fFrontRight  )  - fSideRight
+  -- State update: y' = (fLengthForward + fFrontForward)  - fSideForward
+  -- State update: x' = fSideRight      + (fLengthRight   + fFrontRight)
+  -- State update: y' = fSideForward    + (fLengthForward + fFrontForward)
+  -- State update: x' = fSideRight      + (fLengthRight   - fFrontRight)
+  -- Invokes: pEntity->GetColModel, pEntity->GetModelIndex, pEntity->GetPosition, boundingBox.GetSize, CCollision::CalculateTrianglePlanes
+  true
+end
+
+schema CShadows_CastShadowEntityXYZ
+  ΔCShadows
+  pEntity? : Ref[CEntity]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+  pShadow? : Ref[CCutsceneShadow]
+where
+  -- State update: shadow' = pShadow.GetShadowCamera()
+  -- State update: collision' = pEntity.GetColModel()
+  -- State update: mat' = *RwFrameGetMatrix(RwCameraGetFrame(shadow.GetRwCamera()))
+  -- State update: Xaxis' = { 1.0f, 0.0f, 0.0f }
+  -- State update: proj.at' = mat.at
+  -- State update: radius' = RwCameraGetViewWindow(shadow.GetRwCamera()).x
+  -- Invokes: pShadow->GetShadowCamera, pEntity->GetColModel, CCollision::CalculateTrianglePlanes, shadow->GetRwCamera, pEntity->GetMatrix
+  true
+end
+
+schema CShadows_UpdateStaticShadows
+  ΔCShadows
+where
+  -- State update: m_bJustCreated' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CShadows_UpdatePermanentShadows
+  ΔCShadows
+where
+  -- State update: m_nType' = SHADOWTYPE_NONE
+  -- State update: m_nType' = SHADOWTYPE_NONE
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CStaticShadow_Free
+  ΔCStaticShadow
+where
+  -- State update: pFree' = CShadows::pEmptyBunchList
+  -- State update: pEmptyBunchList' = m_pPolyBunch
+  -- State update: pUsed' = m_pPolyBunch
+  -- State update: pUsed' = pUsed.m_pNext
+  -- State update: pUsed.m_pNext' = pFree
+  -- State update: m_pPolyBunch' = ∅
+  true
+end
+
+schema CShadows_CalcPedShadowValues
+  ΔCShadows
+  vecLightDir? : CVector
+  pfFrontX? : ℙ ℝ
+  pfFrontY? : ℙ ℝ
+  pfSideX? : ℙ ℝ
+  pfSideY? : ℙ ℝ
+  pfDisplacementX? : ℙ ℝ
+  pfDisplacementY? : ℙ ℝ
+where
+  -- State update: pfFrontX' = -vecLightDir.x
+  -- State update: pfFrontY' = -vecLightDir.y
+  -- State update: fDist' = Sqrt(*pfFrontY * *pfFrontY + *pfFrontX * *pfFrontX)
+  -- State update: fMult' = (fDist + 1.0f) / fDist
+  -- State update: pfSideX' = -vecLightDir.y / fDist
+  -- State update: pfSideY' = vecLightDir.x / fDist
+  true
+end
+
+schema CShadows_RenderExtraPlayerShadows
+  ΔCShadows
+where
+  -- State update: pCar' = FindPlayerVehicle()
+  -- State update: vecLight' = CPointLights::aLights[i].coors - FindPlayerCoors()
+  -- State update: fLightDist' = vecLight.Magnitude()
+  -- State update: fRadius' = CPointLights::aLights[i].radius
+  -- State update: fMult' = (1.0f - (2.0f * fLightDist - fRadius) / fRadius)
+  -- State update: nColorStrength' = (5*CTimeCycle::GetLightShadowStrength()/8)
+  -- Invokes: CReplay::IsPlayingBack, CTimeCycle::GetLightShadowStrength, vecLight.Magnitude, pCar->GetModelIndex, pCar->GetPosition
+  true
+end
+
+schema CShadows_TidyUpShadows
+  ΔCShadows
+where
+  -- State update: m_nType' = SHADOWTYPE_NONE
+  true
+end
+
+schema CShadows_RenderIndicatorShadow
+  ΔCShadows
+  nID? : ℕ
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+where
+  -- Invokes: C3dMarkers::PlaceMarkerSet
+  true
+end
+
+schema CShadows_StoreCarLightShadow_2
+  ΔCShadows
+  pCar? : Ref[CVehicle]
+  nID? : ℤ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fMaxViewAngle? : ℝ
+where
+  -- State update: fDistToCamSqr' = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 27.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nRed' = (int32)(nRed   * fMult)
+  -- State update: nGreen' = (int32)(nGreen * fMult)
+  -- State update: nBlue' = (int32)(nBlue  * fMult)
+  -- Invokes: TheCamera.GetPosition, CCutsceneMgr::IsRunning, m_vecMoveSpeed.Magnitude
+  true
+end
+
+schema CShadows_StoreShadowToBeRendered_3
+  ΔCShadows
+  ShadowType? : ℕ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  bDrawOnWater? : 𝔹
+  fScale? : ℝ
+where
+  -- State update: m_ShadowType' = ShadowType
+  -- State update: m_pTexture' = pTexture
+  -- State update: m_vecPos' = *pPosn
+  -- State update: m_vecFront.x' = fFrontX
+  -- State update: m_vecFront.y' = fFrontY
+  -- State update: m_vecSide.x' = fSideX
+  true
+end
+
+schema CShadows_StoreShadowForCar
+  ΔCShadows
+  pCar? : Ref[CAutomobile]
+where
+  -- State update: CarPos' = pCar.GetPosition()
+  -- State update: fDistToCamSqr' = (CarPos - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 18.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nColorStrength' = (int32)(CTimeCycle::GetShadowStrength() * fMult)
+  -- State update: nColorStrength' = CTimeCycle::GetShadowStrength()
+  -- Invokes: CTimeCycle::GetShadowStrength, pCar->GetPosition, TheCamera.GetPosition, CCutsceneMgr::IsRunning, pCar->GetColModel
+  true
+end
+
+schema CShadows_StoreCarLightShadow_3
+  ΔCShadows
+  pCar? : Ref[CAutomobile]
+  nID? : ℤ
+  pTexture? : Ref[RwTexture]
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fMaxViewAngle? : ℝ
+where
+  -- State update: fDistToCamSqr' = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D()
+  -- State update: fDrawDistance' = 27.0f
+  -- State update: fDistToCam' = Sqrt(fDistToCamSqr)
+  -- State update: nRed' = (int32)(nRed   * fMult)
+  -- State update: nGreen' = (int32)(nGreen * fMult)
+  -- State update: nBlue' = (int32)(nBlue  * fMult)
+  -- Invokes: TheCamera.GetPosition, CCutsceneMgr::IsRunning
+  true
+end
+
+schema CShadows_CastShadowEntity
+  ΔCShadows
+  pEntity? : Ref[CEntity]
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  pPosn? : Ref[CVector]
+  fFrontX? : ℝ
+  fFrontY? : ℝ
+  fSideX? : ℝ
+  fSideY? : ℝ
+  nIntensity? : ℤ
+  nRed? : ℕ
+  nGreen? : ℕ
+  nBlue? : ℕ
+  fZDistance? : ℝ
+  fScale? : ℝ
+  ppPolyBunch? : Ref[CPolyBunch]
+where
+  -- State update: pCol' = pEntity.GetColModel()
+  -- State update: x' = (fLengthRight   + fFrontRight  )  - fSideRight
+  -- State update: y' = (fLengthForward + fFrontForward)  - fSideForward
+  -- State update: x' = fSideRight      + (fLengthRight   + fFrontRight)
+  -- State update: y' = fSideForward    + (fLengthForward + fFrontForward)
+  -- State update: x' = fSideRight      + (fLengthRight   - fFrontRight)
+  -- Invokes: pEntity->GetColModel, pEntity->GetModelIndex, pEntity->GetPosition, boundingBox.GetSize, CCollision::CalculateTrianglePlanes
+  true
+end
+
+schema Shadows_CStoredShadow
+  ΔShadowsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Shadows_CPolyBunch
+  ΔShadowsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Shadows_CStaticShadow
+  ΔShadowsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Shadows_CPermanentShadow
+  ΔShadowsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

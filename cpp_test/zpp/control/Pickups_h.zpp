@@ -1,0 +1,602 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pickups (control)
+-- Source File(s): control/Pickups.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Weapon.zpp  (from "Weapon.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+ePickupType ::= PICKUP_NONE | PICKUP_IN_SHOP | PICKUP_ON_STREET | PICKUP_ONCE | PICKUP_ONCE_TIMEOUT | PICKUP_ONCE_TIMEOUT_SLOW | PICKUP_COLLECTABLE1 | PICKUP_IN_SHOP_OUT_OF_STOCK | PICKUP_MONEY | PICKUP_MINE_INACTIVE | PICKUP_MINE_ARMED | PICKUP_NAUTICAL_MINE_INACTIVE | PICKUP_NAUTICAL_MINE_ARMED | PICKUP_FLOATINGPACKAGE | PICKUP_FLOATINGPACKAGE_FLOATING | PICKUP_ON_STREET_SLOW | PICKUP_ASSET_REVENUE | PICKUP_PROPERTY_LOCKED | PICKUP_PROPERTY_FORSALE | PICKUP_NUMOFTYPES
+  -- val(PICKUP_NONE) = 0
+
+ePacmanPickupType ::= PACMAN_NONE | PACMAN_SCRAMBLE | PACMAN_RACE
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPickup
+  m_vecPos : CVector
+  m_fRevenue : ℝ
+  m_pObject : Ref[CObject]
+  m_pExtraObject : Ref[CObject]
+  m_nQuantity : ℕ
+  m_nTimer : ℕ
+  m_nMoneySpeed : ℕ
+  m_eModelIndex : ℤ
+  m_nIndex : ℕ
+  m_sTextKey : seq CHAR
+  m_eType : ℕ
+  m_bRemoved : 𝔹
+  m_bWasAmmoCollected : 𝔹
+  m_bWasControlMessageShown : 𝔹
+where
+  #m_pObject ≤ 1
+  #m_pExtraObject ≤ 1
+  m_nQuantity ≥ 0
+  m_nTimer ≥ 0
+  m_nMoneySpeed ≥ 0
+  m_nIndex ≥ 0
+  #m_sTextKey = 8
+  m_eType ≥ 0
+  #m_bWasAmmoCollected = 1
+  #m_bWasControlMessageShown = 1
+end
+
+schema CPickup_GiveUsAPickUpObject
+  ΔCPickup
+  object? : Ref[CObject]
+  extraObject? : Ref[CObject]
+  handle? : ℤ
+  extraHandle? : ℤ
+  result! : Ref[CObject]
+where
+  -- Declared member operation CPickup::GiveUsAPickUpObject(CObject **object, CObject **extraObject, int32 handle, int32 extraHandle)
+  true
+end
+
+schema CPickup_Update_2
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+  vehicle? : Ref[CVehicle]
+  playerId? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
+  true
+end
+
+schema CPickup_GetRidOfObjects_3
+  ΔCPickup
+where
+  -- Declared member operation CPickup::GetRidOfObjects()
+  true
+end
+
+schema CPickup_ExtractAmmoFromPickup_4
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+where
+  -- Declared member operation CPickup::ExtractAmmoFromPickup(CPlayerPed *player)
+  true
+end
+
+schema CPickup_ProcessGunShot_5
+  ΔCPickup
+  vec1? : Ref[CVector]
+  vec2? : Ref[CVector]
+where
+  -- Declared member operation CPickup::ProcessGunShot(CVector *vec1, CVector *vec2)
+  true
+end
+
+schema CPickup_IsMine_6
+  ΔCPickup
+  result! : 𝔹
+where
+  -- Declared member operation CPickup::IsMine()
+  true
+end
+
+schema CPickup_CanBePickedUp_7
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+  playerId? : ℤ
+  result! : bool
+where
+  -- Declared member operation CPickup::CanBePickedUp(CPlayerPed *player, int playerId)
+  true
+end
+
+schema CPickup_Remove_8
+  ΔCPickup
+where
+  -- Declared member operation CPickup::Remove()
+  true
+end
+
+schema CPickup_GiveUsAPickUpObject_9
+  ΔCPickup
+  handle? : ℤ
+  result! : Ref[CObject]
+where
+  -- Declared member operation CPickup::GiveUsAPickUpObject(int32 handle)
+  true
+end
+
+schema CPickup_CanBePickedUp_10
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPickup::CanBePickedUp(CPlayerPed *player)
+  true
+end
+
+schema tPickupMessage
+  m_pos : CVector2D
+  m_weaponType : eWeaponType
+  m_dist : CVector2D
+  m_color : CRGBA
+  m_bOutOfStock : ℕ
+  m_quantity : ℕ
+  money : ℕ
+where
+  m_bOutOfStock ≥ 0
+  m_quantity ≥ 0
+  money ≥ 0
+end
+
+schema CPickups
+  aPickUpsCollected : seq ℤ  -- bounded array [NUMCOLLECTEDPICKUPS]
+  CollectedPickUpIndex : ℤ
+  NumMessages : ℤ
+  aMessages : seq tPickupMessage  -- bounded array [NUMPICKUPMESSAGES]
+  PlayerOnWeaponPickup : ℤ
+  aPickUps : seq CPickup  -- bounded array [NUMPICKUPS]
+  bPickUpcamActivated : 𝔹
+  pPlayerVehicle : Ref[CVehicle]
+  StaticCamCoors : CVector
+  StaticCamStartTime : ℕ
+where
+  #pPlayerVehicle ≤ 1
+  StaticCamStartTime ≥ 0
+end
+
+schema CPickups_Init
+  ΔCPickups
+where
+  -- Declared member operation CPickups::Init()
+  true
+end
+
+schema CPickups_Update_2
+  ΔCPickups
+where
+  -- Declared member operation CPickups::Update()
+  true
+end
+
+schema CPickups_RenderPickUpText_3
+  ΔCPickups
+where
+  -- Declared member operation CPickups::RenderPickUpText()
+  true
+end
+
+schema CPickups_DoCollectableEffects_4
+  ΔCPickups
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPickups::DoCollectableEffects(CEntity *ent)
+  true
+end
+
+schema CPickups_DoMoneyEffects_5
+  ΔCPickups
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPickups::DoMoneyEffects(CEntity *ent)
+  true
+end
+
+schema CPickups_DoMineEffects_6
+  ΔCPickups
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPickups::DoMineEffects(CEntity *ent)
+  true
+end
+
+schema CPickups_DoPickUpEffects_7
+  ΔCPickups
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPickups::DoPickUpEffects(CEntity *ent)
+  true
+end
+
+schema CPickups_GenerateNewOne_8
+  ΔCPickups
+  pos? : CVector
+  modelIndex? : ℕ
+  type? : ℕ
+  quantity? : ℕ
+  rate? : ℕ
+  highPriority? : 𝔹
+  pText? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate = 0, bool highPriority = false, char* pText = nil)
+  true
+end
+
+schema CPickups_GenerateNewOne_WeaponType_9
+  ΔCPickups
+  pos? : CVector
+  weaponType? : eWeaponType
+  type? : ℕ
+  quantity? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CPickups::GenerateNewOne_WeaponType(CVector pos, eWeaponType weaponType, uint8 type, uint32 quantity)
+  true
+end
+
+schema CPickups_RemovePickUp_10
+  ΔCPickups
+  pickupIndex? : ℤ
+where
+  -- Declared member operation CPickups::RemovePickUp(int32 pickupIndex)
+  true
+end
+
+schema CPickups_AddToCollectedPickupsArray_11
+  ΔCPickups
+  index? : ℤ
+where
+  -- Declared member operation CPickups::AddToCollectedPickupsArray(int32 index)
+  true
+end
+
+schema CPickups_IsPickUpPickedUp_12
+  ΔCPickups
+  pickupId? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPickups::IsPickUpPickedUp(int32 pickupId)
+  true
+end
+
+schema CPickups_ModelForWeapon_13
+  ΔCPickups
+  weaponType? : eWeaponType
+  result! : ℤ
+where
+  -- Declared member operation CPickups::ModelForWeapon(eWeaponType weaponType)
+  true
+end
+
+schema CPickups_WeaponForModel_14
+  ΔCPickups
+  model? : ℤ
+  result! : enum_eWeaponType
+where
+  -- Declared member operation CPickups::WeaponForModel(int32 model)
+  true
+end
+
+schema CPickups_GetActualPickupIndex_15
+  ΔCPickups
+  index? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPickups::GetActualPickupIndex(int32 index)
+  true
+end
+
+schema CPickups_GetNewUniquePickupIndex_16
+  ΔCPickups
+  slot? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPickups::GetNewUniquePickupIndex(int32 slot)
+  true
+end
+
+schema CPickups_PassTime_17
+  ΔCPickups
+  time? : ℕ
+where
+  -- Declared member operation CPickups::PassTime(uint32 time)
+  true
+end
+
+schema CPickups_GivePlayerGoodiesWithPickUpMI_18
+  ΔCPickups
+  modelIndex? : ℤ
+  playerIndex? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
+  true
+end
+
+schema CPickups_TestForPickupsInBubble_19
+  ΔCPickups
+  pos? : CVector
+  range? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPickups::TestForPickupsInBubble(CVector pos, float range)
+  true
+end
+
+schema CPickups_TryToMerge_WeaponType_20
+  ΔCPickups
+  pos? : CVector
+  weapon? : eWeaponType
+  type? : ℕ
+  quantity? : ℕ
+  unused? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CPickups::TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused)
+  true
+end
+
+schema CPickups_CreateSomeMoney_21
+  ΔCPickups
+  arg_1? : CVector
+  arg_2? : ℤ
+where
+  -- Declared member operation CPickups::CreateSomeMoney(CVector, int)
+  true
+end
+
+schema CPickups_DetonateMinesHitByGunShot_22
+  ΔCPickups
+  vec1? : Ref[CVector]
+  vec2? : Ref[CVector]
+where
+  -- Declared member operation CPickups::DetonateMinesHitByGunShot(CVector *vec1, CVector *vec2)
+  true
+end
+
+schema CPickups_RemoveUnnecessaryPickups_23
+  ΔCPickups
+  center? : CVector
+  radius? : ℝ
+where
+  -- Declared member operation CPickups::RemoveUnnecessaryPickups(const CVector& center, float radius)
+  true
+end
+
+schema CPickups_Load_24
+  ΔCPickups
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPickups::Load(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPickups_Save_25
+  ΔCPickups
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPickups::Save(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CPickups_RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo_26
+  ΔCPickups
+  arg_1? : eWeaponType
+where
+  -- Declared member operation CPickups::RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType)
+  true
+end
+
+schema CPickups_FindPickUpForThisObject_27
+  ΔCPickups
+  arg_1? : Ref[CEntity]
+  result! : Ref[CPickup]
+where
+  -- Declared member operation CPickups::FindPickUpForThisObject(CEntity*)
+  true
+end
+
+schema CPickups_GetValue_28
+  ΔCPickups
+  arg_1? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CPickups::GetValue(int)
+  true
+end
+
+schema CPickups_SetValue_29
+  ΔCPickups
+  arg_1? : ℤ
+  arg_2? : ℝ
+where
+  -- Declared member operation CPickups::SetValue(int, float)
+  true
+end
+
+schema CPickups_GenerateNewOne_30
+  ΔCPickups
+  pos? : CVector
+  modelIndex? : ℕ
+  type? : ℕ
+  quantity? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity)
+  true
+end
+
+schema CPacManPickup
+  m_vecPosn : CVector
+  m_pObject : Ref[CObject]
+  m_eType : ℕ
+where
+  #m_pObject ≤ 1
+  m_eType ≥ 0
+end
+
+schema CPacManPickup_Update
+  ΔCPacManPickup
+where
+  -- Declared member operation CPacManPickup::Update()
+  true
+end
+
+schema CPacManPickups
+  aPMPickUps : seq CPacManPickup  -- bounded array [NUMPACMANPICKUPS]
+  LastPickUpCoors : CVector
+  PillsEatenInRace : ℤ
+  bPMActive : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPacManPickups_Init
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::Init(void)
+  true
+end
+
+schema CPacManPickups_Update_2
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::Update(void)
+  true
+end
+
+schema CPacManPickups_GeneratePMPickUps_3
+  ΔCPacManPickups
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℤ
+  arg_4? : ℕ
+where
+  -- Declared member operation CPacManPickups::GeneratePMPickUps(CVector, float, int16, uint8)
+  true
+end
+
+schema CPacManPickups_GeneratePMPickUpsForRace_4
+  ΔCPacManPickups
+  arg_1? : ℤ
+where
+  -- Declared member operation CPacManPickups::GeneratePMPickUpsForRace(int32)
+  true
+end
+
+schema CPacManPickups_GenerateOnePMPickUp_5
+  ΔCPacManPickups
+  arg_1? : CVector
+where
+  -- Declared member operation CPacManPickups::GenerateOnePMPickUp(CVector)
+  true
+end
+
+schema CPacManPickups_Render_6
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::Render(void)
+  true
+end
+
+schema CPacManPickups_StartPacManRace_7
+  ΔCPacManPickups
+  arg_1? : ℤ
+where
+  -- Declared member operation CPacManPickups::StartPacManRace(int32)
+  true
+end
+
+schema CPacManPickups_StartPacManRecord_8
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::StartPacManRecord(void)
+  true
+end
+
+schema CPacManPickups_QueryPowerPillsEatenInRace_9
+  ΔCPacManPickups
+  result! : ℕ
+where
+  -- Declared member operation CPacManPickups::QueryPowerPillsEatenInRace(void)
+  true
+end
+
+schema CPacManPickups_ResetPowerPillsEatenInRace_10
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::ResetPowerPillsEatenInRace(void)
+  true
+end
+
+schema CPacManPickups_ClearPMPickUps_11
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::ClearPMPickUps(void)
+  true
+end
+
+schema CPacManPickups_CleanUpPacManStuff_12
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::CleanUpPacManStuff(void)
+  true
+end
+
+schema CPacManPickups_StartPacManScramble_13
+  ΔCPacManPickups
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℤ
+where
+  -- Declared member operation CPacManPickups::StartPacManScramble(CVector, float, int16)
+  true
+end
+
+schema CPacManPickups_QueryPowerPillsCarriedByPlayer_14
+  ΔCPacManPickups
+  result! : ℕ
+where
+  -- Declared member operation CPacManPickups::QueryPowerPillsCarriedByPlayer(void)
+  true
+end
+
+schema CPacManPickups_ResetPowerPillsCarriedByPlayer_15
+  ΔCPacManPickups
+where
+  -- Declared member operation CPacManPickups::ResetPowerPillsCarriedByPlayer(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Pickups_IsMine
+  ΔPickupsModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

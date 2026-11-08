@@ -1,0 +1,223 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WaterCannon (renderer)
+-- Source File(s): renderer/WaterCannon.cpp, renderer/WaterCannon.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include WaterCannon.zpp  (from "WaterCannon.h")
+-- include Vector.zpp  (from "Vector.h")
+-- include General.zpp  (from "General.h")
+-- include main.zpp  (from "main.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Particle.zpp  (from "Particle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WATER_COLOR : ℕ  -- #define WATER_COLOR 255
+WATERCANNONVERTS : ℕ  -- #define WATERCANNONVERTS 4
+WATERCANNONINDEXES : ℕ  -- #define WATERCANNONINDEXES 12
+WATERCANNON_GRAVITY : ℝ  -- #define WATERCANNON_GRAVITY (0.009f)
+WATERCANNON_LIFETIME : seq CHAR  -- #define WATERCANNON_LIFETIME (150)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+WaterCannon_Enum_1 ::= NUM_SEGMENTPOINTS
+  -- val(NUM_SEGMENTPOINTS) = 16
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWaterCannon
+  m_nId : ℤ
+  m_nCur : ℤ
+  m_nTimeCreated : ℕ
+  field_C : ℤ
+  m_avecPos : seq CVector  -- bounded array [NUM_SEGMENTPOINTS]
+  m_avecVelocity : seq CVector  -- bounded array [NUM_SEGMENTPOINTS]
+  m_abUsed : seq 𝔹  -- bounded array [NUM_SEGMENTPOINTS]
+where
+  m_nTimeCreated ≥ 0
+end
+
+schema CWaterCannon_Init
+  ΔCWaterCannon
+where
+  -- Declared member operation CWaterCannon::Init(void)
+  true
+end
+
+schema CWaterCannon_Update_OncePerFrame_2
+  ΔCWaterCannon
+  index? : ℤ
+where
+  -- Declared member operation CWaterCannon::Update_OncePerFrame(int16 index)
+  true
+end
+
+schema CWaterCannon_Update_NewInput_3
+  ΔCWaterCannon
+  pos? : Ref[CVector]
+  dir? : Ref[CVector]
+where
+  -- Declared member operation CWaterCannon::Update_NewInput(CVector *pos, CVector *dir)
+  true
+end
+
+schema CWaterCannon_Render_4
+  ΔCWaterCannon
+where
+  -- Declared member operation CWaterCannon::Render(void)
+  true
+end
+
+schema CWaterCannon_PushPeds_5
+  ΔCWaterCannon
+where
+  -- Declared member operation CWaterCannon::PushPeds(void)
+  true
+end
+
+schema CWaterCannons
+  aCannons : seq CWaterCannon  -- bounded array [NUM_WATERCANNONS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWaterCannons_Init
+  ΔCWaterCannons
+where
+  -- Declared member operation CWaterCannons::Init(void)
+  true
+end
+
+schema CWaterCannons_UpdateOne_2
+  ΔCWaterCannons
+  id? : ℕ
+  pos? : Ref[CVector]
+  dir? : Ref[CVector]
+where
+  -- Declared member operation CWaterCannons::UpdateOne(uint32 id, CVector *pos, CVector *dir)
+  true
+end
+
+schema CWaterCannons_Update_3
+  ΔCWaterCannons
+where
+  -- Declared member operation CWaterCannons::Update()
+  true
+end
+
+schema CWaterCannons_Render_4
+  ΔCWaterCannons
+where
+  -- Declared member operation CWaterCannons::Render(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWaterCannon_Init
+  ΔCWaterCannon
+where
+  -- State update: m_nId' = 0
+  -- State update: m_nCur' = 0
+  -- State update: m_nTimeCreated' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWaterCannon_Update_OncePerFrame
+  ΔCWaterCannon
+  index? : ℤ
+where
+  -- State update: m_nCur' = (m_nCur + 1) % NUM_SEGMENTPOINTS
+  -- State update: extinguishingPoint' = CGeneral::GetRandomNumber() & (NUM_SEGMENTPOINTS - 1)
+  -- State update: m_nId' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds, CTimer::GetTimeStep, CGeneral::GetRandomNumber, gFireManager.ExtinguishPoint, CTimer::GetFrameCounter
+  true
+end
+
+schema CWaterCannon_Update_NewInput
+  ΔCWaterCannon
+  pos? : Ref[CVector]
+  dir? : Ref[CVector]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWaterCannon_Render
+  ΔCWaterCannon
+where
+  -- State update: pointA' = m_nCur % NUM_SEGMENTPOINTS
+  -- State update: pointB' = pointA - 1
+  -- State update: pointC' = pointA
+  -- State update: bInit' = false
+  -- State update: bFirst' = false
+  -- State update: bFirst' = true
+  -- Invokes: CTimer::GetTimeStepInSeconds, TheCamera.GetForward, cp.Magnitude
+  true
+end
+
+schema CWaterCannon_PushPeds
+  ΔCWaterCannon
+where
+  -- State update: minx' = 10000.0f
+  -- State update: maxx' = -10000.0f
+  -- State update: miny' = 10000.0f
+  -- State update: maxy' = -10000.0f
+  -- State update: minz' = 10000.0f
+  -- State update: maxz' = -10000.0f
+  -- Invokes: CPools::GetPedPool, ped->GetPosition, dist.MagnitudeSqr, ped->GetLocalDirection, ped->ApplyMoveForce
+  true
+end
+
+schema CWaterCannons_Init
+  ΔCWaterCannons
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWaterCannons_UpdateOne
+  ΔCWaterCannons
+  id? : ℕ
+  pos? : Ref[CVector]
+  dir? : Ref[CVector]
+where
+  -- State update: m_nId' = id
+  true
+end
+
+schema CWaterCannons_Update
+  ΔCWaterCannons
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWaterCannons_Render
+  ΔCWaterCannons
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

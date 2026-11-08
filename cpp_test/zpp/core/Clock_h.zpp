@@ -1,0 +1,168 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Clock (core)
+-- Source File(s): core/Clock.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CClock
+  ms_nGameClockHours : ℕ
+  ms_nGameClockMinutes : ℕ
+  ms_nGameClockSeconds : ℕ
+  ms_Stored_nGameClockHours : ℕ
+  ms_Stored_nGameClockMinutes : ℕ
+  ms_Stored_nGameClockSeconds : ℕ
+  ms_nMillisecondsPerGameMinute : ℕ
+  ms_nLastClockTick : ℕ
+  ms_bClockHasBeenStored : 𝔹
+  ms_EnvMapTimeMultiplicator : ℝ
+where
+  ms_nGameClockHours ≥ 0
+  ms_nGameClockMinutes ≥ 0
+  ms_nGameClockSeconds ≥ 0
+  ms_Stored_nGameClockHours ≥ 0
+  ms_Stored_nGameClockMinutes ≥ 0
+  ms_Stored_nGameClockSeconds ≥ 0
+  ms_nMillisecondsPerGameMinute ≥ 0
+  ms_nLastClockTick ≥ 0
+end
+
+schema CClock_Initialise
+  ΔCClock
+  scale? : ℕ
+where
+  -- Declared member operation CClock::Initialise(uint32 scale)
+  true
+end
+
+schema CClock_Update_2
+  ΔCClock
+where
+  -- Declared member operation CClock::Update(void)
+  true
+end
+
+schema CClock_SetGameClock_3
+  ΔCClock
+  h? : ℕ
+  m? : ℕ
+where
+  -- Declared member operation CClock::SetGameClock(uint8 h, uint8 m)
+  true
+end
+
+schema CClock_GetGameClockMinutesUntil_4
+  ΔCClock
+  h? : ℕ
+  m? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CClock::GetGameClockMinutesUntil(uint8 h, uint8 m)
+  true
+end
+
+schema CClock_GetIsTimeInRange_5
+  ΔCClock
+  h1? : ℕ
+  h2? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CClock::GetIsTimeInRange(uint8 h1, uint8 h2)
+  true
+end
+
+schema CClock_StoreClock_6
+  ΔCClock
+where
+  -- Declared member operation CClock::StoreClock(void)
+  true
+end
+
+schema CClock_RestoreClock_7
+  ΔCClock
+where
+  -- Declared member operation CClock::RestoreClock(void)
+  true
+end
+
+schema CClock_CalcEnvMapTimeMultiplicator_8
+  ΔCClock
+where
+  -- Declared member operation CClock::CalcEnvMapTimeMultiplicator(void)
+  true
+end
+
+schema CClock_GetHours_9
+  ΔCClock
+  result! : ℕ
+where
+  -- Declared member operation CClock::GetHours(void)
+  true
+end
+
+schema CClock_GetMinutes_10
+  ΔCClock
+  result! : ℕ
+where
+  -- Declared member operation CClock::GetMinutes(void)
+  true
+end
+
+schema CClock_GetSeconds_11
+  ΔCClock
+  result! : ℤ
+where
+  -- Declared member operation CClock::GetSeconds(void)
+  true
+end
+
+schema CClock_GetHoursRef_12
+  ΔCClock
+  result! : ℕ
+where
+  -- Declared member operation CClock::GetHoursRef(void)
+  true
+end
+
+schema CClock_GetMinutesRef_13
+  ΔCClock
+  result! : ℕ
+where
+  -- Declared member operation CClock::GetMinutesRef(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Clock_GetHours
+  ΔClockModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_nGameClockHours
+  true
+end
+
+schema Clock_GetMinutes
+  ΔClockModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_nGameClockMinutes
+  true
+end
+
+schema Clock_GetSeconds
+  ΔClockModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = ms_nGameClockSeconds
+  true
+end

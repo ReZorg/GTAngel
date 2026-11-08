@@ -1,0 +1,679 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: win (skel)
+-- Source File(s): skel/win/win.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include winerror.zpp  (from "winerror.h")
+-- include windows.zpp  (from "windows.h")
+-- include mmsystem.zpp  (from "mmsystem.h")
+-- include shellapi.zpp  (from "shellapi.h")
+-- include windowsx.zpp  (from "windowsx.h")
+-- include basetsd.zpp  (from "basetsd.h")
+-- include regstr.zpp  (from "regstr.h")
+-- include shlobj.zpp  (from "shlobj.h")
+-- include dbt.zpp  (from "dbt.h")
+-- include ddraw.zpp  (from "ddraw.h")
+-- include DShow.zpp  (from "DShow.h")
+-- include common.zpp  (from "common.h")
+-- include tchar.zpp  (from "tchar.h")
+-- include stdio.zpp  (from "stdio.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include resource.zpp  (from "resource.h")
+-- include skeleton.zpp  (from "skeleton.h")
+-- include platform.zpp  (from "platform.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Text.zpp  (from "Text.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Game.zpp  (from "Game.h")
+-- include PCSave.zpp  (from "PCSave.h")
+-- include AnimViewer.zpp  (from "AnimViewer.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+-- include Font.zpp  (from "Font.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+_WIN32_WINDOWS : seq CHAR  -- #define _WIN32_WINDOWS 0x0500
+WINVER : seq CHAR  -- #define WINVER 0x0500
+MAPVK_VK_TO_CHAR : seq CHAR  -- #define MAPVK_VK_TO_CHAR (2)
+WM_GRAPHNOTIFY : seq CHAR  -- #define WM_GRAPHNOTIFY WM_USER+13
+WITHD3D : seq CHAR  -- #define WITHD3D #define WITHDINPUT
+MAX_SUBSYSTEMS : seq CHAR  -- #define MAX_SUBSYSTEMS (16)
+CMDSTR : seq CHAR  -- #define CMDSTR LPWSTR
+DEVICE_AXIS_MIN : seq CHAR  -- #define DEVICE_AXIS_MIN -2000
+DEVICE_AXIS_MAX : ℕ  -- #define DEVICE_AXIS_MAX 2000
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CJoySticks_CJoySticks
+  ΔCJoySticks
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CJoySticks_ClearJoyInfo
+  ΔCJoySticks
+  joyID? : ℤ
+where
+  -- State update: m_State' = JOYPAD_UNUSED
+  -- State update: m_bInitialised' = false
+  -- State update: m_bHasAxisZ' = false
+  -- State update: m_bHasAxisR' = false
+  true
+end
+
+schema win_psCreateFolder
+  ΔwinModuleState
+  path? : LPCSTR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_psCameraBeginUpdate
+  ΔwinModuleState
+  camera? : Ref[RwCamera]
+where
+  -- State update: ForegroundApp' = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema win_psCameraShowRaster
+  ΔwinModuleState
+  camera? : Ref[RwCamera]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_psGrabScreen
+  ΔwinModuleState
+  pCamera? : Ref[RwCamera]
+where
+  -- State update: pRaster' = RwCameraGetRaster(pCamera)
+  -- State update: image' = RwCameraGetRaster(pCamera).toImage()
+  -- Return postcondition: result! = pImage
+  -- Return postcondition: result! = image
+  -- Return postcondition: result! = nil
+  -- Invokes: image->removeMask
+  true
+end
+
+schema win_psTimer
+  ΔwinModuleState
+where
+  -- State update: time' = (RwUInt32) timeGetTime()
+  -- Return postcondition: result! = time
+  true
+end
+
+schema win_psMouseSetPos
+  ΔwinModuleState
+  pos? : Ref[RwV2d]
+where
+  -- State update: point.x' = (RwInt32) pos.x
+  -- State update: point.y' = (RwInt32) pos.y
+  true
+end
+
+schema win_psGetMemoryFunctions
+  ΔwinModuleState
+where
+  -- Return postcondition: result! = &memFuncs
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema win_psInstallFileSystem
+  ΔwinModuleState
+where
+  -- Return postcondition: result! = (TRUE)
+  true
+end
+
+schema win_psNativeTextureSupport
+  ΔwinModuleState
+where
+  -- Return postcondition: result! = RwD3D8DeviceSupportsDXTTexture()
+  true
+end
+
+schema win_InitInstance
+  ΔwinModuleState
+  instance? : HANDLE
+where
+  -- State update: rect.top' = 0
+  -- State update: rect.right' = RsGlobal.maximumWidth
+  -- State update: rect.bottom' = RsGlobal.maximumHeight
+  true
+end
+
+schema win_GetVideoMemInfo
+  ΔwinModuleState
+  total? : ℕ
+  avaible? : ℕ
+where
+  -- State update: caps.dwCaps' = DDSCAPS_VIDEOMEMORY
+  -- Invokes: pDD7->GetAvailableVidMem, pDD7->Release
+  true
+end
+
+schema win_GetDXVersion
+  ΔwinModuleState
+  result! : ℕ
+where
+  -- State update: DirectDrawCreateEx' = ∅
+  -- State update: hDDrawDLL' = ∅
+  -- State update: hD3D8DLL' = ∅
+  -- State update: hDPNHPASTDLL' = ∅
+  -- State update: dwDXVersion' = 0
+  -- State update: hDDrawDLL' = LoadLibrary( "DDRAW.DLL" )
+  -- Return postcondition: result! = dwDXVersion
+  -- Return postcondition: result! = dwDXVersion
+  -- Return postcondition: result! = dwDXVersion
+  -- Invokes: pDD7->Release
+  true
+end
+
+schema win_psPrintCpuInfo
+  ΔwinModuleState
+where
+  -- State update: features' = _psGetCpuFeatures()
+  -- State update: FeaturesEx' = _psGetCpuFeaturesEx()
+  true
+end
+
+schema win_psInitialize
+  ΔwinModuleState
+where
+  -- State update: PsGlobal.lastMousePos.y' = 0.0f
+  -- State update: RsGlobal.ps' = &PsGlobal
+  -- State update: PsGlobal.fullScreen' = FALSE
+  -- State update: PsGlobal.dinterface' = ∅
+  -- State update: PsGlobal.mouse' = ∅
+  -- State update: PsGlobal.joy1' = ∅
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CFileMgr::Initialise, CPad::Initialise, CPad::GetPad, FrontEndMenuManager.InitialiseMenuContentsAfterLoadingGame, TheMemoryCard.Init
+  true
+end
+
+schema win_psTerminate
+  ΔwinModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_psGetNumVideModes
+  ΔwinModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = RwEngineGetNumVideoModes()
+  true
+end
+
+schema win_psFreeVideoModeList
+  ΔwinModuleState
+  result! : 𝔹
+where
+  -- State update: numModes' = _psGetNumVideModes()
+  -- State update: _VMList' = ∅
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema win_psSelectScreenVM
+  ΔwinModuleState
+  videoMode? : ℤ
+where
+  -- State update: RsGlobal.quit' = TRUE
+  -- Invokes: FrontEndMenuManager.UnloadTextures, TheText.Get, FrontEndMenuManager.LoadAllTextures
+  true
+end
+
+schema win_WaitForState
+  ΔwinModuleState
+  State? : FILTER_STATE
+where
+  -- State update: hr' = pMC.GetState(10, &lfs)
+  -- Invokes: pMC->GetState
+  true
+end
+
+schema win_HandleGraphEvent
+  ΔwinModuleState
+where
+  -- State update: hr' = S_OK
+  -- State update: hr' = pME.FreeEventParams(evCode, evParam1, evParam2)
+  -- State update: gGameState' = GS_INIT_INTRO_MPEG
+  -- State update: gGameState' = GS_INIT_INTRO_MPEG")
+  -- State update: gGameState' = GS_INIT_ONCE
+  -- State update: gGameState' = GS_INIT_ONCE")
+  -- Invokes: pME->GetEvent, pME->FreeEventParams, pME->SetNotifyWindow
+  true
+end
+
+schema win_MainWndProc
+  ΔwinModuleState
+  window? : HWND
+  message? : ℕ
+  wParam? : WPARAM
+  lParam? : LPARAM
+where
+  -- State update: noMemory' = FALSE
+  -- State update: r.x' = 0
+  -- State update: r.y' = 0
+  -- State update: r.w' = LOWORD(lParam)
+  -- State update: r.h' = HIWORD(lParam)
+  -- State update: noMemory' = TRUE
+  -- Return postcondition: result! = 0L
+  -- Return postcondition: result! = 0L
+  -- Return postcondition: result! = 0L
+  -- Invokes: pMC->GetState, pMC->Pause, pMC->Run, CPad::GetPad, DMAudio.IsAudioInitialised
+  true
+end
+
+schema win_InitApplication
+  ΔwinModuleState
+  instance? : HANDLE
+where
+  -- State update: windowClass.style' = CS_BYTEALIGNWINDOW
+  -- State update: windowClass.lpfnWndProc' = (WNDPROC)MainWndProc
+  -- State update: windowClass.cbClsExtra' = 0
+  -- State update: windowClass.cbWndExtra' = 0
+  -- State update: windowClass.hInstance' = (HINSTANCE)instance
+  -- State update: windowClass.hIcon' = ∅
+  -- Return postcondition: result! = RegisterClass(&windowClass)
+  true
+end
+
+schema win_IsForegroundApp
+  ΔwinModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!ForegroundApp
+  true
+end
+
+schema win_GetBestRefreshRate
+  ΔwinModuleState
+  width? : ℕ
+  height? : ℕ
+  depth? : ℕ
+  result! : ℕ
+where
+  -- State update: d3d' = Direct3DCreate9(D3D_SDK_VERSION)
+  -- State update: d3d' = Direct3DCreate8(D3D_SDK_VERSION)
+  -- State update: refreshRate' = INT_MAX
+  -- State update: format' = D3DFMT_X8R8G8B8
+  -- State update: format' = D3DFMT_R8G8B8
+  -- State update: format' = D3DFMT_R5G6B5
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = refreshRate
+  -- Invokes: d3d->GetAdapterModeCount, d3d->EnumAdapterModes, d3d->Release
+  true
+end
+
+schema win_psSelectDevice
+  ΔwinModuleState
+where
+  -- State update: AutoRenderer' = 0
+  -- State update: modeFound' = FALSE
+  -- State update: GnumSubSystems' = RwEngineGetNumSubSystems()
+  -- State update: subSysNum' = 0
+  -- State update: GcurSel' = RwEngineGetCurrentSubSystem()
+  -- State update: GcurSel' = FrontEndMenuManager.m_nPrefsSubsystem
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema win_psSetVideoMode
+  ΔwinModuleState
+  subSystem? : ℤ
+  videoMode? : ℤ
+  result! : 𝔹
+where
+  -- State update: RwInitialised' = FALSE
+  -- State update: GcurSel' = subSystem
+  -- State update: GcurSelVM' = videoMode
+  -- State update: useDefault' = TRUE
+  -- State update: RwInitialised' = TRUE
+  -- State update: useDefault' = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema win_CommandLineToArgv
+  ΔwinModuleState
+  cmdLine? : seq CHAR
+  argCount? : ℙ ℤ
+where
+  -- State update: numArgs' = 0
+  -- State update: len' = (int)strlen(cmdLine)
+  -- State update: inString' = FALSE
+  -- State update: inArg' = FALSE
+  -- State update: inString' = !inString
+  -- State update: inArg' = FALSE
+  -- Return postcondition: result! = (RwChar **)res
+  true
+end
+
+schema win_InitialiseLanguage
+  ΔwinModuleState
+where
+  -- State update: primUserLCID' = PRIMARYLANGID(GetSystemDefaultLCID())
+  -- State update: primSystemLCID' = PRIMARYLANGID(GetUserDefaultLCID())
+  -- State update: primLayout' = PRIMARYLANGID((DWORD_PTR)GetKeyboardLayout(0))
+  -- State update: subUserLCID' = SUBLANGID(GetSystemDefaultLCID())
+  -- State update: subSystemLCID' = SUBLANGID(GetUserDefaultLCID())
+  -- State update: subLayout' = SUBLANGID((DWORD_PTR)GetKeyboardLayout(0))
+  -- Invokes: TheText.Unload, TheText.Load
+  true
+end
+
+schema win_CenterVideo
+  ΔwinModuleState
+where
+  -- State update: hr' = S_OK
+  -- Invokes: pVW->SetWindowPosition, pVW->put_MessageDrain
+  true
+end
+
+schema win_PlayMovieInWindow
+  ΔwinModuleState
+  cmdShow? : ℤ
+  szFile? : seq CHAR
+where
+  -- Invokes: pGB->RenderFile, pGB->QueryInterface, pVW->put_Owner, pVW->put_WindowStyle, pME->SetNotifyWindow
+  true
+end
+
+schema win_CloseInterfaces
+  ΔwinModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_CloseClip
+  ΔwinModuleState
+where
+  -- State update: hr' = pMC.Stop()
+  -- Invokes: pMC->Stop
+  true
+end
+
+schema win_HandleExit
+  ΔwinModuleState
+where
+  -- State update: RsGlobal.quit' = TRUE
+  true
+end
+
+schema win_WinMain
+  ΔwinModuleState
+  instance? : HINSTANCE
+  __RWUNUSED__? : HINSTANCE_prevInstance
+  cmdLine? : CMDSTR
+  cmdShow? : ℤ
+where
+  -- State update: cmdLine' = GetCommandLine()
+  -- State update: argv' = CommandLineToArgv(cmdLine, &argc)
+  -- State update: r.x' = 0
+  -- State update: r.y' = 0
+  -- State update: r.w' = RsGlobal.maximumWidth
+  -- State update: r.h' = RsGlobal.maximumHeight
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: ControlsManager.MakeControllerActionsBlank, ControlsManager.InitDefaultControlConfiguration, ControlsManager.InitDefaultControlConfigMouse, MousePointerStateHelper.GetMouseSetUp, CFileMgr::SetDirMyDocuments
+  true
+end
+
+schema win_InputInitialise
+  ΔwinModuleState
+  result! : HRESULT
+where
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = S_OK
+  true
+end
+
+schema win_InputInitialiseMouse
+  ΔwinModuleState
+  exclusive? : 𝔹
+  result! : HRESULT
+where
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = hr
+  true
+end
+
+schema win_CapturePad
+  ΔwinModuleState
+  padID? : ℤ
+  result! : HRESULT
+where
+  -- State update: pPad' = ∅
+  -- State update: pPad' = &PSGLOBAL(joy1)
+  -- State update: pPad' = &PSGLOBAL(joy2)
+  -- State update: hr' = (*pPad).Poll()
+  -- State update: hr' = (*pPad).Acquire()
+  -- State update: hr' = (*pPad).Acquire()
+  -- Return postcondition: result! = S_OK
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = hr
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema win_InputInitialiseJoys
+  ΔwinModuleState
+where
+  -- State update: devCaps.dwSize' = sizeof(DIDEVCAPS)
+  -- State update: prop.diph.dwSize' = sizeof(DIPROPDWORD)
+  -- State update: prop.diph.dwHeaderSize' = sizeof(DIPROPHEADER)
+  -- State update: prop.diph.dwObj' = 0
+  -- State update: prop.diph.dwHow' = 0
+  -- State update: m_nVendorID' = LOWORD(prop.dwData)
+  -- Invokes: AllValidWinJoys.ClearJoyInfo, ControlsManager.InitDefaultControlConfigJoyPad
+  true
+end
+
+schema win_InputAddJoyStick
+  ΔwinModuleState
+  lpDevice? : LPDIRECTINPUTDEVICE8
+  num? : ℤ
+where
+  -- State update: objInst.dwSize' = sizeof( DIDEVICEOBJECTINSTANCE )
+  -- State update: range.diph.dwSize' = sizeof(DIPROPRANGE)
+  -- State update: range.diph.dwHeaderSize' = sizeof(DIPROPHEADER)
+  -- State update: range.lMin' = DEVICE_AXIS_MIN
+  -- State update: range.lMax' = DEVICE_AXIS_MAX
+  -- State update: range.diph.dwHow' = DIPH_BYOFFSET
+  -- Invokes: lpDevice->GetObjectInfo, lpDevice->SetProperty
+  true
+end
+
+schema win_InputAddJoys
+  ΔwinModuleState
+  result! : HRESULT
+where
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = S_FALSE
+  -- Return postcondition: result! = S_OK
+  true
+end
+
+schema win_InputGetMouseState
+  ΔwinModuleState
+  state? : Ref[DIMOUSESTATE2]
+  result! : HRESULT
+where
+  -- State update: hr' = PSGLOBAL(mouse).Acquire()
+  -- State update: hr' = PSGLOBAL(mouse).Acquire()
+  -- Return postcondition: result! = S_FALSE
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = S_OK
+  true
+end
+
+schema win_InputShutdown
+  ΔwinModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_InputShutdownMouse
+  ΔwinModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_InputMouseNeedsExclusive
+  ΔwinModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = vm.flags & rwVIDEOMODEEXCLUSIVE
+  true
+end
+
+schema win_InputEnumDevicesCallback
+  ΔwinModuleState
+  pdidInstance? : Ref[DIDEVICEINSTANCE]
+  pContext? : ADDRESS
+  result! : BOOL_CALLBACK
+where
+  -- State update: Count' = 0
+  -- State update: pJoystick' = ∅
+  -- State update: pJoystick' = &PSGLOBAL(joy1)
+  -- State update: pJoystick' = &PSGLOBAL(joy2)
+  -- State update: hr' = (*pJoystick).SetDataFormat( &c_dfDIJoystick2 )
+  -- Return postcondition: result! = DIENUM_CONTINUE
+  -- Return postcondition: result! = DIENUM_CONTINUE
+  -- Return postcondition: result! = DIENUM_CONTINUE
+  true
+end
+
+schema win_InputTranslateKey
+  ΔwinModuleState
+  rs? : Ref[RsKeyCodes]
+  flag? : ℕ
+  key? : ℕ
+  result! : 𝔹
+where
+  -- State update: rs' = rs∅
+  -- State update: rs' = rsSHIFT
+  -- State update: rs' = rsPADENTER
+  -- State update: rs' = rsENTER
+  -- State update: rs' = rsRCTRL
+  -- State update: rs' = rsLCTRL
+  -- Return postcondition: result! = *rs != rsNULL
+  true
+end
+
+schema win_InputTranslateShiftKeyUpDown
+  ΔwinModuleState
+  rs? : Ref[RsKeyCodes]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema win_InputTranslateShiftKey
+  ΔwinModuleState
+  rs? : Ref[RsKeyCodes]
+  key? : ℕ
+  bDown? : 𝔹
+  result! : 𝔹
+where
+  -- State update: rs' = rs∅
+  -- State update: rs' = rsLSHIFT
+  -- State update: rs' = rsRSHIFT
+  -- Return postcondition: result! = *rs != rsNULL
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema win_InputIsExtended
+  ΔwinModuleState
+  flag? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (flag & 0x1000000) != 0
+  true
+end
+
+schema win_strcasecmp
+  ΔwinModuleState
+  str1? : seq CHAR
+  str2? : seq CHAR
+  result! : ℤ
+where
+  -- Return postcondition: result! = _strcmpi(str1, str2)
+  true
+end
+
+schema win_strncasecmp
+  ΔwinModuleState
+  str1? : seq CHAR
+  str2? : seq CHAR
+  len? : ℕ
+  result! : ℤ
+where
+  -- Return postcondition: result! = _strnicmp(str1, str2, len)
+  true
+end
+
+schema win_InputInitialiseMouse_2
+  ΔwinModuleState
+  result! : HRESULT
+where
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = hr
+  -- Return postcondition: result! = hr
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema winModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3658
+end

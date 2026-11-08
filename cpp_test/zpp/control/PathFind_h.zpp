@@ -1,0 +1,1290 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PathFind (control)
+-- Source File(s): control/PathFind.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Treadable.zpp  (from "Treadable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+LANE_WIDTH : ℝ  -- #define LANE_WIDTH 5.0f
+WIDTH_TO_PED_NODE_WIDTH : ℝ  -- #define WIDTH_TO_PED_NODE_WIDTH (31.f/(500.f * 8.f))
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PathFind_Enum_1 ::= NodeTypeExtern | NodeTypeIntern
+  -- val(NodeTypeExtern) = 1
+  -- val(NodeTypeIntern) = 2
+
+PathFind_Enum_2 ::= PATH_CAR | PATH_PED
+  -- val(PATH_CAR) = 0
+  -- val(PATH_PED) = 1
+
+PathFind_Enum_3 ::= SWITCH_OFF | SWITCH_ON
+  -- val(SWITCH_OFF) = 0
+  -- val(SWITCH_ON) = 1
+
+PathFind_Enum_4 ::= ROUTE_ADD_BLOCKADE | ROUTE_NO_BLOCKADE
+  -- val(ROUTE_ADD_BLOCKADE) = 0
+  -- val(ROUTE_NO_BLOCKADE) = 1
+
+PathFind_Enum_5 ::= NodeTypeExtern | NodeTypeIntern | UseInRoadBlock | ObjectEastWest
+  -- val(NodeTypeExtern) = 1
+  -- val(NodeTypeIntern) = 2
+  -- val(UseInRoadBlock) = 1
+  -- val(ObjectEastWest) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPedPathNode
+  bBlockade : 𝔹
+  nodeIdX : ℕ
+  nodeIdY : ℕ
+  id : ℤ
+  prev : Ref[CPedPathNode]
+  next : Ref[CPedPathNode]
+where
+  nodeIdX ≥ 0
+  nodeIdY ≥ 0
+  #prev ≤ 1
+  #next ≤ 1
+end
+
+schema CPedPath
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedPath_CalcPedRoute
+  ΔCPedPath
+  pathType? : ℤ
+  position? : CVector
+  destination? : CVector
+  pointPoses? : Ref[CVector]
+  pointsFound? : ℙ ℤ
+  maxPoints? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVector *pointPoses, int16 *pointsFound, int16 maxPoints)
+  true
+end
+
+schema CPedPath_AddNodeToPathList_2
+  ΔCPedPath
+  pNodeToAdd? : Ref[CPedPathNode]
+  id? : ℤ
+  pNodeList? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::AddNodeToPathList(CPedPathNode *pNodeToAdd, int16 id, CPedPathNode *pNodeList)
+  true
+end
+
+schema CPedPath_RemoveNodeFromList_3
+  ΔCPedPath
+  pNode? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::RemoveNodeFromList(CPedPathNode *pNode)
+  true
+end
+
+schema CPedPath_AddNodeToList_4
+  ΔCPedPath
+  pNode? : Ref[CPedPathNode]
+  index? : ℤ
+  pList? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::AddNodeToList(CPedPathNode *pNode, int16 index, CPedPathNode *pList)
+  true
+end
+
+schema CPedPath_AddBlockade_5
+  ΔCPedPath
+  pEntity? : Ref[CEntity]
+  pathNodes? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)
+  true
+end
+
+schema CPedPath_AddBlockadeSectorList_6
+  ΔCPedPath
+  list? : CPtrList
+  pathNodes? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::AddBlockadeSectorList(CPtrList& list, CPedPathNode(*pathNodes)
+  true
+end
+
+schema CPedPath_AddBuildingBlockade_7
+  ΔCPedPath
+  arg_1? : Ref[CEntity]
+  arg_2? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::AddBuildingBlockade(CEntity*, CPedPathNode(*)
+  true
+end
+
+schema CPedPath_AddBuildingBlockadeSectorList_8
+  ΔCPedPath
+  arg_1? : CPtrList
+  arg_2? : Ref[CPedPathNode]
+where
+  -- Declared member operation CPedPath::AddBuildingBlockadeSectorList(CPtrList&, CPedPathNode(*)
+  true
+end
+
+schema CPathNode
+  prevIndex : ℤ
+  nextIndex : ℤ
+  x : ℤ
+  y : ℤ
+  z : ℤ
+  distance : ℤ
+  firstLink : ℤ
+  width : ℕ
+  group : ℤ
+  numLinks : 𝔹
+  bDeadEnd : 𝔹
+  bDisabled : 𝔹
+  bBetweenLevels : 𝔹
+  bUseInRoadBlock : 𝔹
+  bWaterPath : 𝔹
+  bOnlySmallBoats : 𝔹
+  bSelected : 𝔹
+  speedLimit : 𝔹
+  spawnRate : 𝔹
+  flagsC : 𝔹
+  pos : CVector
+  prev : Ref[CPathNode]
+  next : Ref[CPathNode]
+  objectIndex : ℤ
+  unkBits : 𝔹
+where
+  width ≥ 0
+  #numLinks = 4
+  #bDeadEnd = 1
+  #bDisabled = 1
+  #bBetweenLevels = 1
+  #bUseInRoadBlock = 1
+  #bWaterPath = 1
+  #bOnlySmallBoats = 1
+  #bSelected = 1
+  #speedLimit = 2
+  #spawnRate = 4
+  #flagsC = 4
+  #prev ≤ 1
+  #next ≤ 1
+  #unkBits = 2
+end
+
+schema CPathNode_GetPosition
+  ΔCPathNode
+  result! : CVector
+where
+  -- Declared member operation CPathNode::GetPosition(void)
+  true
+end
+
+schema CPathNode_SetPosition_2
+  ΔCPathNode
+  p? : CVector
+  result! : void
+where
+  -- Declared member operation CPathNode::SetPosition(const CVector &p)
+  true
+end
+
+schema CPathNode_GetX_3
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetX(void)
+  true
+end
+
+schema CPathNode_GetY_4
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetY(void)
+  true
+end
+
+schema CPathNode_GetZ_5
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetZ(void)
+  true
+end
+
+schema CPathNode_HasDivider_6
+  ΔCPathNode
+  result! : bool
+where
+  -- Declared member operation CPathNode::HasDivider(void)
+  true
+end
+
+schema CPathNode_GetDividerWidth_7
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetDividerWidth(void)
+  true
+end
+
+schema CPathNode_GetPedNodeWidth_8
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetPedNodeWidth(void)
+  true
+end
+
+schema CPathNode_GetPrev_9
+  ΔCPathNode
+  result! : Ref[CPathNode]
+where
+  -- Declared member operation CPathNode::GetPrev(void)
+  true
+end
+
+schema CPathNode_GetNext_10
+  ΔCPathNode
+  result! : Ref[CPathNode]
+where
+  -- Declared member operation CPathNode::GetNext(void)
+  true
+end
+
+schema CPathNode_SetPrev_11
+  ΔCPathNode
+  node? : Ref[CPathNode]
+where
+  -- Declared member operation CPathNode::SetPrev(CPathNode *node)
+  true
+end
+
+schema CPathNode_SetNext_12
+  ΔCPathNode
+  node? : Ref[CPathNode]
+where
+  -- Declared member operation CPathNode::SetNext(CPathNode *node)
+  true
+end
+
+schema CPathNode_GetPosition_13
+  ΔCPathNode
+  result! : CVector
+where
+  -- Declared member operation CPathNode::GetPosition(void)
+  true
+end
+
+schema CPathNode_SetPosition_14
+  ΔCPathNode
+  p? : CVector
+  result! : void
+where
+  -- Declared member operation CPathNode::SetPosition(const CVector &p)
+  true
+end
+
+schema CPathNode_GetX_15
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetX(void)
+  true
+end
+
+schema CPathNode_GetY_16
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetY(void)
+  true
+end
+
+schema CPathNode_GetZ_17
+  ΔCPathNode
+  result! : ℝ
+where
+  -- Declared member operation CPathNode::GetZ(void)
+  true
+end
+
+schema CPathNode_GetPrev_18
+  ΔCPathNode
+  result! : Ref[CPathNode]
+where
+  -- Declared member operation CPathNode::GetPrev(void)
+  true
+end
+
+schema CPathNode_GetNext_19
+  ΔCPathNode
+  result! : Ref[CPathNode]
+where
+  -- Declared member operation CPathNode::GetNext(void)
+  true
+end
+
+schema CPathNode_SetPrev_20
+  ΔCPathNode
+  node? : Ref[CPathNode]
+  result! : void
+where
+  -- Declared member operation CPathNode::SetPrev(CPathNode *node)
+  true
+end
+
+schema CPathNode_SetNext_21
+  ΔCPathNode
+  node? : Ref[CPathNode]
+  result! : void
+where
+  -- Declared member operation CPathNode::SetNext(CPathNode *node)
+  true
+end
+
+schema CCarPathLink
+  x : ℤ
+  y : ℤ
+  pathNodeIndex : ℤ
+  dirX : ℤ
+  dirY : ℤ
+  numLeftLanes : 𝔹
+  numRightLanes : 𝔹
+  trafficLightDirection : 𝔹
+  trafficLightType : 𝔹
+  bBridgeLights : 𝔹
+  width : ℕ
+  dir : CVector2D
+where
+  #numLeftLanes = 3
+  #numRightLanes = 3
+  #trafficLightDirection = 1
+  #trafficLightType = 2
+  #bBridgeLights = 1
+  width ≥ 0
+end
+
+schema CCarPathLink_GetPosition
+  ΔCCarPathLink
+  result! : CVector2D
+where
+  -- Declared member operation CCarPathLink::GetPosition(void)
+  true
+end
+
+schema CCarPathLink_GetDirection_2
+  ΔCCarPathLink
+  result! : CVector2D
+where
+  -- Declared member operation CCarPathLink::GetDirection(void)
+  true
+end
+
+schema CCarPathLink_GetX_3
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetX(void)
+  true
+end
+
+schema CCarPathLink_GetY_4
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetY(void)
+  true
+end
+
+schema CCarPathLink_GetDirX_5
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetDirX(void)
+  true
+end
+
+schema CCarPathLink_GetDirY_6
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetDirY(void)
+  true
+end
+
+schema CCarPathLink_GetLaneOffset_7
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetLaneOffset(void)
+  true
+end
+
+schema CCarPathLink_OneWayLaneOffset_8
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::OneWayLaneOffset()
+  true
+end
+
+schema CCarPathLink_if_9
+  ΔCCarPathLink
+  arg_1? : numRightLanes
+where
+  -- Declared member operation CCarPathLink::if(numRightLanes == 0)
+  true
+end
+
+schema CCarPathLink_GetLaneOffset_10
+  ΔCCarPathLink
+  result! : return_0_5f
+where
+  -- Declared member operation CCarPathLink::GetLaneOffset()
+  true
+end
+
+schema CCarPathLink_GetPosition_11
+  ΔCCarPathLink
+  result! : CVector2D
+where
+  -- Declared member operation CCarPathLink::GetPosition(void)
+  true
+end
+
+schema CCarPathLink_GetDirection_12
+  ΔCCarPathLink
+  result! : CVector2D
+where
+  -- Declared member operation CCarPathLink::GetDirection(void)
+  true
+end
+
+schema CCarPathLink_GetX_13
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetX(void)
+  true
+end
+
+schema CCarPathLink_GetY_14
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetY(void)
+  true
+end
+
+schema CCarPathLink_GetDirX_15
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetDirX(void)
+  true
+end
+
+schema CCarPathLink_GetDirY_16
+  ΔCCarPathLink
+  result! : ℝ
+where
+  -- Declared member operation CCarPathLink::GetDirY(void)
+  true
+end
+
+schema CPathInfoForObject
+  x : ℝ
+  y : ℝ
+  z : ℝ
+  type : ℤ
+  next : ℤ
+  numLeftLanes : ℤ
+  numRightLanes : ℤ
+  speedLimit : ℤ
+  width : ℕ
+  crossing : 𝔹
+  onlySmallBoats : 𝔹
+  roadBlock : 𝔹
+  disabled : 𝔹
+  waterPath : 𝔹
+  betweenLevels : 𝔹
+  spawnRate : 𝔹
+where
+  width ≥ 0
+  #crossing = 1
+  #onlySmallBoats = 1
+  #roadBlock = 1
+  #disabled = 1
+  #waterPath = 1
+  #betweenLevels = 1
+  #spawnRate = 4
+end
+
+schema CPathInfoForObject_CheckIntegrity
+  ΔCPathInfoForObject
+where
+  -- Declared member operation CPathInfoForObject::CheckIntegrity(void)
+  true
+end
+
+schema CPathInfoForObject_SwapConnectionsToBeRightWayRound_2
+  ΔCPathInfoForObject
+where
+  -- Declared member operation CPathInfoForObject::SwapConnectionsToBeRightWayRound(void)
+  true
+end
+
+schema CTempNode
+  pos : CVector
+  dirX : ℤ
+  dirY : ℤ
+  link1 : ℤ
+  link2 : ℤ
+  numLeftLanes : ℤ
+  numRightLanes : ℤ
+  width : ℕ
+  isCross : 𝔹
+  linkState : ℤ
+where
+  width ≥ 0
+end
+
+schema CTempNodeExternal
+  pos : CVector
+  next : ℤ
+  numLeftLanes : ℤ
+  numRightLanes : ℤ
+  width : ℕ
+  isCross : 𝔹
+where
+  width ≥ 0
+end
+
+schema CRoute
+  m_node : seq T  -- bounded array [8]
+where
+  #m_node = 8
+end
+
+schema CPathFind
+  m_pathNodes : seq CPathNode  -- bounded array [NUM_PATHNODES]
+  m_carPathLinks : seq CCarPathLink  -- bounded array [NUM_CARPATHLINKS]
+  m_mapObjects : seq Ref[CTreadable]  -- bounded array [NUM_MAPOBJECTS]
+  m_connections : seq ℕ  -- bounded array [NUM_PATHCONNECTIONS]
+  m_distances : seq ℕ  -- bounded array [NUM_PATHCONNECTIONS]
+  m_carPathConnections : seq ℤ  -- bounded array [NUM_PATHCONNECTIONS]
+  m_numPathNodes : ℤ
+  m_numCarPathNodes : ℤ
+  m_numPedPathNodes : ℤ
+  m_numMapObjects : ℤ
+  m_numConnections : ℤ
+  m_numCarPathLinks : ℤ
+  unk : ℤ
+  m_numGroups : seq ℕ  -- bounded array [2]
+  m_searchNodes : seq CPathNode  -- bounded array [512]
+  m_objectFlags : seq ℕ  -- bounded array [NUM_MAPOBJECTS]
+  m_connectionFlags : seq CConnectionFlags  -- bounded array [NUM_PATHCONNECTIONS]
+where
+  #m_numGroups = 2
+  #m_searchNodes = 512
+end
+
+schema CPathFind_Init
+  ΔCPathFind
+where
+  -- Declared member operation CPathFind::Init(void)
+  true
+end
+
+schema CPathFind_AllocatePathFindInfoMem_2
+  ΔCPathFind
+  numPathGroups? : ℤ
+where
+  -- Declared member operation CPathFind::AllocatePathFindInfoMem(int16 numPathGroups)
+  true
+end
+
+schema CPathFind_RegisterMapObject_3
+  ΔCPathFind
+  mapObject? : Ref[CTreadable]
+where
+  -- Declared member operation CPathFind::RegisterMapObject(CTreadable *mapObject)
+  true
+end
+
+schema CPathFind_StoreNodeInfoPed_4
+  ΔCPathFind
+  id? : ℤ
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  width? : ℝ
+  crossing? : 𝔹
+  spawnRate? : ℕ
+where
+  -- Declared member operation CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, float width, bool crossing, uint8 spawnRate)
+  true
+end
+
+schema CPathFind_StoreNodeInfoCar_5
+  ΔCPathFind
+  id? : ℤ
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  width? : ℝ
+  numLeft? : ℤ
+  numRight? : ℤ
+  disabled? : 𝔹
+  betweenLevels? : 𝔹
+  speedLimit? : ℕ
+  roadBlock? : 𝔹
+  waterPath? : 𝔹
+  spawnRate? : ℕ
+where
+  -- Declared member operation CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, float width, int8 numLeft, int8 numRight, bool disabled, bool betweenLevels, uint8 speedLimit, bool roadBlock, bool waterPath, uint8 spawnRate)
+  true
+end
+
+schema CPathFind_StoreDetachedNodeInfoPed_6
+  ΔCPathFind
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  crossing? : 𝔹
+  disabled? : 𝔹
+  betweenLevels? : 𝔹
+  spawnRate? : ℕ
+where
+  -- Declared member operation CPathFind::StoreDetachedNodeInfoPed(int32 node, int8 type, int32 next, float x, float y, float z, float width, bool crossing, bool disabled, bool betweenLevels, uint8 spawnRate)
+  true
+end
+
+schema CPathFind_StoreDetachedNodeInfoCar_7
+  ΔCPathFind
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  numLeft? : ℤ
+  numRight? : ℤ
+  disabled? : 𝔹
+  betweenLevels? : 𝔹
+  speedLimit? : ℕ
+  roadBlock? : 𝔹
+  waterPath? : 𝔹
+  spawnRate? : ℕ
+  unk? : 𝔹
+where
+  -- Declared member operation CPathFind::StoreDetachedNodeInfoCar(int32 node, int8 type, int32 next, float x, float y, float z, float width, int8 numLeft, int8 numRight, bool disabled, bool betweenLevels, uint8 speedLimit, bool roadBlock, bool waterPath, uint8 spawnRate, bool unk)
+  true
+end
+
+schema CPathFind_CalcNodeCoors_8
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  id? : ℤ
+  out? : Ref[CVector]
+where
+  -- Declared member operation CPathFind::CalcNodeCoors(float x, float y, float z, int32 id, CVector *out)
+  true
+end
+
+schema CPathFind_LoadPathFindData_9
+  ΔCPathFind
+  result! : 𝔹
+where
+  -- Declared member operation CPathFind::LoadPathFindData(void)
+  true
+end
+
+schema CPathFind_PreparePathData_10
+  ΔCPathFind
+where
+  -- Declared member operation CPathFind::PreparePathData(void)
+  true
+end
+
+schema CPathFind_CountFloodFillGroups_11
+  ΔCPathFind
+  type? : ℕ
+where
+  -- Declared member operation CPathFind::CountFloodFillGroups(uint8 type)
+  true
+end
+
+schema CPathFind_PreparePathDataForType_12
+  ΔCPathFind
+  type? : ℕ
+  tempnodes? : Ref[CTempNode]
+  objectpathinfo? : Ref[CPathInfoForObject]
+  maxdist? : ℝ
+  detachednodes? : Ref[CPathInfoForObject]
+  numDetached? : ℤ
+where
+  -- Declared member operation CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoForObject *objectpathinfo, float maxdist, CPathInfoForObject *detachednodes, int32 numDetached)
+  true
+end
+
+schema CPathFind_IsPathObject_13
+  ΔCPathFind
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPathFind::IsPathObject(int id)
+  true
+end
+
+schema CPathFind_CalcRoadDensity_14
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CPathFind::CalcRoadDensity(float x, float y)
+  true
+end
+
+schema CPathFind_TestForPedTrafficLight_15
+  ΔCPathFind
+  n1? : Ref[CPathNode]
+  n2? : Ref[CPathNode]
+  result! : 𝔹
+where
+  -- Declared member operation CPathFind::TestForPedTrafficLight(CPathNode *n1, CPathNode *n2)
+  true
+end
+
+schema CPathFind_TestCrossesRoad_16
+  ΔCPathFind
+  n1? : Ref[CPathNode]
+  n2? : Ref[CPathNode]
+  result! : 𝔹
+where
+  -- Declared member operation CPathFind::TestCrossesRoad(CPathNode *n1, CPathNode *n2)
+  true
+end
+
+schema CPathFind_AddNodeToList_17
+  ΔCPathFind
+  node? : Ref[CPathNode]
+  listId? : ℤ
+where
+  -- Declared member operation CPathFind::AddNodeToList(CPathNode *node, int32 listId)
+  true
+end
+
+schema CPathFind_RemoveNodeFromList_18
+  ΔCPathFind
+  node? : Ref[CPathNode]
+where
+  -- Declared member operation CPathFind::RemoveNodeFromList(CPathNode *node)
+  true
+end
+
+schema CPathFind_RemoveBadStartNode_19
+  ΔCPathFind
+  pos? : CVector
+  nodes? : Ref[CPathNode]
+  n? : ℙ ℤ
+where
+  -- Declared member operation CPathFind::RemoveBadStartNode(CVector pos, CPathNode **nodes, int16 *n)
+  true
+end
+
+schema CPathFind_SetLinksBridgeLights_20
+  ΔCPathFind
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : 𝔹
+where
+  -- Declared member operation CPathFind::SetLinksBridgeLights(float, float, float, float, bool)
+  true
+end
+
+schema CPathFind_SwitchOffNodeAndNeighbours_21
+  ΔCPathFind
+  nodeId? : ℤ
+  disable? : 𝔹
+where
+  -- Declared member operation CPathFind::SwitchOffNodeAndNeighbours(int32 nodeId, bool disable)
+  true
+end
+
+schema CPathFind_SwitchRoadsOffInArea_22
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  disable? : 𝔹
+where
+  -- Declared member operation CPathFind::SwitchRoadsOffInArea(float x1, float x2, float y1, float y2, float z1, float z2, bool disable)
+  true
+end
+
+schema CPathFind_SwitchPedRoadsOffInArea_23
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  disable? : 𝔹
+where
+  -- Declared member operation CPathFind::SwitchPedRoadsOffInArea(float x1, float x2, float y1, float y2, float z1, float z2, bool disable)
+  true
+end
+
+schema CPathFind_SwitchRoadsInAngledArea_24
+  ΔCPathFind
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  length? : ℝ
+  type? : ℕ
+  enable? : ℕ
+where
+  -- Declared member operation CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float y2, float z2, float length, uint8 type, uint8 enable)
+  true
+end
+
+schema CPathFind_MarkRoadsBetweenLevelsNodeAndNeighbours_25
+  ΔCPathFind
+  nodeId? : ℤ
+where
+  -- Declared member operation CPathFind::MarkRoadsBetweenLevelsNodeAndNeighbours(int32 nodeId)
+  true
+end
+
+schema CPathFind_MarkRoadsBetweenLevelsInArea_26
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+where
+  -- Declared member operation CPathFind::MarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2)
+  true
+end
+
+schema CPathFind_PedMarkRoadsBetweenLevelsInArea_27
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+where
+  -- Declared member operation CPathFind::PedMarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2)
+  true
+end
+
+schema CPathFind_FindNodeClosestToCoors_28
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  distLimit? : ℝ
+  ignoreDisabled? : 𝔹
+  ignoreBetweenLevels? : 𝔹
+  ignoreSelected? : 𝔹
+  bWaterPath? : 𝔹
+  result! : ℤ
+where
+  -- Declared member operation CPathFind::FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled = false, bool ignoreBetweenLevels = false, bool ignoreSelected = false, bool bWaterPath = false)
+  true
+end
+
+schema CPathFind_FindNodeClosestToCoorsFavourDirection_29
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  dirX? : ℝ
+  dirY? : ℝ
+  result! : ℤ
+where
+  -- Declared member operation CPathFind::FindNodeClosestToCoorsFavourDirection(CVector coors, uint8 type, float dirX, float dirY)
+  true
+end
+
+schema CPathFind_FindNodePairClosestToCoors_30
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  node1? : ℙ ℤ
+  node2? : ℙ ℤ
+  angle? : ℙ ℝ
+  minDist? : ℝ
+  maxDist? : ℝ
+  ignoreDisabled? : 𝔹
+  ignoreBetweenLevels? : 𝔹
+  bWaterPath? : 𝔹
+where
+  -- Declared member operation CPathFind::FindNodePairClosestToCoors(CVector coors, uint8 type, int* node1, int* node2, float* angle, float minDist, float maxDist, bool ignoreDisabled = false, bool ignoreBetweenLevels = false, bool bWaterPath = false)
+  true
+end
+
+schema CTempDetachedNode
+  foo : seq ℕ  -- bounded array [20]
+where
+  #foo = 20
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PathFind_GetPosition
+  ΔPathFindModuleState
+  result! : CVector
+where
+  -- Return postcondition: result! = CVector(x/8.0f, y/8.0f, z/8.0f)
+  true
+end
+
+schema PathFind_SetPosition
+  ΔPathFindModuleState
+  p? : CVector
+where
+  -- State update: x' = p.x*8.0f
+  -- State update: y' = p.y*8.0f
+  -- State update: z' = p.z*8.0f
+  true
+end
+
+schema PathFind_GetX
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = x/8.0f
+  true
+end
+
+schema PathFind_GetY
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = y/8.0f
+  true
+end
+
+schema PathFind_GetZ
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = z/8.0f
+  true
+end
+
+schema PathFind_HasDivider
+  ΔPathFindModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = width != 0
+  true
+end
+
+schema PathFind_GetDividerWidth
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = width/(2*8.0f)
+  true
+end
+
+schema PathFind_GetPedNodeWidth
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = width*WIDTH_TO_PED_NODE_WIDTH
+  true
+end
+
+schema PathFind_SetPosition_2
+  ΔPathFindModuleState
+  p? : CVector
+where
+  -- State update: pos' = p
+  true
+end
+
+schema PathFind_GetX_2
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = pos.x
+  true
+end
+
+schema PathFind_GetY_2
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = pos.y
+  true
+end
+
+schema PathFind_GetZ_2
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = pos.z
+  true
+end
+
+schema PathFind_SetPrev
+  ΔPathFindModuleState
+  node? : Ref[CPathNode]
+where
+  -- State update: prev' = node
+  true
+end
+
+schema PathFind_SetNext
+  ΔPathFindModuleState
+  node? : Ref[CPathNode]
+where
+  -- State update: next' = node
+  true
+end
+
+schema PathFind_GetPosition_2
+  ΔPathFindModuleState
+  result! : CVector2D
+where
+  -- Return postcondition: result! = CVector2D(x/8.0f, y/8.0f)
+  true
+end
+
+schema PathFind_GetDirection
+  ΔPathFindModuleState
+  result! : CVector2D
+where
+  -- Return postcondition: result! = CVector2D(dirX/100.0f, dirY/100.0f)
+  true
+end
+
+schema PathFind_GetX_3
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = x/8.0f
+  true
+end
+
+schema PathFind_GetY_3
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = y/8.0f
+  true
+end
+
+schema PathFind_GetDirX
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = dirX/100.0f
+  true
+end
+
+schema PathFind_GetDirY
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = dirY/100.0f
+  true
+end
+
+schema PathFind_GetLaneOffset
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = width/(2*8.0f*LANE_WIDTH)
+  true
+end
+
+schema PathFind_OneWayLaneOffset
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = 0.5f - 0.5f * numRightLanes
+  -- Return postcondition: result! = 0.5f - 0.5f * numLeftLanes
+  -- Return postcondition: result! = 0.5f + GetLaneOffset()
+  true
+end
+
+schema PathFind_GetX_4
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = pos.x
+  true
+end
+
+schema PathFind_GetY_4
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = pos.y
+  true
+end
+
+schema PathFind_GetDirX_2
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = dir.x
+  true
+end
+
+schema PathFind_GetDirY_2
+  ΔPathFindModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = dir.y
+  true
+end
+
+schema PathFind_IsPathObject
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema PathFind_ConnectedNode
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_connections[id] & 0x3FFF
+  true
+end
+
+schema PathFind_ConnectionCrossesRoad
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(m_connections[id] & 0x8000)
+  true
+end
+
+schema PathFind_ConnectionHasTrafficLight
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(m_connections[id] & 0x4000)
+  true
+end
+
+schema PathFind_ConnectionSetTrafficLight
+  ΔPathFindModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema PathFind_ConnectedNode_2
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_connections[id]
+  true
+end
+
+schema PathFind_ConnectionCrossesRoad_2
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_connectionFlags[id].bCrossesRoad
+  true
+end
+
+schema PathFind_ConnectionHasTrafficLight_2
+  ΔPathFindModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_connectionFlags[id].bTrafficLight
+  true
+end
+
+schema PathFind_ConnectionSetTrafficLight_2
+  ΔPathFindModuleState
+  id? : ℤ
+where
+  -- State update: bTrafficLight' = true
+  true
+end
+
+schema CPathNode_SetPrev
+  ΔCPathNode
+  node? : Ref[CPathNode]
+where
+  -- State update: prevIndex' = ThePaths.GetIndex(node)
+  -- Invokes: ThePaths.GetIndex
+  true
+end
+
+schema CPathNode_SetNext
+  ΔCPathNode
+  node? : Ref[CPathNode]
+where
+  -- State update: nextIndex' = ThePaths.GetIndex(node)
+  -- Invokes: ThePaths.GetIndex
+  true
+end

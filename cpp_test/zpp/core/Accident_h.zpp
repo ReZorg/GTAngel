@@ -1,0 +1,105 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Accident (core)
+-- Source File(s): core/Accident.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include config.zpp  (from "config.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Accident_Enum_1 ::= MAX_MEDICS_TO_ATTEND_ACCIDENT
+  -- val(MAX_MEDICS_TO_ATTEND_ACCIDENT) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAccident
+  m_pVictim : Ref[CPed]
+  m_nMedicsAttending : ℕ
+  m_nMedicsPerformingCPR : ℕ
+where
+  #m_pVictim ≤ 1
+  m_nMedicsAttending ≥ 0
+  m_nMedicsPerformingCPR ≥ 0
+end
+
+schema CAccident_CAccident
+  ΔCAccident
+where
+  -- Declared member operation CAccident::CAccident()
+  true
+end
+
+schema CAccidentManager
+  m_aAccidents : seq CAccident  -- bounded array [NUM_ACCIDENTS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CAccidentManager_GetNextFreeAccident
+  ΔCAccidentManager
+  result! : Ref[CAccident]
+where
+  -- Declared member operation CAccidentManager::GetNextFreeAccident()
+  true
+end
+
+schema CAccidentManager_ReportAccident_2
+  ΔCAccidentManager
+  ped? : Ref[CPed]
+where
+  -- Declared member operation CAccidentManager::ReportAccident(CPed *ped)
+  true
+end
+
+schema CAccidentManager_Update_3
+  ΔCAccidentManager
+where
+  -- Declared member operation CAccidentManager::Update()
+  true
+end
+
+schema CAccidentManager_FindNearestAccident_4
+  ΔCAccidentManager
+  vecPos? : CVector
+  pDistance? : ℙ ℝ
+  result! : Ref[CAccident]
+where
+  -- Declared member operation CAccidentManager::FindNearestAccident(CVector vecPos, float *pDistance)
+  true
+end
+
+schema CAccidentManager_CountActiveAccidents_5
+  ΔCAccidentManager
+  result! : ℕ
+where
+  -- Declared member operation CAccidentManager::CountActiveAccidents()
+  true
+end
+
+schema CAccidentManager_UnattendedAccidents_6
+  ΔCAccidentManager
+  result! : 𝔹
+where
+  -- Declared member operation CAccidentManager::UnattendedAccidents()
+  true
+end
+
+schema CAccidentManager_WorkToDoForMedics_7
+  ΔCAccidentManager
+  result! : 𝔹
+where
+  -- Declared member operation CAccidentManager::WorkToDoForMedics()
+  true
+end

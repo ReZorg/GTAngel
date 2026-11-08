@@ -1,0 +1,980 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FileLoader (core)
+-- Source File(s): core/FileLoader.cpp, core/FileLoader.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Quaternion.zpp  (from "Quaternion.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include PedType.zpp  (from "PedType.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include Game.zpp  (from "Game.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include ObjectData.zpp  (from "ObjectData.h")
+-- include DummyObject.zpp  (from "DummyObject.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include ctype.zpp  (from "ctype.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+FileLoader_Enum_1 ::= NONE | OBJS | MLO | TOBJ | WEAP | HIER | CARS | PEDS | PATH | TWODFX
+
+FileLoader_Enum_2 ::= NONE | INST | ZONE | CULL | OCCL | PICK | PATH
+
+FileLoader_Enum_3 ::= NONE | INST | ZONE | CULL | PICK | PATH
+
+FileLoader_Enum_4 ::= NONE | PATH
+
+FileLoader_Enum_5 ::= NONE | OBJS | TOBJ | TWODFX
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ColHeader
+  ident : ℕ
+  size : ℕ
+where
+  ident ≥ 0
+  size ≥ 0
+end
+
+schema CFileLoader
+  ms_line : seq CHAR
+where
+  #ms_line = 256
+end
+
+schema CFileLoader_LoadLevel
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadLevel(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadLine_2
+  ΔCFileLoader
+  fd? : ℤ
+  result! : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadLine(int fd)
+  true
+end
+
+schema CFileLoader_LoadTexDictionary_3
+  ΔCFileLoader
+  filename? : seq CHAR
+  result! : Ref[RwTexDictionary]
+where
+  -- Declared member operation CFileLoader::LoadTexDictionary(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadCollisionFile_4
+  ΔCFileLoader
+  filename? : seq CHAR
+  colSlot? : ℕ
+where
+  -- Declared member operation CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
+  true
+end
+
+schema CFileLoader_LoadCollisionFileFirstTime_5
+  ΔCFileLoader
+  buffer? : ℙ ℕ
+  size? : ℕ
+  colSlot? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlot)
+  true
+end
+
+schema CFileLoader_LoadCollisionFile_6
+  ΔCFileLoader
+  buffer? : ℙ ℕ
+  size? : ℕ
+  colSlot? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadCollisionFile(uint8 *buffer, uint32 size, uint8 colSlot)
+  true
+end
+
+schema CFileLoader_LoadCollisionModel_7
+  ΔCFileLoader
+  buf? : ℙ ℕ
+  model? : struct_CColModel
+  name? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadCollisionModel(uint8 *buf, struct CColModel &model, char *name)
+  true
+end
+
+schema CFileLoader_SplitColTrianglesIntoSections_8
+  ΔCFileLoader
+  model? : CColModel
+where
+  -- Declared member operation CFileLoader::SplitColTrianglesIntoSections(CColModel &model)
+  true
+end
+
+schema CFileLoader_LoadModelFile_9
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadModelFile(const char *filename)
+  true
+end
+
+schema CFileLoader_FindRelatedModelInfoCB_10
+  ΔCFileLoader
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CFileLoader_LoadClumpFile_11
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadClumpFile(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadClumpFile_12
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_StartLoadClumpFile_13
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::StartLoadClumpFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_FinishLoadClumpFile_14
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::FinishLoadClumpFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_LoadAtomicFile_15
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadAtomicFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_SetRelatedModelInfoCB_16
+  ΔCFileLoader
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CFileLoader::SetRelatedModelInfoCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CFileLoader_LoadAtomicFile2Return_17
+  ΔCFileLoader
+  filename? : seq CHAR
+  result! : Ref[RpClump]
+where
+  -- Declared member operation CFileLoader::LoadAtomicFile2Return(const char *filename)
+  true
+end
+
+schema CFileLoader_AddTexDictionaries_18
+  ΔCFileLoader
+  dst? : Ref[RwTexDictionary]
+  src? : Ref[RwTexDictionary]
+where
+  -- Declared member operation CFileLoader::AddTexDictionaries(RwTexDictionary *dst, RwTexDictionary *src)
+  true
+end
+
+schema CFileLoader_LoadObjectTypes_19
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadObjectTypes(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadObject_20
+  ΔCFileLoader
+  line? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadTimeObject_21
+  ΔCFileLoader
+  line? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadTimeObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadWeaponObject_22
+  ΔCFileLoader
+  line? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadWeaponObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadClumpObject_23
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadClumpObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadVehicleObject_24
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadVehicleObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadPedObject_25
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadPedObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadPathHeader_26
+  ΔCFileLoader
+  line? : seq CHAR
+  type? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadPathHeader(const char *line, int &type)
+  true
+end
+
+schema CFileLoader_LoadPedPathNode_27
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+where
+  -- Declared member operation CFileLoader::LoadPedPathNode(const char *line, int id, int node)
+  true
+end
+
+schema CFileLoader_LoadCarPathNode_28
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+  waterPath? : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadCarPathNode(const char *line, int id, int node, bool waterPath)
+  true
+end
+
+schema CFileLoader_Load2dEffect_29
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::Load2dEffect(const char *line)
+  true
+end
+
+schema CFileLoader_LoadScene_30
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadScene(const char *filename)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema FileLoader_GetFilename
+  ΔFileLoaderModuleState
+  filename? : seq CHAR
+where
+  -- State update: s' = strrchr((char*)filename, '\\')
+  -- Return postcondition: result! = s ? s+1 : filename
+  true
+end
+
+schema FileLoader_LoadingScreenLoadingFile
+  ΔFileLoaderModuleState
+  filename? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileLoader_LoadLevel
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: savedTxd' = RwTexDictionaryGetCurrent()
+  -- State update: objectsLoaded' = false
+  -- State update: savedLevel' = CGame::currLevel
+  -- State update: savedTxd' = RwTexDictionaryCreate()
+  -- State update: fd' = CFileMgr::OpenFile(filename, "r")
+  -- State update: fd' = CFileMgr::OpenFile(filename, "r")
+  -- Invokes: CFileMgr::ChangeDir, CFileMgr::OpenFile, CModelInfo::ConstructMloClumps, CObjectData::Initialise, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_LoadCollisionFromDatFile
+  ΔCFileLoader
+  currlevel? : ℤ
+where
+  -- State update: fd' = CFileMgr::OpenFile(CGame::aDatFile, "r")
+  -- State update: line' = LoadLine(fd)
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_LoadLine
+  ΔCFileLoader
+  fd? : ℤ
+where
+  -- State update: line' = ms_line
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = line
+  -- Invokes: CFileMgr::ReadLine
+  true
+end
+
+schema CFileLoader_LoadTexDictionary
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: txd' = ∅
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename)
+  -- State update: txd' = RwTexDictionaryGtaStreamRead(stream)
+  -- State update: txd' = RwTexDictionaryCreate()
+  -- Return postcondition: result! = txd
+  true
+end
+
+schema CFileLoader_LoadCollisionFile
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: mi' = CModelInfo::GetModelInfo(modelname, ∅)
+  -- State update: model' = new CColModel
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CModelInfo::GetModelInfo, mi->GetColModel, mi->SetColModel
+  true
+end
+
+schema CFileLoader_LoadCollisionModel
+  ΔCFileLoader
+  buf? : ℙ ℕ
+  model? : CColModel
+  modelname? : seq CHAR
+where
+  -- State update: model.boundingSphere.radius' = Max(*(float*)(buf), 0.1f)
+  -- State update: model.boundingSphere.center.x' = *(float*)(buf+4)
+  -- State update: model.boundingSphere.center.y' = *(float*)(buf+8)
+  -- State update: model.boundingSphere.center.z' = *(float*)(buf+12)
+  -- State update: model.boundingBox.min.x' = *(float*)(buf+16)
+  -- State update: model.boundingBox.min.y' = *(float*)(buf+20)
+  true
+end
+
+schema FileLoader_GetNameAndLOD
+  ΔFileLoaderModuleState
+  nodename? : seq CHAR
+  name? : seq CHAR
+  n? : ℙ ℤ
+where
+  -- State update: underscore' = ∅
+  -- State update: s' = nodename
+  -- State update: underscore' = s
+  true
+end
+
+schema CFileLoader_FindRelatedModelInfoCB
+  ΔCFileLoader
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: clump' = (RpClump*)data
+  -- State update: nodename' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: mi' = (CSimpleModelInfo*)CModelInfo::GetModelInfo(name, ∅)
+  -- Return postcondition: result! = atomic
+  -- Invokes: CModelInfo::GetModelInfo, mi->IsSimple, mi->SetAtomic, CVisibilityPlugins::SetAtomicModelInfo, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema FileLoader_InitClump
+  ΔFileLoaderModuleState
+  clump? : Ref[RpClump]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileLoader_LoadModelFile
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename)
+  -- State update: clump' = RpClumpStreamRead(stream)
+  true
+end
+
+schema CFileLoader_LoadClumpFile
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename)
+  -- State update: clump' = RpClumpStreamRead(stream)
+  -- State update: nodename' = GetFrameNodeName(RpClumpGetFrame(clump))
+  -- State update: mi' = (CClumpModelInfo*)CModelInfo::GetModelInfo(name, ∅)
+  -- Invokes: CModelInfo::GetModelInfo, mi->IsClump, mi->SetClump
+  true
+end
+
+schema CFileLoader_LoadClumpFile_2
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+where
+  -- State update: clump' = RpClumpStreamRead(stream)
+  -- State update: mi' = (CClumpModelInfo*)CModelInfo::GetModelInfo(id)
+  -- State update: clump' = RpClumpStreamRead(stream)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetModelInfo, mi->SetClump, mi->GetModelType
+  true
+end
+
+schema CFileLoader_StartLoadClumpFile
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+where
+  -- Return postcondition: result! = RpClumpGtaStreamRead1(stream)
+  -- Return postcondition: result! = false
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema CFileLoader_FinishLoadClumpFile
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+where
+  -- State update: clump' = RpClumpGtaStreamRead2(stream)
+  -- State update: mi' = (CClumpModelInfo*)CModelInfo::GetModelInfo(id)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CModelInfo::GetModelInfo, mi->SetClump
+  true
+end
+
+schema CFileLoader_LoadAtomicFile
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+where
+  -- State update: clump' = RpClumpStreamRead(stream)
+  -- State update: gpRelatedModelInfo' = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema FileLoader_MatchModelName
+  ΔFileLoaderModuleState
+  name? : seq CHAR
+  list? : seq CHAR
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CFileLoader_SetRelatedModelInfoCB
+  ΔCFileLoader
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: clump' = (RpClump*)data
+  -- State update: nodename' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- Return postcondition: result! = atomic
+  -- Invokes: gpRelatedModelInfo->SetAtomic, CVisibilityPlugins::SetAtomicModelInfo, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CFileLoader_LoadAtomicFile2Return
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: clump' = ∅
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename)
+  -- State update: clump' = RpClumpStreamRead(stream)
+  -- Return postcondition: result! = clump
+  true
+end
+
+schema FileLoader_MoveTexturesCB
+  ΔFileLoaderModuleState
+  texture? : Ref[RwTexture]
+  pData? : ADDRESS
+where
+  -- Return postcondition: result! = texture
+  true
+end
+
+schema CFileLoader_AddTexDictionaries
+  ΔCFileLoader
+  dst? : Ref[RwTexDictionary]
+  src? : Ref[RwTexDictionary]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileLoader_LoadObjectTypes
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: id' = -1
+  -- State update: section' = NONE
+  -- State update: pathIndex' = -1
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: line' = CFileLoader::LoadLine(fd)
+  -- State update: section' = OBJS
+  -- Invokes: CFileMgr::OpenFile, CFileLoader::LoadLine, CFileMgr::CloseFile, CModelInfo::GetModelInfo, mi->IsBuilding
+  true
+end
+
+schema FileLoader_SetModelInfoFlags
+  ΔFileLoaderModuleState
+  mi? : Ref[CSimpleModelInfo]
+  flags? : ℕ
+where
+  -- State update: mi.m_normalCull' = !!(flags & 1)
+  -- State update: mi.m_noFade' = !!(flags & 2)
+  -- State update: mi.m_drawLast' = !!(flags & (4|8))
+  -- State update: mi.m_additive' = !!(flags & 8)
+  -- State update: mi.m_isSubway' = !!(flags & 0x10)
+  -- State update: mi.m_ignoreLight' = !!(flags & 0x20)
+  -- Invokes: mi->GetModelName
+  true
+end
+
+schema CFileLoader_LoadObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: id' = id
+  -- State update: damaged' = 0
+  -- State update: mi' = CModelInfo::AddSimpleModel(id)
+  -- State update: mi.m_firstDamaged' = damaged
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = id
+  -- Invokes: CModelInfo::AddSimpleModel, mi->SetModelName, mi->SetNumAtomics, mi->SetLodDistances, mi->SetTexDictionary
+  true
+end
+
+schema CFileLoader_LoadMLO
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: minfo' = CModelInfo::AddMloModel(modelIndex)
+  -- State update: minfo.drawDist' = drawDist
+  -- State update: instId' = CModelInfo::GetMloInstanceStore().allocPtr
+  -- State update: minfo.firstInstance' = instId
+  -- State update: minfo.lastInstance' = instId
+  -- Return postcondition: result! = modelIndex
+  -- Invokes: CModelInfo::AddMloModel, minfo->SetModelName, CModelInfo::GetMloInstanceStore, minfo->SetTexDictionary
+  true
+end
+
+schema CFileLoader_LoadMLOInstance
+  ΔCFileLoader
+  id? : ℤ
+  line? : seq CHAR
+where
+  -- State update: minfo' = (CMloModelInfo*)CModelInfo::GetModelInfo(id)
+  -- State update: rad' = Acos(angle) * 2.0f
+  -- State update: inst' = CModelInfo::GetMloInstanceStore().Alloc()
+  -- State update: matrix' = RwMatrixCreate()
+  -- State update: inst.m_modelIndex' = modelIndex
+  -- Invokes: CModelInfo::GetModelInfo, CModelInfo::GetMloInstanceStore, inst->GetMatrix
+  true
+end
+
+schema CFileLoader_LoadTimeObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: id' = id
+  -- State update: damaged' = 0
+  -- State update: mi' = CModelInfo::AddTimeModel(id)
+  -- State update: mi.m_firstDamaged' = damaged
+  -- State update: other' = mi.FindOtherTimeModel(model)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = id
+  -- Invokes: CModelInfo::AddTimeModel, mi->SetModelName, mi->SetNumAtomics, mi->SetLodDistances, mi->SetTimes
+  true
+end
+
+schema CFileLoader_LoadClumpObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: mi' = CModelInfo::AddClumpModel(id)
+  -- Invokes: CModelInfo::AddClumpModel, mi->SetModelName, mi->SetTexDictionary, mi->SetColModel
+  true
+end
+
+schema CFileLoader_LoadVehicleObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: mi' = CModelInfo::AddVehicleModel(id)
+  -- State update: p' = gamename
+  -- State update: p' = ' '
+  -- State update: mi.m_level' = level
+  -- State update: mi.m_compRules' = comprules
+  -- State update: mi.m_wheelId' = misc
+  -- Invokes: CModelInfo::AddVehicleModel, mi->SetModelName, mi->SetTexDictionary, mi->SetAnimFile, mod_HandlingManager.GetHandlingId
+  true
+end
+
+schema CFileLoader_LoadPedObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: mi' = CModelInfo::AddPedModel(id)
+  -- State update: mi.m_pedType' = CPedType::FindPedType(pedType)
+  -- State update: mi.m_pedStatType' = CPedStats::GetPedStatType(pedStats)
+  -- State update: animGroupId' = 0
+  -- State update: mi.m_animGroup' = animGroupId
+  -- State update: mi.m_carsCanDrive' = carsCanDrive
+  -- Invokes: CModelInfo::AddPedModel, mi->SetModelName, mi->SetTexDictionary, mi->SetAnimFile, mi->SetColModel
+  true
+end
+
+schema CFileLoader_LoadPathHeader
+  ΔCFileLoader
+  line? : seq CHAR
+  type? : seq CHAR
+where
+  -- Return postcondition: result! = id
+  true
+end
+
+schema CFileLoader_LoadPedPathNode
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+where
+  -- State update: spawnRate' = 1.0f
+  -- Invokes: ThePaths.StoreDetachedNodeInfoPed, ThePaths.StoreNodeInfoPed
+  true
+end
+
+schema CFileLoader_LoadCarPathNode
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+where
+  -- Invokes: ThePaths.StoreNodeInfoCar
+  true
+end
+
+schema CFileLoader_Load2dEffect
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: mi' = CModelInfo::GetModelInfo(id)
+  -- State update: effect' = CModelInfo::Get2dEffectStore().Alloc()
+  -- State update: effect.pos' = CVector(x, y, z)
+  -- State update: effect.col' = CRGBA(r, g, b, a)
+  -- State update: effect.type' = type
+  -- State update: p' = corona
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::FindTxdSlot, CModelInfo::GetModelInfo, CModelInfo::Get2dEffectStore
+  true
+end
+
+schema CFileLoader_LoadScene
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: section' = NONE
+  -- State update: pathIndex' = -1
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: line' = CFileLoader::LoadLine(fd)
+  -- State update: section' = INST
+  -- State update: section' = ZONE
+  -- Invokes: CFileMgr::OpenFile, CFileLoader::LoadLine, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_LoadObjectInstance
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: area' = 0
+  -- State update: mi' = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id)
+  -- State update: angle' = -RADTODEG(2.0f * Acos(angle))
+  -- State update: xform' = RwMatrixCreate()
+  -- State update: entity' = new CTreadable
+  -- State update: entity' = new CBuilding
+  -- Invokes: CModelInfo::GetModelInfo, mi->IsSimple, CStreaming::IsObjectInCdImage, mi->GetModelName, mi->GetObjectID
+  true
+end
+
+schema CFileLoader_LoadZone
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Invokes: CTheZones::CreateZone
+  true
+end
+
+schema CFileLoader_LoadCullZone
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: wantedLevelDrop' = 0
+  -- Invokes: CCullZones::AddCullZone
+  true
+end
+
+schema CFileLoader_LoadPickup
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileLoader_LoadMapZones
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: section' = NONE
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: line' = CFileLoader::LoadLine(fd)
+  -- State update: section' = ZONE
+  -- State update: section' = NONE
+  -- Invokes: CFileMgr::OpenFile, CFileLoader::LoadLine, CTheZones::CreateMapZone, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_ReloadPaths
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: section' = NONE
+  -- State update: pathIndex' = -1
+  -- State update: fd' = CFileMgr::OpenFile(filename, "r")
+  -- State update: line' = CFileLoader::LoadLine(fd)
+  -- State update: section' = PATH
+  -- State update: section' = NONE
+  -- Invokes: CFileMgr::OpenFile, CFileLoader::LoadLine, ThePaths.AllocatePathFindInfoMem, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_ReloadObjectTypes
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: section' = NONE
+  -- State update: fd' = CFileMgr::OpenFile(filename, "r")
+  -- State update: line' = CFileLoader::LoadLine(fd)
+  -- State update: section' = OBJS
+  -- State update: section' = TOBJ
+  -- State update: section' = TWODFX
+  -- Invokes: CModelInfo::ReInit2dEffects, CFileMgr::ChangeDir, CFileMgr::OpenFile, CFileLoader::LoadLine, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_ReloadObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: mi' = (CSimpleModelInfo*) CModelInfo::GetModelInfo(id)
+  -- Invokes: CModelInfo::GetModelInfo, mi->GetModelType, mi->GetModelName, mi->SetLodDistances
+  true
+end
+
+schema CFileLoader_ReLoadScene
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- State update: fd' = CFileMgr::OpenFile(filename, "r")
+  -- State update: line' = CFileLoader::LoadLine(fd)
+  -- Invokes: CFileMgr::ChangeDir, CFileMgr::OpenFile, CFileLoader::LoadLine, CFileMgr::CloseFile
+  true
+end
+
+schema CFileLoader_LoadCollisionFile_2
+  ΔCFileLoader
+  filename? : seq CHAR
+  colSlot? : ℕ
+where
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: mi' = CModelInfo::GetModelInfo(modelname, ∅)
+  -- State update: model' = new CColModel
+  -- State update: model.level' = colSlot
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CModelInfo::GetModelInfo, mi->GetColModel, mi->DoesOwnColModel
+  true
+end
+
+schema CFileLoader_LoadCollisionFileFirstTime
+  ΔCFileLoader
+  buffer? : ℙ ℕ
+  size? : ℕ
+  colSlot? : ℕ
+where
+  -- State update: header' = (ColHeader*)buffer
+  -- State update: modelsize' = header.size
+  -- State update: mi' = CModelInfo::GetModelInfo(modelname, &modelIndex)
+  -- State update: model' = new CColModel
+  -- State update: model.level' = colSlot
+  -- Return postcondition: result! = size-8 < CDSTREAM_SECTOR_SIZE
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetModelInfo, CColStore::IncludeModelIndex, mi->SetColModel
+  true
+end
+
+schema CFileLoader_LoadCollisionFile_3
+  ΔCFileLoader
+  buffer? : ℙ ℕ
+  size? : ℕ
+  colSlot? : ℕ
+where
+  -- State update: header' = (ColHeader*)buffer
+  -- State update: modelsize' = header.size
+  -- State update: model' = new CColModel
+  -- State update: model.level' = colSlot
+  -- Return postcondition: result! = size-8 < CDSTREAM_SECTOR_SIZE
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetModelInfo, CColStore::GetSlot, mi->GetColModel, mi->SetColModel
+  true
+end
+
+schema CFileLoader_SplitColTrianglesIntoSections
+  ΔCFileLoader
+  model? : CColModel
+where
+  -- State update: model.numTriBBoxes' = 1
+  -- State update: model.triBBoxes' = new CColTriBBox[1]
+  -- State update: first' = 0
+  -- State update: last' = model.numTriangles-1
+  -- State update: v' = model.vertices[model.triangles[0].a].Get()
+  -- State update: vA' = model.vertices[model.triangles[i].a].Get()
+  true
+end
+
+schema CFileLoader_LoadWeaponObject
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- State update: mi' = CModelInfo::AddWeaponModel(id)
+  -- Return postcondition: result! = id
+  -- Invokes: CModelInfo::AddWeaponModel, mi->SetModelName, mi->SetNumAtomics, mi->SetTexDictionary, mi->SetAnimFile
+  true
+end
+
+schema CFileLoader_LoadPathHeader_2
+  ΔCFileLoader
+  line? : seq CHAR
+  type? : ℤ
+where
+  -- Return postcondition: result! = id
+  true
+end
+
+schema CFileLoader_LoadCarPathNode_2
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+  waterPath? : 𝔹
+where
+  -- State update: spawnRate' = 1.0f
+  -- Invokes: ThePaths.StoreDetachedNodeInfoCar, ThePaths.StoreNodeInfoCar
+  true
+end
+
+schema CFileLoader_LoadOcclusionVolume
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Invokes: COcclusion::AddOne
+  true
+end

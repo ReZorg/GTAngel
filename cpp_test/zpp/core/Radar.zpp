@@ -1,0 +1,1229 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Radar (core)
+-- Source File(s): core/Radar.cpp, core/Radar.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include config.zpp  (from "config.h")
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include World.zpp  (from "World.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include General.zpp  (from "General.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Script.zpp  (from "Script.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Font.zpp  (from "Font.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Draw.zpp  (from "Draw.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #endif
+RADAR_MIN_X : ℝ  -- #define RADAR_MIN_X (-2000.0f)
+RADAR_MIN_Y : ℝ  -- #define RADAR_MIN_Y (-2000.0f)
+RADAR_MAX_X : ℝ  -- #define RADAR_MAX_X (2000.0f)
+RADAR_MAX_Y : ℝ  -- #define RADAR_MAX_Y (2000.0f)
+RADAR_SIZE_X : seq CHAR  -- #define RADAR_SIZE_X (RADAR_MAX_X - RADAR_MIN_X)
+RADAR_SIZE_Y : seq CHAR  -- #define RADAR_SIZE_Y (RADAR_MAX_Y - RADAR_MIN_Y)
+RADAR_NUM_TILES : seq CHAR  -- #define RADAR_NUM_TILES (8)
+RADAR_TILE_SIZE : seq CHAR  -- #define RADAR_TILE_SIZE (RADAR_SIZE_X / RADAR_NUM_TILES)
+RADAR_MIN_RANGE : ℝ  -- #define RADAR_MIN_RANGE (120.0f)
+RADAR_MAX_RANGE : ℝ  -- #define RADAR_MAX_RANGE (350.0f)
+RADAR_MIN_SPEED : ℝ  -- #define RADAR_MIN_SPEED (0.3f)
+RADAR_MAX_SPEED : ℝ  -- #define RADAR_MAX_SPEED (0.9f)
+WAYPOINT_R : seq CHAR  -- #define WAYPOINT_R (255)
+WAYPOINT_G : seq CHAR  -- #define WAYPOINT_G (72)
+WAYPOINT_B : seq CHAR  -- #define WAYPOINT_B (77)
+CARBLIP_MARKER_COLOR_R : ℕ  -- #define CARBLIP_MARKER_COLOR_R 252
+CARBLIP_MARKER_COLOR_G : ℕ  -- #define CARBLIP_MARKER_COLOR_G 138
+CARBLIP_MARKER_COLOR_B : ℕ  -- #define CARBLIP_MARKER_COLOR_B 242
+CARBLIP_MARKER_COLOR_A : ℕ  -- #define CARBLIP_MARKER_COLOR_A 255
+CHARBLIP_MARKER_COLOR_R : ℕ  -- #define CHARBLIP_MARKER_COLOR_R 252
+CHARBLIP_MARKER_COLOR_G : ℕ  -- #define CHARBLIP_MARKER_COLOR_G 138
+CHARBLIP_MARKER_COLOR_B : ℕ  -- #define CHARBLIP_MARKER_COLOR_B 242
+CHARBLIP_MARKER_COLOR_A : ℕ  -- #define CHARBLIP_MARKER_COLOR_A 255
+OBJECTBLIP_MARKER_COLOR_R : ℕ  -- #define OBJECTBLIP_MARKER_COLOR_R 252
+OBJECTBLIP_MARKER_COLOR_G : ℕ  -- #define OBJECTBLIP_MARKER_COLOR_G 138
+OBJECTBLIP_MARKER_COLOR_B : ℕ  -- #define OBJECTBLIP_MARKER_COLOR_B 242
+OBJECTBLIP_MARKER_COLOR_A : ℕ  -- #define OBJECTBLIP_MARKER_COLOR_A 255
+COORDBLIP_MARKER_COLOR_R : ℕ  -- #define COORDBLIP_MARKER_COLOR_R 255
+COORDBLIP_MARKER_COLOR_G : ℕ  -- #define COORDBLIP_MARKER_COLOR_G 255
+COORDBLIP_MARKER_COLOR_B : ℕ  -- #define COORDBLIP_MARKER_COLOR_B 128
+COORDBLIP_MARKER_COLOR_A : ℕ  -- #define COORDBLIP_MARKER_COLOR_A 228
+NUM_MAP_LEGENDS : ℕ  -- #define NUM_MAP_LEGENDS 75
+MENU_MAP_LENGTH_UNIT : ℝ  -- #define MENU_MAP_LENGTH_UNIT 1190.0f
+MENU_MAP_WIDTH_SCALE : ℝ  -- #define MENU_MAP_WIDTH_SCALE 1.112f
+MENU_MAP_HEIGHT_SCALE : ℝ  -- #define MENU_MAP_HEIGHT_SCALE 1.119f
+MENU_MAP_TOP_OFFSET : ℝ  -- #define MENU_MAP_TOP_OFFSET 0.28f
+MENU_MAP_LEFT_OFFSET : ℝ  -- #define MENU_MAP_LEFT_OFFSET 0.185f
+MENU_MAP_LENGTH : ℝ  -- #define MENU_MAP_LENGTH (4000.f / MENU_MAP_LENGTH_UNIT)
+RADAR_LEFT : ℝ  -- #define RADAR_LEFT (40.0f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eBlipType ::= BLIP_NONE | BLIP_CAR | BLIP_CHAR | BLIP_OBJECT | BLIP_COORD | BLIP_CONTACT_POINT
+
+eBlipDisplay ::= BLIP_DISPLAY_NEITHER | BLIP_DISPLAY_MARKER_ONLY | BLIP_DISPLAY_BLIP_ONLY | BLIP_DISPLAY_BOTH
+  -- val(BLIP_DISPLAY_NEITHER) = 0
+  -- val(BLIP_DISPLAY_MARKER_ONLY) = 1
+  -- val(BLIP_DISPLAY_BLIP_ONLY) = 2
+  -- val(BLIP_DISPLAY_BOTH) = 3
+
+eRadarSprite ::= RADAR_SPRITE_ENTITY_BLIP | RADAR_SPRITE_COORD_BLIP | RADAR_SPRITE_NONE | RADAR_SPRITE_CENTRE | RADAR_SPRITE_MAP_HERE | RADAR_SPRITE_NORTH | RADAR_SPRITE_AVERY | RADAR_SPRITE_BIKER | RADAR_SPRITE_CORTEZ | RADAR_SPRITE_DIAZ | RADAR_SPRITE_KENT | RADAR_SPRITE_LAWYER | RADAR_SPRITE_PHIL | RADAR_SPRITE_BIKERS | RADAR_SPRITE_BOATYARD | RADAR_SPRITE_MALIBU_CLUB | RADAR_SPRITE_CUBANS | RADAR_SPRITE_FILM | RADAR_SPRITE_GUN | RADAR_SPRITE_HAITIANS | RADAR_SPRITE_HARDWARE | RADAR_SPRITE_SAVE | RADAR_SPRITE_STRIP | RADAR_SPRITE_ICE | RADAR_SPRITE_KCABS | RADAR_SPRITE_LOVEFIST | RADAR_SPRITE_PRINTWORKS | RADAR_SPRITE_PROPERTY | RADAR_SPRITE_SUNYARD | RADAR_SPRITE_SPRAY | RADAR_SPRITE_TSHIRT | RADAR_SPRITE_TOMMY | RADAR_SPRITE_PHONE | RADAR_SPRITE_EIGHTBALL | RADAR_SPRITE_BURNER | RADAR_SPRITE_CIPRIANI | RADAR_SPRITE_DONALD | RADAR_SPRITE_JOSEPH | RADAR_SPRITE_LEONE | RADAR_SPRITE_MARIA | RADAR_SPRITE_MCRAY | RADAR_SPRITE_TOSHIKO | RADAR_SPRITE_VINCENZO | RADAR_SPRITE_BOMB | RADAR_SPRITE_CLOTHES | RADAR_SPRITE_PROPERTY_RED | RADAR_SPRITE_PHIL_CASSIDY | RADAR_SPRITE_POWERUP | ... (86 total branches)
+  -- val(RADAR_SPRITE_ENTITY_BLIP) = -2
+  -- val(RADAR_SPRITE_COORD_BLIP) = -1
+  -- val(RADAR_SPRITE_NONE) = 0
+
+Radar_Enum_4 ::= RADAR_TRACE_RED | RADAR_TRACE_GREEN | RADAR_TRACE_LIGHT_BLUE | RADAR_TRACE_GRAY | RADAR_TRACE_YELLOW | RADAR_TRACE_MAGENTA | RADAR_TRACE_CYAN
+
+Radar_Enum_5 ::= BLIP_MODE_TRIANGULAR_UP | BLIP_MODE_TRIANGULAR_DOWN | BLIP_MODE_SQUARE
+  -- val(BLIP_MODE_TRIANGULAR_UP) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema sRadarTrace
+  m_nColor : ℕ
+  m_eBlipType : ℕ
+  m_nEntityHandle : ℤ
+  m_vec2DPos : CVector
+  m_vecPos : CVector
+  m_BlipIndex : ℕ
+  m_bDim : 𝔹
+  m_bInUse : 𝔹
+  m_bShortRange : 𝔹
+  m_unused : 𝔹
+  m_Radius : ℝ
+  m_wScale : ℤ
+  m_eBlipDisplay : ℕ
+  m_eRadarSprite : ℕ
+where
+  m_nColor ≥ 0
+  m_eBlipType ≥ 0
+  m_BlipIndex ≥ 0
+  m_eBlipDisplay ≥ 0
+  m_eRadarSprite ≥ 0
+end
+
+schema sRadarTraceSave
+  m_nColor : ℕ
+  m_Radius : ℝ
+  m_eBlipType : ℕ
+  m_nEntityHandle : ℤ
+  m_vec2DPos : CVector2D
+  m_vecPos : CVector
+  m_BlipIndex : ℕ
+  m_bDim : 𝔹
+  m_bInUse : 𝔹
+  m_bShortRange : 𝔹
+  m_unused : 𝔹
+  m_wScale : ℤ
+  m_eBlipDisplay : ℕ
+  m_eRadarSprite : ℕ
+where
+  m_nColor ≥ 0
+  m_eBlipType ≥ 0
+  m_BlipIndex ≥ 0
+  m_eBlipDisplay ≥ 0
+  m_eRadarSprite ≥ 0
+end
+
+schema CRadar
+  m_radarRange : ℝ
+  ms_RadarTrace : seq sRadarTrace  -- bounded array [NUMRADARBLIPS]
+  CentreSprite : CSprite2d
+  MapHereSprite : CSprite2d
+  NorthSprite : CSprite2d
+  AverySprite : CSprite2d
+  BikerSprite : CSprite2d
+  CortezSprite : CSprite2d
+  DiazSprite : CSprite2d
+  KentSprite : CSprite2d
+  LawyerSprite : CSprite2d
+  PhilSprite : CSprite2d
+  BikersSprite : CSprite2d
+  BoatyardSprite : CSprite2d
+  MalibuClubSprite : CSprite2d
+  CubansSprite : CSprite2d
+  FilmSprite : CSprite2d
+  GunSprite : CSprite2d
+  HaitiansSprite : CSprite2d
+  HardwareSprite : CSprite2d
+  SaveHouseSprite : CSprite2d
+  StripSprite : CSprite2d
+  IceSprite : CSprite2d
+  KCabsSprite : CSprite2d
+  LovefistSprite : CSprite2d
+  PrintworksSprite : CSprite2d
+  PropertySprite : CSprite2d
+  SunYardSprite : CSprite2d
+  SpraySprite : CSprite2d
+  TShirtSprite : CSprite2d
+  TommySprite : CSprite2d
+  PhoneSprite : CSprite2d
+  EightBallSprite : CSprite2d
+  BurnerSprite : CSprite2d
+  CiprianiSprite : CSprite2d
+  DonaldSprite : CSprite2d
+  JosephSprite : CSprite2d
+  LeoneSprite : CSprite2d
+  MariaSprite : CSprite2d
+  McraySprite : CSprite2d
+  ToshikoSprite : CSprite2d
+  VincenzoSprite : CSprite2d
+  BombSprite : CSprite2d
+  ClothesShopSprite : CSprite2d
+  PropertyRedSprite : CSprite2d
+  PhilCassidySprite : CSprite2d
+  PowerupSprite : CSprite2d
+  MPBase : CSprite2d
+  MPCheckPoint : CSprite2d
+  MPPlayer : CSprite2d
+  MPObjective : CSprite2d
+  MPCar : CSprite2d
+  MPTank : CSprite2d
+  MPCarLockup : CSprite2d
+  MPTargetPlayer : CSprite2d
+  MapHereSprite0 : CSprite2d
+  MapHereSprite1 : CSprite2d
+  MapHereSprite2 : CSprite2d
+  MapHereSprite3 : CSprite2d
+  MapHereSprite4 : CSprite2d
+  MapHereSprite5 : CSprite2d
+  MapHereSprite6 : CSprite2d
+  MapHereSprite7 : CSprite2d
+  MapWayPoint : CSprite2d
+  RadarSprites : seq Ref[CSprite2d]  -- bounded array [RADAR_SPRITE_COUNT]
+  cachedCos : ℝ
+  cachedSin : ℝ
+  ArrowBlipColour1 : CRGBA
+  ArrowBlipColour2 : CRGBA
+  MapLegendList : seq ℤ  -- bounded array [NUM_MAP_LEGENDS]
+  MapLegendCounter : ℤ
+  TargetMarkerPos : CVector
+  RadioWildstyleSprite : CSprite2d
+  RadioWaveSprite : CSprite2d
+  WaypointSprite : CSprite2d
+  AsukaSprite : CSprite2d
+  CatSprite : CSprite2d
+  CopcarSprite : CSprite2d
+  DonSprite : CSprite2d
+  EightSprite : CSprite2d
+  ElSprite : CSprite2d
+  JoeySprite : CSprite2d
+  KenjiSprite : CSprite2d
+  LizSprite : CSprite2d
+  LuigiSprite : CSprite2d
+  RaySprite : CSprite2d
+  SalSprite : CSprite2d
+  SaveSprite : CSprite2d
+  TonySprite : CSprite2d
+  WeaponSprite : CSprite2d
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRadar_DrawYouAreHereSprite
+  ΔCRadar
+  arg_1? : ℝ
+  arg_2? : ℝ
+where
+  -- Declared member operation CRadar::DrawYouAreHereSprite(float, float)
+  true
+end
+
+schema CRadar_ChangeBlipBrightness_2
+  ΔCRadar
+  i? : ℤ
+  bright? : ℤ
+where
+  -- Declared member operation CRadar::ChangeBlipBrightness(int32 i, int32 bright)
+  true
+end
+
+schema CRadar_ChangeBlipColour_3
+  ΔCRadar
+  i? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation CRadar::ChangeBlipColour(int32 i, int32)
+  true
+end
+
+schema CRadar_ChangeBlipDisplay_4
+  ΔCRadar
+  i? : ℤ
+  display? : eBlipDisplay
+where
+  -- Declared member operation CRadar::ChangeBlipDisplay(int32 i, eBlipDisplay display)
+  true
+end
+
+schema CRadar_ChangeBlipScale_5
+  ΔCRadar
+  i? : ℤ
+  scale? : ℤ
+where
+  -- Declared member operation CRadar::ChangeBlipScale(int32 i, int32 scale)
+  true
+end
+
+schema CRadar_ClearBlip_6
+  ΔCRadar
+  i? : ℤ
+where
+  -- Declared member operation CRadar::ClearBlip(int32 i)
+  true
+end
+
+schema CRadar_ClearBlipForEntity_7
+  ΔCRadar
+  type? : eBlipType
+  id? : ℤ
+where
+  -- Declared member operation CRadar::ClearBlipForEntity(eBlipType type, int32 id)
+  true
+end
+
+schema CRadar_ClipRadarPoly_8
+  ΔCRadar
+  out? : Ref[CVector2D]
+  in? : Ref[CVector2D]
+  result! : ℤ
+where
+  -- Declared member operation CRadar::ClipRadarPoly(CVector2D *out, const CVector2D *in)
+  true
+end
+
+schema CRadar_DisplayThisBlip_9
+  ΔCRadar
+  i? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CRadar::DisplayThisBlip(int32 i)
+  true
+end
+
+schema CRadar_Draw3dMarkers_10
+  ΔCRadar
+where
+  -- Declared member operation CRadar::Draw3dMarkers()
+  true
+end
+
+schema CRadar_DrawBlips_11
+  ΔCRadar
+where
+  -- Declared member operation CRadar::DrawBlips()
+  true
+end
+
+schema CRadar_DrawMap_12
+  ΔCRadar
+where
+  -- Declared member operation CRadar::DrawMap()
+  true
+end
+
+schema CRadar_DrawRadarMap_13
+  ΔCRadar
+where
+  -- Declared member operation CRadar::DrawRadarMap()
+  true
+end
+
+schema CRadar_DrawRadarMask_14
+  ΔCRadar
+where
+  -- Declared member operation CRadar::DrawRadarMask()
+  true
+end
+
+schema CRadar_DrawRadarSection_15
+  ΔCRadar
+  x? : ℤ
+  y? : ℤ
+where
+  -- Declared member operation CRadar::DrawRadarSection(int32 x, int32 y)
+  true
+end
+
+schema CRadar_DrawRadarSprite_16
+  ΔCRadar
+  sprite? : ℕ
+  x? : ℝ
+  y? : ℝ
+  alpha? : ℕ
+where
+  -- Declared member operation CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha)
+  true
+end
+
+schema CRadar_DrawRotatingRadarSprite_17
+  ΔCRadar
+  sprite? : Ref[CSprite2d]
+  x? : ℝ
+  y? : ℝ
+  angle? : ℝ
+  alpha? : ℤ
+where
+  -- Declared member operation CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int32 alpha)
+  true
+end
+
+schema CRadar_GetActualBlipArrayIndex_18
+  ΔCRadar
+  i? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRadar::GetActualBlipArrayIndex(int32 i)
+  true
+end
+
+schema CRadar_GetNewUniqueBlipIndex_19
+  ΔCRadar
+  i? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRadar::GetNewUniqueBlipIndex(int32 i)
+  true
+end
+
+schema CRadar_GetRadarTraceColour_20
+  ΔCRadar
+  color? : ℕ
+  bright? : 𝔹
+  result! : ℕ
+where
+  -- Declared member operation CRadar::GetRadarTraceColour(uint32 color, bool bright)
+  true
+end
+
+schema CRadar_Initialise_21
+  ΔCRadar
+where
+  -- Declared member operation CRadar::Initialise()
+  true
+end
+
+schema CRadar_LimitRadarPoint_22
+  ΔCRadar
+  point? : CVector2D
+  result! : ℝ
+where
+  -- Declared member operation CRadar::LimitRadarPoint(CVector2D &point)
+  true
+end
+
+schema CRadar_LoadAllRadarBlips_23
+  ΔCRadar
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CRadar::LoadAllRadarBlips(uint8 *buf, uint32 size)
+  true
+end
+
+schema CRadar_LoadTextures_24
+  ΔCRadar
+where
+  -- Declared member operation CRadar::LoadTextures()
+  true
+end
+
+schema CRadar_RemoveRadarSections_25
+  ΔCRadar
+where
+  -- Declared member operation CRadar::RemoveRadarSections()
+  true
+end
+
+schema CRadar_SaveAllRadarBlips_26
+  ΔCRadar
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CRadar::SaveAllRadarBlips(uint8*, uint32*)
+  true
+end
+
+schema CRadar_SetBlipSprite_27
+  ΔCRadar
+  i? : ℤ
+  icon? : ℤ
+where
+  -- Declared member operation CRadar::SetBlipSprite(int32 i, int32 icon)
+  true
+end
+
+schema CRadar_SetCoordBlip_28
+  ΔCRadar
+  type? : eBlipType
+  pos? : CVector
+  arg_3? : ℕ
+  arg_4? : eBlipDisplay
+  result! : ℤ
+where
+  -- Declared member operation CRadar::SetCoordBlip(eBlipType type, CVector pos, uint32, eBlipDisplay)
+  true
+end
+
+schema CRadar_SetEntityBlip_29
+  ΔCRadar
+  type? : eBlipType
+  arg_2? : ℤ
+  arg_3? : ℕ
+  arg_4? : eBlipDisplay
+  result! : ℤ
+where
+  -- Declared member operation CRadar::SetEntityBlip(eBlipType type, int32, uint32, eBlipDisplay)
+  true
+end
+
+schema CRadar_SetShortRangeCoordBlip_30
+  ΔCRadar
+  type? : eBlipType
+  pos? : CVector
+  arg_3? : ℕ
+  arg_4? : eBlipDisplay
+  result! : ℤ
+where
+  -- Declared member operation CRadar::SetShortRangeCoordBlip(eBlipType type, CVector pos, uint32, eBlipDisplay)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Radar_ClipRadarTileCoords
+  ΔRadarModuleState
+  x? : ℤ
+  y? : ℤ
+where
+  -- State update: x' = 0
+  -- State update: x' = RADAR_NUM_TILES-1
+  -- State update: y' = 0
+  -- State update: y' = RADAR_NUM_TILES-1
+  true
+end
+
+schema Radar_RequestMapSection
+  ΔRadarModuleState
+  x? : ℤ
+  y? : ℤ
+where
+  -- Invokes: CStreaming::RequestTxd
+  true
+end
+
+schema Radar_RemoveMapSection
+  ΔRadarModuleState
+  x? : ℤ
+  y? : ℤ
+where
+  -- Invokes: CStreaming::RemoveTxd
+  true
+end
+
+schema Radar_GetTextureCorners
+  ΔRadarModuleState
+  x? : ℤ
+  y? : ℤ
+  out? : Ref[CVector2D]
+where
+  -- State update: x' = x - RADAR_NUM_TILES/2
+  -- State update: y' = -(y - RADAR_NUM_TILES/2)
+  -- State update: x' = RADAR_TILE_SIZE * (x)
+  -- State update: y' = RADAR_TILE_SIZE * (y - 1)
+  -- State update: x' = RADAR_TILE_SIZE * (x + 1)
+  -- State update: y' = RADAR_TILE_SIZE * (y - 1)
+  true
+end
+
+schema CRadar_CalculateBlipAlpha
+  ΔCRadar
+  dist? : ℝ
+  result! : ℕ
+where
+  -- Return postcondition: result! = 255
+  -- Return postcondition: result! = 255
+  true
+end
+
+schema CRadar_ChangeBlipBrightness
+  ΔCRadar
+  i? : ℤ
+  bright? : ℤ
+where
+  -- State update: index' = GetActualBlipArrayIndex(i)
+  true
+end
+
+schema CRadar_ChangeBlipColour
+  ΔCRadar
+  i? : ℤ
+  color? : ℤ
+where
+  -- State update: index' = GetActualBlipArrayIndex(i)
+  -- State update: m_nColor' = color
+  true
+end
+
+schema CRadar_ChangeBlipDisplay
+  ΔCRadar
+  i? : ℤ
+  display? : eBlipDisplay
+where
+  -- State update: index' = GetActualBlipArrayIndex(i)
+  -- State update: m_eBlipDisplay' = display
+  true
+end
+
+schema CRadar_ChangeBlipScale
+  ΔCRadar
+  i? : ℤ
+  scale? : ℤ
+where
+  -- State update: index' = GetActualBlipArrayIndex(i)
+  -- State update: m_wScale' = scale
+  true
+end
+
+schema CRadar_ClearBlip
+  ΔCRadar
+  i? : ℤ
+where
+  -- State update: index' = GetActualBlipArrayIndex(i)
+  -- State update: m_bInUse' = false
+  -- State update: m_eBlipType' = BLIP_NONE
+  -- State update: m_eBlipDisplay' = BLIP_DISPLAY_NEITHER
+  -- State update: m_eRadarSprite' = RADAR_SPRITE_NONE
+  true
+end
+
+schema CRadar_ClearBlipForEntity
+  ΔCRadar
+  type? : eBlipType
+  id? : ℤ
+where
+  -- State update: m_bInUse' = false
+  -- State update: m_eBlipType' = BLIP_NONE
+  -- State update: m_eBlipDisplay' = BLIP_DISPLAY_NEITHER
+  -- State update: m_eRadarSprite' = RADAR_SPRITE_NONE
+  true
+end
+
+schema Radar_IsPointInsideRadar
+  ΔRadarModuleState
+  point? : CVector2D
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema Radar_LineRadarBoxCollision
+  ΔRadarModuleState
+  out? : CVector2D
+  p1? : CVector2D
+  p2? : CVector2D
+  result! : ℤ
+where
+  -- State update: shortest' = 1.0f
+  -- State update: edge' = -1
+  -- State update: d1' = -1.0f - p1.x
+  -- State update: d2' = -1.0f - p2.x
+  -- State update: t' = d1 / (d1 - d2)
+  -- State update: y' = (p2.y - p1.y)*t + p1.y
+  -- Return postcondition: result! = edge
+  true
+end
+
+schema CRadar_ClipRadarPoly
+  ΔCRadar
+  poly? : Ref[CVector2D]
+  rect? : Ref[CVector2D]
+  result! : ℤ
+where
+  -- State update: laste' = -1
+  -- State update: laste' = e1
+  -- State update: e2' = LineRadarBoxCollision(poly[n], rect[i], rect[(i + 1) % 4])
+  -- State update: e' = LineRadarBoxCollision(tmp, rect[j], rect[(j + 4 - 1) % 4])
+  -- State update: laste' = e
+  -- State update: tmp' = poly[n]
+  -- Return postcondition: result! = n
+  true
+end
+
+schema Radar_ClipPolyPlane
+  ΔRadarModuleState
+  in? : Ref[CVector2D]
+  nin? : ℤ
+  out? : Ref[CVector2D]
+  plane? : Ref[CVector]
+where
+  -- State update: nout' = 0
+  -- State update: x1' = j
+  -- State update: x2' = (j+1) % nin
+  -- State update: d1' = plane.x*in[x1].x + plane.y*in[x1].y + plane.z
+  -- State update: d2' = plane.x*in[x2].x + plane.y*in[x2].y + plane.z
+  -- State update: t' = d1/(d1 - d2)
+  -- Return postcondition: result! = nout
+  true
+end
+
+schema CRadar_DisplayThisBlip
+  ΔCRadar
+  counter? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CRadar_Draw3dMarkers
+  ΔCRadar
+where
+  -- State update: pos' = entity.GetPosition()
+  -- State update: entity' = ((CPed * )entity).m_pMyVehicle
+  -- State update: pos' = entity.GetPosition()
+  -- State update: pos' = entity.GetPosition()
+  -- Invokes: CPools::GetVehiclePool, entity->GetPosition, CModelInfo::GetColModel, entity->GetModelIndex, C3dMarkers::PlaceMarker
+  true
+end
+
+schema CRadar_DrawBlips
+  ΔCRadar
+where
+  -- State update: in' = CVector2D(0.0f, 0.0f)
+  -- State update: angle' = PI + FindPlayerHeading()
+  -- State update: vec2d.x' = vec2DRadarOrigin.x
+  -- State update: vec2d.y' = M_SQRT2 * m_radarRange + vec2DRadarOrigin.y
+  -- State update: blipEntity' = ∅
+  -- State update: blipId' = 0
+  -- Invokes: TheCamera.GetLookDirection, CamTargetEntity->GetPosition, TheCamera.GetForward, CPools::GetVehiclePool, CPools::GetPedPool
+  true
+end
+
+schema CRadar_DrawMap
+  ΔCRadar
+where
+  -- State update: speed' = FindPlayerSpeed().Magnitude()
+  -- State update: m_radarRange' = RADAR_MIN_RANGE
+  -- State update: m_radarRange' = RADAR_MAX_RANGE
+  -- State update: m_radarRange' = RADAR_MIN_RANGE
+  -- State update: vec2DRadarOrigin' = CVector2D(FindPlayerCentreOfWorld_NoSniperShift())
+  true
+end
+
+schema CRadar_DrawRadarMap
+  ΔCRadar
+where
+  -- State update: x' = Floor((vec2DRadarOrigin.x - RADAR_MIN_X) / RADAR_TILE_SIZE)
+  true
+end
+
+schema CRadar_DrawRadarMask
+  ΔCRadar
+where
+  -- State update: in.x' = corners[i].x
+  -- State update: in.y' = corners[i].y
+  -- State update: in.x' = corners[i].x * Cos(j * (PI / 2.0f / 6.0f))
+  -- State update: in.y' = corners[i].y * Sin(j * (PI / 2.0f / 6.0f))
+  -- Invokes: CSprite2d::SetMaskVertices, CSprite2d::GetVertices
+  true
+end
+
+schema CRadar_DrawRadarSection
+  ΔCRadar
+  x? : ℤ
+  y? : ℤ
+where
+  -- State update: texture' = ∅
+  -- State update: numVertices' = ClipRadarPoly(radarPoly, radarCorners)
+  -- Invokes: CTxdStore::GetSlot, CSprite2d::SetVertices, CSprite2d::GetVertices
+  true
+end
+
+schema CRadar_DrawRadarSprite
+  ΔCRadar
+  sprite? : ℕ
+  x? : ℝ
+  y? : ℝ
+  alpha? : ℕ
+where
+  -- State update: alpha' = 255
+  -- State update: alreadyThere' = false
+  -- State update: alreadyThere' = true
+  true
+end
+
+schema CRadar_DrawRotatingRadarSprite
+  ΔCRadar
+  sprite? : Ref[CSprite2d]
+  x? : ℝ
+  y? : ℝ
+  angle? : ℝ
+  alpha? : ℤ
+where
+  -- State update: sizeX' = SCREEN_SCALE_X(8.0f)
+  -- State update: correctedAngle' = angle - PI / 4.f
+  -- State update: sizeY' = SCREEN_SCALE_Y(8.0f)
+  -- State update: cornerAngle' = i * HALFPI + correctedAngle
+  -- Invokes: sprite->Draw
+  true
+end
+
+schema CRadar_GetActualBlipArrayIndex
+  ΔCRadar
+  i? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = (uint16)i
+  true
+end
+
+schema CRadar_GetNewUniqueBlipIndex
+  ΔCRadar
+  i? : ℤ
+  result! : ℤ
+where
+  -- State update: m_BlipIndex' = 1
+  -- Return postcondition: result! = i | (ms_RadarTrace[i].m_BlipIndex << 16)
+  true
+end
+
+schema CRadar_GetRadarTraceColour
+  ΔCRadar
+  color? : ℕ
+  bright? : 𝔹
+  result! : ℕ
+where
+  -- State update: c' = 0x712B49FF
+  -- State update: c' = 0x7F0000FF
+  -- State update: c' = 0x5FA06AFF
+  -- State update: c' = 0x007F00FF
+  -- State update: c' = 0x80A7F3FF
+  -- State update: c' = 0x00007FFF
+  -- Return postcondition: result! = c
+  true
+end
+
+schema CRadar_Initialise
+  ΔCRadar
+where
+  -- State update: TargetMarkerId' = -1
+  -- State update: m_BlipIndex' = 1
+  -- State update: m_bInUse' = false
+  -- State update: m_bShortRange' = false
+  -- State update: m_eBlipType' = BLIP_NONE
+  -- State update: m_eBlipDisplay' = BLIP_DISPLAY_NEITHER
+  -- Invokes: CTxdStore::FindTxdSlot
+  true
+end
+
+schema CRadar_LimitRadarPoint
+  ΔCRadar
+  point? : CVector2D
+  result! : ℝ
+where
+  -- State update: dist' = point.Magnitude()
+  -- State update: invdist' = 1.0f / dist
+  -- Return postcondition: result! = dist
+  -- Return postcondition: result! = dist
+  -- Invokes: point.Magnitude
+  true
+end
+
+schema CRadar_LoadAllRadarBlips
+  ΔCRadar
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRadar_SaveAllRadarBlips
+  ΔCRadar
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = SAVE_HEADER_SIZE + NUMRADARBLIPS * sizeof(sRadarTraceSave)
+  -- State update: bWaypointDeleted' = false
+  -- State update: TargetMarkerId' = -1
+  -- State update: bWaypointDeleted' = true
+  -- State update: saveStruct' = (sRadarTraceSave*) buf
+  -- State update: saveStruct.m_nColor' = ms_RadarTrace[i].m_nColor
+  true
+end
+
+schema CRadar_LoadTextures
+  ΔCRadar
+where
+  -- State update: pixels' = (RwUInt32 *)RwRasterLock(raster, 0, rwRASTERLOCKWRITE)
+  -- State update: x' = 0
+  -- State update: y' = 0
+  -- State update: x2' = x < 8 ? x : 7 - (x & 7)
+  -- State update: y2' = y < 8 ? y : 7 - (y & 7)
+  -- State update: WaypointSprite.m_pTexture' = RwTextureCreate(raster)
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::FindTxdSlot, CentreSprite.SetTexture, MapHereSprite.SetTexture
+  true
+end
+
+schema CRadar_RemoveRadarSections
+  ΔCRadar
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRadar_SetBlipSprite
+  ΔCRadar
+  i? : ℤ
+  icon? : ℤ
+where
+  -- State update: index' = CRadar::GetActualBlipArrayIndex(i)
+  -- State update: m_eRadarSprite' = icon
+  -- Invokes: CRadar::GetActualBlipArrayIndex
+  true
+end
+
+schema CRadar_SetCoordBlip
+  ΔCRadar
+  type? : eBlipType
+  pos? : CVector
+  color? : ℕ
+  display? : eBlipDisplay
+  result! : ℤ
+where
+  -- State update: nextBlip' = 0
+  -- State update: m_eBlipType' = type
+  -- State update: m_nColor' = RADAR_TRACE_MAGENTA
+  -- State update: m_bDim' = true
+  -- State update: m_bInUse' = true
+  -- State update: m_bShortRange' = false
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = CRadar::GetNewUniqueBlipIndex(nextBlip)
+  -- Invokes: CRadar::GetNewUniqueBlipIndex
+  true
+end
+
+schema CRadar_SetShortRangeCoordBlip
+  ΔCRadar
+  type? : eBlipType
+  pos? : CVector
+  color? : ℕ
+  display? : eBlipDisplay
+  result! : ℤ
+where
+  -- State update: index' = SetCoordBlip(type, pos, color, display)
+  -- State update: m_bShortRange' = true
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = index
+  true
+end
+
+schema CRadar_SetEntityBlip
+  ΔCRadar
+  type? : eBlipType
+  handle? : ℤ
+  color? : ℕ
+  display? : eBlipDisplay
+  result! : ℤ
+where
+  -- State update: nextBlip' = 0
+  -- State update: m_eBlipType' = type
+  -- State update: m_nColor' = RADAR_TRACE_YELLOW
+  -- State update: m_bDim' = true
+  -- State update: m_bInUse' = true
+  -- State update: m_bShortRange' = false
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = GetNewUniqueBlipIndex(nextBlip)
+  true
+end
+
+schema CRadar_SetRadarMarkerState
+  ΔCRadar
+  counter? : ℤ
+  flag? : 𝔹
+where
+  -- State update: e.bHasBlip' = flag
+  -- Invokes: CPools::GetVehiclePool, CPools::GetPedPool, CPools::GetObjectPool
+  true
+end
+
+schema CRadar_ShowRadarMarker
+  ΔCRadar
+  pos? : CVector
+  color? : ℕ
+  radius? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRadar_ShowRadarTrace
+  ΔCRadar
+  x? : ℝ
+  y? : ℝ
+  size? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+where
+  -- Invokes: CSprite2d::DrawRect
+  true
+end
+
+schema CRadar_ShowRadarTraceWithHeight
+  ΔCRadar
+  x? : ℝ
+  y? : ℝ
+  size? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  mode? : ℕ
+where
+  -- Invokes: CSprite2d::Draw2DPolygon, CSprite2d::DrawRect
+  true
+end
+
+schema CRadar_Shutdown
+  ΔCRadar
+where
+  -- Invokes: CentreSprite.Delete, MapHereSprite.Delete, NorthSprite.Delete, AverySprite.Delete, BikerSprite.Delete
+  true
+end
+
+schema CRadar_StreamRadarSections
+  ΔCRadar
+  posn? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRadar_StreamRadarSections_2
+  ΔCRadar
+  x? : ℤ
+  y? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRadar_TransformRealWorldToTexCoordSpace
+  ΔCRadar
+  out? : CVector2D
+  in? : CVector2D
+  x? : ℤ
+  y? : ℤ
+where
+  -- State update: out.x' = in.x - (x * RADAR_TILE_SIZE + RADAR_MIN_X)
+  true
+end
+
+schema CRadar_TransformRadarPointToRealWorldSpace
+  ΔCRadar
+  out? : CVector2D
+  in? : CVector2D
+where
+  -- State update: s' = -cachedSin
+  -- State update: c' = cachedCos
+  -- State update: s' = -Sin(TheCamera.GetForward().Heading())
+  -- State update: c' = Cos(TheCamera.GetForward().Heading())
+  -- State update: s' = 0.0f
+  -- State update: c' = 1.0f
+  -- Invokes: TheCamera.GetForward, TheCamera.GetLookDirection, CamTargetEntity->GetForward, forward.Normalise, CamTargetEntity->GetPosition
+  true
+end
+
+schema CRadar_TransformRadarPointToScreenSpace
+  ΔCRadar
+  out? : CVector2D
+  in? : CVector2D
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRadar_TransformRealWorldPointToRadarSpace
+  ΔCRadar
+  out? : CVector2D
+  in? : CVector2D
+where
+  -- State update: s' = cachedSin
+  -- State update: c' = cachedCos
+  -- State update: s' = 0.0f
+  -- State update: c' = 1.0f
+  -- State update: s' = Sin(TheCamera.GetForward().Heading())
+  -- State update: c' = Cos(TheCamera.GetForward().Heading())
+  -- Invokes: TheCamera.GetLookDirection, TheCamera.GetForward, CamTargetEntity->GetForward, forward.Normalise, CamTargetEntity->GetPosition
+  true
+end
+
+schema CRadar_CalculateCachedSinCos
+  ΔCRadar
+where
+  -- State update: cachedSin' = 0.0f
+  -- State update: cachedCos' = 1.0f
+  -- State update: cachedSin' = Sin(TheCamera.GetForward().Heading())
+  -- State update: cachedCos' = Cos(TheCamera.GetForward().Heading())
+  -- State update: cachedSin' = Sin(forward.Heading())
+  -- State update: cachedCos' = Cos(forward.Heading())
+  -- Invokes: TheCamera.GetLookDirection, TheCamera.GetForward, CamTargetEntity->GetForward, forward.Normalise, CamTargetEntity->GetPosition
+  true
+end
+
+schema CRadar_InitFrontEndMap
+  ΔCRadar
+where
+  -- State update: vec2DRadarOrigin.x' = 0.0f
+  -- State update: vec2DRadarOrigin.y' = 0.0f
+  -- State update: m_radarRange' = MENU_MAP_LENGTH_UNIT
+  -- State update: MapLegendCounter' = 0
+  -- State update: ArrowBlipColour1' = CRGBA(0, 0, 0, 0)
+  -- State update: ArrowBlipColour2' = CRGBA(0, 0, 0, 0)
+  true
+end
+
+schema CRadar_DrawYouAreHereSprite
+  ΔCRadar
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: lastChange' = 0
+  -- State update: show' = true
+  -- State update: lastChange' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: show' = !show
+  -- State update: lastChange' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: show' = !show
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, MapHereSprite.Draw, CFont::SetWrapx, CFont::SetRightJustifyWrap, CFont::SetBackGroundOnlyTextOff
+  true
+end
+
+schema CRadar_ToggleTargetMarker
+  ΔCRadar
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: nextBlip' = NUMRADARBLIPS-1
+  -- State update: m_eBlipType' = BLIP_COORD
+  -- State update: m_nColor' = RADAR_TRACE_GRAY
+  -- State update: m_bDim' = 0
+  -- State update: m_bInUse' = 1
+  -- State update: m_Radius' = 1.0f
+  -- Invokes: CWorld::FindGroundZForCoord, CRadar::GetNewUniqueBlipIndex
+  true
+end
+
+schema CRadar_DrawEntityBlip
+  ΔCRadar
+  blipId? : ℤ
+where
+  -- State update: blipEntity' = ((CPed*)blipEntity).m_pMyVehicle
+  -- State update: m_Radius' = ms_RadarTrace[blipId].m_Radius - 0.1f
+  -- State update: m_Radius' = 5.0f
+  -- State update: dist' = LimitRadarPoint(in)
+  -- State update: pos' = FindPlayerCentreOfWorld_NoSniperShift()
+  -- State update: blipPos' = blipEntity.GetPosition()
+  -- Invokes: CPools::GetVehiclePool, CPools::GetPedPool, CPools::GetObjectPool, CTheScripts::IsDebugOn, blipEntity->GetPosition
+  true
+end
+
+schema CRadar_DrawCoordBlip
+  ΔCRadar
+  blipId? : ℤ
+where
+  -- State update: m_Radius' = ms_RadarTrace[blipId].m_Radius - 0.1f
+  -- State update: m_Radius' = 5.0f
+  -- State update: dist' = LimitRadarPoint(in)
+  -- State update: pos' = FindPlayerCentreOfWorld_NoSniperShift()
+  -- State update: blipPos' = ms_RadarTrace[blipId].m_vecPos
+  -- State update: mode' = BLIP_MODE_TRIANGULAR_UP
+  -- Invokes: CTheScripts::IsPlayerOnAMission, CTheScripts::IsDebugOn
+  true
+end
+
+schema CRadar_DrawLegend
+  ΔCRadar
+  x? : ℤ
+  y? : ℤ
+  sprite? : ℤ
+where
+  -- State update: lastChange' = 0
+  -- State update: blipMode' = 0
+  -- State update: color' = ArrowBlipColour1
+  -- State update: color' = ArrowBlipColour2
+  -- State update: lastChange' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: blipMode' = 0
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, CSprite2d::Draw2DPolygon, CSprite2d::DrawRect, TheText.Get, CFont::PrintString
+  true
+end
+
+schema CRadar_SetCoordBlip_2
+  ΔCRadar
+  type? : eBlipType
+  pos? : CVector
+  color? : ℤ
+  display? : eBlipDisplay
+  result! : ℤ
+where
+  -- State update: nextBlip' = 0
+  -- State update: m_eBlipType' = type
+  -- State update: m_nColor' = color
+  -- State update: m_bDim' = 1
+  -- State update: m_bInUse' = 1
+  -- State update: m_Radius' = 1.0f
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = CRadar::GetNewUniqueBlipIndex(nextBlip)
+  -- Invokes: CRadar::GetNewUniqueBlipIndex
+  true
+end
+
+schema CRadar_SetEntityBlip_2
+  ΔCRadar
+  type? : eBlipType
+  handle? : ℤ
+  color? : ℤ
+  display? : eBlipDisplay
+  result! : ℤ
+where
+  -- State update: nextBlip' = 0
+  -- State update: m_eBlipType' = type
+  -- State update: m_nColor' = color
+  -- State update: m_bDim' = 1
+  -- State update: m_bInUse' = 1
+  -- State update: m_Radius' = 1.0f
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = GetNewUniqueBlipIndex(nextBlip)
+  true
+end

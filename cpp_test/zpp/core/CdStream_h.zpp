@@ -1,0 +1,41 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CdStream (core)
+-- Source File(s): core/CdStream.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CDSTREAM_SECTOR_SIZE : ℕ  -- #define CDSTREAM_SECTOR_SIZE 2048
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CdStream_Enum_1 ::= STREAM_NONE | STREAM_SUCCESS | STREAM_READING | STREAM_ERROR | STREAM_ERROR_NOCD | STREAM_ERROR_WRONGCD | STREAM_ERROR_OPENCD | STREAM_WAITING
+  -- val(STREAM_NONE) = uint8( 0)
+  -- val(STREAM_SUCCESS) = uint8( 1)
+  -- val(STREAM_READING) = uint8(-1)
+  -- val(STREAM_ERROR) = uint8(-2)
+  -- val(STREAM_ERROR_NOCD) = uint8(-3)
+  -- val(STREAM_ERROR_WRONGCD) = uint8(-4)
+  -- val(STREAM_ERROR_OPENCD) = uint8(-5)
+  -- val(STREAM_WAITING) = uint8(-6)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema Queue
+  items : ℙ ℤ
+  head : ℤ
+  tail : ℤ
+  size : ℤ
+where
+  #items ≤ 1
+end

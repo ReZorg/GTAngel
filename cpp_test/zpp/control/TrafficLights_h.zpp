@@ -1,0 +1,112 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TrafficLights (control)
+-- Source File(s): control/TrafficLights.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+TrafficLights_Enum_1 ::= PED_LIGHTS_WALK | PED_LIGHTS_WALK_BLINK | PED_LIGHTS_DONT_WALK | CAR_LIGHTS_GREEN | CAR_LIGHTS_YELLOW | CAR_LIGHTS_RED | CAR_LIGHTS_NONE
+  -- val(CAR_LIGHTS_GREEN) = 0
+
+TrafficLights_Enum_2 ::= PED_LIGHTS_WALK | PED_LIGHTS_WALK_BLINK | PED_LIGHTS_DONT_WALK | CAR_LIGHTS_GREEN | CAR_LIGHTS_YELLOW | CAR_LIGHTS_RED
+  -- val(CAR_LIGHTS_GREEN) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTrafficLights
+  bGreenLightsCheat : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTrafficLights_DisplayActualLight
+  ΔCTrafficLights
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CTrafficLights::DisplayActualLight(CEntity *ent)
+  true
+end
+
+schema CTrafficLights_ScanForLightsOnMap_2
+  ΔCTrafficLights
+where
+  -- Declared member operation CTrafficLights::ScanForLightsOnMap(void)
+  true
+end
+
+schema CTrafficLights_FindTrafficLightType_3
+  ΔCTrafficLights
+  light? : Ref[CEntity]
+  result! : ℤ
+where
+  -- Declared member operation CTrafficLights::FindTrafficLightType(CEntity *light)
+  true
+end
+
+schema CTrafficLights_LightForPeds_4
+  ΔCTrafficLights
+  result! : ℕ
+where
+  -- Declared member operation CTrafficLights::LightForPeds(void)
+  true
+end
+
+schema CTrafficLights_LightForCars1_5
+  ΔCTrafficLights
+  result! : ℕ
+where
+  -- Declared member operation CTrafficLights::LightForCars1(void)
+  true
+end
+
+schema CTrafficLights_LightForCars2_6
+  ΔCTrafficLights
+  result! : ℕ
+where
+  -- Declared member operation CTrafficLights::LightForCars2(void)
+  true
+end
+
+schema CTrafficLights_LightForCars1_Visual_7
+  ΔCTrafficLights
+  result! : ℕ
+where
+  -- Declared member operation CTrafficLights::LightForCars1_Visual(void)
+  true
+end
+
+schema CTrafficLights_LightForCars2_Visual_8
+  ΔCTrafficLights
+  result! : ℕ
+where
+  -- Declared member operation CTrafficLights::LightForCars2_Visual(void)
+  true
+end
+
+schema CTrafficLights_ShouldCarStopForLight_9
+  ΔCTrafficLights
+  arg_1? : Ref[CVehicle]
+  arg_2? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CTrafficLights::ShouldCarStopForLight(CVehicle*, bool)
+  true
+end
+
+schema CTrafficLights_ShouldCarStopForBridge_10
+  ΔCTrafficLights
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CTrafficLights::ShouldCarStopForBridge(CVehicle*)
+  true
+end

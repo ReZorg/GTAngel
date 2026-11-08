@@ -1,0 +1,825 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Timecycle (renderer)
+-- Source File(s): renderer/Timecycle.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTimeCycle
+  m_fCurrentAmbientRed : ℝ
+  m_fCurrentAmbientGreen : ℝ
+  m_fCurrentAmbientBlue : ℝ
+  m_fCurrentAmbientRed_Obj : ℝ
+  m_fCurrentAmbientGreen_Obj : ℝ
+  m_fCurrentAmbientBlue_Obj : ℝ
+  m_fCurrentAmbientRed_Bl : ℝ
+  m_fCurrentAmbientGreen_Bl : ℝ
+  m_fCurrentAmbientBlue_Bl : ℝ
+  m_fCurrentAmbientRed_Obj_Bl : ℝ
+  m_fCurrentAmbientGreen_Obj_Bl : ℝ
+  m_fCurrentAmbientBlue_Obj_Bl : ℝ
+  m_fCurrentDirectionalRed : ℝ
+  m_fCurrentDirectionalGreen : ℝ
+  m_fCurrentDirectionalBlue : ℝ
+  m_nCurrentSkyTopRed : ℤ
+  m_nCurrentSkyTopGreen : ℤ
+  m_nCurrentSkyTopBlue : ℤ
+  m_nCurrentSkyBottomRed : ℤ
+  m_nCurrentSkyBottomGreen : ℤ
+  m_nCurrentSkyBottomBlue : ℤ
+  m_nCurrentSunCoreRed : ℤ
+  m_nCurrentSunCoreGreen : ℤ
+  m_nCurrentSunCoreBlue : ℤ
+  m_nCurrentSunCoronaRed : ℤ
+  m_nCurrentSunCoronaGreen : ℤ
+  m_nCurrentSunCoronaBlue : ℤ
+  m_fCurrentSunSize : ℝ
+  m_fCurrentSpriteSize : ℝ
+  m_fCurrentSpriteBrightness : ℝ
+  m_nCurrentShadowStrength : ℤ
+  m_nCurrentLightShadowStrength : ℤ
+  m_nCurrentPoleShadowStrength : ℤ
+  m_fCurrentFogStart : ℝ
+  m_fCurrentFarClip : ℝ
+  m_fCurrentLightsOnGroundBrightness : ℝ
+  m_nCurrentLowCloudsRed : ℤ
+  m_nCurrentLowCloudsGreen : ℤ
+  m_nCurrentLowCloudsBlue : ℤ
+  m_nCurrentFluffyCloudsTopRed : ℤ
+  m_nCurrentFluffyCloudsTopGreen : ℤ
+  m_nCurrentFluffyCloudsTopBlue : ℤ
+  m_nCurrentFluffyCloudsBottomRed : ℤ
+  m_nCurrentFluffyCloudsBottomGreen : ℤ
+  m_nCurrentFluffyCloudsBottomBlue : ℤ
+  m_fCurrentBlurRed : ℝ
+  m_fCurrentBlurGreen : ℝ
+  m_fCurrentBlurBlue : ℝ
+  m_fCurrentWaterRed : ℝ
+  m_fCurrentWaterGreen : ℝ
+  m_fCurrentWaterBlue : ℝ
+  m_fCurrentWaterAlpha : ℝ
+  m_nCurrentFogColourRed : ℤ
+  m_nCurrentFogColourGreen : ℤ
+  m_nCurrentFogColourBlue : ℤ
+  m_FogReduction : ℤ
+  m_bExtraColourOn : ℤ
+  m_ExtraColour : ℤ
+  m_ExtraColourInter : ℝ
+  m_CurrentStoredValue : ℤ
+  m_VectorToSun : seq CVector  -- bounded array [16]
+  m_fShadowFrontX : seq ℝ  -- bounded array [16]
+  m_fShadowFrontY : seq ℝ  -- bounded array [16]
+  m_fShadowSideX : seq ℝ  -- bounded array [16]
+  m_fShadowSideY : seq ℝ  -- bounded array [16]
+  m_fShadowDisplacementX : seq ℝ  -- bounded array [16]
+  m_fShadowDisplacementY : seq ℝ  -- bounded array [16]
+  m_nCurrentTreeShadowStrength : ℤ
+  m_fCurrentBlurAlpha : ℝ
+where
+  #m_VectorToSun = 16
+  #m_fShadowFrontX = 16
+  #m_fShadowFrontY = 16
+  #m_fShadowSideX = 16
+  #m_fShadowSideY = 16
+  #m_fShadowDisplacementX = 16
+  #m_fShadowDisplacementY = 16
+end
+
+schema CTimeCycle_GetAmbientRed
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientRed(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientGreen_2
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientGreen(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientBlue_3
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientBlue(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientRed_Obj_4
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientRed_Obj(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientGreen_Obj_5
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientGreen_Obj(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientBlue_Obj_6
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientBlue_Obj(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientRed_Bl_7
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientRed_Bl(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientGreen_Bl_8
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientGreen_Bl(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientBlue_Bl_9
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientBlue_Bl(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientRed_Obj_Bl_10
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientRed_Obj_Bl(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientGreen_Obj_Bl_11
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientGreen_Obj_Bl(void)
+  true
+end
+
+schema CTimeCycle_GetAmbientBlue_Obj_Bl_12
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetAmbientBlue_Obj_Bl(void)
+  true
+end
+
+schema CTimeCycle_GetDirectionalRed_13
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetDirectionalRed(void)
+  true
+end
+
+schema CTimeCycle_GetDirectionalGreen_14
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetDirectionalGreen(void)
+  true
+end
+
+schema CTimeCycle_GetDirectionalBlue_15
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetDirectionalBlue(void)
+  true
+end
+
+schema CTimeCycle_GetSkyTopRed_16
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSkyTopRed(void)
+  true
+end
+
+schema CTimeCycle_GetSkyTopGreen_17
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSkyTopGreen(void)
+  true
+end
+
+schema CTimeCycle_GetSkyTopBlue_18
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSkyTopBlue(void)
+  true
+end
+
+schema CTimeCycle_GetSkyBottomRed_19
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSkyBottomRed(void)
+  true
+end
+
+schema CTimeCycle_GetSkyBottomGreen_20
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSkyBottomGreen(void)
+  true
+end
+
+schema CTimeCycle_GetSkyBottomBlue_21
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSkyBottomBlue(void)
+  true
+end
+
+schema CTimeCycle_GetSunCoreRed_22
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSunCoreRed(void)
+  true
+end
+
+schema CTimeCycle_GetSunCoreGreen_23
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSunCoreGreen(void)
+  true
+end
+
+schema CTimeCycle_GetSunCoreBlue_24
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSunCoreBlue(void)
+  true
+end
+
+schema CTimeCycle_GetSunCoronaRed_25
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSunCoronaRed(void)
+  true
+end
+
+schema CTimeCycle_GetSunCoronaGreen_26
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSunCoronaGreen(void)
+  true
+end
+
+schema CTimeCycle_GetSunCoronaBlue_27
+  ΔCTimeCycle
+  result! : ℤ
+where
+  -- Declared member operation CTimeCycle::GetSunCoronaBlue(void)
+  true
+end
+
+schema CTimeCycle_GetSunSize_28
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetSunSize(void)
+  true
+end
+
+schema CTimeCycle_GetSpriteBrightness_29
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetSpriteBrightness(void)
+  true
+end
+
+schema CTimeCycle_GetSpriteSize_30
+  ΔCTimeCycle
+  result! : ℝ
+where
+  -- Declared member operation CTimeCycle::GetSpriteSize(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Timecycle_GetAmbientRed
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientRed
+  true
+end
+
+schema Timecycle_GetAmbientGreen
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientGreen
+  true
+end
+
+schema Timecycle_GetAmbientBlue
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientBlue
+  true
+end
+
+schema Timecycle_GetAmbientRed_Obj
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientRed_Obj
+  true
+end
+
+schema Timecycle_GetAmbientGreen_Obj
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientGreen_Obj
+  true
+end
+
+schema Timecycle_GetAmbientBlue_Obj
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientBlue_Obj
+  true
+end
+
+schema Timecycle_GetAmbientRed_Bl
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientRed_Bl
+  true
+end
+
+schema Timecycle_GetAmbientGreen_Bl
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientGreen_Bl
+  true
+end
+
+schema Timecycle_GetAmbientBlue_Bl
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientBlue_Bl
+  true
+end
+
+schema Timecycle_GetAmbientRed_Obj_Bl
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientRed_Obj_Bl
+  true
+end
+
+schema Timecycle_GetAmbientGreen_Obj_Bl
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientGreen_Obj_Bl
+  true
+end
+
+schema Timecycle_GetAmbientBlue_Obj_Bl
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentAmbientBlue_Obj_Bl
+  true
+end
+
+schema Timecycle_GetDirectionalRed
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentDirectionalRed
+  true
+end
+
+schema Timecycle_GetDirectionalGreen
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentDirectionalGreen
+  true
+end
+
+schema Timecycle_GetDirectionalBlue
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentDirectionalBlue
+  true
+end
+
+schema Timecycle_GetSkyTopRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSkyTopRed
+  true
+end
+
+schema Timecycle_GetSkyTopGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSkyTopGreen
+  true
+end
+
+schema Timecycle_GetSkyTopBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSkyTopBlue
+  true
+end
+
+schema Timecycle_GetSkyBottomRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSkyBottomRed
+  true
+end
+
+schema Timecycle_GetSkyBottomGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSkyBottomGreen
+  true
+end
+
+schema Timecycle_GetSkyBottomBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSkyBottomBlue
+  true
+end
+
+schema Timecycle_GetSunCoreRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSunCoreRed
+  true
+end
+
+schema Timecycle_GetSunCoreGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSunCoreGreen
+  true
+end
+
+schema Timecycle_GetSunCoreBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSunCoreBlue
+  true
+end
+
+schema Timecycle_GetSunCoronaRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSunCoronaRed
+  true
+end
+
+schema Timecycle_GetSunCoronaGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSunCoronaGreen
+  true
+end
+
+schema Timecycle_GetSunCoronaBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentSunCoronaBlue
+  true
+end
+
+schema Timecycle_GetSunSize
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentSunSize
+  true
+end
+
+schema Timecycle_GetSpriteBrightness
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentSpriteBrightness
+  true
+end
+
+schema Timecycle_GetSpriteSize
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentSpriteSize
+  true
+end
+
+schema Timecycle_GetShadowStrength
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentShadowStrength
+  true
+end
+
+schema Timecycle_GetLightShadowStrength
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentLightShadowStrength
+  true
+end
+
+schema Timecycle_GetLightOnGroundBrightness
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentLightsOnGroundBrightness
+  true
+end
+
+schema Timecycle_GetFarClip
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentFarClip
+  true
+end
+
+schema Timecycle_GetFogStart
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fCurrentFogStart
+  true
+end
+
+schema Timecycle_GetLowCloudsRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentLowCloudsRed
+  true
+end
+
+schema Timecycle_GetLowCloudsGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentLowCloudsGreen
+  true
+end
+
+schema Timecycle_GetLowCloudsBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentLowCloudsBlue
+  true
+end
+
+schema Timecycle_GetFluffyCloudsTopRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFluffyCloudsTopRed
+  true
+end
+
+schema Timecycle_GetFluffyCloudsTopGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFluffyCloudsTopGreen
+  true
+end
+
+schema Timecycle_GetFluffyCloudsTopBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFluffyCloudsTopBlue
+  true
+end
+
+schema Timecycle_GetFluffyCloudsBottomRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFluffyCloudsBottomRed
+  true
+end
+
+schema Timecycle_GetFluffyCloudsBottomGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFluffyCloudsBottomGreen
+  true
+end
+
+schema Timecycle_GetFluffyCloudsBottomBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFluffyCloudsBottomBlue
+  true
+end
+
+schema Timecycle_GetFogRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFogColourRed
+  true
+end
+
+schema Timecycle_GetFogGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFogColourGreen
+  true
+end
+
+schema Timecycle_GetFogBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nCurrentFogColourBlue
+  true
+end
+
+schema Timecycle_GetFogReduction
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_FogReduction
+  true
+end
+
+schema Timecycle_GetBlurRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentBlurRed
+  true
+end
+
+schema Timecycle_GetBlurGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentBlurGreen
+  true
+end
+
+schema Timecycle_GetBlurBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentBlurBlue
+  true
+end
+
+schema Timecycle_GetWaterRed
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentWaterRed
+  true
+end
+
+schema Timecycle_GetWaterGreen
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentWaterGreen
+  true
+end
+
+schema Timecycle_GetWaterBlue
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentWaterBlue
+  true
+end
+
+schema Timecycle_GetWaterAlpha
+  ΔTimecycleModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_fCurrentWaterAlpha
+  true
+end
+
+schema Timecycle_GetShadowFrontX
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fShadowFrontX[m_CurrentStoredValue]
+  true
+end
+
+schema Timecycle_GetShadowFrontY
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fShadowFrontY[m_CurrentStoredValue]
+  true
+end
+
+schema Timecycle_GetShadowSideX
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fShadowSideX[m_CurrentStoredValue]
+  true
+end
+
+schema Timecycle_GetShadowSideY
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fShadowSideY[m_CurrentStoredValue]
+  true
+end
+
+schema Timecycle_GetShadowDisplacementX
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fShadowDisplacementX[m_CurrentStoredValue]
+  true
+end
+
+schema Timecycle_GetShadowDisplacementY
+  ΔTimecycleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fShadowDisplacementY[m_CurrentStoredValue]
+  true
+end

@@ -1,0 +1,334 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneMgr_overlay (animation)
+-- Source File(s): animation/CutsceneMgr_overlay.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include relocatableChunk.zpp  (from "relocatableChunk.h")
+-- include General.zpp  (from "General.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Directory.zpp  (from "Directory.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include main.zpp  (from "main.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include AnimBlendAssocGroup.zpp  (from "AnimBlendAssocGroup.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Population.zpp  (from "Population.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Text.zpp  (from "Text.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CutsceneMgr_overlay_Enum_1 ::= CUTMODEL_PLAYER | CUTMODEL_SIMPLE | CUTMODEL_REPEATED
+  -- val(CUTMODEL_PLAYER) = 1
+
+CutsceneMgr_overlay_Enum_2 ::= CUT_NONE | CUT_INFO | CUT_MODEL | CUT_TEXT | CUT_UNCOMPRESS | CUT_ATTACH | CUT_REMOVE | CUT_PARTICLE_EFFECT | CUT_EXTRA_COLOR
+  -- val(CUT_NONE) = 0
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CutsceneMgr_overlay_FindCutsceneAudioTrackId
+  ΔCutsceneMgr_overlayModuleState
+  szCutsceneName? : seq CHAR
+where
+  -- Return postcondition: result! = musicNameIdAssoc[i].iTrackId
+  -- Return postcondition: result! = -1
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CutsceneMgr_overlay_GetNextLine
+  ΔCutsceneMgr_overlayModuleState
+  buf? : seq CHAR
+  line? : seq CHAR
+  lineSize? : ℕ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = buf
+  true
+end
+
+schema CutsceneMgr_overlay_CalculateBoundingSphereRadiusCB
+  ΔCutsceneMgr_overlayModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: radius' = RpAtomicGetBoundingSphere(atomic).radius
+  -- State update: center' = RpAtomicGetBoundingSphere(atomic).center
+  -- State update: frame' = RpAtomicGetFrame(atomic)
+  -- State update: size' = RwV3dLength(&center) + radius
+  -- State update: data' = size
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CutsceneMgr_overlay_UpdateCutsceneObjectBoundingBox
+  ΔCutsceneMgr_overlayModuleState
+  clump? : Ref[RpClump]
+  modelId? : ℤ
+where
+  -- State update: pColModel' = &CTempColModels::ms_colModelCutObj[modelId - MI_CUTOBJ01]
+  -- State update: oldRadius' = pColModel.boundingSphere.radius
+  -- State update: radius' = 0.0f
+  -- State update: oldRadius' = 20.0f
+  -- State update: radius' = oldRadius
+  -- State update: radius' = oldRadius
+  true
+end
+
+schema CCutsceneMgr_CreateCutsceneObject
+  ΔCCutsceneMgr
+  modelId? : ℤ
+where
+  -- State update: pModelInfo' = CModelInfo::GetModelInfo(modelId)
+  -- State update: pColModel' = &CTempColModels::ms_colModelCutObj[modelId - MI_CUTOBJ01]
+  -- State update: pCutsceneObject' = new CCutsceneObject()
+  -- Return postcondition: result! = pCutsceneObject
+  -- Invokes: CStreaming::ImGonnaUseStreamingMemory, CModelInfo::GetModelInfo, pModelInfo->SetColModel, pModelInfo->GetRwObject, pCutsceneObject->SetModelIndex
+  true
+end
+
+schema CCutsceneMgr_SetCutsceneAnim
+  ΔCCutsceneMgr
+  animName? : seq CHAR
+  pObject? : Ref[CObject]
+where
+  -- State update: pNewAnim' = ms_cutsceneAssociations.CopyAnimation(animName)
+  -- State update: pAnimBlendClumpData' = *RPANIMBLENDCLUMPDATA(pObject.m_rwObject)
+  -- Invokes: CStreaming::ImGonnaUseStreamingMemory, ms_cutsceneAssociations.CopyAnimation, CStreaming::IHaveUsedStreamingMemory, pNewAnim->SetCurrentTime, link.Prepend
+  true
+end
+
+schema CCutsceneMgr_SetCutsceneAnimToLoop
+  ΔCCutsceneMgr
+  animName? : seq CHAR
+where
+  -- Invokes: ms_cutsceneAssociations.GetAnimation
+  true
+end
+
+schema CCutsceneMgr_SetHeadAnim
+  ΔCCutsceneMgr
+  arg_1? : seq CHAR
+  pObject? : Ref[CObject]
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CCutsceneMgr_StartCutscene
+  ΔCCutsceneMgr
+where
+  -- State update: ms_cutscenePlayStatus' = CUTSCENE_STARTED
+  -- Invokes: TheCamera.SetWideScreenOn, CHud::SetHelpMessage
+  true
+end
+
+schema CCutsceneMgr_SetupCutsceneToStart
+  ΔCCutsceneMgr
+where
+  -- State update: ms_cutsceneTimer' = 0.0f
+  -- State update: ms_running' = true
+  -- State update: mCutsceneSkipFadeTime' = 0
+  -- State update: mCutsceneSkipFading' = 0
+  -- Invokes: TheCamera.SetCamCutSceneOffSet, TheCamera.TakeControlWithSpline, TheCamera.SetWideScreenOn, CHud::SetHelpMessage, hierarchy->IsCompressed
+  true
+end
+
+schema CCutsceneMgr_FinishCutscene
+  ΔCCutsceneMgr
+where
+  -- State update: ms_cutsceneTimer' = TheCamera.GetCutSceneFinishTime() * 0.001f
+  -- State update: bIsVisible' = true
+  -- Invokes: TheCamera.GetCutSceneFinishTime, TheCamera.FinishCutscene
+  true
+end
+
+schema CCutsceneMgr_GetCutsceneTimeInMilleseconds
+  ΔCCutsceneMgr
+where
+  -- Return postcondition: result! = 1000.0f * ms_cutsceneTimer
+  true
+end
+
+schema CCutsceneMgr_HasCutsceneFinished
+  ΔCCutsceneMgr
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !bCamLoaded || TheCamera.GetPositionAlongSpline() == 1.0f
+  -- Invokes: TheCamera.GetPositionAlongSpline
+  true
+end
+
+schema CCutsceneMgr_AttachObjectToBone
+  ΔCCutsceneMgr
+  pObject? : Ref[CObject]
+  pAttachTo? : Ref[CObject]
+  bone? : ℤ
+where
+  -- State update: hanim' = GetAnimHierarchyFromSkinClump(pAttachTo.GetClump())
+  -- State update: id' = RpHAnimIDGetIndex(hanim, bone)
+  -- State update: matrixArray' = RpHAnimHierarchyGetMatrixArray(hanim)
+  -- State update: m_pAttachmentObject' = pAttachTo
+  -- State update: m_pAttachTo' = &matrixArray[id]
+  -- Invokes: pAttachTo->GetClump
+  true
+end
+
+schema CCutsceneMgr_AttachObjectToFrame
+  ΔCCutsceneMgr
+  pObject? : Ref[CObject]
+  pAttachTo? : Ref[CEntity]
+  frame? : seq CHAR
+where
+  -- State update: m_pAttachmentObject' = ∅
+  -- State update: clump' = (RpClump*)pObject.m_rwObject
+  -- Invokes: pAttachTo->GetClump
+  true
+end
+
+schema CCutsceneMgr_AttachObjectToParent
+  ΔCCutsceneMgr
+  pObject? : Ref[CObject]
+  pAttachTo? : Ref[CEntity]
+where
+  -- State update: m_pAttachmentObject' = ∅
+  -- State update: m_pAttachTo' = RpClumpGetFrame(pAttachTo.GetClump())
+  -- Invokes: pAttachTo->GetClump
+  true
+end
+
+schema CCutsceneMgr_HideRequestedObjects
+  ΔCCutsceneMgr
+where
+  -- State update: num' = ms_iNumHiddenEntities
+  -- State update: ms_iNumHiddenEntities' = 0
+  -- State update: bIsVisible' = false
+  -- Invokes: CModelInfo::GetModelInfo, CWorld::FindObjectsOfTypeInRange
+  true
+end
+
+schema CCutsceneMgr_PresubBodge
+  ΔCCutsceneMgr
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCutsceneMgr_LoadCutsceneData_loading
+  ΔCCutsceneMgr
+where
+  -- State update: mi' = ms_iModelIndex[i]
+  -- State update: cutsceneObject' = CreateCutsceneObject(ms_iModelIndex[i])
+  -- State update: objectId' = ms_iAttachObjectToBone[i].objectId
+  -- State update: attachToId' = ms_iAttachObjectToBone[i].attachToId
+  -- State update: bone' = ms_iAttachObjectToBone[i].boneId
+  true
+end
+
+schema CCutsceneMgr_LoadCutsceneData_postload
+  ΔCCutsceneMgr
+  b? : 𝔹
+where
+  -- State update: stream' = ∅
+  -- State update: PedDensityMultiplier' = 0.0f
+  -- State update: CarDensityMultiplier' = 0.0f
+  -- State update: ms_disableStreaming' = false
+  -- State update: ms_animLoaded' = false
+  -- State update: bCamLoaded' = false
+  -- Return postcondition: result! = result
+  -- Invokes: CMessages::ClearThisBigPrintNow, ms_pCutsceneDir->FindItem, CStreaming::MakeSpaceFor, CStreaming::ImGonnaUseStreamingMemory, CAnimManager::LoadAnimFile
+  true
+end
+
+schema CCutsceneMgr_LoadCutsceneData_overlay
+  ΔCCutsceneMgr
+  szCutsceneName? : seq CHAR
+where
+  -- State update: ms_cutsceneProcessing' = true
+  -- State update: ms_wasCutsceneSkipped' = false
+  -- State update: ms_pCutsceneDir.numEntries' = 0
+  -- Invokes: CTimer::Suspend, CStreaming::RemoveCurrentZonesModels, ms_pCutsceneDir->ReadDirFile, CStreaming::RemoveUnusedModelsInLoadedList, CGame::DrasticTidyUpMemory
+  true
+end
+
+schema CCutsceneMgr_LoadCutsceneData_preload
+  ΔCCutsceneMgr
+where
+  -- State update: trackId' = FindCutsceneAudioTrackId(ms_cutsceneName)
+  -- State update: m_PrevExtraColour' = CTimeCycle::m_ExtraColour
+  -- State update: m_fPrevPedDensity' = CPopulation::PedDensityMultiplier
+  -- State update: m_fPrevCarDensity' = CCarCtrl::CarDensityMultiplier
+  -- State update: ms_cutsceneOffset' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: ms_numTextOutput' = 0
+  -- Invokes: CGeneral::faststricmp, DMAudio.ChangeMusicMode, DMAudio.PreloadCutSceneMusic, CModelInfo::GetModelInfo, CStreaming::RemoveModel
+  true
+end
+
+schema CCutsceneMgr_DeleteCutsceneData_overlay
+  ΔCCutsceneMgr
+where
+  -- State update: PedDensityMultiplier' = m_fPrevPedDensity
+  -- State update: CarDensityMultiplier' = m_fPrevCarDensity
+  -- State update: bIsVisible' = true
+  -- State update: ms_iNumHiddenEntities' = 0
+  -- State update: ms_iNumParticleEffects' = 0
+  -- State update: ms_cutsceneProcessing' = false
+  -- Invokes: CTimer::Suspend, CTimeCycle::StartExtraColour, CTimeCycle::StopExtraColour, CMessages::ClearMessages, CRubbish::SetVisibility
+  true
+end
+
+schema CCutsceneMgr_Update_overlay
+  ΔCCutsceneMgr
+where
+  -- State update: ms_cutscenePlayStatus' = CUTSCENE_PLAYING_0
+  -- State update: cutsceneTimeInMS' = GetCutsceneTimeInMilleseconds()
+  -- State update: modelId' = ms_pCutsceneObjects[i].GetModelIndex()
+  -- State update: bCamFading' = true
+  -- State update: ms_wasCutsceneSkipped' = true
+  -- State update: mCutsceneSkipFading' = false
+  -- Invokes: CTimer::Suspend, CTimer::Resume, CGeneral::faststricmp, DMAudio.PlayPreloadedCutSceneMusic, CTimer::GetTimeStepNonClippedInSeconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CutsceneMgr_overlayModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1030
+end

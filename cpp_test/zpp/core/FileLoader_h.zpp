@@ -1,0 +1,295 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FileLoader (core)
+-- Source File(s): core/FileLoader.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFileLoader
+  ms_line : seq CHAR
+where
+  #ms_line = 256
+end
+
+schema CFileLoader_LoadLevel
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadLevel(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadLine_2
+  ΔCFileLoader
+  fd? : ℤ
+  result! : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadLine(int fd)
+  true
+end
+
+schema CFileLoader_LoadTexDictionary_3
+  ΔCFileLoader
+  filename? : seq CHAR
+  result! : Ref[RwTexDictionary]
+where
+  -- Declared member operation CFileLoader::LoadTexDictionary(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadCollisionFile_4
+  ΔCFileLoader
+  filename? : seq CHAR
+  colSlot? : ℕ
+where
+  -- Declared member operation CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
+  true
+end
+
+schema CFileLoader_LoadCollisionFileFirstTime_5
+  ΔCFileLoader
+  buffer? : ℙ ℕ
+  size? : ℕ
+  colSlot? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlot)
+  true
+end
+
+schema CFileLoader_LoadCollisionFile_6
+  ΔCFileLoader
+  buffer? : ℙ ℕ
+  size? : ℕ
+  colSlot? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadCollisionFile(uint8 *buffer, uint32 size, uint8 colSlot)
+  true
+end
+
+schema CFileLoader_LoadCollisionModel_7
+  ΔCFileLoader
+  buf? : ℙ ℕ
+  model? : struct_CColModel
+  name? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadCollisionModel(uint8 *buf, struct CColModel &model, char *name)
+  true
+end
+
+schema CFileLoader_SplitColTrianglesIntoSections_8
+  ΔCFileLoader
+  model? : CColModel
+where
+  -- Declared member operation CFileLoader::SplitColTrianglesIntoSections(CColModel &model)
+  true
+end
+
+schema CFileLoader_LoadModelFile_9
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadModelFile(const char *filename)
+  true
+end
+
+schema CFileLoader_FindRelatedModelInfoCB_10
+  ΔCFileLoader
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CFileLoader_LoadClumpFile_11
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadClumpFile(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadClumpFile_12
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_StartLoadClumpFile_13
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::StartLoadClumpFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_FinishLoadClumpFile_14
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::FinishLoadClumpFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_LoadAtomicFile_15
+  ΔCFileLoader
+  stream? : Ref[RwStream]
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadAtomicFile(RwStream *stream, uint32 id)
+  true
+end
+
+schema CFileLoader_SetRelatedModelInfoCB_16
+  ΔCFileLoader
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CFileLoader::SetRelatedModelInfoCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CFileLoader_LoadAtomicFile2Return_17
+  ΔCFileLoader
+  filename? : seq CHAR
+  result! : Ref[RpClump]
+where
+  -- Declared member operation CFileLoader::LoadAtomicFile2Return(const char *filename)
+  true
+end
+
+schema CFileLoader_AddTexDictionaries_18
+  ΔCFileLoader
+  dst? : Ref[RwTexDictionary]
+  src? : Ref[RwTexDictionary]
+where
+  -- Declared member operation CFileLoader::AddTexDictionaries(RwTexDictionary *dst, RwTexDictionary *src)
+  true
+end
+
+schema CFileLoader_LoadObjectTypes_19
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadObjectTypes(const char *filename)
+  true
+end
+
+schema CFileLoader_LoadObject_20
+  ΔCFileLoader
+  line? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadTimeObject_21
+  ΔCFileLoader
+  line? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadTimeObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadWeaponObject_22
+  ΔCFileLoader
+  line? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadWeaponObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadClumpObject_23
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadClumpObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadVehicleObject_24
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadVehicleObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadPedObject_25
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadPedObject(const char *line)
+  true
+end
+
+schema CFileLoader_LoadPathHeader_26
+  ΔCFileLoader
+  line? : seq CHAR
+  type? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CFileLoader::LoadPathHeader(const char *line, int &type)
+  true
+end
+
+schema CFileLoader_LoadPedPathNode_27
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+where
+  -- Declared member operation CFileLoader::LoadPedPathNode(const char *line, int id, int node)
+  true
+end
+
+schema CFileLoader_LoadCarPathNode_28
+  ΔCFileLoader
+  line? : seq CHAR
+  id? : ℤ
+  node? : ℤ
+  waterPath? : 𝔹
+where
+  -- Declared member operation CFileLoader::LoadCarPathNode(const char *line, int id, int node, bool waterPath)
+  true
+end
+
+schema CFileLoader_Load2dEffect_29
+  ΔCFileLoader
+  line? : seq CHAR
+where
+  -- Declared member operation CFileLoader::Load2dEffect(const char *line)
+  true
+end
+
+schema CFileLoader_LoadScene_30
+  ΔCFileLoader
+  filename? : seq CHAR
+where
+  -- Declared member operation CFileLoader::LoadScene(const char *filename)
+  true
+end

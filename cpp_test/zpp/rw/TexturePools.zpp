@@ -1,0 +1,314 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TexturePools (rw)
+-- Source File(s): rw/TexturePools.cpp, rw/TexturePools.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include d3d8.zpp  (from "d3d8.h")
+-- include common.zpp  (from "common.h")
+-- include TexturePools.zpp  (from "TexturePools.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTexturePool
+  Format : D3DFORMAT
+  size : ℤ
+  levels : ℕ
+  texturesMax : ℤ
+  texturesUsed : ℤ
+  texturesNum : ℤ
+  pTextures : Ref[IDirect3DTexture8]
+where
+  levels ≥ 0
+  #pTextures ≤ 1
+end
+
+schema CTexturePool_CTexturePool
+  ΔCTexturePool
+where
+  -- Declared member operation CTexturePool::CTexturePool()
+  true
+end
+
+schema CTexturePool_Release_2
+  ΔCTexturePool
+where
+  -- Declared member operation CTexturePool::Release()
+  true
+end
+
+schema CTexturePool_FindTexture_3
+  ΔCTexturePool
+  result! : Ref[IDirect3DTexture8]
+where
+  -- Declared member operation CTexturePool::FindTexture()
+  true
+end
+
+schema CTexturePool_AddTexture_4
+  ΔCTexturePool
+  texture? : Ref[IDirect3DTexture8]
+  result! : 𝔹
+where
+  -- Declared member operation CTexturePool::AddTexture(IDirect3DTexture8 *texture)
+  true
+end
+
+schema CTexturePool_Resize_5
+  ΔCTexturePool
+  numTextures? : ℤ
+where
+  -- Declared member operation CTexturePool::Resize(int numTextures)
+  true
+end
+
+schema CTexturePool_GetSize_6
+  ΔCTexturePool
+  result! : ℝ
+where
+  -- Declared member operation CTexturePool::GetSize()
+  true
+end
+
+schema CPaletteList
+  Max : ℤ
+  Num : ℤ
+  Data : ℙ ℤ
+where
+  #Data ≤ 1
+end
+
+schema CPaletteList_Alloc
+  ΔCPaletteList
+  max? : ℤ
+where
+  -- Declared member operation CPaletteList::Alloc(int max)
+  true
+end
+
+schema CPaletteList_Free_2
+  ΔCPaletteList
+where
+  -- Declared member operation CPaletteList::Free()
+  true
+end
+
+schema CPaletteList_Find_3
+  ΔCPaletteList
+  result! : ℤ
+where
+  -- Declared member operation CPaletteList::Find()
+  true
+end
+
+schema CPaletteList_Add_4
+  ΔCPaletteList
+  item? : ℤ
+where
+  -- Declared member operation CPaletteList::Add(int item)
+  true
+end
+
+schema CPaletteList_Resize_5
+  ΔCPaletteList
+  max? : ℤ
+where
+  -- Declared member operation CPaletteList::Resize(int max)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTexturePool_Create
+  ΔCTexturePool
+  _Format? : D3DFORMAT
+  _size? : ℤ
+  mipmapLevels? : ℕ
+  numTextures? : ℤ
+where
+  -- State update: Format' = _Format
+  -- State update: size' = _size
+  -- State update: levels' = mipmapLevels
+  -- State update: pTextures' = new IDirect3DTexture8 *[numTextures]
+  -- State update: texturesMax' = numTextures
+  -- State update: texturesNum' = 0
+  true
+end
+
+schema CTexturePool_Release
+  ΔCTexturePool
+where
+  -- State update: pTextures' = ∅
+  -- State update: texturesNum' = 0
+  -- State update: texturesUsed' = 0
+  true
+end
+
+schema CTexturePool_FindTexture
+  ΔCTexturePool
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pTextures[--texturesNum]
+  true
+end
+
+schema CTexturePool_AddTexture
+  ΔCTexturePool
+  texture? : Ref[IDirect3DTexture8]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CTexturePool_Resize
+  ΔCTexturePool
+  numTextures? : ℤ
+where
+  -- State update: newTextures' = new IDirect3DTexture8 *[numTextures]
+  -- State update: pTextures' = newTextures
+  -- State update: texturesMax' = numTextures
+  true
+end
+
+schema CPaletteList_Alloc
+  ΔCPaletteList
+  max? : ℤ
+where
+  -- State update: Data' = new int[max]
+  -- State update: Max' = max
+  -- State update: Num' = 0
+  true
+end
+
+schema CPaletteList_Free
+  ΔCPaletteList
+where
+  -- State update: Data' = ∅
+  -- State update: Num' = 0
+  true
+end
+
+schema CPaletteList_Find
+  ΔCPaletteList
+where
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = Data[--Num]
+  true
+end
+
+schema CPaletteList_Add
+  ΔCPaletteList
+  item? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPaletteList_Resize
+  ΔCPaletteList
+  max? : ℤ
+where
+  -- State update: newData' = new int[4 * max]
+  -- State update: Data' = newData
+  -- State update: Max' = max
+  true
+end
+
+schema TexturePools_CreateTexture
+  ΔTexturePoolsModuleState
+  width? : ℤ
+  height? : ℤ
+  levels? : ℤ
+  Format? : D3DFORMAT
+  texture? : Ref[IDirect3DTexture8]
+where
+  -- State update: texture' = aTexturePools[i].FindTexture()
+  -- Return postcondition: result! = D3D_OK
+  -- Invokes: _RwD3DDevice->CreateTexture
+  true
+end
+
+schema TexturePools_ReleaseTexture
+  ΔTexturePoolsModuleState
+  texture? : Ref[IDirect3DTexture8]
+where
+  -- State update: levels' = 1
+  -- State update: levels' = 0
+  -- Invokes: texture->GetLevelCount, texture->GetLevelDesc, texture->Release
+  true
+end
+
+schema TexturePools_FindAvailablePaletteIndex
+  ΔTexturePoolsModuleState
+where
+  -- State update: index' = PaletteList.Find()
+  -- State update: index' = MaxPaletteIndex++
+  -- Return postcondition: result! = index
+  -- Invokes: PaletteList.Find
+  true
+end
+
+schema TexturePools_AddAvailablePaletteIndex
+  ΔTexturePoolsModuleState
+  index? : ℤ
+where
+  -- Invokes: PaletteList.Add
+  true
+end
+
+schema TexturePools_TexturePoolsInitialise
+  ΔTexturePoolsModuleState
+where
+  -- State update: MaxPaletteIndex' = 0
+  -- Invokes: PaletteList.Alloc
+  true
+end
+
+schema TexturePools_TexturePoolsShutdown
+  ΔTexturePoolsModuleState
+where
+  -- State update: numTexturePools' = 0
+  -- State update: bUsePaletteIndex' = false
+  -- Invokes: PaletteList.Free
+  true
+end
+
+schema TexturePools_CTexturePool
+  ΔTexturePoolsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema TexturePools_GetSize
+  ΔTexturePoolsModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = size
+  true
+end
+
+schema TexturePools_GetSize_2
+  ΔTexturePoolsModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = size
+  true
+end

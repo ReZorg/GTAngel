@@ -1,0 +1,322 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Hud (renderer)
+-- Source File(s): renderer/Hud.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Text.zpp  (from "Text.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Script.zpp  (from "Script.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include User.zpp  (from "User.h")
+-- include World.zpp  (from "World.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FRAMECOUNTER : seq CHAR  -- #define FRAMECOUNTER CTimer::GetLogicalFrameCounter()
+MONEY_X : ℝ  -- #define MONEY_X 100.0f
+WEAPON_X : ℝ  -- #define WEAPON_X 91.0f
+AMMO_X : ℝ  -- #define AMMO_X 59.0f
+HEALTH_X : ℝ  -- #define HEALTH_X 100.0f
+STARS_X : ℝ  -- #define STARS_X 49.0f
+ZONE_Y : ℝ  -- #define ZONE_Y 61.0f
+VEHICLE_Y : ℝ  -- #define VEHICLE_Y 81.0f
+CLOCK_X : ℝ  -- #define CLOCK_X 101.0f
+SUBS_Y : ℝ  -- #define SUBS_Y 83.0f
+WASTEDBUSTED_Y : ℝ  -- #define WASTEDBUSTED_Y 122.0f
+BIGMESSAGE_Y : ℝ  -- #define BIGMESSAGE_Y 80.0f
+TIMER_RIGHT_OFFSET : ℝ  -- #define TIMER_RIGHT_OFFSET 34.0f
+BIGMESSAGE_Y_OFFSET : ℝ  -- #define BIGMESSAGE_Y_OFFSET 18.0f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CHud_Draw
+  ΔCHud
+where
+  -- State update: m_Wants_To_Draw_Hud' = !m_Wants_To_Draw_Hud
+  -- State update: DrawCrossHair' = false
+  -- State update: CrossHairHidesHud' = false
+  -- State update: DrawCrossHairPC' = false
+  -- State update: playerPed' = FindPlayerPed()
+  -- State update: WeaponType' = playerPed.GetWeapon().m_eWeaponType
+  -- Invokes: CPad::GetPad, CReplay::IsPlayingBack, playerPed->GetWeapon, CTimer::GetTimeInMilliseconds, CSprite::RenderOneXLUSprite
+  true
+end
+
+schema CHud_DrawHealthBar
+  ΔCHud
+  value? : ℤ
+where
+  -- State update: m_ItemToFlash' = -1
+  -- State update: HealthFlashTimer' = 50
+  -- State update: fHealth' = value
+  -- State update: fMaxHealth' = CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth
+  -- State update: fHealth' = Clamp(fHealth, 0.0f, fMaxHealth)
+  -- State update: fWidth' = (fHealth / fMaxHealth) * 40.0f + 16.0f + 4.0f
+  -- Invokes: CFont::SetFontStyle, CFont::SetDropShadowPosition, CFont::SetDropColor, CFont::SetColor, CFont::SetCentreOn
+  true
+end
+
+schema CHud_DrawArmourBar
+  ΔCHud
+  value? : ℤ
+where
+  -- State update: m_ItemToFlash' = -1
+  -- State update: ArmourFlashTimer' = 50
+  -- State update: fArmour' = value
+  -- State update: fMaxArmour' = CWorld::Players[CWorld::PlayerInFocus].m_nMaxArmour
+  -- State update: fArmour' = Clamp(fArmour, 0.0f, fMaxArmour)
+  -- State update: fWidth' = (fArmour / fMaxArmour) * 40.0f + 16.0f + 4.0f
+  -- Invokes: CFont::SetFontStyle, CFont::SetDropShadowPosition, CFont::SetDropColor, CFont::SetColor, CFont::SetCentreOn
+  true
+end
+
+schema CHud_DrawTimeAndCashNumbers
+  ΔCHud
+  str? : seq CHAR
+  x? : ℝ
+  y? : ℝ
+  secondSet? : 𝔹
+where
+  -- State update: width' = 11.0f
+  -- State update: width' = 9.0f
+  -- State update: height' = 10.0f
+  -- State update: c' = *str
+  -- State update: color' = CRGBA(62, 141, 188, m_HudAlpha)
+  -- State update: color' = CRGBA(192, 155, 54, m_HudAlpha)
+  true
+end
+
+schema CHud_DrawCash
+  ΔCHud
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CHud_DrawTime
+  ΔCHud
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CHud_DrawAfterFade
+  ΔCHud
+where
+  -- State update: m_HelpMessageFadeTimer' = 0
+  -- State update: m_HelpMessageState' = 2
+  -- State update: m_HelpMessageTimer' = 0
+  -- State update: m_HelpMessageTimer' = 5
+  -- State update: m_HelpMessageState' = 4
+  -- State update: fAlpha' = 225.0f
+  -- Invokes: CTimer::GetIsUserPaused, CReplay::IsPlayingBack, CMessages::WideStringCompare, CMessages::WideStringCopy, CMessages::GetWideStringLength
+  true
+end
+
+schema CHud_GetRidOfAllHudMessages
+  ΔCHud
+where
+  -- State update: m_ZoneState' = 0
+  -- State update: m_pLastZoneName' = ∅
+  -- State update: m_ZoneNameTimer' = 0
+  -- State update: m_pZoneName' = ∅
+  -- State update: m_HelpMessageTimer' = 0
+  -- State update: m_HelpMessageFadeTimer' = 0
+  true
+end
+
+schema CHud_ReloadTXD
+  ΔCHud
+where
+  -- State update: HudTXD' = CTxdStore::FindTxdSlot("hud")
+  -- State update: HudTXD' = CTxdStore::AddTxdSlot("hud")
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::RemoveTxdSlot, CTxdStore::AddTxdSlot, CTxdStore::LoadTxd, CTxdStore::AddRef
+  true
+end
+
+schema CHud_Initialise
+  ΔCHud
+where
+  -- State update: m_Wants_To_Draw_Hud' = true
+  -- State update: m_Wants_To_Draw_3dMarkers' = true
+  -- State update: HudTXD' = CTxdStore::AddTxdSlot("hud")
+  -- State update: m_pLastZoneName' = ∅
+  -- State update: m_pLastVehicleName' = ∅
+  -- State update: gpSniperSightTex' = RwTextureRead("sitesniper", ∅)
+  -- Invokes: CTxdStore::AddTxdSlot, CTxdStore::LoadTxd, CTxdStore::AddRef, CTxdStore::PopCurrentTxd, CTxdStore::SetCurrentTxd
+  true
+end
+
+schema CHud_ReInitialise
+  ΔCHud
+where
+  -- State update: m_Wants_To_Draw_Hud' = true
+  -- State update: m_Wants_To_Draw_3dMarkers' = true
+  -- State update: m_pLastZoneName' = ∅
+  -- State update: m_pLastVehicleName' = ∅
+  -- State update: m_ItemToFlash' = ITEM_NONE
+  -- State update: m_ClockState' = 1
+  true
+end
+
+schema CHud_SetBigMessage
+  ΔCHud
+  message? : seq CHAR
+  style? : ℕ
+where
+  -- State update: OddJob2On' = 0
+  -- State update: OddJob2OffTimer' = 0.0f
+  true
+end
+
+schema CHud_SetHelpMessage
+  ΔCHud
+  message? : seq CHAR
+  quick? : 𝔹
+  displayForever? : 𝔹
+where
+  -- State update: m_HelpMessageState' = displayForever
+  -- State update: m_HelpMessageState' = 1
+  -- State update: m_HelpMessageQuick' = quick
+  -- State update: m_HelpMessageDisplayForever' = displayForever
+  -- Invokes: CReplay::IsPlayingBack, CMessages::WideStringCopy, CMessages::InsertPlayerControlKeysInString, CMessages::WideStringCompare
+  true
+end
+
+schema CHud_IsHelpMessageBeingDisplayed
+  ΔCHud
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_HelpMessageState != 0
+  true
+end
+
+schema CHud_SetMessage
+  ΔCHud
+  message? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CHud_SetPagerMessage
+  ΔCHud
+  message? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CHud_SetVehicleName
+  ΔCHud
+  name? : seq CHAR
+where
+  -- State update: m_pVehicleName' = name
+  true
+end
+
+schema CHud_SetZoneName
+  ΔCHud
+  name? : seq CHAR
+where
+  -- State update: m_pZoneName' = name
+  true
+end
+
+schema CHud_Shutdown
+  ΔCHud
+where
+  -- State update: gpSniperSightTex' = ∅
+  -- State update: gpRocketSightTex' = ∅
+  -- State update: gpLaserSightTex' = ∅
+  -- State update: gpLaserDotTex' = ∅
+  -- State update: gpViewFinderTex' = ∅
+  -- State update: HudTXD' = CTxdStore::FindTxdSlot("hud")
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::RemoveTxdSlot
+  true
+end
+
+schema CHud_DrawFadeState
+  ΔCHud
+  fadingElement? : DRAW_FADE_STATE
+  forceFadingIn? : ℤ
+  result! : ℝ
+where
+  -- State update: alpha' = 255.0f
+  -- State update: fadeTimer' = m_WantedFadeTimer
+  -- State update: operation' = m_WantedState
+  -- State update: timer' = m_WantedTimer
+  -- State update: fadeTimer' = m_EnergyLostFadeTimer
+  -- State update: operation' = m_EnergyLostState
+  -- Return postcondition: result! = Clamp(alpha, 0.0f, 255.0f)
+  -- Invokes: CTimer::GetTimeStepInMilliseconds
+  true
+end
+
+schema CHud_ResetWastedText
+  ΔCHud
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CHud_UseTimerCounterFontSettings
+  ΔCHud
+where
+  -- Invokes: CFont::SetScale, CFont::SetFontStyle, CFont::SetCentreOff, CFont::SetRightJustifyOn, CFont::SetRightJustifyWrap
+  true
+end
+
+schema CHud_SetHelpMessage_2
+  ΔCHud
+  message? : seq CHAR
+  quick? : 𝔹
+where
+  -- State update: m_HelpMessageState' = 0
+  -- State update: m_HelpMessageQuick' = quick
+  -- Invokes: CReplay::IsPlayingBack, CMessages::WideStringCopy, CMessages::InsertPlayerControlKeysInString
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema HudModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2874
+end

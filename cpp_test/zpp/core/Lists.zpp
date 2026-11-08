@@ -1,0 +1,464 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Lists (core)
+-- Source File(s): core/Lists.cpp, core/Lists.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Lists.zpp  (from "Lists.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPtrNode
+  item : ADDRESS
+  prev : Ref[CPtrNode]
+  next : Ref[CPtrNode]
+where
+  #prev ≤ 1
+  #next ≤ 1
+end
+
+schema CPtrNode_operator_new
+  ΔCPtrNode
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CPtrNode::operator new(size_t)
+  true
+end
+
+schema CPtrNode_operator_delete_2
+  ΔCPtrNode
+  p? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CPtrNode::operator delete(void *p, size_t)
+  true
+end
+
+schema CPtrList
+  first : Ref[CPtrNode]
+  nil : return
+  node : return
+where
+  #first ≤ 1
+end
+
+schema CPtrList_CPtrList
+  ΔCPtrList
+where
+  -- Declared member operation CPtrList::CPtrList(void)
+  true
+end
+
+schema CPtrList_CPtrList_2
+  ΔCPtrList
+  result! : ANY
+where
+  -- Declared member operation CPtrList::CPtrList(void)
+  true
+end
+
+schema CPtrList_FindItem_3
+  ΔCPtrList
+  item? : ADDRESS
+  result! : Ref[CPtrNode]
+where
+  -- Declared member operation CPtrList::FindItem(void *item)
+  true
+end
+
+schema CPtrList_if_4
+  ΔCPtrList
+  item? : node
+  result! : node___node__next
+where
+  -- Declared member operation CPtrList::if(node->item == item)
+  true
+end
+
+schema CPtrList_InsertNode_5
+  ΔCPtrList
+  node? : Ref[CPtrNode]
+  result! : Ref[CPtrNode]
+where
+  -- Declared member operation CPtrList::InsertNode(CPtrNode *node)
+  true
+end
+
+schema CPtrList_if_6
+  ΔCPtrList
+  arg_1? : first
+where
+  -- Declared member operation CPtrList::if(first)
+  true
+end
+
+schema CPtrList_InsertItem_7
+  ΔCPtrList
+  item? : ADDRESS
+  result! : Ref[CPtrNode]
+where
+  -- Declared member operation CPtrList::InsertItem(void *item)
+  true
+end
+
+schema CPtrList_InsertNode_8
+  ΔCPtrList
+  arg_1? : node
+where
+  -- Declared member operation CPtrList::InsertNode(node)
+  true
+end
+
+schema CPtrList_RemoveNode_9
+  ΔCPtrList
+  node? : Ref[CPtrNode]
+  result! : void
+where
+  -- Declared member operation CPtrList::RemoveNode(CPtrNode *node)
+  true
+end
+
+schema CPtrList_if_10
+  ΔCPtrList
+  prev? : node
+where
+  -- Declared member operation CPtrList::if(node->prev)
+  true
+end
+
+schema CPtrList_if_11
+  ΔCPtrList
+  next? : node
+where
+  -- Declared member operation CPtrList::if(node->next)
+  true
+end
+
+schema CPtrList_DeleteNode_12
+  ΔCPtrList
+  node? : Ref[CPtrNode]
+  result! : void
+where
+  -- Declared member operation CPtrList::DeleteNode(CPtrNode *node)
+  true
+end
+
+schema CPtrList_RemoveItem_13
+  ΔCPtrList
+  item? : ADDRESS
+  result! : void
+where
+  -- Declared member operation CPtrList::RemoveItem(void *item)
+  true
+end
+
+schema CPtrList_if_14
+  ΔCPtrList
+  item? : node
+where
+  -- Declared member operation CPtrList::if(node->item == item)
+  true
+end
+
+schema CPtrList_Flush_15
+  ΔCPtrList
+  result! : void
+where
+  -- Declared member operation CPtrList::Flush(void)
+  true
+end
+
+schema CPtrList_DeleteNode_16
+  ΔCPtrList
+  arg_1? : node
+where
+  -- Declared member operation CPtrList::DeleteNode(node)
+  true
+end
+
+schema CEntryInfoNode
+  list : Ref[CPtrList]
+  listnode : Ref[CPtrNode]
+  sector : Ref[CSector]
+  prev : Ref[CEntryInfoNode]
+  next : Ref[CEntryInfoNode]
+where
+  #list ≤ 1
+  #listnode ≤ 1
+  #sector ≤ 1
+  #prev ≤ 1
+  #next ≤ 1
+end
+
+schema CEntryInfoNode_operator_new
+  ΔCEntryInfoNode
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CEntryInfoNode::operator new(size_t)
+  true
+end
+
+schema CEntryInfoNode_operator_delete_2
+  ΔCEntryInfoNode
+  p? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CEntryInfoNode::operator delete(void *p, size_t)
+  true
+end
+
+schema CEntryInfoList
+  first : Ref[CEntryInfoNode]
+  node : return
+where
+  #first ≤ 1
+end
+
+schema CEntryInfoList_CEntryInfoList
+  ΔCEntryInfoList
+where
+  -- Declared member operation CEntryInfoList::CEntryInfoList(void)
+  true
+end
+
+schema CEntryInfoList_CEntryInfoList_2
+  ΔCEntryInfoList
+  result! : ANY
+where
+  -- Declared member operation CEntryInfoList::CEntryInfoList(void)
+  true
+end
+
+schema CEntryInfoList_InsertNode_3
+  ΔCEntryInfoList
+  node? : Ref[CEntryInfoNode]
+  result! : Ref[CEntryInfoNode]
+where
+  -- Declared member operation CEntryInfoList::InsertNode(CEntryInfoNode *node)
+  true
+end
+
+schema CEntryInfoList_if_4
+  ΔCEntryInfoList
+  arg_1? : first
+where
+  -- Declared member operation CEntryInfoList::if(first)
+  true
+end
+
+schema CEntryInfoList_InsertItem_5
+  ΔCEntryInfoList
+  list? : Ref[CPtrList]
+  listnode? : Ref[CPtrNode]
+  sect? : Ref[CSector]
+  result! : Ref[CEntryInfoNode]
+where
+  -- Declared member operation CEntryInfoList::InsertItem(CPtrList *list, CPtrNode *listnode, CSector *sect)
+  true
+end
+
+schema CEntryInfoList_InsertNode_6
+  ΔCEntryInfoList
+  arg_1? : node
+where
+  -- Declared member operation CEntryInfoList::InsertNode(node)
+  true
+end
+
+schema CEntryInfoList_RemoveNode_7
+  ΔCEntryInfoList
+  node? : Ref[CEntryInfoNode]
+  result! : void
+where
+  -- Declared member operation CEntryInfoList::RemoveNode(CEntryInfoNode *node)
+  true
+end
+
+schema CEntryInfoList_if_8
+  ΔCEntryInfoList
+  prev? : node
+where
+  -- Declared member operation CEntryInfoList::if(node->prev)
+  true
+end
+
+schema CEntryInfoList_if_9
+  ΔCEntryInfoList
+  next? : node
+where
+  -- Declared member operation CEntryInfoList::if(node->next)
+  true
+end
+
+schema CEntryInfoList_DeleteNode_10
+  ΔCEntryInfoList
+  node? : Ref[CEntryInfoNode]
+  result! : void
+where
+  -- Declared member operation CEntryInfoList::DeleteNode(CEntryInfoNode *node)
+  true
+end
+
+schema CEntryInfoList_Flush_11
+  ΔCEntryInfoList
+  result! : void
+where
+  -- Declared member operation CEntryInfoList::Flush(void)
+  true
+end
+
+schema CEntryInfoList_DeleteNode_12
+  ΔCEntryInfoList
+  arg_1? : node
+where
+  -- Declared member operation CEntryInfoList::DeleteNode(node)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Lists_new
+  ΔListsModuleState
+  arg_1? : ℕ
+  result! : CPtrNode__operator
+where
+  -- State update: node' = CPools::GetPtrNodePool().New()
+  -- Return postcondition: result! = node
+  -- Invokes: CPools::GetPtrNodePool
+  true
+end
+
+schema Lists_delete
+  ΔListsModuleState
+  p? : ADDRESS
+  arg_2? : ℕ
+  result! : CPtrNode__operator
+where
+  -- Invokes: CPools::GetPtrNodePool
+  true
+end
+
+schema Lists_new_2
+  ΔListsModuleState
+  arg_1? : ℕ
+  result! : CEntryInfoNode__operator
+where
+  -- State update: node' = CPools::GetEntryInfoNodePool().New()
+  -- Return postcondition: result! = node
+  -- Invokes: CPools::GetEntryInfoNodePool
+  true
+end
+
+schema Lists_delete_2
+  ΔListsModuleState
+  p? : ADDRESS
+  arg_2? : ℕ
+  result! : CEntryInfoNode__operator
+where
+  -- Invokes: CPools::GetEntryInfoNodePool
+  true
+end
+
+schema Lists_CPtrList
+  ΔListsModuleState
+where
+  -- State update: first' = ∅
+  true
+end
+
+schema Lists_CPtrList_2
+  ΔListsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lists_RemoveNode
+  ΔListsModuleState
+  node? : Ref[CPtrNode]
+where
+  -- State update: first' = node.next
+  -- State update: node.prev.next' = node.next
+  -- State update: node.next.prev' = node.prev
+  true
+end
+
+schema Lists_DeleteNode
+  ΔListsModuleState
+  node? : Ref[CPtrNode]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lists_RemoveItem
+  ΔListsModuleState
+  item? : ADDRESS
+where
+  -- State update: node' = first
+  -- State update: next' = node.next
+  true
+end
+
+schema Lists_Flush
+  ΔListsModuleState
+where
+  -- State update: node' = first
+  -- State update: next' = node.next
+  true
+end
+
+schema Lists_CEntryInfoList
+  ΔListsModuleState
+where
+  -- State update: first' = ∅
+  true
+end
+
+schema Lists_CEntryInfoList_2
+  ΔListsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lists_RemoveNode_2
+  ΔListsModuleState
+  node? : Ref[CEntryInfoNode]
+where
+  -- State update: first' = node.next
+  -- State update: node.prev.next' = node.next
+  -- State update: node.next.prev' = node.prev
+  true
+end
+
+schema Lists_DeleteNode_2
+  ΔListsModuleState
+  node? : Ref[CEntryInfoNode]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lists_Flush_2
+  ΔListsModuleState
+where
+  -- State update: node' = first
+  -- State update: next' = node.next
+  true
+end

@@ -1,0 +1,281 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedModelInfo (modelinfo)
+-- Source File(s): modelinfo/PedModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include General.zpp  (from "General.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include main.zpp  (from "main.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Leeds.zpp  (from "Leeds.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMPEDINFONODES : ℕ  -- #define NUMPEDINFONODES 8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema LimbCBarg
+  mi : Ref[CPedModelInfo]
+  clump : Ref[RpClump]
+  frameIDs : seq ℤ  -- bounded array [3]
+where
+  #mi ≤ 1
+  #clump ≤ 1
+  #frameIDs = 3
+end
+
+schema ColNodeInfo
+  name : seq CHAR
+  pedNode : ℤ
+  pieceType : ℤ
+  z : ℝ
+  radius : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema PedChunk
+  colmodel : Ref[CColModel]
+  clump : Ref[RpClump]
+where
+  #colmodel ≤ 1
+  #clump ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPedModelInfo_DeleteRwObject
+  ΔCPedModelInfo
+where
+  -- State update: m_hitColModel' = ∅
+  -- State update: frame' = RpAtomicGetFrame(m_head)
+  -- State update: m_head' = ∅
+  -- State update: frame' = RpAtomicGetFrame(m_lhand)
+  -- State update: m_lhand' = ∅
+  -- State update: frame' = RpAtomicGetFrame(m_rhand)
+  -- Invokes: CClumpModelInfo::DeleteRwObject
+  true
+end
+
+schema CPedModelInfo_findLimbsCb
+  ΔCPedModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: limbs' = (LimbCBarg*)data
+  -- State update: frame' = RpAtomicGetFrame(atomic)
+  -- State update: name' = GetFrameNodeName(frame)
+  -- State update: limbs.mi.m_head' = atomic
+  -- State update: limbs.mi.m_lhand' = atomic
+  -- State update: limbs.mi.m_rhand' = atomic
+  -- Return postcondition: result! = atomic
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CPedModelInfo_SetClump
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+where
+  -- State update: limbs' = { this, clump, { 0, 0, 0 } }
+  -- Invokes: CustomPipes::AttachRimPipe, CClumpModelInfo::SetClump
+  true
+end
+
+schema PedModelInfo_CountAtomicsCB
+  ΔPedModelInfoModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema PedModelInfo_GetAtomicListCB
+  ΔPedModelInfoModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: data' = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema PedModelInfo_FindPedFrameFromNameCB
+  ΔPedModelInfoModuleState
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: assoc' = (RwObjectNameAssociation*)data
+  -- State update: assoc.frame' = frame
+  -- Return postcondition: result! = assoc->frame ? nil : frame
+  -- Return postcondition: result! = nil
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CPedModelInfo_SetLowDetailClump
+  ΔCPedModelInfo
+  lodclump? : Ref[RpClump]
+where
+  -- State update: numAtm' = 0
+  -- State update: numLodAtm' = 0
+  -- State update: pAtm' = atomics
+  -- State update: assoc.name' = GetFrameNodeName(RpAtomicGetFrame(atomics[i]))
+  -- State update: assoc.frame' = ∅
+  true
+end
+
+schema PedModelInfo_FindHeadRadiusCB
+  ΔPedModelInfoModuleState
+  object? : Ref[RwObject]
+  data? : ADDRESS
+where
+  -- State update: atomic' = (RpAtomic*)object
+  -- State update: data' = RpAtomicGetBoundingSphere(atomic).radius
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CPedModelInfo_CreateHitColModel
+  ΔCPedModelInfo
+where
+  -- State update: colmodel' = new CColModel
+  -- State update: spheres' = (CColSphere*)RwMalloc(NUMPEDINFONODES*sizeof(CColSphere))
+  -- State update: root' = RpClumpGetFrame(m_clump)
+  -- State update: mat' = RwMatrixCreate()
+  -- State update: nodeFrame' = ∅
+  -- State update: nameAssoc.name' = m_pColNodeInfos[i].name
+  -- Invokes: boundingSphere.Set, boundingBox.Set
+  true
+end
+
+schema CPedModelInfo_AnimatePedColModel
+  ΔCPedModelInfo
+  colmodel? : Ref[CColModel]
+  frame? : Ref[RwFrame]
+where
+  -- State update: mat' = RwMatrixCreate()
+  -- State update: spheres' = colmodel.spheres
+  -- State update: f' = ∅
+  -- State update: nameAssoc.name' = m_pColNodeInfos[i].name
+  -- State update: nameAssoc.frame' = ∅
+  -- State update: f' = nameAssoc.frame
+  -- Return postcondition: result! = colmodel
+  true
+end
+
+schema CPedModelInfo_CreateHitColModelSkinned
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+where
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(clump)
+  -- State update: colmodel' = new CColModel
+  -- State update: spheres' = (CColSphere*)RwMalloc(NUMPEDINFONODES*sizeof(CColSphere))
+  -- State update: root' = RpClumpGetFrame(m_clump)
+  -- State update: invmat' = RwMatrixCreate()
+  -- State update: mat' = RwMatrixCreate()
+  -- Invokes: boundingSphere.Set, boundingBox.Set
+  true
+end
+
+schema CPedModelInfo_AnimatePedColModelSkinned
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+where
+  -- State update: spheres' = m_hitColModel.spheres
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(clump)
+  -- State update: invmat' = RwMatrixCreate()
+  -- State update: mat' = RwMatrixCreate()
+  -- State update: mat' = *invmat
+  -- State update: id' = ConvertPedNode2BoneTag(m_pColNodeInfos[i].pedNode)
+  -- Return postcondition: result! = m_hitColModel
+  -- Return postcondition: result! = m_hitColModel
+  true
+end
+
+schema CPedModelInfo_AnimatePedColModelSkinnedWorld
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+where
+  -- State update: spheres' = m_hitColModel.spheres
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(clump)
+  -- State update: id' = ConvertPedNode2BoneTag(m_pColNodeInfos[i].pedNode)
+  -- State update: idx' = RpHAnimIDGetIndex(hier, id)
+  -- State update: mat' = &RpHAnimHierarchyGetMatrixArray(hier)[idx]
+  -- State update: pos' = { 0.0f, 0.0f, 0.0f }
+  -- Return postcondition: result! = m_hitColModel
+  true
+end
+
+schema CPedModelInfo_LoadModel
+  ΔCPedModelInfo
+  data? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: chk' = (PedChunk*)data
+  -- State update: m_hitColModel' = chk.colmodel
+  -- Invokes: CStreaming::RegisterPointer, CClumpModelInfo::LoadModel
+  true
+end
+
+schema CPedModelInfo_Write
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: CClumpModelInfo::Write, writer.AddPatch, m_hitColModel->Write
+  true
+end
+
+schema CPedModelInfo_WriteModel
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: chunk' = new PedChunk
+  -- State update: chunk.colmodel' = ∅
+  -- State update: chunk.clump' = ∅
+  -- State update: chunk.clump' = (RpClump*)CClumpModelInfo::WriteModel(writer)
+  -- State update: chunk.colmodel' = m_hitColModel
+  -- Return postcondition: result! = nil
+  -- Invokes: writer.AllocateRaw, CClumpModelInfo::WriteModel, writer.AddPatch, colmodel->Write
+  true
+end
+
+schema CPedModelInfo_RcWriteThis
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CPedModelInfo_RcWriteEmpty
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end

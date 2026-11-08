@@ -1,0 +1,109 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Building (buildings)
+-- Source File(s): buildings/Building.cpp, buildings/Building.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Building.zpp  (from "Building.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Entity.zpp  (from "Entity.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBuilding
+  CEntity  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CBuilding_CBuilding
+  ΔCBuilding
+where
+  -- Declared member operation CBuilding::CBuilding(void)
+  true
+end
+
+schema CBuilding_operator_new_2
+  ΔCBuilding
+  arg_1? : ℕ
+  result! : Ref[void]
+where
+  -- Declared member operation CBuilding::operator new(size_t)
+  true
+end
+
+schema CBuilding_operator_delete_3
+  ΔCBuilding
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CBuilding::operator delete(void*, size_t)
+  true
+end
+
+schema CBuilding_ReplaceWithNewModel_4
+  ΔCBuilding
+  id? : ℤ
+where
+  -- Declared member operation CBuilding::ReplaceWithNewModel(int32 id)
+  true
+end
+
+schema CBuilding_GetIsATreadable_5
+  ΔCBuilding
+  result! : 𝔹
+where
+  -- Declared member operation CBuilding::GetIsATreadable(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CBuilding_ReplaceWithNewModel
+  ΔCBuilding
+  id? : ℤ
+where
+  -- State update: m_modelIndex' = id
+  -- Invokes: CModelInfo::GetModelInfo, CStreaming::RemoveModel, CStreaming::RequestModel
+  true
+end
+
+schema Building_IsBuildingPointerValid
+  ΔBuildingModuleState
+  pBuilding? : Ref[CBuilding]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = index >= 0 && index < CPools::GetTreadablePool()->GetSize()
+  -- Return postcondition: result! = index >= 0 && index <= CPools::GetTreadablePool()->GetSize()
+  -- Invokes: pBuilding->GetIsATreadable, CPools::GetTreadablePool, CPools::GetBuildingPool
+  true
+end
+
+schema Building_CBuilding
+  ΔBuildingModuleState
+where
+  -- State update: m_type' = ENTITY_TYPE_BUILDING
+  -- State update: bUsesCollision' = true
+  true
+end
+
+schema Building_GetIsATreadable
+  ΔBuildingModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end

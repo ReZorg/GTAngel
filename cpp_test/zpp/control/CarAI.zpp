@@ -1,0 +1,470 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CarAI (control)
+-- Source File(s): control/CarAI.cpp, control/CarAI.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include Accident.zpp  (from "Accident.h")
+-- include AutoPilot.zpp  (from "AutoPilot.h")
+-- include Bridge.zpp  (from "Bridge.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include General.zpp  (from "General.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Population.zpp  (from "Population.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DISTANCE_TO_SWITCH_DISTANCE_GOTO : ℝ  -- #define DISTANCE_TO_SWITCH_DISTANCE_GOTO 20.0f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCarAI
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCarAI_FindSwitchDistanceClose
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Declared member operation CCarAI::FindSwitchDistanceClose(CVehicle*)
+  true
+end
+
+schema CCarAI_FindSwitchDistanceFarNormalVehicle_2
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Declared member operation CCarAI::FindSwitchDistanceFarNormalVehicle(CVehicle*)
+  true
+end
+
+schema CCarAI_FindSwitchDistanceFar_3
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Declared member operation CCarAI::FindSwitchDistanceFar(CVehicle*)
+  true
+end
+
+schema CCarAI_BackToCruisingIfNoWantedLevel_4
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::BackToCruisingIfNoWantedLevel(CVehicle*)
+  true
+end
+
+schema CCarAI_UpdateCarAI_5
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::UpdateCarAI(CVehicle*)
+  true
+end
+
+schema CCarAI_CarHasReasonToStop_6
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::CarHasReasonToStop(CVehicle*)
+  true
+end
+
+schema CCarAI_GetCarToGoToCoors_7
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVector]
+  result! : ℝ
+where
+  -- Declared member operation CCarAI::GetCarToGoToCoors(CVehicle*, CVector*)
+  true
+end
+
+schema CCarAI_GetCarToParkAtCoors_8
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVector]
+  result! : ℝ
+where
+  -- Declared member operation CCarAI::GetCarToParkAtCoors(CVehicle*, CVector*)
+  true
+end
+
+schema CCarAI_AddPoliceCarOccupants_9
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::AddPoliceCarOccupants(CVehicle*)
+  true
+end
+
+schema CCarAI_AddAmbulanceOccupants_10
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::AddAmbulanceOccupants(CVehicle*)
+  true
+end
+
+schema CCarAI_AddFiretruckOccupants_11
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::AddFiretruckOccupants(CVehicle*)
+  true
+end
+
+schema CCarAI_TellOccupantsToLeaveCar_12
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::TellOccupantsToLeaveCar(CVehicle*)
+  true
+end
+
+schema CCarAI_TellOccupantsToFleeCar_13
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::TellOccupantsToFleeCar(CVehicle*)
+  true
+end
+
+schema CCarAI_TellCarToRamOtherCar_14
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::TellCarToRamOtherCar(CVehicle*, CVehicle*)
+  true
+end
+
+schema CCarAI_TellCarToBlockOtherCar_15
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::TellCarToBlockOtherCar(CVehicle*, CVehicle*)
+  true
+end
+
+schema CCarAI_FindPoliceCarMissionForWantedLevel_16
+  ΔCCarAI
+  result! : ℕ
+where
+  -- Declared member operation CCarAI::FindPoliceCarMissionForWantedLevel()
+  true
+end
+
+schema CCarAI_FindPoliceBoatMissionForWantedLevel_17
+  ΔCCarAI
+  result! : ℕ
+where
+  -- Declared member operation CCarAI::FindPoliceBoatMissionForWantedLevel()
+  true
+end
+
+schema CCarAI_FindPoliceCarSpeedForWantedLevel_18
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+  result! : ℤ
+where
+  -- Declared member operation CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle*)
+  true
+end
+
+schema CCarAI_MellowOutChaseSpeed_19
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::MellowOutChaseSpeed(CVehicle*)
+  true
+end
+
+schema CCarAI_MellowOutChaseSpeedBoat_20
+  ΔCCarAI
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::MellowOutChaseSpeedBoat(CVehicle*)
+  true
+end
+
+schema CCarAI_MakeWayForCarWithSiren_21
+  ΔCCarAI
+  veh? : Ref[CVehicle]
+where
+  -- Declared member operation CCarAI::MakeWayForCarWithSiren(CVehicle *veh)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCarAI_FindSwitchDistanceClose
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Return postcondition: result! = pVehicle->AutoPilot.m_nSwitchDistance
+  true
+end
+
+schema CCarAI_FindSwitchDistanceFarNormalVehicle
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Return postcondition: result! = FindSwitchDistanceClose(pVehicle) + 5.0f
+  true
+end
+
+schema CCarAI_FindSwitchDistanceFar
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Return postcondition: result! = 50.0f
+  -- Return postcondition: result! = FindSwitchDistanceFarNormalVehicle(pVehicle)
+  true
+end
+
+schema CCarAI_BackToCruisingIfNoWantedLevel
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_CRUISE
+  -- State update: pVehicle.AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_STOP_FOR_CARS
+  -- State update: pVehicle.m_bSirenOrAlarm' = false
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_NONE
+  -- Invokes: m_pWanted->GetWantedLevel, CCullZones::NoPolice, CCarCtrl::JoinCarWithRoadSystem
+  true
+end
+
+schema CCarAI_UpdateCarAI
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = FindPoliceCarSpeedForWantedLevel(pVehicle)
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_RAMPLAYER_CLOSE
+  -- State update: pVehicle.m_bSirenOrAlarm' = true
+  -- State update: pVehicle.AutoPilot.m_nTempAction' = TEMPACT_REVERSE
+  -- State update: pVehicle.AutoPilot.m_nTimeTempAction' = CTimer::GetTimeInMilliseconds() + 800
+  -- State update: pVehicle.AutoPilot.m_nTempAction' = TEMPACT_REVERSE
+  -- Invokes: pVehicle->GetStatus, CBridge::ThisIsABridgeObjectMovingUp, m_pCurGroundEntity->GetModelIndex, pVehicle->SetStatus, CTimer::GetFrameCounter
+  true
+end
+
+schema CCarAI_CarHasReasonToStop
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nAntiReverseTimer' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCarAI_GetCarToGoToCoors
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CVector]
+  result! : ℝ
+where
+  -- State update: pVehicle.AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_AVOID_CARS
+  -- State update: pVehicle.AutoPilot.m_nTempAction' = TEMPACT_NONE
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 20
+  -- State update: pVehicle.AutoPilot.m_nAntiReverseTimer' = CTimer::GetTimeInMilliseconds()
+  -- Return postcondition: result! = (pVehicle->GetPosition() - *pTarget).Magnitude2D()
+  -- Invokes: CTimer::GetTimeInMilliseconds, pVehicle->SetStatus, CCarCtrl::JoinCarWithRoadSystemGotoCoors, pVehicle->GetPosition
+  true
+end
+
+schema CCarAI_GetCarToParkAtCoors
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CVector]
+  result! : ℝ
+where
+  -- State update: pVehicle.bParking' = true
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 10
+  -- Return postcondition: result! = (pVehicle->GetPosition() - *pTarget).Magnitude2D()
+  -- Invokes: pVehicle->GetPosition
+  true
+end
+
+schema CCarAI_AddPoliceCarOccupants
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.bOccupantsHaveBeenGenerated' = true
+  -- State update: bMiamiViceCop' = true
+  -- State update: bMiamiViceCop' = true
+  -- State update: MiamiViceCycle' = (CCarCtrl::MiamiViceCycle + 1) % 4
+  -- State update: LastTimeMiamiViceGenerated' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: pVehicle->GetModelIndex, pVehicle->SetUpDriver, pVehicle->SetupPassenger, m_pWanted->GetWantedLevel, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCarAI_AddAmbulanceOccupants
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- Invokes: pVehicle->SetUpDriver, pVehicle->SetupPassenger
+  true
+end
+
+schema CCarAI_AddFiretruckOccupants
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- Invokes: pVehicle->SetUpDriver, pVehicle->SetupPassenger
+  true
+end
+
+schema CCarAI_TellOccupantsToLeaveCar
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: timer' = 100
+  -- State update: m_leaveCarTimer' = timer
+  -- Invokes: pDriver->SetObjective, pVehicle->GetModelIndex, pDriver->Say, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarAI_TellOccupantsToFleeCar
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: timer' = 100
+  -- State update: m_leaveCarTimer' = timer
+  -- Invokes: pDriver->IsPlayer, pDriver->SetObjective, pVehicle->GetModelIndex, pDriver->Say, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarAI_TellCarToRamOtherCar
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_pTargetCar' = pTarget
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_RAMCAR_FARAWAY
+  -- State update: pVehicle.bEngineOn' = true
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = Max(6, pVehicle.AutoPilot.m_nCruiseSpeed)
+  -- Invokes: pTarget->RegisterReference
+  true
+end
+
+schema CCarAI_TellCarToBlockOtherCar
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_pTargetCar' = pTarget
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_BLOCKCAR_FARAWAY
+  -- State update: pVehicle.bEngineOn' = true
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = Max(6, pVehicle.AutoPilot.m_nCruiseSpeed)
+  -- Invokes: pTarget->RegisterReference
+  true
+end
+
+schema CCarAI_FindPoliceCarMissionForWantedLevel
+  ΔCCarAI
+  result! : ℕ
+where
+  -- Return postcondition: result! = MISSION_BLOCKPLAYER_FARAWAY
+  -- Invokes: m_pWanted->GetWantedLevel, CGeneral::GetRandomNumber
+  true
+end
+
+schema CCarAI_FindPoliceBoatMissionForWantedLevel
+  ΔCCarAI
+  result! : ℕ
+where
+  -- Return postcondition: result! = MISSION_BLOCKPLAYER_FARAWAY
+  -- Return postcondition: result! = MISSION_ATTACKPLAYER
+  -- Return postcondition: result! = MISSION_BLOCKPLAYER_FARAWAY
+  -- Invokes: m_pWanted->GetWantedLevel
+  true
+end
+
+schema CCarAI_FindPoliceCarSpeedForWantedLevel
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+  result! : ℤ
+where
+  -- Return postcondition: result! = CGeneral::GetRandomNumberInRange(12, 16)
+  -- Return postcondition: result! = 25
+  -- Return postcondition: result! = 34
+  -- Invokes: m_pWanted->GetWantedLevel, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarAI_MellowOutChaseSpeed
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: distanceToPlayer' = (pVehicle.GetPosition() - FindPlayerCoors()).Magnitude()
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 15
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 22
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 25
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 5
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 13
+  -- Invokes: m_pWanted->GetWantedLevel, pVehicle->GetPosition
+  true
+end
+
+schema CCarAI_MellowOutChaseSpeedBoat
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 8
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 10
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 15
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 20
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 25
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 30
+  -- Invokes: m_pWanted->GetWantedLevel
+  true
+end
+
+schema CCarAI_MakeWayForCarWithSiren
+  ΔCCarAI
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: flatSpeed' = pVehicle.GetMoveSpeed().Magnitude2D()
+  -- State update: forward' = pVehicle.GetMoveSpeed() / flatSpeed
+  -- State update: projection' = flatSpeed * 45 + 20
+  -- State update: vehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: distance' = vehicle.GetPosition() - pVehicle.GetPosition()
+  -- State update: correlation' = DotProduct2D(forward, distance) / distance.Magnitude()
+  -- Invokes: pVehicle->GetMoveSpeed, CPools::GetVehiclePool, vehicle->IsCar, vehicle->IsBike, vehicle->GetStatus
+  true
+end

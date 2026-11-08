@@ -1,0 +1,109 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: KeyGen (core)
+-- Source File(s): core/KeyGen.cpp, core/KeyGen.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include ctype.zpp  (from "ctype.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CKeyGen
+  keyTable : seq ℕ  -- bounded array [256]
+where
+  #keyTable = 256
+end
+
+schema CKeyGen_GetKey
+  ΔCKeyGen
+  str? : seq CHAR
+  size? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CKeyGen::GetKey(const char *str, int size)
+  true
+end
+
+schema CKeyGen_GetKey_2
+  ΔCKeyGen
+  str? : seq CHAR
+  result! : ℕ
+where
+  -- Declared member operation CKeyGen::GetKey(const char *str)
+  true
+end
+
+schema CKeyGen_GetUppercaseKey_3
+  ΔCKeyGen
+  str? : seq CHAR
+  result! : ℕ
+where
+  -- Declared member operation CKeyGen::GetUppercaseKey(const char *str)
+  true
+end
+
+schema CKeyGen_AppendStringToKey_4
+  ΔCKeyGen
+  key? : ℕ
+  str? : seq CHAR
+  result! : ℕ
+where
+  -- Declared member operation CKeyGen::AppendStringToKey(uint32 key, const char *str)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CKeyGen_GetKey
+  ΔCKeyGen
+  str? : seq CHAR
+  size? : ℤ
+where
+  -- State update: key' = 0xffffffff
+  -- State update: key' = keyTable[(key ^ str[i]) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+schema CKeyGen_GetKey_2
+  ΔCKeyGen
+  str? : seq CHAR
+where
+  -- State update: key' = 0xffffffff
+  -- State update: key' = keyTable[(key ^ *(str++)) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+schema CKeyGen_GetUppercaseKey
+  ΔCKeyGen
+  str? : seq CHAR
+where
+  -- State update: key' = 0xffffffff
+  -- State update: key' = keyTable[(key ^ toupper(*(str++))) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+schema CKeyGen_AppendStringToKey
+  ΔCKeyGen
+  key? : ℕ
+  str? : seq CHAR
+where
+  -- State update: key' = keyTable[(key ^ *(str++)) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end

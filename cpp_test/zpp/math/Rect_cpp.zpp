@@ -1,0 +1,54 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Rect (math)
+-- Source File(s): math/Rect.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRect_CRect
+  ΔCRect
+where
+  -- State update: left' = 1000000.0f
+  -- State update: top' = 1000000.0f
+  -- State update: right' = -1000000.0f
+  -- State update: bottom' = -1000000.0f
+  true
+end
+
+schema CRect_CRect_2
+  ΔCRect
+  l? : ℝ
+  t? : ℝ
+  r? : ℝ
+  b? : ℝ
+where
+  -- State update: left' = l
+  -- State update: top' = t
+  -- State update: right' = r
+  -- State update: bottom' = b
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RectModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 17
+end

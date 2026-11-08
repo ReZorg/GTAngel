@@ -1,0 +1,164 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FrameUpdate (animation)
+-- Source File(s): animation/FrameUpdate.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema FrameUpdate_FrameUpdateCallBackNonSkinned
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: mat' = RwFrameGetMatrix(frame.frame)
+  -- State update: updateData' = (AnimBlendFrameUpdateData*)arg
+  -- State update: node' = updateData.nodes
+  -- State update: node' = updateData.nodes
+  -- State update: mat.pos.x' = pos.x
+  -- Invokes: association->IsPartial, sequence->HasTranslation, rot.Normalise, rot.Get
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackWithVelocityExtractionNonSkinned
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: transy' = 0.0f
+  -- State update: cury' = 0.0f
+  -- State update: endy' = 0.0f
+  -- State update: looped' = false
+  -- State update: mat' = RwFrameGetMatrix(frame.frame)
+  -- Invokes: association->IsPartial, sequence->HasTranslation, association->HasTranslation, association->HasXTranslation, rot.Normalise
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackWith3dVelocityExtractionNonSkinned
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: looped' = false
+  -- State update: mat' = RwFrameGetMatrix(frame.frame)
+  -- State update: updateData' = (AnimBlendFrameUpdateData*)arg
+  -- State update: node' = updateData.nodes
+  -- State update: node' = updateData.nodes
+  -- Invokes: association->IsPartial, sequence->HasTranslation, association->HasTranslation, rot.Normalise, rot.Get
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackSkinned
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: transBlendAmount' = 0.0f
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: xform' = frame.hanimFrame
+  -- State update: updateData' = (AnimBlendFrameUpdateData*)arg
+  -- State update: node' = updateData.nodes
+  -- State update: node' = updateData.nodes
+  -- Invokes: association->IsPartial, sequence->HasTranslation, rot.Normalise
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackWithVelocityExtractionSkinned
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: transy' = 0.0f
+  -- State update: cury' = 0.0f
+  -- State update: endy' = 0.0f
+  -- State update: looped' = false
+  -- State update: xform' = frame.hanimFrame
+  -- Invokes: association->IsPartial, sequence->HasTranslation, association->HasTranslation, association->HasXTranslation, rot.Normalise
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackWith3dVelocityExtractionSkinned
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: looped' = false
+  -- State update: xform' = frame.hanimFrame
+  -- State update: updateData' = (AnimBlendFrameUpdateData*)arg
+  -- State update: node' = updateData.nodes
+  -- State update: node' = updateData.nodes
+  -- Invokes: association->IsPartial, sequence->HasTranslation, association->HasTranslation, rot.Normalise
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackOffscreen
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackNonSkinnedCompressed
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: looped' = false
+  -- State update: mat' = RwFrameGetMatrix(frame.frame)
+  -- State update: updateData' = (AnimBlendFrameUpdateData*)arg
+  -- State update: node' = updateData.nodes
+  -- State update: node' = updateData.nodes
+  -- Invokes: association->IsPartial, sequence->HasTranslation, association->HasTranslation, rot.Normalise, rot.Get
+  true
+end
+
+schema FrameUpdate_FrameUpdateCallBackSkinnedCompressed
+  ΔFrameUpdateModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: totalBlendAmount' = 0.0f
+  -- State update: looped' = false
+  -- State update: xform' = frame.hanimFrame
+  -- State update: updateData' = (AnimBlendFrameUpdateData*)arg
+  -- State update: node' = updateData.nodes
+  -- State update: node' = updateData.nodes
+  -- Invokes: association->IsPartial, sequence->HasTranslation, association->HasTranslation, rot.Normalise
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FrameUpdateModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 700
+end

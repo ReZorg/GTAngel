@@ -1,0 +1,131 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TexList (renderer)
+-- Source File(s): renderer/TexList.cpp, renderer/TexList.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include TexList.zpp  (from "TexList.h")
+-- include rtbmp.zpp  (from "rtbmp.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+TexList_Enum_1 ::= MAX_TEXUSED
+  -- val(MAX_TEXUSED) = 400
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTexList
+  ms_nTexUsed : seq 𝔹  -- bounded array [MAX_TEXUSED]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTexList_Initialise
+  ΔCTexList
+where
+  -- Declared member operation CTexList::Initialise()
+  true
+end
+
+schema CTexList_Shutdown_2
+  ΔCTexList
+where
+  -- Declared member operation CTexList::Shutdown()
+  true
+end
+
+schema CTexList_SetTexture_3
+  ΔCTexList
+  slot? : ℤ
+  name? : seq CHAR
+  result! : Ref[RwTexture]
+where
+  -- Declared member operation CTexList::SetTexture(int32 slot, char *name)
+  true
+end
+
+schema CTexList_GetFirstFreeTexture_4
+  ΔCTexList
+  result! : ℤ
+where
+  -- Declared member operation CTexList::GetFirstFreeTexture()
+  true
+end
+
+schema CTexList_LoadFileNameTexture_5
+  ΔCTexList
+  name? : seq CHAR
+  result! : Ref[RwTexture]
+where
+  -- Declared member operation CTexList::LoadFileNameTexture(char *name)
+  true
+end
+
+schema CTexList_LoadGlobalTextureList_6
+  ΔCTexList
+where
+  -- Declared member operation CTexList::LoadGlobalTextureList()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTexList_Initialise
+  ΔCTexList
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTexList_Shutdown
+  ΔCTexList
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTexList_SetTexture
+  ΔCTexList
+  slot? : ℤ
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CTexList_GetFirstFreeTexture
+  ΔCTexList
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CTexList_LoadFileNameTexture
+  ΔCTexList
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = SetTexture(GetFirstFreeTexture(), name)
+  true
+end
+
+schema CTexList_LoadGlobalTextureList
+  ΔCTexList
+where
+  -- Invokes: CFileMgr::SetDir
+  true
+end

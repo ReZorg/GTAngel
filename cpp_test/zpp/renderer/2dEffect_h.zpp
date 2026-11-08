@@ -1,0 +1,150 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: 2dEffect (renderer)
+-- Source File(s): renderer/2dEffect.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+2dEffect_Enum_1 ::= EFFECT_LIGHT | EFFECT_PARTICLE | EFFECT_ATTRACTOR | EFFECT_PED_ATTRACTOR | EFFECT_SUNGLARE
+
+2dEffect_Enum_2 ::= LIGHT_ON | LIGHT_ON_NIGHT | LIGHT_FLICKER | LIGHT_FLICKER_NIGHT | LIGHT_FLASH1 | LIGHT_FLASH1_NIGHT | LIGHT_FLASH2 | LIGHT_FLASH2_NIGHT | LIGHT_FLASH3 | LIGHT_FLASH3_NIGHT | LIGHT_RANDOM_FLICKER | LIGHT_RANDOM_FLICKER_NIGHT | LIGHT_SPECIAL | LIGHT_BRIDGE_FLASH1 | LIGHT_BRIDGE_FLASH2
+
+2dEffect_Enum_3 ::= ATTRACTORTYPE_ICECREAM | ATTRACTORTYPE_STARE
+
+2dEffect_Enum_4 ::= LIGHTFLAG_LOSCHECK | LIGHTFLAG_FOG_NORMAL | LIGHTFLAG_FOG_ALWAYS | LIGHTFLAG_HIDE_OBJECT | LIGHTFLAG_LONG_DIST | LIGHTFLAG_FOG
+  -- val(LIGHTFLAG_LOSCHECK) = 1
+  -- val(LIGHTFLAG_FOG_NORMAL) = 2
+  -- val(LIGHTFLAG_FOG_ALWAYS) = 4
+  -- val(LIGHTFLAG_HIDE_OBJECT) = 8
+  -- val(LIGHTFLAG_LONG_DIST) = 16
+  -- val(LIGHTFLAG_FOG) = (LIGHTFLAG_FOG_NORMAL|LIGHTFLAG_FOG_ALWAYS)
+
+2dEffect_Enum_5 ::= EFFECT_LIGHT | EFFECT_PARTICLE | EFFECT_ATTRACTOR
+
+2dEffect_Enum_6 ::= LIGHTFLAG_LOSCHECK | LIGHTFLAG_FOG_NORMAL | LIGHTFLAG_FOG_ALWAYS | LIGHTFLAG_FOG
+  -- val(LIGHTFLAG_LOSCHECK) = 1
+  -- val(LIGHTFLAG_FOG_NORMAL) = 2
+  -- val(LIGHTFLAG_FOG_ALWAYS) = 4
+  -- val(LIGHTFLAG_FOG) = (LIGHTFLAG_FOG_NORMAL|LIGHTFLAG_FOG_ALWAYS)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema C2dEffect
+  range : ℝ
+  size : ℝ
+  shadowSize : ℝ
+  lightType : ℕ
+  roadReflection : ℕ
+  flareType : ℕ
+  shadowIntensity : ℕ
+  flags : ℕ
+  corona : Ref[RwTexture]
+  shadow : Ref[RwTexture]
+  dir : CVector
+  scale : ℝ
+  type : ℤ
+  probability : ℕ
+  useDir : CVector
+  pos : CVector
+  col : CRGBA
+  particle : Particle
+  attractor : Attractor
+  pedattr : PedAttractor
+where
+  lightType ≥ 0
+  roadReflection ≥ 0
+  flareType ≥ 0
+  shadowIntensity ≥ 0
+  flags ≥ 0
+  #corona ≤ 1
+  #shadow ≤ 1
+  probability ≥ 0
+end
+
+schema C2dEffect_C2dEffect
+  ΔC2dEffect
+where
+  -- Declared member operation C2dEffect::C2dEffect(void)
+  true
+end
+
+schema C2dEffect_if_2
+  ΔC2dEffect
+  shadow? : light
+where
+  -- Declared member operation C2dEffect::if(light.shadow)
+  true
+end
+
+schema Light
+  dist : ℝ
+  range : ℝ
+  size : ℝ
+  shadowSize : ℝ
+  lightType : ℕ
+  roadReflection : ℕ
+  flareType : ℕ
+  shadowIntensity : ℕ
+  flags : ℕ
+  corona : Ref[RwTexture]
+  shadow : Ref[RwTexture]
+where
+  lightType ≥ 0
+  roadReflection ≥ 0
+  flareType ≥ 0
+  shadowIntensity ≥ 0
+  flags ≥ 0
+  #corona ≤ 1
+  #shadow ≤ 1
+end
+
+schema Particle
+  particleType : ℤ
+  dir : CVector
+  scale : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema Attractor
+  dir : CVector
+  type : ℤ
+  probability : ℕ
+where
+  probability ≥ 0
+end
+
+schema PedAttractor
+  queueDir : CVector
+  useDir : CVector
+  type : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema 2dEffect_C2dEffect
+  Δ2dEffectModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema 2dEffect_Shutdown
+  Δ2dEffectModuleState
+where
+  -- State update: light.corona' = ∅
+  -- State update: light.shadow' = ∅
+  true
+end

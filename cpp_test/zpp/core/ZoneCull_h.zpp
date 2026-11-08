@@ -1,0 +1,582 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ZoneCull (core)
+-- Source File(s): core/ZoneCull.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eZoneAttribs ::= ATTRZONE_CAMCLOSEIN | ATTRZONE_STAIRS | ATTRZONE_1STPERSON | ATTRZONE_NORAIN | ATTRZONE_NOPOLICE | ATTRZONE_NOTCULLZONE | ATTRZONE_DOINEEDCOLLISION | ATTRZONE_SUBWAYVISIBLE | ATTRZONE_POLICEABANDONCARS | ATTRZONE_ROOMFORAUDIO | ATTRZONE_WATERFUDGE
+  -- val(ATTRZONE_CAMCLOSEIN) = 1
+  -- val(ATTRZONE_STAIRS) = 2
+  -- val(ATTRZONE_1STPERSON) = 4
+  -- val(ATTRZONE_NORAIN) = 8
+  -- val(ATTRZONE_NOPOLICE) = 0x10
+  -- val(ATTRZONE_NOTCULLZONE) = 0x20
+  -- val(ATTRZONE_DOINEEDCOLLISION) = 0x40
+  -- val(ATTRZONE_SUBWAYVISIBLE) = 0x80
+  -- val(ATTRZONE_POLICEABANDONCARS) = 0x100
+  -- val(ATTRZONE_ROOMFORAUDIO) = 0x200
+  -- val(ATTRZONE_WATERFUDGE) = 0x400
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCullZone
+  position : CVector
+  minx : ℝ
+  maxx : ℝ
+  miny : ℝ
+  maxy : ℝ
+  minz : ℝ
+  maxz : ℝ
+  m_indexStart : ℤ
+  m_groupIndexCount : seq ℤ  -- bounded array [3]
+  m_numBuildings : ℤ
+  m_numTreadablesPlus10m : ℤ
+  m_numTreadables : ℤ
+where
+  #m_groupIndexCount = 3
+end
+
+schema CCullZone_DoStuffLeavingZone
+  ΔCCullZone
+where
+  -- Declared member operation CCullZone::DoStuffLeavingZone(void)
+  true
+end
+
+schema CCullZone_DoStuffLeavingZone_OneBuilding_2
+  ΔCCullZone
+  i? : ℕ
+where
+  -- Declared member operation CCullZone::DoStuffLeavingZone_OneBuilding(uint16 i)
+  true
+end
+
+schema CCullZone_DoStuffLeavingZone_OneTreadableBoth_3
+  ΔCCullZone
+  i? : ℕ
+where
+  -- Declared member operation CCullZone::DoStuffLeavingZone_OneTreadableBoth(uint16 i)
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_4
+  ΔCCullZone
+where
+  -- Declared member operation CCullZone::DoStuffEnteringZone(void)
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_OneBuilding_5
+  ΔCCullZone
+  i? : ℕ
+where
+  -- Declared member operation CCullZone::DoStuffEnteringZone_OneBuilding(uint16 i)
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_OneTreadablePlus10m_6
+  ΔCCullZone
+  i? : ℕ
+where
+  -- Declared member operation CCullZone::DoStuffEnteringZone_OneTreadablePlus10m(uint16 i)
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_OneTreadable_7
+  ΔCCullZone
+  i? : ℕ
+where
+  -- Declared member operation CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
+  true
+end
+
+schema CCullZone_TestLine_8
+  ΔCCullZone
+  vec1? : CVector
+  vec2? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CCullZone::TestLine(CVector vec1, CVector vec2)
+  true
+end
+
+schema CCullZone_DoThoroughLineTest_9
+  ΔCCullZone
+  vec1? : CVector
+  vec2? : CVector
+  testEntity? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CCullZone::DoThoroughLineTest(CVector vec1, CVector vec2, CEntity *testEntity)
+  true
+end
+
+schema CCullZone_CalcDistToCullZoneSquared_10
+  ΔCCullZone
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CCullZone::CalcDistToCullZoneSquared(float x, float y)
+  true
+end
+
+schema CCullZone_CalcDistToCullZone_11
+  ΔCCullZone
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CCullZone::CalcDistToCullZone(float x, float y)
+  true
+end
+
+schema CCullZone_IsEntityCloseEnoughToZone_12
+  ΔCCullZone
+  entity? : Ref[CEntity]
+  checkLevel? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CCullZone::IsEntityCloseEnoughToZone(CEntity* entity, bool checkLevel)
+  true
+end
+
+schema CCullZone_PointFallsWithinZone_13
+  ΔCCullZone
+  pos? : CVector
+  radius? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCullZone::PointFallsWithinZone(CVector pos, float radius)
+  true
+end
+
+schema CCullZone_TestEntityVisibilityFromCullZone_14
+  ΔCCullZone
+  entity? : Ref[CEntity]
+  extraDist? : ℝ
+  LODentity? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CCullZone::TestEntityVisibilityFromCullZone(CEntity *entity, float extraDist, CEntity *LODentity)
+  true
+end
+
+schema CCullZone_FindTestPoints_15
+  ΔCCullZone
+where
+  -- Declared member operation CCullZone::FindTestPoints()
+  true
+end
+
+schema CCullZone_GetGroupStartAndSize_16
+  ΔCCullZone
+  groupid? : ℤ
+  start? : ℤ
+  size? : ℤ
+where
+  -- Declared member operation CCullZone::GetGroupStartAndSize(int32 groupid, int32 &start, int32 &size)
+  true
+end
+
+schema CAttributeZone
+  minx : ℝ
+  maxx : ℝ
+  miny : ℝ
+  maxy : ℝ
+  minz : ℝ
+  maxz : ℝ
+  attributes : ℤ
+  wantedLevel : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCullZones
+  NumCullZones : ℤ
+  aZones : seq CCullZone  -- bounded array [NUMCULLZONES]
+  NumAttributeZones : ℤ
+  aAttributeZones : seq CAttributeZone  -- bounded array [NUMATTRIBZONES]
+  aIndices : seq ℕ  -- bounded array [NUMZONEINDICES]
+  aPointersToBigBuildingsForBuildings : seq ℤ  -- bounded array [NUMBUILDINGS]
+  aPointersToBigBuildingsForTreadables : seq ℤ  -- bounded array [NUMTREADABLES]
+  CurrentWantedLevelDrop_Player : ℤ
+  CurrentFlags_Camera : ℤ
+  CurrentFlags_Player : ℤ
+  OldCullZone : ℤ
+  EntityIndicesUsed : ℤ
+  bCurrentSubwayIsInvisible : 𝔹
+  bCullZonesDisabled : 𝔹
+  bAtBeachForAudio : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCullZones_Init
+  ΔCCullZones
+where
+  -- Declared member operation CCullZones::Init(void)
+  true
+end
+
+schema CCullZones_ResolveVisibilities_2
+  ΔCCullZones
+where
+  -- Declared member operation CCullZones::ResolveVisibilities(void)
+  true
+end
+
+schema CCullZones_Update_3
+  ΔCCullZones
+where
+  -- Declared member operation CCullZones::Update(void)
+  true
+end
+
+schema CCullZones_ForceCullZoneCoors_4
+  ΔCCullZones
+  coors? : CVector
+where
+  -- Declared member operation CCullZones::ForceCullZoneCoors(CVector coors)
+  true
+end
+
+schema CCullZones_FindCullZoneForCoors_5
+  ΔCCullZones
+  coors? : CVector
+  result! : ℤ
+where
+  -- Declared member operation CCullZones::FindCullZoneForCoors(CVector coors)
+  true
+end
+
+schema CCullZones_FindAttributesForCoors_6
+  ΔCCullZones
+  coors? : CVector
+  wantedLevel? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCullZones::FindAttributesForCoors(CVector coors, int32 *wantedLevel)
+  true
+end
+
+schema CCullZones_FindZoneWithStairsAttributeForPlayer_7
+  ΔCCullZones
+  result! : Ref[CAttributeZone]
+where
+  -- Declared member operation CCullZones::FindZoneWithStairsAttributeForPlayer(void)
+  true
+end
+
+schema CCullZones_MarkSubwayAsInvisible_8
+  ΔCCullZones
+  visible? : 𝔹
+where
+  -- Declared member operation CCullZones::MarkSubwayAsInvisible(bool visible)
+  true
+end
+
+schema CCullZones_AddCullZone_9
+  ΔCCullZones
+  position? : CVector
+  minx? : ℝ
+  maxx? : ℝ
+  miny? : ℝ
+  maxy? : ℝ
+  minz? : ℝ
+  maxz? : ℝ
+  flag? : ℕ
+  wantedLevel? : ℤ
+where
+  -- Declared member operation CCullZones::AddCullZone(CVector const &position, float minx, float maxx, float miny, float maxy, float minz, float maxz, uint16 flag, int16 wantedLevel)
+  true
+end
+
+schema CCullZones_CamCloseInForPlayer_10
+  ΔCCullZones
+  result! : 𝔹
+where
+  -- Declared member operation CCullZones::CamCloseInForPlayer(void)
+  true
+end
+
+schema CCullZones_CamStairsForPlayer_11
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::CamStairsForPlayer(void)
+  true
+end
+
+schema CCullZones_Cam1stPersonForPlayer_12
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::Cam1stPersonForPlayer(void)
+  true
+end
+
+schema CCullZones_NoPolice_13
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::NoPolice(void)
+  true
+end
+
+schema CCullZones_DoINeedToLoadCollision_14
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::DoINeedToLoadCollision(void)
+  true
+end
+
+schema CCullZones_PlayerNoRain_15
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::PlayerNoRain(void)
+  true
+end
+
+schema CCullZones_CamNoRain_16
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::CamNoRain(void)
+  true
+end
+
+schema CCullZones_GetWantedLevelDrop_17
+  ΔCCullZones
+  result! : ℤ
+where
+  -- Declared member operation CCullZones::GetWantedLevelDrop(void)
+  true
+end
+
+schema CCullZones_BuildListForBigBuildings_18
+  ΔCCullZones
+  result! : void
+where
+  -- Declared member operation CCullZones::BuildListForBigBuildings()
+  true
+end
+
+schema CCullZones_DoVisibilityTestCullZone_19
+  ΔCCullZones
+  zoneId? : ℤ
+  doIt? : 𝔹
+where
+  -- Declared member operation CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
+  true
+end
+
+schema CCullZones_DoWeHaveMoreThanXOccurencesOfSet_20
+  ΔCCullZones
+  count? : ℤ
+  set? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
+  true
+end
+
+schema CCullZones_CompressIndicesArray_21
+  ΔCCullZones
+where
+  -- Declared member operation CCullZones::CompressIndicesArray()
+  true
+end
+
+schema CCullZones_PickRandomSetForGroup_22
+  ΔCCullZones
+  zone? : ℤ
+  group? : ℤ
+  set? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CCullZones::PickRandomSetForGroup(int32 zone, int32 group, uint16 *set)
+  true
+end
+
+schema CCullZones_ReplaceSetForAllGroups_23
+  ΔCCullZones
+  set? : ℙ ℕ
+  setid? : ℕ
+where
+  -- Declared member operation CCullZones::ReplaceSetForAllGroups(uint16 *set, uint16 setid)
+  true
+end
+
+schema CCullZones_TidyUpAndMergeLists_24
+  ΔCCullZones
+  extraIndices? : ℙ ℕ
+  numExtraIndices? : ℤ
+where
+  -- Declared member operation CCullZones::TidyUpAndMergeLists(uint16 *extraIndices, int32 numExtraIndices)
+  true
+end
+
+schema CCullZones_LoadTempFile_25
+  ΔCCullZones
+  result! : 𝔹
+where
+  -- Declared member operation CCullZones::LoadTempFile(void)
+  true
+end
+
+schema CCullZones_SaveTempFile_26
+  ΔCCullZones
+where
+  -- Declared member operation CCullZones::SaveTempFile(void)
+  true
+end
+
+schema CCullZones_UpdateAtBeachForAudio_27
+  ΔCCullZones
+where
+  -- Declared member operation CCullZones::UpdateAtBeachForAudio(void)
+  true
+end
+
+schema CCullZones_PoliceAbandonCars_28
+  ΔCCullZones
+  result! : 𝔹
+where
+  -- Declared member operation CCullZones::PoliceAbandonCars(void)
+  true
+end
+
+schema CCullZones_InRoomForAudio_29
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::InRoomForAudio(void)
+  true
+end
+
+schema CCullZones_WaterFudge_30
+  ΔCCullZones
+  result! : bool
+where
+  -- Declared member operation CCullZones::WaterFudge(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ZoneCull_GetGroupStartAndSize
+  ΔZoneCullModuleState
+  groupid? : ℤ
+  start? : ℤ
+  size? : ℤ
+where
+  -- State update: start' = m_indexStart
+  -- State update: size' = m_groupIndexCount[0]
+  -- State update: start' = m_groupIndexCount[0] + m_indexStart
+  -- State update: size' = m_groupIndexCount[1]
+  -- State update: start' = m_groupIndexCount[0] + m_groupIndexCount[1] + m_indexStart
+  -- State update: size' = m_groupIndexCount[2]
+  true
+end
+
+schema ZoneCull_CamCloseInForPlayer
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Player & ATTRZONE_CAMCLOSEIN) != 0
+  true
+end
+
+schema ZoneCull_CamStairsForPlayer
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Player & ATTRZONE_STAIRS) != 0
+  true
+end
+
+schema ZoneCull_Cam1stPersonForPlayer
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Player & ATTRZONE_1STPERSON) != 0
+  true
+end
+
+schema ZoneCull_NoPolice
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Player & ATTRZONE_NOPOLICE) != 0
+  true
+end
+
+schema ZoneCull_DoINeedToLoadCollision
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Player & ATTRZONE_DOINEEDCOLLISION) != 0
+  true
+end
+
+schema ZoneCull_PlayerNoRain
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Player & ATTRZONE_NORAIN) != 0
+  true
+end
+
+schema ZoneCull_CamNoRain
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Camera & ATTRZONE_NORAIN) != 0
+  true
+end
+
+schema ZoneCull_GetWantedLevelDrop
+  ΔZoneCullModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = CurrentWantedLevelDrop_Player
+  true
+end
+
+schema ZoneCull_PoliceAbandonCars
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Camera & ATTRZONE_POLICEABANDONCARS) != 0
+  true
+end
+
+schema ZoneCull_InRoomForAudio
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Camera & ATTRZONE_ROOMFORAUDIO) != 0
+  true
+end
+
+schema ZoneCull_WaterFudge
+  ΔZoneCullModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CurrentFlags_Camera & ATTRZONE_WATERFUDGE) != 0
+  true
+end

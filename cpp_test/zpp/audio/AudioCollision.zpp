@@ -1,0 +1,247 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioCollision (audio)
+-- Source File(s): audio/AudioCollision.cpp, audio/AudioCollision.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include AudioCollision.zpp  (from "AudioCollision.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include AudioSamples.zpp  (from "AudioSamples.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include sampman.zpp  (from "sampman.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMAUDIOCOLLISIONS : ℕ  -- #define NUMAUDIOCOLLISIONS 10
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cAudioCollision
+  m_pEntity1 : Ref[CEntity]
+  m_pEntity2 : Ref[CEntity]
+  m_bSurface1 : ℕ
+  m_bSurface2 : ℕ
+  m_fIntensity1 : ℝ
+  m_fIntensity2 : ℝ
+  m_vecPosition : CVector
+  m_fDistance : ℝ
+  m_nBaseVolume : ℤ
+where
+  #m_pEntity1 ≤ 1
+  #m_pEntity2 ≤ 1
+  m_bSurface1 ≥ 0
+  m_bSurface2 ≥ 0
+end
+
+schema cAudioCollision_cAudioCollision
+  ΔcAudioCollision
+where
+  -- Declared member operation cAudioCollision::cAudioCollision()
+  true
+end
+
+schema cAudioCollision_Reset_2
+  ΔcAudioCollision
+  result! : void
+where
+  -- Declared member operation cAudioCollision::Reset()
+  true
+end
+
+schema cAudioCollision_CVector_3
+  ΔcAudioCollision
+  f? : 0_0
+  f? : 0_0
+  f? : 0_0
+  result! : m_vecPosition
+where
+  -- Declared member operation cAudioCollision::CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema cAudioCollisionManager
+  m_asCollisions1 : seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
+  m_asCollisions2 : seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
+  m_bIndicesTable : seq ℕ  -- bounded array [NUMAUDIOCOLLISIONS]
+  m_bCollisionsInQueue : ℕ
+  m_sQueue : cAudioCollision
+  NUMAUDIOCOLLISIONS : i
+where
+  m_bCollisionsInQueue ≥ 0
+end
+
+schema cAudioCollisionManager_cAudioCollisionManager
+  ΔcAudioCollisionManager
+where
+  -- Declared member operation cAudioCollisionManager::cAudioCollisionManager()
+  true
+end
+
+schema cAudioCollisionManager_AddCollisionToRequestedQueue_2
+  ΔcAudioCollisionManager
+  result! : void
+where
+  -- Declared member operation cAudioCollisionManager::AddCollisionToRequestedQueue()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cAudioManager_ReportCollision
+  ΔcAudioManager
+  entity1? : Ref[CEntity]
+  entity2? : Ref[CEntity]
+  surface1? : ℕ
+  surface2? : ℕ
+  collisionPower? : ℝ
+  velocity? : ℝ
+where
+  -- State update: v2' = entity2.GetPosition()
+  -- State update: v2' = entity1.GetPosition()
+  -- State update: v1' = entity1.GetPosition()
+  -- State update: v2' = entity2.GetPosition()
+  -- State update: pos' = (v1 + v2) * 0.5f
+  -- State update: distSquared' = GetDistanceSquared(pos)
+  -- Invokes: entity1->IsBuilding, entity2->GetPosition, entity2->IsBuilding, entity1->GetPosition, m_sCollisionManager.AddCollisionToRequestedQueue
+  true
+end
+
+schema cAudioCollisionManager_AddCollisionToRequestedQueue
+  ΔcAudioCollisionManager
+where
+  -- State update: collisionsIndex' = m_bCollisionsInQueue++
+  -- State update: collisionsIndex' = m_bIndicesTable[NUMAUDIOCOLLISIONS - 1]
+  true
+end
+
+schema cAudioManager_ServiceCollisions
+  ΔcAudioManager
+where
+  -- State update: m_sQueueSample.m_nEntityIndex' = m_nCollisionEntity
+  -- State update: index' = m_sCollisionManager.m_bIndicesTable[i]
+  -- State update: m_nBaseVolume' = ++m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume
+  -- State update: m_pEntity1' = ∅
+  -- State update: m_pEntity2' = ∅
+  -- State update: m_bSurface1' = SURFACE_DEFAULT
+  true
+end
+
+schema cAudioManager_SetUpOneShotCollisionSound
+  ΔcAudioManager
+  col? : cAudioCollision
+where
+  -- State update: counter' = 28
+  -- State update: s1' = col.m_bSurface2
+  -- State update: s2' = col.m_bSurface1
+  -- State update: s1' = col.m_bSurface1
+  -- State update: s2' = col.m_bSurface2
+  -- State update: ratio' = GetCollisionOneShotRatio(s1, col.m_fIntensity1)
+  -- Invokes: SampleManager.GetSampleBaseFrequency
+  true
+end
+
+schema cAudioManager_SetUpLoopingCollisionSound
+  ΔcAudioManager
+  col? : cAudioCollision
+  counter? : ℕ
+where
+  -- State update: distCalculated' = FALSE
+  -- State update: emittingVol' = SetLoopingCollisionRequestedSfxFreqAndGetVol(col)
+  -- State update: m_sQueueSample.m_nCounter' = counter
+  -- State update: m_sQueueSample.m_vecPos' = col.m_vecPosition
+  -- State update: m_sQueueSample.m_nBankIndex' = SFX_BANK_0
+  -- State update: m_sQueueSample.m_bIs2D' = FALSE
+  true
+end
+
+schema cAudioManager_SetLoopingCollisionRequestedSfxFreqAndGetVol
+  ΔcAudioManager
+  audioCollision? : cAudioCollision
+where
+  -- State update: surface1' = audioCollision.m_bSurface1
+  -- State update: surface2' = audioCollision.m_bSurface2
+  -- State update: m_sQueueSample.m_nSampleIndex' = SFX_RAIN
+  -- State update: m_sQueueSample.m_nFrequency' = 13000.f * ratio + 35000
+  -- State update: vol' = 50.f * ratio
+  -- State update: m_sQueueSample.m_nSampleIndex' = SFX_BOAT_WATER_LOOP
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = vol
+  true
+end
+
+schema cAudioManager_GetCollisionOneShotRatio
+  ΔcAudioManager
+  a? : ℕ
+  b? : ℝ
+where
+  -- Return postcondition: result! = GetCollisionRatio(b, 10.f, 60.f, 50.f)
+  -- Return postcondition: result! = GetCollisionRatio(b, 0.f, 2.f, 2.f)
+  -- Return postcondition: result! = GetCollisionRatio(b, 6.f, 50.f, 44.f)
+  true
+end
+
+schema cAudioManager_GetCollisionLoopingRatio
+  ΔcAudioManager
+  a? : ℕ
+  b? : ℕ
+  c? : ℝ
+where
+  -- Return postcondition: result! = GetCollisionRatio(c, 0.0f, 0.02f, 0.02f)
+  true
+end
+
+schema cAudioManager_GetCollisionRatio
+  ΔcAudioManager
+  a? : ℝ
+  b? : ℝ
+  c? : ℝ
+  d? : ℝ
+where
+  -- State update: e' = a
+  -- State update: e' = c
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = (e - b) / d
+  true
+end
+
+schema AudioCollision_cAudioCollision
+  ΔAudioCollisionModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema AudioCollision_Reset
+  ΔAudioCollisionModuleState
+where
+  -- State update: m_pEntity1' = ∅
+  -- State update: m_pEntity2' = ∅
+  -- State update: m_bSurface1' = 0
+  -- State update: m_bSurface2' = 0
+  -- State update: m_fIntensity2' = 0.0f
+  -- State update: m_vecPosition' = CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema AudioCollision_cAudioCollisionManager
+  ΔAudioCollisionModuleState
+where
+  -- State update: m_bCollisionsInQueue' = 0
+  -- Invokes: m_sQueue.Reset
+  true
+end

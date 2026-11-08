@@ -1,0 +1,77 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Dummy (entities)
+-- Source File(s): entities/Dummy.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Lists.zpp  (from "Lists.h")
+-- include Entity.zpp  (from "Entity.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDummy
+  CEntity  -- inherits base schema
+  m_entryInfoList : CEntryInfoList
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CDummy_CDummy
+  ΔCDummy
+where
+  -- Declared member operation CDummy::CDummy(void)
+  true
+end
+
+schema CDummy_Add_2
+  ΔCDummy
+  result! : void
+where
+  -- Declared member operation CDummy::Add(void)
+  true
+end
+
+schema CDummy_Remove_3
+  ΔCDummy
+where
+  -- Declared member operation CDummy::Remove(void)
+  true
+end
+
+schema CDummy_operator_new_4
+  ΔCDummy
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CDummy::operator new(size_t)
+  true
+end
+
+schema CDummy_operator_delete_5
+  ΔCDummy
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CDummy::operator delete(void*, size_t)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Dummy_CDummy
+  ΔDummyModuleState
+where
+  -- State update: m_type' = ENTITY_TYPE_DUMMY
+  true
+end

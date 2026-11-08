@@ -1,0 +1,201 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ShadowCamera (renderer)
+-- Source File(s): renderer/ShadowCamera.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CShadowCamera
+  m_pCamera : Ref[RwCamera]
+  m_pTexture : Ref[RwTexture]
+where
+  #m_pCamera ≤ 1
+  #m_pTexture ≤ 1
+end
+
+schema CShadowCamera_CShadowCamera
+  ΔCShadowCamera
+where
+  -- Declared member operation CShadowCamera::CShadowCamera()
+  true
+end
+
+schema CShadowCamera_CShadowCamera_2
+  ΔCShadowCamera
+  result! : ANY
+where
+  -- Declared member operation CShadowCamera::CShadowCamera()
+  true
+end
+
+schema CShadowCamera_Create_3
+  ΔCShadowCamera
+  rasterSize? : ℤ
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::Create(int32 rasterSize)
+  true
+end
+
+schema CShadowCamera_Destroy_4
+  ΔCShadowCamera
+where
+  -- Declared member operation CShadowCamera::Destroy()
+  true
+end
+
+schema CShadowCamera_SetFrustum_5
+  ΔCShadowCamera
+  objectRadius? : ℝ
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::SetFrustum(float objectRadius)
+  true
+end
+
+schema CShadowCamera_SetLight_6
+  ΔCShadowCamera
+  light? : Ref[RpLight]
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::SetLight(RpLight *light)
+  true
+end
+
+schema CShadowCamera_SetCenter_7
+  ΔCShadowCamera
+  center? : Ref[RwV3d]
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::SetCenter(RwV3d *center)
+  true
+end
+
+schema CShadowCamera_Update_8
+  ΔCShadowCamera
+  clump? : Ref[RpClump]
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::Update(RpClump *clump)
+  true
+end
+
+schema CShadowCamera_Update_9
+  ΔCShadowCamera
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::Update(RpAtomic *atomic)
+  true
+end
+
+schema CShadowCamera_InvertRaster_10
+  ΔCShadowCamera
+where
+  -- Declared member operation CShadowCamera::InvertRaster()
+  true
+end
+
+schema CShadowCamera_GetRwRenderRaster_11
+  ΔCShadowCamera
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::GetRwRenderRaster()
+  true
+end
+
+schema CShadowCamera_MakeGradientRaster_12
+  ΔCShadowCamera
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::MakeGradientRaster()
+  true
+end
+
+schema CShadowCamera_GetRwRenderTexture_13
+  ΔCShadowCamera
+  result! : Ref[RwTexture]
+where
+  -- Declared member operation CShadowCamera::GetRwRenderTexture()
+  true
+end
+
+schema CShadowCamera_GetRwZRaster_14
+  ΔCShadowCamera
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::GetRwZRaster()
+  true
+end
+
+schema CShadowCamera_RasterResample_15
+  ΔCShadowCamera
+  dstRaster? : Ref[RwRaster]
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::RasterResample(RwRaster *dstRaster)
+  true
+end
+
+schema CShadowCamera_RasterBlur_16
+  ΔCShadowCamera
+  dstRaster? : Ref[RwRaster]
+  numPasses? : ℤ
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::RasterBlur(RwRaster *dstRaster, int32 numPasses)
+  true
+end
+
+schema CShadowCamera_RasterGradient_17
+  ΔCShadowCamera
+  dstRaster? : Ref[RwRaster]
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::RasterGradient(RwRaster *dstRaster)
+  true
+end
+
+schema CShadowCamera_DrawOutlineBorder_18
+  ΔCShadowCamera
+  color? : RwRGBA
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CShadowCamera::DrawOutlineBorder(RwRGBA const& color)
+  true
+end
+
+schema CShadowCamera_GetRwCamera_19
+  ΔCShadowCamera
+  result! : Ref[RwCamera]
+where
+  -- Declared member operation CShadowCamera::GetRwCamera()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ShadowCamera_GetRwRenderRaster
+  ΔShadowCameraModuleState
+  result! : Ref[RwRaster]
+where
+  -- Return postcondition: result! = RwCameraGetRaster(m_pCamera)
+  true
+end
+
+schema ShadowCamera_GetRwZRaster
+  ΔShadowCameraModuleState
+  result! : Ref[RwRaster]
+where
+  -- Return postcondition: result! = RwCameraGetZRaster(m_pCamera)
+  true
+end

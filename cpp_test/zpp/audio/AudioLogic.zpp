@@ -1,0 +1,550 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioLogic (audio)
+-- Source File(s): audio/AudioLogic.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include Bridge.zpp  (from "Bridge.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Physical.zpp  (from "Physical.h")
+-- include Placeable.zpp  (from "Placeable.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Projectile.zpp  (from "Projectile.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Train.zpp  (from "Train.h")
+-- include Transmission.zpp  (from "Transmission.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include WaterCannon.zpp  (from "WaterCannon.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include Script.zpp  (from "Script.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include Ferry.zpp  (from "Ferry.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CHANNEL_PLAYER_VEHICLE_ENGINE : seq CHAR  -- #define CHANNEL_PLAYER_VEHICLE_ENGINE m_nActiveSamples
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AudioLogic_Enum_1 ::= CAR_HELI_MAX_DIST | CAR_HELI_ENGINE_MAX_DIST | CAR_HELI_ENGINE_START_MAX_DIST | CAR_HELI_ENGINE_START_VOLUME | CAR_HELI_SEAPLANE_MAX_DIST | CAR_HELI_SEAPLANE_VOLUME | CAR_HELI_REAR_MAX_DIST | CAR_HELI_REAR_VOLUME | FLAT_TYRE_MAX_DIST | FLAT_TYRE_VOLUME | RAIN_ON_VEHICLE_MAX_DIST | RAIN_ON_VEHICLE_VOLUME | REVERSE_GEAR_MAX_DIST | REVERSE_GEAR_VOLUME | MODEL_CAR_ENGINE_MAX_DIST | MODEL_CAR_ENGINE_VOLUME | MODEL_HELI_ENGINE_VOLUME | VEHICLE_ROAD_NOISE_MAX_DIST | VEHICLE_ROAD_NOISE_VOLUME | WET_ROAD_NOISE_MAX_DIST | WET_ROAD_NOISE_VOLUME | VEHICLE_ENGINE_MAX_DIST | VEHICLE_ENGINE_BASE_VOLUME | VEHICLE_ENGINE_FULL_VOLUME | CESNA_IDLE_MAX_DIST | CESNA_REV_MAX_DIST | CESNA_VOLUME | PLAYER_VEHICLE_ENGINE_VOLUME | VEHICLE_SKIDDING_MAX_DIST | VEHICLE_SKIDDING_VOLUME | VEHICLE_HORN_MAX_DIST | VEHICLE_HORN_VOLUME | VEHICLE_SIREN_MAX_DIST | VEHICLE_SIREN_VOLUME | VEHICLE_REVERSE_WARNING_MAX_DIST | VEHICLE_REVERSE_WARNING_VOLUME | VEHICLE_DOORS_MAX_DIST | VEHICLE_DOORS_VOLUME | AIR_BRAKES_MAX_DIST | AIR_BRAKES_VOLUME | ENGINE_DAMAGE_MAX_DIST | ENGINE_DAMAGE_VOLUME | ENGINE_DAMAGE_ON_FIRE_VOLUME | CAR_BOMB_TICK_MAX_DIST | CAR_BOMB_TICK_VOLUME | VEHICLE_ONE_SHOT_HELI_BLADE_MAX_DIST | VEHICLE_ONE_SHOT_HELI_BLADE_VOLUME | VEHICLE_ONE_SHOT_CAR_TYRE_POP_MAX_DIST | ... (203 total branches)
+  -- val(CAR_HELI_MAX_DIST) = 250
+  -- val(CAR_HELI_ENGINE_MAX_DIST) = 140
+  -- val(CAR_HELI_ENGINE_START_MAX_DIST) = 30
+  -- val(CAR_HELI_ENGINE_START_VOLUME) = 70
+  -- val(CAR_HELI_SEAPLANE_MAX_DIST) = 20
+  -- val(CAR_HELI_SEAPLANE_VOLUME) = 100
+  -- val(CAR_HELI_REAR_MAX_DIST) = 27
+  -- val(CAR_HELI_REAR_VOLUME) = 25
+  -- val(FLAT_TYRE_MAX_DIST) = 60
+  -- val(FLAT_TYRE_VOLUME) = 100
+  -- val(RAIN_ON_VEHICLE_MAX_DIST) = 22
+  -- val(RAIN_ON_VEHICLE_VOLUME) = 30
+  -- val(REVERSE_GEAR_MAX_DIST) = 30
+  -- val(REVERSE_GEAR_VOLUME) = 24
+  -- val(MODEL_CAR_ENGINE_MAX_DIST) = 35
+  -- val(MODEL_CAR_ENGINE_VOLUME) = 90
+  -- val(MODEL_HELI_ENGINE_VOLUME) = 70
+  -- val(VEHICLE_ROAD_NOISE_MAX_DIST) = 95
+  -- val(VEHICLE_ROAD_NOISE_VOLUME) = 30
+  -- val(WET_ROAD_NOISE_MAX_DIST) = 30
+  -- val(WET_ROAD_NOISE_VOLUME) = 23
+  -- val(VEHICLE_ENGINE_MAX_DIST) = 50
+  -- val(VEHICLE_ENGINE_BASE_VOLUME) = 75
+  -- val(VEHICLE_ENGINE_FULL_VOLUME) = 90
+
+eVehicleModel ::= LANDSTAL | IDAHO | STINGER | LINERUN | PEREN | SENTINEL | RIO | FIRETRUK | TRASH | STRETCH | MANANA | INFERNUS | VOODOO | PONY | MULE | CHEETAH | AMBULAN | FBICAR | MOONBEAM | ESPERANT | TAXI | WASHING | BOBCAT | MRWHOOP | BFINJECT | HUNTER | POLICE | ENFORCER | SECURICA | BANSHEE | PREDATOR | BUS | RHINO | BARRACKS | CUBAN | CHOPPER | ANGEL | COACH | CABBIE | STALLION | RUMPO | RCBANDIT | ROMERO | PACKER | SENTXS | ADMIRAL | SQUALO | SEASPAR | ... (136 total branches)
+
+AudioLogic_Enum_3 ::= OLD_DOOR | NEW_DOOR | TRUCK_DOOR | BUS_DOOR
+  -- val(OLD_DOOR) = 0
+
+AudioLogic_Enum_4 ::= CAR_HELI_MAX_DIST | CAR_HELI_ENGINE_MAX_DIST | CAR_HELI_ENGINE_START_MAX_DIST | CAR_HELI_ENGINE_START_VOLUME | CAR_HELI_SEAPLANE_MAX_DIST | CAR_HELI_SEAPLANE_VOLUME | CAR_HELI_REAR_MAX_DIST | CAR_HELI_REAR_VOLUME | FLAT_TYRE_MAX_DIST | FLAT_TYRE_VOLUME | RAIN_ON_VEHICLE_MAX_DIST | RAIN_ON_VEHICLE_VOLUME | REVERSE_GEAR_MAX_DIST | REVERSE_GEAR_VOLUME | MODEL_CAR_ENGINE_MAX_DIST | MODEL_CAR_ENGINE_VOLUME | MODEL_HELI_ENGINE_VOLUME | VEHICLE_ROAD_NOISE_MAX_DIST | VEHICLE_ROAD_NOISE_VOLUME | WET_ROAD_NOISE_MAX_DIST | WET_ROAD_NOISE_VOLUME | VEHICLE_ENGINE_MAX_DIST | VEHICLE_ENGINE_BASE_VOLUME | VEHICLE_ENGINE_FULL_VOLUME | CESNA_IDLE_MAX_DIST | CESNA_REV_MAX_DIST | CESNA_VOLUME | PLAYER_VEHICLE_ENGINE_VOLUME | VEHICLE_SKIDDING_MAX_DIST | VEHICLE_SKIDDING_VOLUME | VEHICLE_HORN_MAX_DIST | VEHICLE_HORN_VOLUME | VEHICLE_SIREN_MAX_DIST | VEHICLE_SIREN_VOLUME | VEHICLE_REVERSE_WARNING_MAX_DIST | VEHICLE_REVERSE_WARNING_VOLUME | VEHICLE_DOORS_MAX_DIST | VEHICLE_DOORS_VOLUME | AIR_BRAKES_MAX_DIST | AIR_BRAKES_VOLUME | ENGINE_DAMAGE_MAX_DIST | ENGINE_DAMAGE_VOLUME | ENGINE_DAMAGE_ON_FIRE_VOLUME | CAR_BOMB_TICK_MAX_DIST | CAR_BOMB_TICK_VOLUME | VEHICLE_ONE_SHOT_HELI_BLADE_MAX_DIST | VEHICLE_ONE_SHOT_HELI_BLADE_VOLUME | VEHICLE_ONE_SHOT_CAR_TYRE_POP_MAX_DIST | ... (201 total branches)
+  -- val(CAR_HELI_MAX_DIST) = 250
+  -- val(CAR_HELI_ENGINE_MAX_DIST) = 140
+  -- val(CAR_HELI_ENGINE_START_MAX_DIST) = 30
+  -- val(CAR_HELI_ENGINE_START_VOLUME) = 70
+  -- val(CAR_HELI_SEAPLANE_MAX_DIST) = 20
+  -- val(CAR_HELI_SEAPLANE_VOLUME) = 100
+  -- val(CAR_HELI_REAR_MAX_DIST) = 27
+  -- val(CAR_HELI_REAR_VOLUME) = 25
+  -- val(FLAT_TYRE_MAX_DIST) = 60
+  -- val(FLAT_TYRE_VOLUME) = 100
+  -- val(RAIN_ON_VEHICLE_MAX_DIST) = 22
+  -- val(RAIN_ON_VEHICLE_VOLUME) = 30
+  -- val(REVERSE_GEAR_MAX_DIST) = 30
+  -- val(REVERSE_GEAR_VOLUME) = 24
+  -- val(MODEL_CAR_ENGINE_MAX_DIST) = 35
+  -- val(MODEL_CAR_ENGINE_VOLUME) = 90
+  -- val(MODEL_HELI_ENGINE_VOLUME) = 70
+  -- val(VEHICLE_ROAD_NOISE_MAX_DIST) = 95
+  -- val(VEHICLE_ROAD_NOISE_VOLUME) = 30
+  -- val(WET_ROAD_NOISE_MAX_DIST) = 30
+  -- val(WET_ROAD_NOISE_VOLUME) = 23
+  -- val(VEHICLE_ENGINE_MAX_DIST) = 50
+  -- val(VEHICLE_ENGINE_BASE_VOLUME) = 75
+  -- val(VEHICLE_ENGINE_FULL_VOLUME) = 90
+
+AudioLogic_Enum_5 ::= RAIN_ON_VEHICLE_MAX_DIST | RAIN_ON_VEHICLE_VOLUME | REVERSE_GEAR_MAX_DIST | REVERSE_GEAR_VOLUME | MODEL_CAR_ENGINE_MAX_DIST | MODEL_CAR_ENGINE_VOLUME | VEHICLE_ROAD_NOISE_MAX_DIST | VEHICLE_ROAD_NOISE_VOLUME | WET_ROAD_NOISE_MAX_DIST | WET_ROAD_NOISE_VOLUME | VEHICLE_ENGINE_MAX_DIST | VEHICLE_ENGINE_BASE_VOLUME | VEHICLE_ENGINE_FULL_VOLUME | CESNA_IDLE_MAX_DIST | CESNA_REV_MAX_DIST | CESNA_VOLUME | PLAYER_VEHICLE_ENGINE_VOLUME | VEHICLE_SKIDDING_MAX_DIST | VEHICLE_SKIDDING_VOLUME | VEHICLE_HORN_MAX_DIST | VEHICLE_HORN_VOLUME | VEHICLE_SIREN_MAX_DIST | VEHICLE_SIREN_VOLUME | VEHICLE_REVERSE_WARNING_MAX_DIST | VEHICLE_REVERSE_WARNING_VOLUME | VEHICLE_DOORS_MAX_DIST | VEHICLE_DOORS_VOLUME | AIR_BRAKES_MAX_DIST | AIR_BRAKES_VOLUME | ENGINE_DAMAGE_MAX_DIST | ENGINE_DAMAGE_VOLUME | ENGINE_DAMAGE_ON_FIRE_VOLUME | CAR_BOMB_TICK_MAX_DIST | CAR_BOMB_TICK_VOLUME | VEHICLE_ONE_SHOT_DOOR_MAX_DIST | VEHICLE_ONE_SHOT_DOOR_OPEN_VOLUME | VEHICLE_ONE_SHOT_DOOR_CLOSE_VOLUME | VEHICLE_ONE_SHOT_WINDSHIELD_CRACK_MAX_DIST | VEHICLE_ONE_SHOT_WINDSHIELD_CRACK_VOLUME | VEHICLE_ONE_SHOT_CAR_JUMP_MAX_DIST | VEHICLE_ONE_SHOT_CAR_JUMP_VOLUME | VEHICLE_ONE_SHOT_CAR_ENGINE_START_MAX_DIST | VEHICLE_ONE_SHOT_CAR_ENGINE_START_VOLUME | VEHICLE_ONE_SHOT_CAR_LIGHT_BREAK_VOLUME | VEHICLE_ONE_SHOT_CAR_HYDRAULIC_MAX_DIST | VEHICLE_ONE_SHOT_CAR_HYDRAULIC_VOLUME | VEHICLE_ONE_SHOT_CAR_SPLASH_MAX_DIST | VEHICLE_ONE_SHOT_CAR_SPLASH_VOLUME | ... (189 total branches)
+  -- val(RAIN_ON_VEHICLE_MAX_DIST) = 22
+  -- val(RAIN_ON_VEHICLE_VOLUME) = 30
+  -- val(REVERSE_GEAR_MAX_DIST) = 30
+  -- val(REVERSE_GEAR_VOLUME) = 24
+  -- val(MODEL_CAR_ENGINE_MAX_DIST) = 30
+  -- val(MODEL_CAR_ENGINE_VOLUME) = 90
+  -- val(VEHICLE_ROAD_NOISE_MAX_DIST) = 95
+  -- val(VEHICLE_ROAD_NOISE_VOLUME) = 30
+  -- val(WET_ROAD_NOISE_MAX_DIST) = 30
+  -- val(WET_ROAD_NOISE_VOLUME) = 23
+  -- val(VEHICLE_ENGINE_MAX_DIST) = 50
+  -- val(VEHICLE_ENGINE_BASE_VOLUME) = 80
+  -- val(VEHICLE_ENGINE_FULL_VOLUME) = 120
+  -- val(CESNA_IDLE_MAX_DIST) = 200
+  -- val(CESNA_REV_MAX_DIST) = 90
+  -- val(CESNA_VOLUME) = 80
+  -- val(PLAYER_VEHICLE_ENGINE_VOLUME) = 85
+  -- val(VEHICLE_SKIDDING_MAX_DIST) = 40
+  -- val(VEHICLE_SKIDDING_VOLUME) = 50
+  -- val(VEHICLE_HORN_MAX_DIST) = 40
+  -- val(VEHICLE_HORN_VOLUME) = 80
+  -- val(VEHICLE_SIREN_MAX_DIST) = 110
+  -- val(VEHICLE_SIREN_VOLUME) = 80
+  -- val(VEHICLE_REVERSE_WARNING_MAX_DIST) = 50
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tVehicleSampleData
+  m_nAccelerationSampleIndex : eSfxSample
+  m_nBank : ℕ
+  m_nHornSample : eSfxSample
+  m_nHornFrequency : ℤ
+  m_nSirenOrAlarmSample : ℕ
+  m_nSirenOrAlarmFrequency : ℤ
+  m_bDoorType : ℕ
+where
+  m_nBank ≥ 0
+  m_nSirenOrAlarmSample ≥ 0
+  m_bDoorType ≥ 0
+end
+
+schema sToniReactions
+  sfx : seq ℕ  -- bounded array [4]
+  count : seq ℕ  -- bounded array [4]
+where
+  #sfx = 4
+  #count = 4
+end
+
+schema MissionAudioData
+  m_pName : seq CHAR
+  m_nId : ℕ
+where
+  m_nId ≥ 0
+end
+
+schema tHelicopterSampleData
+  m_fMaxDistance : ℝ
+  m_fBaseDistance : ℝ
+  m_bBaseVolume : ℕ
+where
+  m_bBaseVolume ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cAudioManager_PreInitialiseGameSpecificSetup
+  ΔcAudioManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cAudioManager_PostInitialiseGameSpecificSetup
+  ΔcAudioManager
+where
+  -- State update: m_nFireAudioEntity' = CreateEntity(AUDIOTYPE_FIRE, &gFireManager)
+  -- State update: m_nCollisionEntity' = CreateEntity(AUDIOTYPE_COLLISION, (void *)1)
+  -- State update: m_nFrontEndEntity' = CreateEntity(AUDIOTYPE_FRONTEND, (void *)1)
+  -- State update: m_nProjectileEntity' = CreateEntity(AUDIOTYPE_PROJECTILE, (void *)1)
+  -- State update: m_nWaterCannonEntity' = CreateEntity(AUDIOTYPE_WATERCANNON, (void *)1)
+  -- State update: m_nPoliceChannelEntity' = CreateEntity(AUDIOTYPE_POLICERADIO, (void *)1)
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema cAudioManager_PreTerminateGameSpecificShutdown
+  ΔcAudioManager
+where
+  -- State update: m_nBridgeEntity' = AEHANDLE_NONE
+  -- State update: m_nEscalatorEntity' = AEHANDLE_NONE
+  -- State update: m_nExtraSoundsEntity' = AEHANDLE_NONE
+  -- State update: m_nPoliceChannelEntity' = AEHANDLE_NONE
+  -- State update: m_nWaterCannonEntity' = AEHANDLE_NONE
+  -- State update: m_nFireAudioEntity' = AEHANDLE_NONE
+  true
+end
+
+schema cAudioManager_PostTerminateGameSpecificShutdown
+  ΔcAudioManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cAudioManager_ResetAudioLogicTimers
+  ΔcAudioManager
+  timer? : ℕ
+where
+  -- State update: gPornNextTime' = timer
+  -- State update: gNextCryTime' = timer
+  -- State update: gSawMillNextTime' = timer
+  -- State update: gCellNextTime' = timer
+  -- State update: gShopNextTime' = timer
+  -- State update: gHomeNextTime' = timer
+  -- Invokes: ped->IsPed, SampleManager.StopChannel
+  true
+end
+
+schema cAudioManager_ProcessReverb
+  ΔcAudioManager
+where
+  -- State update: OldVolL' = 0
+  -- State update: OldVolR' = 0
+  -- State update: VolL' = Min(40, 3 * (20 - TheCamera.SoundDistLeft)) + 20
+  -- State update: VolR' = Min(40, 3 * (20 - TheCamera.SoundDistRight)) + 20
+  -- State update: VolUp' = 5 * (20 - TheCamera.SoundDistUp)
+  -- State update: VolL' = Min(MAX_VOLUME, VolL + VolUp)
+  -- Invokes: SampleManager.UpdateReverb, SampleManager.SetChannelReverbFlag
+  true
+end
+
+schema cAudioManager_GetDistanceSquared
+  ΔcAudioManager
+  v? : CVector
+where
+  -- State update: c' = TheCamera.GetPosition()
+  -- Return postcondition: result! = sq(v.x - c.x) + sq(v.y - c.y) + sq((v.z - c.z) * 0.2f)
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema cAudioManager_CalculateDistance
+  ΔcAudioManager
+  distCalculated? : bool8
+  dist? : ℝ
+where
+  -- State update: m_sQueueSample.m_fDistance' = Sqrt(dist)
+  -- State update: distCalculated' = TRUE
+  true
+end
+
+schema cAudioManager_FindVehicleOfPlayer
+  ΔcAudioManager
+where
+  -- State update: vehicle' = FindPlayerVehicle()
+  -- State update: ped' = FindPlayerPed()
+  -- State update: attachedTo' = ped.m_attachedTo
+  -- State update: vehicle' = (CVehicle*)attachedTo
+  -- Return postcondition: result! = vehicle
+  -- Invokes: attachedTo->IsVehicle
+  true
+end
+
+schema cAudioManager_ProcessSpecial
+  ΔcAudioManager
+where
+  -- State update: isBankLoaded' = SampleManager.IsSampleBankLoaded(SFX_BANK_FRONT_END_MENU)
+  -- State update: playerPed' = FindPlayerPed()
+  -- Invokes: MusicManager.ChangeMusicMode, SampleManager.IsSampleBankLoaded, SampleManager.LoadSampleBank, SampleManager.SetEffectsFadeVolume, SampleManager.SetMusicFadeVolume
+  true
+end
+
+schema cAudioManager_ProcessEntity
+  ΔcAudioManager
+  id? : ℤ
+where
+  -- State update: m_sQueueSample.m_nEntityIndex' = id
+  true
+end
+
+schema cAudioManager_ProcessPhysical
+  ΔcAudioManager
+  id? : ℤ
+where
+  -- State update: entity' = (CPhysical *)m_asAudioEntities[id].m_pEntity
+  -- Invokes: entity->GetType
+  true
+end
+
+schema cAudioManager_ProcessVehicle
+  ΔcAudioManager
+  veh? : Ref[CVehicle]
+where
+  -- State update: m_sQueueSample.m_vecPos' = veh.GetPosition()
+  -- State update: params.m_bDistanceCalculated' = FALSE
+  -- State update: params.m_pVehicle' = veh
+  -- State update: params.m_fDistance' = GetDistanceSquared(m_sQueueSample.m_vecPos)
+  -- State update: params.m_nIndex' = veh.m_modelIndex - MI_FIRST_VEHICLE
+  -- State update: params.m_fVelocityChange' = veh.AutoPilot.m_fMaxTrafficSpeed * 0.02f
+  -- Invokes: veh->GetPosition, veh->GetStatus, veh->GetForward, veh->GetVehicleAppearance
+  true
+end
+
+schema cAudioManager_ProcessCarHeli
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: boat' = ∅
+  -- State update: automobile' = ∅
+  -- State update: hunterBool' = FALSE
+  -- State update: freqFrontPrev' = 14287
+  -- State update: freqPropellerPrev' = 7143
+  -- State update: freqSkimmerPrev' = 14287
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: TheCamera.GetMatrix, cameraMatrix.GetUp, m_pVehicle->GetMatrix, cameraMatrix.GetForward, m_pVehicle->GetModelIndex
+  true
+end
+
+schema cAudioManager_ProcessRainOnVehicle
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: veh' = params.m_pVehicle
+  -- State update: veh.m_bRainAudioCounter' = 0
+  -- State update: Vol' = RAIN_ON_VEHICLE_VOLUME * CWeather::Rain
+  -- State update: m_sQueueSample.m_nCounter' = veh.m_bRainSamplesCounter++
+  -- State update: veh.m_bRainSamplesCounter' = 68
+  -- State update: m_sQueueSample.m_nSampleIndex' = (m_anRandomTable[1] & 3) + SFX_CAR_RAIN_1
+  -- Invokes: CCullZones::CamNoRain, CCullZones::PlayerNoRain
+  true
+end
+
+schema cAudioManager_ProcessReverseGear
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: veh' = params.m_pVehicle
+  -- State update: automobile' = (CAutomobile*)params.m_pVehicle
+  -- State update: modificator' = automobile.m_fGasPedalAudio
+  -- State update: modificator' = ABS(modificator)
+  -- State update: Vol' = (REVERSE_GEAR_VOLUME * modificator)
+  -- State update: m_sQueueSample.m_nCounter' = 61
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: veh->GetModelIndex
+  true
+end
+
+schema cAudioManager_ProcessModelHeliVehicle
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: prevFreq' = 22050
+  -- State update: isPlayerVeh' = TRUE
+  -- State update: brakeState' = Pads[0].GetBrake()
+  -- State update: acceletateState' = 255.0f * params.m_pVehicle.m_fGasPedal
+  -- State update: brakeState' = 255.0f * params.m_pVehicle.m_fBrakePedal
+  -- State update: acceletateState' = brakeState
+  true
+end
+
+schema cAudioManager_ProcessModelVehicle
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: prevFreq' = 14000
+  -- State update: LastVol' = 0
+  -- State update: isPlayerVeh' = TRUE
+  -- State update: Vol' = Min(127, 127.0f * Abs(params.m_fVelocityChange) * 3.0f)
+  -- State update: freq' = 8000.0f * Abs(params.m_fVelocityChange) + 14000
+  -- State update: Vol' = 127
+  -- Invokes: m_pVehicle->GetUp
+  true
+end
+
+schema cAudioManager_ProcessVehicleFlatTyre
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: automobile' = (CAutomobile*)params.m_pVehicle
+  -- State update: wheelBurst' = FALSE
+  -- State update: wheelBurst' = TRUE
+  -- State update: bike' = (CBike*)params.m_pVehicle
+  -- State update: wheelBurst' = FALSE
+  -- State update: wheelBurst' = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Invokes: Damage.GetWheelStatus
+  true
+end
+
+schema cAudioManager_ProcessVehicleRoadNoise
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: wheelsOnGround' = ((CAutomobile*)params.m_pVehicle).m_nWheelsOnGround
+  -- State update: wheelsOnGround' = ((CBike*)params.m_pVehicle).m_nWheelsOnGround
+  -- State update: wheelsOnGround' = 4
+  -- State update: velocity' = Abs(params.m_fVelocityChange)
+  -- State update: m_sQueueSample.m_nCounter' = 0
+  -- State update: m_sQueueSample.m_nBankIndex' = SFX_BANK_0
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: SampleManager.GetSampleBaseFrequency
+  true
+end
+
+schema cAudioManager_ProcessWetRoadNoise
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: wheelsOnGround' = ((CAutomobile*)params.m_pVehicle).m_nWheelsOnGround
+  -- State update: wheelsOnGround' = ((CBike*)params.m_pVehicle).m_nWheelsOnGround
+  -- State update: wheelsOnGround' = 4
+  -- State update: velChange' = Abs(params.m_fVelocityChange)
+  -- State update: m_sQueueSample.m_nCounter' = 1
+  -- State update: m_sQueueSample.m_nSampleIndex' = SFX_ROAD_NOISE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: SampleManager.GetSampleBaseFrequency
+  true
+end
+
+schema cAudioManager_ProcessVehicleEngine
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: freq' = 0
+  -- State update: isMoped' = FALSE
+  -- State update: isGolfCart' = FALSE
+  -- State update: traction' = 0.0f
+  -- State update: transmission' = params.m_pTransmission
+  -- State update: isMoped' = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Invokes: m_pVehicle->GetStatus, SampleManager.StopChannel, m_pVehicle->GetModelIndex
+  true
+end
+
+schema cAudioManager_UpdateGasPedalAudio
+  ΔcAudioManager
+  veh? : Ref[CVehicle]
+  vehType? : ℤ
+where
+  -- State update: gasPedal' = Abs(veh.m_fGasPedal)
+  -- State update: gasPealAudioPtr' = &((CAutomobile *)veh).m_fGasPedalAudio
+  -- State update: gasPealAudioPtr' = &((CBike *)veh).m_fGasPedalAudio
+  -- State update: gasPealAudioPtr' = Min(*gasPealAudioPtr + 0.09f, gasPedal)
+  -- State update: gasPealAudioPtr' = Max(*gasPealAudioPtr - 0.07f, gasPedal)
+  true
+end
+
+schema cAudioManager_PlayerJustGotInCar
+  ΔcAudioManager
+where
+  -- State update: bPlayerJustEnteredCar' = TRUE
+  true
+end
+
+schema cAudioManager_PlayerJustLeftCar
+  ΔcAudioManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cAudioManager_AddPlayerCarSample
+  ΔcAudioManager
+  Vol? : ℕ
+  freq? : ℕ
+  sample? : ℕ
+  bank? : ℕ
+  counter? : ℕ
+  bLooping? : bool8
+where
+  -- State update: m_sQueueSample.m_nCounter' = counter
+  -- State update: m_sQueueSample.m_nSampleIndex' = sample
+  -- State update: m_sQueueSample.m_nBankIndex' = bank
+  -- State update: m_sQueueSample.m_nBankIndex' = SFX_BANK_0
+  -- State update: m_sQueueSample.m_bIs2D' = FALSE
+  -- State update: m_sQueueSample.m_nPriority' = 0
+  true
+end
+
+schema cAudioManager_ProcessCesna
+  ΔcAudioManager
+  params? : cVehicleParams
+where
+  -- State update: m_sQueueSample.m_nCounter' = 52
+  -- State update: m_sQueueSample.m_nSampleIndex' = SFX_CESNA_IDLE
+  -- State update: m_sQueueSample.m_nBankIndex' = SFX_BANK_0
+  -- State update: m_sQueueSample.m_bIs2D' = FALSE
+  -- State update: m_sQueueSample.m_nPriority' = 0
+  -- State update: m_sQueueSample.m_nFrequency' = 12500
+  true
+end
+
+schema cAudioManager_ProcessPlayersVehicleEngine
+  ΔcAudioManager
+  params? : cVehicleParams
+  veh? : Ref[CVehicle]
+where
+  -- State update: LastAccel' = 0
+  -- State update: CurrentPretendGear' = 1
+  -- State update: bLostTractionLastFrame' = FALSE
+  -- State update: bHandbrakeOnLastFrame' = FALSE
+  -- State update: nCruising' = 0
+  -- State update: bAccelSampleStopped' = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Invokes: CTimer::GetTimeInMilliseconds, CReplay::IsPlayingBack, SampleManager.GetChannelUsedFlag, m_pVehicle->GetModelIndex, SampleManager.StopChannel
+  true
+end

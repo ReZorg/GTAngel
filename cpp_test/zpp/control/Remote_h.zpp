@@ -1,0 +1,60 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Remote (control)
+-- Source File(s): control/Remote.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRemote
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRemote_GivePlayerRemoteControlledCar
+  ΔCRemote
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℕ
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CRemote::GivePlayerRemoteControlledCar(float, float, float, float, uint16)
+  true
+end
+
+schema CRemote_TakeRemoteControlledCarFromPlayer_2
+  ΔCRemote
+  blowUp? : 𝔹
+where
+  -- Declared member operation CRemote::TakeRemoteControlledCarFromPlayer(bool blowUp = true)
+  true
+end
+
+schema CRemote_GivePlayerRemoteControlledCar_3
+  ΔCRemote
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℕ
+where
+  -- Declared member operation CRemote::GivePlayerRemoteControlledCar(float, float, float, float, uint16)
+  true
+end
+
+schema CRemote_TakeRemoteControlledCarFromPlayer_4
+  ΔCRemote
+where
+  -- Declared member operation CRemote::TakeRemoteControlledCarFromPlayer(void)
+  true
+end

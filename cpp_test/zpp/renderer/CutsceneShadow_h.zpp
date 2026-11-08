@@ -1,0 +1,159 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneShadow (renderer)
+-- Source File(s): renderer/CutsceneShadow.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ShadowCamera.zpp  (from "ShadowCamera.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CutsceneShadow_Enum_1 ::= RASTER | RESAMPLE | BLUR | GRADIENT
+  -- val(RASTER) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCutsceneShadow
+  m_Camera : CShadowCamera
+  m_bResample : 𝔹
+  m_ResampleCamera : CShadowCamera
+  m_nBlurPasses : ℤ
+  m_BlurCamera : CShadowCamera
+  m_bGradient : 𝔹
+  m_GradientCamera : CShadowCamera
+  m_pAtomic : Ref[RpAtomic]
+  m_pClump : Ref[RpClump]
+  m_nRwObjectType : ℤ
+  m_pLight : Ref[RpLight]
+  m_BoundingSphere : RwSphere
+  m_BaseSphere : RwSphere
+where
+  #m_pAtomic ≤ 1
+  #m_pClump ≤ 1
+  #m_pLight ≤ 1
+end
+
+schema CCutsceneShadow_CCutsceneShadow
+  ΔCCutsceneShadow
+where
+  -- Declared member operation CCutsceneShadow::CCutsceneShadow()
+  true
+end
+
+schema CCutsceneShadow_CCutsceneShadow_2
+  ΔCCutsceneShadow
+  result! : ANY
+where
+  -- Declared member operation CCutsceneShadow::CCutsceneShadow()
+  true
+end
+
+schema CCutsceneShadow_GetBaseSphere_3
+  ΔCCutsceneShadow
+  result! : RwSphere
+where
+  -- Declared member operation CCutsceneShadow::GetBaseSphere()
+  true
+end
+
+schema CCutsceneShadow_Create_4
+  ΔCCutsceneShadow
+  object? : Ref[RwObject]
+  rasterSize? : ℤ
+  resample? : 𝔹
+  blurPasses? : ℤ
+  gradient? : 𝔹
+  result! : bool
+where
+  -- Declared member operation CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32 blurPasses, bool gradient)
+  true
+end
+
+schema CCutsceneShadow_SetLightProperties_5
+  ΔCCutsceneShadow
+  angleY? : ℝ
+  angleX? : ℝ
+  setLight? : 𝔹
+  result! : Ref[RwFrame]
+where
+  -- Declared member operation CCutsceneShadow::SetLightProperties(float angleY, float angleX, bool setLight)
+  true
+end
+
+schema CCutsceneShadow_IsInitialized_6
+  ΔCCutsceneShadow
+  result! : 𝔹
+where
+  -- Declared member operation CCutsceneShadow::IsInitialized()
+  true
+end
+
+schema CCutsceneShadow_Destroy_7
+  ΔCCutsceneShadow
+where
+  -- Declared member operation CCutsceneShadow::Destroy()
+  true
+end
+
+schema CCutsceneShadow_Update_8
+  ΔCCutsceneShadow
+  result! : Ref[RwRaster]
+where
+  -- Declared member operation CCutsceneShadow::Update()
+  true
+end
+
+schema CCutsceneShadow_UpdateForCutscene_9
+  ΔCCutsceneShadow
+  result! : Ref[RwTexture]
+where
+  -- Declared member operation CCutsceneShadow::UpdateForCutscene()
+  true
+end
+
+schema CCutsceneShadow_GetShadowCamera_10
+  ΔCCutsceneShadow
+  camType? : ℤ
+  result! : Ref[CShadowCamera]
+where
+  -- Declared member operation CCutsceneShadow::GetShadowCamera(int32 camType = RASTER)
+  true
+end
+
+schema CCutsceneShadow_GetShadowRwTexture_11
+  ΔCCutsceneShadow
+  result! : Ref[RwTexture]
+where
+  -- Declared member operation CCutsceneShadow::GetShadowRwTexture()
+  true
+end
+
+schema CCutsceneShadow_DrawBorderAroundTexture_12
+  ΔCCutsceneShadow
+  color? : RwRGBA
+where
+  -- Declared member operation CCutsceneShadow::DrawBorderAroundTexture(RwRGBA const& color)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CutsceneShadow_GetBaseSphere
+  ΔCutsceneShadowModuleState
+  result! : RwSphere
+where
+  -- Return postcondition: result! = m_BaseSphere
+  true
+end

@@ -1,0 +1,452 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RpAnimBlend (animation)
+-- Source File(s): animation/RpAnimBlend.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include General.zpp  (from "General.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include AnimBlendHierarchy.zpp  (from "AnimBlendHierarchy.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include PedModelInfo.zpp  (from "PedModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RpAnimBlend_Enum_1 ::= ID_RPANIMBLEND
+  -- val(ID_RPANIMBLEND) = MAKECHUNKID(rwVENDORID_ROCKSTAR
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema RpAnimBlend_AnimBlendClumpCreate
+  ΔRpAnimBlendModuleState
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema RpAnimBlend_AnimBlendClumpDestroy
+  ΔRpAnimBlendModuleState
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- State update: data' = *RPANIMBLENDCLUMPDATA(object)
+  -- Return postcondition: result! = object
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendPluginAttach
+  ΔRpAnimBlendModuleState
+where
+  -- Return postcondition: result! = ClumpOffset >= 0
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendGetNextAssociation
+  ΔRpAnimBlendModuleState
+  assoc? : Ref[CAnimBlendAssociation]
+where
+  -- Return postcondition: result! = CAnimBlendAssociation::FromLink(assoc->link.next)
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendGetNextAssociation_2
+  ΔRpAnimBlendModuleState
+  assoc? : Ref[CAnimBlendAssociation]
+  mask? : ℕ
+where
+  -- State update: link' = assoc.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- Return postcondition: result! = assoc
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendAllocateData
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpSetBlendDeltas
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  mask? : ℕ
+  delta? : ℝ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: link' = clumpData.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- State update: assoc.blendDelta' = delta
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpRemoveAllAssociations
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpRemoveAssociations
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  mask? : ℕ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: link' = clumpData.link.next
+  -- State update: next' = link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_FrameForAllChildrenCountCallBack
+  ΔRpAnimBlendModuleState
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: numFrames' = (int*)data
+  -- Return postcondition: result! = frame
+  true
+end
+
+schema RpAnimBlend_FrameForAllChildrenFillFrameArrayCallBack
+  ΔRpAnimBlendModuleState
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: frames' = (AnimBlendFrameData**)data
+  -- State update: frame' = frame
+  -- Return postcondition: result! = frame
+  true
+end
+
+schema RpAnimBlend_FrameInitCBnonskin
+  ΔRpAnimBlendModuleState
+  frameData? : Ref[AnimBlendFrameData]
+  arg_2? : ADDRESS
+where
+  -- State update: frameData.flag' = 0
+  -- State update: frameData.resetPos' = *RwMatrixGetPos(RwFrameGetMatrix(frameData.frame))
+  true
+end
+
+schema RpAnimBlend_FrameInitCBskin
+  ΔRpAnimBlendModuleState
+  frameData? : Ref[AnimBlendFrameData]
+  arg_2? : ADDRESS
+where
+  -- State update: frameData.flag' = 0
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpInitSkinned
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: atomic' = GetFirstAtomic(clump)
+  -- State update: skin' = RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))
+  -- State update: numBones' = RpSkinGetNumBones(skin)
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(clump)
+  -- State update: frames' = clumpData.frames
+  -- Invokes: clumpData->SetNumberOfBones, clumpData->ForAllFrames
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpInitNotSkinned
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- State update: numFrames' = 0
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: root' = RpClumpGetFrame(clump)
+  -- State update: frames' = clumpData.frames
+  -- Invokes: clumpData->SetNumberOfFrames, clumpData->ForAllFrames
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpInit
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpIsInitialized
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- Return postcondition: result! = clumpData && clumpData->numFrames != 0
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetAssociation
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  id? : ℕ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: link' = clumpData.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetMainAssociation
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  assocRet? : Ref[CAnimBlendAssociation]
+  blendRet? : ℙ ℝ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: mainAssoc' = ∅
+  -- State update: secondAssoc' = ∅
+  -- State update: mainBlend' = 0.0f
+  -- State update: secondBlend' = 0.0f
+  -- State update: link' = clumpData.link.next
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = mainAssoc
+  -- Invokes: CAnimBlendAssociation::FromLink, assoc->IsPartial
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetMainPartialAssociation
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: mainAssoc' = ∅
+  -- State update: mainBlend' = 0.0f
+  -- State update: link' = clumpData.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- State update: mainBlend' = assoc.blendAmount
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = mainAssoc
+  -- Invokes: CAnimBlendAssociation::FromLink, assoc->IsPartial
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetMainAssociation_N
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  n? : ℤ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: link' = clumpData.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink, assoc->IsPartial
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetMainPartialAssociation_N
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  n? : ℤ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: link' = clumpData.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink, assoc->IsPartial
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetFirstAssociation
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  mask? : ℕ
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: link' = clumpData.link.next
+  -- State update: assoc' = CAnimBlendAssociation::FromLink(link)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpGetFirstAssociation_2
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = CAnimBlendAssociation::FromLink(clumpData->link.next)
+  -- Return postcondition: result! = nil
+  -- Invokes: CAnimBlendAssociation::FromLink
+  true
+end
+
+schema RpAnimBlend_FillFrameArrayCBnonskin
+  ΔRpAnimBlendModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: frames' = (AnimBlendFrameData**)arg
+  -- Invokes: CVisibilityPlugins::GetFrameHierarchyId
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpFillFrameArraySkin
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  frames? : Ref[AnimBlendFrameData]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(clump)
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpFillFrameArray
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  frames? : Ref[AnimBlendFrameData]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RpAnimBlend_FrameFindByNameCBnonskin
+  ΔRpAnimBlendModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: nodename' = GetFrameNodeName(frame.frame)
+  -- State update: pFrameDataFound' = frame
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema RpAnimBlend_FrameFindByNameCBskin
+  ΔRpAnimBlendModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: name' = ConvertBoneTag2BoneName(frame.nodeID)
+  -- State update: pFrameDataFound' = frame
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema RpAnimBlend_FrameFindByBoneCB
+  ΔRpAnimBlendModuleState
+  frame? : Ref[AnimBlendFrameData]
+  arg? : ADDRESS
+where
+  -- State update: pFrameDataFound' = frame
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpFindFrame
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  name? : seq CHAR
+where
+  -- State update: pFrameDataFound' = ∅
+  -- Return postcondition: result! = pFrameDataFound
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpFindBone
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  boneTag? : ℕ
+where
+  -- State update: pFrameDataFound' = ∅
+  -- Return postcondition: result! = pFrameDataFound
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendNodeUpdateKeyframes
+  ΔRpAnimBlendModuleState
+  frames? : Ref[AnimBlendFrameData]
+  updateData? : Ref[AnimBlendFrameUpdateData]
+  numNodes? : ℤ
+where
+  -- State update: node' = updateData.nodes
+  -- State update: a' = (*node).association
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpUpdateAnimations
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  timeDelta? : ℝ
+  doRender? : 𝔹
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: totalBlend' = 0.0f
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: gpAnimBlendClump' = clumpData
+  -- State update: updateData.foobar' = 0
+  -- State update: link' = clumpData.link.next
+  -- Invokes: CAnimBlendAssociation::FromLink, assoc->UpdateBlend, CAnimManager::UncompressAnimation, assoc->GetNode, assoc->UpdateTimeStep
+  true
+end
+
+schema RpAnimBlend_RpAnimBlendClumpUpdateAnimations_2
+  ΔRpAnimBlendModuleState
+  clump? : Ref[RpClump]
+  timeDelta? : ℝ
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: totalBlend' = 0.0f
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: gpAnimBlendClump' = clumpData
+  -- State update: updateData.foobar' = 0
+  -- State update: link' = clumpData.link.next
+  -- Invokes: CAnimBlendAssociation::FromLink, assoc->UpdateBlend, CAnimManager::UncompressAnimation, assoc->GetNode, clumpData->ForAllFrames
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RpAnimBlendModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 624
+end

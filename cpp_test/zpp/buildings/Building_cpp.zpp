@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Building (buildings)
+-- Source File(s): buildings/Building.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Building.zpp  (from "Building.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Pools.zpp  (from "Pools.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CBuilding_ReplaceWithNewModel
+  ΔCBuilding
+  id? : ℤ
+where
+  -- State update: m_modelIndex' = id
+  -- Invokes: CModelInfo::GetModelInfo, CStreaming::RemoveModel, CStreaming::RequestModel
+  true
+end
+
+schema Building_IsBuildingPointerValid
+  ΔBuildingModuleState
+  pBuilding? : Ref[CBuilding]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = index >= 0 && index < CPools::GetTreadablePool()->GetSize()
+  -- Return postcondition: result! = index >= 0 && index <= CPools::GetTreadablePool()->GetSize()
+  -- Invokes: pBuilding->GetIsATreadable, CPools::GetTreadablePool, CPools::GetBuildingPool
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema BuildingModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 49
+end

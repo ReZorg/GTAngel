@@ -1,0 +1,434 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedType (peds)
+-- Source File(s): peds/PedType.cpp, peds/PedType.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include PedType.zpp  (from "PedType.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+ePedType ::= PEDTYPE_PLAYER1 | PEDTYPE_PLAYER2 | PEDTYPE_PLAYER3 | PEDTYPE_PLAYER4 | PEDTYPE_CIVMALE | PEDTYPE_CIVFEMALE | PEDTYPE_COP | PEDTYPE_GANG1 | PEDTYPE_GANG2 | PEDTYPE_GANG3 | PEDTYPE_GANG4 | PEDTYPE_GANG5 | PEDTYPE_GANG6 | PEDTYPE_GANG7 | PEDTYPE_GANG8 | PEDTYPE_GANG9 | PEDTYPE_EMERGENCY | PEDTYPE_FIREMAN | PEDTYPE_CRIMINAL | PEDTYPE_UNUSED1 | PEDTYPE_PROSTITUTE | PEDTYPE_SPECIAL | PEDTYPE_UNUSED2 | NUM_PEDTYPES
+
+PedType_Enum_2 ::= PED_FLAG_PLAYER1 | PED_FLAG_PLAYER2 | PED_FLAG_PLAYER3 | PED_FLAG_PLAYER4 | PED_FLAG_CIVMALE | PED_FLAG_CIVFEMALE | PED_FLAG_COP | PED_FLAG_GANG1 | PED_FLAG_GANG2 | PED_FLAG_GANG3 | PED_FLAG_GANG4 | PED_FLAG_GANG5 | PED_FLAG_GANG6 | PED_FLAG_GANG7 | PED_FLAG_GANG8 | PED_FLAG_GANG9 | PED_FLAG_EMERGENCY | PED_FLAG_PROSTITUTE | PED_FLAG_CRIMINAL | PED_FLAG_SPECIAL | PED_FLAG_GUN | PED_FLAG_COP_CAR | PED_FLAG_FAST_CAR | PED_FLAG_EXPLOSION | PED_FLAG_FIREMAN | PED_FLAG_DEADPEDS
+  -- val(PED_FLAG_PLAYER1) = 1 << 0
+  -- val(PED_FLAG_PLAYER2) = 1 << 1
+  -- val(PED_FLAG_PLAYER3) = 1 << 2
+  -- val(PED_FLAG_PLAYER4) = 1 << 3
+  -- val(PED_FLAG_CIVMALE) = 1 << 4
+  -- val(PED_FLAG_CIVFEMALE) = 1 << 5
+  -- val(PED_FLAG_COP) = 1 << 6
+  -- val(PED_FLAG_GANG1) = 1 << 7
+  -- val(PED_FLAG_GANG2) = 1 << 8
+  -- val(PED_FLAG_GANG3) = 1 << 9
+  -- val(PED_FLAG_GANG4) = 1 << 10
+  -- val(PED_FLAG_GANG5) = 1 << 11
+  -- val(PED_FLAG_GANG6) = 1 << 12
+  -- val(PED_FLAG_GANG7) = 1 << 13
+  -- val(PED_FLAG_GANG8) = 1 << 14
+  -- val(PED_FLAG_GANG9) = 1 << 15
+  -- val(PED_FLAG_EMERGENCY) = 1 << 16
+  -- val(PED_FLAG_PROSTITUTE) = 1 << 17
+  -- val(PED_FLAG_CRIMINAL) = 1 << 18
+  -- val(PED_FLAG_SPECIAL) = 1 << 19
+  -- val(PED_FLAG_GUN) = 1 << 20
+  -- val(PED_FLAG_COP_CAR) = 1 << 21
+  -- val(PED_FLAG_FAST_CAR) = 1 << 22
+  -- val(PED_FLAG_EXPLOSION) = 1 << 23
+
+ePedStats ::= PEDSTAT_COWARD | PEDSTAT_SHOPPER | PEDSTAT_OLDSHOPPER | PEDSTAT_PLAYER | PEDSTAT_COP | PEDSTAT_MEDIC | PEDSTAT_FIREMAN | PEDSTAT_GANG1 | PEDSTAT_GANG2 | PEDSTAT_GANG3 | PEDSTAT_GANG4 | PEDSTAT_GANG5 | PEDSTAT_GANG6 | PEDSTAT_GANG7 | PEDSTAT_GANG8 | PEDSTAT_GANG9 | PEDSTAT_STREET_GUY | PEDSTAT_SUIT_GUY | PEDSTAT_SENSIBLE_GUY | PEDSTAT_GEEK_GUY | PEDSTAT_OLD_GUY | PEDSTAT_TOUGH_GUY | PEDSTAT_STREET_GIRL | PEDSTAT_SUIT_GIRL | PEDSTAT_SENSIBLE_GIRL | PEDSTAT_GEEK_GIRL | PEDSTAT_OLD_GIRL | PEDSTAT_TOUGH_GIRL | PEDSTAT_TRAMP_MALE | PEDSTAT_TRAMP_FEMALE | PEDSTAT_TOURIST | PEDSTAT_PROSTITUTE | PEDSTAT_CRIMINAL | PEDSTAT_BUSKER | PEDSTAT_TAXIDRIVER | PEDSTAT_PSYCHO | PEDSTAT_STEWARD | PEDSTAT_SPORTSFAN | PEDSTAT_BEACH_GUY | PEDSTAT_BEACH_GIRL | PEDSTAT_SKATER | PEDSTAT_STD_MISSION | NUM_PEDSTATS
+
+PedType_Enum_4 ::= STAT_PUNCH_ONLY | STAT_CAN_KNEE_HEAD | STAT_CAN_KICK | STAT_CAN_ROUNDHOUSE | STAT_NO_DIVE | STAT_ONE_HIT_KNOCKDOWN | STAT_SHOPPING_BAGS | STAT_GUN_PANIC
+  -- val(STAT_PUNCH_ONLY) = 1
+  -- val(STAT_CAN_KNEE_HEAD) = 2
+  -- val(STAT_CAN_KICK) = 4
+  -- val(STAT_CAN_ROUNDHOUSE) = 8
+  -- val(STAT_NO_DIVE) = 0x10
+  -- val(STAT_ONE_HIT_KNOCKDOWN) = 0x20
+  -- val(STAT_SHOPPING_BAGS) = 0x40
+  -- val(STAT_GUN_PANIC) = 0x80
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPedType
+  m_flag : ℕ
+  unknown1 : ℝ
+  unknown2 : ℝ
+  unknown3 : ℝ
+  unknown4 : ℝ
+  unknown5 : ℝ
+  m_threats : ℕ
+  m_avoid : ℕ
+  ms_apPedType : seq Ref[CPedType]  -- bounded array [NUM_PEDTYPES]
+where
+  m_flag ≥ 0
+  m_threats ≥ 0
+  m_avoid ≥ 0
+end
+
+schema CPedType_Initialise
+  ΔCPedType
+where
+  -- Declared member operation CPedType::Initialise(void)
+  true
+end
+
+schema CPedType_Shutdown_2
+  ΔCPedType
+where
+  -- Declared member operation CPedType::Shutdown(void)
+  true
+end
+
+schema CPedType_LoadPedData_3
+  ΔCPedType
+where
+  -- Declared member operation CPedType::LoadPedData(void)
+  true
+end
+
+schema CPedType_FindPedType_4
+  ΔCPedType
+  type? : seq CHAR
+  result! : ePedType
+where
+  -- Declared member operation CPedType::FindPedType(char *type)
+  true
+end
+
+schema CPedType_FindPedFlag_5
+  ΔCPedType
+  type? : seq CHAR
+  result! : ℕ
+where
+  -- Declared member operation CPedType::FindPedFlag(char *type)
+  true
+end
+
+schema CPedType_Save_6
+  ΔCPedType
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPedType::Save(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CPedType_Load_7
+  ΔCPedType
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPedType::Load(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPedType_GetFlag_8
+  ΔCPedType
+  type? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CPedType::GetFlag(int type)
+  true
+end
+
+schema CPedType_GetAvoid_9
+  ΔCPedType
+  type? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CPedType::GetAvoid(int type)
+  true
+end
+
+schema CPedType_GetThreats_10
+  ΔCPedType
+  type? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CPedType::GetThreats(int type)
+  true
+end
+
+schema CPedType_SetThreats_11
+  ΔCPedType
+  type? : ℤ
+  threat? : ℕ
+  result! : void
+where
+  -- Declared member operation CPedType::SetThreats(int type, uint32 threat)
+  true
+end
+
+schema CPedType_AddThreat_12
+  ΔCPedType
+  type? : ℤ
+  threat? : ℤ
+  result! : void
+where
+  -- Declared member operation CPedType::AddThreat(int type, int threat)
+  true
+end
+
+schema CPedType_RemoveThreat_13
+  ΔCPedType
+  type? : ℤ
+  threat? : ℤ
+  result! : void
+where
+  -- Declared member operation CPedType::RemoveThreat(int type, int threat)
+  true
+end
+
+schema CPedType_IsThreat_14
+  ΔCPedType
+  type? : ℤ
+  threat? : ℤ
+  result! : bool
+where
+  -- Declared member operation CPedType::IsThreat(int type, int threat)
+  true
+end
+
+schema CPedStats
+  m_type : ePedStats
+  m_name : seq CHAR
+  m_fleeDistance : ℝ
+  m_headingChangeRate : ℝ
+  m_fear : ℤ
+  m_temper : ℤ
+  m_lawfulness : ℤ
+  m_sexiness : ℤ
+  m_attackStrength : ℝ
+  m_defendWeakness : ℝ
+  m_flags : ℤ
+  ms_apPedStats : seq Ref[CPedStats]  -- bounded array [NUM_PEDSTATS]
+where
+  #m_name = 24
+end
+
+schema CPedStats_Initialise
+  ΔCPedStats
+where
+  -- Declared member operation CPedStats::Initialise(void)
+  true
+end
+
+schema CPedStats_Shutdown_2
+  ΔCPedStats
+where
+  -- Declared member operation CPedStats::Shutdown(void)
+  true
+end
+
+schema CPedStats_LoadPedStats_3
+  ΔCPedStats
+where
+  -- Declared member operation CPedStats::LoadPedStats(void)
+  true
+end
+
+schema CPedStats_GetPedStatType_4
+  ΔCPedStats
+  name? : seq CHAR
+  result! : ePedStats
+where
+  -- Declared member operation CPedStats::GetPedStatType(char *name)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPedType_Initialise
+  ΔCPedType
+where
+  -- State update: m_flag' = PED_FLAG_PLAYER1
+  -- State update: unknown1' = 0.0f
+  -- State update: unknown2' = 0.0f
+  -- State update: unknown4' = 0.0f
+  -- State update: unknown5' = 0.0f
+  -- State update: m_threats' = 0
+  true
+end
+
+schema CPedType_Shutdown
+  ΔCPedType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedType_LoadPedData
+  ΔCPedType
+where
+  -- State update: type' = NUM_PEDTYPES
+  -- State update: buf' = new char[16 * 1024]
+  -- State update: buflen' = CFileMgr::LoadFile("PED.DAT", (uint8*)buf, 16 * 1024, "r")
+  -- State update: bp' = 0
+  -- State update: linelen' = 0
+  -- State update: lp' = 0
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema CPedType_FindPedType
+  ΔCPedType
+  type? : seq CHAR
+where
+  -- Return postcondition: result! = PEDTYPE_PLAYER1
+  -- Return postcondition: result! = PEDTYPE_PLAYER2
+  -- Return postcondition: result! = PEDTYPE_PLAYER3
+  true
+end
+
+schema CPedType_FindPedFlag
+  ΔCPedType
+  type? : seq CHAR
+where
+  -- Return postcondition: result! = PED_FLAG_PLAYER1
+  -- Return postcondition: result! = PED_FLAG_PLAYER2
+  -- Return postcondition: result! = PED_FLAG_PLAYER3
+  true
+end
+
+schema CPedType_Save
+  ΔCPedType
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = sizeof(CPedType) * NUM_PEDTYPES + SAVE_HEADER_SIZE
+  true
+end
+
+schema CPedType_Load
+  ΔCPedType
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedStats_Initialise
+  ΔCPedStats
+where
+  -- State update: m_type' = PEDSTAT_PLAYER
+  -- State update: m_fleeDistance' = 20.0f
+  -- State update: m_headingChangeRate' = 15.0f
+  -- State update: m_fear' = 50
+  -- State update: m_temper' = 50
+  -- State update: m_lawfulness' = 50
+  -- Invokes: CPedStats::LoadPedStats
+  true
+end
+
+schema CPedStats_Shutdown
+  ΔCPedStats
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedStats_LoadPedStats
+  ΔCPedStats
+where
+  -- State update: type' = 0
+  -- State update: buf' = new char[16 * 1024]
+  -- State update: bp' = 0
+  -- State update: linelen' = 0
+  -- State update: lp' = 0
+  -- State update: m_type' = (ePedStats)type
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema CPedStats_GetPedStatType
+  ΔCPedStats
+  name? : seq CHAR
+where
+  -- State update: type' = 0
+  -- Return postcondition: result! = (ePedStats) type
+  -- Return postcondition: result! = NUM_PEDSTATS
+  -- Invokes: CGeneral::faststrcmp
+  true
+end
+
+schema PedType_GetFlag
+  ΔPedTypeModuleState
+  type? : ℤ
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_apPedType[type]->m_flag
+  true
+end
+
+schema PedType_GetAvoid
+  ΔPedTypeModuleState
+  type? : ℤ
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_apPedType[type]->m_avoid
+  true
+end
+
+schema PedType_GetThreats
+  ΔPedTypeModuleState
+  type? : ℤ
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_apPedType[type]->m_threats
+  true
+end
+
+schema PedType_SetThreats
+  ΔPedTypeModuleState
+  type? : ℤ
+  threat? : ℕ
+where
+  -- State update: m_threats' = threat
+  true
+end
+
+schema PedType_AddThreat
+  ΔPedTypeModuleState
+  type? : ℤ
+  threat? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema PedType_RemoveThreat
+  ΔPedTypeModuleState
+  type? : ℤ
+  threat? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema PedType_IsThreat
+  ΔPedTypeModuleState
+  type? : ℤ
+  threat? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_apPedType[type]->m_threats & threat
+  true
+end

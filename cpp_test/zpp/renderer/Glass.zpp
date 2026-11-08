@@ -1,0 +1,587 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Glass (renderer)
+-- Source File(s): renderer/Glass.cpp, renderer/Glass.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Object.zpp  (from "Object.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include General.zpp  (from "General.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include World.zpp  (from "World.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include main.zpp  (from "main.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TEMPBUFFERVERTHILIGHTOFFSET : ℕ  -- #define TEMPBUFFERVERTHILIGHTOFFSET 0
+TEMPBUFFERINDEXHILIGHTOFFSET : ℕ  -- #define TEMPBUFFERINDEXHILIGHTOFFSET 0
+TEMPBUFFERVERTHILIGHTSIZE : ℕ  -- #define TEMPBUFFERVERTHILIGHTSIZE 256
+TEMPBUFFERINDEXHILIGHTSIZE : ℕ  -- #define TEMPBUFFERINDEXHILIGHTSIZE 512
+TEMPBUFFERVERTSHATTEREDOFFSET : seq CHAR  -- #define TEMPBUFFERVERTSHATTEREDOFFSET TEMPBUFFERVERTHILIGHTSIZE
+TEMPBUFFERINDEXSHATTEREDOFFSET : seq CHAR  -- #define TEMPBUFFERINDEXSHATTEREDOFFSET TEMPBUFFERINDEXHILIGHTSIZE
+TEMPBUFFERVERTSHATTEREDSIZE : ℕ  -- #define TEMPBUFFERVERTSHATTEREDSIZE 384
+TEMPBUFFERINDEXSHATTEREDSIZE : ℕ  -- #define TEMPBUFFERINDEXSHATTEREDSIZE 768
+TEMPBUFFERVERTREFLECTIONOFFSET : seq CHAR  -- #define TEMPBUFFERVERTREFLECTIONOFFSET TEMPBUFFERVERTSHATTEREDSIZE
+TEMPBUFFERINDEXREFLECTIONOFFSET : seq CHAR  -- #define TEMPBUFFERINDEXREFLECTIONOFFSET TEMPBUFFERINDEXSHATTEREDSIZE
+TEMPBUFFERVERTREFLECTIONSIZE : ℕ  -- #define TEMPBUFFERVERTREFLECTIONSIZE 512
+TEMPBUFFERINDEXREFLECTIONSIZE : ℕ  -- #define TEMPBUFFERINDEXREFLECTIONSIZE 1024
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Glass_Enum_1 ::= NUM_GLASSTRIANGLES
+  -- val(NUM_GLASSTRIANGLES) = 5
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFallingGlassPane
+  CMatrix  -- inherits base schema
+  m_vecMoveSpeed : CVector
+  m_vecTurn : CVector
+  m_nTimer : ℕ
+  m_fGroundZ : ℝ
+  m_fStep : ℝ
+  m_nTriIndex : ℕ
+  m_bActive : 𝔹
+  m_bShattered : 𝔹
+  m_bCarGlass : 𝔹
+where
+  m_nTimer ≥ 0
+  m_nTriIndex ≥ 0
+end
+
+schema CFallingGlassPane_CFallingGlassPane
+  ΔCFallingGlassPane
+where
+  -- Declared member operation CFallingGlassPane::CFallingGlassPane()
+  true
+end
+
+schema CFallingGlassPane_Render_2
+  ΔCFallingGlassPane
+where
+  -- Declared member operation CFallingGlassPane::Render(void)
+  true
+end
+
+schema CGlass
+  NumGlassEntities : ℕ
+  apEntitiesToBeRendered : seq Ref[CEntity]  -- bounded array [NUM_GLASSENTITIES]
+  aGlassPanes : seq CFallingGlassPane  -- bounded array [NUM_GLASSPANES]
+where
+  NumGlassEntities ≥ 0
+end
+
+schema CGlass_Init
+  ΔCGlass
+where
+  -- Declared member operation CGlass::Init(void)
+  true
+end
+
+schema CGlass_Update_2
+  ΔCGlass
+where
+  -- Declared member operation CGlass::Update(void)
+  true
+end
+
+schema CGlass_Render_3
+  ΔCGlass
+where
+  -- Declared member operation CGlass::Render(void)
+  true
+end
+
+schema CGlass_FindFreePane_4
+  ΔCGlass
+  result! : Ref[CFallingGlassPane]
+where
+  -- Declared member operation CGlass::FindFreePane(void)
+  true
+end
+
+schema CGlass_GeneratePanesForWindow_5
+  ΔCGlass
+  type? : ℕ
+  pos? : CVector
+  up? : CVector
+  right? : CVector
+  speed? : CVector
+  center? : CVector
+  moveSpeed? : ℝ
+  cracked? : 𝔹
+  explosion? : 𝔹
+  stepmul? : ℤ
+  carGlass? : 𝔹
+where
+  -- Declared member operation CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector up, CVector right, CVector speed, CVector center, float moveSpeed, bool cracked, bool explosion, int32 stepmul, bool carGlass)
+  true
+end
+
+schema CGlass_AskForObjectToBeRenderedInGlass_6
+  ΔCGlass
+  entity? : Ref[CEntity]
+where
+  -- Declared member operation CGlass::AskForObjectToBeRenderedInGlass(CEntity *entity)
+  true
+end
+
+schema CGlass_RenderEntityInGlass_7
+  ΔCGlass
+  entity? : Ref[CEntity]
+where
+  -- Declared member operation CGlass::RenderEntityInGlass(CEntity *entity)
+  true
+end
+
+schema CGlass_CalcAlphaWithNormal_8
+  ΔCGlass
+  normal? : Ref[CVector]
+  result! : ℤ
+where
+  -- Declared member operation CGlass::CalcAlphaWithNormal(CVector *normal)
+  true
+end
+
+schema CGlass_RenderHiLightPolys_9
+  ΔCGlass
+where
+  -- Declared member operation CGlass::RenderHiLightPolys(void)
+  true
+end
+
+schema CGlass_RenderShatteredPolys_10
+  ΔCGlass
+where
+  -- Declared member operation CGlass::RenderShatteredPolys(void)
+  true
+end
+
+schema CGlass_RenderReflectionPolys_11
+  ΔCGlass
+where
+  -- Declared member operation CGlass::RenderReflectionPolys(void)
+  true
+end
+
+schema CGlass_WindowRespondsToCollision_12
+  ΔCGlass
+  entity? : Ref[CEntity]
+  amount? : ℝ
+  speed? : CVector
+  point? : CVector
+  explosion? : 𝔹
+where
+  -- Declared member operation CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, CVector point, bool explosion)
+  true
+end
+
+schema CGlass_WindowRespondsToSoftCollision_13
+  ΔCGlass
+  entity? : Ref[CEntity]
+  amount? : ℝ
+where
+  -- Declared member operation CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
+  true
+end
+
+schema CGlass_WasGlassHitByBullet_14
+  ΔCGlass
+  entity? : Ref[CEntity]
+  point? : CVector
+where
+  -- Declared member operation CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
+  true
+end
+
+schema CGlass_WindowRespondsToExplosion_15
+  ΔCGlass
+  entity? : Ref[CEntity]
+  point? : CVector
+where
+  -- Declared member operation CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
+  true
+end
+
+schema CGlass_CarWindscreenShatters_16
+  ΔCGlass
+  vehicle? : Ref[CVehicle]
+  unk? : 𝔹
+where
+  -- Declared member operation CGlass::CarWindscreenShatters(CVehicle *vehicle, bool unk)
+  true
+end
+
+schema CGlass_HasGlassBeenShatteredAtCoors_17
+  ΔCGlass
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CGlass::HasGlassBeenShatteredAtCoors(float x, float y, float z)
+  true
+end
+
+schema CGlass_FindWindowSectorList_18
+  ΔCGlass
+  list? : CPtrList
+  dist? : ℙ ℝ
+  entity? : Ref[CEntity]
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CGlass::FindWindowSectorList(CPtrList &list, float *dist, CEntity **entity, float x, float y, float z)
+  true
+end
+
+schema CGlass_BreakGlassPhysically_19
+  ΔCGlass
+  pos? : CVector
+  radius? : ℝ
+where
+  -- Declared member operation CGlass::BreakGlassPhysically(CVector pos, float radius)
+  true
+end
+
+schema CGlass_GeneratePanesForWindow_20
+  ΔCGlass
+  type? : ℕ
+  pos? : CVector
+  up? : CVector
+  right? : CVector
+  speed? : CVector
+  point? : CVector
+  moveSpeed? : ℝ
+  cracked? : 𝔹
+  explosion? : 𝔹
+where
+  -- Declared member operation CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector up, CVector right, CVector speed, CVector point, float moveSpeed, bool cracked, bool explosion)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CFallingGlassPane_Update
+  ΔCFallingGlassPane
+where
+  -- State update: m_bActive' = false
+  -- State update: pos' = CVector(GetPosition().x, GetPosition().y, m_fGroundZ)
+  -- State update: color' = { 255, 255, 255, 255 }
+  -- State update: nFrameGen' = 0
+  -- State update: dir.x' = CGeneral::GetRandomNumberInRange(-0.35f, 0.35f)
+  -- State update: dir.y' = CGeneral::GetRandomNumberInRange(-0.35f, 0.35f)
+  -- Invokes: CTimer::GetTimeInMilliseconds, CTimer::GetTimeStep, CGeneral::GetRandomNumberInRange, CParticle::AddParticle
+  true
+end
+
+schema CFallingGlassPane_Render
+  ΔCFallingGlassPane
+where
+  -- State update: distToCamera' = (TheCamera.GetPosition() - GetPosition()).Magnitude()
+  -- State update: fwdNorm' = GetForward()
+  -- State update: alpha' = CGlass::CalcAlphaWithNormal(&fwdNorm)
+  -- State update: time' = Clamp(CTimer::GetTimeInMilliseconds() - m_nTimer, 0, 500)
+  -- State update: color' = int32( float(alpha) * (float(time) / 500) )
+  -- State update: color' = 64
+  -- Invokes: TheCamera.GetPosition, fwdNorm.Normalise, CGlass::CalcAlphaWithNormal, CTimer::GetTimeInMilliseconds, CGlass::RenderHiLightPolys
+  true
+end
+
+schema CGlass_Init
+  ΔCGlass
+where
+  -- State update: m_bActive' = false
+  true
+end
+
+schema CGlass_Update
+  ΔCGlass
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CGlass_Render
+  ΔCGlass
+where
+  -- State update: TempBufferVerticesStoredHiLight' = 0
+  -- State update: TempBufferIndicesStoredHiLight' = 0
+  -- State update: TempBufferVerticesStoredShattered' = TEMPBUFFERVERTSHATTEREDOFFSET
+  -- State update: TempBufferIndicesStoredShattered' = TEMPBUFFERINDEXSHATTEREDOFFSET
+  -- State update: TempBufferVerticesStoredReflection' = TEMPBUFFERVERTREFLECTIONOFFSET
+  -- State update: TempBufferIndicesStoredReflection' = TEMPBUFFERINDEXREFLECTIONOFFSET
+  -- Invokes: CTimeCycle::GetFogRed, CTimeCycle::GetFogGreen, CTimeCycle::GetFogBlue
+  true
+end
+
+schema CGlass_FindFreePane
+  ΔCGlass
+where
+  -- Return postcondition: result! = &aGlassPanes[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CGlass_GeneratePanesForWindow
+  ΔCGlass
+  type? : ℕ
+  pos? : CVector
+  up? : CVector
+  right? : CVector
+  speed? : CVector
+  center? : CVector
+  moveSpeed? : ℝ
+  cracked? : 𝔹
+  explosion? : 𝔹
+  stepmul? : ℤ
+  carGlass? : 𝔹
+where
+  -- State update: upLen' = up.Magnitude()
+  -- State update: rightLen' = right.Magnitude()
+  -- State update: upSteps' = upLen + 0.75f
+  -- State update: upSteps' = 1.0f
+  -- State update: rightSteps' = rightLen + 0.75f
+  -- State update: rightSteps' = 1.0f
+  -- Invokes: up.Magnitude, right.Magnitude, CWorld::FindGroundZFor3DCoord, pane->GetRight, pane->GetUp
+  true
+end
+
+schema CGlass_AskForObjectToBeRenderedInGlass
+  ΔCGlass
+  entity? : Ref[CEntity]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CGlass_RenderEntityInGlass
+  ΔCGlass
+  entity? : Ref[CEntity]
+where
+  -- State update: object' = (CObject *)entity
+  -- State update: fwdNorm' = object.GetForward()
+  -- State update: alpha' = CalcAlphaWithNormal(&fwdNorm)
+  -- State update: col' = object.GetColModel()
+  -- State update: a' = object.GetMatrix() * col.vertices[0].Get()
+  -- State update: b' = object.GetMatrix() * col.vertices[1].Get()
+  -- Invokes: TheCamera.GetPosition, object->GetPosition, object->GetForward, fwdNorm.Normalise, object->GetColModel
+  true
+end
+
+schema CGlass_CalcAlphaWithNormal
+  ΔCGlass
+  normal? : Ref[CVector]
+where
+  -- State update: fwdDir' = 2.0f * DotProduct(*normal, TheCamera.GetForward())
+  -- Return postcondition: result! = int32(lerp(fwdDot*fwdDot*fwdDot*fwdDot*fwdDot*fwdDot, 20.0f, 255.0f))
+  -- Invokes: TheCamera.GetForward
+  true
+end
+
+schema CGlass_RenderHiLightPolys
+  ΔCGlass
+where
+  -- State update: TempBufferVerticesStoredHiLight' = TEMPBUFFERVERTHILIGHTOFFSET
+  -- State update: TempBufferIndicesStoredHiLight' = TEMPBUFFERINDEXHILIGHTOFFSET
+  true
+end
+
+schema CGlass_RenderShatteredPolys
+  ΔCGlass
+where
+  -- State update: TempBufferIndicesStoredShattered' = TEMPBUFFERINDEXSHATTEREDOFFSET
+  -- State update: TempBufferVerticesStoredShattered' = TEMPBUFFERVERTSHATTEREDOFFSET
+  true
+end
+
+schema CGlass_RenderReflectionPolys
+  ΔCGlass
+where
+  -- State update: TempBufferIndicesStoredReflection' = TEMPBUFFERINDEXREFLECTIONOFFSET
+  -- State update: TempBufferVerticesStoredReflection' = TEMPBUFFERVERTREFLECTIONOFFSET
+  true
+end
+
+schema CGlass_WindowRespondsToCollision
+  ΔCGlass
+  entity? : Ref[CEntity]
+  amount? : ℝ
+  speed? : CVector
+  point? : CVector
+  explosion? : 𝔹
+where
+  -- State update: object' = (CObject *)entity
+  -- State update: object.bGlassCracked' = true
+  -- State update: col' = object.GetColModel()
+  -- State update: a' = col.vertices[0].Get()
+  -- State update: b' = col.vertices[1].Get()
+  -- State update: c' = col.vertices[2].Get()
+  -- Invokes: object->GetColModel, object->GetMatrix, object->GetPosition
+  true
+end
+
+schema CGlass_WindowRespondsToSoftCollision
+  ΔCGlass
+  entity? : Ref[CEntity]
+  amount? : ℝ
+where
+  -- State update: object' = (CObject *)entity
+  -- State update: object.bGlassCracked' = true
+  -- Invokes: object->GetPosition
+  true
+end
+
+schema CGlass_WasGlassHitByBullet
+  ΔCGlass
+  entity? : Ref[CEntity]
+  point? : CVector
+where
+  -- State update: object' = (CObject *)entity
+  -- State update: object.bGlassCracked' = true
+  -- Invokes: object->GetModelIndex, object->GetPosition, CGeneral::GetRandomNumber
+  true
+end
+
+schema CGlass_WindowRespondsToExplosion
+  ΔCGlass
+  entity? : Ref[CEntity]
+  point? : CVector
+where
+  -- State update: object' = (CObject *)entity
+  -- State update: distToGlass' = object.GetPosition() - point
+  -- State update: fDistToGlass' = distToGlass.Magnitude()
+  -- State update: object.bGlassCracked' = true
+  -- Invokes: object->GetPosition, distToGlass.Magnitude
+  true
+end
+
+schema CGlass_CarWindscreenShatters
+  ΔCGlass
+  vehicle? : Ref[CVehicle]
+  unk? : 𝔹
+where
+  -- State update: col' = vehicle.GetColModel()
+  -- State update: tria' = ∅
+  -- State update: triIndex' = -1
+  -- State update: trib' = ∅
+  -- State update: tri' = &col.triangles[i]
+  -- State update: trib' = tri
+  -- Invokes: vehicle->GetColModel, CCollision::CalculateTrianglePlanes, vehicle->GetMatrix, vehicle->GetRight, vec1.Normalise
+  true
+end
+
+schema CGlass_HasGlassBeenShatteredAtCoors
+  ΔCGlass
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: entity' = ∅
+  -- State update: dist' = 20.0f
+  -- State update: nStartX' = Max(CWorld::GetSectorIndexX(x - 30.0f), 0)
+  -- State update: nStartY' = Max(CWorld::GetSectorIndexY(y - 30.0f), 0)
+  -- State update: nEndX' = Min(CWorld::GetSectorIndexX(x + 30.0f), NUMSECTORS_X-1)
+  -- State update: nEndY' = Min(CWorld::GetSectorIndexY(y + 30.0f), NUMSECTORS_Y-1)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !!((CObject*)entity)->bGlassBroken
+  -- Return postcondition: result! = false
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::AdvanceCurrentScanCode, CWorld::GetSector, entity->GetType
+  true
+end
+
+schema CGlass_FindWindowSectorList
+  ΔCGlass
+  list? : CPtrList
+  dist? : ℙ ℝ
+  entity? : Ref[CEntity]
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: node' = list.first
+  -- State update: ent' = (CEntity *)node.item
+  -- State update: scanCode' = ent.m_scanCode
+  -- State update: node' = node.next
+  -- State update: ent.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: dst' = (CVector(x,y,z) - ent.GetPosition()).Magnitude()
+  -- Invokes: ent->GetModelIndex, CWorld::GetCurrentScanCode, ent->GetPosition
+  true
+end
+
+schema CGlass_BreakGlassPhysically
+  ΔCGlass
+  pos? : CVector
+  radius? : ℝ
+where
+  -- State update: breakTime' = 0
+  -- State update: sphere.piece' = 0
+  -- State update: sphere.radius' = radius
+  -- State update: sphere.surface' = 0
+  -- State update: object' = CPools::GetObjectPool().GetSlot(i)
+  -- State update: col' = object.GetColModel()
+  -- Invokes: CTimer::GetTimeInMilliseconds, CPools::GetObjectPool, object->GetModelIndex, object->GetColModel, object->GetPosition
+  true
+end
+
+schema CGlass_GeneratePanesForWindow_2
+  ΔCGlass
+  type? : ℕ
+  pos? : CVector
+  up? : CVector
+  right? : CVector
+  speed? : CVector
+  point? : CVector
+  moveSpeed? : ℝ
+  cracked? : 𝔹
+  explosion? : 𝔹
+where
+  -- State update: upLen' = up.Magnitude()
+  -- State update: rightLen' = right.Magnitude()
+  -- State update: upSteps' = upLen + 0.75f
+  -- State update: upSteps' = 1.0f
+  -- State update: rightSteps' = rightLen + 0.75f
+  -- State update: rightSteps' = 1.0f
+  -- Invokes: up.Magnitude, right.Magnitude, CWorld::FindGroundZFor3DCoord, pane->GetRight, pane->GetUp
+  true
+end
+
+schema Glass_CFallingGlassPane
+  ΔGlassModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Glass_CFallingGlassPane_2
+  ΔGlassModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

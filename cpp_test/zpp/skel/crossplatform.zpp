@@ -1,0 +1,234 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: crossplatform (skel)
+-- Source File(s): skel/crossplatform.cpp, skel/crossplatform.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include time.zpp  (from "time.h")
+-- include limits.zpp  (from "limits.h")
+-- include IntSafe.zpp  (from "IntSafe.h")
+-- include Windows.zpp  (from "Windows.h")
+-- include win.zpp  (from "win.h")
+-- include iostream.zpp  (from "iostream")
+-- include dirent.zpp  (from "dirent.h")
+-- include types.zpp  (from "sys/types.h")
+-- include stat.zpp  (from "sys/stat.h")
+-- include langinfo.zpp  (from "langinfo.h")
+-- include unistd.zpp  (from "unistd.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+fcaseopen : seq CHAR  -- #define fcaseopen fopen
+caserename : seq CHAR  -- #define caserename rename
+MAX_PATH : seq CHAR  -- #define MAX_PATH PATH_MAX
+DeleteFile : seq CHAR  -- #define DeleteFile unlink
+GetLocalTime : seq CHAR  -- #define GetLocalTime GetLocalTime_CP
+INVALID_HANDLE_VALUE : seq CHAR  -- #define INVALID_HANDLE_VALUE NULL
+LOCALE_USER_DEFAULT : ℕ  -- #define LOCALE_USER_DEFAULT 0
+DATE_SHORTDATE : ℕ  -- #define DATE_SHORTDATE 0
+GLFW_GAMEPAD_BUTTON_A : ℕ  -- #define GLFW_GAMEPAD_BUTTON_A 1
+GLFW_GAMEPAD_BUTTON_B : ℕ  -- #define GLFW_GAMEPAD_BUTTON_B 0
+GLFW_GAMEPAD_BUTTON_X : ℕ  -- #define GLFW_GAMEPAD_BUTTON_X 3
+GLFW_GAMEPAD_BUTTON_Y : ℕ  -- #define GLFW_GAMEPAD_BUTTON_Y 2
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eWinVersion ::= OS_WIN95 | OS_WIN98 | OS_WINNT | OS_WIN2000 | OS_WINXP
+  -- val(OS_WIN95) = 0
+
+crossplatform_Enum_2 ::= LANG_OTHER | LANG_GERMAN | LANG_FRENCH | LANG_ENGLISH | LANG_ITALIAN | LANG_SPANISH
+
+crossplatform_Enum_3 ::= SUBLANG_OTHER | SUBLANG_ENGLISH_AUS
+
+eGameState ::= GS_START_UP | GS_INIT_LOGO_MPEG | GS_LOGO_MPEG | GS_INIT_INTRO_MPEG | GS_INTRO_MPEG | GS_INIT_ONCE | GS_INIT_FRONTEND | GS_FRONTEND | GS_INIT_PLAYING_GAME | GS_PLAYING_GAME
+  -- val(GS_START_UP) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema SYSTEMTIME
+  wYear : ℕ
+  wMonth : ℕ
+  wDayOfWeek : ℕ
+  wDay : ℕ
+  wHour : ℕ
+  wMinute : ℕ
+  wSecond : ℕ
+  wMilliseconds : ℕ
+where
+  wYear ≥ 0
+  wMonth ≥ 0
+  wDayOfWeek ≥ 0
+  wDay ≥ 0
+  wHour ≥ 0
+  wMinute ≥ 0
+  wSecond ≥ 0
+  wMilliseconds ≥ 0
+end
+
+schema WIN32_FIND_DATA
+  extension : seq CHAR
+  folder : seq CHAR
+  cFileName : seq CHAR
+  ftLastWriteTime : time_t
+where
+  #extension = 32
+  #cFileName = 256
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema crossplatform_tmToSystemTime
+  ΔcrossplatformModuleState
+  tm? : Ref[tm]
+  out? : Ref[SYSTEMTIME]
+where
+  -- State update: out.wYear' = tm.tm_year + 1900
+  -- State update: out.wMonth' = tm.tm_mon + 1
+  -- State update: out.wDayOfWeek' = tm.tm_wday
+  -- State update: out.wDay' = tm.tm_mday
+  -- State update: out.wHour' = tm.tm_hour
+  -- State update: out.wMinute' = tm.tm_min
+  true
+end
+
+schema crossplatform_GetLocalTime_CP
+  ΔcrossplatformModuleState
+  out? : Ref[SYSTEMTIME]
+where
+  -- State update: timestamp' = time(∅)
+  -- State update: localTm' = localtime(&timestamp)
+  true
+end
+
+schema crossplatform_FindFirstFile
+  ΔcrossplatformModuleState
+  pathname? : seq CHAR
+  firstfile? : Ref[WIN32_FIND_DATA]
+  result! : HANDLE
+where
+  -- State update: folder' = strtok(pathCopy, "*")
+  -- State update: extension' = strtok(∅, "*")
+  -- State update: extension' = ∅
+  -- State update: realFolder' = casepath(folder)
+  -- State update: folder' = realFolder
+  -- Return postcondition: result! = NULL
+  -- Return postcondition: result! = d
+  true
+end
+
+schema crossplatform_FindNextFile
+  ΔcrossplatformModuleState
+  d? : HANDLE
+  finddata? : Ref[WIN32_FIND_DATA]
+  result! : 𝔹
+where
+  -- State update: extensionLen' = strlen(finddata.extension)
+  -- State update: finddata.ftLastWriteTime' = fileStats.st_mtime
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema crossplatform_GetDateFormat
+  ΔcrossplatformModuleState
+  unused1? : ℤ
+  unused2? : ℤ
+  in? : Ref[SYSTEMTIME]
+  unused3? : ℤ
+  out? : seq CHAR
+  size? : ℤ
+where
+  -- State update: linuxTime.tm_year' = in.wYear - 1900
+  -- State update: linuxTime.tm_mon' = in.wMonth - 1
+  -- State update: linuxTime.tm_wday' = in.wDayOfWeek
+  -- State update: linuxTime.tm_mday' = in.wDay
+  -- State update: linuxTime.tm_hour' = in.wHour
+  -- State update: linuxTime.tm_min' = in.wMinute
+  true
+end
+
+schema crossplatform_FileTimeToSystemTime
+  ΔcrossplatformModuleState
+  writeTime? : Ref[time_t]
+  out? : Ref[SYSTEMTIME]
+where
+  -- State update: ptm' = gmtime(writeTime)
+  true
+end
+
+schema crossplatform_AllocUnicode
+  ΔcrossplatformModuleState
+  src? : seq CHAR
+where
+  -- State update: dst' = (wchar*)malloc(strlen(src)*2 + 2)
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema crossplatform_fcaseopen
+  ΔcrossplatformModuleState
+  filename? : seq CHAR
+  mode? : seq CHAR
+  result! : Ref[FILE]
+where
+  -- State update: real' = casepath(filename)
+  -- Return postcondition: result! = result
+  true
+end
+
+schema crossplatform_caserename
+  ΔcrossplatformModuleState
+  old_filename? : seq CHAR
+  new_filename? : seq CHAR
+  result! : ℤ
+where
+  -- State update: real_old' = casepath(old_filename)
+  -- State update: real_new' = casepath(new_filename)
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = result
+  true
+end
+
+schema crossplatform_casepath
+  ΔcrossplatformModuleState
+  path? : seq CHAR
+  checkPathFirst? : 𝔹
+  result! : seq CHAR
+where
+  -- State update: l' = strlen(path)
+  -- State update: p' = (char*)alloca(l + 1)
+  -- State update: out' = (char*)malloc(l + 3)
+  -- State update: p' = trim(p)
+  -- State update: rl' = 0
+  -- State update: deviceNameOffset' = c - p + 3
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = out
+  true
+end
+
+schema crossplatform_readlink
+  ΔcrossplatformModuleState
+  __path? : seq CHAR
+  __buf? : seq CHAR
+  __buflen? : ℕ
+  result! : ℕ
+where
+  -- State update: errno' = ENOSYS
+  -- Return postcondition: result! = -1
+  true
+end

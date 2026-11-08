@@ -1,0 +1,1431 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Ped (peds)
+-- Source File(s): peds/Ped.cpp, peds/Ped.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include General.zpp  (from "General.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Population.zpp  (from "Population.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Script.zpp  (from "Script.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include Range2D.zpp  (from "Range2D.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include CutsceneShadow.zpp  (from "CutsceneShadow.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include Crime.zpp  (from "Crime.h")
+-- include EventList.zpp  (from "EventList.h")
+-- include PedIK.zpp  (from "PedIK.h")
+-- include PedType.zpp  (from "PedType.h")
+-- include Physical.zpp  (from "Physical.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include WeaponInfo.zpp  (from "WeaponInfo.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Collision.zpp  (from "Collision.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FRONT_OF_PLANE : ℕ  -- #define FRONT_OF_PLANE 1
+ON_THE_PLANE : ℕ  -- #define ON_THE_PLANE 0
+BEHIND_THE_PLANE : seq CHAR  -- #define BEHIND_THE_PLANE -1
+FEET_OFFSET : ℝ  -- #define FEET_OFFSET 1.04f
+CHECK_NEARBY_THINGS_MAX_DIST : ℝ  -- #define CHECK_NEARBY_THINGS_MAX_DIST 15.0f
+ENTER_CAR_MAX_DIST : ℝ  -- #define ENTER_CAR_MAX_DIST 30.0f
+CAN_SEE_ENTITY_ANGLE_THRESHOLD : ℝ  -- #define CAN_SEE_ENTITY_ANGLE_THRESHOLD DEGTORAD(60.0f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Ped_Enum_1 ::= ATTACK_IN_PROGRESS | CANT_ATTACK | WATCH_UNTIL_HE_DISAPPEARS
+
+eFormation ::= FORMATION_UNDEFINED | FORMATION_REAR | FORMATION_REAR_LEFT | FORMATION_REAR_RIGHT | FORMATION_FRONT_LEFT | FORMATION_FRONT_RIGHT | FORMATION_LEFT | FORMATION_RIGHT | FORMATION_FRONT
+
+FightState ::= FIGHTSTATE_MOVE_FINISHED | FIGHTSTATE_JUST_ATTACKED | FIGHTSTATE_NO_MOVE | FIGHTSTATE_1
+  -- val(FIGHTSTATE_MOVE_FINISHED) = -2
+
+Ped_Enum_4 ::= ENDFIGHT_NORMAL | ENDFIGHT_WITH_A_STEP | ENDFIGHT_FAST
+
+PedRouteType ::= PEDROUTE_STOP_WHEN_DONE | PEDROUTE_GO_BACKWARD_WHEN_DONE | PEDROUTE_GO_TO_START_WHEN_DONE
+  -- val(PEDROUTE_STOP_WHEN_DONE) = 1
+
+FightMoveHitLevel ::= HITLEVEL_NULL | HITLEVEL_GROUND | HITLEVEL_LOW | HITLEVEL_MEDIUM | HITLEVEL_HIGH
+
+PedFightMoves ::= FIGHTMOVE_NULL | FIGHTMOVE_IDLE | FIGHTMOVE_SHUFFLE_F | FIGHTMOVE_COMBO_A1 | FIGHTMOVE_COMBO_A2 | FIGHTMOVE_COMBO_A3 | FIGHTMOVE_COMBO_B1 | FIGHTMOVE_COMBO_B2 | FIGHTMOVE_COMBO_B3 | FIGHTMOVE_MELEE1 | FIGHTMOVE_MELEE2 | FIGHTMOVE_MELEE3 | FIGHTMOVE_GROUNDKICK | FIGHTMOVE_HITFRONT | FIGHTMOVE_HITBACK | FIGHTMOVE_HITRIGHT | FIGHTMOVE_HITLEFT | FIGHTMOVE_HITONFLOOR | FIGHTMOVE_HITBEHIND | FIGHTMOVE_IDLE2NORM | NUM_FIGHTMOVES | FIGHTMOVE_STDPUNCH | FIGHTMOVE_HEADBUTT | FIGHTMOVE_KICK | FIGHTMOVE_BODYBLOW
+
+ePedPieceTypes ::= PEDPIECE_TORSO | PEDPIECE_MID | PEDPIECE_LEFTARM | PEDPIECE_RIGHTARM | PEDPIECE_LEFTLEG | PEDPIECE_RIGHTLEG | PEDPIECE_HEAD
+
+eWaitState ::= WAITSTATE_FALSE | WAITSTATE_TRAFFIC_LIGHTS | WAITSTATE_CROSS_ROAD | WAITSTATE_CROSS_ROAD_LOOK | WAITSTATE_LOOK_PED | WAITSTATE_LOOK_SHOP | WAITSTATE_LOOK_ACCIDENT | WAITSTATE_FACEOFF_GANG | WAITSTATE_DOUBLEBACK | WAITSTATE_HITWALL | WAITSTATE_TURN180 | WAITSTATE_SURPRISE | WAITSTATE_STUCK | WAITSTATE_LOOK_ABOUT | WAITSTATE_PLAYANIM_DUCK | WAITSTATE_PLAYANIM_COWER | WAITSTATE_PLAYANIM_TAXI | WAITSTATE_PLAYANIM_HANDSUP | WAITSTATE_PLAYANIM_HANDSCOWER | WAITSTATE_PLAYANIM_CHAT | WAITSTATE_FINISH_FLEE | WAITSTATE_SIT_DOWN | WAITSTATE_SIT_DOWN_RVRS | WAITSTATE_SIT_UP | WAITSTATE_SIT_IDLE | WAITSTATE_USE_ATM | WAITSTATE_SUN_BATHE_PRE | WAITSTATE_SUN_BATHE_DOWN | WAITSTATE_SUN_BATHE_IDLE | WAITSTATE_RIOT | WAITSTATE_FAST_FALL | WAITSTATE_BOMBER | WAITSTATE_STRIPPER | WAITSTATE_GROUND_ATTACK | WAITSTATE_LANCESITTING | WAITSTATE_PLAYANIM_HANDSUP_SIMPLE | WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE | WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE_LOOP | WAITSTATE_CS_MISC_IDLE_LOOK | WAITSTATE_CS_MISC_IDLE_NO | WAITSTATE_CS_MISC_IDLE_YES | WAITSTATE_CS_MISC_IDLE_CHAT2 | WAITSTATE_CS_MISC_IDLE_COUGH | WAITSTATE_CS_MISC_IDLE_GIGGLE_FEMALE | WAITSTATE_CS_MISC_IDLE_TOUGH_CHAT | WAITSTATE_CS_MISC_IDLE_CELL_TALK | WAITSTATE_DONH2_CAMERA | WAITSTATE_DONH3_HAPPY | ... (86 total branches)
+
+eObjective ::= OBJECTIVE_NONE | OBJECTIVE_WAIT_ON_FOOT | OBJECTIVE_WAIT_ON_FOOT_FOR_COP | OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE | OBJECTIVE_GUARD_SPOT | OBJECTIVE_GUARD_AREA | OBJECTIVE_WAIT_IN_CAR | OBJECTIVE_WAIT_IN_CAR_THEN_GET_OUT | OBJECTIVE_KILL_CHAR_ON_FOOT | OBJECTIVE_KILL_CHAR_ANY_MEANS | OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE | OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS | OBJECTIVE_GOTO_CHAR_ON_FOOT | OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING | OBJECTIVE_HASSLE_CHAR | OBJECTIVE_FOLLOW_CHAR_IN_FORMATION | OBJECTIVE_LEAVE_CAR | OBJECTIVE_ENTER_CAR_AS_PASSENGER | OBJECTIVE_ENTER_CAR_AS_DRIVER | OBJECTIVE_FOLLOW_CAR_IN_CAR | OBJECTIVE_FIRE_AT_OBJECT_FROM_VEHICLE | OBJECTIVE_DESTROY_OBJECT | OBJECTIVE_DESTROY_CAR | OBJECTIVE_GOTO_AREA_ANY_MEANS | OBJECTIVE_GOTO_AREA_ON_FOOT | OBJECTIVE_RUN_TO_AREA | OBJECTIVE_GOTO_AREA_IN_CAR | OBJECTIVE_FOLLOW_CAR_ON_FOOT_WITH_OFFSET | OBJECTIVE_GUARD_ATTACK | OBJECTIVE_SET_LEADER | OBJECTIVE_FOLLOW_ROUTE | OBJECTIVE_SOLICIT_VEHICLE | OBJECTIVE_HAIL_TAXI | OBJECTIVE_CATCH_TRAIN | OBJECTIVE_BUY_ICE_CREAM | OBJECTIVE_STEAL_ANY_CAR | OBJECTIVE_STEAL_ANY_MISSION_CAR | OBJECTIVE_MUG_CHAR | OBJECTIVE_LEAVE_CAR_AND_DIE | OBJECTIVE_GOTO_SEAT_ON_FOOT | OBJECTIVE_GOTO_ATM_ON_FOOT | OBJECTIVE_FLEE_CAR | OBJECTIVE_SUN_BATHE | OBJECTIVE_GOTO_BUS_STOP_ON_FOOT | OBJECTIVE_GOTO_PIZZA_ON_FOOT | OBJECTIVE_GOTO_SHELTER_ON_FOOT | OBJECTIVE_AIM_GUN_AT | OBJECTIVE_WANDER | ... (59 total branches)
+
+Ped_Enum_11 ::= RANDOM_CHAR | MISSION_CHAR | UNK_CHAR
+  -- val(RANDOM_CHAR) = 1
+
+PedLineUpPhase ::= LINE_UP_TO_CAR_START | LINE_UP_TO_CAR_END | LINE_UP_TO_CAR_2 | LINE_UP_TO_CAR_FALL
+
+PedOnGroundState ::= NO_PED | PED_IN_FRONT_OF_ATTACKER | PED_ON_THE_FLOOR | PED_DEAD_ON_THE_FLOOR
+
+PointBlankNecessity ::= NO_POINT_BLANK_PED | POINT_BLANK_FOR_WANTED_PED | POINT_BLANK_FOR_SOMEONE_ELSE
+
+PedState ::= PED_NONE | PED_IDLE | PED_LOOK_ENTITY | PED_LOOK_HEADING | PED_WANDER_RANGE | PED_WANDER_PATH | PED_SEEK_POS | PED_SEEK_ENTITY | PED_FLEE_POS | PED_FLEE_ENTITY | PED_PURSUE | PED_FOLLOW_PATH | PED_SNIPER_MODE | PED_ROCKET_MODE | PED_DUMMY | PED_PAUSE | PED_ATTACK | PED_FIGHT | PED_FACE_PHONE | PED_MAKE_CALL | PED_CHAT | PED_MUG | PED_AIM_GUN | PED_AI_CONTROL | PED_SEEK_CAR | PED_SEEK_IN_BOAT | PED_FOLLOW_ROUTE | PED_CPR | PED_SOLICIT | PED_BUY_ICECREAM | PED_INVESTIGATE | PED_STEP_AWAY | PED_ON_FIRE | PED_SUN_BATHE | PED_FLASH | PED_JOG | PED_ANSWER_MOBILE | PED_UNKNOWN | PED_STATES_NO_AI | PED_ABSEIL | PED_SIT | PED_JUMP | PED_FALL | PED_GETUP | PED_STAGGER | PED_DIVE_AWAY | PED_STATES_NO_ST | PED_ENTER_TRAIN | ... (65 total branches)
+
+eMoveState ::= PEDMOVE_NONE | PEDMOVE_STILL | PEDMOVE_WALK | PEDMOVE_JOG | PEDMOVE_RUN | PEDMOVE_SPRINT | PEDMOVE_THROWN
+
+Ped_Enum_17 ::= RANDOM_CHAR | MISSION_CHAR
+  -- val(RANDOM_CHAR) = 1
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema PedAudioData
+  m_nFixedDelayTime : ℤ
+  m_nOverrideFixedDelayTime : ℤ
+  m_nOverrideMaxRandomDelayTime : ℤ
+  m_nMaxRandomDelayTime : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema FightMove
+  animId : AnimationId
+  startFireTime : ℝ
+  endFireTime : ℝ
+  comboFollowOnTime : ℝ
+  strikeRadius : ℝ
+  extendReachMultiplier : ℝ
+  hitLevel : ℕ
+  damage : ℕ
+  flags : ℕ
+where
+  hitLevel ≥ 0
+  damage ≥ 0
+  flags ≥ 0
+end
+
+schema CPed
+  CPhysical  -- inherits base schema
+  m_fCollisionSpeed : ℝ
+  bIsStanding : 𝔹
+  bWasStanding : 𝔹
+  bIsAttacking : 𝔹
+  bIsPointingGunAt : 𝔹
+  bIsLooking : 𝔹
+  bKeepTryingToLook : 𝔹
+  bIsRestoringLook : 𝔹
+  bIsAimingGun : 𝔹
+  bIsRestoringGun : 𝔹
+  bCanPointGunAtTarget : 𝔹
+  bIsTalking : 𝔹
+  bIsInTheAir : 𝔹
+  bIsLanding : 𝔹
+  bIsRunning : 𝔹
+  bHitSomethingLastFrame : 𝔹
+  bVehEnterDoorIsBlocked : 𝔹
+  bCanPedEnterSeekedCar : 𝔹
+  bRespondsToThreats : 𝔹
+  bRenderPedInCar : 𝔹
+  bChangedSeat : 𝔹
+  bUpdateAnimHeading : 𝔹
+  bBodyPartJustCameOff : 𝔹
+  bIsShooting : 𝔹
+  bFindNewNodeAfterStateRestore : 𝔹
+  bHasACamera : 𝔹
+  bGonnaInvestigateEvent : 𝔹
+  bPedIsBleeding : 𝔹
+  bStopAndShoot : 𝔹
+  bIsPedDieAnimPlaying : 𝔹
+  bUsePedNodeSeek : 𝔹
+  bObjectiveCompleted : 𝔹
+  bScriptObjectiveCompleted : 𝔹
+  bKindaStayInSamePlace : 𝔹
+  bBeingChasedByPolice : 𝔹
+  bNotAllowedToDuck : 𝔹
+  bCrouchWhenShooting : 𝔹
+  bIsDucking : 𝔹
+  bGetUpAnimStarted : 𝔹
+  bDoBloodyFootprints : 𝔹
+  bFleeAfterExitingCar : 𝔹
+  bWanderPathAfterExitingCar : 𝔹
+  bIsLeader : 𝔹
+  bDontDragMeOutCar : 𝔹
+  m_ped_flagF8 : 𝔹
+  bWillBeQuickJacked : 𝔹
+  bCancelEnteringCar : 𝔹
+  bObstacleShowedUpDuringKillObjective : 𝔹
+  bDuckAndCover : 𝔹
+  bStillOnValidPoly : 𝔹
+  bAllowMedicsToReviveMe : 𝔹
+  bResetWalkAnims : 𝔹
+  bStartWanderPathOnFoot : 𝔹
+  bOnBoat : 𝔹
+  bBusJacked : 𝔹
+  bGonnaKillTheCarJacker : 𝔹
+  bFadeOut : 𝔹
+  bKnockedUpIntoAir : 𝔹
+  bHitSteepSlope : 𝔹
+  bCullExtraFarAway : 𝔹
+  bClearObjective : 𝔹
+  bTryingToReachDryLand : 𝔹
+  bCollidedWithMyVehicle : 𝔹
+  bRichFromMugging : 𝔹
+  bChrisCriminal : 𝔹
+  bShakeFist : 𝔹
+  bNoCriticalHits : 𝔹
+  bVehExitWillBeInstant : 𝔹
+  bHasAlreadyBeenRecorded : 𝔹
+  bFallenDown : 𝔹
+  bDontAcceptIKLookAts : 𝔹
+  bReachedAttractorHeadingTarget : 𝔹
+  bTurnedAroundOnAttractor : 𝔹
+  bHasAlreadyUsedAttractor : 𝔹
+  bHasAlreadyStoleACar : 𝔹
+  bCarPassenger : 𝔹
+  bFleeWhenStanding : 𝔹
+  bGotUpOfMyOwnAccord : 𝔹
+  bMiamiViceCop : 𝔹
+  bMoneyHasBeenGivenByScript : 𝔹
+  bHasBeenPhotographed : 𝔹
+  bIsDrowning : 𝔹
+  bDrownsInWater : 𝔹
+  bWaitForLeaderToComeCloser : 𝔹
+  bHeldHostageInCar : 𝔹
+  b19C_10 : 𝔹
+  bIsPlayerFriend : 𝔹
+  bHeadStuckInCollision : 𝔹
+  bDeadPedInFrontOfCar : 𝔹
+  bStayInCarOnJack : 𝔹
+  bDontFight : 𝔹
+  bDoomAim : 𝔹
+  bCanBeShotInVehicle : 𝔹
+  bCanGiveUpSunbathing : 𝔹
+  bMakeFleeScream : 𝔹
+  bPushedAlongByCar : 𝔹
+  bRemoveMeWhenIGotIntoCar : 𝔹
+  bIgnoreThreatsBehindObjects : 𝔹
+  bNeverEverTargetThisPed : 𝔹
+  bCrouchWhenScared : 𝔹
+  bKnockedOffBike : 𝔹
+  b158_8 : 𝔹
+  bCollectBusFare : 𝔹
+  bBoughtIceCream : 𝔹
+  bDonePositionOutOfCollision : 𝔹
+  bCanAttackPlayerWithCops : 𝔹
+  bOnlyAllowedToSitBehind : 𝔹
+  bOnlyAllowedToSitInFront : 𝔹
+  b1A1_8 : 𝔹
+  b1A1_10 : 𝔹
+  bOverrideMoveAnim : 𝔹
+  bDropsWeaponsOnDeath : 𝔹
+  b1A4_2 : 𝔹
+  bAttacksPlayerWithCops : 𝔹
+  b1A4_8 : 𝔹
+  b1A4_10 : 𝔹
+  b1A4_20 : 𝔹
+  b1A4_40 : 𝔹
+  b1A4_80 : 𝔹
+  bCanBeTargettedByLeader : 𝔹
+  b1A5_2 : 𝔹
+  b1A5_4 : 𝔹
+  b1A5_8 : 𝔹
+  b1A5_10 : 𝔹
+  b1A5_20 : 𝔹
+  b1A5_40 : 𝔹
+  b1A5_80 : 𝔹
+  unk_1A6 : ℕ
+  CharCreatedBy : ℕ
+  m_objective : eObjective
+  m_prevObjective : eObjective
+  m_pedInObjective : Ref[CPed]
+  m_carInObjective : Ref[CVehicle]
+  m_nextRoutePointPos : CVector
+  m_attractorHeading : ℝ
+  m_leader : Ref[CPed]
+  m_pedFormation : eFormation
+  m_fearFlags : ℕ
+  m_threatEntity : Ref[CEntity]
+  m_eventOrThreat : CVector2D
+  m_eventType : ℕ
+  m_pEventEntity : Ref[CEntity]
+  m_fAngleToEvent : ℝ
+  m_pFrames : seq Ref[AnimBlendFrameData]  -- bounded array [PED_NODE_MAX]
+  m_pWeaponModel : Ref[RpAtomic]
+  m_animGroup : AssocGroupId
+  m_pVehicleAnim : Ref[CAnimBlendAssociation]
+  m_vecAnimMoveDelta : CVector2D
+  m_vecOffsetSeek : CVector
+  m_pedIK : CPedIK
+  m_actionX : ℝ
+  m_actionY : ℝ
+  m_nPedStateTimer : ℕ
+  m_nPedState : PedState
+  m_nLastPedState : PedState
+  m_nMoveState : eMoveState
+  m_nStoredMoveState : ℤ
+  m_nPrevMoveState : ℤ
+  m_nWaitState : eWaitState
+  m_nWaitTimer : ℕ
+  m_pathNodesToGo : seq Ref[CPathNode]  -- bounded array [8]
+  m_nNumPathNodes : ℤ
+  m_nCurPathNodeId : ℤ
+  m_followPathWalkAroundEnt : Ref[CEntity]
+  m_followPathTargetEnt : Ref[CEntity]
+  m_pathNodeTimer : ℕ
+  m_pathNodeObjPool : seq CPathNode  -- bounded array [8]
+  m_pCurPathNode : Ref[CPathNode]
+  m_nPathDir : ℤ
+  m_pLastPathNode : Ref[CPathNode]
+  m_pNextPathNode : Ref[CPathNode]
+  m_followPathDestPos : CVector
+  m_followPathAbortDist : ℝ
+  m_followPathMoveState : eMoveState
+  m_fHealth : ℝ
+  m_fArmour : ℝ
+  m_nExtendedRangeTimer : ℕ
+  m_nScriptShootTimer : ℕ
+  m_nScriptAttackTimer : ℕ
+  m_routeLastPoint : ℤ
+  m_routeStartPoint : ℕ
+  m_routePointsPassed : ℤ
+  m_routeType : ℤ
+  m_routePointsBeingPassed : ℤ
+  m_moved : CVector2D
+  m_fRotationCur : ℝ
+  m_fRotationDest : ℝ
+  m_headingRate : ℝ
+  m_vehDoor : ℕ
+  m_walkAroundType : ℤ
+  m_pCurrentPhysSurface : Ref[CPhysical]
+  m_vecOffsetFromPhysSurface : CVector
+  m_pCurSurface : Ref[CEntity]
+  m_vecSeekPos : CVector
+  m_pSeekTarget : Ref[CEntity]
+  m_pMyVehicle : Ref[CVehicle]
+  bInVehicle : 𝔹
+  m_distanceToCountSeekDone : ℝ
+  m_acceptableHeadingOffset : ℝ
+  m_vehicleInAccident : Ref[CVehicle]
+  m_attractor : Ref[CPedAttractor]
+  m_positionInQueue : ℤ
+  bRunningToPhone : 𝔹
+  m_phoneId : ℤ
+  m_crimeToReportOnPhone : eCrimeType
+  m_phoneTalkTimer : ℕ
+  m_lastAccident : Ref[CAccident]
+  m_nPedType : ℕ
+  m_pedStats : Ref[CPedStats]
+  m_fleeFromPos : CVector2D
+  m_fleeFrom : Ref[CEntity]
+  m_fleeTimer : ℕ
+  m_threatEx : Ref[CEntity]
+  m_collidingEntityWhileFleeing : Ref[CEntity]
+  m_collidingThingTimer : ℕ
+  m_pCollidingEntity : Ref[CEntity]
+  m_stateUnused : ℕ
+  m_timerUnused : ℕ
+  m_weapons : seq CWeapon  -- bounded array [TOTAL_WEAPON_SLOTS]
+  m_storedWeapon : eWeaponType
+  m_delayedWeapon : eWeaponType
+  m_delayedWeaponAmmo : ℕ
+  m_currentWeapon : ℕ
+  m_maxWeaponTypeAllowed : ℕ
+  m_wepSkills : ℕ
+  m_wepAccuracy : ℕ
+  m_pPointGunAt : Ref[CEntity]
+  m_vecHitLastPos : CVector
+  m_curFightMove : ℕ
+  m_lastFightMove : ℕ
+  m_fightButtonPressure : ℕ
+  m_fightState : ℤ
+  m_takeAStepAfterAttack : 𝔹
+  m_bleedCounter : ℕ
+  m_pFire : Ref[CFire]
+  m_pLookTarget : Ref[CEntity]
+  m_fLookDirection : ℝ
+  m_wepModelID : ℤ
+  m_leaveCarTimer : ℕ
+  m_getUpTimer : ℕ
+  m_lookTimer : ℕ
+  m_chatTimer : ℕ
+  m_attackTimer : ℕ
+  m_shootTimer : ℕ
+  m_carJackTimer : ℕ
+  m_objectiveTimer : ℕ
+  m_duckTimer : ℕ
+  m_duckAndCoverTimer : ℕ
+  m_bloodyFootprintCountOrDeathTime : ℕ
+  m_shotTime : ℕ
+  m_ceaseAttackTimer : ℕ
+  m_panicCounter : ℕ
+  m_deadBleeding : 𝔹
+  m_bodyPartBleeding : ℤ
+  m_nearPeds : seq Ref[CPed]  -- bounded array [10]
+  m_numNearPeds : ℕ
+  m_nPedMoney : ℕ
+  m_lastWepDam : ℤ
+  m_lastDamEntity : Ref[CEntity]
+  m_attachedTo : Ref[CEntity]
+  m_vecAttachOffset : CVector
+  m_attachType : ℕ
+  m_attachRotStep : ℝ
+  m_attachWepAmmo : ℕ
+  m_threatFlags : ℕ
+  m_threatCheckTimer : ℕ
+  m_threatCheckInterval : ℕ
+  m_delayedSoundID : ℤ
+  m_delayedSoundTimer : ℕ
+  m_lastSoundStart : ℕ
+  m_soundStart : ℕ
+  m_lastQueuedSound : ℕ
+  m_queuedSound : ℕ
+  m_canTalk : 𝔹
+  m_lastComment : ℕ
+  m_vecSpotToGuard : CVector
+  m_radiusToGuard : ℝ
+  m_fMaxHealth : ℝ
+  ANIM_ATTACK_1 : else_return
+  pos : return
+  nEnterCarRangeMultiplier : ℕ
+  bNastyLimbsCheat : 𝔹
+  bFannyMagnetCheat : 𝔹
+  bPedCheat3 : 𝔹
+  ms_vec2DFleePosition : CVector2D
+  m_unused15D : ℕ
+  m_unused15E : ℕ
+  m_unused15F : ℕ
+  ANIM_WEAPON_FIRE : return
+  ANIM_WEAPON_CROUCHRELOAD : return
+  ANIM_WEAPON_RELOAD : return
+  m_pPathNodesStates : seq ADDRESS  -- bounded array [8]
+  m_stPathNodeStates : seq CVector2D  -- bounded array [10]
+  m_nPathNodes : ℕ
+  m_nCurPathNode : ℤ
+  m_victimOfPlayerCrime : Ref[CEntity]
+  m_fleeFromPosX : ℝ
+  m_fleeFromPosY : ℝ
+  m_vecSeekPosEx : CVector
+  m_distanceToCountSeekDoneEx : ℝ
+  frame : Ref[RwFrame]
+  bPedCheat2 : 𝔹
+where
+  #bIsStanding = 1
+  #bWasStanding = 1
+  #bIsAttacking = 1
+  #bIsPointingGunAt = 1
+  #bIsLooking = 1
+  #bKeepTryingToLook = 1
+  #bIsRestoringLook = 1
+  #bIsAimingGun = 1
+  #bIsRestoringGun = 1
+  #bCanPointGunAtTarget = 1
+  #bIsTalking = 1
+  #bIsInTheAir = 1
+  #bIsLanding = 1
+  #bIsRunning = 1
+  #bHitSomethingLastFrame = 1
+  #bVehEnterDoorIsBlocked = 1
+end
+
+schema CPed_operator_new
+  ΔCPed
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CPed::operator new(size_t)
+  true
+end
+
+schema CPed_operator_new_2
+  ΔCPed
+  arg_1? : ℕ
+  arg_2? : ℤ
+  result! : ADDRESS
+where
+  -- Declared member operation CPed::operator new(size_t, int)
+  true
+end
+
+schema CPed_operator_delete_3
+  ΔCPed
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CPed::operator delete(void*, size_t)
+  true
+end
+
+schema CPed_operator_delete_4
+  ΔCPed
+  arg_1? : ADDRESS
+  arg_2? : ℤ
+where
+  -- Declared member operation CPed::operator delete(void*, int)
+  true
+end
+
+schema CPed_CPed_5
+  ΔCPed
+  pedType? : ℕ
+where
+  -- Declared member operation CPed::CPed(uint32 pedType)
+  true
+end
+
+schema CPed_CPed_6
+  ΔCPed
+  result! : ANY
+where
+  -- Declared member operation CPed::CPed(void)
+  true
+end
+
+schema CPed_DeleteRwObject_7
+  ΔCPed
+where
+  -- Declared member operation CPed::DeleteRwObject()
+  true
+end
+
+schema CPed_SetModelIndex_8
+  ΔCPed
+  mi? : ℕ
+where
+  -- Declared member operation CPed::SetModelIndex(uint32 mi)
+  true
+end
+
+schema CPed_ProcessControl_9
+  ΔCPed
+where
+  -- Declared member operation CPed::ProcessControl(void)
+  true
+end
+
+schema CPed_Teleport_10
+  ΔCPed
+  arg_1? : CVector
+where
+  -- Declared member operation CPed::Teleport(CVector)
+  true
+end
+
+schema CPed_PreRender_11
+  ΔCPed
+where
+  -- Declared member operation CPed::PreRender(void)
+  true
+end
+
+schema CPed_Render_12
+  ΔCPed
+where
+  -- Declared member operation CPed::Render(void)
+  true
+end
+
+schema CPed_SetupLighting_13
+  ΔCPed
+  result! : 𝔹
+where
+  -- Declared member operation CPed::SetupLighting(void)
+  true
+end
+
+schema CPed_RemoveLighting_14
+  ΔCPed
+  arg_1? : 𝔹
+where
+  -- Declared member operation CPed::RemoveLighting(bool)
+  true
+end
+
+schema CPed_FlagToDestroyWhenNextProcessed_15
+  ΔCPed
+where
+  -- Declared member operation CPed::FlagToDestroyWhenNextProcessed(void)
+  true
+end
+
+schema CPed_ProcessEntityCollision_16
+  ΔCPed
+  arg_1? : Ref[CEntity]
+  arg_2? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPed::ProcessEntityCollision(CEntity*, CColPoint*)
+  true
+end
+
+schema CPed_SetMoveAnim_17
+  ΔCPed
+where
+  -- Declared member operation CPed::SetMoveAnim(void)
+  true
+end
+
+schema CPed_AddWeaponModel_18
+  ΔCPed
+  id? : ℤ
+where
+  -- Declared member operation CPed::AddWeaponModel(int id)
+  true
+end
+
+schema CPed_AimGun_19
+  ΔCPed
+where
+  -- Declared member operation CPed::AimGun(void)
+  true
+end
+
+schema CPed_KillPedWithCar_20
+  ΔCPed
+  veh? : Ref[CVehicle]
+  impulse? : ℝ
+where
+  -- Declared member operation CPed::KillPedWithCar(CVehicle *veh, float impulse)
+  true
+end
+
+schema CPed_Say_21
+  ΔCPed
+  audio? : ℕ
+where
+  -- Declared member operation CPed::Say(uint16 audio)
+  true
+end
+
+schema CPed_Say_22
+  ΔCPed
+  audio? : ℕ
+  time? : ℤ
+where
+  -- Declared member operation CPed::Say(uint16 audio, int32 time)
+  true
+end
+
+schema CPed_SetLookFlag_23
+  ΔCPed
+  target? : Ref[CEntity]
+  keepTryingToLook? : 𝔹
+  cancelPrevious? : 𝔹
+where
+  -- Declared member operation CPed::SetLookFlag(CEntity* target, bool keepTryingToLook, bool cancelPrevious = false)
+  true
+end
+
+schema CPed_SetLookFlag_24
+  ΔCPed
+  direction? : ℝ
+  keepTryingToLook? : 𝔹
+  cancelPrevious? : 𝔹
+where
+  -- Declared member operation CPed::SetLookFlag(float direction, bool keepTryingToLook, bool cancelPrevious = false)
+  true
+end
+
+schema CPed_SetLookTimer_25
+  ΔCPed
+  time? : ℤ
+where
+  -- Declared member operation CPed::SetLookTimer(int time)
+  true
+end
+
+schema CPed_SetDie_26
+  ΔCPed
+  anim? : AnimationId
+  arg1? : ℝ
+  arg2? : ℝ
+where
+  -- Declared member operation CPed::SetDie(AnimationId anim = ANIM_STD_KO_FRONT, float arg1 = 4.0f, float arg2 = 0.0f)
+  true
+end
+
+schema CPed_SetDead_27
+  ΔCPed
+where
+  -- Declared member operation CPed::SetDead(void)
+  true
+end
+
+schema CPed_ApplyHeadShot_28
+  ΔCPed
+  weaponType? : eWeaponType
+  pos? : CVector
+  evenOnPlayer? : 𝔹
+where
+  -- Declared member operation CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
+  true
+end
+
+schema CPed_RemoveBodyPart_29
+  ΔCPed
+  nodeId? : PedNode
+  direction? : ℤ
+where
+  -- Declared member operation CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
+  true
+end
+
+schema CPed_OurPedCanSeeThisOne_30
+  ΔCPed
+  target? : Ref[CEntity]
+  shootablesDoBlock? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CPed::OurPedCanSeeThisOne(CEntity *target, bool shootablesDoBlock = false)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPed_CPed
+  ΔCPed
+where
+  -- State update: door_flag' = GetCarDoorFlag(m_vehDoor)
+  -- State update: m_pMyVehicle.pDriver' = ∅
+  -- State update: bInVehicle' = false
+  -- State update: m_pMyVehicle' = ∅
+  -- State update: nearPed' = m_nearPeds[i]
+  -- Invokes: CWorld::Remove, CRadar::ClearBlipForEntity, CPools::GetPedPool, m_pMyVehicle->RemovePassenger, m_pFire->Extinguish
+  true
+end
+
+schema CPed_Initialise
+  ΔCPed
+where
+  -- Invokes: CPedType::Initialise
+  true
+end
+
+schema CPed_SetModelIndex
+  ΔCPed
+  mi? : ℕ
+where
+  -- State update: modelInfo' = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex())
+  -- State update: m_headingRate' = m_pedStats.m_headingChangeRate
+  -- State update: m_animGroup' = (AssocGroupId) modelInfo.m_animGroup
+  -- State update: velocity2d' = &m_vecAnimMoveDelta
+  -- State update: m_pRTShadow' = new CCutsceneShadow
+  -- Invokes: CEntity::SetModelIndex, CModelInfo::GetModelInfo, CAnimManager::AddAnimation, modelInfo->GetHitColModel, modelInfo->CreateHitColModelSkinned
+  true
+end
+
+schema CPed_SetPedStats
+  ΔCPed
+  pedStat? : ePedStats
+where
+  -- State update: m_pedStats' = CPedStats::ms_apPedStats[pedStat]
+  true
+end
+
+schema CPed_DeleteRwObject
+  ΔCPed
+where
+  -- Invokes: CEntity::DeleteRwObject
+  true
+end
+
+schema CPed_BuildPedLists
+  ΔCPed
+where
+  -- State update: centre' = CEntity::GetBoundCentre()
+  -- State update: deadsRegistered' = 0
+  -- State update: xstart' = CWorld::GetSectorIndexX(rect.left)
+  -- State update: ystart' = CWorld::GetSectorIndexY(rect.top)
+  -- State update: xend' = CWorld::GetSectorIndexX(rect.right)
+  -- State update: yend' = CWorld::GetSectorIndexY(rect.bottom)
+  -- Invokes: CTimer::GetFrameCounter, CEntity::GetBoundCentre, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector
+  true
+end
+
+schema CPed_OurPedCanSeeThisOne
+  ΔCPed
+  target? : Ref[CEntity]
+  shootablesDoBlock? : 𝔹
+where
+  -- State update: dist' = CVector2D(target.GetPosition()) - CVector2D(GetPosition())
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: target->GetPosition, dist.Magnitude, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CPed_SortPeds
+  ΔCPed
+  list? : Ref[CPed]
+  min? : ℤ
+  max? : ℤ
+where
+  -- State update: middleDiff' = GetPosition() - list[(max + min) / 2].GetPosition()
+  -- State update: middleDist' = middleDiff.Magnitude()
+  -- State update: left' = max
+  -- State update: right' = min
+  -- State update: rightDiff' = GetPosition() - list[right].GetPosition()
+  -- State update: rightDist' = rightDiff.Magnitude()
+  -- Invokes: middleDiff.Magnitude, rightDiff.Magnitude, leftDiff.Magnitude
+  true
+end
+
+schema CPed_SetMoveState
+  ΔCPed
+  state? : eMoveState
+where
+  -- State update: m_nMoveState' = state
+  true
+end
+
+schema CPed_SetMoveAnim
+  ΔCPed
+where
+  -- State update: m_nStoredMoveState' = PEDMOVE_NONE
+  -- State update: animGroupToUse' = ASSOCGRP_PLAYER
+  -- State update: animGroupToUse' = m_animGroup
+  -- State update: idleAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE)
+  -- State update: idleAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE)
+  -- State update: m_nStoredMoveState' = m_nMoveState
+  -- Invokes: m_leader->IsPlayer, CAnimManager::BlendAnimation, m_leader->GetClump
+  true
+end
+
+schema CPed_StopNonPartialAnims
+  ΔCPed
+where
+  -- State update: assoc' = RpAnimBlendClumpGetFirstAssociation(GetClump())
+  -- Invokes: assoc->IsPartial
+  true
+end
+
+schema CPed_RestartNonPartialAnims
+  ΔCPed
+where
+  -- State update: assoc' = RpAnimBlendClumpGetFirstAssociation(GetClump())
+  -- Invokes: assoc->IsPartial, assoc->SetRun
+  true
+end
+
+schema CPed_SetStoredState
+  ΔCPed
+where
+  -- State update: bFindNewNodeAfterStateRestore' = true
+  -- State update: m_nMoveState' = PEDMOVE_WALK
+  -- State update: m_nLastPedState' = m_nPedState
+  -- State update: m_nPrevMoveState' = m_nMoveState
+  true
+end
+
+schema CPed_RestorePreviousState
+  ΔCPed
+where
+  -- State update: m_nLastPedState' = PED_NONE
+  -- State update: bIsRunning' = false
+  -- State update: diff' = nextNode - GetPosition()
+  -- State update: m_nLastPedState' = PED_NONE
+  -- Invokes: CGeneral::GetRandomNumber, CPathFind::TakeWidthIntoAccountForWandering, diff.MagnitudeSqr
+  true
+end
+
+schema CPed_ScanForThreats
+  ΔCPed
+where
+  -- State update: fearFlags' = m_fearFlags
+  -- State update: ourPos' = GetPosition()
+  -- State update: closestPedDist' = 60.0f
+  -- State update: explosionPos' = GetPosition()
+  -- State update: m_eventOrThreat' = explosionPos
+  -- State update: shooter' = ∅
+  -- Return postcondition: result! = PED_FLAG_EXPLOSION
+  -- Return postcondition: result! = PED_FLAG_GUN
+  -- Return postcondition: result! = CPedType::GetFlag(shooter->m_nPedType)
+  -- Invokes: m_threatEntity->RegisterReference, CPedType::GetFlag, deadPed->GetPosition, m_pEventEntity->RegisterReference, nearPed->GetPosition
+  true
+end
+
+schema CPed_ScanForDelayedResponseThreats
+  ΔCPed
+where
+  -- State update: m_threatEntity' = ∅
+  -- State update: m_pEventEntity' = ∅
+  -- State update: m_threatFlags' = ScanForThreats()
+  -- State update: m_threatCheckTimer' = CTimer::GetTimeInMilliseconds() + m_threatCheckInterval
+  -- State update: m_threatFlags' = 0
+  -- State update: m_threatCheckTimer' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_CheckThreatValidity
+  ΔCPed
+where
+  -- State update: m_threatFlags' = 0
+  -- State update: m_threatEntity' = ∅
+  -- State update: m_threatFlags' = 0
+  -- State update: m_pEventEntity' = ∅
+  -- State update: m_threatFlags' = 0
+  true
+end
+
+schema CPed_CanUseTorsoWhenLooking
+  ΔCPed
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPed_SetLookFlag
+  ΔCPed
+  direction? : ℝ
+  keepTryingToLook? : 𝔹
+  cancelPrevious? : 𝔹
+where
+  -- State update: bIsLooking' = true
+  -- State update: bIsRestoringLook' = false
+  -- State update: m_fLookDirection' = direction
+  -- State update: m_pLookTarget' = ∅
+  -- State update: m_lookTimer' = 0
+  -- State update: bKeepTryingToLook' = keepTryingToLook
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_SetLookFlag_2
+  ΔCPed
+  target? : Ref[CEntity]
+  keepTryingToLook? : 𝔹
+  cancelPrevious? : 𝔹
+where
+  -- State update: bIsLooking' = true
+  -- State update: bIsRestoringLook' = false
+  -- State update: m_pLookTarget' = target
+  -- State update: m_fLookDirection' = 999999.0f
+  -- State update: m_lookTimer' = 0
+  -- State update: bKeepTryingToLook' = keepTryingToLook
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pLookTarget->RegisterReference
+  true
+end
+
+schema CPed_ClearLookFlag
+  ΔCPed
+where
+  -- State update: bIsLooking' = false
+  -- State update: bIsRestoringLook' = true
+  -- State update: bShakeFist' = false
+  -- State update: m_lookTimer' = CTimer::GetTimeInMilliseconds() + 2000
+  -- State update: m_lookTimer' = CTimer::GetTimeInMilliseconds() + 4000
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_MoveHeadToLook
+  ΔCPed
+where
+  -- State update: animTime' = fuckUAssoc.currentTime
+  -- State update: lookingToCop' = false
+  -- State update: lookingToCop' = true
+  -- State update: lookPos' = m_pLookTarget.GetPosition()
+  -- State update: notRocketLauncher' = false
+  -- State update: notTwoHanded' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pLookTarget->GetModelIndex, m_pLookTarget->IsPed, CGeneral::GetRandomNumber, m_pedIK.GetComponentPosition
+  true
+end
+
+schema CPed_RestoreHeadPosition
+  ΔCPed
+where
+  -- State update: bIsRestoringLook' = false
+  -- Invokes: m_pedIK.RestoreLookAt
+  true
+end
+
+schema CPed_SetAimFlag
+  ΔCPed
+  angle? : ℝ
+where
+  -- State update: bIsAimingGun' = true
+  -- State update: bIsRestoringGun' = false
+  -- State update: m_fLookDirection' = angle
+  -- State update: m_lookTimer' = 0
+  -- State update: m_pLookTarget' = ∅
+  -- State update: m_pSeekTarget' = ∅
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_SetAimFlag_2
+  ΔCPed
+  to? : Ref[CEntity]
+where
+  -- State update: bIsAimingGun' = true
+  -- State update: bIsRestoringGun' = false
+  -- State update: m_pLookTarget' = to
+  -- State update: m_pSeekTarget' = to
+  -- State update: m_lookTimer' = 0
+  -- Invokes: m_pLookTarget->CleanUpOldReference, m_pLookTarget->RegisterReference, m_pSeekTarget->CleanUpOldReference, m_pSeekTarget->RegisterReference
+  true
+end
+
+schema CPed_ClearAimFlag
+  ΔCPed
+where
+  -- State update: bIsAimingGun' = false
+  -- State update: bIsRestoringGun' = true
+  -- State update: m_lookTimer' = 0
+  -- State update: m_fFPSMoveHeading' = 0.0f
+  -- State update: m_bFreeAimActive' = false
+  true
+end
+
+schema CPed_AimGun
+  ΔCPed
+where
+  -- State update: vector' = m_pSeekTarget.GetPosition()
+  -- State update: bCanPointGunAtTarget' = m_pedIK.PointGunAtPosition(vector)
+  -- State update: bCanPointGunAtTarget' = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0f)
+  -- Invokes: m_pSeekTarget->IsPed, m_pedIK.GetComponentPosition, m_pSeekTarget->GetPosition, m_pedIK.PointGunAtPosition, m_pedIK.PointGunInDirection
+  true
+end
+
+schema CPed_RestoreGunPosition
+  ΔCPed
+where
+  -- State update: bIsRestoringGun' = false
+  -- State update: bIsRestoringGun' = false
+  -- State update: m_fFPSMoveHeading' = 0.0f
+  -- Invokes: m_pedIK.RestoreGunPosn
+  true
+end
+
+schema CPed_CanWeRunAndFireWithWeapon
+  ΔCPed
+where
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_ScanForInterestingStuff
+  ΔCPed
+where
+  -- State update: mostExpensiveVehAround' = -1
+  -- State update: bestMonetaryValue' = 0
+  -- State update: pos' = GetPosition()
+  -- State update: veh' = (CVehicle*)vehicles[i]
+  -- State update: mostExpensiveVehAround' = i
+  -- State update: bestMonetaryValue' = veh.pHandling.nMonetaryValue
+  -- Invokes: CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumber, CWorld::FindObjectsInRange, m_vecMoveSpeed.Magnitude, veh->IsVehicleNormal
+  true
+end
+
+schema CPed_WillChat
+  ΔCPed
+  stranger? : Ref[CPed]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: ThePaths.TestCrossesRoad, stranger->IsPlayer, stranger->IsGangMember
+  true
+end
+
+schema CPed_CalculateNewVelocity
+  ΔCPed
+where
+  -- State update: headAmount' = DEGTORAD(m_headingRate) * CTimer::GetTimeStep()
+  -- State update: m_fRotationCur' = CGeneral::LimitRadianAngle(m_fRotationCur)
+  -- State update: limitedRotDest' = CGeneral::LimitRadianAngle(m_fRotationDest)
+  -- State update: neededTurn' = limitedRotDest - m_fRotationCur
+  -- State update: m_moved.x' = CrossProduct2D(m_vecAnimMoveDelta, forward)
+  -- State update: m_moved.y' = DotProduct2D(m_vecAnimMoveDelta, forward)
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = CGeneral::LimitRadianAngle(offset + angle)
+  -- Return postcondition: result! = 0
+  -- Invokes: CTimer::GetTimeStep, CGeneral::LimitRadianAngle, m_moved.Magnitude, m_pedIK.RotateTorso, CPed::WorkOutHeadingForMovingFirstPerson
+  true
+end
+
+schema Ped_IsFemale
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE
+  true
+end
+
+schema Ped_HasWeaponSlot
+  ΔPedModuleState
+  slot? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED
+  true
+end
+
+schema Ped_GetWeapon
+  ΔPedModuleState
+  slot? : ℕ
+  result! : CWeapon
+where
+  -- Return postcondition: result! = m_weapons[slot]
+  true
+end
+
+schema Ped_GetPedState
+  ΔPedModuleState
+  result! : PedState
+where
+  -- Return postcondition: result! = m_nPedState
+  true
+end
+
+schema Ped_SetPedState
+  ΔPedModuleState
+  state? : PedState
+where
+  -- State update: m_followPathTargetEnt' = ∅
+  -- State update: m_nPedState' = state
+  -- Invokes: m_followPathTargetEnt->CleanUpOldReference
+  true
+end
+
+schema Ped_Dead
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nPedState == PED_DEAD
+  true
+end
+
+schema Ped_Dying
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nPedState == PED_DIE
+  true
+end
+
+schema Ped_DyingOrDead
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nPedState == PED_DIE || m_nPedState == PED_DEAD
+  true
+end
+
+schema Ped_OnGround
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Ped_OnGroundOrGettingUp
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = OnGround() || m_nPedState == PED_GETUP
+  true
+end
+
+schema Ped_Driving
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nPedState == PED_DRIVING
+  true
+end
+
+schema Ped_InVehicle
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bInVehicle && m_pMyVehicle
+  true
+end
+
+schema Ped_EnteringCar
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK
+  true
+end
+
+schema Ped_IsUseAttractorObjective
+  ΔPedModuleState
+  obj? : eObjective
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Ped_IsNotInWreckedVehicle
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Ped_CanStartMission
+  ΔPedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Ped_GetFireAnimNotDucking
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = Get3rdFireAnim(weapon)
+  -- Return postcondition: result! = GetPrimaryFireAnim(weapon)
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_Get3rdFireAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_WEAPON_FIRE_3RD
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetFireAnimGround
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  kickFloorIfNone? : 𝔹
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_ATTACK_2
+  -- Return postcondition: result! = ANIM_WEAPON_FIRE_3RD
+  -- Return postcondition: result! = ANIM_STD_KICKGROUND
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetPrimaryFireAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_STD_DETONATE
+  -- Return postcondition: result! = ANIM_ATTACK_1
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetCrouchReloadAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_ATTACK_EXTRA2
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetCrouchFireAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_ATTACK_2
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetReloadAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_ATTACK_EXTRA1
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetFightIdleWithMeleeAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_MELEE_IDLE_FIGHTMODE
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetFinishingAttackAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_MELEE_ATTACK_FINISH
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetSecondFireAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_WEAPON_FIRE_2ND
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetMeleeStartAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_MELEE_ATTACK_START
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_GetThrowAnim
+  ΔPedModuleState
+  weapon? : Ref[CWeaponInfo]
+  result! : AnimationId
+where
+  -- Return postcondition: result! = ANIM_THROWABLE_START_THROW
+  -- Return postcondition: result! = (AnimationId)0
+  -- Invokes: weapon->IsFlagSet
+  true
+end
+
+schema Ped_SetFindPathAndFlee
+  ΔPedModuleState
+  fleeFrom? : Ref[CEntity]
+  time? : ℤ
+  walk? : 𝔹
+where
+  -- State update: bUsePedNodeSeek' = true
+  -- State update: m_pNextPathNode' = ∅
+  true
+end
+
+schema Ped_SetFindPathAndFlee_2
+  ΔPedModuleState
+  from? : CVector2D
+  time? : ℤ
+  walk? : 𝔹
+where
+  -- State update: bUsePedNodeSeek' = true
+  -- State update: m_pNextPathNode' = ∅
+  true
+end
+
+schema Ped_SetWeaponLockOnTarget
+  ΔPedModuleState
+  target? : Ref[CEntity]
+where
+  -- State update: m_pPointGunAt' = (CPed*)target
+  -- Invokes: m_pPointGunAt->CleanUpOldReference
+  true
+end
+
+schema Ped_GetNodePosition
+  ΔPedModuleState
+  node? : ℤ
+  result! : CVector
+where
+  -- State update: pos' = { 0.0f, 0.0f, 0.0f }
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, m_pFrames[node].nodeID)
+  -- State update: mats' = RpHAnimHierarchyGetMatrixArray(hier)
+  -- State update: pos' = mats[idx].pos
+  -- Return postcondition: result! = pos
+  true
+end
+
+schema Ped_TransformToNode
+  ΔPedModuleState
+  pos? : CVector
+  node? : ℤ
+where
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, m_pFrames[node].nodeID)
+  -- State update: mats' = RpHAnimHierarchyGetMatrixArray(hier)
+  true
+end
+
+schema Ped_HasWeapon
+  ΔPedModuleState
+  weaponType? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_weapons[weaponType].m_eWeaponType == weaponType
+  true
+end
+
+schema Ped_SetPedState_2
+  ΔPedModuleState
+  state? : PedState
+where
+  -- State update: m_nPedState' = state
+  true
+end

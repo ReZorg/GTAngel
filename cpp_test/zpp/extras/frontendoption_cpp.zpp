@@ -1,0 +1,277 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: frontendoption (extras)
+-- Source File(s): extras/frontendoption.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Text.zpp  (from "Text.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema frontendoption_ChangeScreen
+  ΔfrontendoptionModuleState
+  screen? : ℤ
+  option? : ℤ
+  fadeIn? : 𝔹
+where
+  -- State update: FrontEndMenuManager.m_nPrevScreen' = FrontEndMenuManager.m_nCurrScreen
+  -- State update: FrontEndMenuManager.m_nCurrScreen' = screen
+  -- State update: FrontEndMenuManager.m_nCurrOption' = option
+  -- State update: FrontEndMenuManager.m_nMenuFadeAlpha' = 0
+  true
+end
+
+schema frontendoption_GoBack
+  ΔfrontendoptionModuleState
+  fadeIn? : 𝔹
+where
+  -- State update: option' = FrontEndMenuManager.GetPreviousPageOption()
+  -- Invokes: FrontEndMenuManager.GetPreviousPageOption, FrontEndMenuManager.ThingsToDoBeforeGoingBack
+  true
+end
+
+schema frontendoption_GetNumberOfMenuOptions
+  ΔfrontendoptionModuleState
+  screen? : ℤ
+where
+  -- State update: Rows' = 0
+  -- Return postcondition: result! = Rows
+  true
+end
+
+schema frontendoption_GetLastMenuScreen
+  ΔfrontendoptionModuleState
+where
+  -- State update: page' = -1
+  -- Return postcondition: result! = page
+  true
+end
+
+schema frontendoption_RegisterNewScreen
+  ΔfrontendoptionModuleState
+  name? : seq CHAR
+  prevPage? : ℤ
+  returnPrevPageFunc? : ReturnPrevPageFunc
+  result! : ℤ
+where
+  -- State update: lastOgScreen' = GetLastMenuScreen()
+  -- State update: id' = lastOgScreen + numCustomFrontendScreens
+  -- State update: returnPrevPageFunc' = returnPrevPageFunc
+  -- Return postcondition: result! = id
+  true
+end
+
+schema frontendoption_RegisterNewOption
+  ΔfrontendoptionModuleState
+  result! : ℤ
+where
+  -- State update: numOptions' = GetNumberOfMenuOptions(currentMenu)
+  -- State update: curIdx' = numOptions + optionCursor + 1
+  -- State update: curIdx' = optionCursor
+  -- Return postcondition: result! = curIdx
+  true
+end
+
+schema frontendoption_FrontendOptionSetCursor
+  ΔfrontendoptionModuleState
+  screen? : ℤ
+  option? : ℤ
+  overwrite? : 𝔹
+where
+  -- State update: currentMenu' = screen
+  -- State update: optionCursor' = option
+  -- State update: optionOverwrite' = overwrite
+  true
+end
+
+schema frontendoption_FrontendOptionAddBuiltinAction
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  action? : ℤ
+  targetMenu? : ℤ
+  saveSlot? : ℤ
+where
+  -- State update: screenOptionOrder' = RegisterNewOption()
+  -- State update: option' = aScreens[currentMenu].m_aEntries[screenOptionOrder]
+  -- State update: option.m_Action' = action
+  -- State update: option.m_SaveSlot' = saveSlot
+  -- State update: option.m_TargetMenu' = targetMenu
+  true
+end
+
+schema frontendoption_FrontendOptionAddSelect
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  rightTexts? : seq CHAR
+  numRightTexts? : ℤ
+  var? : ℙ ℤ
+  onlyApplyOnEnter? : 𝔹
+  changeFunc? : ChangeFunc
+  saveCat? : seq CHAR
+  saveKey? : seq CHAR
+  disableIfGameLoaded? : 𝔹
+where
+  -- State update: screenOptionOrder' = RegisterNewOption()
+  -- State update: option' = aScreens[currentMenu].m_aEntries[screenOptionOrder]
+  -- State update: option.m_Action' = MENUACTION_CFO_SELECT
+  -- State update: option.m_CFOSelect' = new CCFOSelect()
+  -- State update: option.m_CFOSelect.rightTexts' = (char**)malloc(numRightTexts * sizeof(char*))
+  -- State update: option.m_CFOSelect.numRightTexts' = numRightTexts
+  true
+end
+
+schema frontendoption_FrontendOptionAddDynamic
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  drawFunc? : DrawFunc
+  var? : ℙ ℤ
+  buttonPressFunc? : ButtonPressFunc
+  saveCat? : seq CHAR
+  saveKey? : seq CHAR
+where
+  -- State update: screenOptionOrder' = RegisterNewOption()
+  -- State update: option' = aScreens[currentMenu].m_aEntries[screenOptionOrder]
+  -- State update: option.m_Action' = MENUACTION_CFO_DYNAMIC
+  -- State update: option.m_CFODynamic' = new CCFODynamic()
+  -- State update: option.m_CFODynamic.drawFunc' = drawFunc
+  -- State update: option.m_CFODynamic.buttonPressFunc' = buttonPressFunc
+  true
+end
+
+schema frontendoption_FrontendScreenAdd
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  sprite? : eMenuSprites
+  prevPage? : ℤ
+  columnWidth? : ℤ
+  headerHeight? : ℤ
+  lineHeight? : ℤ
+  font? : ℤ
+  fontScaleX? : ℝ
+  fontScaleY? : ℝ
+  alignment? : ℤ
+  showLeftRightHelper? : 𝔹
+  returnPrevPageFunc? : ReturnPrevPageFunc
+  result! : ℕ
+where
+  -- State update: screenOrder' = RegisterNewScreen(gxtKey, prevPage, returnPrevPageFunc)
+  -- State update: screen' = new CCustomScreenLayout()
+  -- State update: layout' = screen
+  -- State update: screen.sprite' = sprite
+  -- State update: screen.columnWidth' = columnWidth
+  -- State update: screen.headerHeight' = headerHeight
+  -- Return postcondition: result! = screenOrder
+  true
+end
+
+schema frontendoption_GoBack_2
+  ΔfrontendoptionModuleState
+where
+  -- Invokes: FrontEndMenuManager.SwitchToNewScreen
+  true
+end
+
+schema frontendoption_FrontendOptionAddBuiltinAction_2
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  x? : ℕ
+  y? : ℕ
+  align? : ℕ
+  action? : ℤ
+  targetMenu? : ℤ
+  saveSlot? : ℤ
+where
+  -- State update: screenOptionOrder' = RegisterNewOption()
+  -- State update: option' = aScreens[currentMenu].m_aEntries[screenOptionOrder]
+  -- State update: option.m_X' = x
+  -- State update: option.m_Y' = y
+  -- State update: option.m_Align' = align
+  -- State update: option.m_Action' = action
+  true
+end
+
+schema frontendoption_FrontendOptionAddSelect_2
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  x? : ℕ
+  y? : ℕ
+  align? : ℕ
+  rightTexts? : seq CHAR
+  numRightTexts? : ℤ
+  var? : ℙ ℤ
+  onlyApplyOnEnter? : 𝔹
+  changeFunc? : ChangeFunc
+  saveCat? : seq CHAR
+  saveName? : seq CHAR
+  disableIfGameLoaded? : 𝔹
+where
+  -- State update: screenOptionOrder' = RegisterNewOption()
+  -- State update: option' = aScreens[currentMenu].m_aEntries[screenOptionOrder]
+  -- State update: option.m_Action' = MENUACTION_CFO_SELECT
+  -- State update: option.m_X' = x
+  -- State update: option.m_Y' = y
+  -- State update: option.m_Align' = align
+  true
+end
+
+schema frontendoption_FrontendOptionAddDynamic_2
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  x? : ℕ
+  y? : ℕ
+  align? : ℕ
+  drawFunc? : DrawFunc
+  var? : ℙ ℤ
+  buttonPressFunc? : ButtonPressFunc
+  saveCat? : seq CHAR
+  saveName? : seq CHAR
+where
+  -- State update: screenOptionOrder' = RegisterNewOption()
+  -- State update: option' = aScreens[currentMenu].m_aEntries[screenOptionOrder]
+  -- State update: option.m_Action' = MENUACTION_CFO_DYNAMIC
+  -- State update: option.m_X' = x
+  -- State update: option.m_Y' = y
+  -- State update: option.m_Align' = align
+  true
+end
+
+schema frontendoption_FrontendScreenAdd_2
+  ΔfrontendoptionModuleState
+  gxtKey? : seq CHAR
+  prevPage? : ℤ
+  lineHeight? : ℤ
+  showLeftRightHelper? : 𝔹
+  returnPrevPageFunc? : ReturnPrevPageFunc
+  result! : ℕ
+where
+  -- State update: screenOrder' = RegisterNewScreen(gxtKey, prevPage, returnPrevPageFunc)
+  -- State update: screen' = new CCustomScreenLayout()
+  -- State update: layout' = screen
+  -- State update: screen.lineHeight' = lineHeight
+  -- State update: screen.showLeftRightHelper' = showLeftRightHelper
+  -- Return postcondition: result! = screenOrder
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema frontendoptionModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 295
+end

@@ -1,0 +1,326 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Placeable (core)
+-- Source File(s): core/Placeable.cpp, core/Placeable.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlaceable
+  m_matrix : CMatrix
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaceable_operator_new
+  ΔCPlaceable
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CPlaceable::operator new(size_t)
+  true
+end
+
+schema CPlaceable_CPlaceable_2
+  ΔCPlaceable
+where
+  -- Declared member operation CPlaceable::CPlaceable(void)
+  true
+end
+
+schema CPlaceable_CPlaceable_3
+  ΔCPlaceable
+  result! : ANY
+where
+  -- Declared member operation CPlaceable::CPlaceable(void)
+  true
+end
+
+schema CPlaceable_GetPosition_4
+  ΔCPlaceable
+  result! : CVector
+where
+  -- Declared member operation CPlaceable::GetPosition(void)
+  true
+end
+
+schema CPlaceable_SetPosition_5
+  ΔCPlaceable
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  result! : void
+where
+  -- Declared member operation CPlaceable::SetPosition(float x, float y, float z)
+  true
+end
+
+schema CPlaceable_GetPosition_6
+  ΔCPlaceable
+  result! : m_matrix
+where
+  -- Declared member operation CPlaceable::GetPosition()
+  true
+end
+
+schema CPlaceable_GetPosition_7
+  ΔCPlaceable
+  result! : m_matrix
+where
+  -- Declared member operation CPlaceable::GetPosition()
+  true
+end
+
+schema CPlaceable_SetPosition_8
+  ΔCPlaceable
+  pos? : CVector
+  result! : void
+where
+  -- Declared member operation CPlaceable::SetPosition(const CVector &pos)
+  true
+end
+
+schema CPlaceable_GetRight_9
+  ΔCPlaceable
+  result! : CVector
+where
+  -- Declared member operation CPlaceable::GetRight(void)
+  true
+end
+
+schema CPlaceable_GetForward_10
+  ΔCPlaceable
+  result! : CVector
+where
+  -- Declared member operation CPlaceable::GetForward(void)
+  true
+end
+
+schema CPlaceable_GetUp_11
+  ΔCPlaceable
+  result! : CVector
+where
+  -- Declared member operation CPlaceable::GetUp(void)
+  true
+end
+
+schema CPlaceable_GetMatrix_12
+  ΔCPlaceable
+  result! : CMatrix
+where
+  -- Declared member operation CPlaceable::GetMatrix(void)
+  true
+end
+
+schema CPlaceable_SetMatrix_13
+  ΔCPlaceable
+  newMatrix? : CMatrix
+  result! : void
+where
+  -- Declared member operation CPlaceable::SetMatrix(CMatrix &newMatrix)
+  true
+end
+
+schema CPlaceable_SetTransform_14
+  ΔCPlaceable
+  m? : Ref[RwMatrix]
+  result! : void
+where
+  -- Declared member operation CPlaceable::SetTransform(RwMatrix *m)
+  true
+end
+
+schema CPlaceable_SetHeading_15
+  ΔCPlaceable
+  angle? : ℝ
+  result! : void
+where
+  -- Declared member operation CPlaceable::SetHeading(float angle)
+  true
+end
+
+schema CPlaceable_SetOrientation_16
+  ΔCPlaceable
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CPlaceable::SetOrientation(float x, float y, float z)
+  true
+end
+
+schema CPlaceable_SetRotate_17
+  ΔCPlaceable
+  arg_1? : x
+  arg_2? : y
+  arg_3? : z
+  result! : m_matrix
+where
+  -- Declared member operation CPlaceable::SetRotate(x, y, z)
+  true
+end
+
+schema CPlaceable_Translate_18
+  ΔCPlaceable
+  arg_1? : pos
+  result! : m_matrix
+where
+  -- Declared member operation CPlaceable::Translate(pos)
+  true
+end
+
+schema CPlaceable_IsWithinArea_19
+  ΔCPlaceable
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : bool
+where
+  -- Declared member operation CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2)
+  true
+end
+
+schema CPlaceable_IsWithinArea_20
+  ΔCPlaceable
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2)
+  true
+end
+
+schema CPlaceable_operator_new_21
+  ΔCPlaceable
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CPlaceable::operator new(size_t)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPlaceable_CPlaceable
+  ΔCPlaceable
+where
+  -- Invokes: m_matrix.SetScale
+  true
+end
+
+schema CPlaceable_CPlaceable_2
+  ΔCPlaceable
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlaceable_SetHeading
+  ΔCPlaceable
+  angle? : ℝ
+where
+  -- State update: pos' = GetMatrix().GetPosition()
+  -- Invokes: m_matrix.SetRotateZ
+  true
+end
+
+schema CPlaceable_IsWithinArea
+  ΔCPlaceable
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+where
+  -- State update: tmp' = x1
+  -- State update: x1' = x2
+  -- State update: x2' = tmp
+  -- State update: tmp' = y1
+  -- State update: y1' = y2
+  -- State update: y2' = tmp
+  true
+end
+
+schema CPlaceable_IsWithinArea_2
+  ΔCPlaceable
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+where
+  -- State update: tmp' = x1
+  -- State update: x1' = x2
+  -- State update: x2' = tmp
+  -- State update: tmp' = y1
+  -- State update: y1' = y2
+  -- State update: y2' = tmp
+  true
+end
+
+schema Placeable_SetPosition
+  ΔPlaceableModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: x' = x
+  -- State update: y' = y
+  -- State update: z' = z
+  -- Invokes: m_matrix.GetPosition
+  true
+end
+
+schema Placeable_SetPosition_2
+  ΔPlaceableModuleState
+  pos? : CVector
+where
+  -- Invokes: m_matrix.GetPosition
+  true
+end
+
+schema Placeable_SetMatrix
+  ΔPlaceableModuleState
+  newMatrix? : CMatrix
+where
+  -- State update: m_matrix' = newMatrix
+  true
+end
+
+schema Placeable_SetTransform
+  ΔPlaceableModuleState
+  m? : Ref[RwMatrix]
+where
+  -- State update: m_matrix' = CMatrix(m, false)
+  true
+end
+
+schema Placeable_SetOrientation
+  ΔPlaceableModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: pos' = m_matrix.GetPosition()
+  -- Invokes: m_matrix.GetPosition, m_matrix.SetRotate, m_matrix.Translate
+  true
+end

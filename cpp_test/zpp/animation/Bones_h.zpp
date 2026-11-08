@@ -1,0 +1,49 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Bones (animation)
+-- Source File(s): animation/Bones.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+BoneTag ::= BONE_root | BONE_pelvis | BONE_spine | BONE_spine1 | BONE_neck | BONE_head | BONE_l_clavicle | BONE_l_upperarm | BONE_l_forearm | BONE_l_hand | BONE_l_finger | BONE_r_clavicle | BONE_r_upperarm | BONE_r_forearm | BONE_r_hand | BONE_r_finger | BONE_l_thigh | BONE_l_calf | BONE_l_foot | BONE_r_thigh | BONE_r_calf | BONE_r_foot | BONE_waist | BONE_upperlegr | BONE_lowerlegr | BONE_footr | BONE_upperlegl | BONE_lowerlegl | BONE_footl | BONE_mid | BONE_torso | BONE_upperarmr | BONE_lowerarmr | BONE_Rhand | BONE_upperarml | BONE_lowerarml | BONE_Lhand
+  -- val(BONE_root) = 0
+  -- val(BONE_pelvis) = 1
+  -- val(BONE_spine) = 2
+  -- val(BONE_spine1) = 3
+  -- val(BONE_neck) = 4
+  -- val(BONE_head) = 5
+  -- val(BONE_l_clavicle) = 31
+  -- val(BONE_l_upperarm) = 32
+  -- val(BONE_l_forearm) = 33
+  -- val(BONE_l_hand) = 34
+  -- val(BONE_l_finger) = 35
+  -- val(BONE_r_clavicle) = 21
+  -- val(BONE_r_upperarm) = 22
+  -- val(BONE_r_forearm) = 23
+  -- val(BONE_r_hand) = 24
+  -- val(BONE_r_finger) = 25
+  -- val(BONE_l_thigh) = 41
+  -- val(BONE_l_calf) = 42
+  -- val(BONE_l_foot) = 43
+  -- val(BONE_r_thigh) = 51
+  -- val(BONE_r_calf) = 52
+  -- val(BONE_r_foot) = 53
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema BonesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 49
+end

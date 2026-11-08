@@ -1,0 +1,324 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Boat (vehicles)
+-- Source File(s): vehicles/Boat.cpp, vehicles/Boat.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include World.zpp  (from "World.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Record.zpp  (from "Record.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Door.zpp  (from "Door.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+INVALID_ORIENTATION : ℝ  -- #define INVALID_ORIENTATION (-9999.99f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eBoatNodes ::= BOAT_MOVING | BOAT_WINDSCREEN | BOAT_RUDDER | BOAT_FLAP_LEFT | BOAT_FLAP_RIGHT | BOAT_REARFLAP_LEFT | BOAT_REARFLAP_RIGHT | NUM_BOAT_NODES
+  -- val(BOAT_MOVING) = 1
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBoat
+  CVehicle  -- inherits base schema
+  m_fMovingRotation : ℝ
+  m_fMovingSpeed : ℝ
+  m_boat_unused1 : ℤ
+  m_aBoatNodes : seq Ref[RwFrame]  -- bounded array [NUM_BOAT_NODES]
+  m_boom : CDoor
+  pBoatHandling : Ref[tBoatHandlingData]
+  bBoatInWater : 𝔹
+  bPropellerInWater : 𝔹
+  m_bIsAnchored : 𝔹
+  m_fOrientation : ℝ
+  m_nPoliceShoutTimer : ℕ
+  m_boat_unused2 : ℤ
+  m_fDamage : ℝ
+  m_pSetOnFireEntity : Ref[CEntity]
+  m_skimmerThingTimer : ℝ
+  m_boat_unused3 : 𝔹
+  m_fAccelerate : ℝ
+  m_fBrake : ℝ
+  m_fSteeringLeftRight : ℝ
+  m_nPadID : ℕ
+  m_boat_unused4 : ℤ
+  m_fVolumeUnderWater : ℝ
+  m_vecBuoyancePoint : CVector
+  m_fPrevVolumeUnderWater : ℝ
+  m_nDeltaVolumeUnderWater : ℤ
+  m_nNumWakePoints : ℕ
+  m_avec2dWakePoints : seq CVector2D  -- bounded array [32]
+  m_afWakePointLifeTime : seq ℝ  -- bounded array [32]
+  MAX_WAKE_LENGTH : ℝ
+  MIN_WAKE_INTERVAL : ℝ
+  WAKE_LIFETIME : ℝ
+  apFrameWakeGeneratingBoats : seq Ref[CBoat]  -- bounded array [4]
+  m_fThrustZ : ℝ
+  m_fThrustY : ℝ
+  m_vecMoveRes : CVector
+  m_vecTurnRes : CVector
+where
+  #pBoatHandling ≤ 1
+  #bBoatInWater = 1
+  #bPropellerInWater = 1
+  m_nPoliceShoutTimer ≥ 0
+  #m_pSetOnFireEntity ≤ 1
+  m_nPadID ≥ 0
+  m_nNumWakePoints ≥ 0
+  #m_avec2dWakePoints = 32
+  #m_afWakePointLifeTime = 32
+  #apFrameWakeGeneratingBoats = 4
+end
+
+schema CBoat_CBoat
+  ΔCBoat
+  arg_1? : ℤ
+  arg_2? : ℕ
+where
+  -- Declared member operation CBoat::CBoat(int, uint8)
+  true
+end
+
+schema CBoat_SetModelIndex_2
+  ΔCBoat
+  id? : ℕ
+where
+  -- Declared member operation CBoat::SetModelIndex(uint32 id)
+  true
+end
+
+schema CBoat_ProcessControl_3
+  ΔCBoat
+where
+  -- Declared member operation CBoat::ProcessControl()
+  true
+end
+
+schema CBoat_Teleport_4
+  ΔCBoat
+  v? : CVector
+where
+  -- Declared member operation CBoat::Teleport(CVector v)
+  true
+end
+
+schema CBoat_PreRender_5
+  ΔCBoat
+where
+  -- Declared member operation CBoat::PreRender(void)
+  true
+end
+
+schema CBoat_Render_6
+  ΔCBoat
+where
+  -- Declared member operation CBoat::Render(void)
+  true
+end
+
+schema CBoat_ProcessControlInputs_7
+  ΔCBoat
+  arg_1? : ℕ
+where
+  -- Declared member operation CBoat::ProcessControlInputs(uint8)
+  true
+end
+
+schema CBoat_GetComponentWorldPosition_8
+  ΔCBoat
+  component? : ℤ
+  pos? : CVector
+where
+  -- Declared member operation CBoat::GetComponentWorldPosition(int32 component, CVector &pos)
+  true
+end
+
+schema CBoat_IsComponentPresent_9
+  ΔCBoat
+  component? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CBoat::IsComponentPresent(int32 component)
+  true
+end
+
+schema CBoat_BlowUpCar_10
+  ΔCBoat
+  ent? : Ref[CEntity]
+  result! : void
+where
+  -- Declared member operation CBoat::BlowUpCar(CEntity *ent)
+  true
+end
+
+schema CBoat_RenderWaterOutPolys_11
+  ΔCBoat
+where
+  -- Declared member operation CBoat::RenderWaterOutPolys(void)
+  true
+end
+
+schema CBoat_ApplyWaterResistance_12
+  ΔCBoat
+where
+  -- Declared member operation CBoat::ApplyWaterResistance(void)
+  true
+end
+
+schema CBoat_SetupModelNodes_13
+  ΔCBoat
+where
+  -- Declared member operation CBoat::SetupModelNodes()
+  true
+end
+
+schema CBoat_PruneWakeTrail_14
+  ΔCBoat
+where
+  -- Declared member operation CBoat::PruneWakeTrail(void)
+  true
+end
+
+schema CBoat_AddWakePoint_15
+  ΔCBoat
+  point? : CVector
+where
+  -- Declared member operation CBoat::AddWakePoint(CVector point)
+  true
+end
+
+schema CBoat_DoDriveByShootings_16
+  ΔCBoat
+where
+  -- Declared member operation CBoat::DoDriveByShootings(void)
+  true
+end
+
+schema CBoat_IsSectorAffectedByWake_17
+  ΔCBoat
+  sector? : CVector2D
+  fSize? : ℝ
+  apBoats? : Ref[CBoat]
+  result! : 𝔹
+where
+  -- Declared member operation CBoat::IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats)
+  true
+end
+
+schema CBoat_IsVertexAffectedByWake_18
+  ΔCBoat
+  vecVertex? : CVector
+  pBoat? : Ref[CBoat]
+  result! : ℝ
+where
+  -- Declared member operation CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
+  true
+end
+
+schema CBoat_FillBoatList_19
+  ΔCBoat
+where
+  -- Declared member operation CBoat::FillBoatList(void)
+  true
+end
+
+schema CBoat_Load_20
+  ΔCBoat
+  buf? : ℙ ℕ
+where
+  -- Declared member operation CBoat::Load(uint8*& buf)
+  true
+end
+
+schema CBoat_PreRender_21
+  ΔCBoat
+where
+  -- Declared member operation CBoat::PreRender(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CBoat_SetModelIndex
+  ΔCBoat
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex
+  true
+end
+
+schema CBoat_GetComponentWorldPosition
+  ΔCBoat
+  component? : ℤ
+  pos? : CVector
+where
+  -- State update: pos' = *RwMatrixGetPos(RwFrameGetLTM(m_aBoatNodes[component]))
+  true
+end
+
+schema CBoat_ProcessControl
+  ΔCBoat
+where
+  -- State update: onLand' = m_fDamageImpulse > 0.0f && m_vecDamageNormal.z > 0.1f
+  -- State update: playerVeh' = FindPlayerVehicle()
+  -- State update: dropColor' = { 0, 0, 0, 0 }
+  -- State update: r' = Clamp(r, 0, 255)
+  -- State update: g' = Clamp(g, 0, 255)
+  -- State update: b' = Clamp(b, 0, 255)
+  -- Return postcondition: result! = object
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = numVerts != 0
+  -- Invokes: m_pWanted->GetWantedLevel, pDriver->GetModelIndex, playerVeh->GetVehicleAppearance, CTimer::GetTimeInMilliseconds, DMAudio.PlayOneShot
+  true
+end
+
+schema Boat_IsComponentPresent
+  ΔBoatModuleState
+  component? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end

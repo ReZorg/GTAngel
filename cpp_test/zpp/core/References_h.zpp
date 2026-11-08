@@ -1,0 +1,50 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: References (core)
+-- Source File(s): core/References.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CReference
+  next : Ref[CReference]
+  pentity : Ref[CEntity]
+where
+  #next ≤ 1
+  #pentity ≤ 1
+end
+
+schema CReferences
+  aRefs : seq CReference  -- bounded array [NUMREFERENCES]
+  pEmptyList : Ref[CReference]
+where
+  #pEmptyList ≤ 1
+end
+
+schema CReferences_Init
+  ΔCReferences
+where
+  -- Declared member operation CReferences::Init(void)
+  true
+end
+
+schema CReferences_RemoveReferencesToPlayer_2
+  ΔCReferences
+where
+  -- Declared member operation CReferences::RemoveReferencesToPlayer(void)
+  true
+end
+
+schema CReferences_PruneAllReferencesInWorld_3
+  ΔCReferences
+where
+  -- Declared member operation CReferences::PruneAllReferencesInWorld(void)
+  true
+end

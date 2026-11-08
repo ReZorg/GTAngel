@@ -1,0 +1,119 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SetPieces (control)
+-- Source File(s): control/SetPieces.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include config.zpp  (from "config.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eSetPieceType ::= SETPIECE_NONE | SETPIECE_TWOCOPCARSINALLEY | SETPIECE_CARBLOCKINGPLAYERFROMSIDE | SETPIECE_CARRAMMINGPLAYERFROMSIDE | SETPIECE_CREATECOPPERONFOOT | SETPIECE_CREATETWOCOPPERSONFOOT | SETPIECE_TWOCARSBLOCKINGPLAYERFROMSIDE | SETPIECE_TWOCARSRAMMINGPLAYERFROMSIDE
+  -- val(SETPIECE_NONE) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSetPiece
+  m_nType : ℕ
+  m_nLastTimeCreated : ℕ
+  m_vTriggerInf : CVector2D
+  m_vTriggerSup : CVector2D
+  m_vSpawn1 : CVector2D
+  m_vSpawn2 : CVector2D
+  m_vTarget1 : CVector2D
+  m_vTarget2 : CVector2D
+where
+  m_nType ≥ 0
+  m_nLastTimeCreated ≥ 0
+end
+
+schema CSetPiece_TryToGenerateCopCar
+  ΔCSetPiece
+  arg_1? : CVector2D
+  arg_2? : CVector2D
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CSetPiece::TryToGenerateCopCar(CVector2D, CVector2D)
+  true
+end
+
+schema CSetPiece_TryToGenerateCopPed_2
+  ΔCSetPiece
+  arg_1? : CVector2D
+  result! : Ref[CCopPed]
+where
+  -- Declared member operation CSetPiece::TryToGenerateCopPed(CVector2D)
+  true
+end
+
+schema CSetPiece_Update_3
+  ΔCSetPiece
+where
+  -- Declared member operation CSetPiece::Update(void)
+  true
+end
+
+schema CSetPieces
+  bDebug : 𝔹
+  NumSetPieces : ℕ
+  aSetPieces : seq CSetPiece  -- bounded array [NUM_SETPIECES]
+where
+  NumSetPieces ≥ 0
+end
+
+schema CSetPieces_Init
+  ΔCSetPieces
+where
+  -- Declared member operation CSetPieces::Init(void)
+  true
+end
+
+schema CSetPieces_AddOne_2
+  ΔCSetPieces
+  type? : ℕ
+  arg_2? : CVector2D
+  arg_3? : CVector2D
+  arg_4? : CVector2D
+  arg_5? : CVector2D
+  arg_6? : CVector2D
+  arg_7? : CVector2D
+where
+  -- Declared member operation CSetPieces::AddOne(uint8 type, CVector2D, CVector2D, CVector2D, CVector2D, CVector2D, CVector2D)
+  true
+end
+
+schema CSetPieces_Save_3
+  ΔCSetPieces
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CSetPieces::Save(uint8*, uint32*)
+  true
+end
+
+schema CSetPieces_Load_4
+  ΔCSetPieces
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Declared member operation CSetPieces::Load(uint8*, uint32)
+  true
+end
+
+schema CSetPieces_Update_5
+  ΔCSetPieces
+where
+  -- Declared member operation CSetPieces::Update(void)
+  true
+end

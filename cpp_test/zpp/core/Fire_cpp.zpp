@@ -1,0 +1,315 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Fire (core)
+-- Source File(s): core/Fire.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Vector.zpp  (from "Vector.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include World.zpp  (from "World.h")
+-- include General.zpp  (from "General.h")
+-- include EventList.zpp  (from "EventList.h")
+-- include DamageManager.zpp  (from "DamageManager.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include CarAI.zpp  (from "CarAI.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CFire_CFire
+  ΔCFire
+where
+  -- State update: m_bIsOngoing' = false
+  -- State update: m_bIsScriptFire' = false
+  -- State update: m_bPropagationFlag' = true
+  -- State update: m_bAudioSet' = true
+  -- State update: m_vecPos' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_nExtinguishTime' = 0
+  true
+end
+
+schema CFire_CFire_2
+  ΔCFire
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFire_ProcessFire
+  ΔCFire
+where
+  -- State update: ped' = (CPed *)m_pEntity
+  -- State update: veh' = (CVehicle*)m_pEntity
+  -- State update: m_vecPos' = m_pEntity.GetPosition()
+  -- State update: ped.m_pMyVehicle.m_fHealth' = 75.0f
+  -- State update: fDamagePlayer' = 1.2f * CTimer::GetTimeStep()
+  -- State update: fDamagePeds' = 1.2f * CTimer::GetTimeStep()
+  -- Invokes: CTimer::GetTimeStep, m_pEntity->GetPosition, m_pMyVehicle->IsCar, m_pEntity->IsVehicle, veh->InflictDamage
+  true
+end
+
+schema CFire_ReportThisFire
+  ΔCFire
+where
+  -- Invokes: CEventList::RegisterEvent
+  true
+end
+
+schema CFire_Extinguish
+  ΔCFire
+where
+  -- State update: m_nExtinguishTime' = 0
+  -- State update: m_bIsOngoing' = false
+  -- State update: m_bExtinguishedWithWater' = false
+  -- State update: ped' = (CPed*)m_pEntity
+  -- State update: ped.m_nLastPedState' = PED_NONE
+  -- State update: ped.m_pFire' = ∅
+  -- Invokes: m_pEntity->IsPed, ped->CanSetPedState, ped->IsPlayer, ped->SetIdle, ped->SetWanderPath
+  true
+end
+
+schema CFireManager_StartFire
+  ΔCFireManager
+  pos? : CVector
+  size? : ℝ
+  propagation? : ℕ
+where
+  -- State update: fire' = GetNextFreeFire()
+  -- State update: fire.m_bIsOngoing' = true
+  -- State update: fire.m_bIsScriptFire' = false
+  -- State update: fire.m_bPropagationFlag' = propagation
+  -- State update: fire.m_bAudioSet' = true
+  -- State update: fire.m_vecPos' = pos
+  -- Invokes: CTimer::GetTimeInMilliseconds, fire->ReportThisFire
+  true
+end
+
+schema CFireManager_StartFire_2
+  ΔCFireManager
+  entityOnFire? : Ref[CEntity]
+  fleeFrom? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : ℕ
+where
+  -- State update: ped' = (CPed *)entityOnFire
+  -- State update: veh' = (CVehicle *)entityOnFire
+  -- State update: fire' = GetNextFreeFire()
+  -- State update: ped.m_pFire' = fire
+  -- State update: pos' = entityOnFire.GetPosition()
+  -- State update: ped.m_fleeFrom' = ∅
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: entityOnFire->IsPed, ped->IsPedInControl, entityOnFire->IsVehicle, veh->IsCar, Damage.GetEngineStatus
+  true
+end
+
+schema CFireManager_Update
+  ΔCFireManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFireManager_FindNearestFire
+  ΔCFireManager
+  vecPos? : CVector
+  pDistance? : ℙ ℝ
+  result! : Ref[CFire]
+where
+  -- State update: fireId' = -1
+  -- State update: minDistance' = 999999
+  -- State update: distance' = (m_aFires[j].m_vecPos - vecPos).Magnitude2D()
+  -- State update: minDistance' = distance
+  -- State update: fireId' = j
+  -- State update: pDistance' = minDistance
+  -- Return postcondition: result! = &m_aFires[fireId]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CFireManager_FindFurthestFire_NeverMindFireMen
+  ΔCFireManager
+  coords? : CVector
+  minRange? : ℝ
+  maxRange? : ℝ
+where
+  -- State update: furthestFire' = -1
+  -- State update: lastFireDist' = 0.0f
+  -- State update: fireDist' = (m_aFires[i].m_vecPos - coords).Magnitude2D()
+  -- State update: lastFireDist' = fireDist
+  -- State update: furthestFire' = i
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = &m_aFires[furthestFire]
+  true
+end
+
+schema CFireManager_GetNextFreeFire
+  ΔCFireManager
+where
+  -- Return postcondition: result! = &m_aFires[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CFireManager_GetTotalActiveFires
+  ΞCFireManager
+where
+  -- Return postcondition: result! = m_nTotalFires
+  true
+end
+
+schema CFireManager_ExtinguishPoint
+  ΔCFireManager
+  point? : CVector
+  range? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFireManager_ExtinguishPointWithWater
+  ΔCFireManager
+  point? : CVector
+  range? : ℝ
+where
+  -- State update: fireToExtinguish' = &m_aFires[i]
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CTimer::GetTimeStep, CGeneral::GetRandomNumber, CParticle::AddParticle, fireToExtinguish->Extinguish
+  true
+end
+
+schema CFireManager_StartScriptFire
+  ΔCFireManager
+  pos? : CVector
+  target? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : ℕ
+where
+  -- State update: ped' = (CPed *)target
+  -- State update: veh' = (CVehicle *)target
+  -- State update: fire' = GetNextFreeFire()
+  -- State update: fire.m_bIsOngoing' = true
+  -- State update: fire.m_bIsScriptFire' = true
+  -- State update: fire.m_bPropagationFlag' = propagation
+  -- Return postcondition: result! = fire - m_aFires
+  -- Invokes: target->IsPed, m_pFire->Extinguish, target->IsVehicle, m_pCarFire->Extinguish, veh->IsCar
+  true
+end
+
+schema CFireManager_IsScriptFireExtinguish
+  ΔCFireManager
+  index? : ℤ
+where
+  -- Return postcondition: result! = !m_aFires[index].m_bIsOngoing
+  true
+end
+
+schema CFireManager_RemoveAllScriptFires
+  ΔCFireManager
+where
+  -- State update: m_bIsScriptFire' = false
+  true
+end
+
+schema CFireManager_RemoveScriptFire
+  ΔCFireManager
+  index? : ℤ
+where
+  -- State update: m_bIsScriptFire' = false
+  true
+end
+
+schema CFireManager_SetScriptFireAudio
+  ΔCFireManager
+  index? : ℤ
+  state? : 𝔹
+where
+  -- State update: m_bAudioSet' = state
+  true
+end
+
+schema CFireManager_StartFire_3
+  ΔCFireManager
+  pos? : CVector
+  size? : ℝ
+  propagation? : 𝔹
+where
+  -- State update: fire' = GetNextFreeFire()
+  -- State update: fire.m_bIsOngoing' = true
+  -- State update: fire.m_bIsScriptFire' = false
+  -- State update: fire.m_bPropagationFlag' = propagation
+  -- State update: fire.m_bAudioSet' = true
+  -- State update: fire.m_vecPos' = pos
+  -- Invokes: CTimer::GetTimeInMilliseconds, fire->ReportThisFire
+  true
+end
+
+schema CFireManager_StartFire_4
+  ΔCFireManager
+  entityOnFire? : Ref[CEntity]
+  fleeFrom? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : 𝔹
+where
+  -- State update: ped' = (CPed *)entityOnFire
+  -- State update: veh' = (CVehicle *)entityOnFire
+  -- State update: fire' = GetNextFreeFire()
+  -- State update: ped.m_pFire' = fire
+  -- State update: pos' = entityOnFire.GetPosition()
+  -- State update: ped.m_fleeFrom' = ∅
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: entityOnFire->IsPed, ped->IsPedInControl, entityOnFire->IsVehicle, veh->IsCar, Damage.GetEngineStatus
+  true
+end
+
+schema CFireManager_StartScriptFire_2
+  ΔCFireManager
+  pos? : CVector
+  target? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : 𝔹
+where
+  -- State update: ped' = (CPed *)target
+  -- State update: veh' = (CVehicle *)target
+  -- State update: fire' = GetNextFreeFire()
+  -- State update: fire.m_bIsOngoing' = true
+  -- State update: fire.m_bIsScriptFire' = true
+  -- State update: fire.m_bPropagationFlag' = propagation
+  -- Return postcondition: result! = fire - m_aFires
+  -- Invokes: target->IsPed, m_pFire->Extinguish, target->IsVehicle, m_pCarFire->Extinguish, veh->IsCar
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FireModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 696
+end

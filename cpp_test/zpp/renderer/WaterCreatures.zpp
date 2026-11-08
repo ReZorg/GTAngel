@@ -1,0 +1,280 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WaterCreatures (renderer)
+-- Source File(s): renderer/WaterCreatures.cpp, renderer/WaterCreatures.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include WaterCreatures.zpp  (from "WaterCreatures.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include World.zpp  (from "World.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include General.zpp  (from "General.h")
+-- include Object.zpp  (from "Object.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eFishSlotState ::= WATER_CREATURE_INIT | WATER_CREATURE_ACTIVE | WATER_CREATURE_FADE_OUT | WATER_CREATURE_REMOVE | WATER_CREATURE_DISABLED
+  -- val(WATER_CREATURE_INIT) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWaterCreature
+  m_pObj : Ref[CObject]
+  m_fFwdSpeed : ℝ
+  m_fZTurnSpeed : ℝ
+  m_alpha : ℤ
+  m_fWaterDepth : ℝ
+  m_state : ℤ
+where
+  #m_pObj ≤ 1
+end
+
+schema CWaterCreature_CWaterCreature
+  ΔCWaterCreature
+where
+  -- Declared member operation CWaterCreature::CWaterCreature()
+  true
+end
+
+schema CWaterCreature_Allocate_2
+  ΔCWaterCreature
+  pObj? : Ref[CObject]
+  fFwdSpeed? : ℝ
+  fZTurnSpeed? : ℝ
+  fWaterDepth? : ℝ
+  alpha? : ℕ
+  state? : eFishSlotState
+where
+  -- Declared member operation CWaterCreature::Allocate(CObject *pObj, float fFwdSpeed, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state)
+  true
+end
+
+schema CWaterCreature_Free_3
+  ΔCWaterCreature
+where
+  -- Declared member operation CWaterCreature::Free()
+  true
+end
+
+schema CWaterCreature_Initialise_4
+  ΔCWaterCreature
+  pObj? : Ref[CObject]
+  fFwdSpeed? : ℝ
+  fZTurnSpeed? : ℝ
+  fWaterDepth? : ℝ
+  alpha? : ℕ
+  state? : eFishSlotState
+where
+  -- Declared member operation CWaterCreature::Initialise(CObject *pObj, float fFwdSpeed, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state)
+  true
+end
+
+schema CWaterCreatures
+  aWaterCreatures : seq CWaterCreature  -- bounded array [NUM_WATER_CREATURES]
+  nNumActiveSeaLifeForms : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWaterCreatures_CreateSeaLifeForm
+  ΔCWaterCreatures
+  pos? : CVector
+  modelID? : ℤ
+  zRotAngle? : ℤ
+  result! : Ref[CObject]
+where
+  -- Declared member operation CWaterCreatures::CreateSeaLifeForm(CVector const& pos, int16 modelID, int32 zRotAngle)
+  true
+end
+
+schema CWaterCreatures_CreateOne_2
+  ΔCWaterCreatures
+  pos? : CVector
+  modelID? : ℤ
+where
+  -- Declared member operation CWaterCreatures::CreateOne(CVector const& pos, int32 modelID)
+  true
+end
+
+schema CWaterCreatures_UpdateAll_3
+  ΔCWaterCreatures
+where
+  -- Declared member operation CWaterCreatures::UpdateAll()
+  true
+end
+
+schema CWaterCreatures_FreeFishStructSlot_4
+  ΔCWaterCreatures
+  wc? : Ref[CWaterCreature]
+where
+  -- Declared member operation CWaterCreatures::FreeFishStructSlot(CWaterCreature *wc)
+  true
+end
+
+schema CWaterCreatures_IsSpaceForMoreWaterCreatures_5
+  ΔCWaterCreatures
+  result! : 𝔹
+where
+  -- Declared member operation CWaterCreatures::IsSpaceForMoreWaterCreatures()
+  true
+end
+
+schema CWaterCreatures_CalculateFishHeading_6
+  ΔCWaterCreatures
+  pos1? : CVector
+  pos2? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CWaterCreatures::CalculateFishHeading(CVector const& pos1, CVector const& pos2)
+  true
+end
+
+schema CWaterCreatures_RemoveAll_7
+  ΔCWaterCreatures
+where
+  -- Declared member operation CWaterCreatures::RemoveAll()
+  true
+end
+
+schema CWaterCreatures_GetFishStructSlot_8
+  ΔCWaterCreatures
+  result! : Ref[CWaterCreature]
+where
+  -- Declared member operation CWaterCreatures::GetFishStructSlot()
+  true
+end
+
+schema WaterCreatureProperties
+  modelID : ℙ ℤ
+  fFwdSpeed : ℝ
+  fLevel : ℝ
+  fUnknown : ℝ
+  fWaterDepth : ℝ
+where
+  #modelID ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWaterCreature_CWaterCreature
+  ΔCWaterCreature
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWaterCreature_Initialise
+  ΔCWaterCreature
+  pObj? : Ref[CObject]
+  fFwdSpeed? : ℝ
+  fZTurnSpeed? : ℝ
+  fWaterDepth? : ℝ
+  alpha? : ℕ
+  state? : eFishSlotState
+where
+  -- State update: m_pObj' = pObj
+  -- State update: m_fFwdSpeed' = fFwdSpeed
+  -- State update: m_fZTurnSpeed' = fZTurnSpeed
+  -- State update: m_fWaterDepth' = fWaterDepth
+  -- State update: m_alpha' = alpha
+  -- State update: m_state' = state
+  true
+end
+
+schema CWaterCreature_Allocate
+  ΔCWaterCreature
+  pObj? : Ref[CObject]
+  fFwdSpeed? : ℝ
+  fZTurnSpeed? : ℝ
+  fWaterDepth? : ℝ
+  alpha? : ℕ
+  state? : eFishSlotState
+where
+  -- Invokes: CWaterCreature::Initialise
+  true
+end
+
+schema CWaterCreature_Free
+  ΔCWaterCreature
+where
+  -- Invokes: CWaterCreature::Initialise
+  true
+end
+
+schema CWaterCreatures_IsSpaceForMoreWaterCreatures
+  ΔCWaterCreatures
+  result! : 𝔹
+where
+  -- Return postcondition: result! = nNumActiveSeaLifeForms < NUM_WATER_CREATURES
+  true
+end
+
+schema CWaterCreatures_CalculateFishHeading
+  ΔCWaterCreatures
+  pos1? : CVector
+  pos2? : CVector
+  result! : ℝ
+where
+  -- State update: delta' = pos1 - pos2
+  -- Invokes: delta.Normalise, CGeneral::GetRandomNumberInRange, delta.Heading
+  true
+end
+
+schema CWaterCreatures_CreateOne
+  ΔCWaterCreatures
+  pos? : CVector
+  modelID? : ℤ
+where
+  -- State update: playerPos' = FindPlayerPed().GetPosition()
+  -- State update: fishPos' = pos
+  -- State update: modelID' = CGeneral::GetRandomNumberInRange(0, 64)
+  -- State update: creature' = &aProperties[modelID]
+  -- State update: fishPos.z' = fLevelNoWaves - creature.fLevel
+  -- State update: angle' = CWaterCreatures::CalculateFishHeading(playerPos, fishPos)
+  -- Invokes: TheCamera.IsSphereVisible, CWaterLevel::GetWaterDepth, CGeneral::GetRandomNumberInRange, CWaterCreatures::CalculateFishHeading, fish->SetRwObjectAlpha
+  true
+end
+
+schema CWaterCreatures_FreeFishStructSlot
+  ΔCWaterCreatures
+  wc? : Ref[CWaterCreature]
+where
+  -- Invokes: wc->Free
+  true
+end
+
+schema CWaterCreatures_UpdateAll
+  ΔCWaterCreatures
+where
+  -- State update: playerPos' = FindPlayerPed().GetPosition()
+  -- State update: m_pObj.m_nEndOfLifeTime' = CTimer::GetTimeInMilliseconds() + 40000
+  -- State update: m_state' = WATER_CREATURE_REMOVE
+  -- State update: m_alpha' = Min(aWaterCreatures[i].m_alpha + 4, 255)
+  -- State update: fwd' = aWaterCreatures[i].m_pObj.GetRight()
+  -- State update: m_pObj.m_vecMoveSpeed' = fwd * aWaterCreatures[i].m_fFwdSpeed
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pObj->GetIsOnScreen, m_pObj->SetRwObjectAlpha, m_pObj->GetPosition, m_pObj->GetRight
+  true
+end
+
+schema CWaterCreatures_RemoveAll
+  ΔCWaterCreatures
+where
+  -- State update: m_state' = WATER_CREATURE_DISABLED
+  -- Invokes: CWorld::Remove
+  true
+end

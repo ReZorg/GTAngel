@@ -1,0 +1,144 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Skidmarks (renderer)
+-- Source File(s): renderer/Skidmarks.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSkidmarks_Init
+  ΔCSkidmarks
+where
+  -- State update: slot' = CTxdStore::FindTxdSlot("particle")
+  -- State update: gpSkidTex' = RwTextureRead("particleskid", ∅)
+  -- State update: gpSkidBloodTex' = RwTextureRead("particleskidblood", ∅)
+  -- State update: gpSkidMudTex' = RwTextureRead("particleskidmud", ∅)
+  -- State update: m_state' = 0
+  -- State update: m_wasUpdated' = false
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::FindTxdSlot, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CSkidmarks_Shutdown
+  ΔCSkidmarks
+where
+  -- State update: gpSkidTex' = ∅
+  -- State update: gpSkidBloodTex' = ∅
+  -- State update: gpSkidMudTex' = ∅
+  true
+end
+
+schema CSkidmarks_Clear
+  ΔCSkidmarks
+where
+  -- State update: m_state' = 0
+  -- State update: m_wasUpdated' = false
+  true
+end
+
+schema CSkidmarks_Update
+  ΔCSkidmarks
+where
+  -- State update: t1' = CTimer::GetTimeInMilliseconds() + 2500
+  -- State update: t2' = CTimer::GetTimeInMilliseconds() + 5000
+  -- State update: t3' = CTimer::GetTimeInMilliseconds() + 10000
+  -- State update: t4' = CTimer::GetTimeInMilliseconds() + 20000
+  -- State update: m_state' = 2
+  -- State update: m_fadeStart' = t1
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CSkidmarks_Render
+  ΔCSkidmarks
+where
+  -- State update: color' = CRGBA(0, 0, 0, 255)
+  -- State update: color' = CRGBA(90, 62, 9, 255)
+  -- State update: color' = CRGBA(108, 108, 96, 255)
+  -- State update: color' = CRGBA(132, 34, 11, 255)
+  -- State update: fade' = 255
+  -- State update: alpha' = 128
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CSkidmarks_RegisterOne
+  ΔCSkidmarks
+  id? : ℕ
+  pos? : CVector
+  fwdX? : ℝ
+  fwdY? : ℝ
+  isMuddy? : ℙ 𝔹
+  isBloody? : ℙ 𝔹
+where
+  -- State update: type' = SKIDMARK_BLOODY
+  -- State update: type' = SKIDMARK_MUDDY
+  -- State update: type' = SKIDMARK_NORMAL
+  true
+end
+
+schema CSkidmarks_RegisterOne_2
+  ΔCSkidmarks
+  id? : ℕ
+  pos? : CVector
+  fwdX? : ℝ
+  fwdY? : ℝ
+  type? : eSkidmarkType
+  isBloody? : ℙ 𝔹
+where
+  -- State update: m_state' = 2
+  -- State update: m_fadeStart' = CTimer::GetTimeInMilliseconds() + 10000
+  -- State update: m_fadeEnd' = CTimer::GetTimeInMilliseconds() + 20000
+  -- State update: m_wasUpdated' = true
+  -- State update: m_lastUpdate' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_state' = 2
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetTimeInMilliseconds, right.Normalise, fwd.Normalise
+  true
+end
+
+schema CSkidmarks_RegisterOne_3
+  ΔCSkidmarks
+  id? : ℕ
+  pos? : CVector
+  fwdX? : ℝ
+  fwdY? : ℝ
+  isMuddy? : ℙ 𝔹
+  isBloody? : ℙ 𝔹
+where
+  -- State update: m_state' = 2
+  -- State update: m_fadeStart' = CTimer::GetTimeInMilliseconds() + 10000
+  -- State update: m_fadeEnd' = CTimer::GetTimeInMilliseconds() + 20000
+  -- State update: m_wasUpdated' = true
+  -- State update: m_lastUpdate' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_state' = 2
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetTimeInMilliseconds, right.NormaliseSafe, fwd.NormaliseSafe
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SkidmarksModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 380
+end

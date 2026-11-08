@@ -1,0 +1,269 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Object (objects)
+-- Source File(s): objects/Object.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Physical.zpp  (from "Physical.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Object_Enum_1 ::= UNKNOWN_OBJECT | GAME_OBJECT | MISSION_OBJECT | TEMP_OBJECT | CUTSCENE_OBJECT | CONTROLLED_SUB_OBJECT
+  -- val(UNKNOWN_OBJECT) = 0
+  -- val(GAME_OBJECT) = 1
+  -- val(MISSION_OBJECT) = 2
+  -- val(TEMP_OBJECT) = 3
+  -- val(CUTSCENE_OBJECT) = 4
+  -- val(CONTROLLED_SUB_OBJECT) = 5
+
+CollisionSpecialResponseCase ::= COLLRESPONSE_NONE | COLLRESPONSE_LAMPOST | COLLRESPONSE_SMALLBOX | COLLRESPONSE_BIGBOX | COLLRESPONSE_FENCEPART | COLLRESPONSE_UNKNOWN5
+
+CollisionDamageEffect ::= DAMAGE_EFFECT_NONE | DAMAGE_EFFECT_CHANGE_MODEL | DAMAGE_EFFECT_SPLIT_MODEL | DAMAGE_EFFECT_SMASH_AND_DAMAGE_TRAFFICLIGHTS | DAMAGE_EFFECT_SMASH_COMPLETELY | DAMAGE_EFFECT_CHANGE_THEN_SMASH | DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY | DAMAGE_EFFECT_SMASH_YELLOW_TARGET_COMPLETELY | DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY | DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY | DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY | DAMAGE_EFFECT_SMASH_NEWSTANDNEW1 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW2 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW3 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW4 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW5 | DAMAGE_EFFECT_SMASH_BLACKBAG | DAMAGE_EFFECT_SMASH_VEGPALM | DAMAGE_EFFECT_BURST_BEACHBALL | DAMAGE_EFFECT_SMASH_BEACHLOUNGE_WOOD | DAMAGE_EFFECT_SMASH_BEACHLOUNGE_TOWEL
+  -- val(DAMAGE_EFFECT_SMASH_COMPLETELY) = 20
+  -- val(DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY) = 50
+  -- val(DAMAGE_EFFECT_SMASH_YELLOW_TARGET_COMPLETELY) = 51
+  -- val(DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY) = 60
+  -- val(DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY) = 70
+  -- val(DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY) = 80
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW1) = 91
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW2) = 92
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW3) = 93
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW4) = 94
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW5) = 95
+  -- val(DAMAGE_EFFECT_SMASH_BLACKBAG) = 100
+  -- val(DAMAGE_EFFECT_SMASH_VEGPALM) = 110
+  -- val(DAMAGE_EFFECT_BURST_BEACHBALL) = 120
+  -- val(DAMAGE_EFFECT_SMASH_BEACHLOUNGE_WOOD) = 131
+  -- val(DAMAGE_EFFECT_SMASH_BEACHLOUNGE_TOWEL) = 132
+
+Object_Enum_4 ::= UNKNOWN_OBJECT | GAME_OBJECT | MISSION_OBJECT | TEMP_OBJECT | CUTSCENE_OBJECT
+  -- val(UNKNOWN_OBJECT) = 0
+  -- val(GAME_OBJECT) = 1
+  -- val(MISSION_OBJECT) = 2
+  -- val(TEMP_OBJECT) = 3
+  -- val(CUTSCENE_OBJECT) = 4
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CObject
+  CPhysical  -- inherits base schema
+  m_objectMatrix : CMatrix
+  m_fUprootLimit : ℝ
+  ObjectCreatedBy : ℤ
+  bIsPickup : 𝔹
+  bAmmoCollected : 𝔹
+  bPickupObjWithMessage : 𝔹
+  bOutOfStock : 𝔹
+  bGlassCracked : 𝔹
+  bGlassBroken : 𝔹
+  bHasBeenDamaged : 𝔹
+  bUseVehicleColours : 𝔹
+  bIsWeapon : 𝔹
+  bIsStreetLight : 𝔹
+  m_nBonusValue : ℤ
+  m_nLastWeaponToDamage : ℤ
+  m_nCostValue : ℕ
+  m_fCollisionDamageMultiplier : ℝ
+  m_nCollisionDamageEffect : ℕ
+  m_nSpecialCollisionResponseCases : ℕ
+  m_bCameraToAvoidThisObject : 𝔹
+  m_nBeachballBounces : ℕ
+  m_obj_unused1 : ℕ
+  m_nEndOfLifeTime : ℕ
+  m_nRefModelIndex : ℤ
+  m_pCurSurface : Ref[CEntity]
+  m_pCollidingEntity : Ref[CEntity]
+  m_colour2 : ℤ
+  nNoTempObjects : ℤ
+  fDistToNearestTree : ℝ
+  nBodyCastHealth : ℤ
+where
+  #bIsPickup = 1
+  #bAmmoCollected = 1
+  #bPickupObjWithMessage = 1
+  #bOutOfStock = 1
+  #bGlassCracked = 1
+  #bGlassBroken = 1
+  #bHasBeenDamaged = 1
+  #bUseVehicleColours = 1
+  #bIsWeapon = 1
+  #bIsStreetLight = 1
+  m_nCostValue ≥ 0
+  m_nCollisionDamageEffect ≥ 0
+  m_nSpecialCollisionResponseCases ≥ 0
+  m_nBeachballBounces ≥ 0
+  m_obj_unused1 ≥ 0
+  m_nEndOfLifeTime ≥ 0
+end
+
+schema CObject_operator_new
+  ΔCObject
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CObject::operator new(size_t)
+  true
+end
+
+schema CObject_operator_new_2
+  ΔCObject
+  arg_1? : ℕ
+  arg_2? : ℤ
+  result! : ADDRESS
+where
+  -- Declared member operation CObject::operator new(size_t, int)
+  true
+end
+
+schema CObject_operator_delete_3
+  ΔCObject
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CObject::operator delete(void*, size_t)
+  true
+end
+
+schema CObject_operator_delete_4
+  ΔCObject
+  arg_1? : ADDRESS
+  arg_2? : ℤ
+where
+  -- Declared member operation CObject::operator delete(void*, int)
+  true
+end
+
+schema CObject_CObject_5
+  ΔCObject
+where
+  -- Declared member operation CObject::CObject(void)
+  true
+end
+
+schema CObject_CObject_6
+  ΔCObject
+  arg_1? : ℤ
+  arg_2? : 𝔹
+where
+  -- Declared member operation CObject::CObject(int32, bool)
+  true
+end
+
+schema CObject_CObject_7
+  ΔCObject
+  arg_1? : Ref[CDummyObject]
+where
+  -- Declared member operation CObject::CObject(CDummyObject*)
+  true
+end
+
+schema CObject_CObject_8
+  ΔCObject
+  result! : ANY
+where
+  -- Declared member operation CObject::CObject(void)
+  true
+end
+
+schema CObject_ProcessControl_9
+  ΔCObject
+where
+  -- Declared member operation CObject::ProcessControl(void)
+  true
+end
+
+schema CObject_Teleport_10
+  ΔCObject
+  vecPos? : CVector
+where
+  -- Declared member operation CObject::Teleport(CVector vecPos)
+  true
+end
+
+schema CObject_Render_11
+  ΔCObject
+where
+  -- Declared member operation CObject::Render(void)
+  true
+end
+
+schema CObject_SetupLighting_12
+  ΔCObject
+  result! : 𝔹
+where
+  -- Declared member operation CObject::SetupLighting(void)
+  true
+end
+
+schema CObject_RemoveLighting_13
+  ΔCObject
+  reset? : 𝔹
+where
+  -- Declared member operation CObject::RemoveLighting(bool reset)
+  true
+end
+
+schema CObject_ObjectDamage_14
+  ΔCObject
+  amount? : ℝ
+where
+  -- Declared member operation CObject::ObjectDamage(float amount)
+  true
+end
+
+schema CObject_RefModelInfo_15
+  ΔCObject
+  modelId? : ℤ
+where
+  -- Declared member operation CObject::RefModelInfo(int32 modelId)
+  true
+end
+
+schema CObject_Init_16
+  ΔCObject
+where
+  -- Declared member operation CObject::Init(void)
+  true
+end
+
+schema CObject_CanBeDeleted_17
+  ΔCObject
+  result! : 𝔹
+where
+  -- Declared member operation CObject::CanBeDeleted(void)
+  true
+end
+
+schema CObject_DeleteAllMissionObjects_18
+  ΔCObject
+where
+  -- Declared member operation CObject::DeleteAllMissionObjects()
+  true
+end
+
+schema CObject_DeleteAllTempObjects_19
+  ΔCObject
+where
+  -- Declared member operation CObject::DeleteAllTempObjects()
+  true
+end
+
+schema CObject_DeleteAllTempObjectsInArea_20
+  ΔCObject
+  point? : CVector
+  fRadius? : ℝ
+where
+  -- Declared member operation CObject::DeleteAllTempObjectsInArea(CVector point, float fRadius)
+  true
+end

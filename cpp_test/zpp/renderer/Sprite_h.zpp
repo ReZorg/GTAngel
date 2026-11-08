@@ -1,0 +1,278 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Sprite (renderer)
+-- Source File(s): renderer/Sprite.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSprite
+  m_f2DNearScreenZ : ℝ
+  m_f2DFarScreenZ : ℝ
+  m_fRecipNearClipPlane : ℝ
+  m_bFlushSpriteBufferSwitchZTest : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSprite_GetNearScreenZ
+  ΔCSprite
+  result! : ℝ
+where
+  -- Declared member operation CSprite::GetNearScreenZ(void)
+  true
+end
+
+schema CSprite_GetFarScreenZ_2
+  ΔCSprite
+  result! : ℝ
+where
+  -- Declared member operation CSprite::GetFarScreenZ(void)
+  true
+end
+
+schema CSprite_CalcHorizonCoors_3
+  ΔCSprite
+  result! : ℝ
+where
+  -- Declared member operation CSprite::CalcHorizonCoors(void)
+  true
+end
+
+schema CSprite_CalcScreenCoors_4
+  ΔCSprite
+  in? : RwV3d
+  out? : Ref[RwV3d]
+  outw? : ℙ ℝ
+  outh? : ℙ ℝ
+  farclip? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, bool farclip)
+  true
+end
+
+schema CSprite_InitSpriteBuffer_5
+  ΔCSprite
+where
+  -- Declared member operation CSprite::InitSpriteBuffer(void)
+  true
+end
+
+schema CSprite_InitSpriteBuffer2D_6
+  ΔCSprite
+where
+  -- Declared member operation CSprite::InitSpriteBuffer2D(void)
+  true
+end
+
+schema CSprite_FlushSpriteBuffer_7
+  ΔCSprite
+where
+  -- Declared member operation CSprite::FlushSpriteBuffer(void)
+  true
+end
+
+schema CSprite_RenderOneXLUSprite_8
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  a? : ℕ
+where
+  -- Declared member operation CSprite::RenderOneXLUSprite(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, uint8 a)
+  true
+end
+
+schema CSprite_RenderOneXLUSprite_Rotate_Aspect_9
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  roll? : ℝ
+  a? : ℕ
+where
+  -- Declared member operation CSprite::RenderOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float roll, uint8 a)
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_10
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  a? : ℕ
+where
+  -- Declared member operation CSprite::RenderBufferedOneXLUSprite(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, uint8 a)
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_Rotate_Dimension_11
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  roll? : ℝ
+  a? : ℕ
+where
+  -- Declared member operation CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float roll, uint8 a)
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_Rotate_Aspect_12
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  roll? : ℝ
+  a? : ℕ
+where
+  -- Declared member operation CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float roll, uint8 a)
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_Rotate_2Colours_13
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r1? : ℕ
+  g1? : ℕ
+  b1? : ℕ
+  r2? : ℕ
+  g2? : ℕ
+  b2? : ℕ
+  cx? : ℝ
+  cy? : ℝ
+  recipz? : ℝ
+  rotation? : ℝ
+  a? : ℕ
+where
+  -- Declared member operation CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float x, float y, float z, float w, float h, uint8 r1, uint8 g1, uint8 b1, uint8 r2, uint8 g2, uint8 b2, float cx, float cy, float recipz, float rotation, uint8 a)
+  true
+end
+
+schema CSprite_Set6Vertices2D_14
+  ΔCSprite
+  verts? : Ref[RwIm2DVertex]
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite_Set6Vertices2D_15
+  ΔCSprite
+  verts? : Ref[RwIm2DVertex]
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite::Set6Vertices2D(RwIm2DVertex *verts, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite2D_16
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  w? : ℝ
+  h? : ℝ
+  colour? : RwRGBA
+  intens? : ℤ
+  alpha? : ℕ
+where
+  -- Declared member operation CSprite::RenderBufferedOneXLUSprite2D(float x, float y, float w, float h, const RwRGBA &colour, int16 intens, uint8 alpha)
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite2D_Rotate_Dimension_17
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  w? : ℝ
+  h? : ℝ
+  colour? : RwRGBA
+  intens? : ℤ
+  rotation? : ℝ
+  alpha? : ℕ
+where
+  -- Declared member operation CSprite::RenderBufferedOneXLUSprite2D_Rotate_Dimension(float x, float y, float w, float h, const RwRGBA &colour, int16 intens, float rotation, uint8 alpha)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Sprite_GetNearScreenZ
+  ΔSpriteModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_f2DNearScreenZ
+  true
+end
+
+schema Sprite_GetFarScreenZ
+  ΔSpriteModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_f2DFarScreenZ
+  true
+end

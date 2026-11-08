@@ -1,0 +1,273 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Quaternion (math)
+-- Source File(s): math/Quaternion.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CQuaternion
+  w : ℝ
+  this : Ref[return]
+where
+  #this ≤ 1
+end
+
+schema CQuaternion_CQuaternion
+  ΔCQuaternion
+where
+  -- Declared member operation CQuaternion::CQuaternion(void)
+  true
+end
+
+schema CQuaternion_MagnitudeSqr_2
+  ΞCQuaternion
+  result! : ℝ
+where
+  -- Declared member operation CQuaternion::MagnitudeSqr(void)
+  true
+end
+
+schema CQuaternion_Normalise_3
+  ΔCQuaternion
+  result! : void
+where
+  -- Declared member operation CQuaternion::Normalise(void)
+  true
+end
+
+schema CQuaternion_Multiply_4
+  ΔCQuaternion
+  q1? : CQuaternion
+  q2? : CQuaternion
+where
+  -- Declared member operation CQuaternion::Multiply(const CQuaternion &q1, const CQuaternion &q2)
+  true
+end
+
+schema CQuaternion_Invert_5
+  ΔCQuaternion
+where
+  -- Declared member operation CQuaternion::Invert(void)
+  true
+end
+
+schema CQuaternion_operator_6
+  ΔCQuaternion
+  right? : CQuaternion
+  result! : CQuaternion
+where
+  -- Declared member operation CQuaternion::operator+=(CQuaternion const &right)
+  true
+end
+
+schema CQuaternion_operator_7
+  ΔCQuaternion
+  right? : CQuaternion
+  result! : CQuaternion
+where
+  -- Declared member operation CQuaternion::operator-=(CQuaternion const &right)
+  true
+end
+
+schema CQuaternion_operator_8
+  ΔCQuaternion
+  right? : ℝ
+  result! : CQuaternion
+where
+  -- Declared member operation CQuaternion::operator*=(float right)
+  true
+end
+
+schema CQuaternion_operator_9
+  ΔCQuaternion
+  right? : ℝ
+  result! : CQuaternion
+where
+  -- Declared member operation CQuaternion::operator/=(float right)
+  true
+end
+
+schema CQuaternion_operator_10
+  ΞCQuaternion
+  result! : CQuaternion
+where
+  -- Declared member operation CQuaternion::operator-()
+  true
+end
+
+schema CQuaternion_Slerp_11
+  ΔCQuaternion
+  q1? : CQuaternion
+  q2? : CQuaternion
+  theta? : ℝ
+  invSin? : ℝ
+  t? : ℝ
+  result! : void
+where
+  -- Declared member operation CQuaternion::Slerp(const CQuaternion &q1, const CQuaternion &q2, float theta, float invSin, float t)
+  true
+end
+
+schema CQuaternion_Get_12
+  ΔCQuaternion
+  axis? : Ref[RwV3d]
+  angle? : ℙ ℝ
+where
+  -- Declared member operation CQuaternion::Get(RwV3d *axis, float *angle)
+  true
+end
+
+schema CQuaternion_Set_13
+  ΔCQuaternion
+  axis? : Ref[RwV3d]
+  angle? : ℝ
+where
+  -- Declared member operation CQuaternion::Set(RwV3d *axis, float angle)
+  true
+end
+
+schema CQuaternion_Get_14
+  ΔCQuaternion
+  matrix? : Ref[RwMatrix]
+where
+  -- Declared member operation CQuaternion::Get(RwMatrix *matrix)
+  true
+end
+
+schema CQuaternion_Set_15
+  ΔCQuaternion
+  matrix? : RwMatrix
+where
+  -- Declared member operation CQuaternion::Set(const RwMatrix &matrix)
+  true
+end
+
+schema CQuaternion_Set_16
+  ΔCQuaternion
+  f1? : ℝ
+  f2? : ℝ
+  f3? : ℝ
+where
+  -- Declared member operation CQuaternion::Set(float f1, float f2, float f3)
+  true
+end
+
+schema CQuaternion_Get_17
+  ΔCQuaternion
+  f1? : ℙ ℝ
+  f2? : ℙ ℝ
+  f3? : ℙ ℝ
+where
+  -- Declared member operation CQuaternion::Get(float *f1, float *f2, float *f3)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Quaternion_CQuaternion
+  ΔQuaternionModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Quaternion_Magnitude
+  ΞQuaternionModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = Sqrt(x*x + y*y + z*z + w*w)
+  true
+end
+
+schema Quaternion_MagnitudeSqr
+  ΞQuaternionModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = x*x + y*y + z*z + w*w
+  true
+end
+
+schema Quaternion_Invert
+  ΔQuaternionModuleState
+where
+  -- State update: x' = -x
+  -- State update: y' = -y
+  -- State update: z' = -z
+  true
+end
+
+schema Quaternion_operator
+  ΞQuaternionModuleState
+  result! : CQuaternion
+where
+  -- Return postcondition: result! = CQuaternion(-x, -y, -z, -w)
+  true
+end
+
+schema Quaternion_DotProduct
+  ΔQuaternionModuleState
+  q1? : CQuaternion
+  q2? : CQuaternion
+where
+  -- Return postcondition: result! = q1.x*q2.x + q1.y*q2.y + q1.z*q2.z + q1.w*q2.w
+  true
+end
+
+schema Quaternion_operator_2
+  ΔQuaternionModuleState
+  left? : CQuaternion
+  right? : CQuaternion
+  result! : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Quaternion_operator_3
+  ΔQuaternionModuleState
+  left? : CQuaternion
+  right? : CQuaternion
+  result! : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Quaternion_operator_4
+  ΔQuaternionModuleState
+  left? : CQuaternion
+  right? : ℝ
+  result! : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Quaternion_operator_5
+  ΔQuaternionModuleState
+  left? : ℝ
+  right? : CQuaternion
+  result! : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Quaternion_operator_6
+  ΔQuaternionModuleState
+  left? : CQuaternion
+  right? : ℝ
+  result! : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

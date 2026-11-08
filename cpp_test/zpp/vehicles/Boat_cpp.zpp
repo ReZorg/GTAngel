@@ -1,0 +1,97 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Boat (vehicles)
+-- Source File(s): vehicles/Boat.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include World.zpp  (from "World.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Record.zpp  (from "Record.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+INVALID_ORIENTATION : ℝ  -- #define INVALID_ORIENTATION (-9999.99f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CBoat_SetModelIndex
+  ΔCBoat
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex
+  true
+end
+
+schema CBoat_GetComponentWorldPosition
+  ΔCBoat
+  component? : ℤ
+  pos? : CVector
+where
+  -- State update: pos' = *RwMatrixGetPos(RwFrameGetLTM(m_aBoatNodes[component]))
+  true
+end
+
+schema CBoat_ProcessControl
+  ΔCBoat
+where
+  -- State update: onLand' = m_fDamageImpulse > 0.0f && m_vecDamageNormal.z > 0.1f
+  -- State update: playerVeh' = FindPlayerVehicle()
+  -- State update: dropColor' = { 0, 0, 0, 0 }
+  -- State update: r' = Clamp(r, 0, 255)
+  -- State update: g' = Clamp(g, 0, 255)
+  -- State update: b' = Clamp(b, 0, 255)
+  -- Return postcondition: result! = object
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = numVerts != 0
+  -- Invokes: m_pWanted->GetWantedLevel, pDriver->GetModelIndex, playerVeh->GetVehicleAppearance, CTimer::GetTimeInMilliseconds, DMAudio.PlayOneShot
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema BoatModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1550
+end

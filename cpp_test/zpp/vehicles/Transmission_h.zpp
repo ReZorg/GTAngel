@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Transmission (vehicles)
+-- Source File(s): vehicles/Transmission.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tGear
+  fMaxVelocity : ℝ
+  fShiftUpVelocity : ℝ
+  fShiftDownVelocity : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cTransmission
+  Gears : seq tGear  -- bounded array [6]
+  nDriveType : seq CHAR
+  nEngineType : seq CHAR
+  nNumberOfGears : ℤ
+  Flags : ℕ
+  fEngineAcceleration : ℝ
+  fEngineInertia : ℝ
+  fMaxVelocity : ℝ
+  fMaxCruiseVelocity : ℝ
+  fMaxReverseVelocity : ℝ
+  fCurVelocity : ℝ
+where
+  #Gears = 6
+  Flags ≥ 0
+end
+
+schema cTransmission_InitGearRatios
+  ΔcTransmission
+where
+  -- Declared member operation cTransmission::InitGearRatios(void)
+  true
+end
+
+schema cTransmission_CalculateGearForSimpleCar_2
+  ΔcTransmission
+  speed? : ℝ
+  gear? : ℕ
+where
+  -- Declared member operation cTransmission::CalculateGearForSimpleCar(float speed, uint8 &gear)
+  true
+end
+
+schema cTransmission_CalculateDriveAcceleration_3
+  ΔcTransmission
+  gasPedal? : ℝ
+  gear? : ℕ
+  time? : ℝ
+  velocity? : ℝ
+  inertiaVar1? : ℙ ℝ
+  inertiaVar2? : ℙ ℝ
+  nDriveWheels? : ℕ
+  cheat? : ℕ
+  result! : ℝ
+where
+  -- Declared member operation cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, float &time, const float &velocity, float *inertiaVar1, float *inertiaVar2, uint8 nDriveWheels, uint8 cheat)
+  true
+end
+
+schema cTransmission_CalculateDriveAcceleration_4
+  ΔcTransmission
+  gasPedal? : ℝ
+  gear? : ℕ
+  time? : ℝ
+  velocity? : ℝ
+  cheat? : 𝔹
+  result! : ℝ
+where
+  -- Declared member operation cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, float &time, const float &velocity, bool cheat)
+  true
+end

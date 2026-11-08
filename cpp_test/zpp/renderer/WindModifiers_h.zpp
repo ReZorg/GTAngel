@@ -1,0 +1,42 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WindModifiers (renderer)
+-- Source File(s): renderer/WindModifiers.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWindModifiers
+  m_pos : CVector
+  m_type : ℤ
+  Number : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWindModifiers_RegisterOne
+  ΔCWindModifiers
+  pos? : CVector
+  windSourceType? : ℤ
+where
+  -- Declared member operation CWindModifiers::RegisterOne(CVector pos, int32 windSourceType)
+  true
+end
+
+schema CWindModifiers_FindWindModifier_2
+  ΔCWindModifiers
+  pos? : CVector
+  x? : ℙ ℝ
+  y? : ℙ ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWindModifiers::FindWindModifier(CVector pos, float *x, float *y)
+  true
+end

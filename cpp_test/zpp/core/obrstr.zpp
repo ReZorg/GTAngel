@@ -1,0 +1,109 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: obrstr (core)
+-- Source File(s): core/obrstr.cpp, core/obrstr.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include obrstr.zpp  (from "obrstr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema obrstr_ObrInt
+  ΔobrstrModuleState
+  n1? : ℤ
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema obrstr_ObrInt2
+  ΔobrstrModuleState
+  n1? : ℤ
+  n2? : ℤ
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema obrstr_ObrInt3
+  ΔobrstrModuleState
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema obrstr_ObrInt4
+  ΔobrstrModuleState
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema obrstr_ObrInt5
+  ΔobrstrModuleState
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema obrstr_ObrInt6
+  ΔobrstrModuleState
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema obrstr_IntToStr
+  ΔobrstrModuleState
+  inNum? : ℤ
+  outStr? : seq CHAR
+where
+  -- State update: isNeg' = inNum < 0
+  -- State update: inNum' = -inNum
+  -- State update: outStr' = '-'
+  -- State update: digits' = 1
+  -- State update: _inNum' = inNum
+  -- State update: strSize' = digits
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema obrstrModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 128
+end

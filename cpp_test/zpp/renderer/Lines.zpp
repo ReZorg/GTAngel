@@ -1,0 +1,65 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Lines (renderer)
+-- Source File(s): renderer/Lines.cpp, renderer/Lines.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Lines.zpp  (from "Lines.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CLines
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CLines_RenderLineWithClipping
+  ΔCLines
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- Declared member operation CLines::RenderLineWithClipping(float x1, float y1, float z1, float x2, float y2, float z2, uint32 c1, uint32 c2)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CLines_RenderLineWithClipping
+  ΔCLines
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- State update: len' = sqrt(sq(x1-x2) + sq(y1-y2) + sq(z1-z2))
+  -- State update: numsegs' = len/1.5f + 1.0f
+  -- State update: col1.red' = c1>>24
+  -- State update: col1.green' = c1>>16
+  -- State update: col1.blue' = c1>>8
+  -- State update: col1.alpha' = c1
+  true
+end

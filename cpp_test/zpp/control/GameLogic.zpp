@@ -1,0 +1,262 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: GameLogic (control)
+-- Source File(s): control/GameLogic.cpp, control/GameLogic.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include References.zpp  (from "References.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Script.zpp  (from "Script.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Population.zpp  (from "Population.h")
+-- include General.zpp  (from "General.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include screendroplets.zpp  (from "screendroplets.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SHORTCUT_TAXI_COST : seq CHAR  -- #define SHORTCUT_TAXI_COST (9)
+TOTAL_BUSTED_AUDIO : seq CHAR  -- #define TOTAL_BUSTED_AUDIO (28)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+GameLogic_Enum_1 ::= SHORTCUT_NONE | SHORTCUT_INIT | SHORTCUT_IDLE | SHORTCUT_GETTING_IN | SHORTCUT_TRANSITION | SHORTCUT_ARRIVING | SHORTCUT_GETTING_OUT
+  -- val(SHORTCUT_NONE) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CGameLogic
+  ActivePlayers : ℕ
+  ShortCutState : ℕ
+  pShortCutTaxi : Ref[CAutomobile]
+  NumAfterDeathStartPoints : ℕ
+  ShortCutStart : CVector
+  ShortCutStartOrientation : ℝ
+  ShortCutDestination : CVector
+  ShortCutDestinationOrientation : ℝ
+  ShortCutTimer : ℕ
+  AfterDeathStartPoints : seq CVector  -- bounded array [NUM_SHORTCUT_START_POINTS]
+  AfterDeathStartPointOrientation : seq ℝ  -- bounded array [NUM_SHORTCUT_START_POINTS]
+  ShortCutDropOffForMission : CVector
+  ShortCutDropOffOrientationForMission : ℝ
+  MissionDropOffReadyToBeUsed : 𝔹
+  mStoredPlayerOutfit : seq CHAR
+where
+  ActivePlayers ≥ 0
+  ShortCutState ≥ 0
+  #pShortCutTaxi ≤ 1
+  NumAfterDeathStartPoints ≥ 0
+  ShortCutTimer ≥ 0
+  #mStoredPlayerOutfit = 8
+end
+
+schema CGameLogic_InitAtStartOfGame
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::InitAtStartOfGame()
+  true
+end
+
+schema CGameLogic_PassTime_2
+  ΔCGameLogic
+  time? : ℕ
+where
+  -- Declared member operation CGameLogic::PassTime(uint32 time)
+  true
+end
+
+schema CGameLogic_SortOutStreamingAndMemory_3
+  ΔCGameLogic
+  pos? : CVector
+where
+  -- Declared member operation CGameLogic::SortOutStreamingAndMemory(const CVector &pos)
+  true
+end
+
+schema CGameLogic_Update_4
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::Update()
+  true
+end
+
+schema CGameLogic_RestorePlayerStuffDuringResurrection_5
+  ΔCGameLogic
+  pPlayerPed? : Ref[class_CPlayerPed]
+  pos? : CVector
+  angle? : ℝ
+where
+  -- Declared member operation CGameLogic::RestorePlayerStuffDuringResurrection(class CPlayerPed *pPlayerPed, CVector pos, float angle)
+  true
+end
+
+schema CGameLogic_ClearShortCut_6
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::ClearShortCut()
+  true
+end
+
+schema CGameLogic_SetUpShortCut_7
+  ΔCGameLogic
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : CVector
+  arg_4? : ℝ
+where
+  -- Declared member operation CGameLogic::SetUpShortCut(CVector, float, CVector, float)
+  true
+end
+
+schema CGameLogic_AbandonShortCutIfTaxiHasBeenMessedWith_8
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::AbandonShortCutIfTaxiHasBeenMessedWith()
+  true
+end
+
+schema CGameLogic_AbandonShortCutIfPlayerMilesAway_9
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::AbandonShortCutIfPlayerMilesAway()
+  true
+end
+
+schema CGameLogic_UpdateShortCut_10
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::UpdateShortCut()
+  true
+end
+
+schema CGameLogic_AddShortCutPointAfterDeath_11
+  ΔCGameLogic
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CGameLogic::AddShortCutPointAfterDeath(CVector, float)
+  true
+end
+
+schema CGameLogic_AddShortCutDropOffPointForMission_12
+  ΔCGameLogic
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CGameLogic::AddShortCutDropOffPointForMission(CVector, float)
+  true
+end
+
+schema CGameLogic_RemoveShortCutDropOffPointForMission_13
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::RemoveShortCutDropOffPointForMission()
+  true
+end
+
+schema CGameLogic_AfterDeathArrestSetUpShortCutTaxi_14
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::AfterDeathArrestSetUpShortCutTaxi()
+  true
+end
+
+schema CGameLogic_Save_15
+  ΔCGameLogic
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CGameLogic::Save(uint8*, uint32*)
+  true
+end
+
+schema CGameLogic_Load_16
+  ΔCGameLogic
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Declared member operation CGameLogic::Load(uint8*, uint32)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CGameLogic_InitAtStartOfGame
+  ΔCGameLogic
+where
+  -- State update: ActivePlayers' = 1
+  -- State update: ShortCutState' = SHORTCUT_NONE
+  -- State update: pShortCutTaxi' = ∅
+  -- State update: NumAfterDeathStartPoints' = 0
+  true
+end
+
+schema CGameLogic_PassTime
+  ΔCGameLogic
+  time? : ℕ
+where
+  -- State update: minutes' = time + CClock::GetMinutes()
+  -- State update: hours' = CClock::GetHours()
+  -- State update: days' = CStats::DaysPassed
+  -- State update: DaysPassed' = days
+  -- Invokes: CClock::GetMinutes, CClock::GetHours, CClock::SetGameClock, CPickups::PassTime
+  true
+end
+
+schema CGameLogic_SortOutStreamingAndMemory
+  ΔCGameLogic
+  pos? : CVector
+where
+  -- Invokes: CTimer::Stop, CStreaming::FlushRequestList, CStreaming::DeleteRwObjectsAfterDeath, CStreaming::RemoveUnusedModelsInLoadedList, CGame::DrasticTidyUpMemory
+  true
+end
+
+schema CGameLogic_Update
+  ΔCGameLogic
+where
+  -- State update: pScript' = CTheScripts::pActiveScripts
+  -- State update: gbTryingPorn4Again' = false
+  -- State update: pPlayerInfo' = CWorld::Players[CWorld::PlayerInFocus]
+  -- State update: pPlayerInfo.m_WBState' = WBSTATE_PLAYING
+  -- State update: pPlayerInfo.m_bGetOutOfHospitalFree' = false
+  -- State update: pPlayerInfo.m_nMoney' = Max(0, pPlayerInfo.m_nMoney - 100)
+  -- Invokes: CGeneral::faststricmp, CCutsceneMgr::IsCutsceneProcessing, m_pPed->ClearAdrenaline, pPlayerInfo.KillPlayer, pPlayerInfo.ArrestPlayer
+  true
+end

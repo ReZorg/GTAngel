@@ -1,0 +1,21 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RpAnimBlend (animation)
+-- Source File(s): animation/RpAnimBlend.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema AnimBlendFrameUpdateData
+  foobar : ℤ
+  nodes : seq Ref[CAnimBlendNode]  -- bounded array [16]
+where
+  #nodes = 16
+end

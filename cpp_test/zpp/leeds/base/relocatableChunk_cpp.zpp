@@ -1,0 +1,222 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: relocatableChunk (leeds)
+-- Source File(s): leeds/base/relocatableChunk.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include relocatableChunk.zpp  (from "relocatableChunk.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cRelocatableChunk_Load
+  ΔcRelocatableChunk
+  data? : ADDRESS
+  bShrink? : 𝔹
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema cRelocatableChunk_Load_2
+  ΔcRelocatableChunk
+  name? : seq CHAR
+  bShrink? : 𝔹
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema cRelocatableChunk_Fixup
+  ΔcRelocatableChunk
+  header? : sChunkHeader
+  data? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunk_Fixup_2
+  ΔcRelocatableChunk
+  data? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunk_Shrink
+  ΔcRelocatableChunk
+  header? : sChunkHeader
+  data? : ADDRESS
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema cRelocatableChunk_Shrink_2
+  ΔcRelocatableChunk
+  data? : ADDRESS
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema cRelocatableChunkClassInfo_cRelocatableChunkClassInfo
+  ΔcRelocatableChunkClassInfo
+  class_name? : seq CHAR
+  pVmt? : ADDRESS
+  size? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_cRelocatableChunkWriter
+  ΔcRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_cRelocatableChunkWriter_2
+  ΔcRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_AddPatch
+  ΔcRelocatableChunkWriter
+  addr? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_AddPatchWithInfo
+  ΔcRelocatableChunkWriter
+  str? : seq CHAR
+  unk? : ℤ
+  addr? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_AllocateRaw
+  ΔcRelocatableChunkWriter
+  addr? : ADDRESS
+  size? : ℕ
+  align? : ℕ
+  a5? : 𝔹
+  a6? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_Clear
+  ΔcRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_Class
+  ΔcRelocatableChunkWriter
+  ptr? : ADDRESS
+  classInfo? : cRelocatableChunkClassInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_DebugFileLine
+  ΔcRelocatableChunkWriter
+  arg_1? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_PatchFunc
+  ΔcRelocatableChunkWriter
+  ptr? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_IsAllocated
+  ΔcRelocatableChunkWriter
+  addr? : ADDRESS
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema cRelocatableChunkWriter_Reserve
+  ΔcRelocatableChunkWriter
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_Save
+  ΔcRelocatableChunkWriter
+  filename? : seq CHAR
+  a3? : ℕ
+  a4? : ℕ
+  a5? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cRelocatableChunkWriter_Save_2
+  ΔcRelocatableChunkWriter
+  file? : ADDRESS
+  a3? : ℕ
+  a4? : ℕ
+  a5? : 𝔹
+  pHeader? : Ref[sChunkHeader]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema relocatableChunk_RegisterRelocatableChunkFunc
+  ΔrelocatableChunkModuleState
+  func? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema relocatableChunkModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 38
+end

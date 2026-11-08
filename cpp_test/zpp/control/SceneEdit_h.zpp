@@ -1,0 +1,169 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SceneEdit (control)
+-- Source File(s): control/SceneEdit.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+SceneEdit_Enum_1 ::= MOVIE_DO_NOTHING | MOVIE_NEW_ACTOR | MOVIE_MOVE_ACTOR | MOVIE_SELECT_ACTOR | MOVIE_DELETE_ACTOR | MOVIE_NEW_VEHICLE | MOVIE_MOVE_VEHICLE | MOVIE_SELECT_VEHICLE | MOVIE_DELETE_VEHICLE | MOVIE_GIVE_WEAPON | MOVIE_GOTO | MOVIE_GOTO_WAIT | MOVIE_GET_IN_CAR | MOVIE_GET_OUT_CAR | MOVIE_KILL | MOVIE_FLEE | MOVIE_WAIT | MOVIE_POSITION_CAMERA | MOVIE_SET_CAMERA_TARGET | MOVIE_SELECT_CAMERA_MODE | MOVIE_SAVE_MOVIE | MOVIE_LOAD_MOVIE | MOVIE_PLAY_MOVIE | MOVIE_END | MOVIE_TOTAL_COMMANDS
+  -- val(MOVIE_DO_NOTHING) = 0
+
+SceneEdit_Enum_2 ::= NUM_ACTORS_IN_MOVIE | NUM_VEHICLES_IN_MOVIE | NUM_COMMANDS_IN_MOVIE
+  -- val(NUM_ACTORS_IN_MOVIE) = 5
+  -- val(NUM_VEHICLES_IN_MOVIE) = 5
+  -- val(NUM_COMMANDS_IN_MOVIE) = 20
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CMovieCommand
+  m_nCommandId : ℤ
+  m_vecPosition : CVector
+  m_vecCamera : CVector
+  m_nActorId : ℤ
+  m_nActor2Id : ℤ
+  m_nVehicleId : ℤ
+  m_nModelIndex : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSceneEdit
+  m_bCameraFollowActor : ℤ
+  m_vecCurrentPosition : CVector
+  m_vecCamHeading : CVector
+  m_vecGotoPosition : CVector
+  m_nVehicle : ℤ
+  m_nVehicle2 : ℤ
+  m_nActor : ℤ
+  m_nActor2 : ℤ
+  m_nVehiclemodelId : ℤ
+  m_nPedmodelId : ℤ
+  m_nCurrentMovieCommand : ℤ
+  m_nCurrentCommand : ℤ
+  m_nCurrentVehicle : ℤ
+  m_nCurrentActor : ℤ
+  m_bEditOn : 𝔹
+  m_bRecording : 𝔹
+  m_bCommandActive : 𝔹
+  m_bActorSelected : 𝔹
+  m_bActor2Selected : 𝔹
+  m_bVehicleSelected : 𝔹
+  m_nNumActors : ℤ
+  m_nNumVehicles : ℤ
+  m_nNumMovieCommands : ℤ
+  m_nWeaponType : ℤ
+  pActors : seq Ref[CPed]  -- bounded array [NUM_ACTORS_IN_MOVIE]
+  pVehicles : seq Ref[CVehicle]  -- bounded array [NUM_VEHICLES_IN_MOVIE]
+  m_bDrawGotoArrow : 𝔹
+  Movie : seq CMovieCommand  -- bounded array [NUM_COMMANDS_IN_MOVIE]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSceneEdit_LoadMovie
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::LoadMovie(void)
+  true
+end
+
+schema CSceneEdit_SaveMovie_2
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::SaveMovie(void)
+  true
+end
+
+schema CSceneEdit_Initialise_3
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::Initialise(void)
+  true
+end
+
+schema CSceneEdit_InitPlayback_4
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::InitPlayback(void)
+  true
+end
+
+schema CSceneEdit_ReInitialise_5
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::ReInitialise(void)
+  true
+end
+
+schema CSceneEdit_Update_6
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::Update(void)
+  true
+end
+
+schema CSceneEdit_Draw_7
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::Draw(void)
+  true
+end
+
+schema CSceneEdit_ProcessCommand_8
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::ProcessCommand(void)
+  true
+end
+
+schema CSceneEdit_PlayBack_9
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::PlayBack(void)
+  true
+end
+
+schema CSceneEdit_ClearForNewCommand_10
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::ClearForNewCommand(void)
+  true
+end
+
+schema CSceneEdit_SelectActor_11
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::SelectActor(void)
+  true
+end
+
+schema CSceneEdit_SelectActor2_12
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::SelectActor2(void)
+  true
+end
+
+schema CSceneEdit_SelectVehicle_13
+  ΔCSceneEdit
+where
+  -- Declared member operation CSceneEdit::SelectVehicle(void)
+  true
+end
+
+schema CSceneEdit_SelectWeapon_14
+  ΔCSceneEdit
+  result! : 𝔹
+where
+  -- Declared member operation CSceneEdit::SelectWeapon(void)
+  true
+end

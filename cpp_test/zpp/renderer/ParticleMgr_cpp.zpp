@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ParticleMgr (renderer)
+-- Source File(s): renderer/ParticleMgr.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include ParticleMgr.zpp  (from "ParticleMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cParticleSystemMgr_cParticleSystemMgr
+  ΔcParticleSystemMgr
+where
+  -- State update: m_aParticles' = ∅
+  true
+end
+
+schema cParticleSystemMgr_cParticleSystemMgr_2
+  ΔcParticleSystemMgr
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cParticleSystemMgr_Initialise
+  ΔcParticleSystemMgr
+where
+  -- State update: m_pParticles' = ∅
+  true
+end
+
+schema cParticleSystemMgr_LoadParticleData
+  ΔcParticleSystemMgr
+where
+  -- State update: m_aParticles' = new tParticleSystemData[MAX_PARTICLES]
+  -- State update: entry' = ∅
+  -- State update: type' = PARTICLE_FIRST
+  -- State update: buffEnd' = (char *)&work_buff[len]
+  -- State update: lineStart' = (char *)work_buff
+  -- State update: lineEnd' = lineStart + 1
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ParticleMgrModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 288
+end

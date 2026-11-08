@@ -1,0 +1,135 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Ropes (core)
+-- Source File(s): core/Ropes.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Population.zpp  (from "Population.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Ropes.zpp  (from "Ropes.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRope_Update
+  ΔCRope
+where
+  -- State update: step' = Pow(0.85f, CTimer::GetTimeStep())
+  -- State update: prevPos' = m_pos[i]
+  -- State update: dist' = m_pos[i] - m_pos[i-1]
+  -- State update: m_bActive' = false
+  -- State update: m_bWasRegistered' = false
+  -- Invokes: CTimer::GetTimeStep, CTimer::GetTimeInMilliseconds, dist.Magnitude
+  true
+end
+
+schema CRope_Render
+  ΔCRope
+where
+  -- State update: numVerts' = 0
+  -- Invokes: TheCamera.IsSphereVisible
+  true
+end
+
+schema CRopes_Init
+  ΔCRopes
+where
+  -- State update: m_bActive' = false
+  true
+end
+
+schema CRopes_Update
+  ΔCRopes
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRopes_Render
+  ΔCRopes
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRopes_RegisterRope
+  ΔCRopes
+  id? : ℕ
+  pos? : CVector
+  setUpdateTimer? : 𝔹
+where
+  -- State update: m_bWasRegistered' = true
+  -- State update: m_id' = id
+  -- State update: m_unk' = false
+  -- State update: m_bWasRegistered' = true
+  -- State update: m_bActive' = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CRopes_SetSpeedOfTopNode
+  ΔCRopes
+  id? : ℕ
+  speed? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRopes_FindCoorsAlongRope
+  ΔCRopes
+  id? : ℕ
+  t? : ℝ
+  coors? : Ref[CVector]
+where
+  -- State update: t' = (ARRAY_SIZE(aRopes[0].m_pos)-1)*Clamp(t, 0.0f, 0.999f)
+  -- State update: f' = t - j
+  -- State update: coors' = (1.0f-f)*aRopes[i].m_pos[j] + f*aRopes[i].m_pos[j+1]
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CRopes_CreateRopeWithSwatComingDown
+  ΔCRopes
+  pos? : CVector
+where
+  -- State update: ropeId' = 0
+  -- State update: swat.bUsesCollision' = false
+  -- State update: swat.m_pRopeEntity' = (CEntity*)1
+  -- State update: swat.m_nRopeID' = 100 + ropeId
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CStreaming::HasModelLoaded, CPopulation::AddPed, CAnimManager::BlendAnimation, swat->GetClump
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RopesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 176
+end

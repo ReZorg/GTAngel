@@ -1,0 +1,42 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: DummyObject (objects)
+-- Source File(s): objects/DummyObject.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Dummy.zpp  (from "Dummy.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDummyObject
+  CDummy  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CDummyObject_CDummyObject
+  ΔCDummyObject
+where
+  -- Declared member operation CDummyObject::CDummyObject(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema DummyObject_CDummyObject
+  ΔDummyObjectModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

@@ -1,0 +1,287 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ModelInfo (modelinfo)
+-- Source File(s): modelinfo/ModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include Frontend.zpp  (from "Frontend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CModelInfo_Initialise
+  ΔCModelInfo
+where
+  -- State update: ms_modelInfoPtrs' = new CBaseModelInfo*[MODELINFOSIZE]
+  -- State update: msNumModelInfos' = MODELINFOSIZE
+  -- State update: gp2dEffects' = ms_2dEffectStore.store
+  -- State update: m' = AddSimpleModel(MI_CAR_DOOR)
+  -- State update: m' = AddSimpleModel(MI_CAR_BUMPER)
+  -- State update: m' = AddSimpleModel(MI_CAR_PANEL)
+  -- Invokes: ms_2dEffectStore.Clear, ms_simpleModelStore.Clear, ms_timeModelStore.Clear, ms_weaponModelStore.Clear, ms_clumpModelStore.Clear
+  true
+end
+
+schema CModelInfo_ShutDown
+  ΔCModelInfo
+where
+  -- Invokes: ms_2dEffectStore.Clear, ms_simpleModelStore.Clear, ms_mloInstanceStore.Clear, ms_mloModelStore.Clear, ms_xtraCompsModelStore.Clear
+  true
+end
+
+schema CModelInfo_AddSimpleModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_simpleModelStore.Alloc()
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_simpleModelStore.Alloc, modelinfo->Init
+  true
+end
+
+schema CModelInfo_AddTimeModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_timeModelStore.Alloc()
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_timeModelStore.Alloc, modelinfo->Init
+  true
+end
+
+schema CModelInfo_AddWeaponModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_weaponModelStore.Alloc()
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_weaponModelStore.Alloc, modelinfo->Init
+  true
+end
+
+schema CModelInfo_AddClumpModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_clumpModelStore.Alloc()
+  -- State update: modelinfo.m_clump' = ∅
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_clumpModelStore.Alloc
+  true
+end
+
+schema CModelInfo_AddPedModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_pedModelStore.Alloc()
+  -- State update: modelinfo.m_clump' = ∅
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_pedModelStore.Alloc
+  true
+end
+
+schema CModelInfo_AddVehicleModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_vehicleModelStore.Alloc()
+  -- State update: modelinfo.m_clump' = ∅
+  -- State update: modelinfo.m_vehicleType' = -1
+  -- State update: modelinfo.m_wheelId' = -1
+  -- State update: modelinfo.m_bikeSteerAngle' = 999.99f
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_vehicleModelStore.Alloc
+  true
+end
+
+schema CModelInfo_GetModelInfo
+  ΔCModelInfo
+  name? : seq CHAR
+  id? : ℙ ℤ
+where
+  -- State update: hashKey' = CKeyGen::GetUppercaseKey(name)
+  -- State update: modelinfo' = CModelInfo::ms_modelInfoPtrs[i]
+  -- State update: id' = i
+  -- Return postcondition: result! = modelinfo
+  -- Return postcondition: result! = nil
+  -- Invokes: CKeyGen::GetUppercaseKey, modelinfo->GetNameHashKey
+  true
+end
+
+schema CModelInfo_GetModelInfo_2
+  ΔCModelInfo
+  name? : seq CHAR
+  minIndex? : ℤ
+  maxIndex? : ℤ
+where
+  -- State update: hashKey' = CKeyGen::GetUppercaseKey(name)
+  -- State update: modelinfo' = CModelInfo::ms_modelInfoPtrs[i]
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = modelinfo
+  -- Return postcondition: result! = nil
+  -- Invokes: CKeyGen::GetUppercaseKey, modelinfo->GetNameHashKey
+  true
+end
+
+schema CModelInfo_GetModelInfoFromHashKey
+  ΔCModelInfo
+  hashKey? : ℕ
+  id? : ℙ ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_modelInfoPtrs[i]
+  -- State update: id' = i
+  -- Return postcondition: result! = modelinfo
+  -- Return postcondition: result! = nil
+  -- Invokes: modelinfo->GetNameHashKey
+  true
+end
+
+schema CModelInfo_IsBoatModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: mi' = GetModelInfo(id)
+  -- Invokes: mi->GetModelType
+  true
+end
+
+schema CModelInfo_IsBikeModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: mi' = GetModelInfo(id)
+  -- Invokes: mi->GetModelType
+  true
+end
+
+schema CModelInfo_IsCarModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: mi' = GetModelInfo(id)
+  -- Invokes: mi->GetModelType
+  true
+end
+
+schema CModelInfo_IsTrainModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: mi' = GetModelInfo(id)
+  -- Invokes: mi->GetModelType
+  true
+end
+
+schema CModelInfo_IsHeliModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: mi' = GetModelInfo(id)
+  -- Invokes: mi->GetModelType
+  true
+end
+
+schema CModelInfo_IsPlaneModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: mi' = GetModelInfo(id)
+  -- Invokes: mi->GetModelType
+  true
+end
+
+schema CModelInfo_ReInit2dEffects
+  ΔCModelInfo
+where
+  -- Invokes: ms_2dEffectStore.Clear
+  true
+end
+
+schema CModelInfo_Load
+  ΔCModelInfo
+  numModelInfos? : ℕ
+  modelInfos? : Ref[CBaseModelInfo]
+where
+  -- State update: msNumModelInfos' = numModelInfos
+  -- State update: ms_modelInfoPtrs' = modelInfos
+  true
+end
+
+schema CModelInfo_Load2dEffects
+  ΔCModelInfo
+  numEffects? : ℕ
+  effects? : Ref[C2dEffect]
+where
+  -- State update: ms_2dEffectStore.allocPtr' = numEffects
+  -- State update: gp2dEffects' = effects
+  true
+end
+
+schema CModelInfo_Write
+  ΔCModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: numModelInfos' = msNumModelInfos
+  -- State update: resNumModelInfos' = numModelInfos
+  -- State update: resModelInfoPtrs' = ms_modelInfoPtrs
+  -- Return postcondition: result! = this
+  -- Invokes: writer.AllocateRaw, writer.AddPatch
+  true
+end
+
+schema CModelInfo_AddMloModel
+  ΔCModelInfo
+  id? : ℤ
+where
+  -- State update: modelinfo' = CModelInfo::ms_mloModelStore.Alloc()
+  -- State update: modelinfo.m_clump' = ∅
+  -- State update: modelinfo.firstInstance' = 0
+  -- State update: modelinfo.lastInstance' = 0
+  -- Return postcondition: result! = modelinfo
+  -- Invokes: ms_mloModelStore.Alloc
+  true
+end
+
+schema CModelInfo_RemoveColModelsFromOtherLevels
+  ΔCModelInfo
+  level? : eLevelName
+where
+  -- State update: mi' = GetModelInfo(i)
+  -- State update: colmodel' = mi.GetColModel()
+  -- Invokes: mi->GetColModel, colmodel->RemoveCollisionVolumes
+  true
+end
+
+schema CModelInfo_ConstructMloClumps
+  ΔCModelInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ModelInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 430
+end

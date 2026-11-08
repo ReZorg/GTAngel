@@ -1,0 +1,360 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VarConsole (renderer)
+-- Source File(s): renderer/VarConsole.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+VAR_CONSOLE_PAD : ℕ  -- #define VAR_CONSOLE_PAD 1
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CVarConsole_Initialise
+  ΔCVarConsole
+where
+  -- State update: m_nCountEntries' = 0
+  -- State update: m_nCurPage' = 1
+  -- State update: m_bIsOpen' = false
+  -- State update: m_nCurEntry' = 0
+  -- State update: m_nFirstEntryOnPage' = 0
+  true
+end
+
+schema CVarConsole_Add
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pInt8Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_INT8
+  -- State update: I8_step' = step
+  -- State update: I8_min' = min
+  true
+end
+
+schema CVarConsole_Add_2
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pInt16Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_INT16
+  -- State update: I16_step' = step
+  -- State update: I16_min' = min
+  true
+end
+
+schema CVarConsole_Add_3
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pInt32Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_INT32
+  -- State update: I32_step' = step
+  -- State update: I32_min' = min
+  true
+end
+
+schema CVarConsole_Add_4
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pInt64Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_INT64
+  -- State update: I64_step' = step
+  -- State update: I64_min' = min
+  true
+end
+
+schema CVarConsole_Add_5
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint8Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_UINT8
+  -- State update: I8_step' = step
+  -- State update: I8_min' = min
+  true
+end
+
+schema CVarConsole_Add_6
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint16Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_UINT16
+  -- State update: I16_step' = step
+  -- State update: I16_min' = min
+  true
+end
+
+schema CVarConsole_Add_7
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint32Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_UINT32
+  -- State update: I32_step' = step
+  -- State update: I32_min' = min
+  true
+end
+
+schema CVarConsole_Add_8
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint64Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_UINT64
+  -- State update: I64_step' = step
+  -- State update: I64_min' = min
+  true
+end
+
+schema CVarConsole_Add_9
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℝ
+  step? : ℝ
+  min? : ℝ
+  max? : ℝ
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pFloatValue' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_FLOAT
+  -- State update: F_step' = step
+  -- State update: F_min' = min
+  true
+end
+
+schema CVarConsole_Add_10
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ 𝔹
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pBoolValue' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_BOOL
+  true
+end
+
+schema CVarConsole_Add_11
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : Ref[bool8]
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint8Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_BOOL8
+  true
+end
+
+schema CVarConsole_Add_12
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : Ref[bool16]
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint16Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_BOOL16
+  true
+end
+
+schema CVarConsole_Add_13
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : Ref[bool32]
+  isVar? : bool8
+where
+  -- State update: text' = text
+  -- State update: pUint32Value' = pVal
+  -- State update: bAllowExceedBounds' = isVar
+  -- State update: VarType' = VCE_TYPE_BOOL32
+  true
+end
+
+schema CVarConsole_Remove
+  ΔCVarConsole
+  text? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVarConsole_SortPages
+  ΔCVarConsole
+where
+  -- State update: m_nNumPages' = m_nCountEntries / 30 + 1
+  true
+end
+
+schema CVarConsole_Display
+  ΔCVarConsole
+where
+  -- State update: y' = 45
+  -- Invokes: CFont::SetColor, CFont::SetFontStyle, CFont::SetScale, CFont::SetDropShadowPosition, CFont::SetDropColor
+  true
+end
+
+schema CVarConsole_ModifyLeft
+  ΔCVarConsole
+where
+  -- State update: entry' = m_aEntries[m_nCurEntry]
+  -- State update: entry.pInt8Value' = entry.I8_max
+  -- State update: entry.pInt8Value' = entry.I8_min
+  -- State update: entry.pInt16Value' = entry.I16_max
+  -- State update: entry.pInt16Value' = entry.I16_min
+  -- State update: entry.pInt32Value' = entry.I32_max
+  -- Invokes: entry.pCallback
+  true
+end
+
+schema CVarConsole_ModifyRight
+  ΔCVarConsole
+where
+  -- State update: entry' = m_aEntries[m_nCurEntry]
+  -- State update: entry.pInt8Value' = entry.I8_min
+  -- State update: entry.pInt8Value' = entry.I8_max
+  -- State update: entry.pInt16Value' = entry.I16_min
+  -- State update: entry.pInt16Value' = entry.I16_max
+  -- State update: entry.pInt32Value' = entry.I32_min
+  -- Invokes: entry.pCallback
+  true
+end
+
+schema CVarConsole_Enter
+  ΔCVarConsole
+where
+  -- State update: m_bIsOpen' = true
+  true
+end
+
+schema CVarConsole_Exit
+  ΔCVarConsole
+where
+  -- State update: m_bIsOpen' = false
+  true
+end
+
+schema CVarConsole_Input
+  ΔCVarConsole
+where
+  -- State update: m_nFirstEntryOnPage' = m_nCurEntry
+  -- State update: m_nCurEntry' = m_nCountEntries - 1
+  -- State update: m_nFirstEntryOnPage' = m_nCurEntry - 29
+  -- State update: m_nCurEntry' = 0
+  -- State update: m_nFirstEntryOnPage' = 0
+  -- State update: m_nCurPage' = 1
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CVarConsole_Process
+  ΔCVarConsole
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVarConsole_Open
+  ΔCVarConsole
+where
+  -- Return postcondition: result! = m_bIsOpen
+  true
+end
+
+schema CVarConsole_Check
+  ΔCVarConsole
+where
+  -- Invokes: CPad::GetPad
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema VarConsoleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 786
+end

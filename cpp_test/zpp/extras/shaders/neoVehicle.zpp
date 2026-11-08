@@ -1,0 +1,70 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoVehicle (extras)
+-- Source File(s): extras/shaders/neoVehicle.frag, extras/shaders/neoVehicle.vert
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+fresnel : seq CHAR  -- #define fresnel (u_reflProps.x)
+lightStrength : seq CHAR  -- #define lightStrength (u_reflProps.y)
+shininess : seq CHAR  -- #define shininess (u_reflProps.z)
+specularity : seq CHAR  -- #define specularity (u_reflProps.w)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema neoVehicle_main
+  ΔneoVehicleModuleState
+where
+  -- State update: pass1' = v_color*texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: envmap' = texture(tex1, vec2(v_tex1.x, 1.0-v_tex1.y)).rgb
+  -- State update: pass1.rgb' = mix(pass1.rgb, envmap, v_reflcolor.a)
+  -- State update: pass1.rgb' = mix(u_fogColor.rgb, pass1.rgb, v_fog)
+  -- State update: pass2' = v_reflcolor.rgb * v_fog
+  -- State update: color.rgb' = pass1.rgb*pass1.a + pass2
+  true
+end
+
+schema neoVehicle_DoDirLightSpec
+  ΔneoVehicleModuleState
+  Ldir? : vec3
+  Lcol? : vec3
+  N? : vec3
+  V? : vec3
+  power? : ℝ
+  result! : vec3
+where
+  -- Return postcondition: result! = pow(clamp(dot(N, normalize(V + -Ldir)), 0.0, 1.0), power)*Lcol
+  true
+end
+
+schema neoVehicle_main_2
+  ΔneoVehicleModuleState
+where
+  -- State update: Vertex' = u_world * vec4(in_pos, 1.0)
+  -- State update: gl_Position' = u_proj * u_view * Vertex
+  -- State update: Normal' = mat3(u_world) * in_normal
+  -- State update: viewVec' = normalize(u_eye - Vertex.xyz)
+  -- State update: v_tex0' = in_tex0
+  -- State update: v_color' = in_color
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema neoVehicleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 80
+end

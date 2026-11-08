@@ -1,0 +1,71 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: eax-util (audio)
+-- Source File(s): audio/eax/eax-util.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include eax-util.zpp  (from "eax-util.h")
+-- include math.zpp  (from "math.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema eax-util_EAX3ListenerInterpolate
+  Δeax-utilModuleState
+  lpStart? : LPEAXLISTENERPROPERTIES
+  lpFinish? : LPEAXLISTENERPROPERTIES
+  flRatio? : ℝ
+  lpResult? : LPEAXLISTENERPROPERTIES
+  bCheckValues? : 𝔹
+  result! : 𝔹
+where
+  -- State update: flInvRatio' = (1.0f - flRatio)
+  -- State update: lpResult.ulEnvironment' = 26
+  -- State update: lpResult.flEnvironmentSize' = lpStart.flEnvironmentSize
+  -- State update: lpResult.flEnvironmentDiffusion' = lpStart.flEnvironmentDiffusion
+  -- State update: lpResult.lRoom' = lpStart.lRoom
+  -- State update: lpResult.lRoomHF' = lpStart.lRoomHF
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema eax-util_CheckEAX3LP
+  Δeax-utilModuleState
+  lpEAX3LP? : LPEAXLISTENERPROPERTIES
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema eax-util_Clamp
+  Δeax-utilModuleState
+  eaxVector? : Ref[EAXVECTOR]
+where
+  -- State update: flInvMagnitude' = 1.0f / flMagnitude
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema eax-utilModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 706
+end

@@ -1,0 +1,72 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedRoutes (peds)
+-- Source File(s): peds/PedRoutes.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRouteNode
+  m_route : ℤ
+  m_pos : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRouteNode_GetRouteThisPointIsOn
+  ΔCRouteNode
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRouteNode::GetRouteThisPointIsOn(int16)
+  true
+end
+
+schema CRouteNode_GetPointPosition_2
+  ΔCRouteNode
+  arg_1? : ℤ
+  result! : CVector
+where
+  -- Declared member operation CRouteNode::GetPointPosition(int16)
+  true
+end
+
+schema CRouteNode_GetRouteStart_3
+  ΔCRouteNode
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRouteNode::GetRouteStart(int16)
+  true
+end
+
+schema CRouteNode_AddRoutePoint_4
+  ΔCRouteNode
+  arg_1? : ℤ
+  arg_2? : CVector
+where
+  -- Declared member operation CRouteNode::AddRoutePoint(int16, CVector)
+  true
+end
+
+schema CRouteNode_RemoveRoute_5
+  ΔCRouteNode
+  arg_1? : ℤ
+where
+  -- Declared member operation CRouteNode::RemoveRoute(int16)
+  true
+end
+
+schema CRouteNode_Initialise_6
+  ΔCRouteNode
+where
+  -- Declared member operation CRouteNode::Initialise(void)
+  true
+end

@@ -1,0 +1,37 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: im2d (extras)
+-- Source File(s): extras/shaders/im2d.vert
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema im2d_main
+  Δim2dModuleState
+where
+  -- State update: gl_Position' = in_pos
+  -- State update: gl_Position.w' = 1.0
+  -- State update: gl_Position.xy' = gl_Position.xy * u_xform.xy + u_xform.zw
+  -- State update: v_fog' = DoFog(gl_Position.z)
+  -- State update: v_color' = in_color
+  -- State update: v_tex0' = in_tex0
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema im2dModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 19
+end

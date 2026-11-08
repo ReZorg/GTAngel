@@ -1,0 +1,27 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Master Formal Specification Index
+-- Generated from C:/ddd/GTAngel/cpp_test/src across all 22 subsystems
+--------------------------------------------------------------------------------
+
+-- Subsystem `docs`: 0 Z++ specification files
+-- Subsystem `entities`: 9 Z++ specification files
+-- Subsystem `extras`: 211 Z++ specification files
+-- Subsystem `fakerw`: 24 Z++ specification files
+-- Subsystem `leeds`: 17 Z++ specification files
+-- Subsystem `math`: 20 Z++ specification files
+-- Subsystem `modelinfo`: 33 Z++ specification files
+-- Subsystem `objects`: 24 Z++ specification files
+-- Subsystem `peds`: 46 Z++ specification files
+-- Subsystem `renderer`: 112 Z++ specification files
+-- Subsystem `rw`: 32 Z++ specification files
+-- Subsystem `save`: 14 Z++ specification files
+-- Subsystem `skel`: 18 Z++ specification files
+-- Subsystem `text`: 9 Z++ specification files
+-- Subsystem `vehicles`: 45 Z++ specification files
+-- Subsystem `weapons`: 23 Z++ specification files
+-- Subsystem `animation`: 38 Z++ specification files
+-- Subsystem `audio`: 51 Z++ specification files
+-- Subsystem `buildings`: 8 Z++ specification files
+-- Subsystem `collision`: 32 Z++ specification files
+-- Subsystem `control`: 91 Z++ specification files
+-- Subsystem `core`: 151 Z++ specification files

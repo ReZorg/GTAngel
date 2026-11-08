@@ -1,0 +1,218 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Draw (renderer)
+-- Source File(s): renderer/Draw.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eAspectRatio ::= AR_AUTO | AR_4_3 | AR_5_4 | AR_16_10 | AR_16_9 | AR_21_9 | AR_MAX
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDraw
+  ms_fNearClipZ : ℝ
+  ms_fFarClipZ : ℝ
+  ms_fFOV : ℝ
+  ms_fScaledFOV : ℝ
+  FadeValue : ℕ
+  FadeRed : ℕ
+  FadeGreen : ℕ
+  FadeBlue : ℕ
+where
+  FadeValue ≥ 0
+  FadeRed ≥ 0
+  FadeGreen ≥ 0
+  FadeBlue ≥ 0
+end
+
+schema CDraw_GetNearClipZ
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetNearClipZ(void)
+  true
+end
+
+schema CDraw_SetFarClipZ_2
+  ΔCDraw
+  farclip? : ℝ
+  result! : void
+where
+  -- Declared member operation CDraw::SetFarClipZ(float farclip)
+  true
+end
+
+schema CDraw_GetFarClipZ_3
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetFarClipZ(void)
+  true
+end
+
+schema CDraw_SetFOV_4
+  ΔCDraw
+  fov? : ℝ
+  result! : void
+where
+  -- Declared member operation CDraw::SetFOV(float fov)
+  true
+end
+
+schema CDraw_GetFOV_5
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetFOV(void)
+  true
+end
+
+schema CDraw_GetScaledFOV_6
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetScaledFOV(void)
+  true
+end
+
+schema CDraw_GetScaledFOV_7
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetScaledFOV(void)
+  true
+end
+
+schema CDraw_FindAspectRatio_8
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::FindAspectRatio(void)
+  true
+end
+
+schema CDraw_GetAspectRatio_9
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetAspectRatio(void)
+  true
+end
+
+schema CDraw_SetAspectRatio_10
+  ΔCDraw
+  ratio? : ℝ
+  result! : void
+where
+  -- Declared member operation CDraw::SetAspectRatio(float ratio)
+  true
+end
+
+schema CDraw_GetAspectRatio_11
+  ΔCDraw
+  result! : ℝ
+where
+  -- Declared member operation CDraw::GetAspectRatio(void)
+  true
+end
+
+schema CDraw_ScaleY_12
+  ΔCDraw
+  y? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CDraw::ScaleY(float y)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Draw_SetNearClipZ
+  ΔDrawModuleState
+  nearclip? : ℝ
+where
+  -- State update: ms_fNearClipZ' = nearclip
+  true
+end
+
+schema Draw_GetNearClipZ
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fNearClipZ
+  true
+end
+
+schema Draw_SetFarClipZ
+  ΔDrawModuleState
+  farclip? : ℝ
+where
+  -- State update: ms_fFarClipZ' = farclip
+  true
+end
+
+schema Draw_GetFarClipZ
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fFarClipZ
+  true
+end
+
+schema Draw_GetFOV
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fFOV
+  true
+end
+
+schema Draw_GetScaledFOV
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fScaledFOV
+  true
+end
+
+schema Draw_GetScaledFOV_2
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fFOV
+  true
+end
+
+schema Draw_GetAspectRatio
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fAspectRatio
+  true
+end
+
+schema Draw_SetAspectRatio
+  ΔDrawModuleState
+  ratio? : ℝ
+where
+  -- State update: ms_fAspectRatio' = ratio
+  true
+end
+
+schema Draw_GetAspectRatio_2
+  ΔDrawModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = FindAspectRatio()
+  true
+end

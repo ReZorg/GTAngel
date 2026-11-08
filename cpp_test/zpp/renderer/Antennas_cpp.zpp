@@ -1,0 +1,81 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Antennas (renderer)
+-- Source File(s): renderer/Antennas.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Antennas.zpp  (from "Antennas.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAntennas_Init
+  ΔCAntennas
+where
+  -- State update: active' = false
+  -- State update: updatedLastFrame' = false
+  true
+end
+
+schema CAntennas_Update
+  ΔCAntennas
+where
+  -- State update: active' = false
+  -- State update: updatedLastFrame' = false
+  true
+end
+
+schema CAntennas_RegisterOne
+  ΔCAntennas
+  id? : ℕ
+  dir? : CVector
+  position? : CVector
+  length? : ℝ
+where
+  -- State update: active' = true
+  -- State update: updatedLastFrame' = true
+  -- State update: id' = id
+  -- State update: segmentLength' = length/6.0f
+  -- State update: updatedLastFrame' = true
+  true
+end
+
+schema CAntennas_Render
+  ΔCAntennas
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAntenna_Update
+  ΔCAntenna
+  dir? : CVector
+  basepos? : CVector
+where
+  -- State update: basedir' = pos[i-1] - pos[i-2]
+  -- State update: newpos' = pos[i-1] + (basedir + newdir)/2.0f
+  -- Invokes: newdir.Normalise
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AntennasModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 129
+end

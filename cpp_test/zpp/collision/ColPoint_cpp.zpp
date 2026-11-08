@@ -1,0 +1,45 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColPoint (collision)
+-- Source File(s): collision/ColPoint.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ColPoint.zpp  (from "ColPoint.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CColPoint_operator
+  ΔCColPoint
+  other? : ℤ
+where
+  -- State update: point' = other.point
+  -- State update: normal' = other.normal
+  -- State update: surfaceA' = other.surfaceA
+  -- State update: pieceA' = other.pieceA
+  -- State update: surfaceB' = other.surfaceB
+  -- State update: pieceB' = other.pieceB
+  -- Return postcondition: result! = *this
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ColPointModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 16
+end

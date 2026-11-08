@@ -1,0 +1,2056 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pad (core)
+-- Source File(s): core/Pad.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Pad_Enum_1 ::= PLAYERCONTROL_ENABLED | PLAYERCONTROL_CAMERA | PLAYERCONTROL_UNK2 | PLAYERCONTROL_GARAGE | PLAYERCONTROL_UNK8 | PLAYERCONTROL_UNK10 | PLAYERCONTROL_PLAYERINFO | PLAYERCONTROL_PHONE | PLAYERCONTROL_CUTSCENE | PLAYERCONTROL_SHORTCUT_TAXI
+  -- val(PLAYERCONTROL_ENABLED) = 0
+  -- val(PLAYERCONTROL_CAMERA) = 1
+  -- val(PLAYERCONTROL_UNK2) = 2
+  -- val(PLAYERCONTROL_GARAGE) = 4
+  -- val(PLAYERCONTROL_UNK8) = 8
+  -- val(PLAYERCONTROL_UNK10) = 16
+  -- val(PLAYERCONTROL_PLAYERINFO) = 32
+  -- val(PLAYERCONTROL_PHONE) = 64
+  -- val(PLAYERCONTROL_CUTSCENE) = 128
+  -- val(PLAYERCONTROL_SHORTCUT_TAXI) = 256
+
+Pad_Enum_2 ::= PAD1 | PAD2 | MAX_PADS
+  -- val(PAD1) = 0
+
+Pad_Enum_3 ::= HORNHISTORY_SIZE | DRUNK_STEERING_BUFFER_SIZE
+  -- val(HORNHISTORY_SIZE) = 8
+  -- val(DRUNK_STEERING_BUFFER_SIZE) = 10
+
+Pad_Enum_4 ::= PLAYERCONTROL_ENABLED | PLAYERCONTROL_CAMERA | PLAYERCONTROL_UNK2 | PLAYERCONTROL_GARAGE | PLAYERCONTROL_UNK8 | PLAYERCONTROL_UNK10 | PLAYERCONTROL_PLAYERINFO | PLAYERCONTROL_PHONE | PLAYERCONTROL_CUTSCENE
+  -- val(PLAYERCONTROL_ENABLED) = 0
+  -- val(PLAYERCONTROL_CAMERA) = 1
+  -- val(PLAYERCONTROL_UNK2) = 2
+  -- val(PLAYERCONTROL_GARAGE) = 4
+  -- val(PLAYERCONTROL_UNK8) = 8
+  -- val(PLAYERCONTROL_UNK10) = 16
+  -- val(PLAYERCONTROL_PLAYERINFO) = 32
+  -- val(PLAYERCONTROL_PHONE) = 64
+  -- val(PLAYERCONTROL_CUTSCENE) = 128
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CControllerState
+  LeftStickY : ℤ
+  RightStickY : ℤ
+  LeftShoulder2 : ℤ
+  RightShoulder2 : ℤ
+  DPadRight : ℤ
+  Select : ℤ
+  Circle : ℤ
+  RightShock : ℤ
+  NetworkTalk : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CControllerState_GetLeftStickX
+  ΔCControllerState
+  result! : ℝ
+where
+  -- Declared member operation CControllerState::GetLeftStickX(void)
+  true
+end
+
+schema CControllerState_GetLeftStickY_2
+  ΔCControllerState
+  result! : ℝ
+where
+  -- Declared member operation CControllerState::GetLeftStickY(void)
+  true
+end
+
+schema CControllerState_GetRightStickX_3
+  ΔCControllerState
+  result! : ℝ
+where
+  -- Declared member operation CControllerState::GetRightStickX(void)
+  true
+end
+
+schema CControllerState_GetRightStickY_4
+  ΔCControllerState
+  result! : ℝ
+where
+  -- Declared member operation CControllerState::GetRightStickY(void)
+  true
+end
+
+schema CControllerState_CheckForInput_5
+  ΔCControllerState
+  result! : 𝔹
+where
+  -- Declared member operation CControllerState::CheckForInput()
+  true
+end
+
+schema CControllerState_Clear_6
+  ΔCControllerState
+where
+  -- Declared member operation CControllerState::Clear(void)
+  true
+end
+
+schema CMouseControllerState
+  LMB : 𝔹
+  RMB : 𝔹
+  MMB : 𝔹
+  WHEELUP : 𝔹
+  WHEELDN : 𝔹
+  MXB1 : 𝔹
+  MXB2 : 𝔹
+  _pad0 : seq CHAR
+  y : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMouseControllerState_CMouseControllerState
+  ΔCMouseControllerState
+where
+  -- Declared member operation CMouseControllerState::CMouseControllerState()
+  true
+end
+
+schema CMouseControllerState_Clear_2
+  ΔCMouseControllerState
+where
+  -- Declared member operation CMouseControllerState::Clear()
+  true
+end
+
+schema CMousePointerStateHelper
+  bInvertHorizontally : 𝔹
+  bInvertVertically : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMousePointerStateHelper_GetMouseSetUp
+  ΔCMousePointerStateHelper
+  result! : CMouseControllerState
+where
+  -- Declared member operation CMousePointerStateHelper::GetMouseSetUp()
+  true
+end
+
+schema CKeyboardState
+  F : seq ℤ  -- bounded array [12]
+  VK_KEYS : seq ℤ  -- bounded array [256]
+  ESC : ℤ
+  INS : ℤ
+  DEL : ℤ
+  HOME : ℤ
+  END : ℤ
+  PGUP : ℤ
+  PGDN : ℤ
+  UP : ℤ
+  DOWN : ℤ
+  LEFT : ℤ
+  RIGHT : ℤ
+  SCROLLLOCK : ℤ
+  PAUSE : ℤ
+  NUMLOCK : ℤ
+  DIV : ℤ
+  MUL : ℤ
+  SUB : ℤ
+  ADD : ℤ
+  ENTER : ℤ
+  DECIMAL : ℤ
+  NUM1 : ℤ
+  NUM2 : ℤ
+  NUM3 : ℤ
+  NUM4 : ℤ
+  NUM5 : ℤ
+  NUM6 : ℤ
+  NUM7 : ℤ
+  NUM8 : ℤ
+  NUM9 : ℤ
+  NUM0 : ℤ
+  BACKSP : ℤ
+  TAB : ℤ
+  CAPSLOCK : ℤ
+  EXTENTER : ℤ
+  LSHIFT : ℤ
+  RSHIFT : ℤ
+  SHIFT : ℤ
+  LCTRL : ℤ
+  RCTRL : ℤ
+  LALT : ℤ
+  RALT : ℤ
+  LWIN : ℤ
+  RWIN : ℤ
+  APPS : ℤ
+where
+  #F = 12
+  #VK_KEYS = 256
+end
+
+schema CKeyboardState_Clear
+  ΔCKeyboardState
+where
+  -- Declared member operation CKeyboardState::Clear()
+  true
+end
+
+schema CPad
+  NewState : CControllerState
+  OldState : CControllerState
+  SteeringLeftRightBuffer : seq ℤ  -- bounded array [DRUNK_STEERING_BUFFER_SIZE]
+  DrunkDrivingBufferUsed : ℤ
+  PCTempKeyState : CControllerState
+  PCTempJoyState : CControllerState
+  PCTempMouseState : CControllerState
+  Phase : ℤ
+  Mode : ℤ
+  ShakeDur : ℤ
+  DisablePlayerControls : ℕ
+  ShakeFreq : ℕ
+  bHornHistory : seq 𝔹  -- bounded array [HORNHISTORY_SIZE]
+  iCurrHornHistory : ℕ
+  JustOutOfFrontend : ℤ
+  bApplyBrakes : ℤ
+  CheatString : seq CHAR
+  LastTimeTouched : ℤ
+  AverageWeapon : ℤ
+  AverageEntries : ℤ
+  unk_B4 : ℝ
+  unk_B8 : ℝ
+  bObsoleteControllerMessage : 𝔹
+  bOldDisplayNoControllerMessage : 𝔹
+  m_bMapPadOneToPadTwo : 𝔹
+  m_bDebugCamPCOn : 𝔹
+  bHasPlayerCheated : 𝔹
+  bInvertLook4Pad : 𝔹
+  OldKeyState : CKeyboardState
+  NewKeyState : CKeyboardState
+  TempKeyState : CKeyboardState
+  KeyBoardCheatString : seq CHAR
+  OldMouseControllerState : CMouseControllerState
+  NewMouseControllerState : CMouseControllerState
+  PCTempMouseControllerState : CMouseControllerState
+  XInputJoy2 : ℤ
+where
+  DisablePlayerControls ≥ 0
+  ShakeFreq ≥ 0
+  iCurrHornHistory ≥ 0
+  #CheatString = 12
+  #KeyBoardCheatString = 30
+end
+
+schema CPad_ClearMouseHistory
+  ΔCPad
+where
+  -- Declared member operation CPad::ClearMouseHistory()
+  true
+end
+
+schema CPad_ClearKeyBoardHistory_2
+  ΔCPad
+where
+  -- Declared member operation CPad::ClearKeyBoardHistory()
+  true
+end
+
+schema CPad_UpdateMouse_3
+  ΔCPad
+where
+  -- Declared member operation CPad::UpdateMouse()
+  true
+end
+
+schema CPad_ReconcileTwoControllersInput_4
+  ΔCPad
+  State1? : CControllerState
+  State2? : CControllerState
+  result! : CControllerState
+where
+  -- Declared member operation CPad::ReconcileTwoControllersInput(CControllerState const &State1, CControllerState const &State2)
+  true
+end
+
+schema CPad_StartShake_5
+  ΔCPad
+  nDur? : ℤ
+  nFreq? : ℕ
+where
+  -- Declared member operation CPad::StartShake(int16 nDur, uint8 nFreq)
+  true
+end
+
+schema CPad_StartShake_Distance_6
+  ΔCPad
+  nDur? : ℤ
+  nFreq? : ℕ
+  fX? : ℝ
+  fY? : ℝ
+  fz? : ℝ
+where
+  -- Declared member operation CPad::StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, float fz)
+  true
+end
+
+schema CPad_StartShake_Train_7
+  ΔCPad
+  fX? : ℝ
+  fY? : ℝ
+where
+  -- Declared member operation CPad::StartShake_Train(float fX, float fY)
+  true
+end
+
+schema CPad_UpdatePads_8
+  ΔCPad
+where
+  -- Declared member operation CPad::UpdatePads(void)
+  true
+end
+
+schema CPad_ProcessPCSpecificStuff_9
+  ΔCPad
+where
+  -- Declared member operation CPad::ProcessPCSpecificStuff(void)
+  true
+end
+
+schema CPad_Update_10
+  ΔCPad
+  pad? : ℤ
+where
+  -- Declared member operation CPad::Update(int16 pad)
+  true
+end
+
+schema CPad_DoCheats_11
+  ΔCPad
+where
+  -- Declared member operation CPad::DoCheats(void)
+  true
+end
+
+schema CPad_DoCheats_12
+  ΔCPad
+  unk? : ℤ
+where
+  -- Declared member operation CPad::DoCheats(int16 unk)
+  true
+end
+
+schema CPad_StopPadsShaking_13
+  ΔCPad
+where
+  -- Declared member operation CPad::StopPadsShaking(void)
+  true
+end
+
+schema CPad_StopShaking_14
+  ΔCPad
+  pad? : ℤ
+where
+  -- Declared member operation CPad::StopShaking(int16 pad)
+  true
+end
+
+schema CPad_GetPad_15
+  ΔCPad
+  pad? : ℤ
+  result! : Ref[CPad]
+where
+  -- Declared member operation CPad::GetPad(int32 pad)
+  true
+end
+
+schema CPad_GetSteeringLeftRight_16
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetSteeringLeftRight(void)
+  true
+end
+
+schema CPad_GetSteeringUpDown_17
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetSteeringUpDown(void)
+  true
+end
+
+schema CPad_GetCarGunUpDown_18
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetCarGunUpDown(void)
+  true
+end
+
+schema CPad_GetCarGunLeftRight_19
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetCarGunLeftRight(void)
+  true
+end
+
+schema CPad_GetPedWalkLeftRight_20
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetPedWalkLeftRight(void)
+  true
+end
+
+schema CPad_GetPedWalkUpDown_21
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetPedWalkUpDown(void)
+  true
+end
+
+schema CPad_GetAnalogueUpDown_22
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetAnalogueUpDown(void)
+  true
+end
+
+schema CPad_GetAnalogueLeftRight_23
+  ΔCPad
+  result! : ℤ
+where
+  -- Declared member operation CPad::GetAnalogueLeftRight(void)
+  true
+end
+
+schema CPad_GetLookLeft_24
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::GetLookLeft(void)
+  true
+end
+
+schema CPad_GetLookRight_25
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::GetLookRight(void)
+  true
+end
+
+schema CPad_GetLookBehindForCar_26
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::GetLookBehindForCar(void)
+  true
+end
+
+schema CPad_GetLookBehindForPed_27
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::GetLookBehindForPed(void)
+  true
+end
+
+schema CPad_GetHorn_28
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::GetHorn(void)
+  true
+end
+
+schema CPad_HornJustDown_29
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::HornJustDown(void)
+  true
+end
+
+schema CPad_GetCarGunFired_30
+  ΔCPad
+  result! : 𝔹
+where
+  -- Declared member operation CPad::GetCarGunFired(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Pad_CPad
+  ΔPadModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_CPad_2
+  ΔPadModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_SetDrunkInputDelay
+  ΔPadModuleState
+  delay? : ℤ
+where
+  -- State update: DrunkDrivingBufferUsed' = delay
+  true
+end
+
+schema Pad_GetOddJobTrigger
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetRightShockJustDown()
+  true
+end
+
+schema Pad_GuiLeft
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetAnaloguePadLeft() || GetDPadLeftJustDown()
+  true
+end
+
+schema Pad_GuiRight
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetAnaloguePadRight() || GetDPadRightJustDown()
+  true
+end
+
+schema Pad_GuiUp
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetAnaloguePadUp() || GetDPadUpJustDown()
+  true
+end
+
+schema Pad_GuiDown
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetAnaloguePadDown() || GetDPadDownJustDown()
+  true
+end
+
+schema Pad_GuiSelect
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetCrossJustDown()
+  true
+end
+
+schema Pad_GuiBack
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetTriangleJustDown()
+  true
+end
+
+schema Pad_GetSkipCutscene
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetCrossJustDown()
+  true
+end
+
+schema Pad_GetLeftMouseJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB)
+  true
+end
+
+schema Pad_GetRightMouseJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB)
+  true
+end
+
+schema Pad_GetMiddleMouseJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB)
+  true
+end
+
+schema Pad_GetMouseWheelUpJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_GetMouseWheelDownJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_GetMouseX1JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewMouseControllerState.MXB1 && !OldMouseControllerState.MXB1)
+  true
+end
+
+schema Pad_GetMouseX2JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewMouseControllerState.MXB2 && !OldMouseControllerState.MXB2)
+  true
+end
+
+schema Pad_GetLeftMouseJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewMouseControllerState.LMB && OldMouseControllerState.LMB)
+  true
+end
+
+schema Pad_GetRightMouseJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewMouseControllerState.RMB && OldMouseControllerState.RMB)
+  true
+end
+
+schema Pad_GetMiddleMouseJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewMouseControllerState.MMB && OldMouseControllerState.MMB)
+  true
+end
+
+schema Pad_GetMouseWheelUpJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_GetMouseWheelDownJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_GetMouseX1JustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewMouseControllerState.MXB1 && OldMouseControllerState.MXB1)
+  true
+end
+
+schema Pad_GetMouseX2JustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewMouseControllerState.MXB2 && OldMouseControllerState.MXB2)
+  true
+end
+
+schema Pad_GetLeftMouse
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.LMB
+  true
+end
+
+schema Pad_GetRightMouse
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.RMB
+  true
+end
+
+schema Pad_GetMiddleMouse
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.MMB
+  true
+end
+
+schema Pad_GetMouseWheelUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.WHEELUP
+  true
+end
+
+schema Pad_GetMouseWheelDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.WHEELDN
+  true
+end
+
+schema Pad_GetMouseX1
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.MXB1
+  true
+end
+
+schema Pad_GetMouseX2
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewMouseControllerState.MXB2
+  true
+end
+
+schema Pad_GetLeftMouseUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.LMB
+  true
+end
+
+schema Pad_GetRightMouseUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.RMB
+  true
+end
+
+schema Pad_GetMiddleMouseUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.MMB
+  true
+end
+
+schema Pad_GetMouseWheelUpUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.WHEELUP
+  true
+end
+
+schema Pad_GetMouseWheelDownUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.WHEELDN
+  true
+end
+
+schema Pad_GetMouseX1Up
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.MXB1
+  true
+end
+
+schema Pad_GetMouseX2Up
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !OldMouseControllerState.MXB2
+  true
+end
+
+schema Pad_GetMouseX
+  ΔPadModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = NewMouseControllerState.x
+  true
+end
+
+schema Pad_GetMouseY
+  ΔPadModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = NewMouseControllerState.y
+  true
+end
+
+schema Pad_GetCharJustDown
+  ΔPadModuleState
+  c? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.VK_KEYS[c] && !OldKeyState.VK_KEYS[c])
+  true
+end
+
+schema Pad_GetFJustDown
+  ΔPadModuleState
+  n? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.F[n] && !OldKeyState.F[n])
+  true
+end
+
+schema Pad_GetEscapeJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.ESC && !OldKeyState.ESC)
+  true
+end
+
+schema Pad_GetInsertJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.INS && !OldKeyState.INS)
+  true
+end
+
+schema Pad_GetDeleteJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.DEL && !OldKeyState.DEL)
+  true
+end
+
+schema Pad_GetHomeJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.HOME && !OldKeyState.HOME)
+  true
+end
+
+schema Pad_GetEndJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.END && !OldKeyState.END)
+  true
+end
+
+schema Pad_GetPageUpJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.PGUP && !OldKeyState.PGUP)
+  true
+end
+
+schema Pad_GetPageDownJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.PGDN && !OldKeyState.PGDN)
+  true
+end
+
+schema Pad_GetUpJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.UP && !OldKeyState.UP)
+  true
+end
+
+schema Pad_GetDownJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.DOWN && !OldKeyState.DOWN)
+  true
+end
+
+schema Pad_GetLeftJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.LEFT && !OldKeyState.LEFT)
+  true
+end
+
+schema Pad_GetRightJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.RIGHT && !OldKeyState.RIGHT)
+  true
+end
+
+schema Pad_GetScrollLockJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.SCROLLLOCK && !OldKeyState.SCROLLLOCK)
+  true
+end
+
+schema Pad_GetPauseJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.PAUSE && !OldKeyState.PAUSE)
+  true
+end
+
+schema Pad_GetNumLockJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUMLOCK && !OldKeyState.NUMLOCK)
+  true
+end
+
+schema Pad_GetDivideJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.DIV && !OldKeyState.DIV)
+  true
+end
+
+schema Pad_GetTimesJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.MUL && !OldKeyState.MUL)
+  true
+end
+
+schema Pad_GetMinusJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.SUB && !OldKeyState.SUB)
+  true
+end
+
+schema Pad_GetPlusJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.ADD && !OldKeyState.ADD)
+  true
+end
+
+schema Pad_GetPadEnterJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.ENTER && !OldKeyState.ENTER)
+  true
+end
+
+schema Pad_GetPadDelJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.DECIMAL && !OldKeyState.DECIMAL)
+  true
+end
+
+schema Pad_GetPad1JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM1 && !OldKeyState.NUM1)
+  true
+end
+
+schema Pad_GetPad2JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM2 && !OldKeyState.NUM2)
+  true
+end
+
+schema Pad_GetPad3JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM3 && !OldKeyState.NUM3)
+  true
+end
+
+schema Pad_GetPad4JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM4 && !OldKeyState.NUM4)
+  true
+end
+
+schema Pad_GetPad5JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM5 && !OldKeyState.NUM5)
+  true
+end
+
+schema Pad_GetPad6JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM6 && !OldKeyState.NUM6)
+  true
+end
+
+schema Pad_GetPad7JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM7 && !OldKeyState.NUM7)
+  true
+end
+
+schema Pad_GetPad8JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM8 && !OldKeyState.NUM8)
+  true
+end
+
+schema Pad_GetPad9JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM9 && !OldKeyState.NUM9)
+  true
+end
+
+schema Pad_GetPad0JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.NUM0 && !OldKeyState.NUM0)
+  true
+end
+
+schema Pad_GetBackspaceJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.BACKSP && !OldKeyState.BACKSP)
+  true
+end
+
+schema Pad_GetTabJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.TAB && !OldKeyState.TAB)
+  true
+end
+
+schema Pad_GetCapsLockJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.CAPSLOCK && !OldKeyState.CAPSLOCK)
+  true
+end
+
+schema Pad_GetReturnJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.EXTENTER && !OldKeyState.EXTENTER)
+  true
+end
+
+schema Pad_GetLeftShiftJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.LSHIFT && !OldKeyState.LSHIFT)
+  true
+end
+
+schema Pad_GetShiftJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.SHIFT && !OldKeyState.SHIFT)
+  true
+end
+
+schema Pad_GetRightShiftJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.RSHIFT && !OldKeyState.RSHIFT)
+  true
+end
+
+schema Pad_GetLeftCtrlJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.LCTRL && !OldKeyState.LCTRL)
+  true
+end
+
+schema Pad_GetRightCtrlJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.RCTRL && !OldKeyState.RCTRL)
+  true
+end
+
+schema Pad_GetLeftAltJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.LALT && !OldKeyState.LALT)
+  true
+end
+
+schema Pad_GetRightAltJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.RALT && !OldKeyState.RALT)
+  true
+end
+
+schema Pad_GetLeftWinJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.LWIN && !OldKeyState.LWIN)
+  true
+end
+
+schema Pad_GetRightWinJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.RWIN && !OldKeyState.RWIN)
+  true
+end
+
+schema Pad_GetAppsJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewKeyState.APPS && !OldKeyState.APPS)
+  true
+end
+
+schema Pad_GetEnterJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GetPadEnterJustDown() || GetReturnJustDown()
+  true
+end
+
+schema Pad_GetAltJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GetLeftAltJustDown() || GetRightAltJustDown()
+  true
+end
+
+schema Pad_GetLeftJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewKeyState.LEFT && OldKeyState.LEFT)
+  true
+end
+
+schema Pad_GetRightJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewKeyState.RIGHT && OldKeyState.RIGHT)
+  true
+end
+
+schema Pad_GetEnterJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GetPadEnterJustUp() || GetReturnJustUp()
+  true
+end
+
+schema Pad_GetReturnJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewKeyState.EXTENTER && OldKeyState.EXTENTER)
+  true
+end
+
+schema Pad_GetPadEnterJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewKeyState.ENTER && OldKeyState.ENTER)
+  true
+end
+
+schema Pad_GetChar
+  ΔPadModuleState
+  c? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.VK_KEYS[c]
+  true
+end
+
+schema Pad_GetF
+  ΔPadModuleState
+  n? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.F[n]
+  true
+end
+
+schema Pad_GetEscape
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.ESC
+  true
+end
+
+schema Pad_GetInsert
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.INS
+  true
+end
+
+schema Pad_GetDelete
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.DEL
+  true
+end
+
+schema Pad_GetHome
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.HOME
+  true
+end
+
+schema Pad_GetEnd
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.END
+  true
+end
+
+schema Pad_GetPageUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.PGUP
+  true
+end
+
+schema Pad_GetPageDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.PGDN
+  true
+end
+
+schema Pad_GetUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.UP
+  true
+end
+
+schema Pad_GetDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.DOWN
+  true
+end
+
+schema Pad_GetLeft
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.LEFT
+  true
+end
+
+schema Pad_GetRight
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.RIGHT
+  true
+end
+
+schema Pad_GetScrollLock
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.SCROLLLOCK
+  true
+end
+
+schema Pad_GetPause
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.PAUSE
+  true
+end
+
+schema Pad_GetNumLock
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUMLOCK
+  true
+end
+
+schema Pad_GetDivide
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.DIV
+  true
+end
+
+schema Pad_GetTimes
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.MUL
+  true
+end
+
+schema Pad_GetMinus
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.SUB
+  true
+end
+
+schema Pad_GetPlus
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.ADD
+  true
+end
+
+schema Pad_GetPadEnter
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.ENTER
+  true
+end
+
+schema Pad_GetPadDel
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.DECIMAL
+  true
+end
+
+schema Pad_GetPad1
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM1
+  true
+end
+
+schema Pad_GetPad2
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM2
+  true
+end
+
+schema Pad_GetPad3
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM3
+  true
+end
+
+schema Pad_GetPad4
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM4
+  true
+end
+
+schema Pad_GetPad5
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM5
+  true
+end
+
+schema Pad_GetPad6
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM6
+  true
+end
+
+schema Pad_GetPad7
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM7
+  true
+end
+
+schema Pad_GetPad8
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM8
+  true
+end
+
+schema Pad_GetPad9
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM9
+  true
+end
+
+schema Pad_GetPad0
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.NUM0
+  true
+end
+
+schema Pad_GetBackspace
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.BACKSP
+  true
+end
+
+schema Pad_GetTab
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.TAB
+  true
+end
+
+schema Pad_GetCapsLock
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.CAPSLOCK
+  true
+end
+
+schema Pad_GetEnter
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.EXTENTER
+  true
+end
+
+schema Pad_GetLeftShift
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.LSHIFT
+  true
+end
+
+schema Pad_GetShift
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.SHIFT
+  true
+end
+
+schema Pad_GetRightShift
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.RSHIFT
+  true
+end
+
+schema Pad_GetLeftCtrl
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.LCTRL
+  true
+end
+
+schema Pad_GetRightCtrl
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.RCTRL
+  true
+end
+
+schema Pad_GetLeftAlt
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.LALT
+  true
+end
+
+schema Pad_GetRightAlt
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.RALT
+  true
+end
+
+schema Pad_GetLeftWin
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.LWIN
+  true
+end
+
+schema Pad_GetRightWin
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.RWIN
+  true
+end
+
+schema Pad_GetApps
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = NewKeyState.APPS
+  true
+end
+
+schema Pad_GetTriangleJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Triangle && !OldState.Triangle)
+  true
+end
+
+schema Pad_GetCircleJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Circle && !OldState.Circle)
+  true
+end
+
+schema Pad_GetCrossJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Cross && !OldState.Cross)
+  true
+end
+
+schema Pad_GetSquareJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Square && !OldState.Square)
+  true
+end
+
+schema Pad_GetDPadUpJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.DPadUp && !OldState.DPadUp)
+  true
+end
+
+schema Pad_GetDPadDownJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.DPadDown && !OldState.DPadDown)
+  true
+end
+
+schema Pad_GetDPadLeftJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.DPadLeft && !OldState.DPadLeft)
+  true
+end
+
+schema Pad_GetDPadRightJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.DPadRight && !OldState.DPadRight)
+  true
+end
+
+schema Pad_GetLeftShoulder1JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1)
+  true
+end
+
+schema Pad_GetLeftShoulder2JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2)
+  true
+end
+
+schema Pad_GetRightShoulder1JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.RightShoulder1 && !OldState.RightShoulder1)
+  true
+end
+
+schema Pad_GetRightShoulder2JustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.RightShoulder2 && !OldState.RightShoulder2)
+  true
+end
+
+schema Pad_GetLeftShockJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.LeftShock && !OldState.LeftShock)
+  true
+end
+
+schema Pad_GetRightShockJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.RightShock && !OldState.RightShock)
+  true
+end
+
+schema Pad_GetStartJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Start && !OldState.Start)
+  true
+end
+
+schema Pad_GetSelectJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.Select && !OldState.Select)
+  true
+end
+
+schema Pad_GetLeftStickXJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.LeftStickX && !OldState.LeftStickX)
+  true
+end
+
+schema Pad_GetLeftStickYJustDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(NewState.LeftStickY && !OldState.LeftStickY)
+  true
+end
+
+schema Pad_GetTriangleJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.Triangle && OldState.Triangle)
+  true
+end
+
+schema Pad_GetCircleJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.Circle && OldState.Circle)
+  true
+end
+
+schema Pad_GetCrossJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.Cross && OldState.Cross)
+  true
+end
+
+schema Pad_GetSquareJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.Square && OldState.Square)
+  true
+end
+
+schema Pad_GetDPadUpJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.DPadUp && OldState.DPadUp)
+  true
+end
+
+schema Pad_GetDPadDownJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.DPadDown && OldState.DPadDown)
+  true
+end
+
+schema Pad_GetDPadLeftJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.DPadLeft && OldState.DPadLeft)
+  true
+end
+
+schema Pad_GetDPadRightJustUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(!NewState.DPadRight && OldState.DPadRight)
+  true
+end
+
+schema Pad_GetTriangle
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.Triangle
+  true
+end
+
+schema Pad_GetCircle
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.Circle
+  true
+end
+
+schema Pad_GetCross
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.Cross
+  true
+end
+
+schema Pad_GetSquare
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.Square
+  true
+end
+
+schema Pad_GetDPadUp
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.DPadUp
+  true
+end
+
+schema Pad_GetDPadDown
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.DPadDown
+  true
+end
+
+schema Pad_GetDPadLeft
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.DPadLeft
+  true
+end
+
+schema Pad_GetDPadRight
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.DPadRight
+  true
+end
+
+schema Pad_GetLeftShoulder1
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.LeftShoulder1
+  true
+end
+
+schema Pad_GetLeftShoulder2
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.LeftShoulder2
+  true
+end
+
+schema Pad_GetRightShoulder1
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.RightShoulder1
+  true
+end
+
+schema Pad_GetRightShoulder2
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.RightShoulder2
+  true
+end
+
+schema Pad_GetStart
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.Start
+  true
+end
+
+schema Pad_GetSelect
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!NewState.Select
+  true
+end
+
+schema Pad_GetLeftStickX
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = NewState.LeftStickX
+  true
+end
+
+schema Pad_GetLeftStickY
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = NewState.LeftStickY
+  true
+end
+
+schema Pad_GetRightStickX
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = NewState.RightStickX
+  true
+end
+
+schema Pad_GetRightStickY
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = NewState.RightStickY
+  true
+end
+
+schema Pad_ArePlayerControlsDisabled
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = DisablePlayerControls != PLAYERCONTROL_ENABLED
+  true
+end
+
+schema Pad_SetDisablePlayerControls
+  ΔPadModuleState
+  who? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_SetEnablePlayerControls
+  ΔPadModuleState
+  who? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_IsPlayerControlsDisabledBy
+  ΔPadModuleState
+  who? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = DisablePlayerControls & who
+  true
+end
+
+schema Pad_GetMode
+  ΔPadModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = Mode
+  true
+end
+
+schema Pad_SetMode
+  ΔPadModuleState
+  mode? : ℤ
+where
+  -- State update: Mode' = mode
+  true
+end
+
+schema Pad_IsNoOrObsolete
+  ΔPadModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bDisplayNoControllerMessage || bObsoleteControllerMessage
+  true
+end
+
+schema Pad_SetDisablePlayerControls_2
+  ΔPadModuleState
+  who? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_SetEnablePlayerControls_2
+  ΔPadModuleState
+  who? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Pad_IsPlayerControlsDisabledBy_2
+  ΔPadModuleState
+  who? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = DisablePlayerControls & who
+  true
+end

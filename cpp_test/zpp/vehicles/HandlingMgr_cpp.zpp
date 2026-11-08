@@ -1,0 +1,166 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: HandlingMgr (vehicles)
+-- Source File(s): vehicles/HandlingMgr.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Physical.zpp  (from "Physical.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cHandlingDataMgr_cHandlingDataMgr
+  ΔcHandlingDataMgr
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cHandlingDataMgr_Initialise
+  ΔcHandlingDataMgr
+where
+  -- State update: field_0' = 0.1f
+  -- State update: fWheelFriction' = 0.9f
+  -- State update: field_8' = 1.0f
+  -- State update: field_C' = 0.8f
+  -- State update: field_10' = 0.98f
+  true
+end
+
+schema cHandlingDataMgr_LoadHandlingData
+  ΔcHandlingDataMgr
+where
+  -- State update: start' = (char*)work_buff
+  -- State update: end' = start+1
+  -- State update: handling' = ∅
+  -- State update: flyingHandling' = ∅
+  -- State update: boatHandling' = ∅
+  -- State update: bikeHandling' = ∅
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema cHandlingDataMgr_FindExactWord
+  ΔcHandlingDataMgr
+  word? : seq CHAR
+  words? : seq CHAR
+  wordLen? : ℤ
+  numWords? : ℤ
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = numWords
+  true
+end
+
+schema cHandlingDataMgr_ConvertDataToGameUnits
+  ΔcHandlingDataMgr
+  handling? : Ref[tHandlingData]
+where
+  -- State update: handling.fInvMass' = 1.0f/handling.fMass
+  -- State update: a' = 0.0f
+  -- State update: b' = 100.0f
+  -- State update: velocity' = handling.Transmission.fMaxVelocity
+  -- State update: a' = handling.Transmission.fEngineAcceleration/6.0f
+  -- State update: b' = -velocity * (1.0f/(a_drag + 1.0f) - 1.0f)
+  -- Invokes: Transmission.InitGearRatios
+  true
+end
+
+schema cHandlingDataMgr_ConvertBikeDataToGameUnits
+  ΔcHandlingDataMgr
+  handling? : Ref[tBikeHandlingData]
+where
+  -- State update: handling.fMaxLean' = Sin(DEGTORAD(handling.fMaxLean))
+  -- State update: handling.fFullAnimLean' = DEGTORAD(handling.fFullAnimLean)
+  -- State update: handling.fWheelieAng' = Sin(DEGTORAD(handling.fWheelieAng))
+  -- State update: handling.fStoppieAng' = Sin(DEGTORAD(handling.fStoppieAng))
+  true
+end
+
+schema cHandlingDataMgr_GetHandlingId
+  ΔcHandlingDataMgr
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = i
+  true
+end
+
+schema cHandlingDataMgr_GetFlyingPointer
+  ΔcHandlingDataMgr
+  id? : ℕ
+where
+  -- Return postcondition: result! = &FlyingHandlingData[id-HANDLING_SEAPLANE]
+  -- Return postcondition: result! = &FlyingHandlingData[0]
+  true
+end
+
+schema cHandlingDataMgr_GetBoatPointer
+  ΔcHandlingDataMgr
+  id? : ℕ
+where
+  -- Return postcondition: result! = &BoatHandlingData[id-HANDLING_PREDATOR]
+  -- Return postcondition: result! = &BoatHandlingData[0]
+  true
+end
+
+schema cHandlingDataMgr_ConvertDataToWorldUnits
+  ΔcHandlingDataMgr
+  handling? : Ref[tHandlingData]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cHandlingDataMgr_RangeCheck
+  ΔcHandlingDataMgr
+  handling? : Ref[tHandlingData]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cHandlingDataMgr_ModifyHandlingValue
+  ΔcHandlingDataMgr
+  arg_1? : Ref[CVehicle]
+  arg_2? : tVehicleType
+  arg_3? : tField
+  arg_4? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cHandlingDataMgr_DisplayHandlingData
+  ΔcHandlingDataMgr
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[tHandlingData]
+  arg_3? : ℕ
+  arg_4? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema HandlingMgrModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 623
+end

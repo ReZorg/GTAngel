@@ -1,0 +1,615 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedAttractor (peds)
+-- Source File(s): peds/PedAttractor.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include General.zpp  (from "General.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PedAttractor_GetPedAttractorManager
+  ΔPedAttractorModuleState
+  result! : Ref[CPedAttractorManager]
+where
+  -- State update: pedAttrMgr' = new CPedAttractorManager
+  -- Return postcondition: result! = pedAttrMgr
+  true
+end
+
+schema CVehicleToEffect_From
+  ΔCVehicleToEffect
+  other? : CVehicleToEffect
+  result! : CVehicleToEffect
+where
+  -- State update: m_pVehicle' = other.m_pVehicle
+  -- State update: col' = other.m_effects[i].col
+  -- State update: type' = other.m_effects[i].type
+  -- State update: pos' = other.m_effects[i].pos
+  -- State update: pedattr' = other.m_effects[i].pedattr
+  -- Return postcondition: result! = *this
+  true
+end
+
+schema CVehicleToEffect_ChooseEffect
+  ΞCVehicleToEffect
+  pos? : CVector
+  result! : Ref[C2dEffect]
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = &m_effects[1]
+  -- Return postcondition: result! = &m_effects[3]
+  -- Invokes: m_pVehicle->GetPosition, m_pVehicle->GetRight, m_pVehicle->GetForward
+  true
+end
+
+schema CVehicleToEffect_HasThisEffect
+  ΞCVehicleToEffect
+  pEffect? : Ref[C2dEffect]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPedAttractorManager_GetEffectForIceCreamVan
+  ΔCPedAttractorManager
+  pVehicle? : Ref[CVehicle]
+  pos? : CVector
+  result! : Ref[C2dEffect]
+where
+  -- State update: assoc' = vVehicleToEffect.begin()
+  -- Return postcondition: result! = assoc->ChooseEffect(pos)
+  -- Return postcondition: result! = vVehicleToEffect.back().ChooseEffect(pos)
+  -- Return postcondition: result! = effect.ChooseEffect(pos)
+  -- Invokes: vVehicleToEffect.empty, vVehicleToEffect.begin, vVehicleToEffect.end, assoc->GetVehicle, assoc->ChooseEffect
+  true
+end
+
+schema CPedAttractorManager_GetIceCreamVanForEffect
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  result! : Ref[CVehicle]
+where
+  -- State update: assoc' = vVehicleToEffect.begin()
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc->GetVehicle()
+  -- Return postcondition: result! = nil
+  -- Invokes: vVehicleToEffect.empty, vVehicleToEffect.begin, vVehicleToEffect.end, assoc->HasThisEffect, assoc->GetVehicle
+  true
+end
+
+schema CPedAttractorManager_FindAssociatedAttractor
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : Ref[CPedAttractor]
+where
+  -- State update: attractor' = vecAttractors.begin()
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = *attractor
+  -- Return postcondition: result! = nil
+  -- Invokes: vecAttractors.empty, vecAttractors.begin, vecAttractors.end
+  true
+end
+
+schema CPedAttractorManager_RemoveIceCreamVanEffects
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+where
+  -- State update: pVehicle' = GetIceCreamVanForEffect(pEffect)
+  -- State update: assoc' = vVehicleToEffect.begin()
+  -- State update: total' = 0
+  -- State update: assoc' = vVehicleToEffect.erase(assoc)
+  -- Invokes: vVehicleToEffect.empty, vVehicleToEffect.begin, vVehicleToEffect.end, assoc->GetVehicle, assoc->GetEffect
+  true
+end
+
+schema CPedPizzaAttractor_UpdatePedStateOnDeparture
+  ΞCPedPizzaAttractor
+  pPed? : Ref[CPed]
+where
+  -- State update: pPed.m_nPedMoney' = 0
+  true
+end
+
+schema CPedAtmAttractor_UpdatePedStateOnDeparture
+  ΞCPedAtmAttractor
+  pPed? : Ref[CPed]
+where
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPedAttractor_ComputeDeltaHeading
+  ΞCPedAttractor
+  result! : ℝ
+where
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPedAttractor_ComputeDeltaPos
+  ΞCPedAttractor
+  result! : ℝ
+where
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPedAttractor_ComputeAttractTime
+  ΞCPedAttractor
+  id? : ℤ
+  approacher? : 𝔹
+  time? : ℝ
+where
+  -- State update: time' = m_fTimeInApproachingQueue
+  -- State update: time' = m_fTimeInWaitQueue
+  true
+end
+
+schema CPedAttractor_ComputeAttractPos
+  ΞCPedAttractor
+  qid? : ℤ
+  pos? : CVector
+where
+  -- State update: pos' = vecEffectPos - qid * vecQueueDir * m_fQueueDistance
+  true
+end
+
+schema CPedShelterAttractor_GetDisplacement
+  ΞCPedShelterAttractor
+  qid? : ℤ
+  result! : CVector
+where
+  -- State update: fRandomAngle' = CGeneral::GetRandomNumberInRange(0.0f, TWOPI)
+  -- State update: fRandomOffset' = CGeneral::GetRandomNumberInRange(0.0f, 2.0f)
+  -- State update: close' = false
+  -- State update: v' = ms_displacements.begin()
+  -- State update: close' = true
+  -- Return postcondition: result! = ms_displacements[qid]
+  -- Invokes: ms_displacements.empty, CGeneral::GetRandomNumberInRange, ms_displacements.begin, ms_displacements.end, ms_displacements.push_back
+  true
+end
+
+schema CPedShelterAttractor_ComputeAttractPos
+  ΞCPedShelterAttractor
+  qid? : ℤ
+  pos? : CVector
+where
+  -- State update: pos' = vecEffectPos + GetDisplacement(qid)
+  true
+end
+
+schema CPedAttractor_ComputeAttractHeading
+  ΞCPedAttractor
+  qid? : ℤ
+  heading? : ℝ
+where
+  -- Invokes: CGeneral::GetRadianAngleBetweenPoints
+  true
+end
+
+schema CPedShelterAttractor_ComputeAttractHeading
+  ΞCPedShelterAttractor
+  qid? : ℤ
+  heading? : ℝ
+where
+  -- State update: heading' = CGeneral::GetRandomNumberInRange(0.0f, TWOPI)
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPedAttractor_RegisterPed
+  ΔCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- State update: slot' = ComputeFreeSlot()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = true
+  -- Invokes: vApproachingQueue.begin, vApproachingQueue.end, vApproachingQueue.erase, vApproachingQueue.push_back, pPed->SetNewAttraction
+  true
+end
+
+schema PedAttractor_IsPedUsingAttractorOfThisType
+  ΔPedAttractorModuleState
+  type? : ℤ
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CPedAttractor_DeRegisterPed
+  ΔCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- State update: pPed.m_attractor' = ∅
+  -- State update: pPed.m_positionInQueue' = -1
+  -- State update: pPed.bHasAlreadyUsedAttractor' = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = BroadcastDeparture(pPed)
+  -- Invokes: vApproachingQueue.begin, vApproachingQueue.end, pPed->SetObjective, pPed->GetPedState, vApproachingQueue.erase
+  true
+end
+
+schema CPedAttractor_BroadcastArrival
+  ΔCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: pPedIt' = vWaitingQueue.begin()
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- State update: pPed' = *pPedIt
+  -- State update: slot' = ComputeFreeSlot()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vWaitingQueue.begin, vWaitingQueue.end, vWaitingQueue.push_back, vApproachingQueue.begin, vApproachingQueue.end
+  true
+end
+
+schema CPedAttractor_BroadcastDeparture
+  ΔCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: qid' = -1
+  -- State update: qid' = i
+  -- State update: pPed.m_attractor' = ∅
+  -- State update: pPed.m_positionInQueue' = -1
+  -- State update: pPed.bHasAlreadyUsedAttractor' = true
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vWaitingQueue.size, pPed->SetNewAttraction, pPed->GetPedState, pPed->SetWanderPath, CGeneral::GetNodeHeadingFromVector
+  true
+end
+
+schema CPedShelterAttractor_BroadcastDeparture
+  ΔCPedShelterAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: qid' = -1
+  -- State update: qid' = i
+  -- State update: pPed.m_attractor' = ∅
+  -- State update: pPed.m_positionInQueue' = -1
+  -- State update: pPed.bHasAlreadyUsedAttractor' = true
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vWaitingQueue.size, pPed->GetPedState, pPed->SetWanderPath, CGeneral::GetNodeHeadingFromVector, pPed->SetObjective
+  true
+end
+
+schema CPedAttractor_IsRegisteredWithPed
+  ΞCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: pPedIt' = vWaitingQueue.begin()
+  -- State update: pPedIt' = vApproachingQueue.begin()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: vWaitingQueue.begin, vWaitingQueue.end, vApproachingQueue.begin, vApproachingQueue.end
+  true
+end
+
+schema CPedAttractor_IsInQueue
+  ΞCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: pPedIt' = vWaitingQueue.begin()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: vWaitingQueue.begin, vWaitingQueue.end
+  true
+end
+
+schema CPedAttractorManager_RegisterPedWithAttractor
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  result! : Ref[CPedAttractor]
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = RegisterPed(pPed, pEffect, matrix, vAtmAttractors)
+  true
+end
+
+schema CPedAttractorManager_DeRegisterPed
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: pAttractor->GetEffect
+  true
+end
+
+schema CPedAttractorManager_BroadcastArrival
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: pAttractor->GetEffect
+  true
+end
+
+schema CPedAttractorManager_BroadcastDeparture
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: pAttractor->GetEffect
+  true
+end
+
+schema CPedAttractorManager_IsAtHeadOfQueue
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: pAttractor->GetEffect
+  true
+end
+
+schema CPedAttractorManager_IsInQueue
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: pAttractor->GetEffect
+  true
+end
+
+schema CPedAttractorManager_HasEmptySlot
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  result! : 𝔹
+where
+  -- State update: pAttractor' = FindAssociatedAttractor(pEffect, vAtmAttractors)
+  -- State update: pAttractor' = FindAssociatedAttractor(pEffect, vSeatAttractors)
+  -- State update: pAttractor' = FindAssociatedAttractor(pEffect, vStopAttractors)
+  -- State update: pAttractor' = FindAssociatedAttractor(pEffect, vPizzaAttractors)
+  -- State update: pAttractor' = FindAssociatedAttractor(pEffect, vShelterAttractors)
+  -- State update: pAttractor' = FindAssociatedAttractor(pEffect, vIceCreamAttractors)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = true
+  -- Invokes: pAttractor->GetNoOfRegisteredPeds, pAttractor->GetMaxPedsInAttractor
+  true
+end
+
+schema CPedAttractorManager_IsPedRegisteredWithEffect
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedAttractorManager_ComputeEffectPos
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  pos? : CVector
+where
+  -- State update: pos' = matrix.GetPosition() + Multiply3x3(matrix, pEffect.pos)
+  -- Invokes: matrix.GetPosition
+  true
+end
+
+schema CPedAttractorManager_ComputeEffectQueueDir
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  pos? : CVector
+where
+  -- State update: pos' = Multiply3x3(matrix, pEffect.pedattr.queueDir)
+  true
+end
+
+schema CPedAttractorManager_ComputeEffectUseDir
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  pos? : CVector
+where
+  -- State update: pos' = Multiply3x3(matrix, pEffect.pedattr.useDir)
+  true
+end
+
+schema CPedAttractorManager_RegisterPed
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : Ref[CPedAttractor]
+where
+  -- State update: pRegisteredAttractor' = ∅
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- State update: pAttractor' = *pAttractorIt
+  -- State update: pRegisteredAttractor' = pAttractor
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pRegisteredAttractor
+  -- Return postcondition: result! = pRegisteredAttractor
+  -- Invokes: vecAttractors.begin, vecAttractors.end, pAttractor->GetEffect, pAttractor->GetEffectPos, pAttractor->ComputeFreeSlot
+  true
+end
+
+schema CPedAttractorManager_DeRegisterPed_2
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- State update: pFound' = ∅
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- State update: pFound' = *pAttractorIt
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vecAttractors.begin, vecAttractors.end, pFound->DeRegisterPed, pFound->GetNoOfRegisteredPeds, vecAttractors.erase
+  true
+end
+
+schema CPedAttractorManager_BroadcastArrival_2
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- State update: pFound' = ∅
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- State update: pFound' = *pAttractorIt
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vecAttractors.begin, vecAttractors.end, pFound->BroadcastArrival
+  true
+end
+
+schema CPedAttractorManager_BroadcastDeparture_2
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- State update: pFound' = ∅
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- State update: pFound' = *pAttractorIt
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vecAttractors.begin, vecAttractors.end, pFound->DeRegisterPed, pFound->GetNoOfRegisteredPeds, vecAttractors.erase
+  true
+end
+
+schema CPedAttractorManager_IsInQueue_2
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = (*pAttractorIt)->IsInQueue(pPed)
+  -- Return postcondition: result! = false
+  -- Invokes: vecAttractors.begin, vecAttractors.end
+  true
+end
+
+schema CPedAttractorManager_IsAtHeadOfQueue_2
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = (*pAttractorIt)->IsAtHeadOfQueue(pPed)
+  -- Return postcondition: result! = false
+  -- Invokes: vecAttractors.begin, vecAttractors.end
+  true
+end
+
+schema CPedAttractorManager_IsPedRegistered
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- State update: pAttractorIt' = vecAttractors.begin()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: vecAttractors.begin, vecAttractors.end
+  true
+end
+
+schema CPedAttractorManager_IsApproachable
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  arg_3? : ℤ
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- State update: dp' = -DotProduct(vecUseDir, vecEffectPos)
+  -- State update: vecUseDir' = -vecUseDir
+  -- State update: dp' = -dp
+  -- State update: vecPedToAttractor' = pPed.GetPosition() - vecEffectPos
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CWorld::GetIsLineOfSightClear, pPed->GetPosition, vecPedToAttractor.Normalise, CWorld::IsWanderPathClear
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PedAttractorModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 802
+end

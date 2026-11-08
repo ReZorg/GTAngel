@@ -1,0 +1,277 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Wanted (core)
+-- Source File(s): core/Wanted.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Crime.zpp  (from "Crime.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWanted
+  m_nChaos : ℤ
+  m_nMinChaos : ℤ
+  m_nLastUpdateTime : ℤ
+  m_nLastWantedLevelChange : ℕ
+  m_nLastTimeSuspended : ℕ
+  m_fCrimeSensitivity : ℝ
+  m_CurrentCops : ℕ
+  m_MaxCops : ℕ
+  m_MaximumLawEnforcerVehicles : ℕ
+  m_CopsBeatingSuspect : ℕ
+  m_RoadblockDensity : ℤ
+  m_bIgnoredByCops : 𝔹
+  m_bIgnoredByEveryone : 𝔹
+  m_bSwatRequired : 𝔹
+  m_bFbiRequired : 𝔹
+  m_bArmyRequired : 𝔹
+  m_nWantedLevel : ℤ
+  m_nMinWantedLevel : ℤ
+  m_aCrimes : seq CCrimeBeingQd  -- bounded array [16]
+  m_pCops : seq Ref[CCopPed]  -- bounded array [10]
+  MaximumWantedLevel : ℤ
+  nMaximumWantedLevel : ℤ
+where
+  m_nLastWantedLevelChange ≥ 0
+  m_nLastTimeSuspended ≥ 0
+  m_CurrentCops ≥ 0
+  m_MaxCops ≥ 0
+  m_MaximumLawEnforcerVehicles ≥ 0
+  m_CopsBeatingSuspect ≥ 0
+  #m_bIgnoredByCops = 1
+  #m_bIgnoredByEveryone = 1
+  #m_bSwatRequired = 1
+  #m_bFbiRequired = 1
+  #m_bArmyRequired = 1
+  #m_aCrimes = 16
+  #m_pCops = 10
+end
+
+schema CWanted_Initialise
+  ΔCWanted
+where
+  -- Declared member operation CWanted::Initialise()
+  true
+end
+
+schema CWanted_AreMiamiViceRequired_2
+  ΔCWanted
+  result! : 𝔹
+where
+  -- Declared member operation CWanted::AreMiamiViceRequired()
+  true
+end
+
+schema CWanted_AreSwatRequired_3
+  ΔCWanted
+  result! : 𝔹
+where
+  -- Declared member operation CWanted::AreSwatRequired()
+  true
+end
+
+schema CWanted_AreFbiRequired_4
+  ΔCWanted
+  result! : 𝔹
+where
+  -- Declared member operation CWanted::AreFbiRequired()
+  true
+end
+
+schema CWanted_AreArmyRequired_5
+  ΔCWanted
+  result! : 𝔹
+where
+  -- Declared member operation CWanted::AreArmyRequired()
+  true
+end
+
+schema CWanted_NumOfHelisRequired_6
+  ΔCWanted
+  result! : ℤ
+where
+  -- Declared member operation CWanted::NumOfHelisRequired()
+  true
+end
+
+schema CWanted_SetWantedLevel_7
+  ΔCWanted
+  arg_1? : ℤ
+where
+  -- Declared member operation CWanted::SetWantedLevel(int32)
+  true
+end
+
+schema CWanted_SetWantedLevelNoDrop_8
+  ΔCWanted
+  level? : ℤ
+where
+  -- Declared member operation CWanted::SetWantedLevelNoDrop(int32 level)
+  true
+end
+
+schema CWanted_GetWantedLevel_9
+  ΔCWanted
+  result! : ℤ
+where
+  -- Declared member operation CWanted::GetWantedLevel()
+  true
+end
+
+schema CWanted_CheatWantedLevel_10
+  ΔCWanted
+  level? : ℤ
+  result! : void
+where
+  -- Declared member operation CWanted::CheatWantedLevel(int32 level)
+  true
+end
+
+schema CWanted_RegisterCrime_11
+  ΔCWanted
+  type? : eCrimeType
+  coors? : CVector
+  id? : ℕ
+  policeDoesntCare? : 𝔹
+where
+  -- Declared member operation CWanted::RegisterCrime(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare)
+  true
+end
+
+schema CWanted_RegisterCrime_Immediately_12
+  ΔCWanted
+  type? : eCrimeType
+  coors? : CVector
+  id? : ℕ
+  policeDoesntCare? : 𝔹
+where
+  -- Declared member operation CWanted::RegisterCrime_Immediately(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare)
+  true
+end
+
+schema CWanted_ClearQdCrimes_13
+  ΔCWanted
+where
+  -- Declared member operation CWanted::ClearQdCrimes()
+  true
+end
+
+schema CWanted_AddCrimeToQ_14
+  ΔCWanted
+  type? : eCrimeType
+  id? : ℤ
+  pos? : CVector
+  reported? : 𝔹
+  policeDoesntCare? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWanted::AddCrimeToQ(eCrimeType type, int32 id, const CVector &pos, bool reported, bool policeDoesntCare)
+  true
+end
+
+schema CWanted_ReportCrimeNow_15
+  ΔCWanted
+  type? : eCrimeType
+  coors? : CVector
+  policeDoesntCare? : 𝔹
+where
+  -- Declared member operation CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesntCare)
+  true
+end
+
+schema CWanted_UpdateWantedLevel_16
+  ΔCWanted
+where
+  -- Declared member operation CWanted::UpdateWantedLevel()
+  true
+end
+
+schema CWanted_Reset_17
+  ΔCWanted
+where
+  -- Declared member operation CWanted::Reset()
+  true
+end
+
+schema CWanted_ResetPolicePursuit_18
+  ΔCWanted
+where
+  -- Declared member operation CWanted::ResetPolicePursuit()
+  true
+end
+
+schema CWanted_UpdateCrimesQ_19
+  ΔCWanted
+where
+  -- Declared member operation CWanted::UpdateCrimesQ()
+  true
+end
+
+schema CWanted_Update_20
+  ΔCWanted
+where
+  -- Declared member operation CWanted::Update()
+  true
+end
+
+schema CWanted_Suspend_21
+  ΔCWanted
+where
+  -- Declared member operation CWanted::Suspend()
+  true
+end
+
+schema CWanted_IsIgnored_22
+  ΔCWanted
+  result! : 𝔹
+where
+  -- Declared member operation CWanted::IsIgnored(void)
+  true
+end
+
+schema CWanted_WorkOutPolicePresence_23
+  ΔCWanted
+  posn? : CVector
+  radius? : ℝ
+  result! : ℤ
+where
+  -- Declared member operation CWanted::WorkOutPolicePresence(CVector posn, float radius)
+  true
+end
+
+schema CWanted_SetMaximumWantedLevel_24
+  ΔCWanted
+  level? : ℤ
+where
+  -- Declared member operation CWanted::SetMaximumWantedLevel(int32 level)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Wanted_GetWantedLevel
+  ΔWantedModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nWantedLevel
+  true
+end
+
+schema Wanted_IsIgnored
+  ΔWantedModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bIgnoredByCops || m_bIgnoredByEveryone
+  true
+end

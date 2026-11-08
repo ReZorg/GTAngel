@@ -1,0 +1,573 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioManager (audio)
+-- Source File(s): audio/AudioManager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include AudioCollision.zpp  (from "AudioCollision.h")
+-- include PolRadio.zpp  (from "PolRadio.h")
+-- include VehicleModelInfo.zpp  (from "VehicleModelInfo.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MISSION_AUDIO_SLOTS : seq CHAR  -- #define MISSION_AUDIO_SLOTS (2)
+RESET_LOOP_OFFSETS : seq CHAR  -- #define RESET_LOOP_OFFSETS #define SET_LOOP_OFFSETS(sample)
+CHANNEL_PLAYER_VEHICLE_ENGINE : seq CHAR  -- #define CHANNEL_PLAYER_VEHICLE_ENGINE m_nActiveSamples
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AudioManager_Enum_1 ::= REFLECTION_TOP | REFLECTION_BOTTOM | REFLECTION_LEFT | REFLECTION_RIGHT | REFLECTION_UP | MAX_REFLECTIONS
+  -- val(REFLECTION_TOP) = 0
+
+AudioManager_Enum_2 ::= REFLECTION_NORTH | REFLECTION_SOUTH | REFLECTION_WEST | REFLECTION_EAST | REFLECTION_CEIL_NORTH | REFLECTION_CEIL_SOUTH | REFLECTION_CEIL_WEST | REFLECTION_CEIL_EAST | MAX_REFLECTIONS
+  -- val(REFLECTION_NORTH) = 0
+
+PLAY_STATUS ::= PLAY_STATUS_STOPPED | PLAY_STATUS_PLAYING | PLAY_STATUS_FINISHED
+  -- val(PLAY_STATUS_STOPPED) = 0
+
+LOADING_STATUS ::= LOADING_STATUS_NOT_LOADED | LOADING_STATUS_LOADED | LOADING_STATUS_LOADING
+  -- val(LOADING_STATUS_NOT_LOADED) = 0
+
+AudioManager_Enum_5 ::= PED_COMMENT_VOLUME | PED_COMMENT_VOLUME_BEHIND_WALL | COLLISION_MAX_DIST
+  -- val(PED_COMMENT_VOLUME) = 127
+  -- val(PED_COMMENT_VOLUME_BEHIND_WALL) = 31
+  -- val(COLLISION_MAX_DIST) = 60
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tSound
+  m_nEntityIndex : ℤ
+  m_nBankIndex : ℕ
+  m_bIs2D : bool8
+  m_nPriority : ℕ
+  m_nFrequency : ℕ
+  m_nVolume : ℕ
+  m_fDistance : ℝ
+  m_nLoopCount : ℕ
+  m_nLoopEnd : ℤ
+  m_vecPos : CVector
+  m_bReverb : bool8
+  m_bReflections : bool8
+  m_bIsPlayingFinished : bool8
+  m_nVolumeChange : ℤ
+  field_51_lcs : ℕ
+where
+  m_nBankIndex ≥ 0
+  m_nPriority ≥ 0
+  m_nFrequency ≥ 0
+  m_nVolume ≥ 0
+  m_nLoopCount ≥ 0
+  field_51_lcs ≥ 0
+end
+
+schema tAudioEntity
+  m_nType : eAudioType
+  m_pEntity : ADDRESS
+  m_bIsUsed : bool8
+  m_bStatus : bool8
+  m_awAudioEvent : seq ℤ  -- bounded array [NUM_AUDIOENTITY_EVENTS]
+  m_afVolume : seq ℝ  -- bounded array [NUM_AUDIOENTITY_EVENTS]
+  m_AudioEvents : ℕ
+where
+  m_AudioEvents ≥ 0
+end
+
+schema tPedComment
+  m_nSampleIndex : ℕ
+  m_nEntityIndex : ℤ
+  m_vecPos : CVector
+  m_fDistance : ℝ
+  m_nVolume : ℕ
+  m_nLoadingTimeout : ℤ
+where
+  m_nSampleIndex ≥ 0
+  m_nVolume ≥ 0
+end
+
+schema cPedComments
+  m_nPedCommentCount : seq ℕ  -- bounded array [NUM_SOUND_QUEUES]
+  m_nActiveQueue : ℕ
+  m_nDelayTimer : ℕ
+  NUM_PED_COMMENTS_SLOTS : i
+  NUM_SOUND_QUEUES : j
+where
+  m_nActiveQueue ≥ 0
+  m_nDelayTimer ≥ 0
+end
+
+schema cPedComments_Add
+  ΔcPedComments
+  com? : Ref[tPedComment]
+  result! : void
+where
+  -- Declared member operation cPedComments::Add(tPedComment *com)
+  true
+end
+
+schema cPedComments_Process_2
+  ΔcPedComments
+where
+  -- Declared member operation cPedComments::Process()
+  true
+end
+
+schema cAudioScriptObjectManager
+  m_anScriptObjectEntityIndices : seq ℤ  -- bounded array [NUM_SCRIPT_MAX_ENTITIES]
+  m_nScriptObjectEntityTotal : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cAudioScriptObjectManager_cAudioScriptObjectManager
+  ΔcAudioScriptObjectManager
+where
+  -- Declared member operation cAudioScriptObjectManager::cAudioScriptObjectManager()
+  true
+end
+
+schema cAudioScriptObjectManager_cAudioScriptObjectManager_2
+  ΔcAudioScriptObjectManager
+  result! : ANY
+where
+  -- Declared member operation cAudioScriptObjectManager::cAudioScriptObjectManager()
+  true
+end
+
+schema cPedParams
+  m_bDistanceCalculated : bool8
+  m_fDistance : ℝ
+  m_pPed : Ref[CPed]
+where
+  #m_pPed ≤ 1
+end
+
+schema cPedParams_cPedParams
+  ΔcPedParams
+where
+  -- Declared member operation cPedParams::cPedParams()
+  true
+end
+
+schema cVehicleParams
+  m_VehicleType : ℤ
+  m_bDistanceCalculated : bool8
+  m_fDistance : ℝ
+  m_pVehicle : Ref[CVehicle]
+  m_pTransmission : Ref[cTransmission]
+  m_nIndex : ℕ
+  m_fVelocityChange : ℝ
+where
+  #m_pVehicle ≤ 1
+  #m_pTransmission ≤ 1
+  m_nIndex ≥ 0
+end
+
+schema cVehicleParams_cVehicleParams
+  ΔcVehicleParams
+where
+  -- Declared member operation cVehicleParams::cVehicleParams()
+  true
+end
+
+schema cAudioManager
+  m_bIsInitialised : bool8
+  m_bIsSurround : bool8
+  m_bReduceReleasingPriority : bool8
+  m_nActiveSamples : ℕ
+  m_bDoubleVolume : bool8
+  m_bDynamicAcousticModelingStatus : bool8
+  m_nChannelOffset : ℕ
+  m_fSpeedOfSound : ℝ
+  m_bTimerJustReset : bool8
+  m_nTimer : ℕ
+  m_sQueueSample : tSound
+  m_nActiveQueue : ℕ
+  m_nRequestedCount : seq ℕ  -- bounded array [NUM_SOUND_QUEUES]
+  m_asActiveSamples : seq tSound  -- bounded array [NUM_CHANNELS_GENERIC]
+  m_asAudioEntities : seq tAudioEntity  -- bounded array [NUM_AUDIOENTITIES]
+  m_aAudioEntityOrderList : seq ℕ  -- bounded array [NUM_AUDIOENTITIES]
+  m_nAudioEntitiesCount : ℕ
+  m_afReflectionsDistances : seq ℝ  -- bounded array [MAX_REFLECTIONS]
+  field_4348_lcs : bool8
+  m_bIsPlayerShutUp : bool8
+  m_nPlayerMood : ℕ
+  m_nPlayerMoodTimer : ℕ
+  field_4B38_vc : ℕ
+  m_bGenericSfx : bool8
+  m_sPedComments : cPedComments
+  m_nFireAudioEntity : ℤ
+  m_nWaterCannonEntity : ℤ
+  m_nPoliceChannelEntity : ℤ
+  m_sPoliceRadioQueue : cPoliceRadioQueue
+  m_aCrimes : seq cAMCrime  -- bounded array [10]
+  m_nFrontEndEntity : ℤ
+  m_nCollisionEntity : ℤ
+  m_sCollisionManager : cAudioCollisionManager
+  m_nProjectileEntity : ℤ
+  m_nEscalatorEntity : ℤ
+  m_nExtraSoundsEntity : ℤ
+  m_bIsMissionAudio2D : seq bool8  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_nMissionAudioSampleIndex : seq ℕ  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_nMissionAudioLoadingStatus : seq ℕ  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_nMissionAudioPlayStatus : seq ℕ  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_bIsMissionAudioPlaying : seq bool8  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_nMissionAudioFramesToPlay : seq ℤ  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_bIsMissionAudioAllowedToPlay : seq bool8  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_bIsMissionAudioPhoneCall : seq bool8  -- bounded array [MISSION_AUDIO_SLOTS]
+  m_nGlobalSfxVolumeMultiplier : ℕ
+  m_anRandomTable : seq ℤ  -- bounded array [5]
+  m_nTimeSpent : ℕ
+  m_bIsPaused : bool8
+  m_bWasPaused : bool8
+  m_FrameCounter : ℕ
+  field_5644_lcs : ℕ
+  field_5648_lcs : ℕ
+  field_564C_lcs : ℕ
+where
+  m_nActiveSamples ≥ 0
+  m_nChannelOffset ≥ 0
+  m_nTimer ≥ 0
+  m_nActiveQueue ≥ 0
+  m_nAudioEntitiesCount ≥ 0
+  m_nPlayerMood ≥ 0
+  m_nPlayerMoodTimer ≥ 0
+  field_4B38_vc ≥ 0
+  #m_aCrimes = 10
+  m_nGlobalSfxVolumeMultiplier ≥ 0
+  #m_anRandomTable = 5
+  m_nTimeSpent ≥ 0
+  m_FrameCounter ≥ 0
+  field_5644_lcs ≥ 0
+  field_5648_lcs ≥ 0
+  field_564C_lcs ≥ 0
+end
+
+schema cAudioManager_cAudioManager
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::cAudioManager()
+  true
+end
+
+schema cAudioManager_cAudioManager_2
+  ΔcAudioManager
+  result! : ANY
+where
+  -- Declared member operation cAudioManager::cAudioManager()
+  true
+end
+
+schema cAudioManager_Initialise_3
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::Initialise()
+  true
+end
+
+schema cAudioManager_Terminate_4
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::Terminate()
+  true
+end
+
+schema cAudioManager_Service_5
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::Service()
+  true
+end
+
+schema cAudioManager_CreateEntity_6
+  ΔcAudioManager
+  type? : eAudioType
+  entity? : ADDRESS
+  result! : ℤ
+where
+  -- Declared member operation cAudioManager::CreateEntity(eAudioType type, void *entity)
+  true
+end
+
+schema cAudioManager_DestroyEntity_7
+  ΔcAudioManager
+  id? : ℤ
+where
+  -- Declared member operation cAudioManager::DestroyEntity(int32 id)
+  true
+end
+
+schema cAudioManager_GetEntityStatus_8
+  ΔcAudioManager
+  id? : ℤ
+  result! : bool8
+where
+  -- Declared member operation cAudioManager::GetEntityStatus(int32 id)
+  true
+end
+
+schema cAudioManager_SetEntityStatus_9
+  ΔcAudioManager
+  id? : ℤ
+  status? : bool8
+where
+  -- Declared member operation cAudioManager::SetEntityStatus(int32 id, bool8 status)
+  true
+end
+
+schema cAudioManager_GetEntityPointer_10
+  ΔcAudioManager
+  id? : ℤ
+  result! : ADDRESS
+where
+  -- Declared member operation cAudioManager::GetEntityPointer(int32 id)
+  true
+end
+
+schema cAudioManager_PlayOneShot_11
+  ΔcAudioManager
+  index? : ℤ
+  sound? : ℕ
+  vol? : ℝ
+where
+  -- Declared member operation cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
+  true
+end
+
+schema cAudioManager_SetEffectsMasterVolume_12
+  ΔcAudioManager
+  volume? : ℕ
+where
+  -- Declared member operation cAudioManager::SetEffectsMasterVolume(uint8 volume)
+  true
+end
+
+schema cAudioManager_SetMusicMasterVolume_13
+  ΔcAudioManager
+  volume? : ℕ
+where
+  -- Declared member operation cAudioManager::SetMusicMasterVolume(uint8 volume)
+  true
+end
+
+schema cAudioManager_SetMP3BoostVolume_14
+  ΔcAudioManager
+  volume? : ℕ
+where
+  -- Declared member operation cAudioManager::SetMP3BoostVolume(uint8 volume)
+  true
+end
+
+schema cAudioManager_SetEffectsFadeVol_15
+  ΔcAudioManager
+  volume? : ℕ
+where
+  -- Declared member operation cAudioManager::SetEffectsFadeVol(uint8 volume)
+  true
+end
+
+schema cAudioManager_SetMusicFadeVol_16
+  ΔcAudioManager
+  volume? : ℕ
+where
+  -- Declared member operation cAudioManager::SetMusicFadeVol(uint8 volume)
+  true
+end
+
+schema cAudioManager_SetOutputMode_17
+  ΔcAudioManager
+  surround? : bool8
+where
+  -- Declared member operation cAudioManager::SetOutputMode(bool8 surround)
+  true
+end
+
+schema cAudioManager_ResetTimers_18
+  ΔcAudioManager
+  time? : ℕ
+where
+  -- Declared member operation cAudioManager::ResetTimers(uint32 time)
+  true
+end
+
+schema cAudioManager_DestroyAllGameCreatedEntities_19
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::DestroyAllGameCreatedEntities()
+  true
+end
+
+schema cAudioManager_Get3DProviderName_20
+  ΔcAudioManager
+  id? : ℕ
+  result! : seq CHAR
+where
+  -- Declared member operation cAudioManager::Get3DProviderName(uint8 id)
+  true
+end
+
+schema cAudioManager_GetCurrent3DProviderIndex_21
+  ΔcAudioManager
+  result! : ℤ
+where
+  -- Declared member operation cAudioManager::GetCurrent3DProviderIndex()
+  true
+end
+
+schema cAudioManager_AutoDetect3DProviders_22
+  ΔcAudioManager
+  result! : ℤ
+where
+  -- Declared member operation cAudioManager::AutoDetect3DProviders()
+  true
+end
+
+schema cAudioManager_SetCurrent3DProvider_23
+  ΔcAudioManager
+  which? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation cAudioManager::SetCurrent3DProvider(uint8 which)
+  true
+end
+
+schema cAudioManager_SetSpeakerConfig_24
+  ΔcAudioManager
+  conf? : ℤ
+where
+  -- Declared member operation cAudioManager::SetSpeakerConfig(int32 conf)
+  true
+end
+
+schema cAudioManager_IsMP3RadioChannelAvailable_25
+  ΔcAudioManager
+  result! : bool8
+where
+  -- Declared member operation cAudioManager::IsMP3RadioChannelAvailable()
+  true
+end
+
+schema cAudioManager_ReleaseDigitalHandle_26
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::ReleaseDigitalHandle()
+  true
+end
+
+schema cAudioManager_ReacquireDigitalHandle_27
+  ΔcAudioManager
+where
+  -- Declared member operation cAudioManager::ReacquireDigitalHandle()
+  true
+end
+
+schema cAudioManager_GetCDAudioDriveLetter_28
+  ΔcAudioManager
+  result! : seq CHAR
+where
+  -- Declared member operation cAudioManager::GetCDAudioDriveLetter()
+  true
+end
+
+schema cAudioManager_IsAudioInitialised_29
+  ΔcAudioManager
+  result! : bool8
+where
+  -- Declared member operation cAudioManager::IsAudioInitialised()
+  true
+end
+
+schema cAudioManager_ComputeVolume_30
+  ΔcAudioManager
+  emittingVolume? : ℕ
+  maxDistance? : ℝ
+  distance? : ℝ
+  result! : ℕ
+where
+  -- Declared member operation cAudioManager::ComputeVolume(uint8 emittingVolume, float maxDistance, float distance)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema AudioManager_cPedComments
+  ΔAudioManagerModuleState
+where
+  -- State update: m_nLoadingTimeout' = -1
+  -- State update: m_nActiveQueue' = 0
+  true
+end
+
+schema AudioManager_cAudioScriptObjectManager
+  ΔAudioManagerModuleState
+where
+  -- State update: m_nScriptObjectEntityTotal' = 0
+  true
+end
+
+schema AudioManager_cAudioScriptObjectManager_2
+  ΔAudioManagerModuleState
+where
+  -- State update: m_nScriptObjectEntityTotal' = 0
+  true
+end
+
+schema AudioManager_cPedParams
+  ΔAudioManagerModuleState
+where
+  -- State update: m_bDistanceCalculated' = false
+  -- State update: m_fDistance' = 0.0f
+  -- State update: m_pPed' = ∅
+  true
+end
+
+schema AudioManager_cVehicleParams
+  ΔAudioManagerModuleState
+where
+  -- State update: m_VehicleType' = -1
+  -- State update: m_bDistanceCalculated' = false
+  -- State update: m_fDistance' = 0.0f
+  -- State update: m_pVehicle' = ∅
+  -- State update: m_pTransmission' = ∅
+  -- State update: m_nIndex' = 0
+  true
+end
+
+schema AudioManager_Sqrt
+  ΞAudioManagerModuleState
+  v? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = v <= 0.0f ? 0.0f : ::Sqrt(v)
+  true
+end
+
+schema AudioManager_IsMissionAudioSamplePlaying
+  ΔAudioManagerModuleState
+  result! : bool8
+where
+  -- Return postcondition: result! = m_nMissionAudioPlayStatus == PLAY_STATUS_PLAYING
+  true
+end
+
+schema AudioManager_ShouldDuckMissionAudio
+  ΔAudioManagerModuleState
+  result! : bool8
+where
+  -- Return postcondition: result! = IsMissionAudioSamplePlaying()
+  true
+end

@@ -1,0 +1,243 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Messages (text)
+-- Source File(s): text/Messages.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include User.zpp  (from "User.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Text.zpp  (from "Text.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMessages_Init
+  ΔCMessages
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pString' = ∅
+  true
+end
+
+schema CMessages_GetWideStringLength
+  ΔCMessages
+  src? : seq CHAR
+where
+  -- State update: length' = 0
+  -- Return postcondition: result! = length
+  true
+end
+
+schema CMessages_WideStringCopy
+  ΔCMessages
+  dst? : seq CHAR
+  src? : seq CHAR
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Messages_FixupChar
+  ΔMessagesModuleState
+  c? : seq CHAR
+  result! : seq CHAR
+where
+  -- Return postcondition: result! = c & 0x7fff
+  -- Return postcondition: result! = c
+  -- Invokes: CFont::IsJapanese
+  true
+end
+
+schema CMessages_WideStringCompare
+  ΔCMessages
+  str1? : seq CHAR
+  str2? : seq CHAR
+  size? : ℕ
+where
+  -- State update: len1' = GetWideStringLength(str1)
+  -- State update: len2' = GetWideStringLength(str2)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMessages_Process
+  ΔCMessages
+where
+  -- State update: style' = 0
+  -- State update: m_pText' = ∅
+  -- State update: m_pText' = ∅
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pText' = ∅
+  -- State update: m_pText' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_Display
+  ΔCMessages
+where
+  -- Invokes: CHud::SetBigMessage, CHud::SetMessage
+  true
+end
+
+schema CMessages_AddMessage
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = flag
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddMessageJumpQ
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = flag
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddMessageSoon
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = flag
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- State update: m_pText' = msg
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_ClearMessages
+  ΔCMessages
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pString' = ∅
+  true
+end
+
+schema CMessages_ClearSmallMessagesOnly
+  ΔCMessages
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pString' = ∅
+  true
+end
+
+schema CMessages_AddBigMessage
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  style? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = 0
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddBigMessageQ
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  style? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = 0
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddToPreviousBriefArray
+  ΔCMessages
+  text? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  string? : seq CHAR
+where
+  -- State update: m_pText' = text
+  -- State update: m_pString' = string
+  true
+end
+
+schema CMessages_InsertNumberInString
+  ΔCMessages
+  str? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  outstr? : seq CHAR
+where
+  -- State update: outstr' = '\0'
+  -- State update: outLen' = strlen(numStr)
+  -- State update: outstr' = '\0'
+  -- State update: size' = GetWideStringLength(str)
+  -- State update: c' = 0
+  -- State update: outLen' = strlen(numStr)
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = true
+  -- Invokes: CFont::IsJapanese, CMessages::InsertStringInString, CMessages::GetTokenPadKeyString, CPad::GetPad, TheText.Get
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MessagesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 921
+end

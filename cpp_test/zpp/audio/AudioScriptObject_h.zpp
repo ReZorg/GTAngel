@@ -1,0 +1,99 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioScriptObject (audio)
+-- Source File(s): audio/AudioScriptObject.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cAudioScriptObject
+  AudioId : ℤ
+  Posn : CVector
+  AudioEntity : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cAudioScriptObject_cAudioScriptObject
+  ΔcAudioScriptObject
+where
+  -- Declared member operation cAudioScriptObject::cAudioScriptObject()
+  true
+end
+
+schema cAudioScriptObject_cAudioScriptObject_2
+  ΔcAudioScriptObject
+  result! : ANY
+where
+  -- Declared member operation cAudioScriptObject::cAudioScriptObject()
+  true
+end
+
+schema cAudioScriptObject_Reset_3
+  ΔcAudioScriptObject
+where
+  -- Declared member operation cAudioScriptObject::Reset()
+  true
+end
+
+schema cAudioScriptObject_operator_new_4
+  ΔcAudioScriptObject
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation cAudioScriptObject::operator new(size_t)
+  true
+end
+
+schema cAudioScriptObject_operator_new_5
+  ΔcAudioScriptObject
+  arg_1? : ℕ
+  arg_2? : ℤ
+  result! : ADDRESS
+where
+  -- Declared member operation cAudioScriptObject::operator new(size_t, int)
+  true
+end
+
+schema cAudioScriptObject_operator_delete_6
+  ΔcAudioScriptObject
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation cAudioScriptObject::operator delete(void*, size_t)
+  true
+end
+
+schema cAudioScriptObject_operator_delete_7
+  ΔcAudioScriptObject
+  arg_1? : ADDRESS
+  arg_2? : ℤ
+where
+  -- Declared member operation cAudioScriptObject::operator delete(void*, int)
+  true
+end
+
+schema cAudioScriptObject_LoadAllAudioScriptObjects_8
+  ΔcAudioScriptObject
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation cAudioScriptObject::LoadAllAudioScriptObjects(uint8 *buf, uint32 size)
+  true
+end
+
+schema cAudioScriptObject_SaveAllAudioScriptObjects_9
+  ΔcAudioScriptObject
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation cAudioScriptObject::SaveAllAudioScriptObjects(uint8 *buf, uint32 *size)
+  true
+end

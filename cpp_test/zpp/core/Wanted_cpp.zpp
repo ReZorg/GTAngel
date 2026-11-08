@@ -1,0 +1,287 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Wanted (core)
+-- Source File(s): core/Wanted.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include General.zpp  (from "General.h")
+-- include Stats.zpp  (from "Stats.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWanted_Initialise
+  ΔCWanted
+where
+  -- State update: m_nChaos' = 0
+  -- State update: m_nMinChaos' = 0
+  -- State update: m_nLastUpdateTime' = 0
+  -- State update: m_nLastWantedLevelChange' = 0
+  -- State update: m_nLastTimeSuspended' = 0
+  -- State update: m_CurrentCops' = 0
+  true
+end
+
+schema CWanted_AreMiamiViceRequired
+  ΔCWanted
+where
+  -- Return postcondition: result! = m_nWantedLevel >= 3
+  true
+end
+
+schema CWanted_AreSwatRequired
+  ΔCWanted
+where
+  -- Return postcondition: result! = m_nWantedLevel == 4 || m_bSwatRequired
+  true
+end
+
+schema CWanted_AreFbiRequired
+  ΔCWanted
+where
+  -- Return postcondition: result! = m_nWantedLevel == 5 || m_bFbiRequired
+  true
+end
+
+schema CWanted_AreArmyRequired
+  ΔCWanted
+where
+  -- Return postcondition: result! = m_nWantedLevel == 6 || m_bArmyRequired
+  true
+end
+
+schema CWanted_NumOfHelisRequired
+  ΔCWanted
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 1
+  true
+end
+
+schema CWanted_SetWantedLevel
+  ΔCWanted
+  level? : ℤ
+where
+  -- State update: level' = MaximumWantedLevel
+  -- State update: m_nChaos' = 0
+  -- State update: m_nChaos' = 70
+  -- State update: m_nChaos' = 200
+  -- State update: m_nChaos' = 570
+  -- State update: m_nChaos' = 1220
+  true
+end
+
+schema CWanted_SetWantedLevelNoDrop
+  ΔCWanted
+  level? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWanted_CheatWantedLevel
+  ΔCWanted
+  level? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWanted_SetMaximumWantedLevel
+  ΔCWanted
+  level? : ℤ
+where
+  -- State update: nMaximumWantedLevel' = 0
+  -- State update: MaximumWantedLevel' = 0
+  -- State update: nMaximumWantedLevel' = 115
+  -- State update: MaximumWantedLevel' = 1
+  -- State update: nMaximumWantedLevel' = 365
+  -- State update: MaximumWantedLevel' = 2
+  true
+end
+
+schema CWanted_RegisterCrime
+  ΔCWanted
+  type? : eCrimeType
+  coors? : CVector
+  id? : ℕ
+  policeDoesntCare? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWanted_RegisterCrime_Immediately
+  ΔCWanted
+  type? : eCrimeType
+  coors? : CVector
+  id? : ℕ
+  policeDoesntCare? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWanted_ClearQdCrimes
+  ΔCWanted
+where
+  -- State update: m_nType' = CRIME_NONE
+  true
+end
+
+schema CWanted_AddCrimeToQ
+  ΔCWanted
+  type? : eCrimeType
+  id? : ℤ
+  coors? : CVector
+  reported? : 𝔹
+  policeDoesntCare? : 𝔹
+where
+  -- State update: m_bReported' = reported
+  -- State update: m_nType' = type
+  -- State update: m_nId' = id
+  -- State update: m_vecPosn' = coors
+  -- State update: m_nTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_bReported' = reported
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWanted_ReportCrimeNow
+  ΔCWanted
+  type? : eCrimeType
+  coors? : CVector
+  policeDoesntCare? : 𝔹
+where
+  -- State update: sensitivity' = m_fCrimeSensitivity*0.3f
+  -- State update: sensitivity' = m_fCrimeSensitivity
+  -- State update: wantedLevelDrop' = Min(CCullZones::GetWantedLevelDrop(), 100)
+  -- State update: chaos' = (1.0f - wantedLevelDrop/100.0f) * sensitivity
+  -- State update: m_nChaos' = Max(m_nChaos, m_nMinChaos)
+  -- Invokes: CDarkel::FrenzyOnGoing, CCullZones::GetWantedLevelDrop, DMAudio.ReportCrime
+  true
+end
+
+schema CWanted_UpdateWantedLevel
+  ΔCWanted
+where
+  -- State update: CurrWantedLevel' = m_nWantedLevel
+  -- State update: m_nChaos' = nMaximumWantedLevel
+  -- State update: m_nWantedLevel' = 0
+  -- State update: m_MaximumLawEnforcerVehicles' = 0
+  -- State update: m_MaxCops' = 0
+  -- State update: m_RoadblockDensity' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWanted_WorkOutPolicePresence
+  ΔCWanted
+  posn? : CVector
+  radius? : ℝ
+where
+  -- State update: numPolice' = 0
+  -- State update: ped' = CPools::GetPedPool().GetSlot(i)
+  -- State update: vehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- Return postcondition: result! = numPolice
+  -- Invokes: CPools::GetPedPool, ped->GetModelIndex, ped->GetPosition, CPools::GetVehiclePool, vehicle->GetModelIndex
+  true
+end
+
+schema CWanted_Update
+  ΔCWanted
+where
+  -- State update: m_nMinChaos' = 0
+  -- State update: m_nMinWantedLevel' = 0
+  -- State update: m_nLastUpdateTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: radius' = 18.0f
+  -- State update: playerPos' = FindPlayerCoors()
+  -- State update: m_nLastUpdateTime' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWanted_ResetPolicePursuit
+  ΔCWanted
+where
+  -- State update: cop' = m_pCops[i]
+  -- State update: cop.m_bIsInPursuit' = false
+  -- State update: cop.m_objective' = OBJECTIVE_NONE
+  -- State update: cop.m_prevObjective' = OBJECTIVE_NONE
+  -- State update: cop.m_nLastPedState' = PED_NONE
+  -- State update: m_CurrentCops' = 0
+  -- Invokes: cop->DyingOrDead, cop->SetWanderPath, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CWanted_Reset
+  ΔCWanted
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWanted_UpdateCrimesQ
+  ΔCWanted
+where
+  -- State update: crime' = m_aCrimes[i]
+  -- State update: crime.m_bReported' = true
+  -- State update: crime.m_nType' = CRIME_NONE
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWanted_Suspend
+  ΔCWanted
+where
+  -- State update: m_nMinChaos' = m_nChaos
+  -- State update: m_nMinWantedLevel' = m_nWantedLevel
+  -- State update: m_nLastTimeSuspended' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_nChaos' = 0
+  -- State update: m_nWantedLevel' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema Wanted_CrimeShouldBeReportedOnPhone
+  ΔWantedModuleState
+  crime? : eCrimeType
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema WantedModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 577
+end

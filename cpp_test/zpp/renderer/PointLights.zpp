@@ -1,0 +1,221 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PointLights (renderer)
+-- Source File(s): renderer/PointLights.cpp, renderer/PointLights.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include PointLights.zpp  (from "PointLights.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_DIST : ℝ  -- #define MAX_DIST 22.0f
+FOG_AREA_LENGTH : ℝ  -- #define FOG_AREA_LENGTH 12.0f
+FOG_AREA_WIDTH : ℝ  -- #define FOG_AREA_WIDTH 5.0f
+FOG_AREA_RADIUS : ℝ  -- #define FOG_AREA_RADIUS 9.0f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PointLights_Enum_1 ::= LIGHT_POINT | LIGHT_DIRECTIONAL | LIGHT_DARKEN | LIGHT_FOGONLY_ALWAYS | LIGHT_FOGONLY
+
+PointLights_Enum_2 ::= FOG_NONE | FOG_NORMAL | FOG_ALWAYS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRegisteredPointLight
+  coors : CVector
+  dir : CVector
+  radius : ℝ
+  red : ℝ
+  green : ℝ
+  blue : ℝ
+  type : ℤ
+  fogType : ℤ
+  castExtraShadows : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPointLights
+  NumLights : ℤ
+  aLights : seq ℤ  -- bounded array [NUMPOINTLIGHTS]
+  aCachedMapReads : seq CVector  -- bounded array [32]
+  aCachedMapReadResults : seq ℝ  -- bounded array [32]
+  NextCachedValue : ℤ
+where
+  #aCachedMapReads = 32
+  #aCachedMapReadResults = 32
+end
+
+schema CPointLights_Init
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::Init(void)
+  true
+end
+
+schema CPointLights_InitPerFrame_2
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::InitPerFrame(void)
+  true
+end
+
+schema CPointLights_AddLight_3
+  ΔCPointLights
+  type? : ℕ
+  coors? : CVector
+  dir? : CVector
+  radius? : ℝ
+  red? : ℝ
+  green? : ℝ
+  blue? : ℝ
+  fogType? : ℕ
+  castExtraShadows? : 𝔹
+where
+  -- Declared member operation CPointLights::AddLight(uint8 type, CVector coors, CVector dir, float radius, float red, float green, float blue, uint8 fogType, bool castExtraShadows)
+  true
+end
+
+schema CPointLights_GenerateLightsAffectingObject_4
+  ΔCPointLights
+  objCoors? : Ref[Const_CVector]
+  result! : ℝ
+where
+  -- Declared member operation CPointLights::GenerateLightsAffectingObject(Const CVector *objCoors)
+  true
+end
+
+schema CPointLights_RemoveLightsAffectingObject_5
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::RemoveLightsAffectingObject(void)
+  true
+end
+
+schema CPointLights_RenderFogEffect_6
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::RenderFogEffect(void)
+  true
+end
+
+schema CPointLights_ProcessVerticalLineUsingCache_7
+  ΔCPointLights
+  coors? : CVector
+  groundZ? : ℙ ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPointLights::ProcessVerticalLineUsingCache(CVector coors, float *groundZ)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPointLights_Init
+  ΔCPointLights
+where
+  -- State update: NextCachedValue' = 0
+  true
+end
+
+schema CPointLights_InitPerFrame
+  ΔCPointLights
+where
+  -- State update: NumLights' = 0
+  true
+end
+
+schema CPointLights_AddLight
+  ΔCPointLights
+  type? : ℕ
+  coors? : CVector
+  dir? : CVector
+  radius? : ℝ
+  red? : ℝ
+  green? : ℝ
+  blue? : ℝ
+  fogType? : ℕ
+  castExtraShadows? : 𝔹
+where
+  -- State update: dist' = coors - TheCamera.GetPosition()
+  -- State update: distance' = dist.Magnitude()
+  -- State update: type' = type
+  -- State update: fogType' = fogType
+  -- State update: coors' = coors
+  -- State update: dir' = dir
+  -- Invokes: TheCamera.GetPosition, dist.Magnitude
+  true
+end
+
+schema CPointLights_GenerateLightsAffectingObject
+  ΔCPointLights
+  objCoors? : Ref[Const_CVector]
+where
+  -- State update: dist' = aLights[i].coors - *objCoors
+  -- State update: radius' = aLights[i].radius
+  -- State update: distance' = dist.Magnitude()
+  -- State update: distNorm' = distance/radius
+  -- State update: intensity' = 1.0f
+  -- State update: intensity' = 1.0f - (distNorm - 0.5f)/(1.0f - 0.5f)
+  -- Return postcondition: result! = ret
+  -- Invokes: dist.Magnitude
+  true
+end
+
+schema CPointLights_RemoveLightsAffectingObject
+  ΔCPointLights
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPointLights_RenderFogEffect
+  ΔCPointLights
+where
+  -- State update: coors2X' = aLights[i].coors.x + FOG_AREA_LENGTH*aLights[i].dir.x
+  -- State update: coors2Y' = aLights[i].coors.y + FOG_AREA_LENGTH*aLights[i].dir.y
+  -- State update: xmin' = coors2X
+  -- State update: xmax' = aLights[i].coors.x
+  -- State update: xmax' = coors2X
+  -- State update: xmin' = aLights[i].coors.x
+  -- Invokes: CCutsceneMgr::IsRunning, CSprite::InitSpriteBuffer, CWorld::ProcessVerticalLine, CSprite::CalcScreenCoors, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPointLights_ProcessVerticalLineUsingCache
+  ΔCPointLights
+  coors? : CVector
+  groundZ? : ℙ ℝ
+where
+  -- State update: groundZ' = aCachedMapReadResults[i]
+  -- State update: NextCachedValue' = (NextCachedValue+1) % ARRAY_SIZE(aCachedMapReads)
+  -- State update: groundZ' = point.point.z
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CWorld::ProcessVerticalLine
+  true
+end

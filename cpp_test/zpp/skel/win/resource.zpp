@@ -1,0 +1,36 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: resource (skel)
+-- Source File(s): skel/win/resource.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+IDD_DIALOG1 : ℕ  -- #define IDD_DIALOG1 104
+IDC_DEVICESEL : ℕ  -- #define IDC_DEVICESEL 1000
+IDC_VIDMODE : ℕ  -- #define IDC_VIDMODE 1001
+IDEXIT : ℕ  -- #define IDEXIT 1002
+IDC_SELECTDEVICE : ℕ  -- #define IDC_SELECTDEVICE 1005
+IDI_MAIN_ICON : ℕ  -- #define IDI_MAIN_ICON 1042
+_APS_NEXT_RESOURCE_VALUE : ℕ  -- #define _APS_NEXT_RESOURCE_VALUE 104
+_APS_NEXT_COMMAND_VALUE : ℕ  -- #define _APS_NEXT_COMMAND_VALUE 40001
+_APS_NEXT_CONTROL_VALUE : ℕ  -- #define _APS_NEXT_CONTROL_VALUE 1000
+_APS_NEXT_SYMED_VALUE : ℕ  -- #define _APS_NEXT_SYMED_VALUE 101
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema resourceModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 35
+end

@@ -1,0 +1,650 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: debugmenu (extras)
+-- Source File(s): extras/debugmenu.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include rtcharse.zpp  (from "rtcharse.h")
+-- include re3_inttypes.zpp  (from "re3_inttypes.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+-- include new.zpp  (from "new")
+-- include cursor.zpp  (from "cursor.inc")
+-- include arrow.zpp  (from "arrow.inc")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+snprintf : seq CHAR  -- #define snprintf _snprintf
+strdup : seq CHAR  -- #define strdup _strdup
+REPEATDELAY : ℕ  -- #define REPEATDELAY 700
+REPEATINTERVAL : ℕ  -- #define REPEATINTERVAL 50
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+MenuFontStyle ::= MENUFONT_NORMAL | MENUFONT_SEL_ACTIVE | MENUFONT_SEL_INACTIVE | MENUFONT_MOUSE
+
+EntryType ::= MENUEMPTY | MENUSUB | MENUVAR | MENUVAR_INT | MENUVAR_FLOAT | MENUVAR_CMD | MENUSCROLL
+  -- val(MENUEMPTY) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema Pt
+  y : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema Menu
+  parent : Ref[Menu]
+  r : RwRect
+  entries : Ref[MenuEntry]
+  numEntries : ℤ
+  maxValWidth : ℤ
+  isScrollingDown : bool_isScrollingUp
+  scrollStart : ℤ
+  numVisible : ℤ
+  scrollDownR : RwRect_scrollUpR
+  selection : ℤ
+  selectedEntry : Ref[MenuEntry]
+where
+  #parent ≤ 1
+  #entries ≤ 1
+  #selectedEntry ≤ 1
+end
+
+schema Menu_findEntry
+  ΔMenu
+  entryname? : seq CHAR
+  result! : Ref[MenuEntry]
+where
+  -- Declared member operation Menu::findEntry(const char *entryname)
+  true
+end
+
+schema Menu_insertEntrySorted_2
+  ΔMenu
+  entry? : Ref[MenuEntry]
+where
+  -- Declared member operation Menu::insertEntrySorted(MenuEntry *entry)
+  true
+end
+
+schema Menu_appendEntry_3
+  ΔMenu
+  entry? : Ref[MenuEntry]
+where
+  -- Declared member operation Menu::appendEntry(MenuEntry *entry)
+  true
+end
+
+schema Menu_scroll_4
+  ΔMenu
+  off? : ℤ
+where
+  -- Declared member operation Menu::scroll(int off)
+  true
+end
+
+schema Menu_changeSelection_5
+  ΔMenu
+  newsel? : ℤ
+where
+  -- Declared member operation Menu::changeSelection(int newsel)
+  true
+end
+
+schema Menu_changeSelection_6
+  ΔMenu
+  e? : Ref[MenuEntry]
+where
+  -- Declared member operation Menu::changeSelection(MenuEntry *e)
+  true
+end
+
+schema Menu_update_7
+  ΔMenu
+where
+  -- Declared member operation Menu::update(void)
+  true
+end
+
+schema Menu_draw_8
+  ΔMenu
+where
+  -- Declared member operation Menu::draw(void)
+  true
+end
+
+schema Menu_Menu_9
+  ΔMenu
+where
+  -- Declared member operation Menu::Menu(void)
+  true
+end
+
+schema Menu_Menu_10
+  ΔMenu
+  result! : ANY
+where
+  -- Declared member operation Menu::Menu(void)
+  true
+end
+
+schema MenuEntry_Sub
+  MenuEntry  -- inherits base schema
+  submenu : Ref[Menu]
+where
+  #submenu ≤ 1
+end
+
+schema MenuEntry_Sub_MenuEntry_Sub
+  ΔMenuEntry_Sub
+  name? : seq CHAR
+  menu? : Ref[Menu]
+where
+  -- Declared member operation MenuEntry_Sub::MenuEntry_Sub(const char *name, Menu *menu)
+  true
+end
+
+schema MenuEntry_Sub_MenuEntry_Sub_2
+  ΔMenuEntry_Sub
+  result! : ANY
+where
+  -- Declared member operation MenuEntry_Sub::MenuEntry_Sub(void)
+  true
+end
+
+schema MenuEntry_Var
+  MenuEntry  -- inherits base schema
+  maxvallen : ℤ
+  vartype : ℤ
+  wrapAround : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema MenuEntry_Var_processInput
+  ΔMenuEntry_Var
+  mouseOver? : 𝔹
+  selected? : 𝔹
+where
+  -- Declared member operation MenuEntry_Var::processInput(bool mouseOver, bool selected)
+  true
+end
+
+schema MenuEntry_Var_getValWidth_2
+  ΔMenuEntry_Var
+  result! : ℤ
+where
+  -- Declared member operation MenuEntry_Var::getValWidth(void)
+  true
+end
+
+schema MenuEntry_Var_getValStr_3
+  ΔMenuEntry_Var
+  str? : seq CHAR
+  len? : ℤ
+  result! : void
+where
+  -- Declared member operation MenuEntry_Var::getValStr(char *str, int len)
+  true
+end
+
+schema MenuEntry_Var_MenuEntry_Var_4
+  ΔMenuEntry_Var
+  name? : seq CHAR
+  type? : ℤ
+where
+  -- Declared member operation MenuEntry_Var::MenuEntry_Var(const char *name, int type)
+  true
+end
+
+schema MenuEntry_Int
+  MenuEntry_Var  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema MenuEntry_Int_setStrings
+  ΔMenuEntry_Int
+  strings? : seq CHAR
+where
+  -- Declared member operation MenuEntry_Int::setStrings(const char **strings)
+  true
+end
+
+schema MenuEntry_Int_findStringLen_2
+  ΔMenuEntry_Int
+  result! : ℤ
+where
+  -- Declared member operation MenuEntry_Int::findStringLen(void)
+  true
+end
+
+schema MenuEntry_Int_MenuEntry_Int_3
+  ΔMenuEntry_Int
+  name? : seq CHAR
+where
+  -- Declared member operation MenuEntry_Int::MenuEntry_Int(const char *name)
+  true
+end
+
+schema MenuEntry_Cmd
+  MenuEntry_Var  -- inherits base schema
+  triggerFunc : TriggerFunc
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema MenuEntry_Cmd_processInput
+  ΔMenuEntry_Cmd
+  mouseOver? : 𝔹
+  selected? : 𝔹
+where
+  -- Declared member operation MenuEntry_Cmd::processInput(bool mouseOver, bool selected)
+  true
+end
+
+schema MenuEntry_Cmd_getValStr_2
+  ΔMenuEntry_Cmd
+  str? : seq CHAR
+  len? : ℤ
+where
+  -- Declared member operation MenuEntry_Cmd::getValStr(char *str, int len)
+  true
+end
+
+schema MenuEntry_Cmd_MenuEntry_Cmd_3
+  ΔMenuEntry_Cmd
+  name? : seq CHAR
+  triggerFunc? : TriggerFunc
+where
+  -- Declared member operation MenuEntry_Cmd::MenuEntry_Cmd(const char *name, TriggerFunc triggerFunc)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema debugmenu_fontGetStringSize
+  ΔdebugmenuModuleState
+  s? : seq CHAR
+where
+  -- State update: sz' = { 0, 0 }
+  -- State update: sz.y' = fontDesc.height*fontscale
+  -- State update: x' = 0
+  -- State update: sz.x' = x
+  -- State update: x' = 0
+  -- State update: sz.x' = x
+  -- Return postcondition: result! = sz
+  true
+end
+
+schema debugmenu_fontPrint
+  ΔdebugmenuModuleState
+  s? : seq CHAR
+  x? : ℝ
+  y? : ℝ
+  style? : ℤ
+where
+  -- Return postcondition: result! = fontGetStringSize(s)
+  true
+end
+
+schema debugmenu_fontGetLen
+  ΔdebugmenuModuleState
+  len? : ℤ
+where
+  -- Return postcondition: result! = len*fontDesc.width*fontscale
+  true
+end
+
+schema debugmenu_createMenuFont
+  ΔdebugmenuModuleState
+where
+  -- State update: fg_normal' = { 255, 255, 255, 255 }
+  -- State update: bg_normal' = { 255, 255, 255, 0 }
+  -- State update: fg_sel_active' = { 200, 200, 200, 255 }
+  -- State update: bg_sel_active' = { 132, 132, 132, 255 }
+  -- State update: fg_sel_inactive' = { 200, 200, 200, 255 }
+  -- State update: bg_sel_inactive' = { 200, 200, 200, 0 }
+  true
+end
+
+schema debugmenu_destroyMenuFont
+  ΔdebugmenuModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema debugmenu_Menu
+  ΔdebugmenuModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema debugmenu_MenuEntry_Sub
+  ΔdebugmenuModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema debugmenu_getValWidth
+  ΔdebugmenuModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = maxvallen
+  true
+end
+
+schema debugmenu_isMouseInRect
+  ΔdebugmenuModuleState
+  r? : RwRect
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema MenuEntry_MenuEntry
+  ΔMenuEntry
+  name? : seq CHAR
+where
+  -- State update: type' = MENUEMPTY
+  -- State update: name' = strdup(name)
+  -- State update: next' = ∅
+  -- State update: menu' = ∅
+  true
+end
+
+schema MenuEntry_Cmd_processInput
+  ΔMenuEntry_Cmd
+  mouseOver? : 𝔹
+  selected? : 𝔹
+where
+  -- Invokes: this->triggerFunc
+  true
+end
+
+schema MenuEntry_Cmd_getValStr
+  ΔMenuEntry_Cmd
+  str? : seq CHAR
+  len? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Menu_scroll
+  ΔMenu
+  off? : ℤ
+where
+  -- State update: scrollStart' = 0
+  -- State update: scrollStart' = numEntries-numVisible
+  true
+end
+
+schema Menu_changeSelection
+  ΔMenu
+  newsel? : ℤ
+where
+  -- State update: selection' = newsel
+  -- State update: selection' = 0
+  -- State update: selection' = numEntries-1
+  -- State update: scrollStart' = selection
+  -- State update: scrollStart' = selection-numVisible+1
+  true
+end
+
+schema Menu_changeSelection_2
+  ΔMenu
+  sel? : Ref[MenuEntry]
+where
+  -- State update: e' = this.entries
+  -- State update: selection' = i
+  -- State update: selectedEntry' = sel
+  true
+end
+
+schema Menu_findEntry
+  ΔMenu
+  entryname? : seq CHAR
+where
+  -- State update: m' = this.entries
+  -- Return postcondition: result! = m
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema Menu_insertEntrySorted
+  ΔMenu
+  entry? : Ref[MenuEntry]
+where
+  -- State update: mp' = &this.entries
+  -- State update: cmp' = strcmp(entry.name, (*mp).name)
+  -- State update: entry.next' = *mp
+  -- State update: mp' = entry
+  -- State update: entry.menu' = this
+  true
+end
+
+schema Menu_appendEntry
+  ΔMenu
+  entry? : Ref[MenuEntry]
+where
+  -- State update: mp' = &this.entries
+  -- State update: mp' = &(*mp).next)
+  -- State update: entry.next' = *mp
+  -- State update: mp' = entry
+  -- State update: entry.menu' = this
+  true
+end
+
+schema Menu_update
+  ΔMenu
+where
+  -- State update: x' = this.r.x
+  -- State update: y' = this.r.y + 18
+  -- State update: end' = this.r.y+this.r.h - 18
+  -- State update: numVisible' = 0
+  -- State update: deepestMenu' = this
+  -- State update: bottomy' = end
+  -- Invokes: submenu->update
+  true
+end
+
+schema Menu_draw
+  ΔMenu
+where
+  -- State update: e' = this.entries
+  -- State update: style' = MENUFONT_NORMAL
+  -- State update: style' = MENUFONT_MOUSE
+  -- State update: valw' = fontGetLen(((MenuEntry_Var*)e).getValWidth())
+  -- Invokes: submenu->draw
+  true
+end
+
+schema Menu_Menu
+  ΔMenu
+where
+  -- State update: e' = entries
+  -- State update: next' = e.next
+  true
+end
+
+schema debugmenu_findMenu
+  ΔdebugmenuModuleState
+  name? : seq CHAR
+where
+  -- State update: tmppath' = strdup(name)
+  -- State update: curname' = tmppath
+  -- State update: next' = curname
+  -- State update: m' = &toplevel
+  -- State update: curname' = next
+  -- State update: e' = m.findEntry(curname)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m
+  -- Invokes: m->findEntry, m->insertEntrySorted, m->appendEntry
+  true
+end
+
+schema debugmenu_DebugMenuInit
+  ΔdebugmenuModuleState
+where
+  -- State update: img' = RwImageCreate(16, 16, 32)
+  -- State update: cursor' = RwRasterCreate(w, h, d, flags)
+  -- State update: cursor' = RwRasterSetFromImage(cursor, img)
+  -- State update: img' = RwImageCreate(32, 16, 32)
+  -- State update: arrow' = RwRasterCreate(w, h, d, flags)
+  -- State update: arrow' = RwRasterSetFromImage(arrow, img)
+  true
+end
+
+schema debugmenu_DebugMenuShutdown
+  ΔdebugmenuModuleState
+where
+  -- State update: cursor' = ∅
+  -- State update: arrow' = ∅
+  -- State update: activeMenu' = &toplevel
+  -- State update: deepestMenu' = &toplevel
+  -- State update: mouseOverMenu' = ∅
+  -- State update: mouseOverEntry' = ∅
+  true
+end
+
+schema debugmenu_processInput
+  ΔdebugmenuModuleState
+where
+  -- State update: shift' = KEYDOWN(rsRSHIFT) || KEYDOWN(rsLSHIFT)
+  -- State update: var' = KEYJUSTDOWN(keycode)
+  -- State update: downtime' = CTimer::GetTimeInMilliseconds()
+  -- State update: lastkeydown' = keycode
+  -- State update: keyptr' = &var
+  -- State update: curtime' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds, activeMenu->scroll, activeMenu->changeSelection
+  true
+end
+
+schema debugmenu_updateMouse
+  ΔdebugmenuModuleState
+where
+  -- State update: pad' = CPad::GetPad(0)
+  -- State update: dirX' = 1
+  -- State update: dirY' = 1
+  -- State update: dirX' = -1
+  -- State update: dirY' = -1
+  -- State update: mouseX' = 0.0f
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema debugmenu_DebugMenuProcess
+  ΔdebugmenuModuleState
+where
+  -- State update: pad' = CPad::GetPad(0)
+  -- State update: menuOn' = !menuOn
+  -- State update: pad.DisablePlayerControls' = 1
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema debugmenu_DebugMenuRender
+  ΔdebugmenuModuleState
+where
+  -- State update: cam' = RwCameraGetCurrentCamera()
+  -- State update: screenWidth' = RwRasterGetWidth(RwCameraGetRaster(cam))
+  -- State update: screenHeight' = RwRasterGetHeight(RwCameraGetRaster(cam))
+  -- State update: fontscale' = 1
+  -- State update: toplevel.r.x' = firstBorder*fontscale
+  -- State update: toplevel.r.y' = topBorder + sz.y + 10
+  -- Invokes: toplevel.update, toplevel.draw
+  true
+end
+
+schema debugmenu_drawArrow
+  ΔdebugmenuModuleState
+  r? : RwRect
+  direction? : ℤ
+  style? : ℤ
+where
+  -- State update: cam' = RwCameraGetCurrentCamera()
+  -- State update: recipz' = 1.0f/RwCameraGetNearClipPlane(cam)
+  -- State update: width' = RwRasterGetWidth(arrow)
+  -- State update: height' = RwRasterGetHeight(arrow)
+  -- State update: left' = r.x + (r.w - width)/2
+  -- State update: right' = left + width
+  true
+end
+
+schema debugmenu_drawMouse
+  ΔdebugmenuModuleState
+where
+  -- State update: cam' = RwCameraGetCurrentCamera()
+  -- State update: x' = mouseX
+  -- State update: y' = mouseY
+  -- State update: w' = RwRasterGetWidth(cursor)
+  -- State update: h' = RwRasterGetHeight(cursor)
+  -- State update: recipz' = 1.0f/RwCameraGetNearClipPlane(cam)
+  true
+end
+
+schema debugmenu_DebugMenuAddCmd
+  ΔdebugmenuModuleState
+  path? : seq CHAR
+  name? : seq CHAR
+  triggerFunc? : TriggerFunc
+where
+  -- State update: m' = findMenu(path)
+  -- State update: e' = new MenuEntry_Cmd(name, triggerFunc)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = e
+  -- Invokes: m->appendEntry
+  true
+end
+
+schema debugmenu_DebugMenuEntrySetWrap
+  ΔdebugmenuModuleState
+  e? : Ref[MenuEntry]
+  wrap? : 𝔹
+where
+  -- State update: wrapAround' = wrap
+  true
+end
+
+schema debugmenu_DebugMenuEntrySetStrings
+  ΔdebugmenuModuleState
+  e? : Ref[MenuEntry]
+  strings? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema debugmenu_DebugMenuEntrySetAddress
+  ΔdebugmenuModuleState
+  e? : Ref[MenuEntry]
+  addr? : ADDRESS
+where
+  -- State update: ev' = (MenuEntry_Var*)e
+  -- State update: variable' = (int32*)addr
+  -- State update: variable' = (float*)addr
+  true
+end

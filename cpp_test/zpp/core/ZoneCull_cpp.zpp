@@ -1,0 +1,464 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ZoneCull (core)
+-- Source File(s): core/ZoneCull.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include Building.zpp  (from "Building.h")
+-- include Treadable.zpp  (from "Treadable.h")
+-- include Train.zpp  (from "Train.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include Renderer.zpp  (from "Renderer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMUNCOMPRESSED : seq CHAR  -- #define NUMUNCOMPRESSED (6000)
+NUMTEMPINDICES : seq CHAR  -- #define NUMTEMPINDICES (140000)
+FLAG_FREE : ℕ  -- #define FLAG_FREE 1
+FLAG_PROCESSED : ℕ  -- #define FLAG_PROCESSED 2
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCullZones_Init
+  ΔCCullZones
+where
+  -- State update: NumAttributeZones' = 0
+  -- State update: CurrentWantedLevelDrop_Player' = 0
+  -- State update: CurrentFlags_Camera' = 0
+  -- State update: CurrentFlags_Player' = 0
+  -- State update: bCurrentSubwayIsInvisible' = false
+  -- State update: NumCullZones' = 0
+  true
+end
+
+schema CCullZones_ResolveVisibilities
+  ΔCCullZones
+where
+  -- State update: fd' = CFileMgr::OpenFile("DATA\\cullzone.dat", "rb")
+  -- State update: EntityIndicesUsed' = 0
+  -- State update: pTempArrayIndices' = new uint16[NUMTEMPINDICES]
+  -- State update: TempEntityIndicesUsed' = 0
+  -- State update: pTempArrayIndices' = ∅
+  -- State update: fd' = CFileMgr::OpenFileForWriting("data\\cullzone.dat")
+  -- Invokes: CFileMgr::SetDir, CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile, CFileMgr::OpenFileForWriting
+  true
+end
+
+schema CCullZones_LoadTempFile
+  ΔCCullZones
+where
+  -- State update: fd' = CFileMgr::OpenFile("cullzone.tmp")
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema CCullZones_SaveTempFile
+  ΔCCullZones
+where
+  -- State update: fd' = CFileMgr::OpenFileForWriting("cullzone.tmp")
+  -- Invokes: CFileMgr::OpenFileForWriting, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema CCullZones_BuildListForBigBuildings
+  ΔCCullZones
+where
+  -- State update: building' = CPools::GetBuildingPool().GetSlot(i)
+  -- State update: building2' = CPools::GetBuildingPool().GetSlot(j)
+  -- State update: treadable' = CPools::GetTreadablePool().GetSlot(j)
+  -- Invokes: CPools::GetBuildingPool, CModelInfo::GetModelInfo, building->GetModelIndex, building2->GetModelIndex, building2->GetPosition
+  true
+end
+
+schema CCullZones_DoVisibilityTestCullZone
+  ΔCCullZones
+  zoneId? : ℤ
+  findIndices? : 𝔹
+where
+  -- State update: m_indexStart' = TempEntityIndicesUsed
+  -- State update: building' = CPools::GetBuildingPool().GetSlot(i)
+  -- State update: LODbuilding' = ∅
+  -- State update: building' = CPools::GetTreadablePool().GetSlot(i)
+  -- State update: LODbuilding' = ∅
+  -- State update: building' = CPools::GetTreadablePool().GetSlot(i)
+  -- Invokes: CPools::GetBuildingPool, CPools::GetTreadablePool, building->GetPosition
+  true
+end
+
+schema CCullZones_Update
+  ΔCCullZones
+where
+  -- State update: CurrentFlags_Camera' = FindAttributesForCoors(TheCamera.GetGameCamPosition(), ∅)
+  -- State update: bCurrentSubwayIsInvisible' = invisible
+  -- Invokes: CTimer::GetFrameCounter, TheCamera.GetGameCamPosition
+  true
+end
+
+schema CCullZones_ForceCullZoneCoors
+  ΔCCullZones
+  coors? : CVector
+where
+  -- State update: z' = FindCullZoneForCoors(coors)
+  -- State update: OldCullZone' = z
+  true
+end
+
+schema CCullZones_FindCullZoneForCoors
+  ΔCCullZones
+  coors? : CVector
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CCullZones_FindAttributesForCoors
+  ΔCCullZones
+  coors? : CVector
+  wantedLevel? : ℙ ℤ
+where
+  -- State update: wantedLevel' = 0
+  -- State update: attribs' = 0
+  -- State update: wantedLevel' = Max(*wantedLevel, aAttributeZones[i].wantedLevel)
+  -- Return postcondition: result! = attribs
+  true
+end
+
+schema CCullZones_FindZoneWithStairsAttributeForPlayer
+  ΔCCullZones
+where
+  -- State update: coors' = FindPlayerCoors()
+  -- Return postcondition: result! = &aAttributeZones[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CCullZones_MarkSubwayAsInvisible
+  ΔCCullZones
+  visible? : 𝔹
+where
+  -- State update: e' = CPools::GetBuildingPool().GetSlot(i)
+  -- State update: e.bIsVisible' = visible
+  -- State update: e' = CPools::GetTreadablePool().GetSlot(i)
+  -- State update: e.bIsVisible' = visible
+  -- State update: v' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: v.bIsVisible' = visible
+  -- Invokes: CPools::GetBuildingPool, CPools::GetTreadablePool, CPools::GetVehiclePool, v->IsTrain
+  true
+end
+
+schema CCullZones_AddCullZone
+  ΔCCullZones
+  position? : CVector
+  minx? : ℝ
+  maxx? : ℝ
+  miny? : ℝ
+  maxy? : ℝ
+  minz? : ℝ
+  maxz? : ℝ
+  flag? : ℕ
+  wantedLevel? : ℤ
+where
+  -- State update: cull' = &aZones[NumCullZones++]
+  -- State update: v' = position
+  -- State update: v' = CVector(1061.7f, -613.0f, 19.0f)
+  -- State update: v' = CVector(1061.4f, -506.0f, 18.5f)
+  -- State update: cull.position.x' = Clamp(v.x, minx, maxx)
+  -- State update: cull.position.y' = Clamp(v.y, miny, maxy)
+  true
+end
+
+schema CCullZones_CompressIndicesArray
+  ΔCCullZones
+where
+  -- State update: numExtraIndices' = 0
+  -- State update: pExtraArrayIndices' = new uint16[NUMTEMPINDICES]
+  -- State update: numOccurrences' = 6
+  -- State update: attempt' = 0
+  -- State update: zone' = CGeneral::GetRandomNumber() % NumCullZones
+  -- State update: group' = CGeneral::GetRandomNumber() % 3
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+schema CCullZones_PickRandomSetForGroup
+  ΔCCullZones
+  zone? : ℤ
+  group? : ℤ
+  set? : ℙ ℕ
+where
+  -- State update: numIndices' = 0
+  -- State update: first' = CGeneral::GetRandomNumber() % (numIndices-2)
+  -- State update: numIndices' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+schema CCullZones_DoWeHaveMoreThanXOccurencesOfSet
+  ΔCCullZones
+  count? : ℤ
+  set? : ℙ ℕ
+where
+  -- State update: curCount' = 0
+  -- State update: group' = 0
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCullZones_ReplaceSetForAllGroups
+  ΔCCullZones
+  set? : ℙ ℕ
+  setid? : ℕ
+where
+  -- State update: group' = 0
+  -- State update: insertedSet' = false
+  -- State update: insertedSet' = true
+  true
+end
+
+schema CCullZones_TidyUpAndMergeLists
+  ΔCCullZones
+  extraIndices? : ℙ ℕ
+  numExtraIndices? : ℤ
+where
+  -- State update: numTempIndices' = 0
+  -- State update: start' = 0
+  -- State update: m_indexStart' = start
+  -- State update: m_numBuildings' = 0
+  -- State update: m_numTreadablesPlus10m' = 0
+  -- State update: m_numTreadables' = 0
+  true
+end
+
+schema CCullZone_DoStuffLeavingZone
+  ΔCCullZone
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCullZone_DoStuffLeavingZone_OneBuilding
+  ΔCCullZone
+  i? : ℕ
+where
+  -- State update: bZoneCulled' = false
+  -- State update: bb' = CCullZones::aPointersToBigBuildingsForBuildings[i]
+  -- State update: bZoneCulled' = false
+  -- Invokes: CPools::GetBuildingPool
+  true
+end
+
+schema CCullZone_DoStuffLeavingZone_OneTreadableBoth
+  ΔCCullZone
+  i? : ℕ
+where
+  -- State update: bZoneCulled' = false
+  -- State update: bZoneCulled2' = false
+  -- State update: bb' = CCullZones::aPointersToBigBuildingsForTreadables[i]
+  -- State update: bZoneCulled' = false
+  -- Invokes: CPools::GetTreadablePool, CPools::GetBuildingPool
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone
+  ΔCCullZone
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_OneBuilding
+  ΔCCullZone
+  i? : ℕ
+where
+  -- State update: bZoneCulled' = true
+  -- State update: bb' = CCullZones::aPointersToBigBuildingsForBuildings[i]
+  -- State update: bZoneCulled' = true
+  -- Invokes: CPools::GetBuildingPool
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_OneTreadablePlus10m
+  ΔCCullZone
+  i? : ℕ
+where
+  -- State update: bZoneCulled' = true
+  -- State update: bZoneCulled2' = true
+  -- State update: bb' = CCullZones::aPointersToBigBuildingsForTreadables[i]
+  -- State update: bZoneCulled' = true
+  -- Invokes: CPools::GetTreadablePool, CPools::GetBuildingPool
+  true
+end
+
+schema CCullZone_DoStuffEnteringZone_OneTreadable
+  ΔCCullZone
+  i? : ℕ
+where
+  -- State update: bZoneCulled' = true
+  -- State update: bb' = CCullZones::aPointersToBigBuildingsForTreadables[i]
+  -- State update: bZoneCulled' = true
+  -- Invokes: CPools::GetTreadablePool, CPools::GetBuildingPool
+  true
+end
+
+schema CCullZone_CalcDistToCullZoneSquared
+  ΔCCullZone
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: rx' = sq(x - minx)
+  -- State update: rx' = sq(x - maxx)
+  -- State update: rx' = 0.0f
+  -- State update: ry' = sq(y - miny)
+  -- State update: ry' = sq(y - maxy)
+  -- State update: ry' = 0.0f
+  -- Return postcondition: result! = rx + ry
+  true
+end
+
+schema CCullZone_TestLine
+  ΔCCullZone
+  vec1? : CVector
+  vec2? : CVector
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCullZone_DoThoroughLineTest
+  ΔCCullZone
+  start? : CVector
+  end? : CVector
+  testEntity? : Ref[CEntity]
+where
+  -- State update: side' = CVector(0.0f, 0.0f, 1.0f)
+  -- State update: side' = CVector(1.0f, 0.0f, 0.0f)
+  -- State update: up' = CrossProduct(side, end - start)
+  -- State update: side' = CrossProduct(up, end - start)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CWorld::ProcessLineOfSight, side.Normalise, up.Normalise
+  true
+end
+
+schema CCullZone_IsEntityCloseEnoughToZone
+  ΔCCullZone
+  entity? : Ref[CEntity]
+  checkLevel? : 𝔹
+where
+  -- State update: pos' = entity.GetPosition()
+  -- State update: distToZone' = CalcDistToCullZone(pos.x, pos.y)
+  -- State update: lodDist' = minfo.GetLargestLodDistance() + STREAM_DISTANCE
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: entity->GetPosition, CModelInfo::GetModelInfo, entity->GetModelIndex, minfo->GetLargestLodDistance, CTheZones::GetLevelFromPosition
+  true
+end
+
+schema CCullZone_PointFallsWithinZone
+  ΔCCullZone
+  pos? : CVector
+  radius? : ℝ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCullZone_FindTestPoints
+  ΔCCullZone
+where
+  -- State update: NumTestPoints' = 0
+  -- State update: ElementsX' = (maxx-minx) < 1.0f ? 2 : (maxx-minx)+1.0f
+  -- State update: ElementsY' = (maxy-miny) < 1.0f ? 2 : (maxy-miny)+1.0f
+  -- State update: ElementsZ' = (maxz-minz) < 1.0f ? 2 : (maxz-minz)+1.0f
+  -- State update: ElementsX' = 32
+  -- State update: ElementsY' = 32
+  true
+end
+
+schema CCullZone_TestEntityVisibilityFromCullZone
+  ΔCCullZone
+  entity? : Ref[CEntity]
+  extraDist? : ℝ
+  LODentity? : Ref[CEntity]
+where
+  -- State update: colmodel' = entity.GetColModel()
+  -- State update: boundMaxX' = colmodel.boundingBox.max.x
+  -- State update: boundMaxY' = colmodel.boundingBox.max.y
+  -- State update: boundMaxZ' = colmodel.boundingBox.max.z
+  -- State update: boundMinX' = colmodel.boundingBox.min.x
+  -- State update: boundMinY' = colmodel.boundingBox.min.y
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: entity->GetColModel, LODentity->GetColModel, entity->GetMatrix, entity->GetPosition
+  true
+end
+
+schema ZoneCull_IsPointWithinArbitraryArea
+  ΔZoneCullModuleState
+  px? : ℝ
+  py? : ℝ
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCullZones_UpdateAtBeachForAudio
+  ΔCCullZones
+where
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ZoneCullModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1696
+end

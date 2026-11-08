@@ -1,0 +1,496 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Physical (entities)
+-- Source File(s): entities/Physical.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Lists.zpp  (from "Lists.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Entity.zpp  (from "Entity.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+GRAVITY : ℝ  -- #define GRAVITY (0.008f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Physical_Enum_1 ::= PHYSICAL_MAX_COLLISIONRECORDS
+  -- val(PHYSICAL_MAX_COLLISIONRECORDS) = 6
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPhysical
+  CEntity  -- inherits base schema
+  m_audioEntityId : ℤ
+  m_phys_unused1 : ℝ
+  m_nLastTimeCollided : ℕ
+  m_vecMoveSpeed : CVector
+  m_vecTurnSpeed : CVector
+  m_vecMoveFriction : CVector
+  m_vecTurnFriction : CVector
+  m_vecMoveSpeedAvg : CVector
+  m_vecTurnSpeedAvg : CVector
+  m_fMass : ℝ
+  m_fTurnMass : ℝ
+  m_fForceMultiplier : ℝ
+  m_fAirResistance : ℝ
+  m_fElasticity : ℝ
+  m_fBuoyancy : ℝ
+  m_vecCentreOfMass : CVector
+  m_entryInfoList : CEntryInfoList
+  m_movingListNode : Ref[CPtrNode]
+  m_phys_unused2 : ℤ
+  m_nStaticFrames : ℕ
+  m_nCollisionRecords : ℕ
+  m_aCollisionRecords : seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+  m_fDistanceTravelled : ℝ
+  m_fDamageImpulse : ℝ
+  m_pDamageEntity : Ref[CEntity]
+  m_vecDamageNormal : CVector
+  m_nDamagePieceType : ℤ
+  bIsHeavy : 𝔹
+  bAffectedByGravity : 𝔹
+  bInfiniteMass : 𝔹
+  m_phy_flagA08 : 𝔹
+  bIsInWater : 𝔹
+  m_phy_flagA20 : 𝔹
+  bHitByTrain : 𝔹
+  bSkipLineCol : 𝔹
+  bIsFrozen : 𝔹
+  bDontLoadCollision : 𝔹
+  m_bIsVehicleBeingShifted : 𝔹
+  bJustCheckCollision : 𝔹
+  phys_lcs_unk1 : 𝔹
+  m_nSurfaceTouched : ℕ
+  m_nZoneLevel : ℤ
+  phys_lcs_unk2 : ℤ
+  m_treadable : seq Ref[CTreadable]  -- bounded array [2]
+  m_phy_flagA10 : 𝔹
+where
+  m_nLastTimeCollided ≥ 0
+  #m_movingListNode ≤ 1
+  m_nStaticFrames ≥ 0
+  m_nCollisionRecords ≥ 0
+  #m_pDamageEntity ≤ 1
+  #bIsHeavy = 1
+  #bAffectedByGravity = 1
+  #bInfiniteMass = 1
+  #m_phy_flagA08 = 1
+  #bIsInWater = 1
+  #m_phy_flagA20 = 1
+  #bHitByTrain = 1
+  #bSkipLineCol = 1
+  #bIsFrozen = 1
+  #bDontLoadCollision = 1
+  #m_bIsVehicleBeingShifted = 1
+end
+
+schema CPhysical_CPhysical
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::CPhysical(void)
+  true
+end
+
+schema CPhysical_CPhysical_2
+  ΔCPhysical
+  result! : ANY
+where
+  -- Declared member operation CPhysical::CPhysical(void)
+  true
+end
+
+schema CPhysical_Add_3
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::Add(void)
+  true
+end
+
+schema CPhysical_Remove_4
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::Remove(void)
+  true
+end
+
+schema CPhysical_GetBoundRect_5
+  ΔCPhysical
+  result! : CRect
+where
+  -- Declared member operation CPhysical::GetBoundRect(void)
+  true
+end
+
+schema CPhysical_ProcessControl_6
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ProcessControl(void)
+  true
+end
+
+schema CPhysical_ProcessShift_7
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ProcessShift(void)
+  true
+end
+
+schema CPhysical_ProcessCollision_8
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ProcessCollision(void)
+  true
+end
+
+schema CPhysical_ApplyMoveSpeed_9
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ApplyMoveSpeed(void)
+  true
+end
+
+schema CPhysical_ApplyTurnSpeed_10
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ApplyTurnSpeed(void)
+  true
+end
+
+schema CPhysical_ProcessEntityCollision_11
+  ΔCPhysical
+  ent? : Ref[CEntity]
+  colpoints? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPhysical::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
+  true
+end
+
+schema CPhysical_RemoveAndAdd_12
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::RemoveAndAdd(void)
+  true
+end
+
+schema CPhysical_AddToMovingList_13
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::AddToMovingList(void)
+  true
+end
+
+schema CPhysical_RemoveFromMovingList_14
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::RemoveFromMovingList(void)
+  true
+end
+
+schema CPhysical_SetDamagedPieceRecord_15
+  ΔCPhysical
+  piece? : ℕ
+  impulse? : ℝ
+  entity? : Ref[CEntity]
+  dir? : CVector
+where
+  -- Declared member operation CPhysical::SetDamagedPieceRecord(uint16 piece, float impulse, CEntity *entity, CVector dir)
+  true
+end
+
+schema CPhysical_AddCollisionRecord_16
+  ΔCPhysical
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPhysical::AddCollisionRecord(CEntity *ent)
+  true
+end
+
+schema CPhysical_AddCollisionRecord_Treadable_17
+  ΔCPhysical
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPhysical::AddCollisionRecord_Treadable(CEntity *ent)
+  true
+end
+
+schema CPhysical_GetHasCollidedWith_18
+  ΔCPhysical
+  ent? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CPhysical::GetHasCollidedWith(CEntity *ent)
+  true
+end
+
+schema CPhysical_RemoveRefsToEntity_19
+  ΔCPhysical
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CPhysical::RemoveRefsToEntity(CEntity *ent)
+  true
+end
+
+schema CPhysical_PlacePhysicalRelativeToOtherPhysical_20
+  ΔCPhysical
+  other? : Ref[CPhysical]
+  phys? : Ref[CPhysical]
+  localPos? : CVector
+where
+  -- Declared member operation CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phys, CVector localPos)
+  true
+end
+
+schema CPhysical_GetSpeed_21
+  ΔCPhysical
+  r? : CVector
+  result! : CVector
+where
+  -- Declared member operation CPhysical::GetSpeed(const CVector &r)
+  true
+end
+
+schema CPhysical_GetSpeed_22
+  ΔCPhysical
+  result! : CVector
+where
+  -- Declared member operation CPhysical::GetSpeed(void)
+  true
+end
+
+schema CPhysical_GetMass_23
+  ΔCPhysical
+  pos? : CVector
+  dir? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CPhysical::GetMass(const CVector &pos, const CVector &dir)
+  true
+end
+
+schema CPhysical_GetMassTweak_24
+  ΔCPhysical
+  pos? : CVector
+  dir? : CVector
+  t? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CPhysical::GetMassTweak(const CVector &pos, const CVector &dir, float t)
+  true
+end
+
+schema CPhysical_UnsetIsInSafePosition_25
+  ΔCPhysical
+  result! : void
+where
+  -- Declared member operation CPhysical::UnsetIsInSafePosition(void)
+  true
+end
+
+schema CPhysical_ApplyTurnSpeed_26
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ApplyTurnSpeed()
+  true
+end
+
+schema CPhysical_ApplyMoveSpeed_27
+  ΔCPhysical
+where
+  -- Declared member operation CPhysical::ApplyMoveSpeed()
+  true
+end
+
+schema CPhysical_GetMoveSpeed_28
+  ΔCPhysical
+  result! : CVector
+where
+  -- Declared member operation CPhysical::GetMoveSpeed()
+  true
+end
+
+schema CPhysical_SetMoveSpeed_29
+  ΔCPhysical
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  result! : void
+where
+  -- Declared member operation CPhysical::SetMoveSpeed(float x, float y, float z)
+  true
+end
+
+schema CPhysical_SetMoveSpeed_30
+  ΔCPhysical
+  speed? : CVector
+  result! : void
+where
+  -- Declared member operation CPhysical::SetMoveSpeed(const CVector& speed)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Physical_GetSpeed
+  ΔPhysicalModuleState
+  result! : CVector
+where
+  -- Return postcondition: result! = GetSpeed(CVector(0.0f, 0.0f, 0.0f))
+  true
+end
+
+schema Physical_GetMass
+  ΔPhysicalModuleState
+  pos? : CVector
+  dir? : CVector
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_GetMassTweak
+  ΔPhysicalModuleState
+  pos? : CVector
+  dir? : CVector
+  t? : ℝ
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_UnsetIsInSafePosition
+  ΔPhysicalModuleState
+where
+  -- State update: bIsInSafePosition' = false
+  true
+end
+
+schema Physical_SetMoveSpeed
+  ΔPhysicalModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: m_vecMoveSpeed.x' = x
+  -- State update: m_vecMoveSpeed.y' = y
+  -- State update: m_vecMoveSpeed.z' = z
+  true
+end
+
+schema Physical_SetMoveSpeed_2
+  ΔPhysicalModuleState
+  speed? : CVector
+where
+  -- State update: m_vecMoveSpeed' = speed
+  true
+end
+
+schema Physical_AddToMoveSpeed
+  ΔPhysicalModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_AddToMoveSpeed_2
+  ΔPhysicalModuleState
+  addition? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_AddToMoveSpeed_3
+  ΔPhysicalModuleState
+  addition? : CVector2D
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_SetTurnSpeed
+  ΔPhysicalModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: m_vecTurnSpeed.x' = x
+  -- State update: m_vecTurnSpeed.y' = y
+  -- State update: m_vecTurnSpeed.z' = z
+  true
+end
+
+schema Physical_SetCenterOfMass
+  ΔPhysicalModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: m_vecCentreOfMass.x' = x
+  -- State update: m_vecCentreOfMass.y' = y
+  -- State update: m_vecCentreOfMass.z' = z
+  true
+end
+
+schema Physical_ApplyMoveForce
+  ΔPhysicalModuleState
+  j? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_ApplyTurnForce
+  ΔPhysicalModuleState
+  j? : CVector
+  p? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_ApplyFrictionMoveForce
+  ΔPhysicalModuleState
+  j? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_ApplyFrictionTurnForce
+  ΔPhysicalModuleState
+  j? : CVector
+  p? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Physical_SendMuliVehicleCollision
+  ΔPhysicalModuleState
+  arg_1? : Ref[CEntity]
+  arg_2? : ℙ ℤ
+  arg_3? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

@@ -1,0 +1,1138 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Cam (core)
+-- Source File(s): core/Cam.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include General.zpp  (from "General.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include SceneEdit.zpp  (from "SceneEdit.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Pickups.zpp  (from "Pickups.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Cam_Enum_1 ::= ARRESTCAM_OVERSHOULDER | ARRESTCAM_ALONGGROUND | ARRESTCAM_ALONGGROUND_RIGHT | ARRESTCAM_ALONGGROUND_RIGHT_UP | ARRESTCAM_ALONGGROUND_LEFT | ARRESTCAM_ALONGGROUND_LEFT_UP | ARRESTCAM_LAMPPOST
+  -- val(ARRESTCAM_OVERSHOULDER) = 1
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCam_Init
+  ΔCCam
+where
+  -- State update: Mode' = MODE_FOLLOWPED
+  -- State update: Front' = CVector(0.0f, 0.0f, -1.0f)
+  -- State update: Up' = CVector(0.0f, 0.0f, 1.0f)
+  -- State update: Rotating' = false
+  -- State update: m_iDoCollisionChecksOnFrameNum' = 1
+  -- State update: m_iDoCollisionCheckEveryNumOfFrames' = 9
+  true
+end
+
+schema CCam_Process
+  ΔCCam
+where
+  -- State update: TargetSpeedVar' = 0.0f
+  -- State update: TargetOrientation' = 0.0f
+  -- State update: CamTargetEntity' = TheCamera.pTargetEntity
+  -- State update: m_iFrameNumWereAt' = 1
+  -- State update: CameraTarget' = m_cvecCamFixedModeVector
+  -- State update: CameraTarget' = CamTargetEntity.GetPosition()
+  -- Invokes: CamTargetEntity->IsVehicle, CamTargetEntity->GetPosition, CamTargetEntity->GetForward, CGeneral::GetATanOfXY, CTimer::GetTimeStep
+  true
+end
+
+schema Cam_WellBufferMe
+  ΔCamModuleState
+  Target? : ℝ
+  CurrentValue? : ℙ ℝ
+  CurrentSpeed? : ℙ ℝ
+  MaxSpeed? : ℝ
+  Acceleration? : ℝ
+  IsAngle? : 𝔹
+where
+  -- State update: Delta' = Target - *CurrentValue
+  -- State update: TargetSpeed' = Delta * MaxSpeed
+  -- State update: CurrentSpeed' = TargetSpeed
+  -- State update: CurrentSpeed' = TargetSpeed
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema Cam_MakeAngleLessThan180
+  ΔCamModuleState
+  Angle? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCam_ProcessSpecialHeightRoutines
+  ΔCCam
+where
+  -- State update: StandingOnBoat' = false
+  -- State update: PreviouslyFailedRoadHeightCheck' = false
+  -- State update: ClosestPed' = 0
+  -- State update: FoundPed' = false
+  -- State update: DistOnGround' = CamToTarget.Magnitude2D()
+  -- State update: BetaAngle' = CGeneral::GetATanOfXY(CamToTarget.x, CamToTarget.y)
+  -- Invokes: pTargetEntity->GetPosition, TheCamera.GetGameCamPosition, CamToTarget.Magnitude2D, CGeneral::GetATanOfXY, CamTargetEntity->IsPed
+  true
+end
+
+schema CCam_GetVectorsReadyForRW
+  ΔCCam
+where
+  -- State update: Up' = CVector(0.0f, 0.0f, 1.0f)
+  -- State update: Front.x' = 0.0001f
+  -- State update: Front.y' = 0.0001f
+  -- State update: right' = CrossProduct(Front, Up)
+  -- State update: Up' = CrossProduct(right, Front)
+  -- Invokes: Front.Normalise, right.Normalise
+  true
+end
+
+schema CCam_GetBoatLook_L_R_HeightOffset
+  ΔCCam
+  Offset? : ℝ
+where
+  -- State update: handling' = mod_HandlingManager.GetBoatPointer(mi.m_handlingId)
+  -- State update: Offset' = handling.fLook_L_R_BehindCamHeight
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CModelInfo::GetModelInfo, CamTargetEntity->GetModelIndex, mod_HandlingManager.GetBoatPointer
+  true
+end
+
+schema CCam_LookBehind
+  ΔCCam
+where
+  -- State update: TargetCoors' = CamTargetEntity.GetPosition()
+  -- State update: Front' = CamTargetEntity.GetPosition() - Source
+  -- State update: LookingBehind' = true
+  -- State update: TargetFwd' = CamTargetEntity.GetForward()
+  -- State update: TargetOrientation' = CGeneral::GetATanOfXY(TargetFwd.x, TargetFwd.y)
+  -- State update: DeltaBeta' = TargetOrientation - Beta
+  -- Invokes: CamTargetEntity->GetPosition, CamTargetEntity->IsVehicle, CamTargetEntity->GetForward, TargetFwd.Normalise, CGeneral::GetATanOfXY
+  true
+end
+
+schema CCam_LookLeft
+  ΔCCam
+where
+  -- State update: LookingLeft' = true
+  -- State update: TargetCoors' = CamTargetEntity.GetPosition()
+  -- State update: Front' = CamTargetEntity.GetPosition() - Source
+  -- State update: Dist' = CA_MAX_DISTANCE
+  -- State update: Dist' = 9.0f
+  -- State update: Offset' = 0.0f
+  -- Invokes: CamTargetEntity->IsVehicle, CamTargetEntity->GetPosition, CCullZones::Cam1stPersonForPlayer, CamTargetEntity->GetForward, TargetFwd.Normalise
+  true
+end
+
+schema CCam_LookRight
+  ΔCCam
+where
+  -- State update: LookingRight' = true
+  -- State update: TargetCoors' = CamTargetEntity.GetPosition()
+  -- State update: Front' = CamTargetEntity.GetPosition() - Source
+  -- State update: Dist' = CA_MAX_DISTANCE
+  -- State update: Dist' = 9.0f
+  -- State update: Offset' = 0.0f
+  -- Invokes: CamTargetEntity->IsVehicle, CamTargetEntity->GetPosition, CCullZones::Cam1stPersonForPlayer, CamTargetEntity->GetForward, TargetFwd.Normalise
+  true
+end
+
+schema CCam_ClipIfPedInFrontOfPlayer
+  ΔCCam
+where
+  -- State update: found' = false
+  -- State update: ped' = 0
+  -- State update: Player' = CWorld::Players[CWorld::PlayerInFocus].m_pPed
+  -- State update: found' = true
+  -- State update: PedAngle' = CGeneral::GetATanOfXY(vDist.x, vDist.y)
+  -- State update: DeltaAngle' = FwdAngle - PedAngle
+  -- Invokes: CGeneral::GetATanOfXY, TheCamera.GetForward, TheCamera.GetGameCamPosition, vDist.Magnitude2D
+  true
+end
+
+schema CCam_KeepTrackOfTheSpeed
+  ΔCCam
+  source? : CVector
+  target? : CVector
+  up? : CVector
+  alpha? : ℝ
+  beta? : ℝ
+  fov? : ℝ
+where
+  -- State update: PreviousSource' = source
+  -- State update: PreviousTarget' = target
+  -- State update: PreviousUp' = up
+  -- State update: PreviousBeta' = beta
+  -- State update: PreviousAlpha' = alpha
+  -- State update: PreviousFov' = fov
+  true
+end
+
+schema CCam_Using3rdPersonMouseCam
+  ΔCCam
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCam_GetWeaponFirstPersonOn
+  ΔCCam
+where
+  -- Invokes: CamTargetEntity->IsPed
+  true
+end
+
+schema CCam_IsTargetInWater
+  ΔCCam
+  CamCoors? : CVector
+where
+  -- State update: WaterZ' = -6000.0f
+  -- State update: m_vecLastAboveWaterCamPosition' = Source
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CWaterLevel::GetWaterLevel, CamTargetEntity->GetPosition, CamTargetEntity->IsPed, CamTargetEntity->IsVehicle
+  true
+end
+
+schema CCam_PrintMode
+  ΔCCam
+where
+  -- Invokes: CDebug::PrintAt
+  true
+end
+
+schema CCam_DoAverageOnVector
+  ΔCCam
+  vec? : CVector
+where
+  -- State update: Average' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_iRunningVectorArrayPos' = 0
+  -- State update: m_iRunningVectorCounter' = 1
+  -- State update: m_iRunningVectorArrayPos' = NUMBER_OF_VECTORS_FOR_AVERAGE-1
+  -- State update: m_iRunningVectorCounter' = NUMBER_OF_VECTORS_FOR_AVERAGE+1
+  -- Return postcondition: result! = Average
+  true
+end
+
+schema CCam_Process_FollowPed
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: GroundDist' = 1.85f
+  -- State update: Length' = 0.0f
+  -- State update: LateralLeft' = 0.0f
+  -- State update: LateralRight' = 0.0f
+  -- State update: Center' = 0.0f
+  -- State update: FixedTargetOrientation' = 0.0f
+  -- Invokes: CamTargetEntity->IsPed, Dist.Magnitude2D, CGeneral::GetATanOfXY, ped->GetWeapon, CPad::GetPad
+  true
+end
+
+schema CCam_Process_FollowPedWithMouse
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: Rotating' = false
+  -- State update: m_bCollisionChecksOn' = true
+  -- State update: ResetStatics' = false
+  -- State update: OnTrain' = FindPlayerVehicle() && FindPlayerVehicle().IsTrain()
+  -- State update: TargetCoors' = CameraTarget
+  -- Invokes: CamTargetEntity->IsPed, CPad::GetPad, ToCam.Normalise, CTimer::GetTimeStep, TheCamera.GetFading
+  true
+end
+
+schema CCam_Process_BehindCar
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: CA_MAX_DISTANCE' = 9.95f
+  -- State update: CA_MIN_DISTANCE' = 8.5f
+  -- State update: Dist' = Source - TargetCoors
+  -- State update: Length' = Dist.Magnitude2D()
+  -- Invokes: CamTargetEntity->IsVehicle, Dist.Magnitude2D, CGeneral::GetATanOfXY, TheCamera.AvoidTheGeometry
+  true
+end
+
+schema CCam_WorkOutCamHeight
+  ΔCCam
+  TargetCoors? : CVector
+  TargetOrientation? : ℝ
+  TargetHeight? : ℝ
+where
+  -- State update: AlphaOffset' = 0.0f
+  -- State update: CamClear' = true
+  -- State update: LastTargetAlphaWithCollisionOn' = 0.0f
+  -- State update: LastTopAlphaSpeed' = 0.0f
+  -- State update: LastAlphaSpeedStep' = 0.0f
+  -- State update: PreviousNearCheckNearClipSmall' = false
+  -- Invokes: CGeneral::GetATanOfXY, CamTargetEntity->GetForward, CWorld::FindRoofZFor3DCoord, Forward.Normalise, CWorld::FindGroundZFor3DCoord
+  true
+end
+
+schema CCam_RotCamIfInFrontCar
+  ΔCCam
+  TargetCoors? : CVector
+  TargetOrientation? : ℝ
+where
+  -- State update: BetaMaxSpeed' = 0.15f
+  -- State update: BetaAcceleration' = 0.007f
+  -- State update: MovingForward' = false
+  -- State update: MaxDiffBeta' = DEGTORAD(160.0f)
+  -- State update: phys' = (CPhysical*)CamTargetEntity
+  -- State update: MovingForward' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: phys->GetForward, phys->GetSpeed, phys->IsVehicle, phys->GetModelIndex, speed.Magnitude
+  true
+end
+
+schema CCam_Process_Cam_On_A_String
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: AlphaSpeed' = 0.0f
+  -- State update: m_fTilt' = 0.0f
+  -- State update: m_fTiltSpeed' = 0.0
+  -- State update: mi' = CModelInfo::GetModelInfo(CamTargetEntity.GetModelIndex())
+  -- State update: TargetCoors' = CameraTarget
+  -- Invokes: CamTargetEntity->IsVehicle, CModelInfo::GetModelInfo, CamTargetEntity->GetModelIndex, mi->GetColModel, Dimensions.Magnitude
+  true
+end
+
+schema CCam_Cam_On_A_String_Unobscured
+  ΔCCam
+  TargetCoors? : CVector
+  BaseDist? : ℝ
+where
+  -- State update: id' = CamTargetEntity.GetModelIndex()
+  -- State update: ExtraDist' = 0.0f
+  -- State update: ExtraDist' = INIT_RC_HELI_HORI_EXTRA
+  -- State update: ExtraDist' = INIT_RC_PLANE_HORI_EXTRA
+  -- State update: CA_MAX_DISTANCE' = BaseDist + 0.1f + TheCamera.CarZoomValueSmooth + ExtraDist
+  -- State update: CA_MIN_DISTANCE' = Min(BaseDist*0.6f, 3.5f)
+  -- Invokes: CamTargetEntity->GetModelIndex, Dist.Magnitude2D, CamTargetEntity->GetForward, Forward.Normalise
+  true
+end
+
+schema CCam_FixCamWhenObscuredByVehicle
+  ΔCCam
+  TargetCoors? : CVector
+where
+  -- State update: HeightFixerCarsObscuring' = 0.0f
+  -- State update: HeightFixerCarsObscuringSpeed' = 0.0f
+  -- State update: entity' = ∅
+  -- State update: HeightTarget' = 0.0f
+  -- State update: mi' = CModelInfo::GetModelInfo(entity.GetModelIndex())
+  -- State update: HeightTarget' = 0.0f
+  -- Invokes: CWorld::ProcessLineOfSight, CModelInfo::GetModelInfo, entity->GetModelIndex, mi->GetColModel
+  true
+end
+
+schema CCam_Process_TopDown
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  SpeedVar? : ℝ
+  TargetSpeedVar? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: HeightTarget' = 0.0f
+  -- State update: AdjustHeightTargetMoveBuffer' = 0.0f
+  -- State update: AdjustHeightTargetMoveSpeed' = 0.0f
+  -- State update: NearClipDistance' = 1.5f
+  -- State update: FarClipDistance' = 200.0f
+  -- Invokes: CamTargetEntity->IsVehicle, CamTargetEntity->GetForward, CWorld::ProcessLineOfSight, Front.Normalise
+  true
+end
+
+schema CCam_AvoidWallsTopDownPed
+  ΔCCam
+  TargetCoors? : CVector
+  Offset? : CVector
+  Adjuster? : ℙ ℝ
+  AdjusterSpeed? : ℙ ℝ
+  yDistLimit? : ℝ
+where
+  -- State update: Target' = 0.0f
+  -- State update: MaxSpeed' = 0.13f
+  -- State update: Acceleration' = 0.015f
+  -- State update: TestPoint2' = TargetCoors + Offset
+  -- State update: TestPoint1' = TargetCoors
+  -- State update: TestPoint1.z' = TestPoint2.z
+  -- Invokes: CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCam_Process_TopDownPed
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: NumPedPosCountsSoFar' = 0
+  -- State update: PedAverageSpeed' = 0.0f
+  -- State update: AdjustHeightTargetMoveBuffer' = 0.0f
+  -- State update: AdjustHeightTargetMoveSpeed' = 0.0f
+  -- State update: PedSpeedSoFar' = 0.0f
+  -- State update: FarClipDistance' = 200.0f
+  -- Invokes: CamTargetEntity->IsPed, PlayerMoveSpeed.Magnitude, m_pPointGunAt->GetPosition, CWorld::ProcessLineOfSight, Front.Normalise
+  true
+end
+
+schema CCam_Process_Rocket
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: BackOffset' = 0.19f
+  -- State update: FailedTestTwelveFramesAgo' = false
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: Beta' = ((CPed*)CamTargetEntity).m_fRotationCur + HALFPI
+  -- State update: Alpha' = 0.0f
+  -- Invokes: CamTargetEntity->IsPed, CamTargetEntity->GetMatrix, CamTargetEntity->UpdateRwFrame, CamTargetEntity->UpdateRpHAnim, m_pedIK.GetComponentPosition
+  true
+end
+
+schema CCam_Process_M16_1stPerson
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: BackOffset' = 0.3f
+  -- State update: FailedTestTwelveFramesAgo' = false
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: Beta' = 0.0f
+  -- State update: Beta' = ((CPed*)CamTargetEntity).m_fRotationCur + HALFPI
+  -- Invokes: CamTargetEntity->IsPed, CPad::GetPad, CTimer::GetTimeStep, TargetPed->PositionAttachedPed, CamTargetEntity->GetMatrix
+  true
+end
+
+schema CCam_Process_1stPerson
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  SpeedVar? : ℝ
+  TargetSpeedVar? : ℝ
+where
+  -- State update: BackOffset' = 0.3f
+  -- State update: DontLookThroughWorldFixer' = 0.0f
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: Beta' = TargetOrientation
+  -- State update: Alpha' = 0.0f
+  -- Invokes: CamTargetEntity->IsPed, CamTargetEntity->GetMatrix, CamTargetEntity->UpdateRwFrame, CamTargetEntity->UpdateRpHAnim, m_pedIK.GetComponentPosition
+  true
+end
+
+schema CCam_Process_1rstPersonPedOnPC
+  ΔCCam
+  arg_1? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: TheCamera.m_1rstPersonRunCloseToAWall' = false
+  -- State update: HeadPos' = vecHeadCamOffset
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(CamTargetEntity.GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_HEAD))
+  -- State update: mats' = RpHAnimHierarchyGetMatrixArray(hier)
+  -- Invokes: CamTargetEntity->IsPed, CamTargetEntity->GetClump, CamTargetEntity->GetMatrix, CamTargetEntity->GetForward, Fwd.Normalise
+  true
+end
+
+schema CCam_Process_Sniper
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: BackOffset' = 0.19f
+  -- State update: FailedTestTwelveFramesAgo' = false
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: TargetFOV' = 0.0f
+  -- State update: Beta' = ((CPed*)CamTargetEntity).m_fRotationCur + HALFPI
+  -- State update: Alpha' = 0.0f
+  -- Invokes: CamTargetEntity->IsPed, CamTargetEntity->GetMatrix, CamTargetEntity->UpdateRwFrame, CamTargetEntity->UpdateRpHAnim, m_pedIK.GetComponentPosition
+  true
+end
+
+schema CCam_Process_Syphon
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: CameraObscured' = false
+  -- State update: BetaOffset' = INIT_SYPHON_DEGREE_OFFSET
+  -- State update: HeightDown' = INIT_SYPHON_Z_OFFSET
+  -- State update: AlphaOffset' = INIT_SYPHON_ALPHA_OFFSET
+  -- State update: NegateBetaOffset' = true
+  -- Invokes: CamTargetEntity->IsPed, CGeneral::GetATanOfXY, ground->IsVehicle, ground->IsObject, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCam_Process_Syphon_Crim_In_Front
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: TargetDist' = TheCamera.m_fPedZoomValueSmooth * 0.5f + 4.0f
+  -- State update: vDist' = Source - TargetCoors
+  -- State update: fDist' = vDist.Magnitude2D()
+  -- State update: zOffset' = TargetDist - 2.65f
+  -- Invokes: CamTargetEntity->IsPed, vDist.Magnitude2D, CGeneral::GetATanOfXY, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCam_Process_BehindBoat
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: ResetStatics' = false
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: DeltaBeta' = 0.0f
+  -- State update: TargetWhenChecksWereOn' = 0.0f
+  -- State update: CenterObscuredWhenChecksWereOn' = 0.0f
+  -- State update: WaterZAddition' = 2.75f
+  -- Invokes: CamTargetEntity->IsVehicle, CGeneral::GetATanOfXY, CWaterLevel::GetWaterLevelNoWaves, CamTargetEntity->GetColModel, boundingBox.GetSize
+  true
+end
+
+schema CCam_Process_Fight_Cam
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: BetaMaxSpeed' = 0.015f
+  -- State update: BetaAcceleration' = 0.007f
+  -- State update: PreviouslyFailedBuildingChecks' = false
+  -- State update: m_fMinDistAwayFromCamWhenInterPolating' = 4.0f
+  -- State update: Front' = Source - CameraTarget
+  -- Invokes: CamTargetEntity->IsPed, CGeneral::GetATanOfXY, CPad::GetPad, Front.Magnitude2D, Front.Normalise
+  true
+end
+
+schema Cam_FindSplinePathPositionFloat
+  ΔCamModuleState
+  out? : ℙ ℝ
+  spline? : ℙ ℝ
+  time? : ℕ
+  marker? : ℕ
+where
+  -- State update: numFrames' = spline[0]
+  -- State update: timeDelta' = MS(spline[marker] - spline[marker-4])
+  -- State update: endTime' = MS(spline[4*(numFrames-1) + 1])
+  -- State update: canAdvance' = true
+  -- State update: canAdvance' = false
+  -- State update: marker' = 4*(numFrames-1) + 1
+  true
+end
+
+schema Cam_FindSplinePathPositionVector
+  ΔCamModuleState
+  out? : Ref[CVector]
+  spline? : ℙ ℝ
+  time? : ℕ
+  marker? : ℕ
+where
+  -- State update: numFrames' = spline[0]
+  -- State update: timeDelta' = MS(spline[marker] - spline[marker-10])
+  -- State update: endTime' = MS(spline[10*(numFrames-1) + 1])
+  -- State update: canAdvance' = true
+  -- State update: canAdvance' = false
+  -- State update: marker' = 10*(numFrames-1) + 1
+  true
+end
+
+schema CCam_Process_FlyBy
+  ΔCCam
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: UpAngle' = 0.0f
+  -- State update: FirstFOVValue' = 0.0f
+  -- State update: Up' = CVector(0.0f, 0.0f, 1.0f)
+  -- State update: m_fTimeElapsedFloat' = 0.0f
+  -- State update: TheCamera.m_bStartingSpline' = true
+  -- State update: FirstFOVValue' = TheCamera.m_arrPathArray[0].m_arr_PathData[2]
+  -- Invokes: CTimer::GetTimeStepNonClippedInMilliseconds, Front.Normalise, Up.Normalise
+  true
+end
+
+schema CCam_Process_WheelCam
+  ΔCCam
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: Front' = CVector(1.0f, 0.0f, 0.0f)
+  -- State update: WheelPos' = CamTargetEntity.GetColModel().boundingBox.min
+  -- State update: WheelPos.y' = -2.3f
+  -- State update: WheelPos.z' = 0.3f
+  -- State update: Source' = CamTargetEntity.GetMatrix() * WheelPos
+  -- Return postcondition: result! = !blocked
+  -- Invokes: CamTargetEntity->IsPed, CamTargetEntity->GetMatrix, CamTargetEntity->GetPosition, CamTargetEntity->GetColModel, CamTargetEntity->GetForward
+  true
+end
+
+schema CCam_Process_Fixed
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: DirectionWasLooking' = LOOKING_FORWARD
+  -- State update: Source' = m_cvecCamFixedModeSource
+  -- State update: Front' = CameraTarget - Source
+  -- State update: m_cvecTargetCoorsForFudgeInter' = CameraTarget
+  -- State update: Up' = CVector(0.0f, 0.0f, 1.0f) + m_cvecCamFixedModeUpOffSet
+  -- State update: Right' = CrossProduct(Front, Up)
+  -- Invokes: Front.Normalise, Up.Normalise, Right.Normalise, CWaterLevel::GetWaterLevel, CTimeCycle::GetWaterRed
+  true
+end
+
+schema CCam_Process_LightHouse
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: Source' = CameraTarget
+  -- State update: Source.x' = 474.3f
+  -- State update: Source.y' = -1717.6f
+  -- State update: CamMode' = 1
+  -- State update: Timer' = -24.0f
+  -- State update: CamMode' = 2
+  -- Invokes: CTimer::GetTimeStep, Front.Normalise, Up.Normalise, Right.Normalise
+  true
+end
+
+schema CCam_Process_Player_Fallen_Water
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: entity' = ∅
+  -- State update: FOV' = DefaultFOV
+  -- State update: Source' = CameraTarget
+  -- State update: Source.z' = m_vecLastAboveWaterCamPosition.z + 4.0f
+  -- State update: m_cvecTargetCoorsForFudgeInter' = CameraTarget
+  -- State update: Front' = CameraTarget - Source
+  -- Invokes: Front.Normalise, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCam_Process_SpecialFixedForSyphon
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: Source' = m_cvecCamFixedModeSource
+  -- State update: m_cvecTargetCoorsForFudgeInter' = CameraTarget
+  -- State update: Front' = CameraTarget - Source
+  -- State update: OrigSource' = Source
+  -- State update: Left' = CrossProduct(Up, Front)
+  -- State update: Front' = CrossProduct(Left, Up)
+  -- Invokes: TheCamera.AvoidTheGeometry, Up.Normalise, Left.Normalise, Front.Normalise
+  true
+end
+
+schema CCam_Process_Debug
+  ΔCCam
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: Speed' = 0.0f
+  -- State update: PanSpeedX' = 0.0f
+  -- State update: PanSpeedY' = 0.0f
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors.x' = Source.x + Cos(Alpha) * Sin(Beta) * 7.0f
+  -- State update: TargetCoors.y' = Source.y + Cos(Alpha) * Cos(Beta) * 7.0f
+  -- Invokes: CPad::GetPad, Front.Normalise, m_pPed->SetPosition, CWorld::GetSectorX, CWorld::GetSectorY
+  true
+end
+
+schema CCam_Process_Editor
+  ΔCCam
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: Speed' = 0.0f
+  -- State update: Source' = CVector(796.0f, -937.0, 40.0f)
+  -- State update: CamTargetEntity' = ∅
+  -- State update: ResetStatics' = false
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CamTargetEntity.GetPosition()
+  -- Invokes: CPad::GetPad, CamTargetEntity->GetPosition, Front.Normalise, m_pPed->SetPosition, CWorld::GetSectorX
+  true
+end
+
+schema CCam_Process_ModelView
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: Angle' = Atan2(Front.x, Front.y)
+  -- State update: FOV' = DefaultFOV
+  -- State update: Distance' = 1.5f
+  -- State update: Front.x' = Cos(0.3f) * Sin(Angle)
+  -- State update: Front.y' = Cos(0.3f) * Cos(Angle)
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CCam_ProcessPedsDeadBaby
+  ΔCCam
+where
+  -- State update: TargetCoors' = TheCamera.pTargetEntity.GetPosition()
+  -- State update: TheCamera.m_uiTimeLastChange' = CTimer::GetTimeInMilliseconds()
+  -- State update: CamPos' = TargetCoors
+  -- State update: WaterZ' = 0.0f
+  -- State update: CamPos.z' = WaterZ + 1.5f
+  -- State update: Right.z' = 0.0f
+  -- Invokes: pTargetEntity->IsPed, m_pedIK.GetComponentPosition, pTargetEntity->IsVehicle, pTargetEntity->GetPosition, pTargetEntity->GetColModel
+  true
+end
+
+schema CCam_GetLookAlongGroundPos
+  ΔCCam
+  Target? : Ref[CEntity]
+  Cop? : Ref[CPed]
+  TargetCoors? : CVector
+  SourceOut? : CVector
+where
+  -- State update: CopToTarget' = TargetCoors - Cop.GetPosition()
+  -- State update: CopToTarget.z' = 0.0f
+  -- State update: SourceOut' = TargetCoors + ARRESTDIST_ALONG_GROUND*CopToTarget
+  -- State update: Side' = CrossProduct(CopToTarget, CVector(0.0f, 0.0f, 1.0f))
+  -- State update: found' = false
+  -- State update: SourceOut.z' = ground + ARRESTDIST_ABOVE_GROUND
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: Cop->GetPosition, CopToTarget.Normalise, CWorld::FindGroundZFor3DCoord
+  true
+end
+
+schema CCam_GetLookFromLampPostPos
+  ΔCCam
+  Target? : Ref[CEntity]
+  Cop? : Ref[CPed]
+  TargetCoors? : CVector
+  SourceOut? : CVector
+where
+  -- State update: NearestLampPost' = ∅
+  -- State update: NearestDist' = 10000.0f
+  -- State update: Dist' = (Objects[i].GetPosition() - TargetCoors).Magnitude2D()
+  -- State update: TestStart' = Objects[i].GetColModel().boundingBox.max
+  -- State update: TestStart' = Objects[i].GetMatrix() * TestStart
+  -- State update: TestEnd' = TestStart - TargetCoors
+  -- Return postcondition: result! = NearestLampPost != nil
+  -- Invokes: CWorld::FindObjectsInRange, TestEnd.Normalise, CWorld::GetIsLineOfSightClear
+  true
+end
+
+schema CCam_GetLookOverShoulderPos
+  ΔCCam
+  Target? : Ref[CEntity]
+  Cop? : Ref[CPed]
+  TargetCoors? : CVector
+  SourceOut? : CVector
+where
+  -- State update: CopCoors' = Cop.GetPosition()
+  -- State update: CopToTarget' = TargetCoors - CopCoors
+  -- State update: Side' = CrossProduct(CopToTarget, CVector(0.0f, 0.0f, 1.0f))
+  -- State update: CopToTarget.z' = -0.7071f
+  -- State update: GroundDist' = CopToTarget.Magnitude2D()
+  -- State update: CopToTarget.z' = 0.0f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: Cop->GetPosition, Side.Normalise, CopToTarget.Normalise, CopToTarget.Magnitude2D, CopToTarget.Magnitude
+  true
+end
+
+schema CCam_ProcessArrestCamOne
+  ΔCCam
+where
+  -- State update: cop' = ∅
+  -- State update: FOV' = 45.0f
+  -- State update: foundPos' = false
+  -- State update: targetPed' = (CPed*)TheCamera.pTargetEntity
+  -- State update: nUsingWhichCamera' = 0
+  -- State update: cop' = FindPlayerPed().m_pArrestingCop
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: pTargetEntity->IsPed, m_pedIK.GetComponentPosition, CGeneral::GetRandomNumberInRange, pTargetEntity->IsVehicle, pDriver->IsPlayer
+  true
+end
+
+schema CCam_ProcessArrestCamTwo
+  ΔCCam
+where
+  -- State update: player' = CWorld::Players[CWorld::PlayerInFocus].m_pPed
+  -- State update: ResetStatics' = false
+  -- State update: SourceX' = TheCamera.Cams[(TheCamera.ActiveCam + 1) % 2].Source.x
+  -- State update: SourceY' = TheCamera.Cams[(TheCamera.ActiveCam + 1) % 2].Source.y
+  -- State update: SourceX' = TheCamera.Cams[TheCamera.ActiveCam].Source.x
+  -- State update: SourceY' = TheCamera.Cams[TheCamera.ActiveCam].Source.y
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: player->GetPosition, CGeneral::GetATanOfXY, ToCamera.Normalise, CWorld::GetIsLineOfSightClear
+  true
+end
+
+schema CCam_Process_FollowPed_Rotation
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: MinDist' = 2.0f
+  -- State update: MaxDist' = 2.0f + TheCamera.m_fPedZoomValueSmooth
+  -- State update: BaseOffset' = 0.75f
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: TargetCoors' = DoAverageOnVector(TargetCoors)
+  -- Invokes: CPad::GetPad, CGeneral::GetATanOfXY, Dist.Magnitude, Dist.Magnitude2D, CTimer::GetTimeStep
+  true
+end
+
+schema CCam_Process_FollowCar_SA
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: m_nCurrentHistoryPoints' = 0
+  -- State update: lastBeta' = -9999.0f
+  -- State update: lastAlpha' = -9999.0f
+  -- State update: car' = (CVehicle*)CamTargetEntity
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: camSetArrPos' = 0
+  -- Invokes: CamTargetEntity->IsVehicle, car->GetVehicleAppearance, car->IsCar, CPad::GetPad, pad->GetLookBehindForCar
+  true
+end
+
+schema CCam_GetPedBetaAngleForClearView
+  ΔCCam
+  Target? : CVector
+  Dist? : ℝ
+  BetaOffset? : ℝ
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+where
+  -- State update: ent' = ∅
+  -- State update: a' = 0.0f
+  -- Return postcondition: result! = a
+  -- Return postcondition: result! = -a
+  -- Return postcondition: result! = 0.0f
+  -- Invokes: CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCam_WorkOutCamHeightWeeCar
+  ΔCCam
+  TargetCoors? : CVector
+  TargetOrientation? : ℝ
+where
+  -- State update: TargetZOffSet' = 0.0f
+  -- State update: PreviouslyFailedRoadHeightCheck' = false
+  -- State update: RoadHeightFix' = 0.0f
+  -- State update: RoadHeightFixSpeed' = 0.0f
+  -- State update: RoadHeightFix' = 0.0f
+  -- State update: RoadHeightFixSpeed' = 0.0f
+  -- Invokes: CCullZones::CamNoRain, CCullZones::PlayerNoRain, CWorld::ProcessVerticalLine, ent->IsBuilding
+  true
+end
+
+schema CCam_FixCamIfObscured
+  ΔCCam
+  TargetCoors? : CVector
+  TargetHeight? : ℝ
+  TargetOrientation? : ℝ
+where
+  -- State update: Target' = TargetCoors
+  -- State update: UseEntityPos' = false
+  -- State update: LastObscured' = false
+  -- State update: UseEntityPos' = true
+  -- State update: EntityPos' = CamTargetEntity.GetPosition()
+  -- State update: TempSource' = Source
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CamTargetEntity->GetPosition, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CCam_Process_1stPerson_2
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: DontLookThroughWorldFixer' = 0.0f
+  -- State update: FOV' = DefaultFOV
+  -- State update: TargetCoors' = CameraTarget
+  -- State update: Beta' = TargetOrientation
+  -- State update: Alpha' = 0.0f
+  -- State update: m_fInitialPlayerOrientation' = TargetOrientation
+  -- Invokes: CamTargetEntity->IsPed, m_pedIK.GetComponentPosition, CPad::GetPad, CTimer::GetTimeStep, Front.Normalise
+  true
+end
+
+schema CCam_Process_Circle
+  ΔCCam
+  CameraTarget? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = DefaultFOV
+  -- State update: Front.z' = -Sin(0.7f)
+  -- State update: Source' = CameraTarget - 4.0f*Front
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCam_Process_Chris_With_Binding_PlusRotation
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: AngleToBinned' = 0.0f
+  -- State update: StartingAngleLastChange' = 0.0f
+  -- State update: FixedTargetOrientation' = 0.0f
+  -- State update: FOV' = DefaultFOV
+  -- State update: FixOrientation' = true
+  -- State update: Rotating' = false
+  -- Invokes: CPad::GetPad, CGeneral::GetATanOfXY, Dist.Magnitude2D, Front.Normalise, Front2.Normalise
+  true
+end
+
+schema CCam_Process_ReactionCam
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: AngleToBinned' = 0.0f
+  -- State update: StartingAngleLastChange' = 0.0f
+  -- State update: DontBind' = false
+  -- State update: FOV' = DefaultFOV
+  -- State update: Rotating' = false
+  -- State update: DeadZoneReachedOnePrevious' = 0.0f
+  -- Invokes: Dist.Magnitude2D, CGeneral::GetATanOfXY, CPad::GetPad, CTimer::GetTimeInMilliseconds, Front.Normalise
+  true
+end
+
+schema CCam_Process_FollowPed_WithBinding
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: AngleToBinned' = 0.0f
+  -- State update: StartingAngleLastChange' = 0.0f
+  -- State update: DontBind' = false
+  -- State update: FOV' = DefaultFOV
+  -- State update: Rotating' = false
+  -- State update: DeadZoneReachedOnePrevious' = 0.0f
+  -- Invokes: Dist.Magnitude2D, CGeneral::GetATanOfXY, CPad::GetPad, CTimer::GetTimeInMilliseconds, Front.Normalise
+  true
+end
+
+schema CCam_Process_Bill
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  SpeedVar? : ℝ
+  TargetSpeedVar? : ℝ
+where
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CCam_Process_Im_The_Passenger_Woo_Woo
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = 50.0f
+  -- State update: Source' = CamTargetEntity.GetPosition()
+  -- State update: Front' = CamTargetEntity.GetForward()
+  -- State update: heading' = CGeneral::GetATanOfXY(Front.x, Front.y) + DEGTORAD(45.0f)
+  -- State update: Front.x' = Cos(heading)
+  -- State update: Front.y' = Sin(heading)
+  -- Invokes: CamTargetEntity->GetPosition, CamTargetEntity->GetForward, Front.Normalise, CGeneral::GetATanOfXY, CamTargetEntity->GetUp
+  true
+end
+
+schema CCam_Process_Blood_On_The_Tracks
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = 50.0f
+  -- State update: Source' = CamTargetEntity.GetPosition()
+  -- State update: Test' = -CamTargetEntity.GetForward()
+  -- State update: Test' = -CamTargetEntity.GetForward()
+  -- State update: ResetStatics' = false
+  -- State update: Front' = Test
+  -- Invokes: CamTargetEntity->GetPosition, CamTargetEntity->GetForward, Front.Normalise, CamTargetEntity->GetUp
+  true
+end
+
+schema CCam_Process_Cam_Running_Side_Train
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: FOV' = 60.0f
+  -- State update: Source' = CamTargetEntity.GetPosition()
+  -- State update: fwd' = CamTargetEntity.GetForward()
+  -- State update: heading' = CGeneral::GetATanOfXY(fwd.x, fwd.y) - DEGTORAD(15.0f)
+  -- State update: Front' = fwd
+  -- State update: Up' = CamTargetEntity.GetUp()
+  -- Invokes: CamTargetEntity->GetPosition, CamTargetEntity->GetForward, CGeneral::GetATanOfXY, Front.Normalise, CamTargetEntity->GetUp
+  true
+end
+
+schema CCam_Process_Cam_On_Train_Roof
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- State update: RoofMultiplier' = 1.5f
+  -- State update: Source' = CamTargetEntity.GetPosition()
+  -- State update: Front' = CamTargetEntity.GetForward()
+  -- State update: Up' = CamTargetEntity.GetUp()
+  -- Invokes: CamTargetEntity->GetPosition, CamTargetEntity->GetForward, Front.Normalise, CamTargetEntity->GetUp, Up.Normalise
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CamModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 6585
+end

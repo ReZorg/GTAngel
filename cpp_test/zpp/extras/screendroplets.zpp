@@ -1,0 +1,571 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: screendroplets (extras)
+-- Source File(s): extras/screendroplets.cpp, extras/screendroplets.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include postfx.zpp  (from "postfx.h")
+-- include screendroplets.zpp  (from "screendroplets.h")
+-- include screenDroplet_PS.zpp  (from "shaders/obj/screenDroplet_PS.inc")
+-- include im2d_UV2_vert.zpp  (from "shaders/obj/im2d_UV2_vert.inc")
+-- include screenDroplet_frag.zpp  (from "shaders/obj/screenDroplet_frag.inc")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+MAXSIZE : ℕ  -- #define MAXSIZE 15
+MINSIZE : ℕ  -- #define MINSIZE 4
+NUMINDICES : ℕ  -- #define NUMINDICES 1024
+NUMVERTICES : ℕ  -- #define NUMVERTICES 1024
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+screendroplets_Enum_1 ::= MAXDROPS | MAXDROPSMOVING
+  -- val(MAXDROPS) = 2000
+  -- val(MAXDROPSMOVING) = 700
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema Im2DVertexUV2
+  rw__RWDEVICE__Im2DVertex  -- inherits base schema
+  v2 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema ScreenDroplets
+  lifetime : ℝ
+  color : CRGBA
+  active : 𝔹
+  fades : 𝔹
+  dist : ℝ
+  ms_initialised : ℤ
+  ms_maskTex : Ref[RwTexture]
+  ms_screenTex : Ref[RwTexture]
+  ms_enabled : 𝔹
+  ms_movingEnabled : 𝔹
+  ms_drops : seq ScreenDrop  -- bounded array [MAXDROPS]
+  ms_numDrops : ℤ
+  ms_dropsMoving : seq ScreenDropMoving  -- bounded array [MAXDROPSMOVING]
+  ms_numDropsMoving : ℤ
+  ms_prevCamUp : CVector
+  ms_prevCamPos : CVector
+  ms_camMoveDelta : CVector
+  ms_camMoveDist : ℝ
+  ms_screenMoveDelta : CVector
+  ms_screenMoveDist : ℝ
+  ms_camUpAngle : ℝ
+  ms_splashDuration : ℤ
+  ms_splashObject : Ref[CParticleObject]
+where
+  #ms_maskTex ≤ 1
+  #ms_screenTex ≤ 1
+  #ms_splashObject ≤ 1
+end
+
+schema ScreenDroplets_Fade
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Fade(void)
+  true
+end
+
+schema ScreenDroplets_Initialise_2
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Initialise(void)
+  true
+end
+
+schema ScreenDroplets_InitDraw_3
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::InitDraw(void)
+  true
+end
+
+schema ScreenDroplets_Shutdown_4
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Shutdown(void)
+  true
+end
+
+schema ScreenDroplets_Process_5
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Process(void)
+  true
+end
+
+schema ScreenDroplets_Render_6
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Render(void)
+  true
+end
+
+schema ScreenDroplets_AddToRenderList_7
+  ΔScreenDroplets
+  drop? : Ref[ScreenDrop]
+where
+  -- Declared member operation ScreenDroplets::AddToRenderList(ScreenDrop *drop)
+  true
+end
+
+schema ScreenDroplets_Clear_8
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Clear(void)
+  true
+end
+
+schema ScreenDroplets_NewDrop_9
+  ΔScreenDroplets
+  x? : ℝ
+  y? : ℝ
+  size? : ℝ
+  lifetime? : ℝ
+  fades? : 𝔹
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  result! : Ref[ScreenDrop]
+where
+  -- Declared member operation ScreenDroplets::NewDrop(float x, float y, float size, float lifetime, bool fades, int r = 255, int g = 255, int b = 255)
+  true
+end
+
+schema ScreenDroplets_SetMoving_10
+  ΔScreenDroplets
+  drop? : Ref[ScreenDroplets__ScreenDrop]
+where
+  -- Declared member operation ScreenDroplets::SetMoving(ScreenDroplets::ScreenDrop *drop)
+  true
+end
+
+schema ScreenDroplets_FillScreen_11
+  ΔScreenDroplets
+  n? : ℤ
+where
+  -- Declared member operation ScreenDroplets::FillScreen(int n)
+  true
+end
+
+schema ScreenDroplets_FillScreenMoving_12
+  ΔScreenDroplets
+  amount? : ℝ
+  isBlood? : 𝔹
+where
+  -- Declared member operation ScreenDroplets::FillScreenMoving(float amount, bool isBlood = false)
+  true
+end
+
+schema ScreenDroplets_RegisterSplash_13
+  ΔScreenDroplets
+  pobj? : Ref[CParticleObject]
+where
+  -- Declared member operation ScreenDroplets::RegisterSplash(CParticleObject *pobj)
+  true
+end
+
+schema ScreenDroplets_ProcessCameraMovement_14
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::ProcessCameraMovement(void)
+  true
+end
+
+schema ScreenDroplets_SprayDrops_15
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::SprayDrops(void)
+  true
+end
+
+schema ScreenDroplets_NewTrace_16
+  ΔScreenDroplets
+  moving? : Ref[ScreenDroplets__ScreenDropMoving]
+where
+  -- Declared member operation ScreenDroplets::NewTrace(ScreenDroplets::ScreenDropMoving *moving)
+  true
+end
+
+schema ScreenDroplets_MoveDrop_17
+  ΔScreenDroplets
+  moving? : Ref[ScreenDropMoving]
+where
+  -- Declared member operation ScreenDroplets::MoveDrop(ScreenDropMoving *moving)
+  true
+end
+
+schema ScreenDroplets_ProcessMoving_18
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::ProcessMoving(void)
+  true
+end
+
+schema ScreenDroplets_Fade_19
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Fade(void)
+  true
+end
+
+schema ScreenDrop
+  time : ℝ
+  lifetime : ℝ
+  color : CRGBA
+  active : 𝔹
+  fades : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema ScreenDrop_Fade
+  ΔScreenDrop
+where
+  -- Declared member operation ScreenDrop::Fade(void)
+  true
+end
+
+schema ScreenDropMoving
+  drop : Ref[ScreenDrop]
+  dist : ℝ
+where
+  #drop ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ScreenDroplets_Initialise
+  ΔScreenDroplets
+where
+  -- State update: ms_splashDuration' = -1
+  -- State update: ms_splashObject' = ∅
+  true
+end
+
+schema screendroplets_CreateDropMask
+  ΔscreendropletsModuleState
+  size? : ℤ
+where
+  -- State update: img' = RwImageCreate(size, size, 32)
+  -- State update: pixels' = RwImageGetPixels(img)
+  -- State update: stride' = RwImageGetStride(img)
+  -- State update: y' = 0
+  -- State update: yf' = ((y + 0.5f)/size - 0.5f)*2.0f
+  -- State update: x' = 0
+  -- Return postcondition: result! = RwTextureCreate(ras)
+  true
+end
+
+schema ScreenDroplets_InitDraw
+  ΔScreenDroplets
+where
+  -- State update: ms_maskTex' = CreateDropMask(64)
+  -- State update: ms_screenTex' = RwTextureCreate(∅)
+  -- State update: screenDroplet_PS' = rw::d3d::createPixelShader(screenDroplet_PS_cso)
+  -- State update: screenDroplet' = Shader::create(vs, fs)
+  -- State update: ms_initialised' = 1
+  -- Invokes: d3d::createPixelShader, Shader::create
+  true
+end
+
+schema ScreenDroplets_Shutdown
+  ΔScreenDroplets
+where
+  -- State update: ms_maskTex' = ∅
+  -- State update: ms_screenTex' = ∅
+  -- State update: screenDroplet_PS' = ∅
+  -- State update: screenDroplet' = ∅
+  -- Invokes: d3d::destroyPixelShader, screenDroplet->destroy
+  true
+end
+
+schema ScreenDroplets_Process
+  ΔScreenDroplets
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema screendroplets_FlushBuffer
+  ΔscreendropletsModuleState
+where
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  true
+end
+
+schema screendroplets_StartStoring
+  ΔscreendropletsModuleState
+  numIndices? : ℤ
+  numVertices? : ℤ
+  indexStart? : Ref[RwImVertexIndex]
+  vertexStart? : Ref[Im2DVertexUV2]
+where
+  -- State update: indexStart' = &TempBufferRenderIndexList[TempBufferIndicesStored]
+  -- State update: vertexStart' = &VertexBuffer[TempBufferVerticesStored]
+  -- State update: vertOffset' = TempBufferVerticesStored
+  -- Return postcondition: result! = vertOffset
+  true
+end
+
+schema ScreenDroplets_Render
+  ΔScreenDroplets
+where
+  -- State update: im2dOverridePS' = screenDroplet_PS
+  -- State update: im2dOverrideShader' = screenDroplet
+  -- State update: drop' = &ms_drops[0]
+  -- State update: im2dOverridePS' = ∅
+  -- State update: im2dOverrideShader' = ∅
+  -- Invokes: d3d::setTexture, gl3::setTexture, RenderBuffer::ClearRenderBuffer
+  true
+end
+
+schema ScreenDroplets_AddToRenderList
+  ΔScreenDroplets
+  drop? : Ref[ScreenDroplets__ScreenDrop]
+where
+  -- State update: first' = StartStoring(6, 4, &indices, &verts)
+  -- State update: scale' = 0.5f*SCREEN_SCALE_X(drop.size)
+  -- State update: screenz' = RwIm2DGetNearScreenZ()
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  -- State update: recipz' = 1.0f/z
+  -- State update: magSize' = SCREEN_SCALE_Y(drop.magnification*(300.0f-40.0f) + 40.0f)
+  true
+end
+
+schema ScreenDroplets_Clear
+  ΔScreenDroplets
+where
+  -- State update: drop' = &ms_drops[0]
+  -- State update: drop.active' = false
+  -- State update: ms_numDrops' = 0
+  true
+end
+
+schema ScreenDroplets_NewDrop
+  ΔScreenDroplets
+  x? : ℝ
+  y? : ℝ
+  size? : ℝ
+  lifetime? : ℝ
+  fades? : 𝔹
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+where
+  -- State update: drop' = ms_drops
+  -- State update: drop.x' = x
+  -- State update: drop.y' = y
+  -- State update: drop.size' = size
+  -- State update: drop.magnification' = (MAXSIZE - size + 1.0f) / (MAXSIZE - MINSIZE + 1.0f)
+  -- State update: drop.fades' = fades
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = drop
+  true
+end
+
+schema ScreenDroplets_SetMoving
+  ΔScreenDroplets
+  drop? : Ref[ScreenDroplets__ScreenDrop]
+where
+  -- State update: moving' = ms_dropsMoving
+  -- State update: moving.drop' = drop
+  -- State update: moving.dist' = 0.0f
+  true
+end
+
+schema ScreenDroplets_FillScreen
+  ΔScreenDroplets
+  n? : ℤ
+where
+  -- State update: ms_numDrops' = 0
+  -- State update: drop' = &ms_drops[0]
+  -- State update: drop.active' = false
+  -- State update: x' = CGeneral::GetRandomNumber() % (int)SCREEN_WIDTH
+  -- State update: y' = CGeneral::GetRandomNumber() % (int)SCREEN_HEIGHT
+  -- State update: size' = CGeneral::GetRandomNumberInRange(MINSIZE, MAXSIZE)
+  -- Invokes: CGeneral::GetRandomNumber, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema ScreenDroplets_FillScreenMoving
+  ΔScreenDroplets
+  amount? : ℝ
+  isBlood? : 𝔹
+where
+  -- State update: x' = CGeneral::GetRandomNumber() % (int)SCREEN_WIDTH
+  -- State update: y' = CGeneral::GetRandomNumber() % (int)SCREEN_HEIGHT
+  -- State update: size' = CGeneral::GetRandomNumberInRange(MINSIZE, MAXSIZE)
+  -- State update: drop' = ∅
+  -- State update: drop' = NewDrop(x, y, size, 2000.0f, true, 255, 0, 0)
+  -- State update: drop' = NewDrop(x, y, size, 2000.0f, true)
+  -- Invokes: CGeneral::GetRandomNumber, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema ScreenDroplets_RegisterSplash
+  ΔScreenDroplets
+  pobj? : Ref[CParticleObject]
+where
+  -- State update: dist' = pobj.GetPosition() - ms_prevCamPos
+  -- State update: ms_splashDuration' = 14
+  -- State update: ms_splashObject' = pobj
+  -- Invokes: pobj->GetPosition, dist.MagnitudeSqr
+  true
+end
+
+schema ScreenDroplets_ProcessCameraMovement
+  ΔScreenDroplets
+where
+  -- State update: camMat' = RwFrameGetMatrix(RwCameraGetFrame(Scene.camera))
+  -- State update: camPos' = camMat.pos
+  -- State update: camUp' = camMat.at
+  -- State update: ms_camMoveDelta' = camPos - ms_prevCamPos
+  -- State update: ms_camMoveDist' = ms_camMoveDelta.Magnitude()
+  -- State update: ms_prevCamUp' = camUp
+  -- Invokes: ms_camMoveDelta.Magnitude, ms_screenMoveDelta.Magnitude2D, CPad::GetPad
+  true
+end
+
+schema ScreenDroplets_SprayDrops
+  ΔScreenDroplets
+where
+  -- State update: noRain' = CCullZones::PlayerNoRain() || CCullZones::CamNoRain()
+  -- State update: angle' = 180.0f - ms_camUpAngle
+  -- State update: angle' = Max(angle, 40.0f)
+  -- State update: hyd' = CAudioHydrant::Get(i)
+  -- State update: dist' = hyd.pParticleObject.GetPosition() - ms_prevCamPos
+  -- State update: numDropMult' = 1.0f
+  -- Invokes: CCullZones::PlayerNoRain, CCullZones::CamNoRain, CAudioHydrant::Get, pParticleObject->GetPosition, dist.MagnitudeSqr
+  true
+end
+
+schema ScreenDroplets_NewTrace
+  ΔScreenDroplets
+  moving? : Ref[ScreenDroplets__ScreenDropMoving]
+where
+  -- State update: moving.dist' = 0.0f
+  true
+end
+
+schema ScreenDroplets_MoveDrop
+  ΔScreenDroplets
+  moving? : Ref[ScreenDroplets__ScreenDropMoving]
+where
+  -- State update: drop' = moving.drop
+  -- State update: moving.drop' = ∅
+  -- State update: d' = ms_screenMoveDelta.z*0.2f
+  -- State update: dx' = drop.x - SCREEN_WIDTH*0.5f + ms_screenMoveDelta.x
+  -- State update: dy' = drop.y - SCREEN_HEIGHT*1.2f - ms_screenMoveDelta.y
+  -- State update: dy' = drop.y - SCREEN_HEIGHT*0.5f - ms_screenMoveDelta.y
+  true
+end
+
+schema ScreenDroplets_ProcessMoving
+  ΔScreenDroplets
+where
+  -- State update: moving' = ms_dropsMoving
+  true
+end
+
+schema ScreenDroplets_Fade
+  ΔScreenDroplets
+where
+  -- State update: drop' = &ms_drops[0]
+  -- Invokes: drop->Fade
+  true
+end
+
+schema screendroplets_openim2d_uv2
+  ΔscreendropletsModuleState
+where
+  -- Invokes: d3d9::createVertexDeclaration
+  true
+end
+
+schema screendroplets_closeim2d_uv2
+  ΔscreendropletsModuleState
+where
+  -- State update: im2ddecl_uv2' = ∅
+  -- State update: im2dvertbuf_uv2' = ∅
+  -- State update: im2dindbuf_uv2' = ∅
+  -- Invokes: d3d9::destroyVertexDeclaration
+  true
+end
+
+schema screendroplets_RenderIndexedPrimitive_UV2
+  ΔscreendropletsModuleState
+  primType? : RwPrimitiveType
+  vertices? : Ref[Im2DVertexUV2]
+  numVertices? : ℤ
+  indices? : Ref[RwImVertexIndex]
+  numIndices? : ℤ
+where
+  -- State update: primCount' = 0
+  -- State update: primCount' = numIndices/2
+  -- State update: primCount' = numIndices-1
+  -- State update: primCount' = numIndices/3
+  -- State update: primCount' = numIndices-2
+  -- State update: primCount' = numIndices-2
+  -- Invokes: device.getRenderState, d3d::flushCache, d3ddevice->DrawIndexedPrimitive
+  true
+end
+
+schema screendroplets_openim2d_uv2_2
+  ΔscreendropletsModuleState
+where
+  -- State update: u_xform' = rw::gl3::registerUniform("u_xform", rw::gl3::UNIFORM_VEC4)
+  -- Invokes: gl3::registerUniform
+  true
+end
+
+schema screendroplets_closeim2d_uv2_2
+  ΔscreendropletsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema screendroplets_RenderIndexedPrimitive_UV2_2
+  ΔscreendropletsModuleState
+  primType? : RwPrimitiveType
+  vertices? : Ref[Im2DVertexUV2]
+  numVertices? : ℤ
+  indices? : Ref[RwImVertexIndex]
+  numIndices? : ℤ
+where
+  -- State update: cam' = (Camera*)engine.currentCamera
+  -- Invokes: im2dOverrideShader->use
+  true
+end

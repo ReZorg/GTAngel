@@ -1,0 +1,816 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script5 (control)
+-- Source File(s): control/Script5.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include BulletInfo.zpp  (from "BulletInfo.h")
+-- include General.zpp  (from "General.h")
+-- include Lines.zpp  (from "Lines.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Population.zpp  (from "Population.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include World.zpp  (from "World.h")
+-- include main.zpp  (from "main.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SCRIPT_DATA_SIZE : seq CHAR  -- #define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) +
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_CollectLocateParameters
+  ΔCRunningScript
+  pIp? : ℙ ℕ
+  b3D? : 𝔹
+  result! : ℕ
+where
+  -- State update: id' = (uintptr)this + (*pIp - 16)
+  -- State update: ip' = *pIp
+  -- State update: type' = CTheScripts::Read1ByteFromScript(&ip)
+  -- State update: id' = (uint32)(uintptr)GetPointerToScriptVariable(&ip, 0)
+  -- Return postcondition: result! = id
+  -- Invokes: CTheScripts::Read1ByteFromScript
+  true
+end
+
+schema CRunningScript_LocatePlayerCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPlayerInfo' = &CWorld::Players[ScriptParams[0]]
+  -- State update: decided' = true
+  -- State update: X' = *(float*)&ScriptParams[1]
+  -- Invokes: CTheScripts::IsPlayerStopped, pPlayerInfo->GetPos, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube, CTheScripts::DrawDebugSquare
+  true
+end
+
+schema CRunningScript_LocatePlayerCharCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPlayerInfo' = &CWorld::Players[GET_INTEGER_PARAM(0)]
+  -- State update: pTarget' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: pos' = pPlayerInfo.GetPos()
+  -- State update: X' = pTarget.m_pMyVehicle.GetPosition().x
+  -- Invokes: CPools::GetPedPool, pPlayerInfo->GetPos, m_pMyVehicle->GetPosition, pTarget->GetPosition, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_LocatePlayerCarCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPlayerInfo' = &CWorld::Players[GET_INTEGER_PARAM(0)]
+  -- State update: pTarget' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: pos' = pPlayerInfo.GetPos()
+  -- State update: X' = pTarget.GetPosition().x
+  -- Invokes: CPools::GetVehiclePool, pPlayerInfo->GetPos, pTarget->GetPosition, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_LocateCharCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(ScriptParams[0])
+  -- State update: decided' = true
+  -- State update: X' = *(float*)&ScriptParams[1]
+  -- Invokes: CPools::GetPedPool, pPed->InVehicle, m_pMyVehicle->GetPosition, pPed->GetPosition, CTheScripts::IsPedStopped
+  true
+end
+
+schema CRunningScript_LocateCharCharCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pTarget' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: X' = pTarget.m_pMyVehicle.GetPosition().x
+  -- State update: Y' = pTarget.m_pMyVehicle.GetPosition().y
+  -- Invokes: CPools::GetPedPool, m_pMyVehicle->GetPosition, pPed->GetPosition, pTarget->GetPosition, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_LocateCharCarCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pTarget' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: X' = pTarget.GetPosition().x
+  -- State update: Y' = pTarget.GetPosition().y
+  -- Invokes: CPools::GetPedPool, CPools::GetVehiclePool, m_pMyVehicle->GetPosition, pPed->GetPosition, pTarget->GetPosition
+  true
+end
+
+schema CRunningScript_LocateCharObjectCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pTarget' = CPools::GetObjectPool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: X' = pTarget.GetPosition().x
+  -- State update: Y' = pTarget.GetPosition().y
+  -- Invokes: CPools::GetPedPool, CPools::GetObjectPool, m_pMyVehicle->GetPosition, pPed->GetPosition, pTarget->GetPosition
+  true
+end
+
+schema CRunningScript_LocateCarCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(ScriptParams[0])
+  -- State update: pos' = pVehicle.GetPosition()
+  -- State update: decided' = true
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetPosition, CTheScripts::IsVehicleStopped, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube
+  true
+end
+
+schema CRunningScript_LocateObjectCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pObject' = CPools::GetObjectPool().GetAt(ScriptParams[0])
+  -- State update: pos' = pObject.GetPosition()
+  -- State update: X' = *(float*)&ScriptParams[1]
+  -- State update: Y' = *(float*)&ScriptParams[2]
+  -- Invokes: CPools::GetObjectPool, pObject->GetPosition, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube, CTheScripts::DrawDebugSquare
+  true
+end
+
+schema CRunningScript_LocateSniperBulletCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: X' = *(float*)&ScriptParams[0]
+  -- State update: Y' = *(float*)&ScriptParams[1]
+  -- State update: Z' = *(float*)&ScriptParams[2]
+  -- State update: dX' = *(float*)&ScriptParams[3]
+  -- Invokes: CBulletInfo::TestForSniperBullet, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube, CTheScripts::DrawDebugSquare
+  true
+end
+
+schema CRunningScript_PlayerInAreaCheckCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPlayerInfo' = &CWorld::Players[ScriptParams[0]]
+  -- State update: decided' = true
+  -- State update: infX' = *(float*)&ScriptParams[1]
+  -- Invokes: CTheScripts::IsPlayerStopped, pPlayerInfo->GetPos, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube, CTheScripts::DrawDebugSquare
+  true
+end
+
+schema CRunningScript_PlayerInAngledAreaCheckCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPlayerInfo' = &CWorld::Players[ScriptParams[0]]
+  -- State update: decided' = true
+  -- State update: infX' = *(float*)&ScriptParams[1]
+  -- Invokes: CTheScripts::IsPlayerStopped, CGeneral::GetRadianAngleBetweenPoints, pPlayerInfo->GetPos, CTheScripts::HighlightImportantAngledArea, CTheScripts::DrawDebugAngledCube
+  true
+end
+
+schema CRunningScript_CharInAreaCheckCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(ScriptParams[0])
+  -- State update: decided' = true
+  -- State update: infX' = *(float*)&ScriptParams[1]
+  -- Invokes: CPools::GetPedPool, pPed->InVehicle, m_pMyVehicle->GetPosition, pPed->GetPosition, CTheScripts::IsPedStopped
+  true
+end
+
+schema CRunningScript_CarInAreaCheckCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(ScriptParams[0])
+  -- State update: pos' = pVehicle.GetPosition()
+  -- State update: decided' = true
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetPosition, CTheScripts::IsVehicleStopped, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube
+  true
+end
+
+schema CRunningScript_ObjectInAreaCheckCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = true
+  -- State update: b3D' = false
+  -- State update: pObject' = CPools::GetObjectPool().GetAt(ScriptParams[0])
+  -- State update: pos' = pObject.GetPosition()
+  -- State update: infX' = *(float*)&ScriptParams[1]
+  -- State update: infY' = *(float*)&ScriptParams[2]
+  -- Invokes: CPools::GetObjectPool, pObject->GetPosition, CTheScripts::HighlightImportantArea, CTheScripts::DrawDebugCube, CTheScripts::DrawDebugSquare
+  true
+end
+
+schema CRunningScript_DoDeatharrestCheck
+  ΔCRunningScript
+where
+  -- State update: pPlayer' = &CWorld::Players[CWorld::PlayerInFocus]
+  -- State update: AllowMissionReplay' = MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE
+  -- State update: m_nIp' = m_anStack[--m_nStackPointer]
+  -- State update: messageId' = 0
+  -- State update: messageId' = 5
+  -- State update: messageId' = 10
+  -- Invokes: CTheScripts::IsPlayerOnAMission, pPlayer->IsRestartingAfterDeath, pPlayer->IsRestartingAfterArrest, UpsideDownCars.AreAnyCarsUpsideDown, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CRunningScript_GetPadState
+  ΔCRunningScript
+  pad? : ℕ
+  button? : ℕ
+  result! : ℤ
+where
+  -- State update: pPad' = CPad::GetPad(pad)
+  -- Return postcondition: result! = pPad->NewState.LeftStickX
+  -- Return postcondition: result! = pPad->NewState.LeftStickY
+  -- Return postcondition: result! = pPad->NewState.RightStickX
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CRunningScript_LocateCollectiveCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = false
+  -- State update: b3D' = true
+  -- State update: X' = *(float*)&ScriptParams[1]
+  -- State update: Y' = *(float*)&ScriptParams[2]
+  -- State update: Z' = *(float*)&ScriptParams[3]
+  -- Invokes: CPools::GetPedPool, m_pMyVehicle->GetPosition, pPed->GetPosition, CTheScripts::IsPedStopped, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_LocateCollectiveCharCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = false
+  -- State update: b3D' = true
+  -- State update: pTarget' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: X' = pTarget.m_pMyVehicle.GetPosition().x
+  -- State update: Y' = pTarget.m_pMyVehicle.GetPosition().y
+  -- State update: Z' = pTarget.m_pMyVehicle.GetPosition().z
+  -- Invokes: CPools::GetPedPool, m_pMyVehicle->GetPosition, pTarget->GetPosition, pPed->GetPosition, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_LocateCollectiveCarCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = false
+  -- State update: b3D' = true
+  -- State update: pTarget' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: X' = pTarget.GetPosition().x
+  -- State update: Y' = pTarget.GetPosition().y
+  -- State update: Z' = pTarget.GetPosition().z
+  -- Invokes: CPools::GetVehiclePool, pTarget->GetPosition, CPools::GetPedPool, m_pMyVehicle->GetPosition, pPed->GetPosition
+  true
+end
+
+schema CRunningScript_LocateCollectivePlayerCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: b3D' = false
+  -- State update: b3D' = true
+  -- State update: pos' = CWorld::Players[GET_INTEGER_PARAM(1)].GetPos()
+  -- State update: X' = pos.x
+  -- State update: Y' = pos.y
+  -- State update: Z' = pos.z
+  -- Invokes: CPools::GetPedPool, m_pMyVehicle->GetPosition, pPed->GetPosition, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_CollectiveInAreaCheckCommand
+  ΔCRunningScript
+  command? : ℤ
+  pIp? : ℙ ℕ
+where
+  -- State update: decided' = false
+  -- State update: b3D' = false
+  -- State update: b3D' = true
+  -- State update: infX' = *(float*)&ScriptParams[1]
+  -- State update: infY' = *(float*)&ScriptParams[2]
+  -- State update: infZ' = *(float*)&ScriptParams[3]
+  -- Invokes: CPools::GetPedPool, m_pMyVehicle->GetPosition, pPed->GetPosition, CTheScripts::IsPedStopped, CTheScripts::HighlightImportantArea
+  true
+end
+
+schema CRunningScript_CheckDamagedWeaponType
+  ΔCRunningScript
+  actual? : ℤ
+  type? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CTheScripts_PrintListSizes
+  ΔCTheScripts
+where
+  -- State update: active' = 0
+  -- State update: idle' = 0
+  -- State update: pScript' = pActiveScripts
+  -- State update: pScript' = pIdleScripts
+  -- Invokes: pScript->GetNext
+  true
+end
+
+schema CTheScripts_LoadAllScripts
+  ΔCTheScripts
+  buf? : ℙ ℕ
+  size? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CRunningScript_Save
+  ΔCRunningScript
+  buf? : ℙ ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRunningScript_Load
+  ΔCRunningScript
+  buf? : ℙ ℕ
+where
+  -- State update: p' = prev
+  -- State update: next' = n
+  -- State update: prev' = p
+  true
+end
+
+schema CTheScripts_ClearSpaceForMissionEntity
+  ΔCTheScripts
+  pos? : CVector
+  pEntity? : Ref[CEntity]
+where
+  -- State update: entities' = 0
+  -- State update: pFound' = aEntities[i]
+  -- State update: pVehicle' = (CVehicle*)pFound
+  -- State update: pVehicle.pDriver' = ∅
+  -- State update: pPed' = (CPed*)pFound
+  -- Invokes: CWorld::FindObjectsKindaColliding, pEntity->GetBoundRadius, pEntity->GetColModel, CCollision::ProcessColModels, pEntity->GetMatrix
+  true
+end
+
+schema CTheScripts_HighlightImportantArea
+  ΔCTheScripts
+  id? : ℕ
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z? : ℝ
+where
+  -- State update: infX' = x1
+  -- State update: supX' = x2
+  -- State update: infX' = x2
+  -- State update: supX' = x1
+  -- State update: infY' = y1
+  -- State update: supY' = y2
+  -- Invokes: CWorld::FindGroundZForCoord, CShadows::RenderIndicatorShadow
+  true
+end
+
+schema CTheScripts_HighlightImportantAngledArea
+  ΔCTheScripts
+  id? : ℕ
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  z? : ℝ
+where
+  -- State update: X' = (x1 + x2) / 2
+  -- State update: Y' = (y1 + y2) / 2
+  -- State update: infX' = X
+  -- State update: infY' = Y
+  -- State update: X' = (x2 + x3) / 2
+  -- State update: Y' = (y2 + y3) / 2
+  -- Invokes: CWorld::FindGroundZForCoord, CShadows::RenderIndicatorShadow
+  true
+end
+
+schema CTheScripts_AddPedsInVehicleToCollective
+  ΔCTheScripts
+  index? : ℤ
+  result! : ℤ
+where
+  -- State update: colIndex' = NextFreeCollectiveIndex
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(index)
+  -- State update: pDriver' = pVehicle.pDriver
+  -- State update: index' = FindFreeSlotInCollectiveArray()
+  -- State update: colIndex' = colIndex
+  -- State update: pedIndex' = CPools::GetPedPool().GetIndex(pDriver)
+  -- Return postcondition: result! = colIndex
+  -- Invokes: CPools::GetVehiclePool, pDriver->IsPlayer, CPools::GetPedPool, pPassenger->IsPlayer
+  true
+end
+
+schema CTheScripts_AddPedsInAreaToCollective
+  ΔCTheScripts
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  radius? : ℝ
+  result! : ℤ
+where
+  -- State update: colIndex' = NextFreeCollectiveIndex
+  -- State update: pPed' = (CPed*)pEntities[i]
+  -- State update: index' = FindFreeSlotInCollectiveArray()
+  -- State update: colIndex' = colIndex
+  -- State update: pedIndex' = CPools::GetPedPool().GetIndex(pPed)
+  -- State update: pVehicle' = (CVehicle*)pEntities[i]
+  -- Return postcondition: result! = colIndex
+  -- Invokes: CWorld::FindObjectsInRange, pPed->IsPlayer, CPools::GetPedPool, pDriver->IsPlayer, pPassenger->IsPlayer
+  true
+end
+
+schema CTheScripts_FindFreeSlotInCollectiveArray
+  ΔCTheScripts
+  result! : ℤ
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CTheScripts_SetObjectiveForAllPedsInCollective
+  ΔCTheScripts
+  colIndex? : ℤ
+  objective? : eObjective
+  p1? : ℤ
+  p2? : ℤ
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(CollectiveArray[i].pedIndex)
+  -- State update: colIndex' = -1
+  -- State update: pedIndex' = 0
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- Invokes: CPools::GetPedPool, pPed->SetObjective
+  true
+end
+
+schema CTheScripts_SetObjectiveForAllPedsInCollective_2
+  ΔCTheScripts
+  colIndex? : ℤ
+  objective? : eObjective
+  p1? : CVector
+  p2? : ℝ
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(CollectiveArray[i].pedIndex)
+  -- State update: colIndex' = -1
+  -- State update: pedIndex' = 0
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- Invokes: CPools::GetPedPool, pPed->SetObjective
+  true
+end
+
+schema CTheScripts_SetObjectiveForAllPedsInCollective_3
+  ΔCTheScripts
+  colIndex? : ℤ
+  objective? : eObjective
+  p1? : CVector
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(CollectiveArray[i].pedIndex)
+  -- State update: colIndex' = -1
+  -- State update: pedIndex' = 0
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- Invokes: CPools::GetPedPool, pPed->SetObjective
+  true
+end
+
+schema CTheScripts_SetObjectiveForAllPedsInCollective_4
+  ΔCTheScripts
+  colIndex? : ℤ
+  objective? : eObjective
+  p1? : ADDRESS
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(CollectiveArray[i].pedIndex)
+  -- State update: colIndex' = -1
+  -- State update: pedIndex' = 0
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- Invokes: CPools::GetPedPool, pPed->SetObjective
+  true
+end
+
+schema CTheScripts_SetObjectiveForAllPedsInCollective_5
+  ΔCTheScripts
+  colIndex? : ℤ
+  objective? : eObjective
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(CollectiveArray[i].pedIndex)
+  -- State update: colIndex' = -1
+  -- State update: pedIndex' = 0
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- Invokes: CPools::GetPedPool, pPed->SetObjective
+  true
+end
+
+schema CTheScripts_IsPedStopped
+  ΔCTheScripts
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = IsVehicleStopped(pPed->m_pMyVehicle)
+  -- Invokes: pPed->InVehicle
+  true
+end
+
+schema CTheScripts_IsPlayerStopped
+  ΔCTheScripts
+  pPlayer? : Ref[CPlayerInfo]
+  result! : 𝔹
+where
+  -- State update: pPed' = pPlayer.m_pPed
+  -- Return postcondition: result! = IsVehicleStopped(pPed->m_pMyVehicle)
+  -- Return postcondition: result! = false
+  -- Invokes: pPed->InVehicle, pPed->GetClump
+  true
+end
+
+schema CTheScripts_IsVehicleStopped
+  ΔCTheScripts
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CTheScripts_RemoveThisPed
+  ΔCTheScripts
+  pPed? : Ref[CPed]
+where
+  -- State update: pPed.m_pMyVehicle.m_nDoorLock' = CARLOCK_UNLOCKED
+  -- Invokes: pPed->InVehicle, m_pMyVehicle->RemoveDriver, m_pMyVehicle->SetStatus, m_pMyVehicle->IsLawEnforcementVehicle, m_pMyVehicle->ChangeLawEnforcerState
+  true
+end
+
+schema CTheScripts_CleanUpThisPed
+  ΔCTheScripts
+  pPed? : Ref[CPed]
+where
+  -- State update: pPed.CharCreatedBy' = RANDOM_CHAR
+  -- State update: pPed.m_objectiveTimer' = CTimer::GetTimeInMilliseconds() + 30000
+  -- State update: pPed.bWanderPathAfterExitingCar' = false
+  -- State update: pPed.bWanderPathAfterExitingCar' = true
+  -- State update: flees' = false
+  -- State update: ms' = pPed.m_nMoveState
+  -- Invokes: CTimer::GetTimeInMilliseconds, pPed->InVehicle, CCarCtrl::JoinCarWithRoadSystem, pPed->IsPedHeadAbovePos, pPed->SetObjective
+  true
+end
+
+schema CTheScripts_CleanUpThisVehicle
+  ΔCTheScripts
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.bIsLocked' = false
+  -- State update: pVehicle.VehicleCreatedBy' = RANDOM_VEHICLE
+  -- Invokes: CCarCtrl::RemoveFromInterestingVehicleList
+  true
+end
+
+schema CTheScripts_CleanUpThisObject
+  ΔCTheScripts
+  pObject? : Ref[CObject]
+where
+  -- State update: pObject.ObjectCreatedBy' = TEMP_OBJECT
+  -- State update: pObject.m_nEndOfLifeTime' = CTimer::GetTimeInMilliseconds() + 20000000
+  -- State update: pObject.m_nRefModelIndex' = -1
+  -- State update: pObject.bUseVehicleColours' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CTheScripts_ReadObjectNamesFromScript
+  ΔCTheScripts
+where
+  -- State update: varSpace' = GetSizeOfVariableSpace()
+  -- State update: ip' = varSpace + 8
+  -- State update: NumSaveVars' = Read4BytesFromScript(&ip)
+  -- State update: SavedVarIndices' = (uint16*)&ScriptSpace[ip]
+  -- State update: NumberOfUsedObjects' = Read2BytesFromScript(&ip)
+  -- State update: index' = 0
+  true
+end
+
+schema CTheScripts_UpdateObjectIndices
+  ΔCTheScripts
+where
+  -- State update: found' = false
+  -- State update: pModel' = CModelInfo::GetModelInfo(j)
+  -- State update: found' = true
+  -- State update: index' = j
+  -- Invokes: CModelInfo::GetModelInfo, pModel->GetModelName
+  true
+end
+
+schema CTheScripts_ReadMultiScriptFileOffsetsFromScript
+  ΔCTheScripts
+where
+  -- State update: varSpace' = GetSizeOfVariableSpace()
+  -- State update: ip' = varSpace + 3
+  -- State update: objectSize' = Read4BytesFromScript(&ip)
+  -- State update: ip' = objectSize + 8
+  -- State update: NumTrueGlobals' = Read2BytesFromScript(&ip)
+  -- State update: MostGlobals' = Read2BytesFromScript(&ip)
+  true
+end
+
+schema CRunningScript_UpdateCompareFlag
+  ΔCRunningScript
+  flag? : 𝔹
+where
+  -- State update: flag' = !flag
+  -- State update: m_bCondResult' = flag
+  -- State update: m_nAndOrState' = ANDOR_NONE
+  -- State update: m_nAndOrState' = ANDOR_NONE
+  true
+end
+
+schema CTheScripts_DrawDebugAngledSquare
+  ΔCTheScripts
+  infX? : ℝ
+  infY? : ℝ
+  supX? : ℝ
+  supY? : ℝ
+  rotSupX? : ℝ
+  rotSupY? : ℝ
+  rotInfX? : ℝ
+  rotInfY? : ℝ
+where
+  -- State update: p1' = CVector(infX, infY, -1000.0f)
+  -- State update: p1.z' = 2.0f + tmpCP.point.z
+  -- State update: p2' = CVector(supX, supY, -1000.0f)
+  -- State update: p2.z' = 2.0f + tmpCP.point.z
+  -- State update: p3' = CVector(rotSupX, rotSupY, -1000.0f)
+  -- State update: p3.z' = 2.0f + tmpCP.point.z
+  -- Invokes: CWorld::ProcessVerticalLine, CTheScripts::ScriptDebugLine3D
+  true
+end
+
+schema CTheScripts_DrawDebugCube
+  ΔCTheScripts
+  infX? : ℝ
+  infY? : ℝ
+  infZ? : ℝ
+  supX? : ℝ
+  supY? : ℝ
+  supZ? : ℝ
+where
+  -- Invokes: CTheScripts::ScriptDebugLine3D
+  true
+end
+
+schema CTheScripts_DrawDebugAngledCube
+  ΔCTheScripts
+  infX? : ℝ
+  infY? : ℝ
+  infZ? : ℝ
+  supX? : ℝ
+  supY? : ℝ
+  supZ? : ℝ
+  rotSupX? : ℝ
+  rotSupY? : ℝ
+  rotInfX? : ℝ
+  rotInfY? : ℝ
+where
+  -- Invokes: CTheScripts::ScriptDebugLine3D
+  true
+end
+
+schema CTheScripts_ScriptDebugLine3D
+  ΔCTheScripts
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  col? : ℕ
+  col2? : ℕ
+where
+  -- State update: vecInf' = CVector(x1, y1, z1)
+  -- State update: vecSup' = CVector(x2, y2, z2)
+  -- State update: color1' = col
+  -- State update: color2' = col2
+  true
+end
+
+schema CTheScripts_RenderTheScriptDebugLines
+  ΔCTheScripts
+where
+  -- State update: NumScriptDebugLines' = 0
+  -- Invokes: CLines::RenderLineWithClipping
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script5ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3081
+end

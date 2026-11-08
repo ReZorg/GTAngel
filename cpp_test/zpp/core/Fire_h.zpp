@@ -1,0 +1,252 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Fire (core)
+-- Source File(s): core/Fire.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Fire_Enum_1 ::= MAX_FIREMEN_ATTENDING
+  -- val(MAX_FIREMEN_ATTENDING) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFire
+  m_bIsOngoing : 𝔹
+  m_bIsScriptFire : 𝔹
+  m_bPropagationFlag : 𝔹
+  m_bAudioSet : 𝔹
+  m_vecPos : CVector
+  m_pEntity : Ref[CEntity]
+  m_pSource : Ref[CEntity]
+  m_nExtinguishTime : ℕ
+  m_nStartTime : ℕ
+  m_nNextTimeToAddFlames : ℕ
+  m_fStrength : ℝ
+  m_fWaterExtinguishCountdown : ℝ
+  m_bExtinguishedWithWater : 𝔹
+  field_20 : ℤ
+  m_nFiremenPuttingOut : ℕ
+where
+  #m_pEntity ≤ 1
+  #m_pSource ≤ 1
+  m_nExtinguishTime ≥ 0
+  m_nStartTime ≥ 0
+  m_nNextTimeToAddFlames ≥ 0
+  m_nFiremenPuttingOut ≥ 0
+end
+
+schema CFire_CFire
+  ΔCFire
+where
+  -- Declared member operation CFire::CFire()
+  true
+end
+
+schema CFire_CFire_2
+  ΔCFire
+  result! : ANY
+where
+  -- Declared member operation CFire::CFire()
+  true
+end
+
+schema CFire_ProcessFire_3
+  ΔCFire
+where
+  -- Declared member operation CFire::ProcessFire(void)
+  true
+end
+
+schema CFire_ReportThisFire_4
+  ΔCFire
+where
+  -- Declared member operation CFire::ReportThisFire(void)
+  true
+end
+
+schema CFire_Extinguish_5
+  ΔCFire
+where
+  -- Declared member operation CFire::Extinguish(void)
+  true
+end
+
+schema CFireManager
+  m_nTotalFires : ℕ
+  m_aFires : seq CFire  -- bounded array [NUM_FIRES]
+where
+  m_nTotalFires ≥ 0
+end
+
+schema CFireManager_StartFire
+  ΔCFireManager
+  pos? : CVector
+  size? : ℝ
+  propagation? : ℕ
+where
+  -- Declared member operation CFireManager::StartFire(CVector pos, float size, uint8 propagation)
+  true
+end
+
+schema CFireManager_StartFire_2
+  ΔCFireManager
+  entityOnFire? : Ref[CEntity]
+  fleeFrom? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : ℕ
+  result! : Ref[CFire]
+where
+  -- Declared member operation CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength, uint8 propagation)
+  true
+end
+
+schema CFireManager_Update_3
+  ΔCFireManager
+where
+  -- Declared member operation CFireManager::Update(void)
+  true
+end
+
+schema CFireManager_FindFurthestFire_NeverMindFireMen_4
+  ΔCFireManager
+  coords? : CVector
+  minRange? : ℝ
+  maxRange? : ℝ
+  result! : Ref[CFire]
+where
+  -- Declared member operation CFireManager::FindFurthestFire_NeverMindFireMen(CVector coords, float minRange, float maxRange)
+  true
+end
+
+schema CFireManager_FindNearestFire_5
+  ΔCFireManager
+  vecPos? : CVector
+  pDistance? : ℙ ℝ
+  result! : Ref[CFire]
+where
+  -- Declared member operation CFireManager::FindNearestFire(CVector vecPos, float *pDistance)
+  true
+end
+
+schema CFireManager_GetNextFreeFire_6
+  ΔCFireManager
+  result! : Ref[CFire]
+where
+  -- Declared member operation CFireManager::GetNextFreeFire(void)
+  true
+end
+
+schema CFireManager_GetTotalActiveFires_7
+  ΞCFireManager
+  result! : ℕ
+where
+  -- Declared member operation CFireManager::GetTotalActiveFires()
+  true
+end
+
+schema CFireManager_ExtinguishPoint_8
+  ΔCFireManager
+  point? : CVector
+  range? : ℝ
+where
+  -- Declared member operation CFireManager::ExtinguishPoint(CVector point, float range)
+  true
+end
+
+schema CFireManager_ExtinguishPointWithWater_9
+  ΔCFireManager
+  point? : CVector
+  range? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CFireManager::ExtinguishPointWithWater(CVector point, float range)
+  true
+end
+
+schema CFireManager_StartScriptFire_10
+  ΔCFireManager
+  pos? : CVector
+  target? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strength, uint8 propagation)
+  true
+end
+
+schema CFireManager_IsScriptFireExtinguish_11
+  ΔCFireManager
+  index? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CFireManager::IsScriptFireExtinguish(int16 index)
+  true
+end
+
+schema CFireManager_RemoveAllScriptFires_12
+  ΔCFireManager
+where
+  -- Declared member operation CFireManager::RemoveAllScriptFires(void)
+  true
+end
+
+schema CFireManager_RemoveScriptFire_13
+  ΔCFireManager
+  index? : ℤ
+where
+  -- Declared member operation CFireManager::RemoveScriptFire(int16 index)
+  true
+end
+
+schema CFireManager_SetScriptFireAudio_14
+  ΔCFireManager
+  index? : ℤ
+  state? : 𝔹
+where
+  -- Declared member operation CFireManager::SetScriptFireAudio(int16 index, bool state)
+  true
+end
+
+schema CFireManager_StartFire_15
+  ΔCFireManager
+  pos? : CVector
+  size? : ℝ
+  propagation? : 𝔹
+where
+  -- Declared member operation CFireManager::StartFire(CVector pos, float size, bool propagation)
+  true
+end
+
+schema CFireManager_StartFire_16
+  ΔCFireManager
+  entityOnFire? : Ref[CEntity]
+  fleeFrom? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : 𝔹
+  result! : Ref[CFire]
+where
+  -- Declared member operation CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength, bool propagation)
+  true
+end
+
+schema CFireManager_StartScriptFire_17
+  ΔCFireManager
+  pos? : CVector
+  target? : Ref[CEntity]
+  strength? : ℝ
+  propagation? : 𝔹
+  result! : ℤ
+where
+  -- Declared member operation CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strength, bool propagation)
+  true
+end

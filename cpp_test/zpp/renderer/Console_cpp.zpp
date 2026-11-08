@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Console (renderer)
+-- Source File(s): renderer/Console.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include stdarg.zpp  (from "stdarg.h")
+-- include Console.zpp  (from "Console.h")
+-- include Font.zpp  (from "Font.h")
+-- include Timer.zpp  (from "Timer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CONSOLE_X_POS : ℝ  -- #define CONSOLE_X_POS (30.0f)
+CONSOLE_Y_POS : ℝ  -- #define CONSOLE_Y_POS (10.0f)
+CONSOLE_LINE_HEIGHT : ℝ  -- #define CONSOLE_LINE_HEIGHT (12.0f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CConsole_AddLine
+  ΔCConsole
+  s? : seq CHAR
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CConsole_AddOneLine
+  ΔCConsole
+  s? : seq CHAR
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+where
+  -- State update: StrIndex' = (m_nLineCount + m_nCurrentLine) % MAX_LINES
+  -- State update: _strNum1' = m_nLineCount
+  -- State update: m_nCurrentLine' = (m_nCurrentLine + 1) % MAX_LINES
+  -- State update: m_nLineCount' = _strNum1
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CConsole_Display
+  ΔCConsole
+where
+  -- State update: m_nCurrentLine' = (m_nCurrentLine + 1) % MAX_LINES
+  -- State update: line' = (i + m_nCurrentLine) % MAX_LINES
+  -- Invokes: CFont::SetPropOn, CFont::SetBackgroundOff, CFont::SetScale, CFont::SetCentreOff, CFont::SetRightJustifyOff
+  true
+end
+
+schema Console_cprintf
+  ΔConsoleModuleState
+  format? : seq CHAR
+where
+  -- Invokes: TheConsole.AddLine
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ConsoleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 108
+end

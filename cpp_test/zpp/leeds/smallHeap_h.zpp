@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: smallHeap (leeds)
+-- Source File(s): leeds/smallHeap.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include memoryManager.zpp  (from "memoryManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cSmallHeap
+  base__cMemoryManager  -- inherits base schema
+  bLocked : 𝔹
+  bUnk : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cSmallHeap_cSmallHeap
+  ΔcSmallHeap
+where
+  -- Declared member operation cSmallHeap::cSmallHeap()
+  true
+end
+
+schema cSmallHeap_Lock_2
+  ΔcSmallHeap
+where
+  -- Declared member operation cSmallHeap::Lock()
+  true
+end
+
+schema cSmallHeap_Unlock_3
+  ΔcSmallHeap
+where
+  -- Declared member operation cSmallHeap::Unlock()
+  true
+end
+
+schema cSmallHeap_IsLocked_4
+  ΞcSmallHeap
+  result! : 𝔹
+where
+  -- Declared member operation cSmallHeap::IsLocked()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema smallHeap_IsLocked
+  ΞsmallHeapModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bLocked
+  true
+end

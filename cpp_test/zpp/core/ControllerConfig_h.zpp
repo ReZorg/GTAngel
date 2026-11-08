@@ -1,0 +1,353 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ControllerConfig (core)
+-- Source File(s): core/ControllerConfig.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include dinput.zpp  (from "dinput.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DIRECTINPUT_VERSION : seq CHAR  -- #define DIRECTINPUT_VERSION 0x0800
+JOY_BUTTONS : ℕ  -- #define JOY_BUTTONS 16
+MAX_BUTTONS : seq CHAR  -- #define MAX_BUTTONS (JOY_BUTTONS+1)
+ACTIONNAME_LENGTH : ℕ  -- #define ACTIONNAME_LENGTH 40
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eControllerType ::= KEYBOARD | OPTIONAL_EXTRA | MOUSE | JOYSTICK | MAX_CONTROLLERTYPES
+  -- val(KEYBOARD) = 0
+
+e_ControllerAction ::= PED_FIREWEAPON | PED_CYCLE_WEAPON_RIGHT | PED_CYCLE_WEAPON_LEFT | GO_FORWARD | GO_BACK | GO_LEFT | GO_RIGHT | PED_SNIPER_ZOOM_IN | PED_SNIPER_ZOOM_OUT | VEHICLE_ENTER_EXIT | CAMERA_CHANGE_VIEW_ALL_SITUATIONS | PED_JUMPING | PED_SPRINT | PED_LOOKBEHIND | PED_DUCK | PED_ANSWER_PHONE | VEHICLE_BRAKE | VEHICLE_CHANGE_RADIO_STATION | VEHICLE_HORN | TOGGLE_SUBMISSIONS | VEHICLE_HANDBRAKE | PED_1RST_PERSON_LOOK_LEFT | PED_1RST_PERSON_LOOK_RIGHT | VEHICLE_LOOKLEFT | VEHICLE_LOOKRIGHT | VEHICLE_LOOKBEHIND | VEHICLE_TURRETLEFT | VEHICLE_TURRETRIGHT | VEHICLE_TURRETUP | VEHICLE_TURRETDOWN | PED_CYCLE_TARGET_LEFT | PED_CYCLE_TARGET_RIGHT | PED_CENTER_CAMERA_BEHIND_PLAYER | PED_LOCK_TARGET | NETWORK_TALK | PED_1RST_PERSON_LOOK_UP | PED_1RST_PERSON_LOOK_DOWN | _CONTROLLERACTION_36 | TOGGLE_DPAD | SWITCH_DEBUG_CAM_ON | TAKE_SCREEN_SHOT | SHOW_MOUSE_POINTER_TOGGLE | UNKNOWN_ACTION | MAX_CONTROLLERACTIONS
+  -- val(PED_FIREWEAPON) = 0
+
+e_ControllerActionType ::= ACTIONTYPE_1RSTPERSON | ACTIONTYPE_3RDPERSON | ACTIONTYPE_VEHICLE | ACTIONTYPE_VEHICLE_3RDPERSON | ACTIONTYPE_COMMON | ACTIONTYPE_1RST3RDPERSON | ACTIONTYPE_NONE
+  -- val(ACTIONTYPE_1RSTPERSON) = 0
+
+eContSetOrder ::= SETORDER_NONE | SETORDER_1 | SETORDER_2 | SETORDER_3 | SETORDER_4 | MAX_SETORDERS
+  -- val(SETORDER_NONE) = 0
+
+eSimCheckers ::= SIM_X1 | SIM_Y1 | SIM_X2 | SIM_Y2 | MAX_SIMS
+  -- val(SIM_X1) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema GlfwJoyState
+  id : ℤ
+  isGamepad : 𝔹
+  numButtons : ℕ
+  buttons : ℙ ℕ
+  mappedButtons : seq 𝔹  -- bounded array [17]
+where
+  numButtons ≥ 0
+  #buttons ≤ 1
+  #mappedButtons = 17
+end
+
+schema CControllerConfigManager
+  m_ContSetOrder : ℤ
+  m_bFirstCapture : 𝔹
+  m_NewState : GlfwJoyState
+  m_aButtonStates : seq 𝔹  -- bounded array [MAX_BUTTONS]
+  m_bMouseAssociated : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CControllerConfigManager_tControllerConfigBind
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::tControllerConfigBind()
+  true
+end
+
+schema CControllerConfigManager_MakeControllerActionsBlank_2
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::MakeControllerActionsBlank()
+  true
+end
+
+schema CControllerConfigManager_GetJoyButtonJustDown_3
+  ΔCControllerConfigManager
+  result! : ℤ
+where
+  -- Declared member operation CControllerConfigManager::GetJoyButtonJustDown()
+  true
+end
+
+schema CControllerConfigManager_SaveSettings_4
+  ΔCControllerConfigManager
+  file? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::SaveSettings(int32 file)
+  true
+end
+
+schema CControllerConfigManager_LoadSettings_5
+  ΔCControllerConfigManager
+  file? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::LoadSettings(int32 file)
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfiguration_6
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::InitDefaultControlConfiguration()
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfigMouse_7
+  ΔCControllerConfigManager
+  availableButtons? : CMouseControllerState
+where
+  -- Declared member operation CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerState const &availableButtons)
+  true
+end
+
+schema CControllerConfigManager_InitDefaultControlConfigJoyPad_8
+  ΔCControllerConfigManager
+  buttons? : ℕ
+where
+  -- Declared member operation CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
+  true
+end
+
+schema CControllerConfigManager_InitialiseControllerActionNameArray_9
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::InitialiseControllerActionNameArray()
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyInConfigMenus_ButtonDown_10
+  ΔCControllerConfigManager
+  button? : ℤ
+  padnumber? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, int32 padnumber)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_11
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown(int32 button, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_Driving_12
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_Driving(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_FirstPersonOnly_13
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_ThirdPersonOnly_14
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly_15
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_AllStates_16
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_AllStates(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonDown_VehicleAndThirdPersonOnly_17
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonDown_VehicleAndThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_UpdateJoyInConfigMenus_ButtonUp_18
+  ΔCControllerConfigManager
+  button? : ℤ
+  padnumber? : ℤ
+where
+  -- Declared member operation CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(int32 button, int32 padnumber)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonUp_19
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonUp(int32 button, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_AffectControllerStateOn_ButtonUp_All_Player_States_20
+  ΔCControllerConfigManager
+  button? : ℤ
+  type? : eControllerType
+  state? : CControllerState
+where
+  -- Declared member operation CControllerConfigManager::AffectControllerStateOn_ButtonUp_All_Player_States(int32 button, eControllerType type, CControllerState &state)
+  true
+end
+
+schema CControllerConfigManager_AffectPadFromKeyBoard_21
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::AffectPadFromKeyBoard()
+  true
+end
+
+schema CControllerConfigManager_AffectPadFromMouse_22
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::AffectPadFromMouse()
+  true
+end
+
+schema CControllerConfigManager_ClearSimButtonPressCheckers_23
+  ΔCControllerConfigManager
+where
+  -- Declared member operation CControllerConfigManager::ClearSimButtonPressCheckers()
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyboardKeyDown_24
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_GetIsKeyboardKeyJustDown_25
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_GetIsMouseButtonDown_26
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsMouseButtonDown(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_GetIsMouseButtonUp_27
+  ΔCControllerConfigManager
+  keycode? : RsKeyCodes
+  result! : 𝔹
+where
+  -- Declared member operation CControllerConfigManager::GetIsMouseButtonUp(RsKeyCodes keycode)
+  true
+end
+
+schema CControllerConfigManager_DeleteMatchingCommonControls_28
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::DeleteMatchingCommonControls(e_ControllerAction action, int32 key, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching3rdPersonControls_29
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::DeleteMatching3rdPersonControls(e_ControllerAction action, int32 key, eControllerType type)
+  true
+end
+
+schema CControllerConfigManager_DeleteMatching1rst3rdPersonControls_30
+  ΔCControllerConfigManager
+  action? : e_ControllerAction
+  key? : ℤ
+  type? : eControllerType
+where
+  -- Declared member operation CControllerConfigManager::DeleteMatching1rst3rdPersonControls(e_ControllerAction action, int32 key, eControllerType type)
+  true
+end
+
+schema tControllerConfigBind
+  m_Key : ℤ
+  m_ContSetOrder : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tControllerConfigBind_tControllerConfigBind
+  ΔtControllerConfigBind
+where
+  -- Declared member operation tControllerConfigBind::tControllerConfigBind()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ControllerConfig_tControllerConfigBind
+  ΔControllerConfigModuleState
+where
+  -- State update: m_Key' = 0
+  -- State update: m_ContSetOrder' = 0
+  true
+end

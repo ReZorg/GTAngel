@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RenderBuffer (renderer)
+-- Source File(s): renderer/RenderBuffer.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TEMPBUFFERVERTSIZE : ℕ  -- #define TEMPBUFFERVERTSIZE 512
+TEMPBUFFERINDEXSIZE : ℕ  -- #define TEMPBUFFERINDEXSIZE 1024
+TempBufferRenderVertices : ℝ  -- #define TempBufferRenderVertices (TempVertexBuffer.im3d)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema RenderBuffer
+  VerticesToBeStored : ℤ
+  IndicesToBeStored : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema RenderBuffer_ClearRenderBuffer
+  ΔRenderBuffer
+where
+  -- Declared member operation RenderBuffer::ClearRenderBuffer(void)
+  true
+end
+
+schema RenderBuffer_StartStoring_2
+  ΔRenderBuffer
+  numIndices? : ℤ
+  numVertices? : ℤ
+  indexStart? : Ref[RwImVertexIndex]
+  vertexStart? : Ref[RwIm3DVertex]
+where
+  -- Declared member operation RenderBuffer::StartStoring(int numIndices, int numVertices, RwImVertexIndex **indexStart, RwIm3DVertex **vertexStart)
+  true
+end
+
+schema RenderBuffer_StopStoring_3
+  ΔRenderBuffer
+where
+  -- Declared member operation RenderBuffer::StopStoring(void)
+  true
+end
+
+schema RenderBuffer_RenderStuffInBuffer_4
+  ΔRenderBuffer
+where
+  -- Declared member operation RenderBuffer::RenderStuffInBuffer(void)
+  true
+end
+
+schema VertexBufferUnion
+  im2d : seq RwIm2DVertex  -- bounded array [TEMPBUFFERVERTSIZE]
+  im3d : seq RwIm3DVertex  -- bounded array [TEMPBUFFERVERTSIZE]
+where
+  instance_addr ∈ ADDRESS
+end

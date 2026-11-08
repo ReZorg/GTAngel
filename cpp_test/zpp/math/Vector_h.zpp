@@ -1,0 +1,423 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Vector (math)
+-- Source File(s): math/Vector.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CVector
+  RwV3d  -- inherits base schema
+  w : ℝ
+  this : Ref[return]
+where
+  #this ≤ 1
+end
+
+schema CVector_CVector
+  ΔCVector
+where
+  -- Declared member operation CVector::CVector(void)
+  true
+end
+
+schema CVector_CVector_2
+  ΔCVector
+  v? : RwV3d
+  result! : ANY
+where
+  -- Declared member operation CVector::CVector(const RwV3d &v)
+  true
+end
+
+schema CVector_Heading_3
+  ΞCVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::Heading(void)
+  true
+end
+
+schema CVector_Magnitude_4
+  ΞCVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::Magnitude(void)
+  true
+end
+
+schema CVector_MagnitudeSqr_5
+  ΞCVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::MagnitudeSqr(void)
+  true
+end
+
+schema CVector_Magnitude2D_6
+  ΞCVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::Magnitude2D(void)
+  true
+end
+
+schema CVector_MagnitudeSqr2D_7
+  ΞCVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::MagnitudeSqr2D(void)
+  true
+end
+
+schema CVector_Normalise_8
+  ΔCVector
+  result! : void
+where
+  -- Declared member operation CVector::Normalise(void)
+  true
+end
+
+schema CVector_Normalise2D_9
+  ΔCVector
+where
+  -- Declared member operation CVector::Normalise2D(void)
+  true
+end
+
+schema CVector_RecipSqrt_10
+  ΔCVector
+  arg_1? : sq
+  result! : ℝ
+where
+  -- Declared member operation CVector::RecipSqrt(sq)
+  true
+end
+
+schema CVector_operator_11
+  ΔCVector
+  right? : CVector
+  result! : CVector
+where
+  -- Declared member operation CVector::operator+=(CVector const &right)
+  true
+end
+
+schema CVector_operator_12
+  ΔCVector
+  right? : CVector
+  result! : CVector
+where
+  -- Declared member operation CVector::operator-=(CVector const &right)
+  true
+end
+
+schema CVector_operator_13
+  ΔCVector
+  right? : ℝ
+  result! : CVector
+where
+  -- Declared member operation CVector::operator*=(float right)
+  true
+end
+
+schema CVector_operator_14
+  ΔCVector
+  right? : ℝ
+  result! : CVector
+where
+  -- Declared member operation CVector::operator/=(float right)
+  true
+end
+
+schema CVector_operator_15
+  ΞCVector
+  result! : CVector
+where
+  -- Declared member operation CVector::operator-()
+  true
+end
+
+schema CVector_operator_16
+  ΞCVector
+  right? : CVector
+  result! : bool
+where
+  -- Declared member operation CVector::operator==(CVector const &right)
+  true
+end
+
+schema CVector_operator_17
+  ΞCVector
+  right? : CVector
+  result! : bool
+where
+  -- Declared member operation CVector::operator!=(CVector const &right)
+  true
+end
+
+schema CVector_IsZero_18
+  ΞCVector
+  result! : bool
+where
+  -- Declared member operation CVector::IsZero(void)
+  true
+end
+
+schema CVector_Heading_19
+  ΞCVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::Heading(void)
+  true
+end
+
+schema CVector_operator_20
+  ΔCVector
+  right? : CVector
+  result! : bool
+where
+  -- Declared member operation CVector::operator==(CVector const &right)
+  true
+end
+
+schema CVector_operator_21
+  ΔCVector
+  left? : CVector
+  right? : CVector
+  result! : CVector
+where
+  -- Declared member operation CVector::operator+(const CVector &left, const CVector &right)
+  true
+end
+
+schema CVector_operator_22
+  ΔCVector
+  left? : CVector
+  right? : CVector
+  result! : CVector
+where
+  -- Declared member operation CVector::operator-(const CVector &left, const CVector &right)
+  true
+end
+
+schema CVector_operator_23
+  ΔCVector
+  left? : CVector
+  right? : ℝ
+  result! : CVector
+where
+  -- Declared member operation CVector::operator*(const CVector &left, float right)
+  true
+end
+
+schema CVector_operator_24
+  ΔCVector
+  left? : ℝ
+  right? : CVector
+  result! : CVector
+where
+  -- Declared member operation CVector::operator*(float left, const CVector &right)
+  true
+end
+
+schema CVector_operator_25
+  ΔCVector
+  left? : CVector
+  right? : ℝ
+  result! : CVector
+where
+  -- Declared member operation CVector::operator/(const CVector &left, float right)
+  true
+end
+
+schema CVector_DotProduct_26
+  ΔCVector
+  v1? : CVector
+  v2? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::DotProduct(const CVector &v1, const CVector &v2)
+  true
+end
+
+schema CVector_CrossProduct_27
+  ΔCVector
+  v1? : CVector
+  v2? : CVector
+  result! : CVector
+where
+  -- Declared member operation CVector::CrossProduct(const CVector &v1, const CVector &v2)
+  true
+end
+
+schema CVector_Distance_28
+  ΔCVector
+  v1? : CVector
+  v2? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::Distance(const CVector &v1, const CVector &v2)
+  true
+end
+
+schema CVector_Distance2D_29
+  ΔCVector
+  v1? : CVector
+  v2? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CVector::Distance2D(const CVector &v1, const CVector &v2)
+  true
+end
+
+schema CVector_Sqrt_30
+  ΔCVector
+  y? : Ref[xx___y]
+  result! : return
+where
+  -- Declared member operation CVector::Sqrt(x*x + y*y)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Vector_CVector
+  ΔVectorModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Vector_CVector_2
+  ΔVectorModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: x' = x
+  -- State update: y' = y
+  -- State update: z' = z
+  true
+end
+
+schema Vector_CVector_3
+  ΔVectorModuleState
+  v? : RwV3d
+where
+  -- State update: x' = v.x
+  -- State update: y' = v.y
+  -- State update: z' = v.z
+  true
+end
+
+schema Vector_Heading
+  ΞVectorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = x == 0.0f && y == 0.0f ? 0.0f : Atan2(-x, y)
+  true
+end
+
+schema Vector_Magnitude
+  ΞVectorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = Sqrt(x*x + y*y + z*z)
+  true
+end
+
+schema Vector_MagnitudeSqr
+  ΞVectorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = x*x + y*y + z*z
+  true
+end
+
+schema Vector_Magnitude2D
+  ΞVectorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = Sqrt(x*x + y*y)
+  true
+end
+
+schema Vector_MagnitudeSqr2D
+  ΞVectorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = x*x + y*y
+  true
+end
+
+schema Vector_Normalise2D
+  ΔVectorModuleState
+where
+  -- State update: sq' = MagnitudeSqr2D()
+  -- State update: invsqrt' = RecipSqrt(sq)
+  true
+end
+
+schema Vector_operator
+  ΞVectorModuleState
+  result! : CVector
+where
+  -- Return postcondition: result! = CVector(-x, -y, -z)
+  true
+end
+
+schema Vector_operator_2
+  ΞVectorModuleState
+  right? : CVector
+  result! : 𝔹
+where
+  -- Return postcondition: result! = x == right.x && y == right.y && z == right.z
+  true
+end
+
+schema Vector_operator_3
+  ΞVectorModuleState
+  right? : CVector
+  result! : 𝔹
+where
+  -- Return postcondition: result! = x != right.x || y != right.y || z != right.z
+  true
+end
+
+schema Vector_IsZero
+  ΞVectorModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = x == 0.0f && y == 0.0f && z == 0.0f
+  true
+end
+
+schema Vector_Heading_2
+  ΞVectorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = Atan2(-x, y)
+  true
+end
+
+schema Vector_operator_4
+  ΔVectorModuleState
+  right? : CVector
+  result! : 𝔹
+where
+  -- State update: x' = v2.x - v1.x
+  -- State update: y' = v2.y - v1.y
+  -- Return postcondition: result! = CVector(left.x + right.x, left.y + right.y, left.z + right.z)
+  -- Return postcondition: result! = CVector(left.x - right.x, left.y - right.y, left.z - right.z)
+  -- Return postcondition: result! = CVector(left.x * right, left.y * right, left.z * right)
+  true
+end

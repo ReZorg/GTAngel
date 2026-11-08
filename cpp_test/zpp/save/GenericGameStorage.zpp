@@ -1,0 +1,477 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: GenericGameStorage (save)
+-- Source File(s): save/GenericGameStorage.cpp, save/GenericGameStorage.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include main.zpp  (from "main.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarGen.zpp  (from "CarGen.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Date.zpp  (from "Date.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include PCSave.zpp  (from "PCSave.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include Script.zpp  (from "Script.h")
+-- include SetPieces.zpp  (from "SetPieces.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include TimeStep.zpp  (from "TimeStep.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include Game.zpp  (from "Game.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+BLOCK_COUNT : ℕ  -- #define BLOCK_COUNT 22
+SIZE_OF_SIMPLEVARS : seq CHAR  -- #define SIZE_OF_SIMPLEVARS 0xE8
+SLOT_COUNT : seq CHAR  -- #define SLOT_COUNT (8)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+GenericGameStorage_Enum_1 ::= SAVE_TYPE_NONE | SAVE_TYPE_32_BIT | SAVE_TYPE_64_BIT | SAVE_TYPE_MSVC | SAVE_TYPE_GCC | SAVE_TYPE_STEAM
+  -- val(SAVE_TYPE_NONE) = 0
+  -- val(SAVE_TYPE_32_BIT) = 1
+  -- val(SAVE_TYPE_64_BIT) = 2
+  -- val(SAVE_TYPE_MSVC) = 4
+  -- val(SAVE_TYPE_GCC) = 8
+  -- val(SAVE_TYPE_STEAM) = 16
+
+GenericGameStorage_Enum_2 ::= SAVE_TYPE_NONE | SAVE_TYPE_32_BIT | SAVE_TYPE_64_BIT | SAVE_TYPE_MSVC | SAVE_TYPE_GCC
+  -- val(SAVE_TYPE_NONE) = 0
+  -- val(SAVE_TYPE_32_BIT) = 1
+  -- val(SAVE_TYPE_64_BIT) = 2
+  -- val(SAVE_TYPE_MSVC) = 4
+  -- val(SAVE_TYPE_GCC) = 8
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema GenericGameStorage_InitRadioStationPositionList
+  ΔGenericGameStorageModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema GenericGameStorage_GetSavedRadioStationPosition
+  ΔGenericGameStorageModuleState
+  station? : ℤ
+where
+  -- Return postcondition: result! = RadioStationPosition[station]
+  true
+end
+
+schema GenericGameStorage_PopulateRadioStationPositionList
+  ΔGenericGameStorageModuleState
+where
+  -- Invokes: DMAudio.GetRadioPosition
+  true
+end
+
+schema GenericGameStorage_GenericLoad
+  ΔGenericGameStorageModuleState
+where
+  -- State update: CheckSum' = 0
+  -- State update: size' = align4bytes(size)
+  -- State update: buf' = (work_buff + 0x40)
+  -- State update: qs' = saveSize >> 24
+  -- State update: currPad' = CPad::GetPad(0)
+  -- State update: TheCamera.CarZoomIndicator' = f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::ResetCheats, TheCamera.GetMatrix, CPad::GetPad, CTimer::GetTimeInMilliseconds, CProjectileInfo::RemoveAllProjectiles
+  true
+end
+
+schema GenericGameStorage_ReadInSizeofSaveFileBuffer
+  ΔGenericGameStorageModuleState
+  file? : ℤ
+  size? : ℕ
+where
+  -- State update: file' = CFileMgr::OpenFile(LoadFileName, "rb")
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_OPEN
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_READ
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_CLOSE
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::GetErrorReadWrite
+  true
+end
+
+schema GenericGameStorage_ReadDataFromFile
+  ΔGenericGameStorageModuleState
+  file? : ℤ
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_OPEN
+  -- State update: read_size' = CFileMgr::Read(file, (const char*)buf, size)
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_READ
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_CLOSE
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CFileMgr::Read, CFileMgr::GetErrorReadWrite
+  true
+end
+
+schema GenericGameStorage_CloseFile
+  ΔGenericGameStorageModuleState
+  file? : ℤ
+where
+  -- Return postcondition: result! = CFileMgr::CloseFile(file) == 0
+  -- Invokes: CFileMgr::CloseFile
+  true
+end
+
+schema GenericGameStorage_DoGameSpecificStuffAfterSucessLoad
+  ΔGenericGameStorageModuleState
+where
+  -- State update: StillToFadeOut' = true
+  -- State update: JustLoadedDontFadeInYet' = true
+  -- Invokes: CCollision::SortOutCollisionAfterLoad, CStreaming::LoadSceneCollision, TheCamera.GetPosition, CStreaming::LoadScene, CGame::TidyUpMemory
+  true
+end
+
+schema GenericGameStorage_CheckSlotDataValid
+  ΔGenericGameStorageModuleState
+  slot? : ℤ
+where
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_SUCCESSFUL
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_DATA_INVALID
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CStreaming::DeleteAllRwObjects
+  true
+end
+
+schema GenericGameStorage_MakeSpaceForSizeInBufferPointer
+  ΔGenericGameStorageModuleState
+  presize? : ℙ ℕ
+  buf? : ℙ ℕ
+  postsize? : ℙ ℕ
+where
+  -- State update: presize' = buf
+  -- State update: postsize' = buf
+  true
+end
+
+schema GenericGameStorage_CopySizeAndPreparePointer
+  ΔGenericGameStorageModuleState
+  buf? : ℙ ℕ
+  postbuf? : ℙ ℕ
+  postbuf2? : ℙ ℕ
+  unused? : ℕ
+  size? : ℕ
+where
+  -- State update: size' = align4bytes(size)
+  -- State update: postbuf' = postbuf2
+  true
+end
+
+schema GenericGameStorage_DoGameSpecificStuffBeforeSave
+  ΔGenericGameStorageModuleState
+where
+  -- State update: ped' = FindPlayerPed()
+  -- State update: ped.m_fCurrentStamina' = ped.m_fMaxStamina
+  -- Invokes: CGameLogic::PassTime, CGame::TidyUpMemory
+  true
+end
+
+schema GenericGameStorage_MakeValidSaveName
+  ΔGenericGameStorageModuleState
+  slot? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema GenericGameStorage_GetSavedGameDateAndTime
+  ΔGenericGameStorageModuleState
+  slot? : ℤ
+where
+  -- Return postcondition: result! = SlotSaveDate[slot]
+  true
+end
+
+schema GenericGameStorage_GetNameOfSavedGame
+  ΔGenericGameStorageModuleState
+  slot? : ℤ
+where
+  -- Return postcondition: result! = SlotFileName[slot]
+  true
+end
+
+schema GenericGameStorage_CheckDataNotCorrupt
+  ΔGenericGameStorageModuleState
+  slot? : ℤ
+  name? : seq CHAR
+where
+  -- State update: blocknum' = 0
+  -- State update: level' = LEVEL_GENERIC
+  -- State update: CheckSum' = 0
+  -- State update: bytes_processed' = 0
+  -- State update: file' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: blocksize' = sizeof(work_buff) - sizeof(uint32)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CFileMgr::OpenFile
+  true
+end
+
+schema GenericGameStorage_RestoreForStartLoad
+  ΔGenericGameStorageModuleState
+where
+  -- State update: file' = CFileMgr::OpenFile(LoadFileName, "rb")
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_OPEN
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_READ
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_CLOSE
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_LOAD_CLOSE
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::GetErrorReadWrite, TheCamera.GetMatrix, CStreaming::RemoveUnusedBigBuildings, CStreaming::RemoveUnusedBuildings
+  true
+end
+
+schema GenericGameStorage_align4bytes
+  ΔGenericGameStorageModuleState
+  size? : ℤ
+where
+  -- Return postcondition: result! = (size + 3) & 0xFFFFFFFC
+  true
+end
+
+schema GenericGameStorage_GetSaveType
+  ΔGenericGameStorageModuleState
+  savename? : seq CHAR
+where
+  -- State update: save_type' = SAVE_TYPE_NONE
+  -- State update: file' = CFileMgr::OpenFile(savename, "rb")
+  -- State update: buf' = work_buff
+  -- State update: buf' = work_buff2
+  -- Return postcondition: result! = save_type
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema GenericGameStorage_FixSimpleVarsAndScripts
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: read' = *size
+  -- State update: written' = *size - (sizeof(int8) + 3)
+  -- State update: pre_steam' = 0x40 + sizeof(int32) + sizeof(int32) + sizeof(float) * 3
+  -- State update: post_steam' = *size - (sizeof(int8) + 3) - pre_steam
+  true
+end
+
+schema GenericGameStorage_FixGarages
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: written' = 5240
+  -- State update: read' = 5040
+  -- State update: read' = 5808
+  -- State update: read' = 5880
+  true
+end
+
+schema GenericGameStorage_FixCranes
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: read' = 2 * sizeof(uint32) + 0x480
+  -- State update: written' = 2 * sizeof(uint32) + 0x3E0
+  -- State update: size' = 0
+  -- State update: size' = written
+  true
+end
+
+schema GenericGameStorage_FixPickups
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: size' = 0
+  -- State update: size' = written
+  true
+end
+
+schema GenericGameStorage_FixPhoneInfo
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: read' = 0x1138
+  -- State update: written' = 0xA30
+  -- State update: size' = 0
+  -- State update: size' = written
+  true
+end
+
+schema GenericGameStorage_FixParticles
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: read' = 0xA0 * (numObjects + 1) + 4
+  -- State update: written' = 0x88 * (numObjects + 1) + 4
+  -- State update: size' = 0
+  -- State update: size' = written
+  true
+end
+
+schema GenericGameStorage_FixScriptPaths
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: read' = 0x108
+  -- State update: written' = 0x9C
+  -- State update: size' = 0
+  -- State update: size' = written
+  true
+end
+
+schema GenericGameStorage_FixSave
+  ΔGenericGameStorageModuleState
+  slot? : ℤ
+  save_type? : ℕ
+where
+  -- State update: success' = false
+  -- State update: file_in' = CFileMgr::OpenFile(savename_bak, "rb")
+  -- State update: file_out' = CFileMgr::OpenFileForWriting(savename)
+  -- State update: CheckSum' = 0
+  -- State update: totalSize' = 0
+  -- State update: size' = align4bytes(size)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = success
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::OpenFileForWriting, CFileMgr::Read, PcSaveHelper.PcClassSaveRoutine, CFileMgr::Write
+  true
+end
+
+schema GenericGameStorage_DisplaySaveResult
+  ΔGenericGameStorageModuleState
+  unk? : ℤ
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema GenericGameStorage_SaveGameForPause
+  ΔGenericGameStorageModuleState
+  type? : ℤ
+  result! : 𝔹
+where
+  -- State update: WaitForSave' = 0
+  -- State update: IsQuickSave' = type
+  -- State update: MissionStartTime' = 0
+  -- State update: res' = PcSaveHelper.SaveSlot(PAUSE_SAVE_SLOT)
+  -- State update: IsQuickSave' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, PcSaveHelper.SaveSlot, PcSaveHelper.PopulateSlotInfo
+  true
+end
+
+schema GenericGameStorage_FixZones
+  ΔGenericGameStorageModuleState
+  save_type? : ℕ
+  buf? : ℙ ℕ
+  buf2? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  -- State update: buf2_start' = buf2
+  -- State update: read' = 11300
+  -- State update: written' = 10100
+  -- State update: hdr_size' = 10100 - (1 * 4 + 4)
+  -- State update: size' = 0
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema GenericGameStorageModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1606
+end

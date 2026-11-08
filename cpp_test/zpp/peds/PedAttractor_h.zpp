@@ -1,0 +1,1073 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedAttractor (peds)
+-- Source File(s): peds/PedAttractor.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include vector.zpp  (from "vector")
+-- include 2dEffect.zpp  (from "2dEffect.h")
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUM_ATTRACTORS_FOR_ICECREAM_VAN : ℕ  -- #define NUM_ATTRACTORS_FOR_ICECREAM_VAN 4
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+ePedAttractorType ::= ATTRACTOR_ATM | ATTRACTOR_SEAT | ATTRACTOR_STOP | ATTRACTOR_PIZZA | ATTRACTOR_SHELTER | ATTRACTOR_ICECREAM
+  -- val(ATTRACTOR_ATM) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CVehicleToEffect
+  m_pVehicle : Ref[CVehicle]
+  m_effects : seq C2dEffect  -- bounded array [NUM_ATTRACTORS_FOR_ICECREAM_VAN]
+where
+  #m_pVehicle ≤ 1
+end
+
+schema CVehicleToEffect_CVehicleToEffect
+  ΔCVehicleToEffect
+  pVehicle? : Ref[CVehicle]
+where
+  -- Declared member operation CVehicleToEffect::CVehicleToEffect(CVehicle* pVehicle)
+  true
+end
+
+schema CVehicleToEffect_ChooseEffect_2
+  ΞCVehicleToEffect
+  pos? : CVector
+  result! : Ref[C2dEffect]
+where
+  -- Declared member operation CVehicleToEffect::ChooseEffect(const CVector& pos)
+  true
+end
+
+schema CVehicleToEffect_From_3
+  ΔCVehicleToEffect
+  other? : CVehicleToEffect
+  result! : CVehicleToEffect
+where
+  -- Declared member operation CVehicleToEffect::From(const CVehicleToEffect& other)
+  true
+end
+
+schema CVehicleToEffect_operator_4
+  ΔCVehicleToEffect
+  other? : CVehicleToEffect
+  result! : CVehicleToEffect
+where
+  -- Declared member operation CVehicleToEffect::operator=(const CVehicleToEffect& other)
+  true
+end
+
+schema CVehicleToEffect_CVehicleToEffect_5
+  ΔCVehicleToEffect
+  result! : ANY
+where
+  -- Declared member operation CVehicleToEffect::CVehicleToEffect()
+  true
+end
+
+schema CVehicleToEffect_GetVehicle_6
+  ΞCVehicleToEffect
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CVehicleToEffect::GetVehicle()
+  true
+end
+
+schema CVehicleToEffect_HasThisEffect_7
+  ΞCVehicleToEffect
+  pEffect? : Ref[C2dEffect]
+  result! : bool
+where
+  -- Declared member operation CVehicleToEffect::HasThisEffect(C2dEffect* pEffect)
+  true
+end
+
+schema CVehicleToEffect_GetEffect_8
+  ΞCVehicleToEffect
+  i? : ℤ
+  result! : Ref[C2dEffect]
+where
+  -- Declared member operation CVehicleToEffect::GetEffect(int32 i)
+  true
+end
+
+schema CPedAttractorManager
+  vAtmAttractors : Ref[std__vector_CPedAttractor]
+  vSeatAttractors : Ref[std__vector_CPedAttractor]
+  vStopAttractors : Ref[std__vector_CPedAttractor]
+  vPizzaAttractors : Ref[std__vector_CPedAttractor]
+  vShelterAttractors : Ref[std__vector_CPedAttractor]
+  vIceCreamAttractors : Ref[std__vector_CPedAttractor]
+  vVehicleToEffect : std__vector_CVehicleToEffect
+where
+  #vAtmAttractors ≤ 1
+  #vSeatAttractors ≤ 1
+  #vStopAttractors ≤ 1
+  #vPizzaAttractors ≤ 1
+  #vShelterAttractors ≤ 1
+  #vIceCreamAttractors ≤ 1
+end
+
+schema CPedAttractorManager_RegisterPedWithAttractor
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  result! : Ref[CPedAttractor]
+where
+  -- Declared member operation CPedAttractorManager::RegisterPedWithAttractor(CPed* pPed, C2dEffect* pEffect, const CMatrix& matrix)
+  true
+end
+
+schema CPedAttractorManager_RegisterPed_2
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : Ref[CPedAttractor]
+where
+  -- Declared member operation CPedAttractorManager::RegisterPed(CPed* pPed, C2dEffect* pEffect, const CMatrix& matrix, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_BroadcastArrival_3
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::BroadcastArrival(CPed* pPed, CPedAttractor* pAttractor)
+  true
+end
+
+schema CPedAttractorManager_BroadcastArrival_4
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::BroadcastArrival(CPed* pPed, CPedAttractor* pAttractor, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_GetEffectForIceCreamVan_5
+  ΔCPedAttractorManager
+  pVehicle? : Ref[CVehicle]
+  pos? : CVector
+  result! : Ref[C2dEffect]
+where
+  -- Declared member operation CPedAttractorManager::GetEffectForIceCreamVan(CVehicle* pVehicle, const CVector& pos)
+  true
+end
+
+schema CPedAttractorManager_IsApproachable_6
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  arg_3? : ℤ
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsApproachable(C2dEffect* pEffect, const CMatrix& matrix, int32, CPed* pPed)
+  true
+end
+
+schema CPedAttractorManager_RemoveIceCreamVanEffects_7
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+where
+  -- Declared member operation CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
+  true
+end
+
+schema CPedAttractorManager_HasEmptySlot_8
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::HasEmptySlot(const C2dEffect* pEffect)
+  true
+end
+
+schema CPedAttractorManager_FindAssociatedAttractor_9
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : Ref[CPedAttractor]
+where
+  -- Declared member operation CPedAttractorManager::FindAssociatedAttractor(const C2dEffect* pEffect, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_IsInQueue_10
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsInQueue(CPed* pPed, CPedAttractor* pAttractor)
+  true
+end
+
+schema CPedAttractorManager_IsInQueue_11
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsInQueue(CPed* pPed, CPedAttractor* pAttractor, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_IsAtHeadOfQueue_12
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsAtHeadOfQueue(CPed* pPed, CPedAttractor* pAttractor)
+  true
+end
+
+schema CPedAttractorManager_IsAtHeadOfQueue_13
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsAtHeadOfQueue(CPed* pPed, CPedAttractor* pAttractor, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_BroadcastDeparture_14
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::BroadcastDeparture(CPed* pPed, CPedAttractor* pAttractor)
+  true
+end
+
+schema CPedAttractorManager_BroadcastDeparture_15
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::BroadcastDeparture(CPed* pPed, CPedAttractor* pAttractor, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_DeRegisterPed_16
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::DeRegisterPed(CPed* pPed, CPedAttractor* pAttractor)
+  true
+end
+
+schema CPedAttractorManager_DeRegisterPed_17
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  pAttractor? : Ref[CPedAttractor]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::DeRegisterPed(CPed* pPed, CPedAttractor* pAttractor, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_IsPedRegisteredWithEffect_18
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsPedRegisteredWithEffect(CPed* pPed)
+  true
+end
+
+schema CPedAttractorManager_IsPedRegistered_19
+  ΔCPedAttractorManager
+  pPed? : Ref[CPed]
+  vecAttractors? : Ref[std__vector_CPedAttractor]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractorManager::IsPedRegistered(CPed* pPed, std::vector<CPedAttractor*>& vecAttractors)
+  true
+end
+
+schema CPedAttractorManager_GetIceCreamVanForEffect_20
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CPedAttractorManager::GetIceCreamVanForEffect(C2dEffect* pEffect)
+  true
+end
+
+schema CPedAttractorManager_ComputeEffectPos_21
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  pos? : CVector
+where
+  -- Declared member operation CPedAttractorManager::ComputeEffectPos(const C2dEffect* pEffect, const CMatrix& matrix, CVector& pos)
+  true
+end
+
+schema CPedAttractorManager_ComputeEffectQueueDir_22
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  pos? : CVector
+where
+  -- Declared member operation CPedAttractorManager::ComputeEffectQueueDir(const C2dEffect* pEffect, const CMatrix& matrix, CVector& pos)
+  true
+end
+
+schema CPedAttractorManager_ComputeEffectUseDir_23
+  ΔCPedAttractorManager
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  pos? : CVector
+where
+  -- Declared member operation CPedAttractorManager::ComputeEffectUseDir(const C2dEffect* pEffect, const CMatrix& matrix, CVector& pos)
+  true
+end
+
+schema CPedAttractor
+  p2dEffect : Ref[C2dEffect]
+  vApproachingQueue : Ref[std__vector_CPed]
+  vWaitingQueue : Ref[std__vector_CPed]
+  m_nMaxPedsInAttractor : ℤ
+  m_fQueueDistance : ℝ
+  m_fTimeInWaitQueue : ℝ
+  m_fTimeInApproachingQueue : ℝ
+  m_fDistanceToUseAttractor : ℝ
+  m_fAcceptableHeading : ℝ
+  m_fMaxPositionDisplacement : ℝ
+  m_fMaxHeadingDisplacement : ℝ
+  vecEffectPos : CVector
+  vecQueueDir : CVector
+  vecUseDir : CVector
+where
+  #p2dEffect ≤ 1
+  #vApproachingQueue ≤ 1
+  #vWaitingQueue ≤ 1
+end
+
+schema CPedAttractor_GetHeadOfQueueWaitTime
+  ΔCPedAttractor
+  result! : ℝ
+where
+  -- Declared member operation CPedAttractor::GetHeadOfQueueWaitTime()
+  true
+end
+
+schema CPedAttractor_CPedAttractor_2
+  ΔCPedAttractor
+  result! : ANY
+where
+  -- Declared member operation CPedAttractor::CPedAttractor()
+  true
+end
+
+schema CPedAttractor_GetType_3
+  ΞCPedAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedAttractor::GetType()
+  true
+end
+
+schema CPedAttractor_UpdatePedStateOnDeparture_4
+  ΞCPedAttractor
+  pPed? : Ref[CPed]
+where
+  -- Declared member operation CPedAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedAttractor_IsAtHeadOfQueue_5
+  ΞCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractor::IsAtHeadOfQueue(CPed* pPed)
+  true
+end
+
+schema CPedAttractor_ComputeAttractPos_6
+  ΞCPedAttractor
+  id? : ℤ
+  pos? : CVector
+  result! : void
+where
+  -- Declared member operation CPedAttractor::ComputeAttractPos(int32 id, CVector& pos)
+  true
+end
+
+schema CPedAttractor_ComputeAttractHeading_7
+  ΞCPedAttractor
+  id? : ℤ
+  pHeading? : ℝ
+where
+  -- Declared member operation CPedAttractor::ComputeAttractHeading(int32 id, float& pHeading)
+  true
+end
+
+schema CPedAttractor_BroadcastDeparture_8
+  ΔCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractor::BroadcastDeparture(CPed* pPed)
+  true
+end
+
+schema CPedAttractor_IsRegisteredWithPed_9
+  ΞCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractor::IsRegisteredWithPed(CPed* pPed)
+  true
+end
+
+schema CPedAttractor_DeRegisterPed_10
+  ΔCPedAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractor::DeRegisterPed(CPed* pPed)
+  true
+end
+
+schema CPedAttractor_ComputeDeltaHeading_11
+  ΞCPedAttractor
+  result! : ℝ
+where
+  -- Declared member operation CPedAttractor::ComputeDeltaHeading()
+  true
+end
+
+schema CPedAttractor_ComputeDeltaPos_12
+  ΞCPedAttractor
+  result! : ℝ
+where
+  -- Declared member operation CPedAttractor::ComputeDeltaPos()
+  true
+end
+
+schema CPedAttractor_ComputeAttractTime_13
+  ΞCPedAttractor
+  id? : ℤ
+  arg_2? : 𝔹
+  time? : ℝ
+where
+  -- Declared member operation CPedAttractor::ComputeAttractTime(int32 id, bool, float& time)
+  true
+end
+
+schema CPedAttractor_GetNoOfRegisteredPeds_14
+  ΞCPedAttractor
+  result! : ℤ
+where
+  -- Declared member operation CPedAttractor::GetNoOfRegisteredPeds()
+  true
+end
+
+schema CPedAttractor_ComputeFreeSlot_15
+  ΞCPedAttractor
+  result! : ℤ
+where
+  -- Declared member operation CPedAttractor::ComputeFreeSlot()
+  true
+end
+
+schema CPedAttractor_IsInQueue_16
+  ΞCPedAttractor
+  arg_1? : Ref[CPed]
+  result! : bool
+where
+  -- Declared member operation CPedAttractor::IsInQueue(CPed*)
+  true
+end
+
+schema CPedAttractor_RegisterPed_17
+  ΔCPedAttractor
+  arg_1? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractor::RegisterPed(CPed*)
+  true
+end
+
+schema CPedAttractor_BroadcastArrival_18
+  ΔCPedAttractor
+  arg_1? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedAttractor::BroadcastArrival(CPed*)
+  true
+end
+
+schema CPedAttractor_CPedAttractor_19
+  ΔCPedAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedAttractor::CPedAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+schema CPedAttractor_GetEffect_20
+  ΞCPedAttractor
+  result! : Ref[C2dEffect]
+where
+  -- Declared member operation CPedAttractor::GetEffect()
+  true
+end
+
+schema CPedAttractor_GetEffectPos_21
+  ΞCPedAttractor
+  result! : CVector
+where
+  -- Declared member operation CPedAttractor::GetEffectPos()
+  true
+end
+
+schema CPedAttractor_GetMaxPedsInAttractor_22
+  ΞCPedAttractor
+  result! : ℤ
+where
+  -- Declared member operation CPedAttractor::GetMaxPedsInAttractor()
+  true
+end
+
+schema CPedAttractor_GetDistanceToCountSeekDone_23
+  ΞCPedAttractor
+  result! : ℝ
+where
+  -- Declared member operation CPedAttractor::GetDistanceToCountSeekDone()
+  true
+end
+
+schema CPedAttractor_GetAcceptableHeading_24
+  ΞCPedAttractor
+  result! : ℝ
+where
+  -- Declared member operation CPedAttractor::GetAcceptableHeading()
+  true
+end
+
+schema CPedAtmAttractor
+  CPedAttractor  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedAtmAttractor_GetType
+  ΞCPedAtmAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedAtmAttractor::GetType()
+  true
+end
+
+schema CPedAtmAttractor_UpdatePedStateOnDeparture_2
+  ΞCPedAtmAttractor
+  pPed? : Ref[CPed]
+where
+  -- Declared member operation CPedAtmAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedAtmAttractor_CPedAtmAttractor_3
+  ΔCPedAtmAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedAtmAttractor::CPedAtmAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+schema CPedIceCreamAttractor
+  CPedAttractor  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedIceCreamAttractor_CPedIceCreamAttractor
+  ΔCPedIceCreamAttractor
+  result! : ANY
+where
+  -- Declared member operation CPedIceCreamAttractor::CPedIceCreamAttractor()
+  true
+end
+
+schema CPedIceCreamAttractor_GetType_2
+  ΞCPedIceCreamAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedIceCreamAttractor::GetType()
+  true
+end
+
+schema CPedIceCreamAttractor_UpdatePedStateOnDeparture_3
+  ΞCPedIceCreamAttractor
+  pPed? : Ref[CPed]
+  result! : void
+where
+  -- Declared member operation CPedIceCreamAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedIceCreamAttractor_CPedIceCreamAttractor_4
+  ΔCPedIceCreamAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedIceCreamAttractor::CPedIceCreamAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+schema CPedPizzaAttractor
+  CPedAttractor  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedPizzaAttractor_GetHeadOfQueueWaitTime
+  ΔCPedPizzaAttractor
+  result! : ℝ
+where
+  -- Declared member operation CPedPizzaAttractor::GetHeadOfQueueWaitTime()
+  true
+end
+
+schema CPedPizzaAttractor_GetType_2
+  ΞCPedPizzaAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedPizzaAttractor::GetType()
+  true
+end
+
+schema CPedPizzaAttractor_UpdatePedStateOnDeparture_3
+  ΞCPedPizzaAttractor
+  pPed? : Ref[CPed]
+  result! : void
+where
+  -- Declared member operation CPedPizzaAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedPizzaAttractor_CPedPizzaAttractor_4
+  ΔCPedPizzaAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedPizzaAttractor::CPedPizzaAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+schema CPedSeatAttractor
+  CPedAttractor  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedSeatAttractor_GetType
+  ΞCPedSeatAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedSeatAttractor::GetType()
+  true
+end
+
+schema CPedSeatAttractor_UpdatePedStateOnDeparture_2
+  ΞCPedSeatAttractor
+  pPed? : Ref[CPed]
+  result! : void
+where
+  -- Declared member operation CPedSeatAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedSeatAttractor_CPedSeatAttractor_3
+  ΔCPedSeatAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedSeatAttractor::CPedSeatAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+schema CPedShelterAttractor
+  CPedAttractor  -- inherits base schema
+  ms_displacements : std__vector_CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedShelterAttractor_GetType
+  ΞCPedShelterAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedShelterAttractor::GetType()
+  true
+end
+
+schema CPedShelterAttractor_BroadcastDeparture_2
+  ΔCPedShelterAttractor
+  arg_1? : Ref[CPed]
+  result! : bool
+where
+  -- Declared member operation CPedShelterAttractor::BroadcastDeparture(CPed*)
+  true
+end
+
+schema CPedShelterAttractor_UpdatePedStateOnDeparture_3
+  ΞCPedShelterAttractor
+  pPed? : Ref[CPed]
+where
+  -- Declared member operation CPedShelterAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedShelterAttractor_IsAtHeadOfQueue_4
+  ΞCPedShelterAttractor
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPedShelterAttractor::IsAtHeadOfQueue(CPed* pPed)
+  true
+end
+
+schema CPedShelterAttractor_ComputeAttractPos_5
+  ΞCPedShelterAttractor
+  qid? : ℤ
+  pos? : CVector
+  result! : void
+where
+  -- Declared member operation CPedShelterAttractor::ComputeAttractPos(int qid, CVector& pos)
+  true
+end
+
+schema CPedShelterAttractor_ComputeAttractHeading_6
+  ΞCPedShelterAttractor
+  qid? : ℤ
+  heading? : ℝ
+where
+  -- Declared member operation CPedShelterAttractor::ComputeAttractHeading(int qid, float& heading)
+  true
+end
+
+schema CPedShelterAttractor_CPedShelterAttractor_7
+  ΔCPedShelterAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedShelterAttractor::CPedShelterAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+schema CPedShelterAttractor_GetDisplacement_8
+  ΞCPedShelterAttractor
+  qid? : ℤ
+  result! : CVector
+where
+  -- Declared member operation CPedShelterAttractor::GetDisplacement(int32 qid)
+  true
+end
+
+schema CPedStopAttractor
+  CPedAttractor  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedStopAttractor_GetType
+  ΞCPedStopAttractor
+  result! : ePedAttractorType
+where
+  -- Declared member operation CPedStopAttractor::GetType()
+  true
+end
+
+schema CPedStopAttractor_UpdatePedStateOnDeparture_2
+  ΞCPedStopAttractor
+  pPed? : Ref[CPed]
+  result! : void
+where
+  -- Declared member operation CPedStopAttractor::UpdatePedStateOnDeparture(CPed* pPed)
+  true
+end
+
+schema CPedStopAttractor_CPedStopAttractor_3
+  ΔCPedStopAttractor
+  pEffect? : Ref[C2dEffect]
+  matrix? : CMatrix
+  maxpeds? : ℤ
+  qdist? : ℝ
+  waitTime? : ℝ
+  approachTime? : ℝ
+  distance? : ℝ
+  headingdiff? : ℝ
+  posdisp? : ℝ
+  headdisp? : ℝ
+where
+  -- Declared member operation CPedStopAttractor::CPedStopAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PedAttractor_operator
+  ΔPedAttractorModuleState
+  other? : CVehicleToEffect
+  result! : CVehicleToEffect
+where
+  -- Return postcondition: result! = From(other)
+  true
+end
+
+schema PedAttractor_CVehicleToEffect
+  ΔPedAttractorModuleState
+where
+  -- State update: m_pVehicle' = ∅
+  true
+end
+
+schema PedAttractor_GetVehicle
+  ΞPedAttractorModuleState
+  result! : Ref[CVehicle]
+where
+  -- Return postcondition: result! = m_pVehicle
+  true
+end
+
+schema PedAttractor_GetEffect
+  ΞPedAttractorModuleState
+  i? : ℤ
+  result! : Ref[C2dEffect]
+where
+  -- Return postcondition: result! = &m_effects[i]
+  true
+end
+
+schema PedAttractor_GetHeadOfQueueWaitTime
+  ΔPedAttractorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = 0.0f
+  true
+end
+
+schema PedAttractor_IsAtHeadOfQueue
+  ΞPedAttractorModuleState
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = vWaitingQueue.front() == pPed
+  -- Invokes: vWaitingQueue.front
+  true
+end
+
+schema PedAttractor_GetNoOfRegisteredPeds
+  ΞPedAttractorModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = (int32)(vWaitingQueue.size() + vApproachingQueue.size())
+  -- Invokes: vWaitingQueue.size, vApproachingQueue.size
+  true
+end
+
+schema PedAttractor_ComputeFreeSlot
+  ΞPedAttractorModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = (int32)vWaitingQueue.size()
+  -- Invokes: vWaitingQueue.size
+  true
+end
+
+schema PedAttractor_GetEffect_2
+  ΞPedAttractorModuleState
+  result! : Ref[C2dEffect]
+where
+  -- Return postcondition: result! = p2dEffect
+  true
+end
+
+schema PedAttractor_GetEffectPos
+  ΞPedAttractorModuleState
+  result! : CVector
+where
+  -- Return postcondition: result! = vecEffectPos
+  true
+end
+
+schema PedAttractor_GetMaxPedsInAttractor
+  ΞPedAttractorModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_nMaxPedsInAttractor
+  true
+end
+
+schema PedAttractor_GetDistanceToCountSeekDone
+  ΞPedAttractorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fDistanceToUseAttractor
+  true
+end
+
+schema PedAttractor_GetAcceptableHeading
+  ΞPedAttractorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fAcceptableHeading
+  true
+end
+
+schema PedAttractor_CPedIceCreamAttractor
+  ΔPedAttractorModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema PedAttractor_GetType
+  ΞPedAttractorModuleState
+  result! : ePedAttractorType
+where
+  -- Return postcondition: result! = ATTRACTOR_ICECREAM
+  true
+end
+
+schema PedAttractor_GetHeadOfQueueWaitTime_2
+  ΔPedAttractorModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = 2000.0f
+  true
+end
+
+schema PedAttractor_GetType_2
+  ΞPedAttractorModuleState
+  result! : ePedAttractorType
+where
+  -- Return postcondition: result! = ATTRACTOR_PIZZA
+  true
+end
+
+schema PedAttractor_GetType_3
+  ΞPedAttractorModuleState
+  result! : ePedAttractorType
+where
+  -- Return postcondition: result! = ATTRACTOR_SEAT
+  true
+end
+
+schema PedAttractor_GetType_4
+  ΞPedAttractorModuleState
+  result! : ePedAttractorType
+where
+  -- Return postcondition: result! = ATTRACTOR_SHELTER
+  true
+end
+
+schema PedAttractor_IsAtHeadOfQueue_2
+  ΞPedAttractorModuleState
+  pPed? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema PedAttractor_GetType_5
+  ΞPedAttractorModuleState
+  result! : ePedAttractorType
+where
+  -- Return postcondition: result! = ATTRACTOR_STOP
+  true
+end

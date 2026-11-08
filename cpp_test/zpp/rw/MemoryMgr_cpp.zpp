@@ -1,0 +1,106 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MemoryMgr (rw)
+-- Source File(s): rw/MemoryMgr.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema MemoryMgr_InitMemoryMgr
+  ΔMemoryMgrModuleState
+where
+  -- Invokes: gMainHeap.Init
+  true
+end
+
+schema MemoryMgr_MemoryMgrMalloc
+  ΔMemoryMgrModuleState
+  size? : ℕ
+where
+  -- State update: mem' = gMainHeap.Malloc(size)
+  -- State update: mem' = malloc(size)
+  -- State update: pMemoryTop' = (uint8*)mem + size
+  -- Return postcondition: result! = mem
+  -- Invokes: gMainHeap.Malloc
+  true
+end
+
+schema MemoryMgr_MemoryMgrRealloc
+  ΔMemoryMgrModuleState
+  ptr? : ADDRESS
+  size? : ℕ
+where
+  -- State update: mem' = gMainHeap.Realloc(ptr, size)
+  -- State update: mem' = realloc(ptr, size)
+  -- State update: pMemoryTop' = (uint8*)mem + size
+  -- Return postcondition: result! = mem
+  -- Invokes: gMainHeap.Realloc
+  true
+end
+
+schema MemoryMgr_MemoryMgrCalloc
+  ΔMemoryMgrModuleState
+  num? : ℕ
+  size? : ℕ
+where
+  -- State update: mem' = gMainHeap.Malloc(num*size)
+  -- State update: mem' = calloc(num, size)
+  -- State update: pMemoryTop' = (uint8*)mem + size
+  -- Return postcondition: result! = mem
+  -- Invokes: gMainHeap.Malloc
+  true
+end
+
+schema MemoryMgr_MemoryMgrFree
+  ΔMemoryMgrModuleState
+  ptr? : ADDRESS
+where
+  -- Invokes: gMainHeap.Free
+  true
+end
+
+schema MemoryMgr_RwMallocAlign
+  ΔMemoryMgrModuleState
+  size? : ℕ
+  align? : ℕ
+where
+  -- State update: ptralign' = align-1
+  -- State update: mem' = (void *)MemoryMgrMalloc(size + sizeof(uintptr) + ptralign)
+  -- State update: mem' = (void *)MemoryMgrMalloc(size + align)
+  -- State update: addr' = (void *)((((uintptr)mem) + align) & ~(align - 1))
+  -- Return postcondition: result! = addr
+  true
+end
+
+schema MemoryMgr_RwFreeAlign
+  ΔMemoryMgrModuleState
+  mem? : ADDRESS
+where
+  -- State update: addr' = *(((void **)mem) - 1)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MemoryMgrModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 130
+end

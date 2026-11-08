@@ -1,0 +1,159 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: custompipes (extras)
+-- Source File(s): extras/custompipes.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+custompipes_Enum_1 ::= VEHICLEPIPE_PSP | VEHICLEPIPE_PS2 | VEHICLEPIPE_MOBILE | VEHICLEPIPE_NEO
+  -- val(VEHICLEPIPE_NEO) = -1
+
+custompipes_Enum_2 ::= WORLDPIPE_PSP | WORLDPIPE_PS2 | WORLDPIPE_MOBILE
+
+custompipes_Enum_3 ::= VEHICLEPIPE_MATFX | VEHICLEPIPE_NEO
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CustomMatExt
+  glossTex : Ref[rw__Texture]
+  haveGloss : 𝔹
+where
+  #glossTex ≤ 1
+end
+
+schema Color
+  a : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema Color_Color
+  ΔColor
+where
+  -- Declared member operation Color::Color(void)
+  true
+end
+
+schema InterpolatedValue
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema InterpolatedValue_Read
+  ΔInterpolatedValue
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Declared member operation InterpolatedValue::Read(char *s, int line, int field)
+  true
+end
+
+schema InterpolatedFloat
+  InterpolatedValue  -- inherits base schema
+  curInterpolator : ℝ
+  curVal : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema InterpolatedFloat_InterpolatedFloat
+  ΔInterpolatedFloat
+  init? : ℝ
+where
+  -- Declared member operation InterpolatedFloat::InterpolatedFloat(float init)
+  true
+end
+
+schema InterpolatedFloat_Read_2
+  ΔInterpolatedFloat
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Declared member operation InterpolatedFloat::Read(char *s, int line, int field)
+  true
+end
+
+schema InterpolatedFloat_Get_3
+  ΔInterpolatedFloat
+  result! : ℝ
+where
+  -- Declared member operation InterpolatedFloat::Get(void)
+  true
+end
+
+schema InterpolatedColor
+  InterpolatedValue  -- inherits base schema
+  curInterpolator : ℝ
+  curVal : Color
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema InterpolatedColor_InterpolatedColor
+  ΔInterpolatedColor
+  init? : Color
+where
+  -- Declared member operation InterpolatedColor::InterpolatedColor(const Color &init)
+  true
+end
+
+schema InterpolatedColor_Read_2
+  ΔInterpolatedColor
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Declared member operation InterpolatedColor::Read(char *s, int line, int field)
+  true
+end
+
+schema InterpolatedColor_Get_3
+  ΔInterpolatedColor
+  result! : Color
+where
+  -- Declared member operation InterpolatedColor::Get(void)
+  true
+end
+
+schema InterpolatedLight
+  InterpolatedColor  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema InterpolatedLight_InterpolatedLight
+  ΔInterpolatedLight
+  init? : Color
+where
+  -- Declared member operation InterpolatedLight::InterpolatedLight(const Color &init)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema custompipes_Color
+  ΔcustompipesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema custompipes_Color_2
+  ΔcustompipesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

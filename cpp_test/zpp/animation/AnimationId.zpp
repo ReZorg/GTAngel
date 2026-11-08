@@ -1,0 +1,27 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimationId (animation)
+-- Source File(s): animation/AnimationId.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AnimationId ::= ANIM_STD_WALK | ANIM_STD_RUN | ANIM_STD_RUNFAST | ANIM_STD_IDLE | ANIM_STD_STARTWALK | ANIM_STD_RUNSTOP1 | ANIM_STD_RUNSTOP2 | ANIM_STD_IDLE_CAM | ANIM_STD_IDLE_HBHB | ANIM_STD_IDLE_TIRED | ANIM_STD_IDLE_BIGGUN | ANIM_STD_CHAT | ANIM_STD_HAILTAXI | ANIM_STD_KO_FRONT | ANIM_STD_KO_LEFT | ANIM_STD_KO_BACK | ANIM_STD_KO_RIGHT | ANIM_STD_KO_SHOT_FACE | ANIM_STD_KO_SHOT_STOMACH | ANIM_STD_KO_SHOT_ARM_L | ANIM_STD_KO_SHOT_ARM_R | ANIM_STD_KO_SHOT_LEG_L | ANIM_STD_KO_SHOT_LEG_R | ANIM_STD_SPINFORWARD_LEFT | ANIM_STD_SPINFORWARD_RIGHT | ANIM_STD_HIGHIMPACT_FRONT | ANIM_STD_HIGHIMPACT_LEFT | ANIM_STD_HIGHIMPACT_BACK | ANIM_STD_HIGHIMPACT_RIGHT | ANIM_STD_HITBYGUN_FRONT | ANIM_STD_HITBYGUN_LEFT | ANIM_STD_HITBYGUN_BACK | ANIM_STD_HITBYGUN_RIGHT | ANIM_STD_HIT_FRONT | ANIM_STD_HIT_LEFT | ANIM_STD_HIT_BACK | ANIM_STD_HIT_RIGHT | ANIM_STD_HIT_FLOOR | ANIM_STD_HIT_WALL | ANIM_STD_HIT_FLOOR_FRONT | ANIM_STD_HIT_BEHIND | ANIM_STD_FIGHT_IDLE | ANIM_STD_FIGHT_2IDLE | ANIM_STD_FIGHT_SHUFFLE_F | ANIM_STD_PARTIAL_PUNCH | ANIM_FIGHT_ATTACK_A1 | ANIM_FIGHT_ATTACK_A2 | ANIM_FIGHT_ATTACK_A3 | ... (324 total branches)
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AnimationIdModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 343
+end

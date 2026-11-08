@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioManager (audio)
+-- Source File(s): audio/AudioManager.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Entity.zpp  (from "Entity.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SPEED_OF_SOUND : ℝ  -- #define SPEED_OF_SOUND 343.f
+TIME_SPENT : ℕ  -- #define TIME_SPENT 30
+WORKING_VOLUME_FIELD : seq CHAR  -- #define WORKING_VOLUME_FIELD m_nEmittingVolume
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cAudioManager_cAudioManager
+  ΔcAudioManager
+where
+  -- State update: m_bIsInitialised' = FALSE
+  -- State update: m_bIsSurround' = TRUE
+  -- State update: m_nChannelOffset' = 0
+  -- State update: m_fSpeedOfSound' = SPEED_OF_SOUND / TIME_SPENT
+  -- State update: m_nTimeSpent' = TIME_SPENT
+  -- State update: m_nActiveSamples' = NUM_CHANNELS_GENERIC
+  true
+end
+
+schema cAudioManager_cAudioManager_2
+  ΔcAudioManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cAudioManager_Initialise
+  ΔcAudioManager
+where
+  -- State update: m_bIsInitialised' = SampleManager.Initialise()
+  -- State update: m_nActiveSamples' = SampleManager.GetMaximumSupportedChannels()
+  -- State update: m_nActiveSamples' = NUM_CHANNELS_GENERIC
+  -- State update: m_bIsUsed' = FALSE
+  -- State update: m_nAudioEntitiesCount' = 0
+  -- State update: m_bIsInitialised' = FALSE
+  -- Return postcondition: result! = AEHANDLE_ERROR_NOAUDIOSYS
+  -- Return postcondition: result! = AEHANDLE_ERROR_NOENTITY
+  -- Return postcondition: result! = AEHANDLE_ERROR_BADAUDIOTYPE
+  -- Invokes: SampleManager.Initialise, SampleManager.GetMaximumSupportedChannels, MusicManager.Initialise, cAudioManager::Terminate, MusicManager.Terminate
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AudioManagerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1497
+end

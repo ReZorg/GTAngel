@@ -1,0 +1,389 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Bike (vehicles)
+-- Source File(s): vehicles/Bike.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eBikeNodes ::= BIKE_NODE_NONE | BIKE_CHASSIS | BIKE_FORKS_FRONT | BIKE_FORKS_REAR | BIKE_WHEEL_FRONT | BIKE_WHEEL_REAR | BIKE_MUDGUARD | BIKE_HANDLEBARS | BIKE_NUM_NODES
+
+Bike_Enum_2 ::= BIKEWHEEL_FRONT | BIKEWHEEL_REAR
+
+Bike_Enum_3 ::= BIKESUSP_F1 | BIKESUSP_F2 | BIKESUSP_R1 | BIKESUSP_R2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBike
+  CVehicle  -- inherits base schema
+  m_aBikeNodes : seq Ref[RwFrame]  -- bounded array [BIKE_NUM_NODES]
+  bLeanMatrixClean : 𝔹
+  m_leanMatrix : CMatrix
+  m_vecAvgSurfaceNormal : CVector
+  m_vecAvgSurfaceRight : CVector
+  pBikeHandling : Ref[tBikeHandlingData]
+  m_bikeAnimType : AssocGroupId
+  m_wheelStatus : seq ℕ  -- bounded array [2]
+  m_aWheelColPoints : seq ℤ  -- bounded array [4]
+  m_aSuspensionSpringRatio : seq ℝ  -- bounded array [4]
+  m_aSuspensionSpringRatioPrev : seq ℝ  -- bounded array [4]
+  m_aWheelTimer : seq ℝ  -- bounded array [4]
+  m_bike_unused1 : ℝ
+  m_aWheelSkidmarkType : seq eSkidmarkType  -- bounded array [2]
+  m_aWheelSkidmarkBloody : seq 𝔹  -- bounded array [2]
+  m_aWheelSkidmarkUnk : seq 𝔹  -- bounded array [2]
+  m_aWheelRotation : seq ℝ  -- bounded array [2]
+  m_aWheelSpeed : seq ℝ  -- bounded array [2]
+  m_aWheelPosition : seq ℝ  -- bounded array [2]
+  m_aWheelBasePosition : seq ℝ  -- bounded array [2]
+  m_aSuspensionSpringLength : seq ℝ  -- bounded array [4]
+  m_aSuspensionLineLength : seq ℝ  -- bounded array [4]
+  m_fHeightAboveRoad : ℝ
+  m_fTraction : ℝ
+  m_fRearForkLength : ℝ
+  m_fFrontForkY : ℝ
+  m_fFrontForkZ : ℝ
+  m_fFrontForkSlope : ℝ
+  m_fWheelAngle : ℝ
+  m_fLeanLRAngle : ℝ
+  m_fLeanLRAngle2 : ℝ
+  m_fLeanInput : ℝ
+  m_fPedLeanAmountLR : ℝ
+  m_fPedLeanAmountUD : ℝ
+  m_bike_unused2 : ℕ
+  unused : seq ℕ  -- bounded array [3]
+  m_bombType : 𝔹
+  bDriverLastFrame : 𝔹
+  m_bike_flag01 : 𝔹
+  m_bike_flag02 : 𝔹
+  bWaterTight : 𝔹
+  bIsBeingPickedUp : 𝔹
+  bIsStanding : 𝔹
+  bExtraSpeed : 𝔹
+  bIsOnFire : 𝔹
+  bWheelieCam : 𝔹
+  bFixedColour : 𝔹
+  m_pBombRigger : Ref[CEntity]
+  m_doingBurnout : ℤ
+  m_fTireTemperature : ℝ
+  m_fBrakeDestabilization : ℝ
+  m_fVelocityChangeForAudio : ℝ
+  m_fFireBlowUpTimer : ℝ
+  m_aGroundPhysical : seq Ref[CPhysical]  -- bounded array [4]
+  m_aGroundOffset : seq CVector  -- bounded array [4]
+  m_pSetOnFireEntity : Ref[CEntity]
+  m_nWheelsOnGround : ℕ
+  m_nDriveWheelsOnGround : ℕ
+  m_nDriveWheelsOnGroundPrev : ℕ
+  m_fGasPedalAudio : ℝ
+  m_aWheelState : seq tWheelState  -- bounded array [2]
+  unk1 : seq ℕ  -- bounded array [96]
+  m_bikeSitAnimation : AnimationId
+  unk2 : seq ℕ  -- bounded array [180]
+where
+  #pBikeHandling ≤ 1
+  #m_wheelStatus = 2
+  #m_aWheelColPoints = 4
+  #m_aSuspensionSpringRatio = 4
+  #m_aSuspensionSpringRatioPrev = 4
+  #m_aWheelTimer = 4
+  #m_aWheelSkidmarkType = 2
+  #m_aWheelSkidmarkBloody = 2
+  #m_aWheelSkidmarkUnk = 2
+  #m_aWheelRotation = 2
+  #m_aWheelSpeed = 2
+  #m_aWheelPosition = 2
+  #m_aWheelBasePosition = 2
+  #m_aSuspensionSpringLength = 4
+  #m_aSuspensionLineLength = 4
+  m_bike_unused2 ≥ 0
+end
+
+schema CBike_CBike
+  ΔCBike
+  id? : ℤ
+  CreatedBy? : ℕ
+where
+  -- Declared member operation CBike::CBike(int32 id, uint8 CreatedBy)
+  true
+end
+
+schema CBike_SetModelIndex_2
+  ΔCBike
+  id? : ℕ
+where
+  -- Declared member operation CBike::SetModelIndex(uint32 id)
+  true
+end
+
+schema CBike_ProcessControl_3
+  ΔCBike
+where
+  -- Declared member operation CBike::ProcessControl(void)
+  true
+end
+
+schema CBike_Teleport_4
+  ΔCBike
+  v? : CVector
+where
+  -- Declared member operation CBike::Teleport(CVector v)
+  true
+end
+
+schema CBike_PreRender_5
+  ΔCBike
+where
+  -- Declared member operation CBike::PreRender(void)
+  true
+end
+
+schema CBike_Render_6
+  ΔCBike
+where
+  -- Declared member operation CBike::Render(void)
+  true
+end
+
+schema CBike_ProcessEntityCollision_7
+  ΔCBike
+  ent? : Ref[CEntity]
+  colpoints? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CBike::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
+  true
+end
+
+schema CBike_ProcessControlInputs_8
+  ΔCBike
+  arg_1? : ℕ
+where
+  -- Declared member operation CBike::ProcessControlInputs(uint8)
+  true
+end
+
+schema CBike_GetComponentWorldPosition_9
+  ΔCBike
+  component? : ℤ
+  pos? : CVector
+where
+  -- Declared member operation CBike::GetComponentWorldPosition(int32 component, CVector &pos)
+  true
+end
+
+schema CBike_IsComponentPresent_10
+  ΔCBike
+  component? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CBike::IsComponentPresent(int32 component)
+  true
+end
+
+schema CBike_SetComponentRotation_11
+  ΔCBike
+  component? : ℤ
+  rotation? : CVector
+where
+  -- Declared member operation CBike::SetComponentRotation(int32 component, CVector rotation)
+  true
+end
+
+schema CBike_IsDoorReady_12
+  ΔCBike
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CBike::IsDoorReady(eDoors door)
+  true
+end
+
+schema CBike_IsDoorFullyOpen_13
+  ΔCBike
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CBike::IsDoorFullyOpen(eDoors door)
+  true
+end
+
+schema CBike_IsDoorClosed_14
+  ΔCBike
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CBike::IsDoorClosed(eDoors door)
+  true
+end
+
+schema CBike_IsDoorMissing_15
+  ΔCBike
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CBike::IsDoorMissing(eDoors door)
+  true
+end
+
+schema CBike_RemoveRefsToVehicle_16
+  ΔCBike
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CBike::RemoveRefsToVehicle(CEntity *ent)
+  true
+end
+
+schema CBike_BlowUpCar_17
+  ΔCBike
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CBike::BlowUpCar(CEntity *ent)
+  true
+end
+
+schema CBike_SetUpWheelColModel_18
+  ΔCBike
+  colModel? : Ref[CColModel]
+  result! : 𝔹
+where
+  -- Declared member operation CBike::SetUpWheelColModel(CColModel *colModel)
+  true
+end
+
+schema CBike_BurstTyre_19
+  ΔCBike
+  tyre? : ℕ
+  applyForces? : 𝔹
+where
+  -- Declared member operation CBike::BurstTyre(uint8 tyre, bool applyForces)
+  true
+end
+
+schema CBike_IsRoomForPedToLeaveCar_20
+  ΔCBike
+  component? : ℕ
+  doorOffset? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CBike::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
+  true
+end
+
+schema CBike_GetHeightAboveRoad_21
+  ΔCBike
+  result! : ℝ
+where
+  -- Declared member operation CBike::GetHeightAboveRoad(void)
+  true
+end
+
+schema CBike_PlayCarHorn_22
+  ΔCBike
+where
+  -- Declared member operation CBike::PlayCarHorn(void)
+  true
+end
+
+schema CBike_KnockOffRider_23
+  ΔCBike
+  weapon? : eWeaponType
+  direction? : ℕ
+  ped? : Ref[CPed]
+  bGetBackOn? : 𝔹
+where
+  -- Declared member operation CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBackOn)
+  true
+end
+
+schema CBike_VehicleDamage_24
+  ΔCBike
+where
+  -- Declared member operation CBike::VehicleDamage(void)
+  true
+end
+
+schema CBike_ProcessBuoyancy_25
+  ΔCBike
+where
+  -- Declared member operation CBike::ProcessBuoyancy(void)
+  true
+end
+
+schema CBike_DoDriveByShootings_26
+  ΔCBike
+where
+  -- Declared member operation CBike::DoDriveByShootings(void)
+  true
+end
+
+schema CBike_AddDamagedVehicleParticles_27
+  ΔCBike
+where
+  -- Declared member operation CBike::AddDamagedVehicleParticles(void)
+  true
+end
+
+schema CBike_AddWheelDirtAndWater_28
+  ΔCBike
+  colpoint? : ℙ ℤ
+  belowEffectSpeed? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CBike::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
+  true
+end
+
+schema CBike_PlayHornIfNecessary_29
+  ΔCBike
+where
+  -- Declared member operation CBike::PlayHornIfNecessary(void)
+  true
+end
+
+schema CBike_ResetSuspension_30
+  ΔCBike
+where
+  -- Declared member operation CBike::ResetSuspension(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Bike_GetBikeDoorFlag
+  ΔBikeModuleState
+  carnode? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = CAR_DOOR_FLAG_RR | CAR_DOOR_FLAG_LR
+  -- Return postcondition: result! = CAR_DOOR_FLAG_RF | CAR_DOOR_FLAG_LF
+  -- Return postcondition: result! = CAR_DOOR_FLAG_UNKNOWN
+  true
+end
+
+schema Bike_GetBikeDoorFlagInclJumpInFromFront
+  ΔBikeModuleState
+  carnode? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = CAR_DOOR_FLAG_RR | CAR_DOOR_FLAG_LR
+  -- Return postcondition: result! = CAR_DOOR_FLAG_RF | CAR_DOOR_FLAG_LF
+  -- Return postcondition: result! = CAR_DOOR_FLAG_UNKNOWN
+  true
+end

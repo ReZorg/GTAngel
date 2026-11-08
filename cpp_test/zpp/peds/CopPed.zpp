@@ -1,0 +1,255 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CopPed (peds)
+-- Source File(s): peds/CopPed.cpp, peds/CopPed.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include General.zpp  (from "General.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include RoadBlocks.zpp  (from "RoadBlocks.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include Ropes.zpp  (from "Ropes.h")
+-- include Stinger.zpp  (from "Stinger.h")
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eCopType ::= COP_STREET | COP_FBI | COP_SWAT | COP_HELI_SWAT | COP_ARMY | COP_MIAMIVICE
+  -- val(COP_STREET) = 0
+  -- val(COP_FBI) = 1
+  -- val(COP_SWAT) = 2
+  -- val(COP_HELI_SWAT) = 3
+  -- val(COP_ARMY) = 4
+  -- val(COP_MIAMIVICE) = 5
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCopPed
+  CPed  -- inherits base schema
+  m_nRoadblockVeh : Ref[CVehicle]
+  m_fDistanceToTarget : ℝ
+  m_bIsInPursuit : 𝔹
+  m_bIsDisabledCop : 𝔹
+  field_5FE : ℤ
+  m_bBeatingSuspect : 𝔹
+  m_bStopAndShootDisabledZone : 𝔹
+  m_bDragsPlayerFromCar : 𝔹
+  m_bZoneDisabled : 𝔹
+  m_fAbseilPos : ℝ
+  m_nCopType : eCopType
+  m_bThrowsSpikeTrap : 𝔹
+  m_pRopeEntity : Ref[CEntity]
+  m_nRopeID : ℕ
+  m_nHassleTimer : ℕ
+  field_61C : ℕ
+  field_624 : ℤ
+  field_628 : ℤ
+  m_nRoadblockNode : ℤ
+  field_1350 : ℤ
+  field_1364 : ℤ
+where
+  #m_nRoadblockVeh ≤ 1
+  #m_pRopeEntity ≤ 1
+  m_nRopeID ≥ 0
+  m_nHassleTimer ≥ 0
+  field_61C ≥ 0
+end
+
+schema CCopPed_CCopPed
+  ΔCCopPed
+  arg_1? : eCopType
+  modifier? : ℤ
+where
+  -- Declared member operation CCopPed::CCopPed(eCopType, int32 modifier = 0)
+  true
+end
+
+schema CCopPed_CCopPed_2
+  ΔCCopPed
+  result! : ANY
+where
+  -- Declared member operation CCopPed::CCopPed()
+  true
+end
+
+schema CCopPed_ClearPursuit_3
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ClearPursuit(void)
+  true
+end
+
+schema CCopPed_ProcessControl_4
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ProcessControl(void)
+  true
+end
+
+schema CCopPed_SetArrestPlayer_5
+  ΔCCopPed
+  arg_1? : Ref[CPed]
+where
+  -- Declared member operation CCopPed::SetArrestPlayer(CPed*)
+  true
+end
+
+schema CCopPed_SetPursuit_6
+  ΔCCopPed
+  arg_1? : 𝔹
+where
+  -- Declared member operation CCopPed::SetPursuit(bool)
+  true
+end
+
+schema CCopPed_ArrestPlayer_7
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ArrestPlayer(void)
+  true
+end
+
+schema CCopPed_ScanForCrimes_8
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ScanForCrimes(void)
+  true
+end
+
+schema CCopPed_CopAI_9
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::CopAI(void)
+  true
+end
+
+schema CCopPed_ProcessHeliSwat_10
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ProcessHeliSwat(void)
+  true
+end
+
+schema CCopPed_ProcessStingerCop_11
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ProcessStingerCop(void)
+  true
+end
+
+schema CCopPed_CCopPed_12
+  ΔCCopPed
+  arg_1? : eCopType
+where
+  -- Declared member operation CCopPed::CCopPed(eCopType)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCopPed_CCopPed
+  ΔCCopPed
+where
+  -- Invokes: m_pStinger->Remove
+  true
+end
+
+schema CCopPed_SetArrestPlayer
+  ΔCCopPed
+  player? : Ref[CPed]
+where
+  -- State update: player.bGonnaKillTheCarJacker' = true
+  -- State update: m_bCanBeDamaged' = false
+  -- State update: m_pArrestingCop' = this
+  -- State update: player.m_nLastPedState' = player.m_nPedState
+  -- State update: m_bCanBeDamaged' = false
+  -- State update: m_pArrestingCop' = this
+  -- Invokes: player->EnteringCar, CTimer::GetTimeInMilliseconds, this->RegisterReference, player->SetPedState, m_pSeekTarget->RegisterReference
+  true
+end
+
+schema CCopPed_ClearPursuit
+  ΔCCopPed
+where
+  -- State update: player' = FindPlayerPed()
+  -- State update: wanted' = player.m_pWanted
+  -- State update: ourCopId' = 0
+  -- State update: foundMyself' = false
+  -- State update: biggestCopId' = 0
+  -- State update: m_bIsInPursuit' = false
+  -- Invokes: wanted->GetWantedLevel, m_pMyVehicle->GetPosition
+  true
+end
+
+schema CCopPed_SetPursuit
+  ΔCCopPed
+  ignoreCopLimit? : 𝔹
+where
+  -- State update: wanted' = FindPlayerPed().m_pWanted
+  -- State update: m_bIsInPursuit' = true
+  -- State update: m_prevObjective' = OBJECTIVE_NONE
+  -- State update: bNotAllowedToDuck' = true
+  -- State update: bIsRunning' = true
+  -- State update: m_bStopAndShootDisabledZone' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCopPed_ArrestPlayer
+  ΔCCopPed
+where
+  -- State update: m_pVehicleAnim' = ∅
+  -- State update: suspect' = (CPed*)m_pSeekTarget
+  -- State update: arrestAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ARREST)
+  -- State update: m_fRotationCur' = m_fRotationDest
+  -- Invokes: suspect->CanSetPedState, suspect->SetPedState, suspect->DyingOrDead, suspect->EnteringCar, CAnimManager::BlendAnimation
+  true
+end
+
+schema CCopPed_ScanForCrimes
+  ΔCCopPed
+where
+  -- State update: playerVeh' = FindPlayerVehicle()
+  -- State update: player' = FindPlayerPed()
+  -- Invokes: playerVeh->IsCar, playerVeh->IsAlarmOn, playerVeh->GetPosition, m_pWanted->GetWantedLevel, player->SetWantedLevelNoDrop
+  true
+end
+
+schema CCopPed_CopAI
+  ΔCCopPed
+where
+  -- State update: wanted' = FindPlayerPed().m_pWanted
+  -- State update: wantedLevel' = wanted.GetWantedLevel()
+  -- State update: m_bZoneDisabled' = true
+  -- State update: m_bIsDisabledCop' = true
+  -- State update: m_nRoadblockNode' = -1
+  -- State update: m_nRoadblockNode' = 0
+  -- Invokes: wanted->GetWantedLevel, CCullZones::NoPolice, copFarthestToTarget->ClearPursuit, CWeaponInfo::GetWeaponInfo, CTimer::GetTimeInMilliseconds
+  true
+end

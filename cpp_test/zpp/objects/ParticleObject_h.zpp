@@ -1,0 +1,273 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ParticleObject (objects)
+-- Source File(s): objects/ParticleObject.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include ParticleType.zpp  (from "ParticleType.h")
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_PARTICLEOBJECTS : ℕ  -- #define MAX_PARTICLEOBJECTS 70
+MAX_AUDIOHYDRANTS : ℕ  -- #define MAX_AUDIOHYDRANTS 8
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eParticleObjectType ::= POBJECT_PAVEMENT_STEAM | POBJECT_PAVEMENT_STEAM_SLOWMOTION | POBJECT_WALL_STEAM | POBJECT_WALL_STEAM_SLOWMOTION | POBJECT_DARK_SMOKE | POBJECT_FIRE_HYDRANT | POBJECT_FIRE_HYDRANT_STEAM | POBJECT_CAR_WATER_SPLASH | POBJECT_PED_WATER_SPLASH | POBJECT_SPLASHES_AROUND | POBJECT_SMALL_FIRE | POBJECT_BIG_FIRE | POBJECT_DRY_ICE | POBJECT_DRY_ICE_SLOWMOTION | POBJECT_WATER_FOUNTAIN_VERT | POBJECT_WATER_FOUNTAIN_HORIZ | POBJECT_FIRE_TRAIL | POBJECT_SMOKE_TRAIL | POBJECT_FIREBALL_AND_SMOKE | POBJECT_ROCKET_TRAIL | POBJECT_EXPLOSION_ONCE | POBJECT_CATALINAS_GUNFLASH | POBJECT_CATALINAS_SHOTGUNFLASH
+  -- val(POBJECT_PAVEMENT_STEAM) = 0
+
+eParticleObjectState ::= POBJECTSTATE_INITIALISED | POBJECTSTATE_UPDATE_CLOSE | POBJECTSTATE_UPDATE_FAR | POBJECTSTATE_FREE
+  -- val(POBJECTSTATE_INITIALISED) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CParticleObject
+  CPlaceable  -- inherits base schema
+  m_pNext : Ref[CParticleObject]
+  m_pPrev : Ref[CParticleObject]
+  m_pParticle : Ref[CParticle]
+  m_nRemoveTimer : ℕ
+  m_Type : eParticleObjectType
+  m_ParticleType : tParticleType
+  m_nNumEffectCycles : ℕ
+  m_nSkipFrames : ℕ
+  m_nFrameCounter : ℕ
+  m_nState : ℕ
+  m_vecTarget : CVector
+  m_fRandVal : ℝ
+  m_fSize : ℝ
+  m_Color : CRGBA
+  m_bRemove : ℕ
+  m_nCreationChance : ℤ
+  pCloseListHead : Ref[CParticleObject]
+  pFarListHead : Ref[CParticleObject]
+  pUnusedListHead : Ref[CParticleObject]
+where
+  #m_pNext ≤ 1
+  #m_pPrev ≤ 1
+  #m_pParticle ≤ 1
+  m_nRemoveTimer ≥ 0
+  m_nNumEffectCycles ≥ 0
+  m_nSkipFrames ≥ 0
+  m_nFrameCounter ≥ 0
+  m_nState ≥ 0
+  m_bRemove ≥ 0
+  #pCloseListHead ≤ 1
+  #pFarListHead ≤ 1
+  #pUnusedListHead ≤ 1
+end
+
+schema CParticleObject_CParticleObject
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::CParticleObject()
+  true
+end
+
+schema CParticleObject_CParticleObject_2
+  ΔCParticleObject
+  result! : ANY
+where
+  -- Declared member operation CParticleObject::CParticleObject()
+  true
+end
+
+schema CParticleObject_Initialise_3
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::Initialise(void)
+  true
+end
+
+schema CParticleObject_AddObject_4
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  remove? : ℕ
+  result! : Ref[CParticleObject]
+where
+  -- Declared member operation CParticleObject::AddObject(uint16 type, CVector const &pos, uint8 remove)
+  true
+end
+
+schema CParticleObject_AddObject_5
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  size? : ℝ
+  remove? : ℕ
+  result! : Ref[CParticleObject]
+where
+  -- Declared member operation CParticleObject::AddObject(uint16 type, CVector const &pos, float size, uint8 remove)
+  true
+end
+
+schema CParticleObject_AddObject_6
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  target? : CVector
+  size? : ℝ
+  remove? : ℕ
+  result! : Ref[CParticleObject]
+where
+  -- Declared member operation CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &target, float size, uint8 remove)
+  true
+end
+
+schema CParticleObject_AddObject_7
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  target? : CVector
+  size? : ℝ
+  lifeTime? : ℕ
+  color? : RwRGBA
+  remove? : ℕ
+  result! : Ref[CParticleObject]
+where
+  -- Declared member operation CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &target, float size, uint32 lifeTime, RwRGBA const &color, uint8 remove)
+  true
+end
+
+schema CParticleObject_AddObject_8
+  ΔCParticleObject
+  type? : tParticleType
+  pos? : CVector
+  target? : CVector
+  size? : ℝ
+  lifeTime? : ℕ
+  numEffectCycles? : ℕ
+  skipFrames? : ℕ
+  creationChance? : ℕ
+  remove? : ℕ
+  result! : Ref[CParticleObject]
+where
+  -- Declared member operation CParticleObject::AddObject(tParticleType type, CVector const &pos, CVector const &target, float size, uint32 lifeTime, uint8 numEffectCycles, uint8 skipFrames, uint16 creationChance, uint8 remove)
+  true
+end
+
+schema CParticleObject_RemoveObject_9
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::RemoveObject(void)
+  true
+end
+
+schema CParticleObject_UpdateAll_10
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::UpdateAll(void)
+  true
+end
+
+schema CParticleObject_UpdateClose_11
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::UpdateClose(void)
+  true
+end
+
+schema CParticleObject_UpdateFar_12
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::UpdateFar(void)
+  true
+end
+
+schema CParticleObject_SaveParticle_13
+  ΔCParticleObject
+  buffer? : ℙ ℕ
+  length? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CParticleObject::SaveParticle(uint8 *buffer, uint32 *length)
+  true
+end
+
+schema CParticleObject_LoadParticle_14
+  ΔCParticleObject
+  buffer? : ℙ ℕ
+  length? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CParticleObject::LoadParticle(uint8 *buffer, uint32 length)
+  true
+end
+
+schema CParticleObject_RemoveAllExpireableParticleObjects_15
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::RemoveAllExpireableParticleObjects(void)
+  true
+end
+
+schema CParticleObject_RemoveAllParticleObjects_16
+  ΔCParticleObject
+where
+  -- Declared member operation CParticleObject::RemoveAllParticleObjects(void)
+  true
+end
+
+schema CParticleObject_MoveToList_17
+  ΔCParticleObject
+  from? : Ref[CParticleObject]
+  to? : Ref[CParticleObject]
+  obj? : Ref[CParticleObject]
+where
+  -- Declared member operation CParticleObject::MoveToList(CParticleObject **from, CParticleObject **to, CParticleObject *obj)
+  true
+end
+
+schema CAudioHydrant
+  AudioEntity : ℤ
+  pParticleObject : Ref[CParticleObject]
+where
+  #pParticleObject ≤ 1
+end
+
+schema CAudioHydrant_CAudioHydrant
+  ΔCAudioHydrant
+where
+  -- Declared member operation CAudioHydrant::CAudioHydrant()
+  true
+end
+
+schema CAudioHydrant_Remove_2
+  ΔCAudioHydrant
+  particleobject? : Ref[CParticleObject]
+where
+  -- Declared member operation CAudioHydrant::Remove(CParticleObject *particleobject)
+  true
+end
+
+schema CAudioHydrant_Get_3
+  ΔCAudioHydrant
+  n? : ℤ
+  result! : Ref[CAudioHydrant]
+where
+  -- Declared member operation CAudioHydrant::Get(int n)
+  true
+end
+
+schema CAudioHydrant_pParticleObject_4
+  ΔCAudioHydrant
+  arg_1? : nil
+where
+  -- Declared member operation CAudioHydrant::pParticleObject(nil)
+  true
+end

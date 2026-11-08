@@ -1,0 +1,224 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CarGen (vehicles)
+-- Source File(s): vehicles/CarGen.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include config.zpp  (from "config.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CarGen_Enum_1 ::= CARGEN_MAXACTUALLIMIT
+  -- val(CARGEN_MAXACTUALLIMIT) = 100
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCarGenerator
+  m_nModelIndex : ℤ
+  m_vecPos : CVector
+  m_fAngle : ℝ
+  m_nColor1 : ℤ
+  m_nColor2 : ℤ
+  m_bForceSpawn : ℕ
+  m_nAlarm : ℕ
+  m_nDoorlock : ℕ
+  m_nMinDelay : ℤ
+  m_nMaxDelay : ℤ
+  m_nTimer : ℕ
+  m_nVehicleHandle : ℤ
+  m_nUsesRemaining : ℕ
+  m_bIsBlocking : 𝔹
+  m_vecInf : CVector
+  m_vecSup : CVector
+  m_fSize : ℝ
+where
+  m_bForceSpawn ≥ 0
+  m_nAlarm ≥ 0
+  m_nDoorlock ≥ 0
+  m_nTimer ≥ 0
+  m_nUsesRemaining ≥ 0
+end
+
+schema CCarGenerator_SwitchOff
+  ΔCCarGenerator
+where
+  -- Declared member operation CCarGenerator::SwitchOff()
+  true
+end
+
+schema CCarGenerator_SwitchOn_2
+  ΔCCarGenerator
+where
+  -- Declared member operation CCarGenerator::SwitchOn()
+  true
+end
+
+schema CCarGenerator_CalcNextGen_3
+  ΔCCarGenerator
+  result! : ℕ
+where
+  -- Declared member operation CCarGenerator::CalcNextGen()
+  true
+end
+
+schema CCarGenerator_DoInternalProcessing_4
+  ΔCCarGenerator
+where
+  -- Declared member operation CCarGenerator::DoInternalProcessing()
+  true
+end
+
+schema CCarGenerator_Process_5
+  ΔCCarGenerator
+where
+  -- Declared member operation CCarGenerator::Process()
+  true
+end
+
+schema CCarGenerator_Setup_6
+  ΔCCarGenerator
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  angle? : ℝ
+  mi? : ℤ
+  color1? : ℤ
+  color2? : ℤ
+  force? : ℕ
+  alarm? : ℕ
+  lock? : ℕ
+  min_delay? : ℕ
+  max_delay? : ℕ
+where
+  -- Declared member operation CCarGenerator::Setup(float x, float y, float z, float angle, int32 mi, int16 color1, int16 color2, uint8 force, uint8 alarm, uint8 lock, uint16 min_delay, uint16 max_delay)
+  true
+end
+
+schema CCarGenerator_CheckForBlockage_7
+  ΔCCarGenerator
+  result! : 𝔹
+where
+  -- Declared member operation CCarGenerator::CheckForBlockage()
+  true
+end
+
+schema CCarGenerator_CheckIfWithinRangeOfAnyPlayer_8
+  ΔCCarGenerator
+  result! : 𝔹
+where
+  -- Declared member operation CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
+  true
+end
+
+schema CCarGenerator_SetUsesRemaining_9
+  ΔCCarGenerator
+  uses? : ℕ
+where
+  -- Declared member operation CCarGenerator::SetUsesRemaining(uint16 uses)
+  true
+end
+
+schema CCarGenerator_CheckForBlockage_10
+  ΔCCarGenerator
+  mi? : ℤ
+  result! : bool
+where
+  -- Declared member operation CCarGenerator::CheckForBlockage(int32 mi)
+  true
+end
+
+schema CCarGenerator_CheckIfWithinRangeOfAnyPlayers_11
+  ΔCCarGenerator
+  result! : 𝔹
+where
+  -- Declared member operation CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
+  true
+end
+
+schema CTheCarGenerators
+  ProcessCounter : ℕ
+  NumOfCarGenerators : ℕ
+  CarGeneratorArray : seq CCarGenerator  -- bounded array [NUM_CARGENS]
+  GenerateEvenIfPlayerIsCloseCounter : ℕ
+  CurrentActiveCount : ℕ
+where
+  ProcessCounter ≥ 0
+  NumOfCarGenerators ≥ 0
+  GenerateEvenIfPlayerIsCloseCounter ≥ 0
+  CurrentActiveCount ≥ 0
+end
+
+schema CTheCarGenerators_Process
+  ΔCTheCarGenerators
+where
+  -- Declared member operation CTheCarGenerators::Process()
+  true
+end
+
+schema CTheCarGenerators_CreateCarGenerator_2
+  ΔCTheCarGenerators
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  angle? : ℝ
+  mi? : ℤ
+  color1? : ℤ
+  color2? : ℤ
+  force? : ℕ
+  alarm? : ℕ
+  lock? : ℕ
+  min_delay? : ℕ
+  max_delay? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CTheCarGenerators::CreateCarGenerator(float x, float y, float z, float angle, int32 mi, int16 color1, int16 color2, uint8 force, uint8 alarm, uint8 lock, uint16 min_delay, uint16 max_delay)
+  true
+end
+
+schema CTheCarGenerators_Init_3
+  ΔCTheCarGenerators
+where
+  -- Declared member operation CTheCarGenerators::Init()
+  true
+end
+
+schema CTheCarGenerators_SaveAllCarGenerators_4
+  ΔCTheCarGenerators
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CTheCarGenerators::SaveAllCarGenerators(uint8 *, uint32 *)
+  true
+end
+
+schema CTheCarGenerators_LoadAllCarGenerators_5
+  ΔCTheCarGenerators
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Declared member operation CTheCarGenerators::LoadAllCarGenerators(uint8 *, uint32)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CarGen_SetUsesRemaining
+  ΔCarGenModuleState
+  uses? : ℕ
+where
+  -- State update: m_nUsesRemaining' = uses
+  true
+end

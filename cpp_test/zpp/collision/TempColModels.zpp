@@ -1,0 +1,81 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TempColModels (collision)
+-- Source File(s): collision/TempColModels.cpp, collision/TempColModels.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include Game.zpp  (from "Game.h")
+-- include ColModel.zpp  (from "ColModel.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTempColModels
+  ms_colModelPed1 : CColModel
+  ms_colModelBBox : CColModel
+  ms_colModelWeapon : CColModel
+  ms_colModelPed2 : CColModel
+  ms_colModelBumper1 : CColModel
+  ms_colModelWheel1 : CColModel
+  ms_colModelPanel1 : CColModel
+  ms_colModelBodyPart2 : CColModel
+  ms_colModelBodyPart1 : CColModel
+  ms_colModelCutObj : seq CColModel  -- bounded array [10]
+  ms_colModelPedGroundHit : CColModel
+  ms_colModelBoot1 : CColModel
+  ms_colModelDoor1 : CColModel
+  ms_colModelBonnet1 : CColModel
+  ms_colModelFerryDocked : CColModel
+where
+  #ms_colModelCutObj = 10
+end
+
+schema CTempColModels_Initialise
+  ΔCTempColModels
+where
+  -- Declared member operation CTempColModels::Initialise(void)
+  true
+end
+
+schema CTempColModels_Write_2
+  ΔCTempColModels
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CTempColModels::Write(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CTempColModels_Initialise_3
+  ΔCTempColModels
+where
+  -- Declared member operation CTempColModels::Initialise(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTempColModels_Initialise
+  ΔCTempColModels
+where
+  -- State update: colmodel.numSpheres' = ARRAY_SIZE(sphrs)
+  -- State update: colmodel.spheres' = sphrs
+  -- State update: colmodel.level' = LEVEL_GENERIC
+  -- State update: colmodel.ownsCollisionVolumes' = false
+  -- State update: gpTempColModels' = new CTempColModels
+  -- State update: ms_colModelBBox.level' = LEVEL_GENERIC
+  -- Invokes: gpTempColModels->Initialise, boundingSphere.Set, boundingBox.Set, CTempColModels::Write, writer.AllocateRaw
+  true
+end

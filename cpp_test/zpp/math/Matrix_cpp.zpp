@@ -1,0 +1,416 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Matrix (math)
+-- Source File(s): math/Matrix.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMatrix_CMatrix
+  ΔCMatrix
+where
+  -- State update: m_attachment' = ∅
+  -- State update: m_hasRwMatrix' = false
+  true
+end
+
+schema CMatrix_CMatrix_2
+  ΔCMatrix
+  m? : CMatrix
+where
+  -- State update: m_attachment' = ∅
+  -- State update: m_hasRwMatrix' = false
+  -- State update: this' = m
+  true
+end
+
+schema CMatrix_CMatrix_3
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+  owner? : 𝔹
+where
+  -- State update: m_attachment' = ∅
+  true
+end
+
+schema CMatrix_CMatrix_4
+  ΔCMatrix
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMatrix_Attach
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+  owner? : 𝔹
+where
+  -- State update: m_attachment' = matrix
+  -- State update: m_hasRwMatrix' = owner
+  true
+end
+
+schema CMatrix_AttachRW
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+  owner? : 𝔹
+where
+  -- State update: m_attachment' = matrix
+  -- State update: m_hasRwMatrix' = owner
+  true
+end
+
+schema CMatrix_Detach
+  ΔCMatrix
+where
+  -- State update: m_attachment' = ∅
+  true
+end
+
+schema CMatrix_Update
+  ΔCMatrix
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMatrix_UpdateRW
+  ΔCMatrix
+where
+  -- State update: m_attachment.right' = GetRight()
+  -- State update: m_attachment.up' = GetForward()
+  -- State update: m_attachment.at' = GetUp()
+  -- State update: m_attachment.pos' = GetPosition()
+  true
+end
+
+schema CMatrix_operator
+  ΔCMatrix
+  rhs? : CMatrix
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMatrix_CopyOnlyMatrix
+  ΔCMatrix
+  other? : CMatrix
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMatrix_operator_2
+  ΔCMatrix
+  rhs? : CMatrix
+where
+  -- Return postcondition: result! = *this
+  -- Invokes: rhs.GetRight, rhs.GetForward, rhs.GetUp, rhs.GetPosition
+  true
+end
+
+schema CMatrix_SetUnity
+  ΔCMatrix
+where
+  -- State update: rx' = 1.0f
+  -- State update: ry' = 0.0f
+  -- State update: rz' = 0.0f
+  -- State update: fx' = 0.0f
+  -- State update: fy' = 1.0f
+  -- State update: fz' = 0.0f
+  true
+end
+
+schema CMatrix_ResetOrientation
+  ΔCMatrix
+where
+  -- State update: rx' = 1.0f
+  -- State update: ry' = 0.0f
+  -- State update: rz' = 0.0f
+  -- State update: fx' = 0.0f
+  -- State update: fy' = 1.0f
+  -- State update: fz' = 0.0f
+  true
+end
+
+schema CMatrix_SetScale
+  ΔCMatrix
+  s? : ℝ
+where
+  -- State update: rx' = s
+  -- State update: ry' = 0.0f
+  -- State update: rz' = 0.0f
+  -- State update: fx' = 0.0f
+  -- State update: fy' = s
+  -- State update: fz' = 0.0f
+  true
+end
+
+schema CMatrix_SetTranslate
+  ΔCMatrix
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: rx' = 1.0f
+  -- State update: ry' = 0.0f
+  -- State update: rz' = 0.0f
+  -- State update: fx' = 0.0f
+  -- State update: fy' = 1.0f
+  -- State update: fz' = 0.0f
+  true
+end
+
+schema CMatrix_SetRotateXOnly
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- State update: c' = Cos(angle)
+  -- State update: s' = Sin(angle)
+  -- State update: rx' = 1.0f
+  -- State update: ry' = 0.0f
+  -- State update: rz' = 0.0f
+  -- State update: fx' = 0.0f
+  true
+end
+
+schema CMatrix_SetRotateYOnly
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- State update: c' = Cos(angle)
+  -- State update: s' = Sin(angle)
+  -- State update: rx' = c
+  -- State update: ry' = 0.0f
+  -- State update: rz' = -s
+  -- State update: fx' = 0.0f
+  true
+end
+
+schema CMatrix_SetRotateZOnly
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- State update: c' = Cos(angle)
+  -- State update: s' = Sin(angle)
+  -- State update: rx' = c
+  -- State update: ry' = s
+  -- State update: rz' = 0.0f
+  -- State update: fx' = -s
+  true
+end
+
+schema CMatrix_SetRotateX
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- State update: px' = 0.0f
+  -- State update: py' = 0.0f
+  -- State update: pz' = 0.0f
+  true
+end
+
+schema CMatrix_SetRotateY
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- State update: px' = 0.0f
+  -- State update: py' = 0.0f
+  -- State update: pz' = 0.0f
+  true
+end
+
+schema CMatrix_SetRotateZ
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- State update: px' = 0.0f
+  -- State update: py' = 0.0f
+  -- State update: pz' = 0.0f
+  true
+end
+
+schema CMatrix_SetRotate
+  ΔCMatrix
+  xAngle? : ℝ
+  yAngle? : ℝ
+  zAngle? : ℝ
+where
+  -- State update: cX' = Cos(xAngle)
+  -- State update: sX' = Sin(xAngle)
+  -- State update: cY' = Cos(yAngle)
+  -- State update: sY' = Sin(yAngle)
+  -- State update: cZ' = Cos(zAngle)
+  -- State update: sZ' = Sin(zAngle)
+  true
+end
+
+schema CMatrix_RotateX
+  ΔCMatrix
+  x? : ℝ
+where
+  -- State update: c' = Cos(x)
+  -- State update: s' = Sin(x)
+  -- State update: ry' = this.ry
+  -- State update: rz' = this.rz
+  -- State update: uy' = this.fy
+  -- State update: uz' = this.fz
+  true
+end
+
+schema CMatrix_RotateY
+  ΔCMatrix
+  y? : ℝ
+where
+  -- State update: c' = Cos(y)
+  -- State update: s' = Sin(y)
+  -- State update: rx' = this.rx
+  -- State update: rz' = this.rz
+  -- State update: ux' = this.fx
+  -- State update: uz' = this.fz
+  true
+end
+
+schema CMatrix_RotateZ
+  ΔCMatrix
+  z? : ℝ
+where
+  -- State update: c' = Cos(z)
+  -- State update: s' = Sin(z)
+  -- State update: ry' = this.ry
+  -- State update: rx' = this.rx
+  -- State update: uy' = this.fy
+  -- State update: ux' = this.fx
+  true
+end
+
+schema CMatrix_Rotate
+  ΔCMatrix
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: cX' = Cos(x)
+  -- State update: sX' = Sin(x)
+  -- State update: cY' = Cos(y)
+  -- State update: sY' = Sin(y)
+  -- State update: cZ' = Cos(z)
+  -- State update: sZ' = Sin(z)
+  true
+end
+
+schema CMatrix_operator_3
+  ΔCMatrix
+  rhs? : CMatrix
+where
+  -- State update: this' = *this * rhs
+  -- Return postcondition: result! = *this
+  true
+end
+
+schema CMatrix_Reorthogonalise
+  ΔCMatrix
+where
+  -- State update: r' = GetRight()
+  -- State update: f' = GetForward()
+  -- State update: u' = GetUp()
+  -- State update: u' = CrossProduct(r, f)
+  -- State update: r' = CrossProduct(f, u)
+  -- State update: f' = CrossProduct(u, r)
+  -- Invokes: u.Normalise, r.Normalise
+  true
+end
+
+schema Matrix_operator
+  ΔMatrixModuleState
+  m1? : CMatrix
+  m2? : CMatrix
+where
+  -- State update: out.rx' = m1.rx * m2.rx + m1.fx * m2.ry + m1.ux * m2.rz
+  -- State update: out.ry' = m1.ry * m2.rx + m1.fy * m2.ry + m1.uy * m2.rz
+  -- State update: out.rz' = m1.rz * m2.rx + m1.fz * m2.ry + m1.uz * m2.rz
+  -- State update: out.fx' = m1.rx * m2.fx + m1.fx * m2.fy + m1.ux * m2.fz
+  -- State update: out.fy' = m1.ry * m2.fx + m1.fy * m2.fy + m1.uy * m2.fz
+  -- State update: out.fz' = m1.rz * m2.fx + m1.fz * m2.fy + m1.uz * m2.fz
+  -- Return postcondition: result! = out
+  true
+end
+
+schema Matrix_Invert
+  ΔMatrixModuleState
+  src? : CMatrix
+  dst? : CMatrix
+where
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema Matrix_Invert_2
+  ΔMatrixModuleState
+  matrix? : CMatrix
+where
+  -- Return postcondition: result! = Invert(matrix, inv)
+  true
+end
+
+schema CCompressedMatrixNotAligned_CompressFromFullMatrix
+  ΔCCompressedMatrixNotAligned
+  other? : CMatrix
+where
+  -- State update: m_rightX' = 127.0f * other.GetRight().x
+  -- State update: m_rightY' = 127.0f * other.GetRight().y
+  -- State update: m_rightZ' = 127.0f * other.GetRight().z
+  -- State update: m_upX' = 127.0f * other.GetForward().x
+  -- State update: m_upY' = 127.0f * other.GetForward().y
+  -- State update: m_upZ' = 127.0f * other.GetForward().z
+  -- Invokes: other.GetRight, other.GetForward, other.GetPosition
+  true
+end
+
+schema CCompressedMatrixNotAligned_DecompressIntoFullMatrix
+  ΔCCompressedMatrixNotAligned
+  other? : CMatrix
+where
+  -- State update: x' = m_rightX / 127.0f
+  -- State update: y' = m_rightY / 127.0f
+  -- State update: z' = m_rightZ / 127.0f
+  -- State update: x' = m_upX / 127.0f
+  -- State update: y' = m_upY / 127.0f
+  -- State update: z' = m_upZ / 127.0f
+  -- Invokes: other.GetRight, other.GetForward, other.GetUp, other.GetPosition, other.Reorthogonalise
+  true
+end
+
+schema CMatrix_CopyToRwMatrix
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+where
+  -- State update: matrix.right' = GetRight()
+  -- State update: matrix.up' = GetForward()
+  -- State update: matrix.at' = GetUp()
+  -- State update: matrix.pos' = GetPosition()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MatrixModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 589
+end

@@ -1,0 +1,147 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PowerPoints (control)
+-- Source File(s): control/PowerPoints.cpp, control/PowerPoints.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include PowerPoints.zpp  (from "PowerPoints.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PowerPoints_Enum_1 ::= POWERPOINT_NONE | POWERPOINT_HEALTH | POWERPOINT_HIDEOUT_INDUSTRIAL | POWERPOINT_HIDEOUT_COMMERCIAL | POWERPOINT_HIDEOUT_SUBURBAN
+  -- val(POWERPOINT_NONE) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPowerPoint
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPowerPoint_Update
+  ΔCPowerPoint
+where
+  -- Declared member operation CPowerPoint::Update()
+  true
+end
+
+schema CPowerPoints
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPowerPoints_Init
+  ΔCPowerPoints
+where
+  -- Declared member operation CPowerPoints::Init()
+  true
+end
+
+schema CPowerPoints_Update_2
+  ΔCPowerPoints
+where
+  -- Declared member operation CPowerPoints::Update()
+  true
+end
+
+schema CPowerPoints_GenerateNewOne_3
+  ΔCPowerPoints
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℕ
+where
+  -- Declared member operation CPowerPoints::GenerateNewOne(float, float, float, float, float, float, uint8)
+  true
+end
+
+schema CPowerPoints_Save_4
+  ΔCPowerPoints
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CPowerPoints::Save(uint8**, uint32*)
+  true
+end
+
+schema CPowerPoints_Load_5
+  ΔCPowerPoints
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Declared member operation CPowerPoints::Load(uint8*, uint32)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPowerPoint_Update
+  ΔCPowerPoint
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Init
+  ΔCPowerPoints
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Update
+  ΔCPowerPoints
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_GenerateNewOne
+  ΔCPowerPoints
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Save
+  ΔCPowerPoints
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Load
+  ΔCPowerPoints
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

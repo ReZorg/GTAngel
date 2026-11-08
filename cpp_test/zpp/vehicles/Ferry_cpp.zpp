@@ -1,0 +1,338 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Ferry (vehicles)
+-- Source File(s): vehicles/Ferry.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Ferry.zpp  (from "Ferry.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include General.zpp  (from "General.h")
+-- include Leeds.zpp  (from "Leeds.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include sampman.zpp  (from "sampman.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FERRY_SPEED : ℝ  -- #define FERRY_SPEED (0.1f)
+FERRY_SLOWDOWN_DISTANCE : ℝ  -- #define FERRY_SLOWDOWN_DISTANCE (50.0f)
+FERRY_TIME_STOPPED_AT_STATION : ℝ  -- #define FERRY_TIME_STOPPED_AT_STATION (10.0f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CFerry_Init
+  ΔCFerry
+  pInstancePtr? : ADDRESS
+where
+  -- State update: mspInst' = (CFerryInst*)pInstancePtr
+  -- State update: mspInst' = new CFerryInst()
+  -- State update: aLineBits' = new CFerryInterpolationLine[NUM_FERRY_STATIONS * 4 + 2]
+  -- State update: filename' = "Data\\PATHS\\FERRY1.DAT"
+  -- State update: readingFile' = false
+  -- State update: pPath' = mspInst.pPathData[k]
+  -- Invokes: CFileMgr::LoadFile, CWorld::ProcessVerticalLine
+  true
+end
+
+schema CFerry_InitFerrys
+  ΔCFerry
+where
+  -- Invokes: CStreaming::LoadAllRequestedModels, CStreaming::RequestModel
+  true
+end
+
+schema CFerry_SwitchFerryCollision
+  ΔCFerry
+  type? : ℤ
+where
+  -- State update: pFerry' = GetFerry(i)
+  -- State update: pFerry.m_nCollision' = type
+  -- State update: mi' = pFerry.GetModelInfo()
+  -- Invokes: pFerry->GetModelInfo, mi->SetColModel
+  true
+end
+
+schema CFerry_UpdateFerrys
+  ΔCFerry
+where
+  -- State update: pFerry' = GetFerry(i)
+  -- State update: deltaT' = t - mspInst.pPathData[i / 2].aLineBits[j].time
+  -- State update: pFerry.m_bApproachingDock' = true
+  -- State update: m_bApproachingDock' = true
+  -- State update: m_bApproachingDock' = true
+  -- State update: fDelta' = 0.0f
+  -- Invokes: CTimer::GetTimeStepInMilliseconds
+  true
+end
+
+schema CFerry_SetModelIndex
+  ΔCFerry
+  mi? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex, CClumpModelInfo::FillFrameArray
+  true
+end
+
+schema CFerry_PreRender
+  ΔCFerry
+where
+  -- State update: mi' = GetModelInfo()
+  -- State update: vVectorToCamera' = GetPosition() - TheCamera.GetPosition()
+  -- State update: fDistanceToCamera' = vVectorToCamera.Magnitude()
+  -- State update: vDirectionToCamera' = CVector(1.0f, 0.0f, 0.0f)
+  -- State update: vDirectionToCamera' = vVectorToCamera / fDistanceToCamera
+  -- State update: dp' = DotProduct(GetForward(), vDirectionToCamera)
+  -- Invokes: CGeneral::GetRandomTrueFalse, CParticle::AddParticle, TheCamera.GetPosition, vVectorToCamera.Magnitude, CCoronas::RegisterCorona
+  true
+end
+
+schema CFerry_Render
+  ΔCFerry
+where
+  -- State update: m_bAlreadyRendered' = true
+  -- Invokes: CEntity::Render
+  true
+end
+
+schema CFerry_RenderAllRemaning
+  ΔCFerry
+where
+  -- State update: pFerry' = GetFerry(i)
+  -- State update: pFerry.m_bAlreadyRendered' = false
+  -- Invokes: pFerry->Render
+  true
+end
+
+schema CFerry_FerryHitStuff
+  ΔCFerry
+  lst? : CPtrList
+where
+  -- State update: pNode' = lst.first
+  -- State update: pEntity' = (CPhysical*)pNode.item
+  -- State update: pEntity.bHitByTrain' = true
+  -- Invokes: pEntity->GetPosition
+  true
+end
+
+schema CFerry_ProcessControl
+  ΔCFerry
+where
+  -- State update: pPath' = mspInst.pPathData[m_nFerryId / 2]
+  -- State update: fPosition' = mspInst.m_afPositions[m_nFerryId]
+  -- State update: fSpeed' = mspInst.m_afSpeeds[m_nFerryId]
+  -- State update: trackNodes' = mspInst.pPathData[m_nFerryId / 2].aTrackNodes
+  -- State update: numTrackNodes' = mspInst.pPathData[m_nFerryId / 2].NumTrackNodes
+  -- State update: totalLengthOfTrack' = mspInst.pPathData[m_nFerryId / 2].TotalLengthOfTrack
+  -- Invokes: CTimer::GetFrameCounter, fwd.Normalise, tmp.SetRotateZ, right.Normalise, m_vecMoveSpeed.MagnitudeSqr
+  true
+end
+
+schema CFerry_OpenFerryDoor
+  ΔCFerry
+  ratio? : ℝ
+where
+  -- State update: door1' = 0
+  -- State update: door2' = 1
+  -- State update: door1' = 2
+  -- State update: door2' = 3
+  -- State update: node1' = m_bUseFrontDoor ? FERRY_DOOR_FRONT : FERRY_DOOR_BACK
+  -- State update: node2' = m_bUseFrontDoor ? FERRY_RAMP_FRONT : FERRY_RAMP_BACK
+  -- Invokes: doorL.GetPosition, doorR.GetPosition, doorL.SetRotateXOnly, doorR.SetRotateXOnly, doorL.UpdateRW
+  true
+end
+
+schema CFerry_GetBoardingSpace
+  ΔCFerry
+  use? : CFerry__eSpaceUse
+  style? : CFerry__eSpaceStyle
+  position? : ℕ
+  result! : CVector
+where
+  -- State update: pModelInfo' = GetModelInfo()
+  -- State update: style' = FERRY_SPACE_STYLE_1
+  -- State update: style' = FERRY_SPACE_STYLE_0
+  -- State update: space' = pModelInfo.m_positions[FERRY_POS_PED_POINT]
+  -- State update: space' = pModelInfo.m_positions[FERRY_POS_CAR1 + position]
+  -- State update: space' = GetMatrix() * space
+  -- Return postcondition: result! = space
+  true
+end
+
+schema CFerry_GetClosestFerry
+  ΔCFerry
+  x? : ℝ
+  y? : ℝ
+  result! : Ref[CFerry]
+where
+  -- State update: closest' = -1
+  -- State update: mindist' = 9999.9f
+  -- State update: pFerry' = GetFerry(i)
+  -- State update: mindist' = dist
+  -- State update: closest' = i
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = GetFerry(closest)
+  -- Invokes: pFerry->GetPosition
+  true
+end
+
+schema CFerry_IsDocked
+  ΔCFerry
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bFerryDocked
+  true
+end
+
+schema CFerry_OpenDoor
+  ΔCFerry
+where
+  -- State update: m_nDoorState' = FERRY_DOOR_OPENING
+  -- State update: m_nDoorTimer' = CTimer::GetTimeInMilliseconds() + 10000
+  -- State update: pModelInfo' = GetModelInfo()
+  -- State update: vPlayerPos' = FindPlayerPed().GetPosition()
+  -- State update: m_bUseFrontDoor' = true
+  -- State update: m_bUseFrontDoor' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, AudioManager.DirectlyEnqueueSample
+  true
+end
+
+schema CFerry_CloseDoor
+  ΔCFerry
+where
+  -- State update: m_nDoorState' = FERRY_DOOR_CLOSING
+  -- State update: m_nDoorTimer' = CTimer::GetTimeInMilliseconds() + 10000
+  -- Invokes: CTimer::GetTimeInMilliseconds, AudioManager.DirectlyEnqueueSample
+  true
+end
+
+schema CFerry_IsDoorOpen
+  ΔCFerry
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nDoorState == FERRY_DOOR_OPEN
+  true
+end
+
+schema CFerry_IsDoorClosed
+  ΔCFerry
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nDoorState == FERRY_DOOR_CLOSED
+  true
+end
+
+schema CFerry_CompleteDorrMovement
+  ΔCFerry
+where
+  -- State update: m_nDoorTimer' = 0
+  true
+end
+
+schema CFerry_DissableFerryPath
+  ΔCFerry
+  arg_1? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFerry_EnableFerryPath
+  ΔCFerry
+  path? : ℤ
+where
+  -- State update: pFerry' = new CFerry(MI_FERRY, PERMANENT_VEHICLE)
+  -- State update: bDirect' = i & 1
+  -- State update: pFerry.bIsLocked' = true
+  -- State update: pFerry.m_nFerryId' = i
+  -- State update: pFerry.m_nCurTrackNode' = 0
+  -- Invokes: CStreaming::LoadAllRequestedModels, CStreaming::RequestModel, pFerry->SetPosition, pFerry->SetStatus, pFerry->SetHeading
+  true
+end
+
+schema CFerry_SkipFerryToNextDock
+  ΔCFerry
+where
+  -- State update: m_nSkipFerryStatus' = 1
+  true
+end
+
+schema CFerry_PruneWakeTrail
+  ΔCFerry
+where
+  -- State update: num_remaining' = 0
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CFerry_AddWakePoint
+  ΔCFerry
+  point? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFerry_PlayArrivedHorn
+  ΔCFerry
+where
+  -- State update: m_bPlayerArrivedHorn' = true
+  -- State update: fDistToCamera' = (GetPosition() - TheCamera.GetPosition()).Magnitude()
+  -- State update: volume' = (200.0f - fDistToCamera) / 200.0f * 127
+  -- Invokes: TheCamera.GetPosition, AudioManager.DirectlyEnqueueSample
+  true
+end
+
+schema CFerry_GetNearestDoor
+  ΔCFerry
+  arg_1? : CVector
+  result! : CVector
+where
+  -- Return postcondition: result! = CVector(0.0f, 0.0f, 1.0f)
+  true
+end
+
+schema CFerry_SetupForMultiplayer
+  ΔCFerry
+where
+  -- Invokes: CStreaming::SetModelIsDeletable
+  true
+end
+
+schema CFerry_Write
+  ΔCFerry
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.AddPatch
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FerryModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 833
+end

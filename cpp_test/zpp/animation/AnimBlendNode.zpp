@@ -1,0 +1,333 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendNode (animation)
+-- Source File(s): animation/AnimBlendNode.cpp, animation/AnimBlendNode.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include AnimBlendNode.zpp  (from "AnimBlendNode.h")
+-- include AnimBlendSequence.zpp  (from "AnimBlendSequence.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlendNode
+  theta : ℝ
+  invSin : ℝ
+  frameA : ℤ
+  frameB : ℤ
+  remainingTime : ℝ
+  sequence : Ref[CAnimBlendSequence]
+  association : Ref[CAnimBlendAssociation]
+where
+  #sequence ≤ 1
+  #association ≤ 1
+end
+
+schema CAnimBlendNode_Init
+  ΔCAnimBlendNode
+where
+  -- Declared member operation CAnimBlendNode::Init(void)
+  true
+end
+
+schema CAnimBlendNode_Update_2
+  ΔCAnimBlendNode
+  trans? : CVector
+  rot? : CQuaternion
+  weight? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::Update(CVector &trans, CQuaternion &rot, float weight)
+  true
+end
+
+schema CAnimBlendNode_UpdateCompressed_3
+  ΔCAnimBlendNode
+  trans? : CVector
+  rot? : CQuaternion
+  weight? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::UpdateCompressed(CVector &trans, CQuaternion &rot, float weight)
+  true
+end
+
+schema CAnimBlendNode_NextKeyFrame_4
+  ΔCAnimBlendNode
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::NextKeyFrame(void)
+  true
+end
+
+schema CAnimBlendNode_NextKeyFrameCompressed_5
+  ΔCAnimBlendNode
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::NextKeyFrameCompressed(void)
+  true
+end
+
+schema CAnimBlendNode_FindKeyFrame_6
+  ΔCAnimBlendNode
+  t? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::FindKeyFrame(float t)
+  true
+end
+
+schema CAnimBlendNode_SetupKeyFrameCompressed_7
+  ΔCAnimBlendNode
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::SetupKeyFrameCompressed(void)
+  true
+end
+
+schema CAnimBlendNode_CalcDeltas_8
+  ΔCAnimBlendNode
+where
+  -- Declared member operation CAnimBlendNode::CalcDeltas(void)
+  true
+end
+
+schema CAnimBlendNode_CalcDeltasCompressed_9
+  ΔCAnimBlendNode
+where
+  -- Declared member operation CAnimBlendNode::CalcDeltasCompressed(void)
+  true
+end
+
+schema CAnimBlendNode_GetCurrentTranslation_10
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetCurrentTranslation(CVector &trans, float weight)
+  true
+end
+
+schema CAnimBlendNode_GetCurrentTranslationCompressed_11
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetCurrentTranslationCompressed(CVector &trans, float weight)
+  true
+end
+
+schema CAnimBlendNode_GetEndTranslation_12
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetEndTranslation(CVector &trans, float weight)
+  true
+end
+
+schema CAnimBlendNode_GetEndTranslationCompressed_13
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetEndTranslationCompressed(CVector &trans, float weight)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimBlendNode_Init
+  ΔCAnimBlendNode
+where
+  -- State update: frameA' = -1
+  -- State update: frameB' = -1
+  -- State update: remainingTime' = 0.0f
+  -- State update: sequence' = ∅
+  -- State update: association' = ∅
+  true
+end
+
+schema CAnimBlendNode_Update
+  ΔCAnimBlendNode
+  trans? : CVector
+  rot? : CQuaternion
+  weight? : ℝ
+where
+  -- State update: looped' = false
+  -- State update: trans' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: rot' = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f)
+  -- State update: looped' = NextKeyFrame()
+  -- State update: blend' = association.GetBlendAmount(weight)
+  -- State update: kfA' = (KeyFrameTrans*)sequence.GetKeyFrame(frameA)
+  -- Return postcondition: result! = looped
+  -- Invokes: association->IsRunning, association->GetBlendAmount, sequence->GetKeyFrame, rot.Slerp
+  true
+end
+
+schema CAnimBlendNode_UpdateCompressed
+  ΔCAnimBlendNode
+  trans? : CVector
+  rot? : CQuaternion
+  weight? : ℝ
+where
+  -- State update: looped' = false
+  -- State update: trans' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: rot' = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f)
+  -- State update: looped' = NextKeyFrameCompressed()
+  -- State update: blend' = association.GetBlendAmount(weight)
+  -- State update: trans' = transB + t*(transA - transB)
+  -- Return postcondition: result! = looped
+  -- Invokes: association->IsRunning, association->GetBlendAmount, sequence->GetKeyFrameCompressed, kfA->GetDeltaTime, kfA->GetTranslation
+  true
+end
+
+schema CAnimBlendNode_NextKeyFrame
+  ΔCAnimBlendNode
+where
+  -- State update: looped' = false
+  -- State update: frameB' = frameA
+  -- State update: remainingTime' = 0.0f
+  -- State update: looped' = true
+  -- State update: frameA' = 0
+  -- State update: frameB' = frameA - 1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = looped
+  -- Invokes: association->IsRepeating, sequence->GetKeyFrame
+  true
+end
+
+schema CAnimBlendNode_NextKeyFrameCompressed
+  ΔCAnimBlendNode
+where
+  -- State update: looped' = false
+  -- State update: frameB' = frameA
+  -- State update: remainingTime' = 0.0f
+  -- State update: looped' = true
+  -- State update: frameA' = 0
+  -- State update: frameB' = frameA - 1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = looped
+  -- Invokes: association->IsRepeating, sequence->GetKeyFrameCompressed
+  true
+end
+
+schema CAnimBlendNode_FindKeyFrame
+  ΔCAnimBlendNode
+  t? : ℝ
+where
+  -- State update: frameA' = 0
+  -- State update: frameB' = frameA
+  -- State update: remainingTime' = 0.0f
+  -- State update: remainingTime' = 0.0f
+  -- State update: frameA' = 0
+  -- State update: frameB' = frameA
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: sequence->GetKeyFrame, association->IsRepeating
+  true
+end
+
+schema CAnimBlendNode_SetupKeyFrameCompressed
+  ΔCAnimBlendNode
+where
+  -- State update: frameA' = 1
+  -- State update: frameB' = 0
+  -- State update: frameA' = 0
+  -- State update: remainingTime' = 0.0f
+  -- State update: remainingTime' = sequence.GetKeyFrameCompressed(frameA).GetDeltaTime()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: sequence->GetKeyFrameCompressed
+  true
+end
+
+schema CAnimBlendNode_CalcDeltas
+  ΔCAnimBlendNode
+where
+  -- State update: kfA' = sequence.GetKeyFrame(frameA)
+  -- State update: kfB' = sequence.GetKeyFrame(frameB)
+  -- State update: cos' = DotProduct(kfA.rotation, kfB.rotation)
+  -- State update: cos' = 1.0f
+  -- State update: theta' = Acos(cos)
+  -- Invokes: sequence->GetKeyFrame
+  true
+end
+
+schema CAnimBlendNode_CalcDeltasCompressed
+  ΔCAnimBlendNode
+where
+  -- State update: kfA' = sequence.GetKeyFrameCompressed(frameA)
+  -- State update: kfB' = sequence.GetKeyFrameCompressed(frameB)
+  -- State update: cos' = DotProduct(rotA, rotB)
+  -- State update: cos' = DotProduct(rotA, rotB)
+  -- State update: cos' = 1.0f
+  -- State update: theta' = Acos(cos)
+  -- Invokes: sequence->GetKeyFrameCompressed, kfA->GetRotation, kfB->GetRotation, kfB->SetRotation
+  true
+end
+
+schema CAnimBlendNode_GetCurrentTranslation
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- State update: trans' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: blend' = association.GetBlendAmount(weight)
+  -- State update: kfA' = (KeyFrameTrans*)sequence.GetKeyFrame(frameA)
+  -- State update: kfB' = (KeyFrameTrans*)sequence.GetKeyFrame(frameB)
+  -- State update: trans' = kfB.translation + t*(kfA.translation - kfB.translation)
+  -- Invokes: association->GetBlendAmount, sequence->GetKeyFrame
+  true
+end
+
+schema CAnimBlendNode_GetCurrentTranslationCompressed
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- State update: trans' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: blend' = association.GetBlendAmount(weight)
+  -- State update: trans' = transB + t*(transA - transB)
+  -- Invokes: association->GetBlendAmount, sequence->GetKeyFrameCompressed, kfA->GetDeltaTime, kfA->GetTranslation, kfB->GetTranslation
+  true
+end
+
+schema CAnimBlendNode_GetEndTranslation
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- State update: trans' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: blend' = association.GetBlendAmount(weight)
+  -- State update: trans' = kf.translation * blend
+  -- Invokes: association->GetBlendAmount, sequence->GetKeyFrame
+  true
+end
+
+schema CAnimBlendNode_GetEndTranslationCompressed
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- State update: trans' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: blend' = association.GetBlendAmount(weight)
+  -- State update: trans' = pos * blend
+  -- Invokes: association->GetBlendAmount, sequence->GetKeyFrameCompressed, kf->GetTranslation
+  true
+end

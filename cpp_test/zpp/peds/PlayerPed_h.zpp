@@ -1,0 +1,325 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PlayerPed (peds)
+-- Source File(s): peds/PlayerPed.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlayerPed
+  CPed  -- inherits base schema
+  m_pWanted : Ref[CWanted]
+  m_pArrestingCop : Ref[CCopPed]
+  m_fMoveSpeed : ℝ
+  m_fCurrentStamina : ℝ
+  m_fMaxStamina : ℝ
+  m_fStaminaProgress : ℝ
+  m_nSelectedWepSlot : ℤ
+  m_bSpeedTimerFlag : 𝔹
+  m_nEvadeAmount : ℕ
+  m_nSpeedTimer : ℕ
+  m_nHitAnimDelayTimer : ℕ
+  m_fAttackButtonCounter : ℝ
+  m_bHaveTargetSelected : 𝔹
+  m_pEvadingFrom : Ref[CEntity]
+  m_nTargettableObjects : seq ℤ  -- bounded array [4]
+  m_nAdrenalineTime : ℕ
+  m_nDrunkenness : ℕ
+  m_nFadeDrunkenness : ℕ
+  m_nDrunkCountdown : ℕ
+  m_bAdrenalineActive : 𝔹
+  m_bHasLockOnTarget : 𝔹
+  m_bCanBeDamaged : 𝔹
+  m_bNoPosForMeleeAttack : 𝔹
+  unk1 : 𝔹
+  m_vecSafePos : seq CVector  -- bounded array [6]
+  m_pPedAtSafePos : seq Ref[CPed]  -- bounded array [6]
+  m_pMeleeList : seq Ref[CPed]  -- bounded array [6]
+  m_nAttackDirToCheck : ℤ
+  m_fWalkAngle : ℝ
+  m_fFPSMoveHeading : ℝ
+  m_pMinigunTopAtomic : Ref[RpAtomic]
+  m_fGunSpinSpeed : ℝ
+  m_fGunSpinAngle : ℝ
+  m_nPadDownPressedInMilliseconds : ℤ
+  m_nLastBusFareCollected : ℤ
+  m_cachedCamSource : CVector
+  m_cachedCamFront : CVector
+  m_cachedCamUp : CVector
+  field_1367 : ℤ
+  field_1413 : ℤ
+where
+  #m_pWanted ≤ 1
+  #m_pArrestingCop ≤ 1
+  m_nEvadeAmount ≥ 0
+  m_nSpeedTimer ≥ 0
+  m_nHitAnimDelayTimer ≥ 0
+  #m_pEvadingFrom ≤ 1
+  #m_nTargettableObjects = 4
+  m_nAdrenalineTime ≥ 0
+  m_nDrunkenness ≥ 0
+  m_nFadeDrunkenness ≥ 0
+  m_nDrunkCountdown ≥ 0
+  #m_vecSafePos = 6
+  #m_pPedAtSafePos = 6
+  #m_pMeleeList = 6
+  #m_pMinigunTopAtomic ≤ 1
+end
+
+schema CPlayerPed_CPlayerPed
+  ΔCPlayerPed
+  result! : ANY
+where
+  -- Declared member operation CPlayerPed::CPlayerPed()
+  true
+end
+
+schema CPlayerPed_SetMoveAnim_2
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::SetMoveAnim()
+  true
+end
+
+schema CPlayerPed_ReApplyMoveAnims_3
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::ReApplyMoveAnims(void)
+  true
+end
+
+schema CPlayerPed_ClearWeaponTarget_4
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::ClearWeaponTarget(void)
+  true
+end
+
+schema CPlayerPed_SetWantedLevel_5
+  ΔCPlayerPed
+  level? : ℤ
+where
+  -- Declared member operation CPlayerPed::SetWantedLevel(int32 level)
+  true
+end
+
+schema CPlayerPed_SetWantedLevelNoDrop_6
+  ΔCPlayerPed
+  level? : ℤ
+where
+  -- Declared member operation CPlayerPed::SetWantedLevelNoDrop(int32 level)
+  true
+end
+
+schema CPlayerPed_KeepAreaAroundPlayerClear_7
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::KeepAreaAroundPlayerClear(void)
+  true
+end
+
+schema CPlayerPed_AnnoyPlayerPed_8
+  ΔCPlayerPed
+  arg_1? : 𝔹
+where
+  -- Declared member operation CPlayerPed::AnnoyPlayerPed(bool)
+  true
+end
+
+schema CPlayerPed_MakeChangesForNewWeapon_9
+  ΔCPlayerPed
+  arg_1? : ℤ
+where
+  -- Declared member operation CPlayerPed::MakeChangesForNewWeapon(int32)
+  true
+end
+
+schema CPlayerPed_MakeChangesForNewWeapon_10
+  ΔCPlayerPed
+  arg_1? : eWeaponType
+where
+  -- Declared member operation CPlayerPed::MakeChangesForNewWeapon(eWeaponType)
+  true
+end
+
+schema CPlayerPed_SetInitialState_11
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::SetInitialState(void)
+  true
+end
+
+schema CPlayerPed_ProcessControl_12
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::ProcessControl(void)
+  true
+end
+
+schema CPlayerPed_ClearAdrenaline_13
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::ClearAdrenaline(void)
+  true
+end
+
+schema CPlayerPed_UseSprintEnergy_14
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::UseSprintEnergy(void)
+  true
+end
+
+schema CPlayerPed_SetRealMoveAnim_15
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::SetRealMoveAnim(void)
+  true
+end
+
+schema CPlayerPed_RestoreSprintEnergy_16
+  ΔCPlayerPed
+  arg_1? : ℝ
+where
+  -- Declared member operation CPlayerPed::RestoreSprintEnergy(float)
+  true
+end
+
+schema CPlayerPed_DoWeaponSmoothSpray_17
+  ΔCPlayerPed
+  result! : ℝ
+where
+  -- Declared member operation CPlayerPed::DoWeaponSmoothSpray(void)
+  true
+end
+
+schema CPlayerPed_DoStuffToGoOnFire_18
+  ΔCPlayerPed
+where
+  -- Declared member operation CPlayerPed::DoStuffToGoOnFire(void)
+  true
+end
+
+schema CPlayerPed_DoesTargetHaveToBeBroken_19
+  ΔCPlayerPed
+  arg_1? : CVector
+  arg_2? : Ref[CWeapon]
+  result! : 𝔹
+where
+  -- Declared member operation CPlayerPed::DoesTargetHaveToBeBroken(CVector, CWeapon*)
+  true
+end
+
+schema CPlayerPed_RunningLand_20
+  ΔCPlayerPed
+  arg_1? : Ref[CPad]
+where
+  -- Declared member operation CPlayerPed::RunningLand(CPad*)
+  true
+end
+
+schema CPlayerPed_IsThisPedAnAimingPriority_21
+  ΔCPlayerPed
+  arg_1? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CPlayerPed::IsThisPedAnAimingPriority(CPed*)
+  true
+end
+
+schema CPlayerPed_PlayerControlSniper_22
+  ΔCPlayerPed
+  arg_1? : Ref[CPad]
+where
+  -- Declared member operation CPlayerPed::PlayerControlSniper(CPad*)
+  true
+end
+
+schema CPlayerPed_PlayerControlM16_23
+  ΔCPlayerPed
+  arg_1? : Ref[CPad]
+where
+  -- Declared member operation CPlayerPed::PlayerControlM16(CPad*)
+  true
+end
+
+schema CPlayerPed_PlayerControlFighter_24
+  ΔCPlayerPed
+  arg_1? : Ref[CPad]
+where
+  -- Declared member operation CPlayerPed::PlayerControlFighter(CPad*)
+  true
+end
+
+schema CPlayerPed_ProcessWeaponSwitch_25
+  ΔCPlayerPed
+  arg_1? : Ref[CPad]
+where
+  -- Declared member operation CPlayerPed::ProcessWeaponSwitch(CPad*)
+  true
+end
+
+schema CPlayerPed_MakeObjectTargettable_26
+  ΔCPlayerPed
+  arg_1? : ℤ
+where
+  -- Declared member operation CPlayerPed::MakeObjectTargettable(int32)
+  true
+end
+
+schema CPlayerPed_PlayerControl1stPersonRunAround_27
+  ΔCPlayerPed
+  padUsed? : Ref[CPad]
+where
+  -- Declared member operation CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
+  true
+end
+
+schema CPlayerPed_EvaluateNeighbouringTarget_28
+  ΔCPlayerPed
+  arg_1? : Ref[CEntity]
+  arg_2? : Ref[CEntity]
+  arg_3? : ℙ ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : 𝔹
+  arg_7? : 𝔹
+where
+  -- Declared member operation CPlayerPed::EvaluateNeighbouringTarget(CEntity*, CEntity**, float*, float, float, bool, bool)
+  true
+end
+
+schema CPlayerPed_EvaluateTarget_29
+  ΔCPlayerPed
+  arg_1? : Ref[CEntity]
+  arg_2? : Ref[CEntity]
+  arg_3? : ℙ ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : 𝔹
+where
+  -- Declared member operation CPlayerPed::EvaluateTarget(CEntity*, CEntity**, float*, float, float, bool)
+  true
+end
+
+schema CPlayerPed_FindNextWeaponLockOnTarget_30
+  ΔCPlayerPed
+  arg_1? : Ref[CEntity]
+  arg_2? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CPlayerPed::FindNextWeaponLockOnTarget(CEntity*, bool)
+  true
+end

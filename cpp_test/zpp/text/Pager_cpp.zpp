@@ -1,0 +1,117 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pager (text)
+-- Source File(s): text/Pager.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pager.zpp  (from "Pager.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Camera.zpp  (from "Camera.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPager_Init
+  ΔCPager
+where
+  -- State update: m_nNumDisplayLetters' = 8
+  true
+end
+
+schema CPager_Process
+  ΔCPager
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pText' = ∅
+  -- State update: m_nTimeToChangePosition' = CTimer::GetTimeInMilliseconds() + m_messages[0].m_nSpeedMs
+  -- Invokes: CMessages::AddToPreviousBriefArray, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPager_Display
+  ΔCPager
+where
+  -- State update: pText' = m_messages[0].m_pText
+  -- State update: pos' = m_messages[0].m_nCurrentPosition + i
+  -- Invokes: CMessages::InsertNumberInString, CHud::SetPagerMessage
+  true
+end
+
+schema CPager_AddMessage
+  ΔCPager
+  str? : seq CHAR
+  speed? : ℕ
+  priority? : ℕ
+  a5? : ℕ
+where
+  -- State update: size' = CMessages::GetWideStringLength(str)
+  -- State update: m_pText' = str
+  -- State update: m_nSpeedMs' = speed
+  -- State update: m_nPriority' = priority
+  -- State update: unused' = a5
+  -- State update: m_nCurrentPosition' = -(m_nNumDisplayLetters + 10)
+  -- Invokes: CMessages::GetWideStringLength, CTimer::GetTimeInMilliseconds, CMessages::AddToPreviousBriefArray
+  true
+end
+
+schema CPager_AddMessageWithNumber
+  ΔCPager
+  str? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  speed? : ℕ
+  priority? : ℕ
+  a11? : ℕ
+where
+  -- State update: size' = CMessages::GetWideStringLength(nstr)
+  -- State update: m_pText' = str
+  -- State update: m_nSpeedMs' = speed
+  -- State update: m_nPriority' = priority
+  -- State update: unused' = a11
+  -- State update: m_nCurrentPosition' = -(m_nNumDisplayLetters + 10)
+  -- Invokes: CMessages::InsertNumberInString, CMessages::GetWideStringLength, CTimer::GetTimeInMilliseconds, CMessages::AddToPreviousBriefArray
+  true
+end
+
+schema CPager_ClearMessages
+  ΔCPager
+where
+  -- State update: m_pText' = ∅
+  true
+end
+
+schema CPager_RestartCurrentMessage
+  ΔCPager
+where
+  -- State update: m_nCurrentPosition' = -(m_nNumDisplayLetters + 10)
+  -- State update: m_nTimeToChangePosition' = CTimer::GetTimeInMilliseconds() + m_messages[0].m_nSpeedMs
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PagerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 184
+end

@@ -1,0 +1,566 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ModelIndices (modelinfo)
+-- Source File(s): modelinfo/ModelIndices.cpp, modelinfo/ModelIndices.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include main.zpp  (from "main.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MI_TRAFFICLIGHTS : seq CHAR  -- #define MI_TRAFFICLIGHTS gpModelIndices->TRAFFICLIGHTS
+MI_TLIGHT_POST : seq CHAR  -- #define MI_TLIGHT_POST gpModelIndices->TLIGHT_POST
+MI_TLIGHT_WALK : seq CHAR  -- #define MI_TLIGHT_WALK gpModelIndices->TLIGHT_WALK
+MI_TLIGHT_BOX1 : seq CHAR  -- #define MI_TLIGHT_BOX1 gpModelIndices->TLIGHT_BOX1
+MI_TLIGHT_BOX2 : seq CHAR  -- #define MI_TLIGHT_BOX2 gpModelIndices->TLIGHT_BOX2
+MI_TRAFFICLIGHTS_VERTICAL : seq CHAR  -- #define MI_TRAFFICLIGHTS_VERTICAL gpModelIndices->TRAFFICLIGHTS_VERTICAL
+MI_TRAFFICLIGHTS_MIAMI : seq CHAR  -- #define MI_TRAFFICLIGHTS_MIAMI gpModelIndices->TRAFFICLIGHTS_MIAMI
+MI_TRAFFICLIGHTS_TWOVERTICAL : seq CHAR  -- #define MI_TRAFFICLIGHTS_TWOVERTICAL gpModelIndices->TRAFFICLIGHTS_TWOVERTICAL
+MI_SINGLESTREETLIGHTS1 : seq CHAR  -- #define MI_SINGLESTREETLIGHTS1 gpModelIndices->SINGLESTREETLIGHTS1
+MI_SINGLESTREETLIGHTS2 : seq CHAR  -- #define MI_SINGLESTREETLIGHTS2 gpModelIndices->SINGLESTREETLIGHTS2
+MI_SINGLESTREETLIGHTS3 : seq CHAR  -- #define MI_SINGLESTREETLIGHTS3 gpModelIndices->SINGLESTREETLIGHTS3
+MI_DOUBLESTREETLIGHTS : seq CHAR  -- #define MI_DOUBLESTREETLIGHTS gpModelIndices->DOUBLESTREETLIGHTS
+MI_STREETLAMP1 : seq CHAR  -- #define MI_STREETLAMP1 gpModelIndices->STREETLAMP1
+MI_STREETLAMP2 : seq CHAR  -- #define MI_STREETLAMP2 gpModelIndices->STREETLAMP2
+MI_ROADSFORROADBLOCKSSTART : seq CHAR  -- #define MI_ROADSFORROADBLOCKSSTART gpModelIndices->ROADSFORROADBLOCKSSTART
+MI_ROADSFORROADBLOCKSEND : seq CHAR  -- #define MI_ROADSFORROADBLOCKSEND gpModelIndices->ROADSFORROADBLOCKSEND
+MI_TREE2 : seq CHAR  -- #define MI_TREE2 gpModelIndices->TREE2
+MI_TREE3 : seq CHAR  -- #define MI_TREE3 gpModelIndices->TREE3
+MI_TREE6 : seq CHAR  -- #define MI_TREE6 gpModelIndices->TREE6
+MI_TREE8 : seq CHAR  -- #define MI_TREE8 gpModelIndices->TREE8
+MI_TREE1 : seq CHAR  -- #define MI_TREE1 gpModelIndices->TREE1
+MI_TREE4 : seq CHAR  -- #define MI_TREE4 gpModelIndices->TREE4
+MI_TREE5 : seq CHAR  -- #define MI_TREE5 gpModelIndices->TREE5
+MI_TREE7 : seq CHAR  -- #define MI_TREE7 gpModelIndices->TREE7
+MI_TREE9 : seq CHAR  -- #define MI_TREE9 gpModelIndices->TREE9
+MI_TREE10 : seq CHAR  -- #define MI_TREE10 gpModelIndices->TREE10
+MI_TREE11 : seq CHAR  -- #define MI_TREE11 gpModelIndices->TREE11
+MI_TREE12 : seq CHAR  -- #define MI_TREE12 gpModelIndices->TREE12
+MI_TREE13 : seq CHAR  -- #define MI_TREE13 gpModelIndices->TREE13
+MI_TREE14 : seq CHAR  -- #define MI_TREE14 gpModelIndices->TREE14
+MODELID_CRANE_1 : seq CHAR  -- #define MODELID_CRANE_1 gpModelIndices->CRANE_1
+MODELID_CRANE_2 : seq CHAR  -- #define MODELID_CRANE_2 gpModelIndices->CRANE_2
+MODELID_CRANE_3 : seq CHAR  -- #define MODELID_CRANE_3 gpModelIndices->CRANE_3
+MODELID_CRANE_4 : seq CHAR  -- #define MODELID_CRANE_4 gpModelIndices->CRANE_4
+MODELID_CRANE_5 : seq CHAR  -- #define MODELID_CRANE_5 gpModelIndices->CRANE_5
+MODELID_CRANE_6 : seq CHAR  -- #define MODELID_CRANE_6 gpModelIndices->CRANE_6
+MI_PARKINGMETER : seq CHAR  -- #define MI_PARKINGMETER gpModelIndices->PARKINGMETER
+MI_PARKINGMETER2 : seq CHAR  -- #define MI_PARKINGMETER2 gpModelIndices->PARKINGMETER2
+MI_MALLFAN : seq CHAR  -- #define MI_MALLFAN gpModelIndices->MALLFAN
+MI_HOTELFAN_NIGHT : seq CHAR  -- #define MI_HOTELFAN_NIGHT gpModelIndices->HOTELFAN_NIGHT
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+ModelIndices_Enum_1 ::= MI_PLAYER | MI_COP | MI_SWAT | MI_FBI | MI_ARMY | MI_MEDIC | MI_FIREMAN | MI_MALE01 | MI_TAXI_D | MI_PIMP | MI_CRIMINAL01 | MI_CRIMINAL02 | MI_MALE02 | MI_MALE03 | MI_FATMALE01 | MI_FATMALE02 | MI_FEMALE01 | MI_FEMALE02 | MI_FEMALE03 | MI_FATFEMALE01 | MI_FATFEMALE02 | MI_PROSTITUTE | MI_PROSTITUTE2 | MI_P_MAN1 | MI_P_MAN2 | MI_P_WOM1 | MI_P_WOM2 | MI_CT_MAN1 | MI_CT_MAN2 | MI_CT_WOM1 | MI_CT_WOM2 | MI_LI_MAN1 | MI_LI_MAN2 | MI_LI_WOM1 | MI_LI_WOM2 | MI_DOCKER1 | MI_DOCKER2 | MI_SCUM_MAN | MI_SCUM_WOM | MI_WORKER1 | MI_WORKER2 | MI_B_MAN1 | MI_B_MAN2 | MI_B_MAN3 | MI_B_WOM1 | MI_B_WOM2 | MI_B_WOM3 | MI_MOD_MAN | ... (325 total branches)
+  -- val(MI_PLAYER) = 0
+  -- val(MI_TAXI_D) = 9
+
+ModelIndices_Enum_2 ::= NUM_OF_SPECIAL_CHARS | NUM_OF_CUTSCENE_OBJECTS
+  -- val(NUM_OF_SPECIAL_CHARS) = 21
+  -- val(NUM_OF_CUTSCENE_OBJECTS) = 5
+
+ModelIndices_Enum_3 ::= MI_PLAYER | MI_COP | MI_SWAT | MI_FBI | MI_ARMY | MI_MEDIC | MI_FIREMAN | MI_MALE01 | MI_HFYST | MI_HFOST | MI_HMYST | MI_HMOST | MI_HFYRI | MI_HFORI | MI_HMYRI | MI_HMORI | MI_HFYBE | MI_HFOBE | MI_HMYBE | MI_HMOBE | MI_HFYBU | MI_HFYMD | MI_HFYCG | MI_HFYPR | MI_HFOTR | MI_HMOTR | MI_HMYAP | MI_HMOCA | MI_TAXI_D | MI_BMODK | MI_BMYKR | MI_BFYST | MI_BFOST | MI_BMYST | MI_BMOST | MI_BFYRI | MI_BFORI | MI_BMYRI | MI_BFYBE | MI_BMYBE | MI_BFOBE | MI_BMOBE | MI_BMYBU | MI_BFYPR | MI_BFOTR | MI_BMOTR | MI_BMYPI | MI_BMYBB | ... (302 total branches)
+  -- val(MI_PLAYER) = 0
+  -- val(MI_HFYST) = 9
+
+ModelIndices_Enum_4 ::= MI_PLAYER | MI_COP | MI_SWAT | MI_FBI | MI_ARMY | MI_MEDIC | MI_FIREMAN | MI_MALE01 | MI_TAXI_D | MI_PIMP | MI_GANG01 | MI_GANG02 | MI_GANG03 | MI_GANG04 | MI_GANG05 | MI_GANG06 | MI_GANG07 | MI_GANG08 | MI_GANG09 | MI_GANG10 | MI_GANG11 | MI_GANG12 | MI_GANG13 | MI_GANG14 | MI_CRIMINAL01 | MI_CRIMINAL02 | MI_SPECIAL01 | MI_SPECIAL02 | MI_SPECIAL03 | MI_SPECIAL04 | MI_MALE02 | MI_MALE03 | MI_FATMALE01 | MI_FATMALE02 | MI_FEMALE01 | MI_FEMALE02 | MI_FEMALE03 | MI_FATFEMALE01 | MI_FATFEMALE02 | MI_PROSTITUTE | MI_PROSTITUTE2 | MI_P_MAN1 | MI_P_MAN2 | MI_P_WOM1 | MI_P_WOM2 | MI_CT_MAN1 | MI_CT_MAN2 | MI_CT_WOM1 | ... (183 total branches)
+  -- val(MI_PLAYER) = 0
+
+ModelIndices_Enum_5 ::= NUM_OF_SPECIAL_CHARS | NUM_OF_CUTSCENE_OBJECTS
+  -- val(NUM_OF_SPECIAL_CHARS) = 4
+  -- val(NUM_OF_CUTSCENE_OBJECTS) = 5
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CModelIndices
+  TRAFFICLIGHTS : ℤ
+  TLIGHT_POST : ℤ
+  TLIGHT_WALK : ℤ
+  TLIGHT_BOX1 : ℤ
+  TLIGHT_BOX2 : ℤ
+  TRAFFICLIGHTS_VERTICAL : ℤ
+  TRAFFICLIGHTS_MIAMI : ℤ
+  TRAFFICLIGHTS_TWOVERTICAL : ℤ
+  SINGLESTREETLIGHTS1 : ℤ
+  SINGLESTREETLIGHTS2 : ℤ
+  SINGLESTREETLIGHTS3 : ℤ
+  DOUBLESTREETLIGHTS : ℤ
+  STREETLAMP1 : ℤ
+  STREETLAMP2 : ℤ
+  ROADSFORROADBLOCKSSTART : ℤ
+  ROADSFORROADBLOCKSEND : ℤ
+  TREE2 : ℤ
+  TREE3 : ℤ
+  TREE6 : ℤ
+  TREE8 : ℤ
+  TREE1 : ℤ
+  TREE4 : ℤ
+  TREE5 : ℤ
+  TREE7 : ℤ
+  TREE9 : ℤ
+  TREE10 : ℤ
+  TREE11 : ℤ
+  TREE12 : ℤ
+  TREE13 : ℤ
+  TREE14 : ℤ
+  CRANE_1 : ℤ
+  CRANE_2 : ℤ
+  CRANE_3 : ℤ
+  CRANE_4 : ℤ
+  CRANE_5 : ℤ
+  CRANE_6 : ℤ
+  PARKINGMETER : ℤ
+  PARKINGMETER2 : ℤ
+  MALLFAN : ℤ
+  HOTELFAN_NIGHT : ℤ
+  HOTELFAN_DAY : ℤ
+  HOTROOMFAN : ℤ
+  PHONEBOOTH1 : ℤ
+  WASTEBIN : ℤ
+  BIN : ℤ
+  POSTBOX1 : ℤ
+  NEWSSTAND : ℤ
+  TRAFFICCONE : ℤ
+  DUMP1 : ℤ
+  ROADWORKBARRIER1 : ℤ
+  BUSSIGN1 : ℤ
+  NOPARKINGSIGN1 : ℤ
+  PHONESIGN : ℤ
+  TAXISIGN : ℤ
+  FISHSTALL01 : ℤ
+  FISHSTALL02 : ℤ
+  FISHSTALL03 : ℤ
+  FISHSTALL04 : ℤ
+  BAGELSTAND2 : ℤ
+  FIRE_HYDRANT : ℤ
+  COLLECTABLE1 : ℤ
+  MONEY : ℤ
+  CARMINE : ℤ
+  GARAGEDOOR1 : ℤ
+  GARAGEDOOR2 : ℤ
+  GARAGEDOOR3 : ℤ
+  GARAGEDOOR4 : ℤ
+  GARAGEDOOR5 : ℤ
+  GARAGEDOOR6 : ℤ
+  GARAGEDOOR7 : ℤ
+  GARAGEDOOR9 : ℤ
+  GARAGEDOOR10 : ℤ
+  GARAGEDOOR11 : ℤ
+  GARAGEDOOR12 : ℤ
+  GARAGEDOOR13 : ℤ
+  GARAGEDOOR14 : ℤ
+  GARAGEDOOR15 : ℤ
+  GARAGEDOOR16 : ℤ
+  GARAGEDOOR17 : ℤ
+  GARAGEDOOR18 : ℤ
+  GARAGEDOOR19 : ℤ
+  GARAGEDOOR20 : ℤ
+  GARAGEDOOR21 : ℤ
+  GARAGEDOOR22 : ℤ
+  GARAGEDOOR23 : ℤ
+  GARAGEDOOR24 : ℤ
+  GARAGEDOOR25 : ℤ
+  GARAGEDOOR26 : ℤ
+  GARAGEDOOR27 : ℤ
+  GARAGEDOOR28 : ℤ
+  GARAGEDOOR29 : ℤ
+  GARAGEDOOR30 : ℤ
+  GARAGEDOOR31 : ℤ
+  GARAGEDOOR32 : ℤ
+  GARAGEDOOR33 : ℤ
+  GARAGEDOOR34 : ℤ
+  GARAGEDOOR35 : ℤ
+  GARAGEDOOR36 : ℤ
+  GARAGEDOOR37 : ℤ
+  GARAGEDOOR38 : ℤ
+  GARAGEDOOR39 : ℤ
+  TESTRAMP1 : ℤ
+  TESTRAMP2 : ℤ
+  NAUTICALMINE : ℤ
+  CRUSHERBODY : ℤ
+  CRUSHERLID : ℤ
+  DONKEYMAG : ℤ
+  BULLION : ℤ
+  FLOATPACKAGE1 : ℤ
+  BRIEFCASE : ℤ
+  CHINABANNER1 : ℤ
+  CHINABANNER2 : ℤ
+  CHINABANNER3 : ℤ
+  CHINABANNER4 : ℤ
+  CHINABANNER5 : ℤ
+  CHINABANNER6 : ℤ
+  CHINABANNER7 : ℤ
+  CHINABANNER8 : ℤ
+  CHINABANNER9 : ℤ
+  CHINABANNER10 : ℤ
+  CHINABANNER11 : ℤ
+  CHINABANNER12 : ℤ
+  CHINALANTERN : ℤ
+  GLASS1 : ℤ
+  GLASS2 : ℤ
+  GLASS3 : ℤ
+  GLASS4 : ℤ
+  GLASS5 : ℤ
+  GLASS6 : ℤ
+  GLASS7 : ℤ
+  GLASS8 : ℤ
+  BRIDGELIFT : ℤ
+  BRIDGEWEIGHT : ℤ
+  BRIDGEROADSEGMENT : ℤ
+  EXPLODINGBARREL : ℤ
+  ITALYBANNER1 : ℤ
+  MEGADAMAGE : ℤ
+  REGENERATOR : ℤ
+  INVISIBLE : ℤ
+  GOOD_CAR : ℤ
+  BAD_CAR : ℤ
+  PICKUP_ADRENALINE : ℤ
+  PICKUP_BODYARMOUR : ℤ
+  PICKUP_INFO : ℤ
+  PICKUP_HEALTH : ℤ
+  PICKUP_BONUS : ℤ
+  PICKUP_BRIBE : ℤ
+  PICKUP_KILLFRENZY : ℤ
+  PICKUP_CAMERA : ℤ
+  PICKUP_REVENUE : ℤ
+  PICKUP_SAVEGAME : ℤ
+  PICKUP_PROPERTY : ℤ
+  PICKUP_PROPERTY_FORSALE : ℤ
+  PICKUP_CLOTHES : ℤ
+  BOLLARDLIGHT : ℤ
+  CA_SP1 : ℤ
+  CA_SP2 : ℤ
+  CA_SP3 : ℤ
+  CA_SP4 : ℤ
+  PACKAGE1IZZY : ℤ
+  MAGNET : ℤ
+  RAILTRACKS : ℤ
+  FENCE : ℤ
+  FENCE2 : ℤ
+  PETROLPUMP : ℤ
+  PETROLPUMP2 : ℤ
+  BODYCAST : ℤ
+  IZZY_CONFDOOR : ℤ
+  SHIPDOOR : ℤ
+  IZZY_JDDOOR : ℤ
+  IZZY_JDDOOR_SLIDER : ℤ
+  LITEHOUSE_GATE : ℤ
+  COFFEE : ℤ
+  BUOY : ℤ
+  PARKTABLE : ℤ
+  SUBWAY1 : ℤ
+  SUBWAY2 : ℤ
+  SUBWAY3 : ℤ
+  SUBWAY4 : ℤ
+  SUBWAY5 : ℤ
+  SUBWAY6 : ℤ
+  SUBWAY7 : ℤ
+  SUBWAY8 : ℤ
+  SUBWAY9 : ℤ
+  SUBWAY10 : ℤ
+  SUBWAY11 : ℤ
+  SUBWAY12 : ℤ
+  SUBWAY13 : ℤ
+  SUBWAY14 : ℤ
+  SUBWAY15 : ℤ
+  SUBWAY16 : ℤ
+  SUBWAY17 : ℤ
+  SUBWAY18 : ℤ
+  SUBPLATFORM_IND : ℤ
+  SUBPLATFORM_COMS : ℤ
+  SUBPLATFORM_COMS2 : ℤ
+  SUBPLATFORM_COMN : ℤ
+  SUBPLATFORM_SUB : ℤ
+  SUBPLATFORM_SUB2 : ℤ
+  FILES : ℤ
+  LAMPPOST1 : ℤ
+  VEG_PALM01 : ℤ
+  VEG_PALM02 : ℤ
+  VEG_PALM03 : ℤ
+  VEG_PALM04 : ℤ
+  VEG_PALM05 : ℤ
+  VEG_PALM06 : ℤ
+  VEG_PALM07 : ℤ
+  VEG_PALM08 : ℤ
+  MLAMPPOST : ℤ
+  BARRIER1 : ℤ
+  LITTLEHA_POLICE : ℤ
+  TELPOLE02 : ℤ
+  TRAFFICLIGHT01 : ℤ
+  PARKBENCH : ℤ
+  PLC_STINGER : ℤ
+  LIGHTBEAM : ℤ
+  AIRPORTRADAR : ℤ
+  RCBOMB : ℤ
+  JM_SALRADIO : ℤ
+  BEACHBALL : ℤ
+  SANDCASTLE1 : ℤ
+  SANDCASTLE2 : ℤ
+  JELLYFISH : ℤ
+  JELLYFISH01 : ℤ
+  FISH1SINGLE : ℤ
+  FISH1S : ℤ
+  FISH2SINGLE : ℤ
+  FISH2S : ℤ
+  FISH3SINGLE : ℤ
+  FISH3S : ℤ
+  TURTLE : ℤ
+  DOLPHIN : ℤ
+  SHARK : ℤ
+  SUBMARINE : ℤ
+  ESCALATORSTEP : ℤ
+  LOUNGE_WOOD_UP : ℤ
+  LOUNGE_TOWEL_UP : ℤ
+  LOUNGE_WOOD_DN : ℤ
+  LOTION : ℤ
+  BEACHTOWEL01 : ℤ
+  BEACHTOWEL02 : ℤ
+  BEACHTOWEL03 : ℤ
+  BEACHTOWEL04 : ℤ
+  BLIMP_NIGHT : ℤ
+  BLIMP_DAY : ℤ
+  YT_MAIN_BODY : ℤ
+  YT_MAIN_BODY2 : ℤ
+  SMALL_HELIX : ℤ
+  PT_BARRIER : ℤ
+  SUBWAYGATE : ℤ
+  IN_PMBRIDRAMP3 : ℤ
+  IN_PMBRIDG2_UPGS : ℤ
+  IN_PMBRIDGE2 : ℤ
+  IN_PMBRIDG1_UPGS : ℤ
+  PM_LIGHTRIG3 : ℤ
+  PM_LIGHTRIG1 : ℤ
+  IN_PMSCAFF_UPS : ℤ
+  IN_PM_CONCBLOK2 : ℤ
+  IN_PMSCAFFH_NS : ℤ
+  IN_PM_GRAVL_JMP : ℤ
+  IN_PM_SCAFFCOVR : ℤ
+  IN_PM_GIRDER2 : ℤ
+  IN_PM_SCAFFH_WE : ℤ
+  IN_PM_SIXCONC2 : ℤ
+  IN_BMBRIDRAMP3 : ℤ
+  IN_BMBRIDG2_UPGS : ℤ
+  IN_BMBRIDGE2 : ℤ
+  IN_BMBRIDG1_UPGS : ℤ
+  BM_LIGHTRIG3 : ℤ
+  BM_LIGHTRIG1 : ℤ
+  IN_BMSCAFF_UPS : ℤ
+  IN_BM_CONCBLOK2 : ℤ
+  IN_BMSCAFFH_NS : ℤ
+  IN_BM_GRAVL_JMP : ℤ
+  IN_BM_SCAFFCOVR : ℤ
+  IN_BM_GIRDER2 : ℤ
+  IN_BM_SCAFFH_WE : ℤ
+  IN_BM_SIXCONC2 : ℤ
+  CRATE_SJL : ℤ
+  DOOR1_SJL : ℤ
+  DOOR2_SJL : ℤ
+  SJL_PORTACABIN : ℤ
+  SJL_PORTACABINRED : ℤ
+  advert_test : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ModelIndices_InitModelIndices
+  ΔModelIndicesModuleState
+where
+  -- State update: gpModelIndices' = new CModelIndices
+  true
+end
+
+schema ModelIndices_MatchModelString
+  ΔModelIndicesModuleState
+  modelname? : seq CHAR
+  id? : ℤ
+where
+  -- State update: var' = id
+  -- Invokes: CGeneral::faststrcmp
+  true
+end
+
+schema ModelIndices_TestModelIndices
+  ΔModelIndicesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsGlass
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsTrafficLight
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsLightWithoutShift
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsLightWithPreRenderEffects
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsLightThatNeedsRepositioning
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsLightObject
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsLampPost
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsLCSTrafficLight
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsBodyPart
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Return postcondition: result! = id == MI_BODYPARTA || id == MI_BODYPARTB
+  true
+end
+
+schema ModelIndices_IsPedModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Return postcondition: result! = id >= MI_PLAYER && id <= MI_LAST_PED
+  true
+end
+
+schema ModelIndices_IsPalmTreeModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsTreeModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsPolicePedModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Return postcondition: result! = id == MI_COP || id == MI_SWAT || id == MI_FBI || id == MI_ARMY
+  true
+end
+
+schema ModelIndices_IsPoliceVehicleModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsExplosiveThingModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsFence
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Return postcondition: result! = id == MI_FENCE || id == MI_FENCE2
+  true
+end
+
+schema ModelIndices_IsStreetLight
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsBoatModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsBannerModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ModelIndices_IsPickupModel
+  ΔModelIndicesModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

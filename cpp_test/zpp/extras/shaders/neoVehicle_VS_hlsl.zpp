@@ -1,0 +1,64 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoVehicle_VS (extras)
+-- Source File(s): extras/shaders/neoVehicle_VS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include standardConstants.zpp  (from "standardConstants.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+fresnel : seq CHAR  -- #define fresnel (reflProps.x)
+lightStrength : seq CHAR  -- #define lightStrength (reflProps.y)
+shininess : seq CHAR  -- #define shininess (reflProps.z)
+specularity : seq CHAR  -- #define specularity (reflProps.w)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VS_in
+  POSITION : ℝ
+  NORMAL : ℝ
+  TEXCOORD0 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema VS_out
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+  TEXCOORD1 : ℝ
+  COLOR0 : ℝ
+  COLOR1 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema neoVehicle_VS_main
+  ΔneoVehicle_VSModuleState
+  input? : in_VS_in
+  result! : VS_out
+where
+  -- State update: output.Position' = mul(combinedMat, input.Position)
+  -- State update: Vertex' = mul(worldMat, input.Position).xyz
+  -- State update: Normal' = mul(normalMat, input.Normal)
+  -- State update: viewVec' = normalize(eye - Vertex)
+  -- State update: output.TexCoord0.xy' = input.TexCoord
+  -- State update: output.Color' = input.Prelight
+  -- Return postcondition: result! = output
+  true
+end

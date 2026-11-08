@@ -1,0 +1,120 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WeaponModelInfo (modelinfo)
+-- Source File(s): modelinfo/WeaponModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include SimpleModelInfo.zpp  (from "SimpleModelInfo.h")
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeaponModelInfo
+  CSimpleModelInfo  -- inherits base schema
+  m_animFileName : seq CHAR
+  msClassInfo : base__cRelocatableChunkClassInfo
+  msClassInstance : CWeaponModelInfo
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWeaponModelInfo_CWeaponModelInfo
+  ΔCWeaponModelInfo
+where
+  -- Declared member operation CWeaponModelInfo::CWeaponModelInfo(void)
+  true
+end
+
+schema CWeaponModelInfo_SetAnimFile_2
+  ΔCWeaponModelInfo
+  file? : seq CHAR
+  result! : void
+where
+  -- Declared member operation CWeaponModelInfo::SetAnimFile(const char *file)
+  true
+end
+
+schema CWeaponModelInfo_ConvertAnimFileIndex_3
+  ΔCWeaponModelInfo
+where
+  -- Declared member operation CWeaponModelInfo::ConvertAnimFileIndex(void)
+  true
+end
+
+schema CWeaponModelInfo_GetAnimFileIndex_4
+  ΔCWeaponModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CWeaponModelInfo::GetAnimFileIndex(void)
+  true
+end
+
+schema CWeaponModelInfo_RcWriteThis_5
+  ΔCWeaponModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : void
+where
+  -- Declared member operation CWeaponModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CWeaponModelInfo_RcWriteEmpty_6
+  ΔCWeaponModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CWeaponModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CWeaponModelInfo_Init_7
+  ΔCWeaponModelInfo
+where
+  -- Declared member operation CWeaponModelInfo::Init(void)
+  true
+end
+
+schema CWeaponModelInfo_SetWeaponInfo_8
+  ΔCWeaponModelInfo
+  weaponId? : ℤ
+where
+  -- Declared member operation CWeaponModelInfo::SetWeaponInfo(int32 weaponId)
+  true
+end
+
+schema CWeaponModelInfo_GetWeaponInfo_9
+  ΔCWeaponModelInfo
+  result! : eWeaponType
+where
+  -- Declared member operation CWeaponModelInfo::GetWeaponInfo(void)
+  true
+end
+
+schema CWeaponModelInfo_SetAtomic_10
+  ΔCWeaponModelInfo
+  n? : ℤ
+  atomic? : Ref[RpAtomic]
+where
+  -- Declared member operation CWeaponModelInfo::SetAtomic(int n, RpAtomic *atomic)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema WeaponModelInfo_GetAnimFileIndex
+  ΔWeaponModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_animFileIndex
+  true
+end

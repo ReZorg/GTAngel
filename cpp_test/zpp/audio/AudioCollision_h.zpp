@@ -1,0 +1,118 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioCollision (audio)
+-- Source File(s): audio/AudioCollision.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMAUDIOCOLLISIONS : ℕ  -- #define NUMAUDIOCOLLISIONS 10
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cAudioCollision
+  m_pEntity1 : Ref[CEntity]
+  m_pEntity2 : Ref[CEntity]
+  m_bSurface1 : ℕ
+  m_bSurface2 : ℕ
+  m_fIntensity1 : ℝ
+  m_fIntensity2 : ℝ
+  m_vecPosition : CVector
+  m_fDistance : ℝ
+  m_nBaseVolume : ℤ
+where
+  #m_pEntity1 ≤ 1
+  #m_pEntity2 ≤ 1
+  m_bSurface1 ≥ 0
+  m_bSurface2 ≥ 0
+end
+
+schema cAudioCollision_cAudioCollision
+  ΔcAudioCollision
+where
+  -- Declared member operation cAudioCollision::cAudioCollision()
+  true
+end
+
+schema cAudioCollision_Reset_2
+  ΔcAudioCollision
+  result! : void
+where
+  -- Declared member operation cAudioCollision::Reset()
+  true
+end
+
+schema cAudioCollision_CVector_3
+  ΔcAudioCollision
+  f? : 0_0
+  f? : 0_0
+  f? : 0_0
+  result! : m_vecPosition
+where
+  -- Declared member operation cAudioCollision::CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema cAudioCollisionManager
+  m_asCollisions1 : seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
+  m_asCollisions2 : seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
+  m_bIndicesTable : seq ℕ  -- bounded array [NUMAUDIOCOLLISIONS]
+  m_bCollisionsInQueue : ℕ
+  m_sQueue : cAudioCollision
+  NUMAUDIOCOLLISIONS : i
+where
+  m_bCollisionsInQueue ≥ 0
+end
+
+schema cAudioCollisionManager_cAudioCollisionManager
+  ΔcAudioCollisionManager
+where
+  -- Declared member operation cAudioCollisionManager::cAudioCollisionManager()
+  true
+end
+
+schema cAudioCollisionManager_AddCollisionToRequestedQueue_2
+  ΔcAudioCollisionManager
+  result! : void
+where
+  -- Declared member operation cAudioCollisionManager::AddCollisionToRequestedQueue()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema AudioCollision_cAudioCollision
+  ΔAudioCollisionModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema AudioCollision_Reset
+  ΔAudioCollisionModuleState
+where
+  -- State update: m_pEntity1' = ∅
+  -- State update: m_pEntity2' = ∅
+  -- State update: m_bSurface1' = 0
+  -- State update: m_bSurface2' = 0
+  -- State update: m_fIntensity2' = 0.0f
+  -- State update: m_vecPosition' = CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema AudioCollision_cAudioCollisionManager
+  ΔAudioCollisionModuleState
+where
+  -- State update: m_bCollisionsInQueue' = 0
+  -- Invokes: m_sQueue.Reset
+  true
+end

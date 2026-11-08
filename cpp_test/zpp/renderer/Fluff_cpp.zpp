@@ -1,0 +1,163 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Fluff (renderer)
+-- Source File(s): renderer/Fluff.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include General.zpp  (from "General.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include maths.zpp  (from "maths.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include World.zpp  (from "World.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SCRIPTPATHS_SAVE_SIZE : seq CHAR  -- #define SCRIPTPATHS_SAVE_SIZE 0x9C
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eScrollBarTypes ::= SCROLL_ARENA_STRING
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPlaneTrail_Init
+  ΔCPlaneTrail
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlaneTrail_Render
+  ΔCPlaneTrail
+  visibility? : ℝ
+where
+  -- State update: numVerts' = 0
+  -- State update: alpha' = visibility*110.0f
+  -- State update: time' = CTimer::GetTimeInMilliseconds() - m_time[i]
+  -- State update: fade' = (30000.0f - time) / 10000.0f
+  -- State update: fade' = Min(fade, 1.0f)
+  -- Invokes: TheCamera.IsSphereVisible, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPlaneTrail_RegisterPoint
+  ΔCPlaneTrail
+  pos? : CVector
+where
+  -- State update: bNewPoint' = false
+  -- State update: bNewPoint' = true
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPlaneTrails_Init
+  ΔCPlaneTrails
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlaneTrails_Update
+  ΔCPlaneTrails
+where
+  -- State update: planePos.z' = 550.0f
+  -- State update: planePos.z' = 500.0f
+  -- State update: planePos.z' = 600.0f
+  -- Invokes: CTimer::GetTimeInMilliseconds, CClock::GetHours, CCoronas::RegisterCorona, CCoronas::UpdateCoronaCoors
+  true
+end
+
+schema CPlaneTrails_Render
+  ΔCPlaneTrails
+where
+  -- State update: visibility' = Min(1.0f-CWeather::Foggyness, 1.0f-CWeather::CloudCoverage)
+  -- State update: visibility' = Min(visibility, 1.0f-CWeather::Rain)
+  -- Invokes: CTimeCycle::GetSkyTopRed, CTimeCycle::GetSkyTopGreen, CTimeCycle::GetSkyTopBlue
+  true
+end
+
+schema CPlaneTrails_RegisterPoint
+  ΔCPlaneTrails
+  pos? : CVector
+  id? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlaneBanner_Init
+  ΔCPlaneBanner
+where
+  -- State update: x' = i
+  -- State update: y' = 0.0f
+  -- State update: z' = -60.0f
+  true
+end
+
+schema CPlaneBanner_Update
+  ΔCPlaneBanner
+where
+  -- State update: z' = Max(m_pos[0].z, -100.0f)
+  -- State update: dist' = m_pos[i] - m_pos[i-1]
+  -- State update: len' = dist.Magnitude()
+  -- Invokes: CTimer::GetTimeStep, dist.Magnitude
+  true
+end
+
+schema CPlaneBanner_Render
+  ΔCPlaneBanner
+where
+  -- State update: camDist' = (TheCamera.GetPosition() - m_pos[0]).Magnitude()
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: CigOn' = false
+  -- Return postcondition: result! = count
+  -- Return postcondition: result! = String_Time
+  -- Return postcondition: result! = true
+  -- Invokes: TheCamera.GetPosition, TheCamera.IsSphereVisible, CPlaneBanner::RegisterPoint, CPlaneBanners::Init, CPlaneBanners::Update
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FluffModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2294
+end

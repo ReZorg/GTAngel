@@ -1,0 +1,385 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CarCtrl (control)
+-- Source File(s): control/CarCtrl.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include General.zpp  (from "General.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+GAME_SPEED_TO_METERS_PER_SECOND : ℝ  -- #define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
+METERS_PER_SECOND_TO_GAME_SPEED : ℝ  -- #define METERS_PER_SECOND_TO_GAME_SPEED (1.0f / GAME_SPEED_TO_METERS_PER_SECOND)
+GAME_SPEED_TO_CARAI_SPEED : ℝ  -- #define GAME_SPEED_TO_CARAI_SPEED 60.0f
+TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING : ℕ  -- #define TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING 2500
+FIX_PATHFIND_BUG : seq CHAR  -- #define FIX_PATHFIND_BUG class CCarCtrl
+LANE_WIDTH : ℝ  -- #define LANE_WIDTH 5.0f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CarCtrl_Enum_1 ::= MAX_CARS_TO_KEEP | MAX_CAR_MODELS_IN_ARRAY
+  -- val(MAX_CARS_TO_KEEP) = 2
+  -- val(MAX_CAR_MODELS_IN_ARRAY) = 25
+
+CarCtrl_Enum_2 ::= TOTAL_MULTIPLAYER_CAR_BANKS | CARS_IN_MULTIPLAYER_BANK
+  -- val(TOTAL_MULTIPLAYER_CAR_BANKS) = 3
+  -- val(CARS_IN_MULTIPLAYER_BANK) = 8
+
+eCarClass ::= NORMAL | POOR | RICH | EXEC | WORKER | BIG | TAXI | MOPED | MOTORBIKE | LEISUREBOAT | WORKERBOAT | COPS | CUBAN | HAITIAN | STREET | DIAZ | BIKER | SECURITY | PLAYER | GOLFERS | GANG9 | COPS_BOAT | FIRST_CAR_RATING | FIRST_BOAT_RATING | FIRST_GANG_CAR_RATING | NUM_CAR_CLASSES | NUM_BOAT_CLASSES | NUM_GANG_CAR_CLASSES | TOTAL_CUSTOM_CLASSES
+  -- val(NORMAL) = 0
+  -- val(FIRST_CAR_RATING) = NORMAL
+  -- val(FIRST_BOAT_RATING) = LEISUREBOAT
+
+CarCtrl_Enum_4 ::= MAX_CARS_TO_KEEP | MAX_CAR_MODELS_IN_ARRAY
+  -- val(MAX_CARS_TO_KEEP) = 2
+  -- val(MAX_CAR_MODELS_IN_ARRAY) = 256
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCarCtrl
+  NumLawEnforcerCars : ℤ
+  NumAmbulancesOnDuty : ℤ
+  NumFiretrucksOnDuty : ℤ
+  NumRandomCars : ℤ
+  NumMissionCars : ℤ
+  NumParkedCars : ℤ
+  NumPermanentCars : ℤ
+  bCarsGeneratedAroundCamera : 𝔹
+  CarDensityMultiplier : ℝ
+  CountDownToCarsAtStart : ℤ
+  MaxNumberOfCarsInUse : ℤ
+  LastTimeLawEnforcerCreated : ℕ
+  LastTimeFireTruckCreated : ℕ
+  LastTimeAmbulanceCreated : ℕ
+  TotalNumOfCarsOfRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+  MiamiViceCycle : ℤ
+  LastTimeMiamiViceGenerated : ℕ
+  NumRequestsOfCarRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+  NumOfLoadedCarsOfRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+  scriptControlsMpCarLimit : 𝔹
+  angle : return
+  NextCarOfRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+where
+  LastTimeLawEnforcerCreated ≥ 0
+  LastTimeFireTruckCreated ≥ 0
+  LastTimeAmbulanceCreated ≥ 0
+  LastTimeMiamiViceGenerated ≥ 0
+end
+
+schema CCarCtrl_SwitchVehicleToRealPhysics
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*)
+  true
+end
+
+schema CCarCtrl_AddToCarArray_2
+  ΔCCarCtrl
+  id? : ℤ
+  vehclass? : ℤ
+where
+  -- Declared member operation CCarCtrl::AddToCarArray(int32 id, int32 vehclass)
+  true
+end
+
+schema CCarCtrl_UpdateCarCount_3
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : 𝔹
+where
+  -- Declared member operation CCarCtrl::UpdateCarCount(CVehicle*, bool)
+  true
+end
+
+schema CCarCtrl_ChooseCarModel_4
+  ΔCCarCtrl
+  vehclass? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChooseCarModel(int32 vehclass)
+  true
+end
+
+schema CCarCtrl_JoinCarWithRoadSystemGotoCoors_5
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : CVector
+  arg_3? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool)
+  true
+end
+
+schema CCarCtrl_JoinCarWithRoadSystem_6
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::JoinCarWithRoadSystem(CVehicle*)
+  true
+end
+
+schema CCarCtrl_UpdateCarOnRails_7
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::UpdateCarOnRails(CVehicle*)
+  true
+end
+
+schema CCarCtrl_MapCouldMoveInThisArea_8
+  ΔCCarCtrl
+  x? : ℝ
+  y? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::MapCouldMoveInThisArea(float x, float y)
+  true
+end
+
+schema CCarCtrl_ScanForPedDanger_9
+  ΔCCarCtrl
+  veh? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::ScanForPedDanger(CVehicle *veh)
+  true
+end
+
+schema CCarCtrl_RemoveFromInterestingVehicleList_10
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::RemoveFromInterestingVehicleList(CVehicle*)
+  true
+end
+
+schema CCarCtrl_GenerateRandomCars_11
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::GenerateRandomCars(void)
+  true
+end
+
+schema CCarCtrl_GenerateOneRandomCar_12
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::GenerateOneRandomCar(void)
+  true
+end
+
+schema CCarCtrl_GenerateEmergencyServicesCar_13
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::GenerateEmergencyServicesCar(void)
+  true
+end
+
+schema CCarCtrl_ChooseModel_14
+  ΔCCarCtrl
+  arg_1? : Ref[CZoneInfo]
+  arg_2? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChooseModel(CZoneInfo*, int*)
+  true
+end
+
+schema CCarCtrl_ChoosePoliceCarModel_15
+  ΔCCarCtrl
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChoosePoliceCarModel(void)
+  true
+end
+
+schema CCarCtrl_ChooseGangCarModel_16
+  ΔCCarCtrl
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChooseGangCarModel(int32 gang)
+  true
+end
+
+schema CCarCtrl_RemoveDistantCars_17
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::RemoveDistantCars(void)
+  true
+end
+
+schema CCarCtrl_PossiblyRemoveVehicle_18
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::PossiblyRemoveVehicle(CVehicle*)
+  true
+end
+
+schema CCarCtrl_IsThisVehicleInteresting_19
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::IsThisVehicleInteresting(CVehicle*)
+  true
+end
+
+schema CCarCtrl_RegisterVehicleOfInterest_20
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::RegisterVehicleOfInterest(CVehicle*)
+  true
+end
+
+schema CCarCtrl_CountCarsOfType_21
+  ΔCCarCtrl
+  mi? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::CountCarsOfType(int32 mi)
+  true
+end
+
+schema CCarCtrl_SlowCarOnRailsDownForTrafficAndLights_22
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle*)
+  true
+end
+
+schema CCarCtrl_PickNextNodeAccordingStrategy_23
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*)
+  true
+end
+
+schema CCarCtrl_DragCarToPoint_24
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVector]
+where
+  -- Declared member operation CCarCtrl::DragCarToPoint(CVehicle*, CVector*)
+  true
+end
+
+schema CCarCtrl_FindMaximumSpeedForThisCarInTraffic_25
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Declared member operation CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle*)
+  true
+end
+
+schema CCarCtrl_SlowCarDownForCarsSectorList_26
+  ΔCCarCtrl
+  arg_1? : CPtrList
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℙ ℝ
+  arg_8? : ℝ
+where
+  -- Declared member operation CCarCtrl::SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float)
+  true
+end
+
+schema CCarCtrl_SlowCarDownForPedsSectorList_27
+  ΔCCarCtrl
+  arg_1? : CPtrList
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℙ ℝ
+  arg_8? : ℝ
+where
+  -- Declared member operation CCarCtrl::SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float)
+  true
+end
+
+schema CCarCtrl_SlowCarDownForOtherCar_28
+  ΔCCarCtrl
+  arg_1? : Ref[CEntity]
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℙ ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCarCtrl::SlowCarDownForOtherCar(CEntity*, CVehicle*, float*, float)
+  true
+end
+
+schema CCarCtrl_TestCollisionBetween2MovingRects_29
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : Ref[CVector]
+  arg_6? : Ref[CVector]
+  arg_7? : ℕ
+  result! : ℝ
+where
+  -- Declared member operation CCarCtrl::TestCollisionBetween2MovingRects(CVehicle*, CVehicle*, float, float, CVector*, CVector*, uint8)
+  true
+end
+
+schema CCarCtrl_FindAngleToWeaveThroughTraffic_30
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CPhysical]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CCarCtrl::FindAngleToWeaveThroughTraffic(CVehicle*, CPhysical*, float, float)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CarCtrl_GetPositionAlongCurrentCurve
+  ΔCarCtrlModuleState
+  pVehicle? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Return postcondition: result! = (float)timeInCurve / pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CarCtrl_LimitRadianAngle
+  ΔCarCtrlModuleState
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = CGeneral::LimitRadianAngle(angle)
+  -- Invokes: CGeneral::LimitRadianAngle
+  true
+end

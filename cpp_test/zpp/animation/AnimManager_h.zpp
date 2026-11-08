@@ -1,0 +1,339 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimManager (animation)
+-- Source File(s): animation/AnimManager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include AnimBlendHierarchy.zpp  (from "AnimBlendHierarchy.h")
+-- include AnimationId.zpp  (from "AnimationId.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_ANIMBLOCK_NAME : ℕ  -- #define MAX_ANIMBLOCK_NAME 20
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AssocGroupId ::= ASSOCGRP_STD | ASSOCGRP_VAN | ASSOCGRP_COACH | ASSOCGRP_BIKE_STANDARD | ASSOCGRP_BIKE_VESPA | ASSOCGRP_BIKE_HARLEY | ASSOCGRP_BIKE_DIRT | ASSOCGRP_UNARMED | ASSOCGRP_SCREWDRIVER | ASSOCGRP_KNIFE | ASSOCGRP_BASEBALLBAT | ASSOCGRP_GOLFCLUB | ASSOCGRP_CHAINSAW | ASSOCGRP_PYTHON | ASSOCGRP_COLT | ASSOCGRP_SHOTGUN | ASSOCGRP_BUDDY | ASSOCGRP_TEC | ASSOCGRP_UZI | ASSOCGRP_RIFLE | ASSOCGRP_M60 | ASSOCGRP_SNIPER | ASSOCGRP_THROW | ASSOCGRP_FLAMETHROWER | ASSOCGRP_ROCKETLAUNCHER | ASSOCGRP_MEDIC | ASSOCGRP_SUNBATHE | ASSOCGRP_PLAYER_IDLE | ASSOCGRP_RIOT | ASSOCGRP_STRIP | ASSOCGRP_LANCE | ASSOCGRP_PLAYER | ASSOCGRP_PLAYERROCKET | ASSOCGRP_PLAYER1ARMED | ASSOCGRP_PLAYER2ARMED | ASSOCGRP_PLAYERBBBAT | ASSOCGRP_AICHAINSAW | ASSOCGRP_PLAYERCHAINSAW | ASSOCGRP_SHUFFLE | ASSOCGRP_OLD | ASSOCGRP_GANG1 | ASSOCGRP_GANG2 | ASSOCGRP_FAT | ASSOCGRP_OLDFAT | ASSOCGRP_JOGGER | ASSOCGRP_WOMAN | ASSOCGRP_WOMANSHOP | ASSOCGRP_BUSYWOMAN | ... (84 total branches)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlock
+  name : seq CHAR
+  isLoaded : 𝔹
+  refCount : ℤ
+  firstIndex : ℤ
+  numAnims : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema AnimAssocDesc
+  animId : ℤ
+  flags : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema AnimAssocDefinition
+  name : seq CHAR
+  blockName : seq CHAR
+  modelIndex : ℤ
+  numAnims : ℤ
+  animNames : seq CHAR
+  animDescs : Ref[AnimAssocDesc]
+where
+  #animDescs ≤ 1
+end
+
+schema CAnimManager
+  ms_aAnimAssocDefinitions : seq AnimAssocDefinition  -- bounded array [NUM_ANIM_ASSOC_GROUPS]
+  ms_aAnimBlocks : seq CAnimBlock  -- bounded array [NUMANIMBLOCKS]
+  ms_aAnimations : seq CAnimBlendHierarchy  -- bounded array [NUMANIMATIONS]
+  ms_numAnimBlocks : ℤ
+  ms_numAnimations : ℤ
+  ms_aAnimAssocGroups : Ref[CAnimBlendAssocGroup]
+  ms_animCache : Ref[CLinkList_CAnimBlendHierarchy]
+where
+  #ms_aAnimAssocGroups ≤ 1
+  #ms_animCache ≤ 1
+end
+
+schema CAnimManager_Initialise
+  ΔCAnimManager
+where
+  -- Declared member operation CAnimManager::Initialise(void)
+  true
+end
+
+schema CAnimManager_Shutdown_2
+  ΔCAnimManager
+where
+  -- Declared member operation CAnimManager::Shutdown(void)
+  true
+end
+
+schema CAnimManager_UncompressAnimation_3
+  ΔCAnimManager
+  anim? : Ref[CAnimBlendHierarchy]
+where
+  -- Declared member operation CAnimManager::UncompressAnimation(CAnimBlendHierarchy *anim)
+  true
+end
+
+schema CAnimManager_RemoveFromUncompressedCache_4
+  ΔCAnimManager
+  hier? : Ref[CAnimBlendHierarchy]
+where
+  -- Declared member operation CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy *hier)
+  true
+end
+
+schema CAnimManager_GetAnimationBlock_5
+  ΔCAnimManager
+  block? : ℤ
+  result! : Ref[CAnimBlock]
+where
+  -- Declared member operation CAnimManager::GetAnimationBlock(int32 block)
+  true
+end
+
+schema CAnimManager_GetAnimationBlock_6
+  ΔCAnimManager
+  name? : seq CHAR
+  result! : Ref[CAnimBlock]
+where
+  -- Declared member operation CAnimManager::GetAnimationBlock(const char *name)
+  true
+end
+
+schema CAnimManager_GetAnimationBlockIndex_7
+  ΔCAnimManager
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CAnimManager::GetAnimationBlockIndex(const char *name)
+  true
+end
+
+schema CAnimManager_RegisterAnimBlock_8
+  ΔCAnimManager
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CAnimManager::RegisterAnimBlock(const char *name)
+  true
+end
+
+schema CAnimManager_GetNumRefsToAnimBlock_9
+  ΔCAnimManager
+  block? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CAnimManager::GetNumRefsToAnimBlock(int32 block)
+  true
+end
+
+schema CAnimManager_AddAnimBlockRef_10
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Declared member operation CAnimManager::AddAnimBlockRef(int32 block)
+  true
+end
+
+schema CAnimManager_RemoveAnimBlockRefWithoutDelete_11
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Declared member operation CAnimManager::RemoveAnimBlockRefWithoutDelete(int32 block)
+  true
+end
+
+schema CAnimManager_RemoveAnimBlockRef_12
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Declared member operation CAnimManager::RemoveAnimBlockRef(int32 block)
+  true
+end
+
+schema CAnimManager_RemoveAnimBlock_13
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Declared member operation CAnimManager::RemoveAnimBlock(int32 block)
+  true
+end
+
+schema CAnimManager_GetAnimation_14
+  ΔCAnimManager
+  name? : seq CHAR
+  animBlock? : Ref[CAnimBlock]
+  result! : Ref[CAnimBlendHierarchy]
+where
+  -- Declared member operation CAnimManager::GetAnimation(const char *name, CAnimBlock *animBlock)
+  true
+end
+
+schema CAnimManager_GetAnimation_15
+  ΔCAnimManager
+  n? : ℤ
+  result! : Ref[CAnimBlendHierarchy]
+where
+  -- Declared member operation CAnimManager::GetAnimation(int32 n)
+  true
+end
+
+schema CAnimManager_GetAnimGroupName_16
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  result! : seq CHAR
+where
+  -- Declared member operation CAnimManager::GetAnimGroupName(AssocGroupId groupId)
+  true
+end
+
+schema CAnimManager_CreateAnimAssociation_17
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  animId? : AnimationId
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimManager::CreateAnimAssociation(AssocGroupId groupId, AnimationId animId)
+  true
+end
+
+schema CAnimManager_GetAnimAssociation_18
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  animId? : AnimationId
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimManager::GetAnimAssociation(AssocGroupId groupId, AnimationId animId)
+  true
+end
+
+schema CAnimManager_GetAnimAssociation_19
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  name? : seq CHAR
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimManager::GetAnimAssociation(AssocGroupId groupId, const char *name)
+  true
+end
+
+schema CAnimManager_AddAnimation_20
+  ΔCAnimManager
+  clump? : Ref[RpClump]
+  groupId? : AssocGroupId
+  animId? : AnimationId
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimManager::AddAnimation(RpClump *clump, AssocGroupId groupId, AnimationId animId)
+  true
+end
+
+schema CAnimManager_AddAnimationAndSync_21
+  ΔCAnimManager
+  clump? : Ref[RpClump]
+  syncanim? : Ref[CAnimBlendAssociation]
+  groupId? : AssocGroupId
+  animId? : AnimationId
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimManager::AddAnimationAndSync(RpClump *clump, CAnimBlendAssociation *syncanim, AssocGroupId groupId, AnimationId animId)
+  true
+end
+
+schema CAnimManager_BlendAnimation_22
+  ΔCAnimManager
+  clump? : Ref[RpClump]
+  groupId? : AssocGroupId
+  animId? : AnimationId
+  delta? : ℝ
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimManager::BlendAnimation(RpClump *clump, AssocGroupId groupId, AnimationId animId, float delta)
+  true
+end
+
+schema CAnimManager_LoadAnimFiles_23
+  ΔCAnimManager
+where
+  -- Declared member operation CAnimManager::LoadAnimFiles(void)
+  true
+end
+
+schema CAnimManager_LoadAnimFile_24
+  ΔCAnimManager
+  filename? : seq CHAR
+where
+  -- Declared member operation CAnimManager::LoadAnimFile(const char *filename)
+  true
+end
+
+schema CAnimManager_LoadAnimFile_25
+  ΔCAnimManager
+  stream? : Ref[RwStream]
+  compress? : 𝔹
+  uncompressedAnims? : seq CHAR
+where
+  -- Declared member operation CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*uncompressedAnims)
+  true
+end
+
+schema CAnimManager_CreateAnimAssocGroups_26
+  ΔCAnimManager
+where
+  -- Declared member operation CAnimManager::CreateAnimAssocGroups(void)
+  true
+end
+
+schema CAnimManager_RemoveLastAnimFile_27
+  ΔCAnimManager
+where
+  -- Declared member operation CAnimManager::RemoveLastAnimFile(void)
+  true
+end
+
+schema CAnimManager_GetAnimAssocGroups_28
+  ΔCAnimManager
+  result! : Ref[CAnimBlendAssocGroup]
+where
+  -- Declared member operation CAnimManager::GetAnimAssocGroups(void)
+  true
+end
+
+schema CAnimManager_LoadAnimFile_29
+  ΔCAnimManager
+  fd? : ℤ
+  compress? : 𝔹
+  result! : void
+where
+  -- Declared member operation CAnimManager::LoadAnimFile(int fd, bool compress)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema AnimManager_GetAnimAssocGroups
+  ΔAnimManagerModuleState
+  result! : Ref[CAnimBlendAssocGroup]
+where
+  -- Return postcondition: result! = ms_aAnimAssocGroups
+  true
+end

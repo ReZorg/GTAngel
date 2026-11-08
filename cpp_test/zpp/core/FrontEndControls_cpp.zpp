@@ -1,0 +1,1421 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FrontEndControls (core)
+-- Source File(s): core/FrontEndControls.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Text.zpp  (from "Text.h")
+-- include Font.zpp  (from "Font.h")
+-- include FrontEndControls.zpp  (from "FrontEndControls.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+X : seq CHAR  -- #define X SCREEN_SCALE_X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPlaceableShText_Draw
+  ΔCPlaceableShText
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetRightJustifyOn, CFont::SetDropShadowPosition, CFont::SetDropColor, CFont::SetColor, CFont::PrintString
+  true
+end
+
+schema CPlaceableShText_Draw_2
+  ΔCPlaceableShText
+  color? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetRightJustifyOn, CFont::SetDropShadowPosition, CFont::SetDropColor, CFont::SetColor, CFont::PrintString
+  true
+end
+
+schema CPlaceableShTextTwoLines_Draw
+  ΔCPlaceableShTextTwoLines
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetRightJustifyOn, CFont::SetDropShadowPosition, CFont::SetDropColor, CFont::SetColor, CFont::PrintString
+  true
+end
+
+schema CPlaceableShTextTwoLines_Draw_2
+  ΔCPlaceableShTextTwoLines
+  color? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetRightJustifyOn, CFont::SetDropShadowPosition, CFont::SetDropColor, CFont::SetColor, CFont::PrintString
+  true
+end
+
+schema CPlaceableShOption_Draw
+  ΔCPlaceableShOption
+  highlightColor? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  bHighlight? : 𝔹
+where
+  -- Invokes: CPlaceableShText::Draw
+  true
+end
+
+schema CPlaceableShOptionTwoLines_Draw
+  ΔCPlaceableShOptionTwoLines
+  highlightColor? : CRGBA
+  x? : ℝ
+  y? : ℝ
+  bHighlight? : 𝔹
+where
+  -- Invokes: CPlaceableShTextTwoLines::Draw
+  true
+end
+
+schema CPlaceableSprite_Draw
+  ΔCPlaceableSprite
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlaceableSprite_Draw_2
+  ΔCPlaceableSprite
+  color? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: m_pSprite->Draw
+  true
+end
+
+schema CPlaceableShSprite_Draw
+  ΔCPlaceableShSprite
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: m_shadow.Draw, m_sprite.Draw
+  true
+end
+
+schema CMenuPictureAndText_SetNewOldShadowWrapX
+  ΔCMenuPictureAndText
+  bWrapX? : 𝔹
+  newWrapX? : ℝ
+  oldWrapX? : ℝ
+where
+  -- State update: m_bWrap' = bWrapX
+  -- State update: m_wrapX' = newWrapX
+  -- State update: m_oldWrapx' = oldWrapX
+  true
+end
+
+schema CMenuPictureAndText_SetNewOldTextScale
+  ΔCMenuPictureAndText
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+where
+  -- State update: m_bSetTextScale' = bTextScale
+  -- State update: m_textScale' = newScale
+  -- State update: m_oldTextScale' = oldScale
+  true
+end
+
+schema CMenuPictureAndText_SetTextsColor
+  ΔCMenuPictureAndText
+  color? : CRGBA
+where
+  -- State update: m_color' = color
+  true
+end
+
+schema CMenuPictureAndText_AddText
+  ΔCMenuPictureAndText
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  color? : CRGBA
+  bRightJustify? : 𝔹
+where
+  -- State update: m_text' = text
+  -- State update: m_position.x' = positionX
+  -- State update: m_position.y' = positionY
+  -- State update: m_color' = color
+  -- State update: m_bRightJustify' = bRightJustify
+  true
+end
+
+schema CMenuPictureAndText_AddPicture
+  ΔCMenuPictureAndText
+  sprite? : Ref[CSprite2d]
+  shadow? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  height? : ℝ
+  color? : CRGBA
+where
+  -- State update: m_sprite.m_pSprite' = sprite
+  -- State update: m_shadow.m_pSprite' = shadow
+  -- State update: m_sprite.m_position.x' = positionX
+  -- State update: m_sprite.m_position.y' = positionY
+  -- State update: m_sprite.m_size.x' = width
+  -- State update: m_sprite.m_size.y' = height
+  true
+end
+
+schema CMenuPictureAndText_AddPicture_2
+  ΔCMenuPictureAndText
+  sprite? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  height? : ℝ
+  color? : CRGBA
+where
+  -- State update: m_sprite.m_pSprite' = sprite
+  -- State update: m_shadow.m_pSprite' = ∅
+  -- State update: m_sprite.m_position.x' = positionX
+  -- State update: m_sprite.m_position.y' = positionY
+  -- State update: m_sprite.m_size.x' = width
+  -- State update: m_sprite.m_size.y' = height
+  true
+end
+
+schema CMenuPictureAndText_Draw
+  ΔCMenuPictureAndText
+  arg_1? : CRGBA
+  arg_2? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale
+  true
+end
+
+schema CMenuPictureAndText_SetAlpha
+  ΔCMenuPictureAndText
+  alpha? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPictureAndText_SetShadows
+  ΔCMenuPictureAndText
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuMultiChoice_AddTitle
+  ΔCMenuMultiChoice
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- State update: m_title.m_text' = text
+  -- Invokes: m_title.SetPosition
+  true
+end
+
+schema CMenuMultiChoice_AddOption
+  ΔCMenuMultiChoice
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+where
+  -- State update: m_text' = text
+  -- State update: m_bSelected' = bSelected
+  -- State update: m_bRightJustify' = bRightJustify
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = &m_options[m_numOptions++]
+  true
+end
+
+schema CMenuMultiChoice_SetColors
+  ΔCMenuMultiChoice
+  title? : CRGBA
+  normal? : CRGBA
+  selected? : CRGBA
+where
+  -- Invokes: m_title.SetColor
+  true
+end
+
+schema CMenuMultiChoice_SetNewOldTextScale
+  ΔCMenuMultiChoice
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+  bTitleTextScale? : 𝔹
+where
+  -- State update: m_bSetTextScale' = bTextScale
+  -- State update: m_textScale' = newScale
+  -- State update: m_oldTextScale' = oldScale
+  -- State update: m_bSetTitleTextScale' = bTitleTextScale
+  true
+end
+
+schema CMenuMultiChoice_Draw
+  ΔCMenuMultiChoice
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale, m_title.Draw, CFont::DrawFonts
+  true
+end
+
+schema CMenuMultiChoice_DrawNormal
+  ΔCMenuMultiChoice
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale, m_title.Draw, CFont::DrawFonts
+  true
+end
+
+schema CMenuMultiChoice_DrawHighlighted
+  ΔCMenuMultiChoice
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale, m_title.Draw, CFont::DrawFonts
+  true
+end
+
+schema CMenuMultiChoice_SetAlpha
+  ΔCMenuMultiChoice
+  alpha? : ℕ
+where
+  -- Invokes: m_title.SetAlpha
+  true
+end
+
+schema CMenuMultiChoice_SetShadows
+  ΔCMenuMultiChoice
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Invokes: m_title.SetShadows
+  true
+end
+
+schema CMenuMultiChoice_GoNext
+  ΔCMenuMultiChoice
+where
+  -- State update: m_cursor' = -1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoice_GoPrev
+  ΔCMenuMultiChoice
+where
+  -- State update: m_cursor' = -1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoice_SelectCurrentOptionUnderCursor
+  ΔCMenuMultiChoice
+where
+  -- State update: m_bSelected' = false
+  -- State update: m_bSelected' = true
+  true
+end
+
+schema CMenuMultiChoice_GetMenuSelection
+  ΔCMenuMultiChoice
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CMenuMultiChoice_SetMenuSelection
+  ΔCMenuMultiChoice
+  selection? : ℤ
+where
+  -- State update: m_bSelected' = false
+  -- State update: m_bSelected' = true
+  true
+end
+
+schema CMenuMultiChoiceTriggered_Initialise
+  ΔCMenuMultiChoiceTriggered
+where
+  -- State update: m_defaultCancel' = ∅
+  true
+end
+
+schema CMenuMultiChoiceTriggered_AddOption
+  ΔCMenuMultiChoiceTriggered
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  trigger? : Trigger
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+where
+  -- Return postcondition: result! = option
+  -- Invokes: CMenuMultiChoice::AddOption
+  true
+end
+
+schema CMenuMultiChoiceTriggered_SelectCurrentOptionUnderCursor
+  ΔCMenuMultiChoiceTriggered
+where
+  -- Invokes: CMenuMultiChoice::SelectCurrentOptionUnderCursor
+  true
+end
+
+schema CMenuMultiChoiceTriggered_SelectDefaultCancelAction
+  ΔCMenuMultiChoiceTriggered
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuMultiChoiceTriggeredAlways_Draw
+  ΔCMenuMultiChoiceTriggeredAlways
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CMenuMultiChoiceTriggered::Draw
+  true
+end
+
+schema CMenuMultiChoiceTriggeredAlways_DrawNormal
+  ΔCMenuMultiChoiceTriggeredAlways
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CMenuMultiChoiceTriggered::DrawNormal
+  true
+end
+
+schema CMenuMultiChoiceTriggeredAlways_DrawHighlighted
+  ΔCMenuMultiChoiceTriggeredAlways
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CMenuMultiChoiceTriggered::DrawHighlighted
+  true
+end
+
+schema CMenuMultiChoicePictured_Initialise
+  ΔCMenuMultiChoicePictured
+where
+  -- State update: m_pSprite' = ∅
+  true
+end
+
+schema CMenuMultiChoicePictured_AddOption
+  ΔCMenuMultiChoicePictured
+  sprite? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  size? : CVector2D
+  bSelected? : 𝔹
+where
+  -- State update: m_pSprite' = sprite
+  -- State update: m_size' = size
+  -- Return postcondition: result! = option
+  -- Invokes: CMenuMultiChoice::AddOption
+  true
+end
+
+schema CMenuMultiChoicePictured_Draw
+  ΔCMenuMultiChoicePictured
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: selectedColor' = m_options[0].GetSelectedColor()
+  -- State update: color' = m_options[0].GetColor()
+  -- Invokes: CMenuMultiChoice::Draw
+  true
+end
+
+schema CMenuMultiChoicePictured_DrawNormal
+  ΔCMenuMultiChoicePictured
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: selectedColor' = m_options[0].GetSelectedColor()
+  -- State update: color' = m_options[0].GetColor()
+  -- Invokes: CMenuMultiChoice::DrawNormal
+  true
+end
+
+schema CMenuMultiChoicePictured_DrawHighlighted
+  ΔCMenuMultiChoicePictured
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: selectedColor' = m_options[0].GetSelectedColor()
+  -- State update: color' = m_options[0].GetColor()
+  -- Invokes: CMenuMultiChoice::DrawHighlighted
+  true
+end
+
+schema CMenuMultiChoicePictured_SetAlpha
+  ΔCMenuMultiChoicePictured
+  alpha? : ℕ
+where
+  -- Invokes: CMenuMultiChoice::SetAlpha
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_Initialise
+  ΔCMenuMultiChoicePicturedTriggered
+where
+  -- State update: m_defaultCancel' = ∅
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_AddOption
+  ΔCMenuMultiChoicePicturedTriggered
+  sprite? : Ref[CSprite2d]
+  positionX? : ℝ
+  positionY? : ℝ
+  size? : CVector2D
+  trigger? : Trigger
+  bSelected? : 𝔹
+where
+  -- Return postcondition: result! = option
+  -- Invokes: CMenuMultiChoicePictured::AddOption
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_SelectCurrentOptionUnderCursor
+  ΔCMenuMultiChoicePicturedTriggered
+where
+  -- Invokes: CMenuMultiChoice::SelectCurrentOptionUnderCursor
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggered_SelectDefaultCancelAction
+  ΔCMenuMultiChoicePicturedTriggered
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_Initialise
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+where
+  -- State update: right' = -1
+  -- State update: left' = -1
+  -- State update: down' = -1
+  -- State update: up' = -1
+  -- Invokes: CMenuMultiChoicePicturedTriggered::Initialise
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_AddOption
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+  sprite? : Ref[CSprite2d]
+  moveTab? : Ref[FEC_MOVETAB]
+  positionX? : ℝ
+  positionY? : ℝ
+  size? : CVector2D
+  trigger? : Trigger
+  bSelected? : 𝔹
+where
+  -- Return postcondition: result! = option
+  -- Invokes: CMenuMultiChoicePicturedTriggered::AddOption
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoDown
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].down
+  -- State update: m_cursor' = move
+  -- Return postcondition: result! = GoNext()
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoUp
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].up
+  -- State update: m_cursor' = move
+  -- Return postcondition: result! = GoPrev()
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoLeft
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].left
+  -- State update: m_cursor' = move
+  -- Return postcondition: result! = GoPrev()
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoicePicturedTriggeredAnyMove_GoRight
+  ΔCMenuMultiChoicePicturedTriggeredAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].right
+  -- State update: m_cursor' = move
+  -- Return postcondition: result! = GoNext()
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_AddTitle
+  ΔCMenuMultiChoiceTwoLines
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- State update: m_title.m_text' = text
+  -- Invokes: m_title.SetPosition
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_AddOption
+  ΔCMenuMultiChoiceTwoLines
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_AddOption_2
+  ΔCMenuMultiChoiceTwoLines
+  text1? : seq CHAR
+  positionX1? : ℝ
+  positionY1? : ℝ
+  text2? : seq CHAR
+  positionX2? : ℝ
+  positionY2? : ℝ
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+where
+  -- State update: m_line1.m_text' = text1
+  -- State update: m_line2.m_text' = text2
+  -- State update: m_bSelected' = bSelected
+  -- State update: m_bRightJustify' = bRightJustify
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = &m_options[m_numOptions++]
+  -- Invokes: m_line1.SetPosition, m_line2.SetPosition
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetColors
+  ΔCMenuMultiChoiceTwoLines
+  title? : CRGBA
+  normal? : CRGBA
+  selected? : CRGBA
+where
+  -- Invokes: m_title.SetColor
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetNewOldTextScale
+  ΔCMenuMultiChoiceTwoLines
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+  bTitleTextScale? : 𝔹
+where
+  -- State update: m_bSetTextScale' = bTextScale
+  -- State update: m_textScale' = newScale
+  -- State update: m_oldTextScale' = oldScale
+  -- State update: m_bSetTitleTextScale' = bTitleTextScale
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_Draw
+  ΔCMenuMultiChoiceTwoLines
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale, m_title.Draw, CFont::DrawFonts
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_DrawNormal
+  ΔCMenuMultiChoiceTwoLines
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale, m_title.Draw, CFont::DrawFonts
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_DrawHighlighted
+  ΔCMenuMultiChoiceTwoLines
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CFont::SetScale, m_title.Draw, CFont::DrawFonts
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetAlpha
+  ΔCMenuMultiChoiceTwoLines
+  alpha? : ℕ
+where
+  -- Invokes: m_title.SetAlpha
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetShadows
+  ΔCMenuMultiChoiceTwoLines
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Invokes: m_title.SetShadows
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoNext
+  ΔCMenuMultiChoiceTwoLines
+where
+  -- State update: m_cursor' = -1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GoPrev
+  ΔCMenuMultiChoiceTwoLines
+where
+  -- State update: m_cursor' = -1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SelectCurrentOptionUnderCursor
+  ΔCMenuMultiChoiceTwoLines
+where
+  -- State update: m_bSelected' = false
+  -- State update: m_bSelected' = true
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_GetMenuSelection
+  ΔCMenuMultiChoiceTwoLines
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CMenuMultiChoiceTwoLines_SetMenuSelection
+  ΔCMenuMultiChoiceTwoLines
+  selection? : ℤ
+where
+  -- State update: m_bSelected' = false
+  -- State update: m_bSelected' = true
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_Initialise
+  ΔCMenuMultiChoiceTwoLinesTriggered
+where
+  -- State update: m_defaultCancel' = ∅
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_AddOption
+  ΔCMenuMultiChoiceTwoLinesTriggered
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+  trigger? : Trigger
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+where
+  -- Return postcondition: result! = option
+  -- Invokes: CMenuMultiChoiceTwoLines::AddOption
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_AddOption_2
+  ΔCMenuMultiChoiceTwoLinesTriggered
+  text1? : seq CHAR
+  positionX1? : ℝ
+  positionY1? : ℝ
+  text2? : seq CHAR
+  positionX2? : ℝ
+  positionY2? : ℝ
+  trigger? : Trigger
+  bSelected? : 𝔹
+  bRightJustify? : 𝔹
+where
+  -- Return postcondition: result! = option
+  -- Invokes: CMenuMultiChoiceTwoLines::AddOption
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_SelectCurrentOptionUnderCursor
+  ΔCMenuMultiChoiceTwoLinesTriggered
+where
+  -- Invokes: CMenuMultiChoiceTwoLines::SelectCurrentOptionUnderCursor
+  true
+end
+
+schema CMenuMultiChoiceTwoLinesTriggered_SelectDefaultCancelAction
+  ΔCMenuMultiChoiceTwoLinesTriggered
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuOnOff_SetColors
+  ΔCMenuOnOff
+  title? : CRGBA
+  options? : CRGBA
+where
+  -- Invokes: m_title.SetColors
+  true
+end
+
+schema CMenuOnOff_SetNewOldTextScale
+  ΔCMenuOnOff
+  bTextScale? : 𝔹
+  newScale? : CVector2D
+  oldScale? : CVector2D
+  bTitleTextScale? : 𝔹
+where
+  -- State update: m_bSetTextScale' = bTextScale
+  -- State update: m_textScale' = newScale
+  -- State update: m_oldTextScale' = oldScale
+  -- State update: m_bSetTitleTextScale' = bTitleTextScale
+  true
+end
+
+schema CMenuOnOff_SetOptionPosition
+  ΔCMenuOnOff
+  x? : ℝ
+  y? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuOnOff_AddTitle
+  ΔCMenuOnOff
+  text? : seq CHAR
+  bSelected? : 𝔹
+  positionX? : ℝ
+  positionY? : ℝ
+  bRightJustify? : 𝔹
+where
+  -- State update: m_title.m_text' = text
+  -- State update: m_title.m_bSelected' = bSelected
+  -- Invokes: m_title.SetPosition
+  true
+end
+
+schema CMenuOnOff_Draw
+  ΔCMenuOnOff
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_text' = TheText.Get("FEM_NO")
+  -- State update: m_text' = TheText.Get("FEM_YES")
+  -- State update: m_text' = TheText.Get("FEM_OFF")
+  -- State update: m_text' = TheText.Get("FEM_ON")
+  -- Invokes: TheText.Get, CFont::SetScale, m_title.Draw
+  true
+end
+
+schema CMenuOnOff_DrawNormal
+  ΔCMenuOnOff
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_text' = TheText.Get("FEM_NO")
+  -- State update: m_text' = TheText.Get("FEM_YES")
+  -- State update: m_text' = TheText.Get("FEM_OFF")
+  -- State update: m_text' = TheText.Get("FEM_ON")
+  -- Invokes: TheText.Get, CFont::SetScale, m_title.Draw
+  true
+end
+
+schema CMenuOnOff_DrawHighlighted
+  ΔCMenuOnOff
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_text' = TheText.Get("FEM_NO")
+  -- State update: m_text' = TheText.Get("FEM_YES")
+  -- State update: m_text' = TheText.Get("FEM_OFF")
+  -- State update: m_text' = TheText.Get("FEM_ON")
+  -- Invokes: TheText.Get, CFont::SetScale, m_title.Draw
+  true
+end
+
+schema CMenuOnOff_SetAlpha
+  ΔCMenuOnOff
+  alpha? : ℕ
+where
+  -- Invokes: m_title.SetAlpha
+  true
+end
+
+schema CMenuOnOff_SetShadows
+  ΔCMenuOnOff
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Invokes: m_title.SetShadows
+  true
+end
+
+schema CMenuOnOffTriggered_SetOptionPosition
+  ΔCMenuOnOffTriggered
+  x? : ℝ
+  y? : ℝ
+  trigger? : Trigger
+  bRightJustify? : 𝔹
+where
+  -- State update: m_trigger' = trigger
+  -- Invokes: CMenuOnOff::SetOptionPosition
+  true
+end
+
+schema CMenuOnOffTriggered_SelectCurrentOptionUnderCursor
+  ΔCMenuOnOffTriggered
+where
+  -- Invokes: CMenuOnOff::SelectCurrentOptionUnderCursor
+  true
+end
+
+schema CMenuSlider_SetColors
+  ΔCMenuSlider
+  title? : CRGBA
+  percentage? : CRGBA
+  left? : CRGBA
+  right? : CRGBA
+where
+  -- Invokes: m_title.SetColor, m_percentageText.SetColor
+  true
+end
+
+schema CMenuSlider_AddTickBox
+  ΔCMenuSlider
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  heightLeft? : ℝ
+  heightRight? : ℝ
+where
+  -- State update: x' = width
+  -- State update: y' = heightLeft
+  -- State update: x' = width
+  -- State update: y' = heightRight
+  -- Invokes: m_box.SetPosition
+  true
+end
+
+schema CMenuSlider_AddTitle
+  ΔCMenuSlider
+  text? : seq CHAR
+  positionX? : ℝ
+  positionY? : ℝ
+where
+  -- State update: m_title.m_text' = text
+  -- Invokes: m_title.SetPosition
+  true
+end
+
+schema CMenuSlider_Draw
+  ΔCMenuSlider
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: selectionCol' = m_colors[0]
+  -- State update: selectionCol' = m_colors[1]
+  -- State update: shadowCol' = m_box.GetShadowColor()
+  -- State update: f' = m_value/1000.0f
+  -- State update: boxPos' = m_box.m_position + m_position + CVector2D(x,y)
+  -- State update: boxPos' = m_box.m_position + m_position + CVector2D(x,y)
+  -- Invokes: m_box.GetShadowColor, CSprite2d::DrawRect, m_title.Draw, m_percentageText.Draw, CMenuSlider::DrawNormal
+  true
+end
+
+schema CMenuSlider_DrawNormal
+  ΔCMenuSlider
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: shadowCol' = m_box.GetShadowColor()
+  -- State update: f' = m_value/1000.0f
+  -- State update: boxPos' = m_box.m_position + m_position + CVector2D(x,y)
+  -- State update: boxPos' = m_box.m_position + m_position + CVector2D(x,y)
+  -- State update: m_percentageText.m_text' = Buf16
+  -- Invokes: m_box.GetShadowColor, CSprite2d::DrawRect, m_title.Draw, m_percentageText.Draw, m_percentageText.GetColor
+  true
+end
+
+schema CMenuSlider_DrawHighlighted
+  ΔCMenuSlider
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: shadowCol' = m_box.GetShadowColor()
+  -- State update: f' = m_value/1000.0f
+  -- State update: boxPos' = m_box.m_position + m_position + CVector2D(x,y)
+  -- State update: boxPos' = m_box.m_position + m_position + CVector2D(x,y)
+  -- State update: m_percentageText.m_text' = Buf16
+  -- Invokes: m_title.Draw, m_box.GetShadowColor, CSprite2d::DrawRect, m_percentageText.Draw, m_percentageText.GetColor
+  true
+end
+
+schema CMenuSlider_DrawTicks
+  ΔCMenuSlider
+  position? : CVector2D
+  size? : CVector2D
+  heightRight? : ℝ
+  level? : ℝ
+  leftCol? : CRGBA
+  selCol? : CRGBA
+  rightCol? : CRGBA
+  bShadow? : 𝔹
+  shadowOffset? : CVector2D
+  shadowColor? : CRGBA
+where
+  -- State update: numTicks' = size.x / X(8.0f)
+  -- State update: dy' = heightRight - size.y
+  -- State update: stepy' = dy / numTicks
+  -- State update: left' = level*numTicks
+  -- State update: drewSelection' = 0
+  -- State update: shadowRect' = rect
+  -- Invokes: CSprite2d::DrawRect
+  true
+end
+
+schema CMenuSlider_DrawTicks_2
+  ΔCMenuSlider
+  position? : CVector2D
+  size? : CVector2D
+  heightRight? : ℝ
+  level? : ℝ
+  leftCol? : CRGBA
+  rightCol? : CRGBA
+  bShadow? : 𝔹
+  shadowOffset? : CVector2D
+  shadowColor? : CRGBA
+where
+  -- State update: numTicks' = size.x / X(8.0f)
+  -- State update: dy' = heightRight - size.y
+  -- State update: stepy' = dy / numTicks
+  -- State update: left' = level*numTicks
+  -- State update: shadowRect' = rect
+  -- Invokes: CSprite2d::DrawRect
+  true
+end
+
+schema CMenuSlider_SetAlpha
+  ΔCMenuSlider
+  alpha? : ℕ
+where
+  -- State update: m_someAlpha' = alpha
+  -- State update: alpha' = alpha
+  -- State update: alpha' = alpha
+  -- Invokes: m_title.SetAlpha, m_box.SetAlpha, m_percentageText.SetAlpha
+  true
+end
+
+schema CMenuSlider_SetShadows
+  ΔCMenuSlider
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Invokes: m_title.SetShadows, m_box.SetShadows, m_percentageText.SetShadows
+  true
+end
+
+schema CMenuSliderTriggered_AddTickBox
+  ΔCMenuSliderTriggered
+  positionX? : ℝ
+  positionY? : ℝ
+  width? : ℝ
+  heightLeft? : ℝ
+  heightRight? : ℝ
+  trigger? : Trigger
+  alwaysTrigger? : Trigger
+where
+  -- State update: m_trigger' = trigger
+  -- State update: m_alwaysTrigger' = alwaysTrigger
+  -- Invokes: CMenuSlider::AddTickBox
+  true
+end
+
+schema CMenuSliderTriggered_Draw
+  ΔCMenuSliderTriggered
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Invokes: CMenuSlider::Draw
+  true
+end
+
+schema CMenuSliderTriggered_GoLeft
+  ΔCMenuSliderTriggered
+where
+  -- Return postcondition: result! = true
+  -- Invokes: CMenuSlider::GoLeft
+  true
+end
+
+schema CMenuSliderTriggered_GoRight
+  ΔCMenuSliderTriggered
+where
+  -- Return postcondition: result! = true
+  -- Invokes: CMenuSlider::GoRight
+  true
+end
+
+schema CMenuSliderTriggered_GoLeftStill
+  ΔCMenuSliderTriggered
+where
+  -- Return postcondition: result! = true
+  -- Invokes: CMenuSlider::GoLeftStill
+  true
+end
+
+schema CMenuSliderTriggered_GoRightStill
+  ΔCMenuSliderTriggered
+where
+  -- Return postcondition: result! = true
+  -- Invokes: CMenuSlider::GoRightStill
+  true
+end
+
+schema CMenuLineLister_SetLinesColor
+  ΔCMenuLineLister
+  color? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuLineLister_ResetNumberOfTextLines
+  ΔCMenuLineLister
+where
+  -- State update: m_numLines' = 0
+  -- State update: m_text' = ∅
+  -- State update: m_text' = ∅
+  true
+end
+
+schema CMenuLineLister_AddTextLine
+  ΔCMenuLineLister
+  left? : seq CHAR
+  right? : seq CHAR
+where
+  -- State update: leftLine' = GetLeftLine(m_numLines)
+  -- State update: leftLine.m_text' = left
+  -- State update: rightLine' = GetRightLine(m_numLines)
+  -- State update: rightLine.m_text' = right
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: leftLine->SetPosition, rightLine->SetPosition
+  true
+end
+
+schema CMenuLineLister_Draw
+  ΔCMenuLineLister
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: m_scrollPosition' = 0.0f
+  -- State update: m_scrollPosition' = n*m_lineSpacing
+  -- State update: screenPos' = 0.0f
+  -- State update: linePos' = m_linesLeft[i].m_position
+  -- State update: newAlpha' = m_lineAlphas[i] + m_lineFade[i]
+  -- State update: newAlpha' = 0
+  -- Invokes: CFont::SetRightJustifyOn, CFont::SetRightJustifyOff
+  true
+end
+
+schema CMenuLineLister_SetAlpha
+  ΔCMenuLineLister
+  alpha? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuLineLister_SetShadows
+  ΔCMenuLineLister
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPage_Initialise
+  ΔCMenuPage
+where
+  -- State update: m_numControls' = 0
+  -- State update: m_pCurrentControl' = ∅
+  -- State update: m_cursor' = 0
+  true
+end
+
+schema CMenuPage_AddMenu
+  ΔCMenuPage
+  widget? : Ref[CMenuBase]
+where
+  -- State update: m_pCurrentControl' = widget
+  -- State update: m_cursor' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMenuPage_IsActiveMenuTwoState
+  ΔCMenuPage
+where
+  -- Return postcondition: result! = m_pCurrentControl && m_pCurrentControl->m_bTwoState
+  true
+end
+
+schema CMenuPage_ActiveMenuTwoState_SelectNextPosition
+  ΔCMenuPage
+where
+  -- State update: sel' = m_pCurrentControl.GetMenuSelection()
+  -- Invokes: m_pCurrentControl->GoFirst, m_pCurrentControl->GetMenuSelection, m_pCurrentControl->SelectCurrentOptionUnderCursor, m_pCurrentControl->GoNext
+  true
+end
+
+schema CMenuPage_Draw
+  ΔCMenuPage
+  optionHighlight? : CRGBA
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPage_DrawHighlighted
+  ΔCMenuPage
+  titleHighlight? : CRGBA
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPage_DrawNormal
+  ΔCMenuPage
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPage_ActivatePage
+  ΔCMenuPage
+where
+  -- State update: m_cursor' = 0
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- State update: m_cursor' = 0
+  -- Invokes: m_pCurrentControl->GoFirst
+  true
+end
+
+schema CMenuPage_SetAlpha
+  ΔCMenuPage
+  alpha? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPage_SetShadows
+  ΔCMenuPage
+  bDropShadows? : 𝔹
+  shadowColor? : CRGBA
+  shadowOffset? : CVector2D
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuPage_GoUpMenuOnPage
+  ΔCMenuPage
+where
+  -- State update: m_cursor' = m_numControls-1
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, m_pCurrentControl->GoLast
+  true
+end
+
+schema CMenuPage_GoDownMenuOnPage
+  ΔCMenuPage
+where
+  -- State update: m_cursor' = 0
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, m_pCurrentControl->GoFirst
+  true
+end
+
+schema CMenuPage_GoLeftMenuOnPage
+  ΔCMenuPage
+where
+  -- State update: m_cursor' = m_numControls-1
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, m_pCurrentControl->GoLast
+  true
+end
+
+schema CMenuPage_GoRightMenuOnPage
+  ΔCMenuPage
+where
+  -- State update: m_cursor' = 0
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, m_pCurrentControl->GoFirst
+  true
+end
+
+schema CMenuPageAnyMove_Initialise
+  ΔCMenuPageAnyMove
+where
+  -- State update: left' = -1
+  -- State update: right' = -1
+  -- State update: up' = -1
+  -- State update: down' = -1
+  -- Invokes: CMenuPage::Initialise
+  true
+end
+
+schema CMenuPageAnyMove_AddMenu
+  ΔCMenuPageAnyMove
+  widget? : Ref[CMenuBase]
+  moveTab? : Ref[FEC_MOVETAB]
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CMenuPageAnyMove_GoUpMenuOnPage
+  ΔCMenuPageAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].up
+  -- State update: m_cursor' = move
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, CMenuPage::GoUpMenuOnPage, m_pCurrentControl->GoLast
+  true
+end
+
+schema CMenuPageAnyMove_GoDownMenuOnPage
+  ΔCMenuPageAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].down
+  -- State update: m_cursor' = move
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, CMenuPage::GoDownMenuOnPage, m_pCurrentControl->GoLast
+  true
+end
+
+schema CMenuPageAnyMove_GoLeftMenuOnPage
+  ΔCMenuPageAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].left
+  -- State update: m_cursor' = move
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, CMenuPage::GoLeftMenuOnPage, m_pCurrentControl->GoLast
+  true
+end
+
+schema CMenuPageAnyMove_GoRightMenuOnPage
+  ΔCMenuPageAnyMove
+where
+  -- State update: move' = m_moveTab[m_cursor].right
+  -- State update: m_cursor' = move
+  -- State update: m_pCurrentControl' = m_controls[m_cursor]
+  -- Invokes: m_pCurrentControl->DeactivateMenu, CMenuPage::GoRightMenuOnPage, m_pCurrentControl->GoLast
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FrontEndControlsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1887
+end

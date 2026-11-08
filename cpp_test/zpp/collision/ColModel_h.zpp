@@ -1,0 +1,150 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColModel (collision)
+-- Source File(s): collision/ColModel.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include templates.zpp  (from "templates.h")
+-- include ColBox.zpp  (from "ColBox.h")
+-- include ColSphere.zpp  (from "ColSphere.h")
+-- include ColLine.zpp  (from "ColLine.h")
+-- include ColPoint.zpp  (from "ColPoint.h")
+-- include ColTriangle.zpp  (from "ColTriangle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CColModel
+  boundingSphere : CSphere
+  boundingBox : CBox
+  numSpheres : ℤ
+  numBoxes : ℤ
+  numTriangles : ℤ
+  numLines : ℤ
+  numTriBBoxes : ℤ
+  level : ℕ
+  ownsCollisionVolumes : 𝔹
+  spheres : Ref[CColSphere]
+  lines : Ref[CColLine]
+  boxes : Ref[CColBox]
+  triBBoxes : Ref[CColTriBBox]
+  vertices : Ref[CompressedVector]
+  triangles : Ref[CColTriangle]
+  trianglePlanes : Ref[CColTrianglePlane]
+where
+  level ≥ 0
+  #spheres ≤ 1
+  #lines ≤ 1
+  #boxes ≤ 1
+  #triBBoxes ≤ 1
+  #vertices ≤ 1
+  #triangles ≤ 1
+  #trianglePlanes ≤ 1
+end
+
+schema CColModel_CColModel
+  ΔCColModel
+where
+  -- Declared member operation CColModel::CColModel(void)
+  true
+end
+
+schema CColModel_CColModel_2
+  ΔCColModel
+  result! : ANY
+where
+  -- Declared member operation CColModel::CColModel(void)
+  true
+end
+
+schema CColModel_RemoveCollisionVolumes_3
+  ΔCColModel
+where
+  -- Declared member operation CColModel::RemoveCollisionVolumes(void)
+  true
+end
+
+schema CColModel_CalculateTrianglePlanes_4
+  ΔCColModel
+where
+  -- Declared member operation CColModel::CalculateTrianglePlanes(void)
+  true
+end
+
+schema CColModel_RemoveTrianglePlanes_5
+  ΔCColModel
+where
+  -- Declared member operation CColModel::RemoveTrianglePlanes(void)
+  true
+end
+
+schema CColModel_GetLinkPtr_6
+  ΔCColModel
+  result! : Ref[CLink_CColModel]
+where
+  -- Declared member operation CColModel::GetLinkPtr(void)
+  true
+end
+
+schema CColModel_SetLinkPtr_7
+  ΔCColModel
+  arg_1? : Ref[CLink_CColModel]
+where
+  -- Declared member operation CColModel::SetLinkPtr(CLink<CColModel*>*)
+  true
+end
+
+schema CColModel_GetTrianglePoint_8
+  ΞCColModel
+  v? : CVector
+  i? : ℤ
+where
+  -- Declared member operation CColModel::GetTrianglePoint(CVector &v, int i)
+  true
+end
+
+schema CColModel_operator_new_9
+  ΔCColModel
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CColModel::operator new(size_t)
+  true
+end
+
+schema CColModel_operator_delete_10
+  ΔCColModel
+  p? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CColModel::operator delete(void *p, size_t)
+  true
+end
+
+schema CColModel_operator_11
+  ΔCColModel
+  other? : CColModel
+  result! : CColModel
+where
+  -- Declared member operation CColModel::operator=(const CColModel& other)
+  true
+end
+
+schema CColModel_Write_12
+  ΔCColModel
+  writer? : base__cRelocatableChunkWriter
+  allocSpace? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CColModel::Write(base::cRelocatableChunkWriter &writer, bool allocSpace)
+  true
+end

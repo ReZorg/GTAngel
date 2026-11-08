@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Rubbish (renderer)
+-- Source File(s): renderer/Rubbish.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema COneSheet
+  m_basePos : CVector
+  m_animatedPos : CVector
+  m_targetZ : ℝ
+  m_state : ℤ
+  m_animationType : ℤ
+  m_moveStart : ℕ
+  m_moveDuration : ℕ
+  m_animHeight : ℝ
+  m_xDist : ℝ
+  m_yDist : ℝ
+  m_angle : ℝ
+  m_isVisible : 𝔹
+  m_targetIsVisible : 𝔹
+  m_next : Ref[COneSheet]
+  m_prev : Ref[COneSheet]
+where
+  m_moveStart ≥ 0
+  m_moveDuration ≥ 0
+  #m_next ≤ 1
+  #m_prev ≤ 1
+end
+
+schema COneSheet_AddToList
+  ΔCOneSheet
+  list? : Ref[COneSheet]
+where
+  -- Declared member operation COneSheet::AddToList(COneSheet *list)
+  true
+end
+
+schema COneSheet_RemoveFromList_2
+  ΔCOneSheet
+where
+  -- Declared member operation COneSheet::RemoveFromList(void)
+  true
+end
+
+schema CRubbish
+  bRubbishInvisible : 𝔹
+  RubbishVisibility : ℤ
+  aSheets : seq COneSheet  -- bounded array [NUM_RUBBISH_SHEETS]
+  StartEmptyList : COneSheet
+  EndEmptyList : COneSheet
+  StartStaticsList : COneSheet
+  EndStaticsList : COneSheet
+  StartMoversList : COneSheet
+  EndMoversList : COneSheet
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRubbish_Render
+  ΔCRubbish
+where
+  -- Declared member operation CRubbish::Render(void)
+  true
+end
+
+schema CRubbish_StirUp_2
+  ΔCRubbish
+  veh? : Ref[CVehicle]
+where
+  -- Declared member operation CRubbish::StirUp(CVehicle *veh)
+  true
+end
+
+schema CRubbish_Update_3
+  ΔCRubbish
+where
+  -- Declared member operation CRubbish::Update(void)
+  true
+end
+
+schema CRubbish_SetVisibility_4
+  ΔCRubbish
+  visible? : 𝔹
+where
+  -- Declared member operation CRubbish::SetVisibility(bool visible)
+  true
+end
+
+schema CRubbish_Init_5
+  ΔCRubbish
+where
+  -- Declared member operation CRubbish::Init(void)
+  true
+end
+
+schema CRubbish_Shutdown_6
+  ΔCRubbish
+where
+  -- Declared member operation CRubbish::Shutdown(void)
+  true
+end

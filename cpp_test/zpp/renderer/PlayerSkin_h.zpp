@@ -1,0 +1,69 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PlayerSkin (renderer)
+-- Source File(s): renderer/PlayerSkin.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DEFAULT_SKIN_NAME : seq CHAR  -- #define DEFAULT_SKIN_NAME "$$
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlayerSkin
+  m_txdSlot : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlayerSkin_Initialise
+  ΔCPlayerSkin
+where
+  -- Declared member operation CPlayerSkin::Initialise()
+  true
+end
+
+schema CPlayerSkin_Shutdown_2
+  ΔCPlayerSkin
+where
+  -- Declared member operation CPlayerSkin::Shutdown()
+  true
+end
+
+schema CPlayerSkin_GetSkinTexture_3
+  ΔCPlayerSkin
+  texName? : seq CHAR
+  result! : Ref[RwTexture]
+where
+  -- Declared member operation CPlayerSkin::GetSkinTexture(const char *texName)
+  true
+end
+
+schema CPlayerSkin_BeginFrontendSkinEdit_4
+  ΔCPlayerSkin
+where
+  -- Declared member operation CPlayerSkin::BeginFrontendSkinEdit()
+  true
+end
+
+schema CPlayerSkin_EndFrontendSkinEdit_5
+  ΔCPlayerSkin
+where
+  -- Declared member operation CPlayerSkin::EndFrontendSkinEdit()
+  true
+end
+
+schema CPlayerSkin_RenderFrontendSkinEdit_6
+  ΔCPlayerSkin
+where
+  -- Declared member operation CPlayerSkin::RenderFrontendSkinEdit()
+  true
+end

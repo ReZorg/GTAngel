@@ -1,0 +1,214 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedIK (peds)
+-- Source File(s): peds/PedIK.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+LimbMoveStatus ::= ANGLES_SET_TO_MAX | ONE_ANGLE_COULDNT_BE_SET_EXACTLY | ANGLES_SET_EXACTLY
+
+PedIK_Enum_2 ::= GUN_POINTED_SUCCESSFULLY | LOOKAROUND_HEAD_ONLY | AIMS_WITH_ARM
+  -- val(GUN_POINTED_SUCCESSFULLY) = 1
+  -- val(LOOKAROUND_HEAD_ONLY) = 2
+  -- val(AIMS_WITH_ARM) = 4
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema LimbOrientation
+  yaw : ℝ
+  pitch : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema LimbMovementInfo
+  maxYaw : ℝ
+  minYaw : ℝ
+  yawD : ℝ
+  maxPitch : ℝ
+  minPitch : ℝ
+  pitchD : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedIK
+  m_ped : Ref[CPed_Const]
+  m_headOrient : LimbOrientation
+  m_torsoOrient : LimbOrientation
+  m_upperArmOrient : LimbOrientation
+  m_lowerArmOrient : LimbOrientation
+  m_flags : ℤ
+  ms_torsoInfo : LimbMovementInfo
+  ms_headInfo : LimbMovementInfo
+  ms_headRestoreInfo : LimbMovementInfo
+  ms_upperArmInfo : LimbMovementInfo
+  ms_lowerArmInfo : LimbMovementInfo
+where
+  #m_ped ≤ 1
+end
+
+schema CPedIK_CPedIK
+  ΔCPedIK
+  ped? : Ref[CPed]
+where
+  -- Declared member operation CPedIK::CPedIK(CPed *ped)
+  true
+end
+
+schema CPedIK_PointGunInDirection_2
+  ΔCPedIK
+  targetYaw? : ℝ
+  targetPitch? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::PointGunInDirection(float targetYaw, float targetPitch)
+  true
+end
+
+schema CPedIK_PointGunInDirectionUsingArm_3
+  ΔCPedIK
+  targetYaw? : ℝ
+  targetPitch? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::PointGunInDirectionUsingArm(float targetYaw, float targetPitch)
+  true
+end
+
+schema CPedIK_PointGunAtPosition_4
+  ΔCPedIK
+  position? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::PointGunAtPosition(CVector const& position)
+  true
+end
+
+schema CPedIK_GetComponentPosition_5
+  ΔCPedIK
+  pos? : RwV3d
+  node? : ℕ
+where
+  -- Declared member operation CPedIK::GetComponentPosition(RwV3d &pos, uint32 node)
+  true
+end
+
+schema CPedIK_GetWorldMatrix_6
+  ΔCPedIK
+  source? : Ref[RwFrame]
+  destination? : Ref[RwMatrix]
+  result! : Ref[RwMatrix]
+where
+  -- Declared member operation CPedIK::GetWorldMatrix(RwFrame *source, RwMatrix *destination)
+  true
+end
+
+schema CPedIK_RotateTorso_7
+  ΔCPedIK
+  animBlend? : Ref[AnimBlendFrameData]
+  limb? : Ref[LimbOrientation]
+  changeRoll? : 𝔹
+where
+  -- Declared member operation CPedIK::RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll)
+  true
+end
+
+schema CPedIK_ExtractYawAndPitchLocal_8
+  ΔCPedIK
+  mat? : Ref[RwMatrix]
+  yaw? : ℙ ℝ
+  pitch? : ℙ ℝ
+where
+  -- Declared member operation CPedIK::ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch)
+  true
+end
+
+schema CPedIK_ExtractYawAndPitchLocalSkinned_9
+  ΔCPedIK
+  node? : Ref[AnimBlendFrameData]
+  yaw? : ℙ ℝ
+  pitch? : ℙ ℝ
+where
+  -- Declared member operation CPedIK::ExtractYawAndPitchLocalSkinned(AnimBlendFrameData *node, float *yaw, float *pitch)
+  true
+end
+
+schema CPedIK_ExtractYawAndPitchWorld_10
+  ΔCPedIK
+  mat? : Ref[RwMatrix]
+  yaw? : ℙ ℝ
+  pitch? : ℙ ℝ
+where
+  -- Declared member operation CPedIK::ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch)
+  true
+end
+
+schema CPedIK_MoveLimb_11
+  ΔCPedIK
+  limb? : LimbOrientation
+  targetYaw? : ℝ
+  targetPitch? : ℝ
+  moveInfo? : LimbMovementInfo
+  result! : LimbMoveStatus
+where
+  -- Declared member operation CPedIK::MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, LimbMovementInfo &moveInfo)
+  true
+end
+
+schema CPedIK_RestoreGunPosn_12
+  ΔCPedIK
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::RestoreGunPosn(void)
+  true
+end
+
+schema CPedIK_RotateHead_13
+  ΔCPedIK
+where
+  -- Declared member operation CPedIK::RotateHead(void)
+  true
+end
+
+schema CPedIK_LookInDirection_14
+  ΔCPedIK
+  targetYaw? : ℝ
+  targetPitch? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::LookInDirection(float targetYaw, float targetPitch)
+  true
+end
+
+schema CPedIK_LookAtPosition_15
+  ΔCPedIK
+  pos? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::LookAtPosition(CVector const& pos)
+  true
+end
+
+schema CPedIK_RestoreLookAt_16
+  ΔCPedIK
+  result! : 𝔹
+where
+  -- Declared member operation CPedIK::RestoreLookAt(void)
+  true
+end

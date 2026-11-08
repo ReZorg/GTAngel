@@ -1,0 +1,33 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AudioSamples (audio)
+-- Source File(s): audio/AudioSamples.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eSfxSample ::= SFX_CAR_HORN_JEEP | SFX_CAR_HORN_BMW328 | SFX_CAR_HORN_BUS | SFX_CAR_HORN_BUS2 | SFX_CAR_HORN_56CHEV | SFX_CAR_HORN_PICKUP | SFX_CAR_HORN_PORSCHE | SFX_CAR_HORN_TRUCK | SFX_CAR_HELI_MAI | SFX_CAR_HELI_MAI2 | SFX_CAR_HELI_REA | SFX_CAR_HELI_STA | SFX_CAR_HELI_ROT | SFX_CAR_HELI_FAR | SFX_CAR_HELI_ROL | SFX_OLD_CAR_DOOR_OPEN | SFX_OLD_CAR_DOOR_CLOSE | SFX_NEW_CAR_DOOR_OPEN | SFX_NEW_CAR_DOOR_CLOSE | SFX_TRUCK_DOOR_OPEN | SFX_TRUCK_DOOR_CLOSE | SFX_REVERSE_GEAR | SFX_REVERSE_GEAR_2 | SFX_CAR_STARTER | SFX_ROAD_NOISE | SFX_SKID | SFX_GRAVEL_SKID | SFX_POLICE_SIREN_SLOW | SFX_SIREN_FAST | SFX_AMBULANCE_SIREN_SLOW | SFX_REVERSE_WARNING | SFX_ICE_CREAM_TUNE | SFX_AIR_BRAKES | SFX_TYRE_BUMP | SFX_TYRE_BURST_B | SFX_TYRE_BURST | SFX_TYRE_BURST_L | SFX_PALM_TREE_LO | SFX_BULLET_PASS_1 | SFX_BULLET_PASS_2 | SFX_SKATE_1 | SFX_SKATE_2 | SFX_FOOTSTEP_CONCRETE_1 | SFX_FOOTSTEP_CONCRETE_2 | SFX_FOOTSTEP_CONCRETE_3 | SFX_FOOTSTEP_CONCRETE_4 | SFX_FOOTSTEP_CONCRETE_5 | SFX_EXPLOSION_1 | ... (17873 total branches)
+  -- val(SFX_CAR_HORN_JEEP) = 0
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AudioSamplesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 17962
+end

@@ -1,0 +1,216 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: OnscreenTimer (control)
+-- Source File(s): control/OnscreenTimer.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Script.zpp  (from "Script.h")
+-- include OnscreenTimer.zpp  (from "OnscreenTimer.h")
+-- include Camera.zpp  (from "Camera.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema COnscreenTimer_Init
+  ΔCOnscreenTimer
+where
+  -- State update: m_bDisabled' = false
+  -- State update: m_nCounterOffset' = 0
+  -- State update: m_nTotal' = -1
+  -- State update: m_nType' = COUNTER_DISPLAY_NUMBER
+  -- State update: m_nTypeOfTotal' = 0
+  -- State update: m_bCounterProcessed' = false
+  true
+end
+
+schema COnscreenTimer_Process
+  ΔCOnscreenTimer
+where
+  -- Invokes: CReplay::IsPlayingBack
+  true
+end
+
+schema COnscreenTimer_ProcessForDisplay
+  ΔCOnscreenTimer
+where
+  -- State update: m_bProcessed' = false
+  -- State update: m_bClockProcessed' = false
+  -- State update: m_bClockProcessed' = true
+  -- State update: m_bProcessed' = true
+  -- State update: m_bCounterProcessed' = false
+  -- State update: m_bCounterProcessed' = true
+  true
+end
+
+schema COnscreenTimer_ClearCounter
+  ΔCOnscreenTimer
+  offset? : ℕ
+where
+  -- State update: m_nCounterOffset' = 0
+  -- State update: m_nTypeOfTotal' = 0
+  -- State update: m_nType' = COUNTER_DISPLAY_NUMBER
+  -- State update: m_bCounterProcessed' = false
+  -- State update: m_bAddDollarPrefix' = false
+  true
+end
+
+schema COnscreenTimer_ClearClock
+  ΔCOnscreenTimer
+  offset? : ℕ
+where
+  -- State update: m_nClockOffset' = 0
+  -- State update: m_bClockProcessed' = false
+  -- State update: m_bClockGoingDown' = true
+  -- State update: m_bClockTickThisFrame' = false
+  true
+end
+
+schema COnscreenTimer_AddCounter
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text1? : seq CHAR
+  pos? : ℕ
+  total? : ℤ
+  text2? : seq CHAR
+  totalType? : ℕ
+where
+  -- State update: m_nCounterOffset' = offset
+  -- State update: m_nTotal' = total
+  -- State update: m_nTypeOfTotal' = totalType
+  -- State update: m_nType' = type
+  -- State update: m_bAddDollarPrefix' = 0
+  -- State update: m_colour1' = CRGBA(112, 132, 157, 255)
+  true
+end
+
+schema COnscreenTimer_AddClock
+  ΔCOnscreenTimer
+  offset? : ℕ
+  text? : seq CHAR
+  bGoingDown? : 𝔹
+where
+  -- State update: m_nClockOffset' = offset
+  -- State update: m_bClockGoingDown' = bGoingDown
+  -- State update: m_bClockTickThisFrame' = false
+  -- State update: m_aClockColour' = CRGBA(244, 225, 91, 255)
+  -- State update: m_aClockColour' = gbColour
+  -- State update: gbColour' = CRGBA(255, 255, 255, 255)
+  true
+end
+
+schema COnscreenTimerEntry_Process
+  ΔCOnscreenTimerEntry
+where
+  -- State update: timerPtr' = CTheScripts::GetPointerToScriptVariable(m_nClockOffset)
+  -- State update: oldTime' = *timerPtr
+  -- State update: newTime' = oldTime - int32(CTimer::GetTimeStepInMilliseconds())
+  -- State update: timerPtr' = newTime
+  -- State update: timerPtr' = 0
+  -- State update: m_bClockProcessed' = 0
+  -- Invokes: CTheScripts::GetPointerToScriptVariable, CTimer::GetTimeStepInMilliseconds, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplayClock
+  ΔCOnscreenTimerEntry
+where
+  -- State update: time' = *CTheScripts::GetPointerToScriptVariable(m_nClockOffset)
+  -- Invokes: CTheScripts::GetPointerToScriptVariable
+  true
+end
+
+schema COnscreenCounterEntry_ProcessForDisplayCounter
+  ΔCOnscreenCounterEntry
+where
+  -- State update: counter' = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset)
+  -- State update: m_nTotal' = Min(99, m_nTotal)
+  -- Invokes: CTheScripts::GetPointerToScriptVariable
+  true
+end
+
+schema COnscreenTimer_ChangeCounterPrefix
+  ΔCOnscreenTimer
+  offset? : ℕ
+  bChange? : 𝔹
+where
+  -- State update: m_bAddDollarPrefix' = bChange
+  true
+end
+
+schema COnscreenTimer_AddCounter_2
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+  pos? : ℕ
+where
+  -- State update: m_nCounterOffset' = offset
+  -- State update: m_nType' = type
+  true
+end
+
+schema COnscreenTimer_AddCounter_3
+  ΔCOnscreenTimer
+  offset? : ℕ
+  type? : ℕ
+  text? : seq CHAR
+where
+  -- State update: m_nCounterOffset' = offset
+  -- State update: m_nType' = type
+  true
+end
+
+schema COnscreenTimer_AddClock_2
+  ΔCOnscreenTimer
+  offset? : ℕ
+  text? : seq CHAR
+where
+  -- State update: m_nTimerOffset' = offset
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplay
+  ΔCOnscreenTimerEntry
+where
+  -- State update: m_bTimerProcessed' = false
+  -- State update: m_bCounterProcessed' = false
+  -- State update: m_bTimerProcessed' = true
+  -- State update: m_bCounterProcessed' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema COnscreenTimerEntry_ProcessForDisplayCounter
+  ΔCOnscreenTimerEntry
+where
+  -- State update: counter' = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset)
+  -- Invokes: CTheScripts::GetPointerToScriptVariable
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema OnscreenTimerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 341
+end

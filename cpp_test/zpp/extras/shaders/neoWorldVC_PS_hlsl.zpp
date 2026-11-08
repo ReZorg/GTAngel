@@ -1,0 +1,22 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoWorldVC_PS (extras)
+-- Source File(s): extras/shaders/neoWorldVC_PS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema PS_INPUT
+  COLOR0 : ℝ
+  TEXCOORD0 : ℝ
+  TEXCOORD1 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end

@@ -1,0 +1,159 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TimeModelInfo (modelinfo)
+-- Source File(s): modelinfo/TimeModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include SimpleModelInfo.zpp  (from "SimpleModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTimeModelInfo
+  CSimpleModelInfo  -- inherits base schema
+  m_timeOn : ℤ
+  m_timeOff : ℤ
+  m_otherTimeModelID : ℤ
+  msClassInfo : base__cRelocatableChunkClassInfo
+  msClassInstance : CTimeModelInfo
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTimeModelInfo_CTimeModelInfo
+  ΔCTimeModelInfo
+where
+  -- Declared member operation CTimeModelInfo::CTimeModelInfo(void)
+  true
+end
+
+schema CTimeModelInfo_RcWriteThis_2
+  ΔCTimeModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : void
+where
+  -- Declared member operation CTimeModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CTimeModelInfo_RcWriteEmpty_3
+  ΔCTimeModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CTimeModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CTimeModelInfo_GetTimeOn_4
+  ΔCTimeModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CTimeModelInfo::GetTimeOn(void)
+  true
+end
+
+schema CTimeModelInfo_GetTimeOff_5
+  ΔCTimeModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CTimeModelInfo::GetTimeOff(void)
+  true
+end
+
+schema CTimeModelInfo_SetTimes_6
+  ΔCTimeModelInfo
+  on? : ℤ
+  off? : ℤ
+  result! : void
+where
+  -- Declared member operation CTimeModelInfo::SetTimes(int32 on, int32 off)
+  true
+end
+
+schema CTimeModelInfo_GetOtherTimeModel_7
+  ΔCTimeModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CTimeModelInfo::GetOtherTimeModel(void)
+  true
+end
+
+schema CTimeModelInfo_SetOtherTimeModel_8
+  ΔCTimeModelInfo
+  other? : ℤ
+  result! : void
+where
+  -- Declared member operation CTimeModelInfo::SetOtherTimeModel(int32 other)
+  true
+end
+
+schema CTimeModelInfo_FindOtherTimeModel_9
+  ΔCTimeModelInfo
+  name? : seq CHAR
+  result! : Ref[CTimeModelInfo]
+where
+  -- Declared member operation CTimeModelInfo::FindOtherTimeModel(const char *name)
+  true
+end
+
+schema CTimeModelInfo_FindOtherTimeModel_10
+  ΔCTimeModelInfo
+  result! : Ref[CTimeModelInfo]
+where
+  -- Declared member operation CTimeModelInfo::FindOtherTimeModel(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema TimeModelInfo_GetTimeOn
+  ΔTimeModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_timeOn
+  true
+end
+
+schema TimeModelInfo_GetTimeOff
+  ΔTimeModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_timeOff
+  true
+end
+
+schema TimeModelInfo_SetTimes
+  ΔTimeModelInfoModuleState
+  on? : ℤ
+  off? : ℤ
+where
+  -- State update: m_timeOn' = on
+  -- State update: m_timeOff' = off
+  true
+end
+
+schema TimeModelInfo_GetOtherTimeModel
+  ΔTimeModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_otherTimeModelID
+  true
+end
+
+schema TimeModelInfo_SetOtherTimeModel
+  ΔTimeModelInfoModuleState
+  other? : ℤ
+where
+  -- State update: m_otherTimeModelID' = other
+  true
+end

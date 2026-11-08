@@ -1,0 +1,286 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: DMAudio (audio)
+-- Source File(s): audio/DMAudio.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include Crime.zpp  (from "Crime.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NO_AUDIO_PROVIDER : seq CHAR  -- #define NO_AUDIO_PROVIDER -3
+AUDIO_PROVIDER_NOT_DETERMINED : seq CHAR  -- #define AUDIO_PROVIDER_NOT_DETERMINED -99
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cDMAudio
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cDMAudio_cDMAudio
+  ΔcDMAudio
+  result! : ANY
+where
+  -- Declared member operation cDMAudio::cDMAudio()
+  true
+end
+
+schema cDMAudio_Terminate_2
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::Terminate(void)
+  true
+end
+
+schema cDMAudio_Service_3
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::Service(void)
+  true
+end
+
+schema cDMAudio_CreateEntity_4
+  ΔcDMAudio
+  type? : eAudioType
+  UID? : ADDRESS
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::CreateEntity(eAudioType type, void *UID)
+  true
+end
+
+schema cDMAudio_DestroyEntity_5
+  ΔcDMAudio
+  audioEntity? : ℤ
+where
+  -- Declared member operation cDMAudio::DestroyEntity(int32 audioEntity)
+  true
+end
+
+schema cDMAudio_GetEntityStatus_6
+  ΔcDMAudio
+  audioEntity? : ℤ
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::GetEntityStatus(int32 audioEntity)
+  true
+end
+
+schema cDMAudio_SetEntityStatus_7
+  ΔcDMAudio
+  audioEntity? : ℤ
+  status? : bool8
+where
+  -- Declared member operation cDMAudio::SetEntityStatus(int32 audioEntity, bool8 status)
+  true
+end
+
+schema cDMAudio_PlayOneShot_8
+  ΔcDMAudio
+  audioEntity? : ℤ
+  oneShot? : ℕ
+  volume? : ℝ
+where
+  -- Declared member operation cDMAudio::PlayOneShot(int32 audioEntity, uint16 oneShot, float volume)
+  true
+end
+
+schema cDMAudio_DestroyAllGameCreatedEntities_9
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::DestroyAllGameCreatedEntities(void)
+  true
+end
+
+schema cDMAudio_SetOutputMode_10
+  ΔcDMAudio
+  surround? : bool8
+where
+  -- Declared member operation cDMAudio::SetOutputMode(bool8 surround)
+  true
+end
+
+schema cDMAudio_SetMP3BoostVolume_11
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetMP3BoostVolume(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetEffectsMasterVolume_12
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetEffectsMasterVolume(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetMusicMasterVolume_13
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetMusicMasterVolume(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetEffectsFadeVol_14
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetEffectsFadeVol(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetMusicFadeVol_15
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetMusicFadeVol(uint8 volume)
+  true
+end
+
+schema cDMAudio_GetNum3DProvidersAvailable_16
+  ΔcDMAudio
+  result! : ℕ
+where
+  -- Declared member operation cDMAudio::GetNum3DProvidersAvailable(void)
+  true
+end
+
+schema cDMAudio_Get3DProviderName_17
+  ΔcDMAudio
+  id? : ℕ
+  result! : seq CHAR
+where
+  -- Declared member operation cDMAudio::Get3DProviderName(uint8 id)
+  true
+end
+
+schema cDMAudio_AutoDetect3DProviders_18
+  ΔcDMAudio
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::AutoDetect3DProviders(void)
+  true
+end
+
+schema cDMAudio_GetCurrent3DProviderIndex_19
+  ΔcDMAudio
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::GetCurrent3DProviderIndex(void)
+  true
+end
+
+schema cDMAudio_SetCurrent3DProvider_20
+  ΔcDMAudio
+  which? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::SetCurrent3DProvider(uint8 which)
+  true
+end
+
+schema cDMAudio_SetSpeakerConfig_21
+  ΔcDMAudio
+  config? : ℤ
+where
+  -- Declared member operation cDMAudio::SetSpeakerConfig(int32 config)
+  true
+end
+
+schema cDMAudio_IsMP3RadioChannelAvailable_22
+  ΔcDMAudio
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::IsMP3RadioChannelAvailable(void)
+  true
+end
+
+schema cDMAudio_ReleaseDigitalHandle_23
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::ReleaseDigitalHandle(void)
+  true
+end
+
+schema cDMAudio_ReacquireDigitalHandle_24
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::ReacquireDigitalHandle(void)
+  true
+end
+
+schema cDMAudio_SetDynamicAcousticModelingStatus_25
+  ΔcDMAudio
+  status? : bool8
+where
+  -- Declared member operation cDMAudio::SetDynamicAcousticModelingStatus(bool8 status)
+  true
+end
+
+schema cDMAudio_CheckForAnAudioFileOnCD_26
+  ΔcDMAudio
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::CheckForAnAudioFileOnCD(void)
+  true
+end
+
+schema cDMAudio_GetCDAudioDriveLetter_27
+  ΔcDMAudio
+  result! : seq CHAR
+where
+  -- Declared member operation cDMAudio::GetCDAudioDriveLetter(void)
+  true
+end
+
+schema cDMAudio_IsAudioInitialised_28
+  ΔcDMAudio
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::IsAudioInitialised(void)
+  true
+end
+
+schema cDMAudio_ResetPoliceRadio_29
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::ResetPoliceRadio()
+  true
+end
+
+schema cDMAudio_ReportCrime_30
+  ΔcDMAudio
+  crime? : eCrimeType
+  pos? : CVector
+where
+  -- Declared member operation cDMAudio::ReportCrime(eCrimeType crime, CVector const &pos)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema DMAudio_cDMAudio
+  ΔDMAudioModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

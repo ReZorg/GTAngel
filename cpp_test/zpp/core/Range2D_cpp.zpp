@@ -1,0 +1,61 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Range2D (core)
+-- Source File(s): core/Range2D.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Range2D.zpp  (from "Range2D.h")
+-- include General.zpp  (from "General.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRange2D_IsInRange
+  ΔCRange2D
+  vec? : CVector2D
+where
+  -- Return postcondition: result! = min.x < vec.x && max.x > vec.x && min.y < vec.y && max.y > vec.y
+  true
+end
+
+schema CRange2D_DebugShowRange
+  ΔCRange2D
+  arg_1? : ℝ
+  arg_2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRange2D_GetRandomPointInRange
+  ΔCRange2D
+where
+  -- State update: distX' = Abs(max.x - min.x)
+  -- State update: distY' = Abs(max.y - min.y)
+  -- State update: outX' = CGeneral::GetRandomNumber() % distX + min.x
+  -- State update: outY' = CGeneral::GetRandomNumber() % distY + min.y
+  -- Return postcondition: result! = CVector2D(outX, outY)
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Range2DModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 28
+end

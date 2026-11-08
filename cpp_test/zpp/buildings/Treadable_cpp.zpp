@@ -1,0 +1,30 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Treadable (buildings)
+-- Source File(s): buildings/Treadable.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpworld.zpp  (from "rpworld.h")
+-- include Treadable.zpp  (from "Treadable.h")
+-- include Pools.zpp  (from "Pools.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TreadableModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 8
+end

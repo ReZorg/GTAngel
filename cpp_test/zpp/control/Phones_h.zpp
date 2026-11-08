@@ -1,0 +1,201 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Phones (control)
+-- Source File(s): control/Phones.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Physical.zpp  (from "Physical.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PhoneState ::= PHONE_STATE_FREE | PHONE_STATE_REPORTING_CRIME | PHONE_STATE_2 | PHONE_STATE_MESSAGE_REMOVED | PHONE_STATE_ONETIME_MESSAGE_SET | PHONE_STATE_REPEATED_MESSAGE_SET | PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE | PHONE_STATE_ONETIME_MESSAGE_STARTED | PHONE_STATE_REPEATED_MESSAGE_STARTED | PHONE_STATE_9
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPhone
+  m_vecPos : CVector
+  m_apMessages : seq CHAR
+  m_repeatedMessagePickupStart : ℕ
+  m_pEntity : Ref[CEntity]
+  m_nState : PhoneState
+  m_visibleToCam : 𝔹
+where
+  #m_apMessages = 6
+  m_repeatedMessagePickupStart ≥ 0
+  #m_pEntity ≤ 1
+end
+
+schema CPhone_CPhone
+  ΔCPhone
+where
+  -- Declared member operation CPhone::CPhone()
+  true
+end
+
+schema CPhoneInfo
+  bDisplayingPhoneMessage : 𝔹
+  PhoneEnableControlsTimer : ℕ
+  pPhoneDisplayingMessages : Ref[CPhone]
+  bPickingUpPhone : 𝔹
+  pCallBackPed : Ref[CPed]
+  m_nMax : ℤ
+  m_nScriptPhonesMax : ℤ
+  m_aPhones : seq CPhone  -- bounded array [NUMPHONES]
+where
+  PhoneEnableControlsTimer ≥ 0
+  #pPhoneDisplayingMessages ≤ 1
+  #pCallBackPed ≤ 1
+end
+
+schema CPhoneInfo_CPhoneInfo
+  ΔCPhoneInfo
+where
+  -- Declared member operation CPhoneInfo::CPhoneInfo()
+  true
+end
+
+schema CPhoneInfo_PhoneAtThisPosition_2
+  ΔCPhoneInfo
+  arg_1? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CPhoneInfo::PhoneAtThisPosition(CVector)
+  true
+end
+
+schema CPhoneInfo_HasMessageBeenDisplayed_3
+  ΔCPhoneInfo
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPhoneInfo::HasMessageBeenDisplayed(int)
+  true
+end
+
+schema CPhoneInfo_IsMessageBeingDisplayed_4
+  ΔCPhoneInfo
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPhoneInfo::IsMessageBeingDisplayed(int)
+  true
+end
+
+schema CPhoneInfo_Load_5
+  ΔCPhoneInfo
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPhoneInfo::Load(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPhoneInfo_Save_6
+  ΔCPhoneInfo
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPhoneInfo::Save(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CPhoneInfo_SetPhoneMessage_JustOnce_7
+  ΔCPhoneInfo
+  phoneId? : ℤ
+  msg1? : seq CHAR
+  msg2? : seq CHAR
+  msg3? : seq CHAR
+  msg4? : seq CHAR
+  msg5? : seq CHAR
+  msg6? : seq CHAR
+where
+  -- Declared member operation CPhoneInfo::SetPhoneMessage_JustOnce(int phoneId, wchar *msg1, wchar *msg2, wchar *msg3, wchar *msg4, wchar *msg5, wchar *msg6)
+  true
+end
+
+schema CPhoneInfo_SetPhoneMessage_Repeatedly_8
+  ΔCPhoneInfo
+  phoneId? : ℤ
+  msg1? : seq CHAR
+  msg2? : seq CHAR
+  msg3? : seq CHAR
+  msg4? : seq CHAR
+  msg5? : seq CHAR
+  msg6? : seq CHAR
+where
+  -- Declared member operation CPhoneInfo::SetPhoneMessage_Repeatedly(int phoneId, wchar *msg1, wchar *msg2, wchar *msg3, wchar *msg4, wchar *msg5, wchar *msg6)
+  true
+end
+
+schema CPhoneInfo_GrabPhone_9
+  ΔCPhoneInfo
+  arg_1? : ℝ
+  arg_2? : ℝ
+  result! : ℤ
+where
+  -- Declared member operation CPhoneInfo::GrabPhone(float, float)
+  true
+end
+
+schema CPhoneInfo_Initialise_10
+  ΔCPhoneInfo
+where
+  -- Declared member operation CPhoneInfo::Initialise(void)
+  true
+end
+
+schema CPhoneInfo_Shutdown_11
+  ΔCPhoneInfo
+where
+  -- Declared member operation CPhoneInfo::Shutdown(void)
+  true
+end
+
+schema CPhoneInfo_Update_12
+  ΔCPhoneInfo
+where
+  -- Declared member operation CPhoneInfo::Update(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Phones_CPhone
+  ΔPhonesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Phones_CPhone_2
+  ΔPhonesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Phones_CPhoneInfo
+  ΔPhonesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Phones_CPhoneInfo_2
+  ΔPhonesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

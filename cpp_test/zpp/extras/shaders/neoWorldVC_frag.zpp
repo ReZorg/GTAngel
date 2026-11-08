@@ -1,0 +1,36 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoWorldVC (extras)
+-- Source File(s): extras/shaders/neoWorldVC.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema neoWorldVC_main
+  ΔneoWorldVCModuleState
+where
+  -- State update: t0' = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: t1' = texture(tex1, vec2(v_tex1.x, 1.0-v_tex1.y))
+  -- State update: color' = t0*v_color*(1.0 + u_lightMap*(t1-1.0))
+  -- State update: color.a' = v_color.a*t0.a*u_lightMap.a
+  -- State update: color.rgb' = mix(u_fogColor.rgb, color.rgb, v_fog)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema neoWorldVCModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 26
+end

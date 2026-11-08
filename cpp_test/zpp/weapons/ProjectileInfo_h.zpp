@@ -1,0 +1,130 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ProjectileInfo (weapons)
+-- Source File(s): weapons/ProjectileInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CProjectileInfo
+  m_eWeaponType : eWeaponType
+  m_pSource : Ref[CEntity]
+  m_nExplosionTime : ℕ
+  m_bInUse : 𝔹
+  m_vecPos : CVector
+  ms_apProjectile : seq Ref[CProjectile]  -- bounded array [NUM_PROJECTILES]
+where
+  #m_pSource ≤ 1
+  m_nExplosionTime ≥ 0
+end
+
+schema CProjectileInfo_GetProjectileInfo
+  ΔCProjectileInfo
+  id? : ℤ
+  result! : Ref[CProjectileInfo]
+where
+  -- Declared member operation CProjectileInfo::GetProjectileInfo(int32 id)
+  true
+end
+
+schema CProjectileInfo_Initialise_2
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::Initialise()
+  true
+end
+
+schema CProjectileInfo_Shutdown_3
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::Shutdown()
+  true
+end
+
+schema CProjectileInfo_AddProjectile_4
+  ΔCProjectileInfo
+  ped? : Ref[CEntity]
+  weapon? : eWeaponType
+  pos? : CVector
+  speed? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CProjectileInfo::AddProjectile(CEntity *ped, eWeaponType weapon, CVector pos, float speed)
+  true
+end
+
+schema CProjectileInfo_RemoveProjectile_5
+  ΔCProjectileInfo
+  info? : Ref[CProjectileInfo]
+  projectile? : Ref[CProjectile]
+where
+  -- Declared member operation CProjectileInfo::RemoveProjectile(CProjectileInfo *info, CProjectile *projectile)
+  true
+end
+
+schema CProjectileInfo_RemoveNotAdd_6
+  ΔCProjectileInfo
+  entity? : Ref[CEntity]
+  weaponType? : eWeaponType
+  pos? : CVector
+where
+  -- Declared member operation CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector pos)
+  true
+end
+
+schema CProjectileInfo_RemoveIfThisIsAProjectile_7
+  ΔCProjectileInfo
+  pObject? : Ref[CObject]
+  result! : 𝔹
+where
+  -- Declared member operation CProjectileInfo::RemoveIfThisIsAProjectile(CObject *pObject)
+  true
+end
+
+schema CProjectileInfo_RemoveAllProjectiles_8
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::RemoveAllProjectiles()
+  true
+end
+
+schema CProjectileInfo_RemoveDetonatorProjectiles_9
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::RemoveDetonatorProjectiles()
+  true
+end
+
+schema CProjectileInfo_Update_10
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::Update()
+  true
+end
+
+schema CProjectileInfo_IsProjectileInRange_11
+  ΔCProjectileInfo
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  remove? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, float z1, float z2, bool remove)
+  true
+end

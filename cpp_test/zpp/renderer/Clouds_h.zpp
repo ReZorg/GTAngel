@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Clouds (renderer)
+-- Source File(s): renderer/Clouds.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CClouds
+  CloudRotation : ℝ
+  IndividualRotation : ℕ
+  ms_cameraRoll : ℝ
+  ms_horizonZ : ℝ
+  ms_HorizonTilt : ℝ
+  ms_colourTop : CRGBA
+  ms_colourBottom : CRGBA
+  ms_colourBkGrd : CRGBA
+where
+  IndividualRotation ≥ 0
+end
+
+schema CClouds_Init
+  ΔCClouds
+where
+  -- Declared member operation CClouds::Init(void)
+  true
+end
+
+schema CClouds_Shutdown_2
+  ΔCClouds
+where
+  -- Declared member operation CClouds::Shutdown(void)
+  true
+end
+
+schema CClouds_Update_3
+  ΔCClouds
+where
+  -- Declared member operation CClouds::Update(void)
+  true
+end
+
+schema CClouds_Render_4
+  ΔCClouds
+where
+  -- Declared member operation CClouds::Render(void)
+  true
+end
+
+schema CClouds_RenderBackground_5
+  ΔCClouds
+  topred? : ℤ
+  topgreen? : ℤ
+  topblue? : ℤ
+  botred? : ℤ
+  botgreen? : ℤ
+  botblue? : ℤ
+  alpha? : ℤ
+where
+  -- Declared member operation CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue, int16 botred, int16 botgreen, int16 botblue, int16 alpha)
+  true
+end
+
+schema CClouds_RenderHorizon_6
+  ΔCClouds
+where
+  -- Declared member operation CClouds::RenderHorizon(void)
+  true
+end

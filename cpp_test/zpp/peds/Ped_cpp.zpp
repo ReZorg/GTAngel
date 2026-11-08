@@ -1,0 +1,441 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Ped (peds)
+-- Source File(s): peds/Ped.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include General.zpp  (from "General.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Population.zpp  (from "Population.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Script.zpp  (from "Script.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include Range2D.zpp  (from "Range2D.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include CutsceneShadow.zpp  (from "CutsceneShadow.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FRONT_OF_PLANE : ℕ  -- #define FRONT_OF_PLANE 1
+ON_THE_PLANE : ℕ  -- #define ON_THE_PLANE 0
+BEHIND_THE_PLANE : seq CHAR  -- #define BEHIND_THE_PLANE -1
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPed_CPed
+  ΔCPed
+where
+  -- State update: door_flag' = GetCarDoorFlag(m_vehDoor)
+  -- State update: m_pMyVehicle.pDriver' = ∅
+  -- State update: bInVehicle' = false
+  -- State update: m_pMyVehicle' = ∅
+  -- State update: nearPed' = m_nearPeds[i]
+  -- Invokes: CWorld::Remove, CRadar::ClearBlipForEntity, CPools::GetPedPool, m_pMyVehicle->RemovePassenger, m_pFire->Extinguish
+  true
+end
+
+schema CPed_Initialise
+  ΔCPed
+where
+  -- Invokes: CPedType::Initialise
+  true
+end
+
+schema CPed_SetModelIndex
+  ΔCPed
+  mi? : ℕ
+where
+  -- State update: modelInfo' = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex())
+  -- State update: m_headingRate' = m_pedStats.m_headingChangeRate
+  -- State update: m_animGroup' = (AssocGroupId) modelInfo.m_animGroup
+  -- State update: velocity2d' = &m_vecAnimMoveDelta
+  -- State update: m_pRTShadow' = new CCutsceneShadow
+  -- Invokes: CEntity::SetModelIndex, CModelInfo::GetModelInfo, CAnimManager::AddAnimation, modelInfo->GetHitColModel, modelInfo->CreateHitColModelSkinned
+  true
+end
+
+schema CPed_SetPedStats
+  ΔCPed
+  pedStat? : ePedStats
+where
+  -- State update: m_pedStats' = CPedStats::ms_apPedStats[pedStat]
+  true
+end
+
+schema CPed_DeleteRwObject
+  ΔCPed
+where
+  -- Invokes: CEntity::DeleteRwObject
+  true
+end
+
+schema CPed_BuildPedLists
+  ΔCPed
+where
+  -- State update: centre' = CEntity::GetBoundCentre()
+  -- State update: deadsRegistered' = 0
+  -- State update: xstart' = CWorld::GetSectorIndexX(rect.left)
+  -- State update: ystart' = CWorld::GetSectorIndexY(rect.top)
+  -- State update: xend' = CWorld::GetSectorIndexX(rect.right)
+  -- State update: yend' = CWorld::GetSectorIndexY(rect.bottom)
+  -- Invokes: CTimer::GetFrameCounter, CEntity::GetBoundCentre, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector
+  true
+end
+
+schema CPed_OurPedCanSeeThisOne
+  ΔCPed
+  target? : Ref[CEntity]
+  shootablesDoBlock? : 𝔹
+where
+  -- State update: dist' = CVector2D(target.GetPosition()) - CVector2D(GetPosition())
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: target->GetPosition, dist.Magnitude, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CPed_SortPeds
+  ΔCPed
+  list? : Ref[CPed]
+  min? : ℤ
+  max? : ℤ
+where
+  -- State update: middleDiff' = GetPosition() - list[(max + min) / 2].GetPosition()
+  -- State update: middleDist' = middleDiff.Magnitude()
+  -- State update: left' = max
+  -- State update: right' = min
+  -- State update: rightDiff' = GetPosition() - list[right].GetPosition()
+  -- State update: rightDist' = rightDiff.Magnitude()
+  -- Invokes: middleDiff.Magnitude, rightDiff.Magnitude, leftDiff.Magnitude
+  true
+end
+
+schema CPed_SetMoveState
+  ΔCPed
+  state? : eMoveState
+where
+  -- State update: m_nMoveState' = state
+  true
+end
+
+schema CPed_SetMoveAnim
+  ΔCPed
+where
+  -- State update: m_nStoredMoveState' = PEDMOVE_NONE
+  -- State update: animGroupToUse' = ASSOCGRP_PLAYER
+  -- State update: animGroupToUse' = m_animGroup
+  -- State update: idleAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE)
+  -- State update: idleAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE)
+  -- State update: m_nStoredMoveState' = m_nMoveState
+  -- Invokes: m_leader->IsPlayer, CAnimManager::BlendAnimation, m_leader->GetClump
+  true
+end
+
+schema CPed_StopNonPartialAnims
+  ΔCPed
+where
+  -- State update: assoc' = RpAnimBlendClumpGetFirstAssociation(GetClump())
+  -- Invokes: assoc->IsPartial
+  true
+end
+
+schema CPed_RestartNonPartialAnims
+  ΔCPed
+where
+  -- State update: assoc' = RpAnimBlendClumpGetFirstAssociation(GetClump())
+  -- Invokes: assoc->IsPartial, assoc->SetRun
+  true
+end
+
+schema CPed_SetStoredState
+  ΔCPed
+where
+  -- State update: bFindNewNodeAfterStateRestore' = true
+  -- State update: m_nMoveState' = PEDMOVE_WALK
+  -- State update: m_nLastPedState' = m_nPedState
+  -- State update: m_nPrevMoveState' = m_nMoveState
+  true
+end
+
+schema CPed_RestorePreviousState
+  ΔCPed
+where
+  -- State update: m_nLastPedState' = PED_NONE
+  -- State update: bIsRunning' = false
+  -- State update: diff' = nextNode - GetPosition()
+  -- State update: m_nLastPedState' = PED_NONE
+  -- Invokes: CGeneral::GetRandomNumber, CPathFind::TakeWidthIntoAccountForWandering, diff.MagnitudeSqr
+  true
+end
+
+schema CPed_ScanForThreats
+  ΔCPed
+where
+  -- State update: fearFlags' = m_fearFlags
+  -- State update: ourPos' = GetPosition()
+  -- State update: closestPedDist' = 60.0f
+  -- State update: explosionPos' = GetPosition()
+  -- State update: m_eventOrThreat' = explosionPos
+  -- State update: shooter' = ∅
+  -- Return postcondition: result! = PED_FLAG_EXPLOSION
+  -- Return postcondition: result! = PED_FLAG_GUN
+  -- Return postcondition: result! = CPedType::GetFlag(shooter->m_nPedType)
+  -- Invokes: m_threatEntity->RegisterReference, CPedType::GetFlag, deadPed->GetPosition, m_pEventEntity->RegisterReference, nearPed->GetPosition
+  true
+end
+
+schema CPed_ScanForDelayedResponseThreats
+  ΔCPed
+where
+  -- State update: m_threatEntity' = ∅
+  -- State update: m_pEventEntity' = ∅
+  -- State update: m_threatFlags' = ScanForThreats()
+  -- State update: m_threatCheckTimer' = CTimer::GetTimeInMilliseconds() + m_threatCheckInterval
+  -- State update: m_threatFlags' = 0
+  -- State update: m_threatCheckTimer' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_CheckThreatValidity
+  ΔCPed
+where
+  -- State update: m_threatFlags' = 0
+  -- State update: m_threatEntity' = ∅
+  -- State update: m_threatFlags' = 0
+  -- State update: m_pEventEntity' = ∅
+  -- State update: m_threatFlags' = 0
+  true
+end
+
+schema CPed_CanUseTorsoWhenLooking
+  ΔCPed
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPed_SetLookFlag
+  ΔCPed
+  direction? : ℝ
+  keepTryingToLook? : 𝔹
+  cancelPrevious? : 𝔹
+where
+  -- State update: bIsLooking' = true
+  -- State update: bIsRestoringLook' = false
+  -- State update: m_fLookDirection' = direction
+  -- State update: m_pLookTarget' = ∅
+  -- State update: m_lookTimer' = 0
+  -- State update: bKeepTryingToLook' = keepTryingToLook
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_SetLookFlag_2
+  ΔCPed
+  target? : Ref[CEntity]
+  keepTryingToLook? : 𝔹
+  cancelPrevious? : 𝔹
+where
+  -- State update: bIsLooking' = true
+  -- State update: bIsRestoringLook' = false
+  -- State update: m_pLookTarget' = target
+  -- State update: m_fLookDirection' = 999999.0f
+  -- State update: m_lookTimer' = 0
+  -- State update: bKeepTryingToLook' = keepTryingToLook
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pLookTarget->RegisterReference
+  true
+end
+
+schema CPed_ClearLookFlag
+  ΔCPed
+where
+  -- State update: bIsLooking' = false
+  -- State update: bIsRestoringLook' = true
+  -- State update: bShakeFist' = false
+  -- State update: m_lookTimer' = CTimer::GetTimeInMilliseconds() + 2000
+  -- State update: m_lookTimer' = CTimer::GetTimeInMilliseconds() + 4000
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_MoveHeadToLook
+  ΔCPed
+where
+  -- State update: animTime' = fuckUAssoc.currentTime
+  -- State update: lookingToCop' = false
+  -- State update: lookingToCop' = true
+  -- State update: lookPos' = m_pLookTarget.GetPosition()
+  -- State update: notRocketLauncher' = false
+  -- State update: notTwoHanded' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pLookTarget->GetModelIndex, m_pLookTarget->IsPed, CGeneral::GetRandomNumber, m_pedIK.GetComponentPosition
+  true
+end
+
+schema CPed_RestoreHeadPosition
+  ΔCPed
+where
+  -- State update: bIsRestoringLook' = false
+  -- Invokes: m_pedIK.RestoreLookAt
+  true
+end
+
+schema CPed_SetAimFlag
+  ΔCPed
+  angle? : ℝ
+where
+  -- State update: bIsAimingGun' = true
+  -- State update: bIsRestoringGun' = false
+  -- State update: m_fLookDirection' = angle
+  -- State update: m_lookTimer' = 0
+  -- State update: m_pLookTarget' = ∅
+  -- State update: m_pSeekTarget' = ∅
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_SetAimFlag_2
+  ΔCPed
+  to? : Ref[CEntity]
+where
+  -- State update: bIsAimingGun' = true
+  -- State update: bIsRestoringGun' = false
+  -- State update: m_pLookTarget' = to
+  -- State update: m_pSeekTarget' = to
+  -- State update: m_lookTimer' = 0
+  -- Invokes: m_pLookTarget->CleanUpOldReference, m_pLookTarget->RegisterReference, m_pSeekTarget->CleanUpOldReference, m_pSeekTarget->RegisterReference
+  true
+end
+
+schema CPed_ClearAimFlag
+  ΔCPed
+where
+  -- State update: bIsAimingGun' = false
+  -- State update: bIsRestoringGun' = true
+  -- State update: m_lookTimer' = 0
+  -- State update: m_fFPSMoveHeading' = 0.0f
+  -- State update: m_bFreeAimActive' = false
+  true
+end
+
+schema CPed_AimGun
+  ΔCPed
+where
+  -- State update: vector' = m_pSeekTarget.GetPosition()
+  -- State update: bCanPointGunAtTarget' = m_pedIK.PointGunAtPosition(vector)
+  -- State update: bCanPointGunAtTarget' = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0f)
+  -- Invokes: m_pSeekTarget->IsPed, m_pedIK.GetComponentPosition, m_pSeekTarget->GetPosition, m_pedIK.PointGunAtPosition, m_pedIK.PointGunInDirection
+  true
+end
+
+schema CPed_RestoreGunPosition
+  ΔCPed
+where
+  -- State update: bIsRestoringGun' = false
+  -- State update: bIsRestoringGun' = false
+  -- State update: m_fFPSMoveHeading' = 0.0f
+  -- Invokes: m_pedIK.RestoreGunPosn
+  true
+end
+
+schema CPed_CanWeRunAndFireWithWeapon
+  ΔCPed
+where
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_ScanForInterestingStuff
+  ΔCPed
+where
+  -- State update: mostExpensiveVehAround' = -1
+  -- State update: bestMonetaryValue' = 0
+  -- State update: pos' = GetPosition()
+  -- State update: veh' = (CVehicle*)vehicles[i]
+  -- State update: mostExpensiveVehAround' = i
+  -- State update: bestMonetaryValue' = veh.pHandling.nMonetaryValue
+  -- Invokes: CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumber, CWorld::FindObjectsInRange, m_vecMoveSpeed.Magnitude, veh->IsVehicleNormal
+  true
+end
+
+schema CPed_WillChat
+  ΔCPed
+  stranger? : Ref[CPed]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: ThePaths.TestCrossesRoad, stranger->IsPlayer, stranger->IsGangMember
+  true
+end
+
+schema CPed_CalculateNewVelocity
+  ΔCPed
+where
+  -- State update: headAmount' = DEGTORAD(m_headingRate) * CTimer::GetTimeStep()
+  -- State update: m_fRotationCur' = CGeneral::LimitRadianAngle(m_fRotationCur)
+  -- State update: limitedRotDest' = CGeneral::LimitRadianAngle(m_fRotationDest)
+  -- State update: neededTurn' = limitedRotDest - m_fRotationCur
+  -- State update: m_moved.x' = CrossProduct2D(m_vecAnimMoveDelta, forward)
+  -- State update: m_moved.y' = DotProduct2D(m_vecAnimMoveDelta, forward)
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = CGeneral::LimitRadianAngle(offset + angle)
+  -- Return postcondition: result! = 0
+  -- Invokes: CTimer::GetTimeStep, CGeneral::LimitRadianAngle, m_moved.Magnitude, m_pedIK.RotateTorso, CPed::WorkOutHeadingForMovingFirstPerson
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PedModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 17641
+end

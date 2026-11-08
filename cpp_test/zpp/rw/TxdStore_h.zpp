@@ -1,0 +1,292 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TxdStore (rw)
+-- Source File(s): rw/TxdStore.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include templates.zpp  (from "templates.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema TxdDef
+  texDict : Ref[RwTexDictionary]
+  refCount : ℤ
+  refCountGu : ℤ
+  name : seq CHAR
+where
+  #texDict ≤ 1
+  #name = 20
+end
+
+schema CTxdStore
+  ms_pTxdPool : Ref[CPool_TxdDef_TxdDef]
+  ms_pStoredTxd : Ref[RwTexDictionary]
+where
+  #ms_pTxdPool ≤ 1
+  #ms_pStoredTxd ≤ 1
+end
+
+schema CTxdStore_Initialise
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::Initialise(void)
+  true
+end
+
+schema CTxdStore_Shutdown_2
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::Shutdown(void)
+  true
+end
+
+schema CTxdStore_GameShutdown_3
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::GameShutdown(void)
+  true
+end
+
+schema CTxdStore_AddTxdSlot_4
+  ΔCTxdStore
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CTxdStore::AddTxdSlot(const char *name)
+  true
+end
+
+schema CTxdStore_RemoveTxdSlot_5
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveTxdSlot(int slot)
+  true
+end
+
+schema CTxdStore_FindTxdSlot_6
+  ΔCTxdStore
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CTxdStore::FindTxdSlot(const char *name)
+  true
+end
+
+schema CTxdStore_GetTxdName_7
+  ΔCTxdStore
+  slot? : ℤ
+  result! : seq CHAR
+where
+  -- Declared member operation CTxdStore::GetTxdName(int slot)
+  true
+end
+
+schema CTxdStore_PushCurrentTxd_8
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::PushCurrentTxd(void)
+  true
+end
+
+schema CTxdStore_PopCurrentTxd_9
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::PopCurrentTxd(void)
+  true
+end
+
+schema CTxdStore_SetCurrentTxd_10
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::SetCurrentTxd(int slot)
+  true
+end
+
+schema CTxdStore_Create_11
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::Create(int slot)
+  true
+end
+
+schema CTxdStore_GetNumRefs_12
+  ΔCTxdStore
+  slot? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CTxdStore::GetNumRefs(int slot)
+  true
+end
+
+schema CTxdStore_AddRef_13
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::AddRef(int slot)
+  true
+end
+
+schema CTxdStore_AddRefEvenIfNotInMemory_14
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::AddRefEvenIfNotInMemory(int slot)
+  true
+end
+
+schema CTxdStore_AddRefGu_15
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::AddRefGu(int slot)
+  true
+end
+
+schema CTxdStore_RemoveRef_16
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveRef(int slot)
+  true
+end
+
+schema CTxdStore_RemoveRefGu_17
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveRefGu(int slot)
+  true
+end
+
+schema CTxdStore_RemoveRefWithoutDelete_18
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveRefWithoutDelete(int slot)
+  true
+end
+
+schema CTxdStore_LoadTxd_19
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::LoadTxd(int slot, RwStream *stream)
+  true
+end
+
+schema CTxdStore_LoadTxd_20
+  ΔCTxdStore
+  slot? : ℤ
+  data? : ADDRESS
+  chunk? : ADDRESS
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::LoadTxd(int slot, void *data, void *chunk)
+  true
+end
+
+schema CTxdStore_LoadTxd_21
+  ΔCTxdStore
+  slot? : ℤ
+  filename? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::LoadTxd(int slot, const char *filename)
+  true
+end
+
+schema CTxdStore_StartLoadTxd_22
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::StartLoadTxd(int slot, RwStream *stream)
+  true
+end
+
+schema CTxdStore_FinishLoadTxd_23
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::FinishLoadTxd(int slot, RwStream *stream)
+  true
+end
+
+schema CTxdStore_RemoveTxd_24
+  ΔCTxdStore
+  slot? : ℤ
+  notChunk? : 𝔹
+where
+  -- Declared member operation CTxdStore::RemoveTxd(int slot, bool notChunk = false)
+  true
+end
+
+schema CTxdStore_Load_25
+  ΔCTxdStore
+  stored? : Ref[RwTexDictionary]
+  pool? : Ref[CPool_TxdDef]
+where
+  -- Declared member operation CTxdStore::Load(RwTexDictionary *stored, CPool<TxdDef> *pool)
+  true
+end
+
+schema CTxdStore_GetSlot_26
+  ΔCTxdStore
+  slot? : ℤ
+  result! : Ref[TxdDef]
+where
+  -- Declared member operation CTxdStore::GetSlot(int slot)
+  true
+end
+
+schema CTxdStore_assert_27
+  ΔCTxdStore
+  arg_1? : ms_pTxdPool
+where
+  -- Declared member operation CTxdStore::assert(ms_pTxdPool)
+  true
+end
+
+schema CTxdStore_assert_28
+  ΔCTxdStore
+  arg_1? : slot___ms_pTxdPool__GetSize
+where
+  -- Declared member operation CTxdStore::assert(slot < ms_pTxdPool->GetSize()
+  true
+end
+
+schema CTxdStore_GetSlot_29
+  ΔCTxdStore
+  arg_1? : slot
+  result! : return_ms_pTxdPool
+where
+  -- Declared member operation CTxdStore::GetSlot(slot)
+  true
+end
+
+schema CTxdStore_isTxdLoaded_30
+  ΔCTxdStore
+  slot? : ℤ
+  result! : bool
+where
+  -- Declared member operation CTxdStore::isTxdLoaded(int slot)
+  true
+end

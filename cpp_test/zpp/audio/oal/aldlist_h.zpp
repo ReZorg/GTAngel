@@ -1,0 +1,240 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: aldlist (audio)
+-- Source File(s): audio/oal/aldlist.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include oal_utils.zpp  (from "oal_utils.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+aldlist_Enum_1 ::= ADEXT_EXT_CAPTURE | ADEXT_EXT_EFX | ADEXT_EXT_OFFSET | ADEXT_EXT_LINEAR_DISTANCE | ADEXT_EXT_EXPONENT_DISTANCE | ADEXT_EAX2 | ADEXT_EAX3 | ADEXT_EAX4 | ADEXT_EAX5 | ADEXT_EAX_RAM
+  -- val(ADEXT_EXT_CAPTURE) = (1 << 0)
+  -- val(ADEXT_EXT_EFX) = (1 << 1)
+  -- val(ADEXT_EXT_OFFSET) = (1 << 2)
+  -- val(ADEXT_EXT_LINEAR_DISTANCE) = (1 << 3)
+  -- val(ADEXT_EXT_EXPONENT_DISTANCE) = (1 << 4)
+  -- val(ADEXT_EAX2) = (1 << 5)
+  -- val(ADEXT_EAX3) = (1 << 6)
+  -- val(ADEXT_EAX4) = (1 << 7)
+  -- val(ADEXT_EAX5) = (1 << 8)
+  -- val(ADEXT_EAX_RAM) = (1 << 9)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ALDEVICEINFO
+  strDeviceName : seq CHAR
+  iMajorVersion : ℤ
+  iMinorVersion : ℤ
+  uiSourceCount : ℤ
+  Extensions : ℤ
+  bSelected : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema ALDEVICEINFO_ALDEVICEINFO
+  ΔALDEVICEINFO
+where
+  -- Declared member operation ALDEVICEINFO::ALDEVICEINFO()
+  true
+end
+
+schema ALDEVICEINFO_ALDEVICEINFO_2
+  ΔALDEVICEINFO
+  result! : ANY
+where
+  -- Declared member operation ALDEVICEINFO::ALDEVICEINFO()
+  true
+end
+
+schema ALDEVICEINFO_SetName_3
+  ΔALDEVICEINFO
+  name? : seq CHAR
+  result! : void
+where
+  -- Declared member operation ALDEVICEINFO::SetName(const char *name)
+  true
+end
+
+schema ALDEVICEINFO_strlen_4
+  ΔALDEVICEINFO
+  arg_1? : name
+  result! : strDeviceName___new_char
+where
+  -- Declared member operation ALDEVICEINFO::strlen(name)
+  true
+end
+
+schema ALDEVICEINFO_strcpy_5
+  ΔALDEVICEINFO
+  arg_1? : strDeviceName
+  arg_2? : name
+where
+  -- Declared member operation ALDEVICEINFO::strcpy(strDeviceName, name)
+  true
+end
+
+schema ALDeviceList
+  aDeviceInfo : seq ALDEVICEINFO  -- bounded array [64]
+  nNumOfDevices : ℤ
+  defaultDeviceIndex : ℤ
+  filterIndex : ℤ
+where
+  #aDeviceInfo = 64
+end
+
+schema ALDeviceList_ALDeviceList
+  ΔALDeviceList
+where
+  -- Declared member operation ALDeviceList::ALDeviceList()
+  true
+end
+
+schema ALDeviceList_ALDeviceList_2
+  ΔALDeviceList
+  result! : ANY
+where
+  -- Declared member operation ALDeviceList::ALDeviceList()
+  true
+end
+
+schema ALDeviceList_GetNumDevices_3
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Declared member operation ALDeviceList::GetNumDevices()
+  true
+end
+
+schema ALDeviceList_GetDeviceName_4
+  ΔALDeviceList
+  index? : ℤ
+  result! : seq CHAR
+where
+  -- Declared member operation ALDeviceList::GetDeviceName(unsigned int index)
+  true
+end
+
+schema ALDeviceList_GetDeviceVersion_5
+  ΔALDeviceList
+  index? : ℤ
+  major? : ℙ ℤ
+  minor? : ℙ ℤ
+where
+  -- Declared member operation ALDeviceList::GetDeviceVersion(unsigned int index, int *major, int *minor)
+  true
+end
+
+schema ALDeviceList_GetMaxNumSources_6
+  ΔALDeviceList
+  index? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation ALDeviceList::GetMaxNumSources(unsigned int index)
+  true
+end
+
+schema ALDeviceList_IsExtensionSupported_7
+  ΔALDeviceList
+  index? : ℤ
+  ext? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation ALDeviceList::IsExtensionSupported(int index, unsigned short ext)
+  true
+end
+
+schema ALDeviceList_GetDefaultDevice_8
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Declared member operation ALDeviceList::GetDefaultDevice()
+  true
+end
+
+schema ALDeviceList_FilterDevicesMinVer_9
+  ΔALDeviceList
+  major? : ℤ
+  minor? : ℤ
+where
+  -- Declared member operation ALDeviceList::FilterDevicesMinVer(int major, int minor)
+  true
+end
+
+schema ALDeviceList_FilterDevicesMaxVer_10
+  ΔALDeviceList
+  major? : ℤ
+  minor? : ℤ
+where
+  -- Declared member operation ALDeviceList::FilterDevicesMaxVer(int major, int minor)
+  true
+end
+
+schema ALDeviceList_FilterDevicesExtension_11
+  ΔALDeviceList
+  ext? : ℤ
+where
+  -- Declared member operation ALDeviceList::FilterDevicesExtension(unsigned short ext)
+  true
+end
+
+schema ALDeviceList_ResetFilters_12
+  ΔALDeviceList
+where
+  -- Declared member operation ALDeviceList::ResetFilters()
+  true
+end
+
+schema ALDeviceList_GetFirstFilteredDevice_13
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Declared member operation ALDeviceList::GetFirstFilteredDevice()
+  true
+end
+
+schema ALDeviceList_GetNextFilteredDevice_14
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Declared member operation ALDeviceList::GetNextFilteredDevice()
+  true
+end
+
+schema ALDeviceList_GetMaxNumSources_15
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Declared member operation ALDeviceList::GetMaxNumSources()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema aldlist_ALDEVICEINFO
+  ΔaldlistModuleState
+where
+  -- State update: strDeviceName' = ∅
+  true
+end
+
+schema aldlist_SetName
+  ΔaldlistModuleState
+  name? : seq CHAR
+where
+  -- State update: strDeviceName' = new char[strlen(name) + 1]
+  true
+end

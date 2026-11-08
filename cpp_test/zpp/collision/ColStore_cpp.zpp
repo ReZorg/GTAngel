@@ -1,0 +1,333 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColStore (collision)
+-- Source File(s): collision/ColStore.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+-- include templates.zpp  (from "templates.h")
+-- include General.zpp  (from "General.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include Script.zpp  (from "Script.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Physical.zpp  (from "Physical.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include Pools.zpp  (from "Pools.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ColChunkEntry
+  modelId : ℤ
+  colModel : Ref[CColModel]
+where
+  #colModel ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ColStore_LevelPos
+  ΔColStoreModuleState
+  level? : eLevelName
+where
+  -- Return postcondition: result! = pos[level]
+  true
+end
+
+schema ColStore_PosLevel
+  ΔColStoreModuleState
+  pos? : CVector
+where
+  -- State update: lastPlayerLevel' = LEVEL_INDUSTRIAL
+  -- State update: lastOtherLevel' = LEVEL_INDUSTRIAL
+  -- State update: lastPlayerLevel' = CGame::currLevel
+  -- State update: lvl' = CTheZones::GetLevelFromPosition(&pos)
+  -- State update: lastOtherLevel' = lvl
+  -- Return postcondition: result! = lastPlayerLevel
+  -- Return postcondition: result! = lastOtherLevel
+  -- Invokes: CTheZones::GetLevelFromPosition
+  true
+end
+
+schema CColStore_Initialise
+  ΔCColStore
+where
+  -- State update: ms_pColPool' = new CPool<ColDef,ColDef>(COLSTORESIZE, "CollisionFiles")
+  -- Invokes: VarConsole.Add
+  true
+end
+
+schema CColStore_Shutdown
+  ΔCColStore
+where
+  -- State update: ms_pColPool' = ∅
+  true
+end
+
+schema CColStore_AddColSlot
+  ΔCColStore
+  name? : seq CHAR
+where
+  -- State update: def' = ms_pColPool.New()
+  -- State update: def.isLoaded' = false
+  -- State update: def.unused' = 0
+  -- State update: def.bounds.left' = 1000000.0f
+  -- State update: def.bounds.top' = 1000000.0f
+  -- State update: def.bounds.right' = -1000000.0f
+  -- Return postcondition: result! = ms_pColPool->GetJustIndex(def)
+  -- Invokes: ms_pColPool->New, ms_pColPool->GetJustIndex
+  true
+end
+
+schema CColStore_RemoveColSlot
+  ΔCColStore
+  slot? : ℤ
+where
+  -- Invokes: ms_pColPool->Delete
+  true
+end
+
+schema CColStore_FindColSlot
+  ΔCColStore
+  name? : seq CHAR
+where
+  -- State update: size' = ms_pColPool.GetSize()
+  -- State update: def' = GetSlot(i)
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  -- Invokes: ms_pColPool->GetSize, CGeneral::faststricmp
+  true
+end
+
+schema CColStore_GetColName
+  ΔCColStore
+  slot? : ℤ
+where
+  -- Return postcondition: result! = GetSlot(slot)->name
+  true
+end
+
+schema CColStore_GetBoundingBox
+  ΔCColStore
+  slot? : ℤ
+where
+  -- Return postcondition: result! = GetSlot(slot)->bounds
+  true
+end
+
+schema CColStore_IncludeModelIndex
+  ΔCColStore
+  slot? : ℤ
+  modelIndex? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.minIndex' = modelIndex
+  -- State update: def.maxIndex' = modelIndex
+  true
+end
+
+schema CColStore_LoadCol
+  ΔCColStore
+  slot? : ℤ
+  buffer? : ℙ ℕ
+  bufsize? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: success' = CFileLoader::LoadCollisionFile(buffer, bufsize, slot)
+  -- State update: def.isLoaded' = true
+  -- Return postcondition: result! = success
+  -- Invokes: CFileLoader::LoadCollisionFileFirstTime, CFileLoader::LoadCollisionFile
+  true
+end
+
+schema CColStore_LoadColCHK
+  ΔCColStore
+  slot? : ℤ
+  data? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.chunk' = chunk
+  -- State update: entry' = (ColChunkEntry*)data
+  -- State update: mi' = CModelInfo::GetModelInfo(entry.modelId)
+  -- State update: def.isLoaded' = true
+  -- Invokes: CStreaming::RegisterPointer, CModelInfo::GetModelInfo, mi->SetColModel
+  true
+end
+
+schema CColStore_RemoveCol
+  ΔCColStore
+  slot? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.isLoaded' = false
+  -- State update: id' = 0
+  -- State update: mi' = CModelInfo::GetModelInfo(id)
+  -- State update: col' = mi.GetColModel()
+  -- State update: id' = 0
+  -- Invokes: CModelInfo::GetModelInfo, mi->GetColModel, col->RemoveCollisionVolumes, mi->SetColModel, CStreaming::UnregisterPointer
+  true
+end
+
+schema CColStore_LoadAllCollision
+  ΔCColStore
+where
+  -- Invokes: CStreaming::RequestCol, CStreaming::LoadAllRequestedModels
+  true
+end
+
+schema CColStore_RemoveAllCollision
+  ΔCColStore
+where
+  -- Invokes: CStreaming::CanRemoveCol, CStreaming::RemoveCol
+  true
+end
+
+schema CColStore_AddCollisionNeededAtPosn
+  ΔCColStore
+  pos? : CVector
+where
+  -- State update: bLoadAtSecondPosition' = true
+  -- State update: secondPosition' = pos
+  true
+end
+
+schema CColStore_LoadCollision
+  ΔCColStore
+  pos? : CVector
+  level? : eLevelName
+where
+  -- State update: level' = PosLevel(pos)
+  -- State update: allowedLevel' = (eLevelName)CTheScripts::AllowedCollision[0]
+  -- State update: allowedLevel' = (eLevelName)CTheScripts::AllowedCollision[1]
+  -- State update: requestedSomething' = false
+  -- State update: wantThisOne' = false
+  -- State update: wantThisOne' = true
+  -- Invokes: CStreaming::RequestCol, CStreaming::RemoveCol, CTimer::Suspend, CStreaming::LoadAllRequestedModels, CGarages::SetupAnyGaragesForThisIsland
+  true
+end
+
+schema CColStore_RequestCollision
+  ΔCColStore
+  pos? : CVector
+where
+  -- Invokes: CStreaming::RequestCol
+  true
+end
+
+schema CColStore_EnsureCollisionIsInMemory
+  ΔCColStore
+  pos? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CColStore_DoScriptsWantThisIn
+  ΔCColStore
+  slot? : ℤ
+where
+  -- State update: coldef' = GetSlot(slot)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = !CTheScripts::IsFortStauntonDestroyed()
+  -- Invokes: CTheScripts::IsFortStauntonDestroyed
+  true
+end
+
+schema CColStore_HasCollisionLoaded
+  ΔCColStore
+  level? : eLevelName
+where
+  -- State update: pos' = LevelPos(level)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CColStore_HasCollisionLoaded_2
+  ΔCColStore
+  pos? : CVector
+where
+  -- Return postcondition: result! = HasCollisionLoaded(PosLevel(pos))
+  true
+end
+
+schema CColStore_Load
+  ΔCColStore
+  onlyBB? : 𝔹
+  pool? : Ref[CPool_ColDef]
+where
+  -- State update: ms_pColPool' = pool
+  -- State update: m_onlyBB' = onlyBB
+  true
+end
+
+schema CColStore_AddCollisionNeededAtPosn_2
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- State update: bLoadAtSecondPosition' = true
+  -- State update: secondPosition' = pos
+  true
+end
+
+schema CColStore_LoadCollision_2
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- State update: wantThisOne' = false
+  -- State update: wantThisOne' = true
+  -- State update: pEntity' = ∅
+  -- State update: pCleanup' = &CTheScripts::MissionCleanUp.m_sEntities[j]
+  -- State update: pEntity' = CPools::GetVehiclePool().GetAt(pCleanup.id)
+  -- State update: pEntity' = CPools::GetPedPool().GetAt(pCleanup.id)
+  -- Invokes: CPools::GetVehiclePool, pEntity->GetStatus, CPools::GetPedPool, pEntity->GetPosition, CStreaming::RequestCol
+  true
+end
+
+schema CColStore_RequestCollision_2
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- Invokes: CStreaming::RequestCol
+  true
+end
+
+schema CColStore_EnsureCollisionIsInMemory_2
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- Invokes: CStreaming::HasColLoaded, CStreaming::RequestCol, TheCamera.GetScreenFadeStatus, FrontEndMenuManager.MessageScreen, CTimer::Suspend
+  true
+end
+
+schema CColStore_HasCollisionLoaded_3
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end

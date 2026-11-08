@@ -1,0 +1,758 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Stats (core)
+-- Source File(s): core/Stats.cpp, core/Stats.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Text.zpp  (from "Text.h")
+-- include World.zpp  (from "World.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include main.zpp  (from "main.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include climits.zpp  (from "climits")
+-- include PedType.zpp  (from "PedType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MILES_IN_METER : ℝ  -- #define MILES_IN_METER 0.000621371192f
+FEET_IN_METER : ℝ  -- #define FEET_IN_METER 3.28084f
+STAT_D : seq CHAR  -- #define STAT_D *(int*)stat
+STAT_F : seq CHAR  -- #define STAT_F *(float*)stat
+STAT2_D : seq CHAR  -- #define STAT2_D *(int*)stat2
+STAT2_F : seq CHAR  -- #define STAT2_F *(float*)stat2
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Stats_Enum_1 ::= TOTAL_FASTEST_TIMES | TOTAL_HIGHEST_SCORES | TOTAL_BEST_POSITIONS | TOTAL_PROPERTIES
+  -- val(TOTAL_FASTEST_TIMES) = 23
+  -- val(TOTAL_HIGHEST_SCORES) = 5
+  -- val(TOTAL_BEST_POSITIONS) = 1
+  -- val(TOTAL_PROPERTIES) = 15
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStats
+  SeagullsKilled : ℤ
+  DaysPassed : ℤ
+  HeadsPopped : ℤ
+  CommercialPassed : ℤ
+  IndustrialPassed : ℤ
+  SuburbanPassed : ℤ
+  NumberKillFrenziesPassed : ℤ
+  PeopleKilledByOthers : ℤ
+  HelisDestroyed : ℤ
+  PedsKilledOfThisType : seq ℤ  -- bounded array [NUM_PEDTYPES]
+  TimesDied : ℤ
+  TimesArrested : ℤ
+  KillsSinceLastCheckpoint : ℤ
+  DistanceTravelledByCar : ℝ
+  DistanceTravelledByHelicoptor : ℝ
+  DistanceTravelledByBike : ℝ
+  DistanceTravelledByBoat : ℝ
+  DistanceTravelledByPlane : ℝ
+  DistanceTravelledByGolfCart : ℝ
+  DistanceTravelledOnFoot : ℝ
+  FlightTime : ℤ
+  TimesDrowned : ℤ
+  PhotosTaken : ℤ
+  LoanSharks : ℝ
+  StoresKnockedOff : ℝ
+  MovieStunts : ℝ
+  Assassinations : ℝ
+  PizzasDelivered : ℝ
+  GarbagePickups : ℝ
+  IceCreamSold : ℝ
+  TopShootingRangeScore : ℝ
+  ShootingRank : ℝ
+  CarsExploded : ℤ
+  BoatsExploded : ℤ
+  WantedStarsAttained : ℤ
+  WantedStarsEvaded : ℤ
+  PeopleKilledByPlayer : ℤ
+  ProgressMade : ℝ
+  TotalProgressInGame : ℝ
+  MaximumJumpDistance : ℝ
+  MaximumJumpHeight : ℝ
+  MaximumJumpFlips : ℤ
+  MaximumJumpSpins : ℤ
+  BestStuntJump : ℤ
+  NumberOfUniqueJumpsFound : ℤ
+  TotalNumberOfUniqueJumps : ℤ
+  PassengersDroppedOffWithTaxi : ℤ
+  MoneyMadeWithTaxi : ℤ
+  MissionsGiven : ℤ
+  MissionsPassed : ℤ
+  LastMissionPassedName : seq CHAR
+  TotalLegitimateKills : ℤ
+  LivesSavedWithAmbulance : ℤ
+  CriminalsCaught : ℤ
+  HighestLevelAmbulanceMission : ℤ
+  HighestLevelVigilanteMission : ℤ
+  HighestLevelFireMission : ℤ
+  FiresExtinguished : ℤ
+  TotalNumberKillFrenzies : ℤ
+  TotalNumberMissions : ℤ
+  RoundsFiredByPlayer : ℤ
+  KgsOfExplosivesUsed : ℤ
+  BulletsThatHit : ℤ
+  BestTimeBombDefusal : ℤ
+  FastestTimes : seq ℤ  -- bounded array [TOTAL_FASTEST_TIMES]
+  HighestScores : seq ℤ  -- bounded array [TOTAL_HIGHEST_SCORES]
+  BestPositions : seq ℤ  -- bounded array [TOTAL_BEST_POSITIONS]
+  PropertyOwned : seq 𝔹  -- bounded array [TOTAL_PROPERTIES]
+  NumPropertyOwned : ℤ
+  PropertyDestroyed : ℤ
+  HighestChaseValue : ℝ
+  CheatedCount : ℤ
+  ShowChaseStatOnScreen : ℤ
+  PamphletMissionPassed : ℤ
+  abSonyCDs : seq 𝔹  -- bounded array [1]
+  BloodRingKills : ℤ
+  BloodRingTime : ℤ
+  FavoriteRadioStationList : seq ℝ  -- bounded array [NUM_RADIOS]
+  Sprayings : ℤ
+  AutoPaintingBudget : ℝ
+  NoMoreHurricanes : ℤ
+  FashionBudget : ℝ
+  PropertyBudget : ℝ
+  WeaponBudget : ℝ
+  SafeHouseVisits : ℤ
+  TyresPopped : ℤ
+  LongestWheelie : ℤ
+  LongestStoppie : ℤ
+  Longest2Wheel : ℤ
+  LongestWheelieDist : ℝ
+  LongestStoppieDist : ℝ
+  Longest2WheelDist : ℝ
+  ElBurroTime : ℤ
+  Record4x4One : ℤ
+  Record4x4Two : ℤ
+  Record4x4Three : ℤ
+  Record4x4Mayhem : ℤ
+  LongestFlightInDodo : ℤ
+  TimeTakenDefuseMission : ℤ
+  InstantHitsFiredByPlayer : ℤ
+  InstantHitsHitByPlayer : ℤ
+  mmRain : ℤ
+  CarsCrushed : ℤ
+where
+  #LastMissionPassedName = 8
+  #abSonyCDs = 1
+end
+
+schema CStats_Init
+  ΔCStats
+where
+  -- Declared member operation CStats::Init(void)
+  true
+end
+
+schema CStats_RegisterFastestTime_2
+  ΔCStats
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation CStats::RegisterFastestTime(int32, int32)
+  true
+end
+
+schema CStats_RegisterHighestScore_3
+  ΔCStats
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation CStats::RegisterHighestScore(int32, int32)
+  true
+end
+
+schema CStats_RegisterBestPosition_4
+  ΔCStats
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation CStats::RegisterBestPosition(int32, int32)
+  true
+end
+
+schema CStats_AnotherLifeSavedWithAmbulance_5
+  ΔCStats
+where
+  -- Declared member operation CStats::AnotherLifeSavedWithAmbulance()
+  true
+end
+
+schema CStats_AnotherCriminalCaught_6
+  ΔCStats
+where
+  -- Declared member operation CStats::AnotherCriminalCaught()
+  true
+end
+
+schema CStats_RegisterLevelAmbulanceMission_7
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::RegisterLevelAmbulanceMission(int32)
+  true
+end
+
+schema CStats_RegisterLevelVigilanteMission_8
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::RegisterLevelVigilanteMission(int32)
+  true
+end
+
+schema CStats_RegisterLevelFireMission_9
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::RegisterLevelFireMission(int32)
+  true
+end
+
+schema CStats_AnotherFireExtinguished_10
+  ΔCStats
+where
+  -- Declared member operation CStats::AnotherFireExtinguished()
+  true
+end
+
+schema CStats_FindCriminalRatingString_11
+  ΔCStats
+  result! : seq CHAR
+where
+  -- Declared member operation CStats::FindCriminalRatingString()
+  true
+end
+
+schema CStats_FindChaseString_12
+  ΔCStats
+  fMediaLevel? : ℝ
+  result! : seq CHAR
+where
+  -- Declared member operation CStats::FindChaseString(float fMediaLevel)
+  true
+end
+
+schema CStats_AnotherKillFrenzyPassed_13
+  ΔCStats
+where
+  -- Declared member operation CStats::AnotherKillFrenzyPassed()
+  true
+end
+
+schema CStats_SetTotalNumberKillFrenzies_14
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::SetTotalNumberKillFrenzies(int32)
+  true
+end
+
+schema CStats_SetTotalNumberMissions_15
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::SetTotalNumberMissions(int32)
+  true
+end
+
+schema CStats_CheckPointReachedSuccessfully_16
+  ΔCStats
+where
+  -- Declared member operation CStats::CheckPointReachedSuccessfully()
+  true
+end
+
+schema CStats_CheckPointReachedUnsuccessfully_17
+  ΔCStats
+where
+  -- Declared member operation CStats::CheckPointReachedUnsuccessfully()
+  true
+end
+
+schema CStats_FindCriminalRatingNumber_18
+  ΔCStats
+  result! : ℤ
+where
+  -- Declared member operation CStats::FindCriminalRatingNumber()
+  true
+end
+
+schema CStats_SaveStats_19
+  ΔCStats
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CStats::SaveStats(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CStats_LoadStats_20
+  ΔCStats
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CStats::LoadStats(uint8 *buf, uint32 size)
+  true
+end
+
+schema CStats_GetPercentageProgress_21
+  ΔCStats
+  result! : ℝ
+where
+  -- Declared member operation CStats::GetPercentageProgress()
+  true
+end
+
+schema CStats_MoneySpentOnWeapons_22
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::MoneySpentOnWeapons(int32)
+  true
+end
+
+schema CStats_MoneySpentOnProperty_23
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::MoneySpentOnProperty(int32)
+  true
+end
+
+schema CStats_MoneySpentOnAutoPainting_24
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::MoneySpentOnAutoPainting(int32)
+  true
+end
+
+schema CStats_MoneySpentOnFashion_25
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::MoneySpentOnFashion(int32)
+  true
+end
+
+schema CStats_NumOfVisitsFromLoanSharks_26
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::NumOfVisitsFromLoanSharks(int32)
+  true
+end
+
+schema CStats_NumOfStoresKnockedOff_27
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::NumOfStoresKnockedOff(int32)
+  true
+end
+
+schema CStats_NumOfMovieStunts_28
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::NumOfMovieStunts(int32)
+  true
+end
+
+schema CStats_NumOfAssassinations_29
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::NumOfAssassinations(int32)
+  true
+end
+
+schema CStats_NumOfPizzasDelivered_30
+  ΔCStats
+  arg_1? : ℤ
+where
+  -- Declared member operation CStats::NumOfPizzasDelivered(int32)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CStats_Init
+  ΔCStats
+where
+  -- State update: PeopleKilledByOthers' = 0
+  -- State update: PeopleKilledByPlayer' = 0
+  -- State update: CarsExploded' = 0
+  -- State update: BoatsExploded' = 0
+  -- State update: RoundsFiredByPlayer' = 0
+  -- State update: HelisDestroyed' = 0
+  true
+end
+
+schema CStats_RegisterFastestTime
+  ΔCStats
+  index? : ℤ
+  time? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_RegisterHighestScore
+  ΔCStats
+  index? : ℤ
+  score? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_RegisterBestPosition
+  ΔCStats
+  index? : ℤ
+  position? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_AnotherLifeSavedWithAmbulance
+  ΔCStats
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_AnotherCriminalCaught
+  ΔCStats
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_RegisterLevelAmbulanceMission
+  ΔCStats
+  level? : ℤ
+where
+  -- State update: HighestLevelAmbulanceMission' = Max(HighestLevelAmbulanceMission, level)
+  true
+end
+
+schema CStats_RegisterLevelVigilanteMission
+  ΔCStats
+  level? : ℤ
+where
+  -- State update: HighestLevelVigilanteMission' = Max(HighestLevelVigilanteMission, level)
+  true
+end
+
+schema CStats_RegisterLevelFireMission
+  ΔCStats
+  level? : ℤ
+where
+  -- State update: HighestLevelFireMission' = Max(HighestLevelFireMission, level)
+  true
+end
+
+schema CStats_AnotherFireExtinguished
+  ΔCStats
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_AnotherKillFrenzyPassed
+  ΔCStats
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_SetTotalNumberKillFrenzies
+  ΔCStats
+  total? : ℤ
+where
+  -- State update: TotalNumberKillFrenzies' = total
+  true
+end
+
+schema CStats_SetTotalNumberMissions
+  ΔCStats
+  total? : ℤ
+where
+  -- State update: TotalNumberMissions' = total
+  true
+end
+
+schema CStats_FindCriminalRatingNumber
+  ΔCStats
+  result! : ℤ
+where
+  -- State update: rating' = 0
+  -- State update: rating' = 3521
+  -- State update: rating' = 4552
+  -- Return postcondition: result! = rating
+  true
+end
+
+schema CStats_GetPercentageProgress
+  ΔCStats
+  result! : ℝ
+where
+  -- Return postcondition: result! = Min(percentCompleted, 100.0f)
+  true
+end
+
+schema CStats_MoneySpentOnWeapons
+  ΔCStats
+  money? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_MoneySpentOnProperty
+  ΔCStats
+  money? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_MoneySpentOnAutoPainting
+  ΔCStats
+  money? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_MoneySpentOnFashion
+  ΔCStats
+  money? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfVisitsFromLoanSharks
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfStoresKnockedOff
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfMovieStunts
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfAssassinations
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfPizzasDelivered
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfGarbagePickups
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_NumOfIceCreamSold
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_AddNumBloodRingKills
+  ΔCStats
+  num? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_LongestTimeInBloodRing
+  ΔCStats
+  time? : ℤ
+where
+  -- State update: BloodRingTime' = time
+  true
+end
+
+schema CStats_AddPropertyAsOwned
+  ΔCStats
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_GetFavoriteRadioStationList
+  ΔCStats
+  station? : ℤ
+  result! : ℝ
+where
+  -- Return postcondition: result! = FavoriteRadioStationList[station]
+  true
+end
+
+schema CStats_SaveStats
+  ΔCStats
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: buf_start' = buf
+  true
+end
+
+schema CStats_LoadStats
+  ΔCStats
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: buf_start' = buf
+  true
+end
+
+schema CStats_PopulateFavoriteRadioStationList
+  ΔCStats
+where
+  -- State update: pListenTimeArray' = DMAudio.GetListenTimeArray()
+  -- Invokes: DMAudio.GetListenTimeArray
+  true
+end
+
+schema CStats_BuildStatLine
+  ΔCStats
+  text? : seq CHAR
+  stat? : ADDRESS
+  displayType? : ℤ
+  stat2? : ADDRESS
+  isTime? : ℤ
+where
+  -- Invokes: CFont::IsJapanese, TheText.Get, CFont::FilterOutTokensFromString
+  true
+end
+
+schema CStats_ConstructStatLine
+  ΔCStats
+  rowIdx? : ℤ
+where
+  -- State update: a' = right1
+  -- State update: a' = right1
+  -- State update: b' = right2
+  -- State update: hour' = 0, minute
+  -- State update: minute' = FastestTimes[id]
+  -- State update: minute' = -minute
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds, CFont::IsJapanese, TheText.Get, DMAudio.GetListenTimeArray, DMAudio.IsMP3RadioChannelAvailable
+  true
+end
+
+schema CStats_RegisterElBurroTime
+  ΔCStats
+  time? : ℤ
+where
+  -- State update: ElBurroTime' = (ElBurroTime && ElBurroTime < time) ? ElBurroTime : time
+  true
+end
+
+schema CStats_Register4x4OneTime
+  ΔCStats
+  time? : ℤ
+where
+  -- State update: Record4x4One' = (Record4x4One && Record4x4One < time) ? Record4x4One : time
+  true
+end
+
+schema CStats_Register4x4TwoTime
+  ΔCStats
+  time? : ℤ
+where
+  -- State update: Record4x4Two' = (Record4x4Two && Record4x4Two < time) ? Record4x4Two : time
+  true
+end
+
+schema CStats_Register4x4ThreeTime
+  ΔCStats
+  time? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_Register4x4MayhemTime
+  ΔCStats
+  time? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStats_RegisterLongestFlightInDodo
+  ΔCStats
+  time? : ℤ
+where
+  -- State update: LongestFlightInDodo' = Max(LongestFlightInDodo, time)
+  true
+end
+
+schema CStats_RegisterTimeTakenDefuseMission
+  ΔCStats
+  time? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

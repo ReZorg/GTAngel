@@ -1,0 +1,111 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Camera (core)
+-- Source File(s): core/Camera.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Train.zpp  (from "Train.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include General.zpp  (from "General.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include Text.zpp  (from "Text.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include SceneEdit.zpp  (from "SceneEdit.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PLAYER : seq CHAR  -- #define PLAYER (CWorld::Players[CWorld::PlayerInFocus].m_pPed)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Camera_Enum_1 ::= OBBE_WHEEL | OBBE_1 | OBBE_2 | OBBE_3 | OBBE_1STPERSON | OBBE_5 | OBBE_ONSTRING | OBBE_COPCAR | OBBE_COPCAR_WHEEL | OBBE_9 | OBBE_10 | OBBE_11 | OBBE_12 | OBBE_13 | OBBE_14 | OBBE_15 | OBBE_16 | OBBE_17 | OBBE_18 | OBBE_19 | OBBE_ONSTRING_HELI | OBBE_INVALID
+
+Camera_Enum_2 ::= OBBE_WHEEL | OBBE_1 | OBBE_2 | OBBE_3 | OBBE_1STPERSON | OBBE_5 | OBBE_ONSTRING | OBBE_COPCAR | OBBE_COPCAR_WHEEL | OBBE_9 | OBBE_10 | OBBE_11 | OBBE_12 | OBBE_13 | OBBE_INVALID
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCamera_CCamera
+  ΔCCamera
+where
+  -- State update: m_fMouseAccelHorzntl' = 0.0025f
+  -- State update: m_fMouseAccelVertical' = 0.003f
+  true
+end
+
+schema CCamera_Init
+  ΔCCamera
+where
+  -- State update: fMouseAccelHorzntl' = m_fMouseAccelHorzntl
+  -- State update: fMouseAccelVertical' = m_fMouseAccelVertical
+  -- State update: DummyCamera' = CCamera(0.f)
+  -- State update: this' = DummyCamera
+  -- State update: m_fMouseAccelHorzntl' = fMouseAccelHorzntl
+  -- State update: m_fMouseAccelVertical' = fMouseAccelVertical
+  true
+end
+
+schema CCamera_Process
+  ΔCCamera
+where
+  -- State update: PlayerMinDist' = 1.3f
+  -- State update: WasPreviouslyInterSyhonFollowPed' = false
+  -- State update: FOV' = 0.0f
+  -- State update: deltaBeta' = 0.0f
+  -- State update: lookLRBVehicle' = false
+  -- State update: m_bJust_Switched' = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::GetPad, CGeneral::GetATanOfXY, CTimer::GetTimeInMilliseconds, pTargetEntity->IsVehicle, ToCam.Magnitude2D
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CameraModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 4252
+end

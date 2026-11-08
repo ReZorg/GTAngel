@@ -1,0 +1,898 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Weapon (weapons)
+-- Source File(s): weapons/Weapon.cpp, weapons/Weapon.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include BulletInfo.zpp  (from "BulletInfo.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include General.zpp  (from "General.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Object.zpp  (from "Object.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include ShotInfo.zpp  (from "ShotInfo.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include WeaponInfo.zpp  (from "WeaponInfo.h")
+-- include World.zpp  (from "World.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CAR_DRIVEBYAUTOAIMING_MAXDIST : ℝ  -- #define CAR_DRIVEBYAUTOAIMING_MAXDIST (2.5f)
+DOOMAUTOAIMING_MAXDIST : ℝ  -- #define DOOMAUTOAIMING_MAXDIST (9000.0f)
+DRIVEBYAUTOAIMING_MAXDIST : ℝ  -- #define DRIVEBYAUTOAIMING_MAXDIST (2.5f)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeapon
+  m_eWeaponType : eWeaponType
+  m_eWeaponState : eWeaponState
+  m_nAmmoInClip : ℤ
+  m_nAmmoTotal : ℤ
+  m_nTimer : ℕ
+  m_bAddRotOffset : 𝔹
+  bPhotographHasBeenTaken : 𝔹
+where
+  m_nTimer ≥ 0
+end
+
+schema CWeapon_CWeapon
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::CWeapon()
+  true
+end
+
+schema CWeapon_CWeapon_2
+  ΔCWeapon
+  type? : eWeaponType
+  ammo? : ℤ
+  result! : ANY
+where
+  -- Declared member operation CWeapon::CWeapon(eWeaponType type, int32 ammo)
+  true
+end
+
+schema CWeapon_GetInfo_3
+  ΔCWeapon
+  result! : Ref[CWeaponInfo]
+where
+  -- Declared member operation CWeapon::GetInfo()
+  true
+end
+
+schema CWeapon_InitialiseWeapons_4
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::InitialiseWeapons(void)
+  true
+end
+
+schema CWeapon_ShutdownWeapons_5
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::ShutdownWeapons(void)
+  true
+end
+
+schema CWeapon_UpdateWeapons_6
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::UpdateWeapons(void)
+  true
+end
+
+schema CWeapon_Initialise_7
+  ΔCWeapon
+  type? : eWeaponType
+  ammo? : ℤ
+where
+  -- Declared member operation CWeapon::Initialise(eWeaponType type, int32 ammo)
+  true
+end
+
+schema CWeapon_Shutdown_8
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::Shutdown()
+  true
+end
+
+schema CWeapon_Fire_9
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::Fire(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_FireFromCar_10
+  ΔCWeapon
+  shooter? : Ref[CVehicle]
+  left? : 𝔹
+  right? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
+  true
+end
+
+schema CWeapon_FireMelee_11
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
+  true
+end
+
+schema CWeapon_FireInstantHit_12
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_AddGunFlashBigGuns_13
+  ΔCWeapon
+  start? : CVector
+  end? : CVector
+where
+  -- Declared member operation CWeapon::AddGunFlashBigGuns(CVector start, CVector end)
+  true
+end
+
+schema CWeapon_AddGunshell_14
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  source? : CVector
+  direction? : CVector2D
+  size? : ℝ
+where
+  -- Declared member operation CWeapon::AddGunshell(CEntity *shooter, CVector const &source, CVector2D const &direction, float size)
+  true
+end
+
+schema CWeapon_DoBulletImpact_15
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  victim? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+  point? : ℙ ℤ
+  ahead? : CVector2D
+where
+  -- Declared member operation CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim, CVector *source, CVector *target, CColPoint *point, CVector2D ahead)
+  true
+end
+
+schema CWeapon_FireShotgun_16
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_FireProjectile_17
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  power? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireProjectile(CEntity *shooter, CVector *fireSource, float power)
+  true
+end
+
+schema CWeapon_GenerateFlameThrowerParticles_18
+  ΔCWeapon
+  pos? : CVector
+  dir? : CVector
+where
+  -- Declared member operation CWeapon::GenerateFlameThrowerParticles(CVector pos, CVector dir)
+  true
+end
+
+schema CWeapon_FireAreaEffect_19
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireAreaEffect(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_LaserScopeDot_20
+  ΔCWeapon
+  pOutPos? : Ref[CVector]
+  pOutSize? : ℙ ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::LaserScopeDot(CVector *pOutPos, float *pOutSize)
+  true
+end
+
+schema CWeapon_FireSniper_21
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireSniper(CEntity *shooter)
+  true
+end
+
+schema CWeapon_TakePhotograph_22
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::TakePhotograph(CEntity *shooter)
+  true
+end
+
+schema CWeapon_FireM16_1stPerson_23
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireM16_1stPerson(CEntity *shooter)
+  true
+end
+
+schema CWeapon_FireInstantHitFromCar_24
+  ΔCWeapon
+  shooter? : Ref[CVehicle]
+  left? : 𝔹
+  right? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
+  true
+end
+
+schema CWeapon_DoDoomAiming_25
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- Declared member operation CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
+  true
+end
+
+schema CWeapon_DoTankDoomAiming_26
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  driver? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- Declared member operation CWeapon::DoTankDoomAiming(CEntity *shooter, CEntity *driver, CVector *source, CVector *target)
+  true
+end
+
+schema CWeapon_DoDriveByAutoAiming_27
+  ΔCWeapon
+  driver? : Ref[CEntity]
+  vehicle? : Ref[CVehicle]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- Declared member operation CWeapon::DoDriveByAutoAiming(CEntity *driver, CVehicle *vehicle, CVector *source, CVector *target)
+  true
+end
+
+schema CWeapon_Reload_28
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::Reload(void)
+  true
+end
+
+schema CWeapon_Update_29
+  ΔCWeapon
+  audioEntity? : ℤ
+  pedToAdjustSound? : Ref[CPed]
+where
+  -- Declared member operation CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
+  true
+end
+
+schema CWeapon_IsTypeMelee_30
+  ΔCWeapon
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::IsTypeMelee(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Weapon_Find3rdPersonCamTargetVectorFromCachedVectors
+  ΔWeaponModuleState
+  dist? : ℝ
+  pos? : CVector
+  source? : CVector
+  target? : CVector
+  camSource? : CVector
+  camFront? : CVector
+  camUp? : CVector
+where
+  -- State update: source' = pos
+  -- State update: target' = dist * FindPlayerPed().GetForward() + source
+  -- State update: source' = camSource
+  -- State update: target' = camFront
+  -- State update: target' = dist * target + source
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CPad::GetPad, CDraw::GetAspectRatio, target.Normalise
+  true
+end
+
+schema CWeapon_GetInfo
+  ΔCWeapon
+where
+  -- State update: info' = CWeaponInfo::GetWeaponInfo(m_eWeaponType)
+  -- Return postcondition: result! = info
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CWeapon_CWeapon
+  ΔCWeapon
+  type? : eWeaponType
+  ammo? : ℤ
+where
+  -- State update: m_eWeaponType' = type
+  -- State update: m_eWeaponState' = WEAPONSTATE_READY
+  -- State update: m_nAmmoTotal' = Min(ammo, 99999)
+  -- State update: m_nAmmoInClip' = 0
+  -- State update: m_nTimer' = 0
+  -- State update: m_bAddRotOffset' = false
+  true
+end
+
+schema CWeapon_InitialiseWeapons
+  ΔCWeapon
+where
+  -- State update: bPhotographHasBeenTaken' = false
+  -- Invokes: CWeaponInfo::Initialise, CShotInfo::Initialise, CExplosion::Initialise, CProjectileInfo::Initialise, CBulletInfo::Initialise
+  true
+end
+
+schema CWeapon_ShutdownWeapons
+  ΔCWeapon
+where
+  -- Invokes: CWeaponInfo::Shutdown, CShotInfo::Shutdown, CExplosion::Shutdown, CProjectileInfo::Shutdown, CBulletInfo::Shutdown
+  true
+end
+
+schema CWeapon_UpdateWeapons
+  ΔCWeapon
+where
+  -- Invokes: CShotInfo::Update, CExplosion::Update, CProjectileInfo::Update, CBulletInfo::Update
+  true
+end
+
+schema CWeapon_Initialise
+  ΔCWeapon
+  type? : eWeaponType
+  ammo? : ℤ
+where
+  -- State update: m_eWeaponType' = type
+  -- State update: m_eWeaponState' = WEAPONSTATE_READY
+  -- State update: m_nAmmoTotal' = Min(ammo, 99999)
+  -- State update: m_nAmmoInClip' = 0
+  -- State update: m_nTimer' = 0
+  -- State update: modelId' = CWeaponInfo::GetWeaponInfo(m_eWeaponType).m_nModelId
+  -- Invokes: CWeaponInfo::GetWeaponInfo, CModelInfo::GetModelInfo
+  true
+end
+
+schema CWeapon_Shutdown
+  ΔCWeapon
+where
+  -- State update: modelId' = CWeaponInfo::GetWeaponInfo(m_eWeaponType).m_nModelId
+  -- State update: model2Id' = CWeaponInfo::GetWeaponInfo(m_eWeaponType).m_nModel2Id
+  -- State update: m_eWeaponType' = WEAPONTYPE_UNARMED
+  -- State update: m_eWeaponState' = WEAPONSTATE_READY
+  -- State update: m_nAmmoInClip' = 0
+  -- State update: m_nAmmoTotal' = 0
+  -- Invokes: CWeaponInfo::GetWeaponInfo, CModelInfo::GetModelInfo
+  true
+end
+
+schema CWeapon_Fire
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+where
+  -- State update: source' = fireSource
+  -- State update: shooterSource' = shooter.GetMatrix() * fireOffset
+  -- State update: source' = &shooterSource
+  -- State update: heading' = RADTODEG(shooter.GetForward().Heading())
+  -- State update: angle' = DEGTORAD(heading)
+  -- State update: addFireRateAsDelay' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: shooter->GetMatrix, shooter->GetForward, shooter->IsPed, shooter->GetPosition, m_pSeekTarget->GetPosition
+  true
+end
+
+schema CWeapon_FireFromCar
+  ΔCWeapon
+  shooter? : Ref[CVehicle]
+  left? : 𝔹
+  right? : 𝔹
+where
+  -- State update: m_eWeaponState' = WEAPONSTATE_FIRING
+  -- State update: m_eWeaponState' = WEAPONSTATE_RELOADING
+  -- State update: m_nTimer' = CTimer::GetTimeInMilliseconds() + GetInfo().m_nReload
+  -- State update: m_nTimer' = CTimer::GetTimeInMilliseconds() + 1000
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: DMAudio.PlayOneShot, shooter->GetStatus, CStats::GetPercentageProgress, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWeapon_FireMelee
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : CVector
+where
+  -- State update: info' = GetInfo()
+  -- State update: anim2Playing' = false
+  -- State update: anim2Playing' = true
+  -- State update: shooterPed' = (CPed*)shooter
+  -- State update: damageEntityRegistered' = 0
+  -- State update: victimPed' = shooterPed.m_nearPeds[i]
+  -- Return postcondition: result! = true
+  -- Invokes: CPed::GetFireAnimGround, shooter->GetClump, shooter->IsPed, CGlass::BreakGlassPhysically, CEventList::RegisterEvent
+  true
+end
+
+schema CWeapon_FireInstantHit
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+where
+  -- State update: info' = GetInfo()
+  -- State update: victim' = ∅
+  -- State update: heading' = RADTODEG(shooter.GetForward().Heading())
+  -- State update: angle' = DEGTORAD(heading)
+  -- State update: vel' = ((CPed *)shooter).m_vecMoveSpeed
+  -- State update: shooterMoving' = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: shooter->GetForward, ahead.Normalise, shooter->IsPed, threatAttack->IsPed, m_pedIK.GetComponentPosition
+  true
+end
+
+schema CWeapon_AddGunFlashBigGuns
+  ΔCWeapon
+  start? : CVector
+  end? : CVector
+where
+  -- State update: gunflashPos' = start
+  -- State update: shootVec' = end - start
+  -- State update: ahead' = shootVec
+  -- State update: gunflashPos' = start
+  -- State update: gunflashPos' = start
+  -- State update: gunflashPos' = start
+  -- Invokes: CPointLights::AddLight, shootVec.Normalise, ahead.Normalise, CParticle::AddParticle, offset.Normalise2D
+  true
+end
+
+schema CWeapon_AddGunshell
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  source? : CVector
+  direction? : CVector2D
+  size? : ℝ
+where
+  -- State update: entityPosition' = shooter.GetPosition()
+  -- State update: diff' = entityPosition - prevEntityPosition
+  -- State update: prevEntityPosition' = entityPosition
+  -- Invokes: CGeneral::GetRandomNumberInRange, shooter->GetPosition, CParticle::AddParticle
+  true
+end
+
+schema CWeapon_DoBulletImpact
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  victim? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+  point? : ℙ ℤ
+  ahead? : CVector2D
+where
+  -- State update: info' = GetInfo()
+  -- State update: shooterPed' = (CPed*)shooter
+  -- State update: guyWePointGun' = shooterPed.m_pPointGunAt
+  -- State update: distWithBullet' = (point.point - shooter.GetPosition()).Magnitude()
+  -- State update: dotProd' = DotProduct(aimDir, bulletDir)
+  -- State update: aimAndBulletAngle' = PI
+  -- Invokes: shooter->IsPed, guyWePointGun->GetPosition, shooter->GetPosition, CTimer::GetTimeInMilliseconds, shooterPed->SetAttackTimer
+  true
+end
+
+schema CWeapon_FireShotgun
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+where
+  -- State update: info' = GetInfo()
+  -- State update: heading' = RADTODEG(shooter.GetForward().Heading())
+  -- State update: angle' = DEGTORAD(heading)
+  -- State update: gunflashPos' = *fireSource
+  -- State update: gunsmokePos' = *fireSource
+  -- State update: threatAttack' = ((CPed*)shooter).m_pPointGunAt
+  -- Return postcondition: result! = true
+  -- Invokes: shooter->GetForward, rotOffset.Normalise, CParticle::AddParticle, CEventList::RegisterEvent, CPointLights::AddLight
+  true
+end
+
+schema CWeapon_FireProjectile
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  power? : ℝ
+where
+  -- State update: projectileType' = m_eWeaponType
+  -- State update: source' = *fireSource
+  -- State update: projectileType' = WEAPONTYPE_ROCKET
+  -- State update: mode' = TheCamera.Cams[TheCamera.ActiveCam].Mode
+  -- State update: target' = *fireSource
+  -- State update: target' = *fireSource
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: shooter->IsPed, shooter->GetForward, shooter->GetPosition, CWorld::GetIsLineOfSightClear, CProjectileInfo::RemoveNotAdd
+  true
+end
+
+schema CWeapon_GenerateFlameThrowerParticles
+  ΔCWeapon
+  pos? : CVector
+  dir? : CVector
+where
+  -- Invokes: CParticle::AddParticle
+  true
+end
+
+schema CWeapon_FireAreaEffect
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+where
+  -- State update: info' = GetInfo()
+  -- State update: heading' = RADTODEG(shooter.GetForward().Heading())
+  -- State update: shooterPed' = (CPlayerPed*)shooter
+  -- State update: norm' = (1.0f / info.m_fRange)
+  -- State update: dir' = (target - source) * norm
+  -- State update: angle' = DEGTORAD(heading)
+  -- Return postcondition: result! = true
+  -- Invokes: shooter->GetForward, TheCamera.Find3rdPersonCamTargetVector, CShotInfo::AddShot, CWeapon::GenerateFlameThrowerParticles
+  true
+end
+
+schema CWeapon_LaserScopeDot
+  ΔCWeapon
+  pOutPos? : Ref[CVector]
+  pOutSize? : ℙ ℝ
+where
+  -- State update: info' = GetInfo()
+  -- State update: range' = info.m_fRange
+  -- State update: foundEnt' = ∅
+  -- State update: target' = TheCamera.Cams[TheCamera.ActiveCam].Front
+  -- State update: pos' = foundCol.point
+  -- State update: pOutPos' = pos
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: target.Normalise, CWorld::ProcessLineOfSight, CSprite::CalcScreenCoors, CCoronas::RegisterCorona
+  true
+end
+
+schema CWeapon_FireSniper
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+where
+  -- State update: mode' = TheCamera.Cams[TheCamera.ActiveCam].Mode
+  -- State update: info' = GetInfo()
+  -- State update: cam' = &TheCamera.Cams[TheCamera.ActiveCam]
+  -- State update: source' = cam.Source
+  -- State update: dir' = cam.Front
+  -- State update: MoonSize' = (CCoronas::MoonSize+1) & 7
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: dir.Normalise, CBulletInfo::AddBullet, CPad::GetPad, CParticle::HandleShootableBirdsStuff, shooter->IsPed
+  true
+end
+
+schema CWeapon_TakePhotograph
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+where
+  -- State update: bSnapShotActive' = true
+  -- State update: SnapShotFrames' = 0
+  -- State update: bPhotographHasBeenTaken' = true
+  -- State update: ped' = CPools::GetPedPool().GetSlot(i)
+  -- State update: pedPos' = ped.GetPosition()
+  -- State update: foundEnt' = ∅
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPools::GetPedPool, ped->GetPosition, TheCamera.GetPosition, CSprite::CalcScreenCoors, TheCamera.GetForward
+  true
+end
+
+schema CWeapon_FireM16_1stPerson
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+where
+  -- State update: mode' = TheCamera.Cams[TheCamera.ActiveCam].Mode
+  -- State update: info' = GetInfo()
+  -- State update: bIncludeCarTyres' = true
+  -- State update: bIncludeBikers' = true
+  -- State update: pIgnoreEntity' = shooter
+  -- State update: bIncludeDeadPeds' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: front.Normalise, CHeli::TestBulletCollision, CParticle::AddParticle, CGeneral::GetRandomNumber, CPad::GetPad
+  true
+end
+
+schema CWeapon_FireInstantHitFromCar
+  ΔCWeapon
+  shooter? : Ref[CVehicle]
+  left? : 𝔹
+  right? : 𝔹
+where
+  -- State update: info' = GetInfo()
+  -- State update: modelInfo' = shooter.GetModelInfo()
+  -- State update: source' = info.m_vecFireOffset
+  -- State update: target' = source - info.m_fRange * shooter.GetRight()
+  -- State update: target' = source + info.m_fRange * shooter.GetRight()
+  -- State update: target' = source + info.m_fRange * shooter.GetForward()
+  -- Return postcondition: result! = true
+  -- Invokes: shooter->GetModelInfo, shooter->IsBike, pDriver->TransformToNode, CTimer::GetTimeStep, shooter->GetRight
+  true
+end
+
+schema CWeapon_DoDoomAiming
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- State update: shooterPed' = (CPed*)shooter
+  -- State update: closestEntityDist' = 10000.0f
+  -- State update: victim' = entities[i]
+  -- State update: distToVictimZ' = Abs(shooterPed.GetPosition().z-victim.GetPosition().z)
+  -- State update: entityDist' = Sqrt(SQR(distToVictim) + SQR(distToVictimZ))
+  -- State update: closestEntityDist' = entityDist
+  -- Invokes: CWorld::FindObjectsInRange, shooterPed->CanSeeEntity, victim->GetStatus, shooterPed->GetPosition, victim->GetPosition
+  true
+end
+
+schema CWeapon_DoTankDoomAiming
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  driver? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- State update: closestEntityDist' = 10000.0f
+  -- State update: normZ' = (target.z - source.z) / (*target-*source).Magnitude()
+  -- State update: victim' = entities[i]
+  -- State update: vehicleDist' = Sqrt(SQR(distToVictim) + SQR(distToVictimZ))
+  -- State update: closestEntityDist' = vehicleDist
+  -- State update: closestEntity' = i
+  -- Invokes: CWorld::FindObjectsInRange, victim->GetStatus, victim->IsVehicle, shooter->GetPosition, victim->GetPosition
+  true
+end
+
+schema CWeapon_DoDriveByAutoAiming
+  ΔCWeapon
+  driver? : Ref[CEntity]
+  vehicle? : Ref[CVehicle]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- State update: shooterPed' = (CPed*)driver
+  -- State update: closestEntityDist' = 10000.0f
+  -- State update: victim' = (CPed*)peds[i]
+  -- State update: model' = vehicle.GetModelIndex()
+  -- State update: pedDist' = lineDist / Max(5.f, distToVictim)
+  -- State update: distToVictim' = (victim.GetPosition() - driver.GetPosition()).Magnitude()
+  -- Invokes: CWorld::FindObjectsInRange, victim->DyingOrDead, CCollision::DistToLine, victim->GetPosition, vehicle->GetModelIndex
+  true
+end
+
+schema CWeapon_Reload
+  ΔCWeapon
+where
+  -- State update: info' = GetInfo()
+  -- State update: m_nAmmoInClip' = info.m_nAmountofAmmunition
+  -- State update: m_nAmmoInClip' = m_nAmmoTotal
+  true
+end
+
+schema CWeapon_Update
+  ΔCWeapon
+  audioEntity? : ℤ
+  pedToAdjustSound? : Ref[CPed]
+where
+  -- State update: info' = GetInfo()
+  -- State update: m_eWeaponState' = WEAPONSTATE_READY
+  -- State update: timePassed' = m_nTimer - CWeaponInfo::ms_aReloadSampleTime[m_eWeaponType]
+  -- State update: m_eWeaponState' = WEAPONSTATE_OUT_OF_AMMO
+  -- State update: m_eWeaponState' = WEAPONSTATE_READY
+  -- State update: reloadAssoc' = ∅
+  -- Invokes: CTimer::GetPreviousTimeInMilliseconds, CTimer::GetTimeInMilliseconds, DMAudio.PlayOneShot, CPickups::RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo, CPed::GetReloadAnim
+  true
+end
+
+schema Weapon_FireOneInstantHitRound
+  ΔWeaponModuleState
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+  damage? : ℤ
+where
+  -- State update: victimPed' = (CPed *)victim
+  -- State update: pos' = victimPed.GetPosition()
+  -- State update: localDir' = victimPed.GetLocalDirection(posOffset)
+  -- State update: asoc.blendAmount' = 0.0f
+  -- State update: asoc.blendDelta' = 8.0f
+  -- State update: dir.x' = CGeneral::GetRandomNumberInRange(-0.1f, 0.1f)
+  -- Invokes: CParticle::AddParticle, CPointLights::AddLight, CWorld::ProcessLineOfSight, victim->IsPed, victimPed->DyingOrDead
+  true
+end
+
+schema CWeapon_IsTypeMelee
+  ΔCWeapon
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWeapon_IsType2Handed
+  ΔCWeapon
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWeapon_MakePedsJumpAtShot
+  ΔCWeapon
+  shooter? : Ref[CPhysical]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- State update: minx' = Min(source.x, target.x) - 2.0f
+  -- State update: maxx' = Max(source.x, target.x) + 2.0f
+  -- State update: miny' = Min(source.y, target.y) - 2.0f
+  -- State update: maxy' = Max(source.y, target.y) + 2.0f
+  -- State update: minz' = Min(source.z, target.z) - 2.0f
+  -- State update: maxz' = Max(source.z, target.z) + 2.0f
+  -- Invokes: CPools::GetPedPool, ped->GetPosition, CGeneral::GetRandomNumber, ped->SetEvasiveDive
+  true
+end
+
+schema CWeapon_HitsGround
+  ΔCWeapon
+  holder? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  aimingTo? : Ref[CEntity]
+where
+  -- State update: info' = GetInfo()
+  -- State update: adjustedOffset' = info.m_vecFireOffset
+  -- State update: foundEnt' = ∅
+  -- State update: source' = *fireSource
+  -- State update: source' = holder.GetMatrix() * adjustedOffset
+  -- State update: aimEntity' = aimingTo ? aimingTo : ((CPed*)holder).m_pSeekTarget
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: holder->IsPed, holder->GetMatrix, aimEntity->GetPosition, CWorld::ProcessLineOfSight, foundEnt->IsBuilding
+  true
+end
+
+schema CWeapon_BlowUpExplosiveThings
+  ΔCWeapon
+  thing? : Ref[CEntity]
+where
+  -- State update: object' = (CObject*)thing
+  -- State update: mi' = object.GetModelIndex()
+  -- State update: object.bHasBeenDamaged' = true
+  -- Invokes: thing->IsObject, object->GetModelIndex, object->IsObject, CExplosion::AddExplosion, object->GetPosition
+  true
+end
+
+schema CWeapon_HasWeaponAmmoToBeUsed
+  ΔCWeapon
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = m_nAmmoTotal != 0
+  true
+end
+
+schema CPed_IsPedDoingDriveByShooting
+  ΔCPed
+where
+  -- State update: veh' = (CVehicle*)*victim
+  -- State update: radius' = 1.0f
+  -- State update: found' = false
+  -- State update: victim' = veh.pDriver
+  -- State update: found' = true
+  -- State update: passenger' = veh.pPassengers[i]
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CWeaponInfo::GetWeaponInfo, CWeapon::ProcessLineOfSight, CWorld::ProcessLineOfSight, CWeapon::CheckForShootingVehicleOccupant, pDriver->TransformToNode
+  true
+end
+
+schema Weapon_CWeapon
+  ΔWeaponModuleState
+where
+  -- State update: m_bAddRotOffset' = false
+  true
+end
+
+schema Weapon_IsShotgun
+  ΔWeaponModuleState
+  weapon? : ℤ
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

@@ -1,0 +1,54 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoRim_VS (extras)
+-- Source File(s): extras/shaders/neoRim_VS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include standardConstants.zpp  (from "standardConstants.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VS_in
+  POSITION : ℝ
+  NORMAL : ℝ
+  TEXCOORD0 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema VS_out
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema neoRim_VS_main
+  ΔneoRim_VSModuleState
+  input? : in_VS_in
+  result! : VS_out
+where
+  -- State update: output.Position' = mul(combinedMat, input.Position)
+  -- State update: Vertex' = mul(worldMat, input.Position).xyz
+  -- State update: Normal' = mul(normalMat, input.Normal)
+  -- State update: output.TexCoord0.xy' = input.TexCoord
+  -- State update: output.Color' = input.Prelight
+  -- State update: f' = rimData.x - rimData.y*dot(Normal, viewVec)
+  -- Return postcondition: result! = output
+  true
+end

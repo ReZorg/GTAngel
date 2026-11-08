@@ -1,0 +1,143 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Timer (core)
+-- Source File(s): core/Timer.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Record.zpp  (from "Record.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+RsTimerType : seq CHAR  -- #define RsTimerType uint32
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTimer_Initialise
+  ΔCTimer
+where
+  -- State update: ms_fTimeScale' = 1.0f
+  -- State update: ms_fTimeStep' = 1.0f
+  -- State update: suspendDepth' = 0
+  -- State update: m_UserPause' = false
+  -- State update: m_CodePause' = false
+  -- State update: m_snTimeInMillisecondsNonClipped' = 0
+  -- Invokes: DMAudio.ResetTimers
+  true
+end
+
+schema CTimer_Shutdown
+  ΔCTimer
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimer_Update
+  ΔCTimer
+where
+  -- State update: frameTimeLogical' = 0.0
+  -- State update: frameTimeFraction' = 0.0
+  -- State update: frameTimeFractionScaled' = 0.0
+  -- State update: m_snPreviousTimeInMilliseconds' = m_snTimeInMilliseconds
+  -- State update: updInCycles' = (pc.LowPart - _oldPerfCounter.LowPart)
+  -- State update: _oldPerfCounter' = pc
+  -- Invokes: CRecordDataForGame::IsPlayingBack, CRecordDataForChase::IsRecording
+  true
+end
+
+schema CTimer_Suspend
+  ΔCTimer
+where
+  -- State update: suspendPcTimer' = RsTimer()
+  true
+end
+
+schema CTimer_Resume
+  ΔCTimer
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimer_GetCyclesPerMillisecond
+  ΔCTimer
+  result! : ℕ
+where
+  -- Return postcondition: result! = _nCyclesPerMS
+  -- Return postcondition: result! = 1
+  true
+end
+
+schema CTimer_GetCurrentTimeInCycles
+  ΔCTimer
+  result! : ℕ
+where
+  -- Return postcondition: result! = (pc.LowPart - _oldPerfCounter.LowPart)
+  -- Return postcondition: result! = RsTimer() - oldPcTimer
+  true
+end
+
+schema CTimer_GetIsSlowMotionActive
+  ΔCTimer
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_fTimeScale < 1.0f
+  true
+end
+
+schema CTimer_Stop
+  ΔCTimer
+where
+  -- State update: m_snPreviousTimeInMilliseconds' = m_snTimeInMilliseconds
+  true
+end
+
+schema CTimer_StartUserPause
+  ΔCTimer
+where
+  -- State update: m_UserPause' = true
+  true
+end
+
+schema CTimer_EndUserPause
+  ΔCTimer
+where
+  -- State update: m_UserPause' = false
+  true
+end
+
+schema CTimer_GetCyclesPerFrame
+  ΔCTimer
+  result! : ℕ
+where
+  -- Return postcondition: result! = 20
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TimerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 296
+end

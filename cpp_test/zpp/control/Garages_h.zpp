@@ -1,0 +1,951 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Garages (control)
+-- Source File(s): control/Garages.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include config.zpp  (from "config.h")
+-- include Lists.zpp  (from "Lists.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SWITCH_GARAGE_DISTANCE_CLOSE : ℝ  -- #define SWITCH_GARAGE_DISTANCE_CLOSE 40.0f
+CRUSHER_GARAGE_X1 : ℝ  -- #define CRUSHER_GARAGE_X1 (1135.5f)
+CRUSHER_GARAGE_Y1 : ℝ  -- #define CRUSHER_GARAGE_Y1 (57.0f)
+CRUSHER_GARAGE_Z1 : ℝ  -- #define CRUSHER_GARAGE_Z1 (-1.0f)
+CRUSHER_GARAGE_X2 : ℝ  -- #define CRUSHER_GARAGE_X2 (1149.5f)
+CRUSHER_GARAGE_Y2 : ℝ  -- #define CRUSHER_GARAGE_Y2 (63.7f)
+CRUSHER_GARAGE_Z2 : ℝ  -- #define CRUSHER_GARAGE_Z2 (3.5f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eGarageState ::= GS_FULLYCLOSED | GS_OPENED | GS_CLOSING | GS_OPENING | GS_OPENEDCONTAINSCAR | GS_CLOSEDCONTAINSCAR | GS_AFTERDROPOFF | GS_WAITINGFORCAR
+
+eGarageType ::= GARAGE_NONE | GARAGE_MISSION | GARAGE_BOMBSHOP1 | GARAGE_BOMBSHOP2 | GARAGE_BOMBSHOP3 | GARAGE_RESPRAY | GARAGE_COLLECTORSITEMS | GARAGE_COLLECTSPECIFICCARS | GARAGE_COLLECTCARS_1 | GARAGE_COLLECTCARS_2 | GARAGE_COLLECTCARS_3 | GARAGE_FORCARTOCOMEOUTOF | GARAGE_CRATE_GARAGE | GARAGE_CRUSHER | GARAGE_MISSION_KEEPCAR | GARAGE_FOR_SCRIPT_TO_OPEN | GARAGE_HIDEOUT_ONE | GARAGE_HIDEOUT_TWO | GARAGE_HIDEOUT_THREE | GARAGE_FOR_SCRIPT_TO_OPEN_AND_CLOSE | GARAGE_KEEPS_OPENING_FOR_SPECIFIC_CAR | GARAGE_MISSION_KEEPCAR_REMAINCLOSED | GARAGE_COLLECTCARS_4 | GARAGE_FOR_SCRIPT_TO_OPEN_FOR_CAR | GARAGE_HIDEOUT_FOUR | GARAGE_HIDEOUT_FIVE | GARAGE_HIDEOUT_SIX | GARAGE_HIDEOUT_SEVEN | GARAGE_HIDEOUT_EIGHT | GARAGE_HIDEOUT_NINE | GARAGE_HIDEOUT_TEN | GARAGE_HIDEOUT_ELEVEN
+
+Garages_Enum_3 ::= TOTAL_COLLECTCARS_GARAGES | TOTAL_HIDEOUT_GARAGES | TOTAL_COLLECTCARS_CARS
+  -- val(TOTAL_COLLECTCARS_GARAGES) = 4
+  -- val(TOTAL_HIDEOUT_GARAGES) = 12
+  -- val(TOTAL_COLLECTCARS_CARS) = 16
+
+Garages_Enum_4 ::= FLAG_BULLETPROOF | FLAG_FIREPROOF | FLAG_EXPLOSIONPROOF | FLAG_COLLISIONPROOF | FLAG_MELEEPROOF | FLAG_TIRES_INVULNERABLE | FLAG_STRONG | FLAG_HEAVY | FLAG_PERMANENT_COLOUR | FLAG_BOMB | FLAG_NOT_DAMAGED_UPSIDEDOWN | FLAG_REWARD_VEHICLE
+  -- val(FLAG_BULLETPROOF) = 0x1
+  -- val(FLAG_FIREPROOF) = 0x2
+  -- val(FLAG_EXPLOSIONPROOF) = 0x4
+  -- val(FLAG_COLLISIONPROOF) = 0x8
+  -- val(FLAG_MELEEPROOF) = 0x10
+  -- val(FLAG_TIRES_INVULNERABLE) = 0x20
+  -- val(FLAG_STRONG) = 0x40
+  -- val(FLAG_HEAVY) = 0x80
+  -- val(FLAG_PERMANENT_COLOUR) = 0x100
+  -- val(FLAG_BOMB) = 0x200
+  -- val(FLAG_NOT_DAMAGED_UPSIDEDOWN) = 0x400
+  -- val(FLAG_REWARD_VEHICLE) = 0x8000
+
+Garages_Enum_5 ::= MESSAGE_LENGTH
+  -- val(MESSAGE_LENGTH) = 8
+
+Garages_Enum_6 ::= TOTAL_COLLECTCARS_GARAGES | TOTAL_HIDEOUT_GARAGES | TOTAL_COLLECTCARS_CARS
+  -- val(TOTAL_COLLECTCARS_GARAGES) = 4
+  -- val(TOTAL_HIDEOUT_GARAGES) = 12
+  -- val(TOTAL_COLLECTCARS_CARS) = 6
+
+Garages_Enum_7 ::= TOTAL_COLLECTCARS_GARAGES | TOTAL_COLLECTCARS_CARS
+  -- val(TOTAL_COLLECTCARS_GARAGES) = GARAGE_COLLECTCARS_3 - GARAGE_COLLECTCARS_1 + 1
+  -- val(TOTAL_COLLECTCARS_CARS) = 16
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStoredCar
+  m_nModelIndex : ℤ
+  m_fPosX : ℝ
+  m_fPosY : ℝ
+  m_fPosZ : ℝ
+  m_fForwardX : ℝ
+  m_fForwardY : ℝ
+  m_fForwardZ : ℝ
+  m_fTractionMultiplier : ℝ
+  m_nFlags : ℤ
+  m_nPrimaryColor : ℤ
+  m_nSecondaryColor : ℤ
+  m_nRadioStation : ℤ
+  m_nVariationA : ℤ
+  m_nVariationB : ℤ
+  m_nCarBombType : ℤ
+  m_vecPos : CVector
+  m_vecAngle : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CStoredCar_Init
+  ΔCStoredCar
+where
+  -- Declared member operation CStoredCar::Init()
+  true
+end
+
+schema CStoredCar_Clear_2
+  ΔCStoredCar
+  result! : void
+where
+  -- Declared member operation CStoredCar::Clear()
+  true
+end
+
+schema CStoredCar_HasCar_3
+  ΔCStoredCar
+  result! : bool
+where
+  -- Declared member operation CStoredCar::HasCar()
+  true
+end
+
+schema CStoredCar_StoreCar_4
+  ΔCStoredCar
+  arg_1? : Ref[CVehicle]
+  result! : void
+where
+  -- Declared member operation CStoredCar::StoreCar(CVehicle*)
+  true
+end
+
+schema CStoredCar_RestoreCar_5
+  ΔCStoredCar
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CStoredCar::RestoreCar()
+  true
+end
+
+schema CStoredCar_operator_6
+  ΔCStoredCar
+  other? : CStoredCar
+  result! : CStoredCar
+where
+  -- Declared member operation CStoredCar::operator=(const CStoredCar& other)
+  true
+end
+
+schema CGarage
+  m_eGarageType : ℕ
+  m_eGarageState : ℕ
+  m_nMaxStoredCars : ℕ
+  field_2 : 𝔹
+  m_bClosingWithoutTargetCar : 𝔹
+  m_bDeactivated : 𝔹
+  m_bResprayHappened : 𝔹
+  m_nTargetModelIndex : ℤ
+  m_pDoor1 : Ref[CEntity]
+  m_pDoor2 : Ref[CEntity]
+  m_bDoor1PoolIndex : ℕ
+  m_bDoor2PoolIndex : ℕ
+  m_bDoor1IsDummy : 𝔹
+  m_bDoor2IsDummy : 𝔹
+  m_bRecreateDoorOnNextRefresh : 𝔹
+  m_bRotatedDoor : 𝔹
+  m_bCameraFollowsPlayer : 𝔹
+  m_vecCorner1 : CVector2D
+  m_fInfZ : ℝ
+  m_vDir1 : CVector2D
+  m_vDir2 : CVector2D
+  m_fSupZ : ℝ
+  m_vecSSGaragePos : CVector
+  m_fSSGarageAngle : ℝ
+  m_fDir1Len : ℝ
+  m_fDir2Len : ℝ
+  m_fInfX : ℝ
+  m_fSupX : ℝ
+  m_fInfY : ℝ
+  m_fSupY : ℝ
+  m_nTimeCrusherCraneActivated : ℕ
+  m_pSSTargetCar : Ref[CVehicle]
+  m_fDoorPos : ℝ
+  m_fDoorHeight : ℝ
+  m_fDoor1X : ℝ
+  m_fDoor1Y : ℝ
+  m_fDoor2X : ℝ
+  m_fDoor2Y : ℝ
+  m_fDoor1Z : ℝ
+  m_fDoor2Z : ℝ
+  m_nTimeToStartAction : ℕ
+  m_bCollectedCarsState : ℕ
+  m_pTarget : Ref[CVehicle]
+  m_sStoredCar : CStoredCar
+  m_bInitialized : 𝔹
+  m_bLocked : 𝔹
+  m_nSSGarageState : 𝔹
+  m_bSSGarageStateChanging : 𝔹
+  m_fX2 : ℝ
+  m_fY1 : ℝ
+  m_fY2 : ℝ
+  m_fZ1 : ℝ
+  m_fZ2 : ℝ
+  field_96 : ADDRESS
+where
+  m_eGarageType ≥ 0
+  m_eGarageState ≥ 0
+  m_nMaxStoredCars ≥ 0
+  #m_pDoor1 ≤ 1
+  #m_pDoor2 ≤ 1
+  m_bDoor1PoolIndex ≥ 0
+  m_bDoor2PoolIndex ≥ 0
+  m_nTimeCrusherCraneActivated ≥ 0
+  #m_pSSTargetCar ≤ 1
+  m_nTimeToStartAction ≥ 0
+  m_bCollectedCarsState ≥ 0
+  #m_pTarget ≤ 1
+end
+
+schema CGarage_OpenThisGarage
+  ΔCGarage
+where
+  -- Declared member operation CGarage::OpenThisGarage()
+  true
+end
+
+schema CGarage_CloseThisGarage_2
+  ΔCGarage
+where
+  -- Declared member operation CGarage::CloseThisGarage()
+  true
+end
+
+schema CGarage_IsOpen_3
+  ΔCGarage
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsOpen()
+  true
+end
+
+schema CGarage_IsClosed_4
+  ΔCGarage
+  result! : bool
+where
+  -- Declared member operation CGarage::IsClosed()
+  true
+end
+
+schema CGarage_IsUsed_5
+  ΔCGarage
+  result! : bool
+where
+  -- Declared member operation CGarage::IsUsed()
+  true
+end
+
+schema CGarage_Update_6
+  ΔCGarage
+  result! : void
+where
+  -- Declared member operation CGarage::Update()
+  true
+end
+
+schema CGarage_GetGarageCenterX_7
+  ΔCGarage
+  result! : ℝ
+where
+  -- Declared member operation CGarage::GetGarageCenterX()
+  true
+end
+
+schema CGarage_GetGarageCenterY_8
+  ΔCGarage
+  result! : ℝ
+where
+  -- Declared member operation CGarage::GetGarageCenterY()
+  true
+end
+
+schema CGarage_IsFar_9
+  ΔCGarage
+  result! : bool
+where
+  -- Declared member operation CGarage::IsFar()
+  true
+end
+
+schema CGarage_TidyUpGarage_10
+  ΔCGarage
+where
+  -- Declared member operation CGarage::TidyUpGarage()
+  true
+end
+
+schema CGarage_RefreshDoorPointers_11
+  ΔCGarage
+  arg_1? : 𝔹
+where
+  -- Declared member operation CGarage::RefreshDoorPointers(bool)
+  true
+end
+
+schema CGarage_UpdateCrusherAngle_12
+  ΔCGarage
+where
+  -- Declared member operation CGarage::UpdateCrusherAngle()
+  true
+end
+
+schema CGarage_UpdateDoorsHeight_13
+  ΔCGarage
+where
+  -- Declared member operation CGarage::UpdateDoorsHeight()
+  true
+end
+
+schema CGarage_IsEntityEntirelyInside3D_14
+  ΔCGarage
+  arg_1? : Ref[CEntity]
+  arg_2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsEntityEntirelyInside3D(CEntity*, float)
+  true
+end
+
+schema CGarage_IsEntityEntirelyOutside_15
+  ΔCGarage
+  arg_1? : Ref[CEntity]
+  arg_2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsEntityEntirelyOutside(CEntity*, float)
+  true
+end
+
+schema CGarage_CalcDistToGarageRectangleSquared_16
+  ΔCGarage
+  arg_1? : ℝ
+  arg_2? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGarage::CalcDistToGarageRectangleSquared(float, float)
+  true
+end
+
+schema CGarage_CalcSmallestDistToGarageDoorSquared_17
+  ΔCGarage
+  arg_1? : ℝ
+  arg_2? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGarage::CalcSmallestDistToGarageDoorSquared(float, float)
+  true
+end
+
+schema CGarage_IsAnyOtherCarTouchingGarage_18
+  ΔCGarage
+  pException? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsAnyOtherCarTouchingGarage(CVehicle* pException)
+  true
+end
+
+schema CGarage_IsStaticPlayerCarEntirelyInside_19
+  ΔCGarage
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsStaticPlayerCarEntirelyInside()
+  true
+end
+
+schema CGarage_IsPlayerOutsideGarage_20
+  ΔCGarage
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsPlayerOutsideGarage()
+  true
+end
+
+schema CGarage_IsAnyCarBlockingDoor_21
+  ΔCGarage
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsAnyCarBlockingDoor()
+  true
+end
+
+schema CGarage_CenterCarInGarage_22
+  ΔCGarage
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CGarage::CenterCarInGarage(CVehicle*)
+  true
+end
+
+schema CGarage_DoesCraigNeedThisCar_23
+  ΔCGarage
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::DoesCraigNeedThisCar(int32)
+  true
+end
+
+schema CGarage_MarkThisCarAsCollectedForCraig_24
+  ΔCGarage
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::MarkThisCarAsCollectedForCraig(int32)
+  true
+end
+
+schema CGarage_HasCraigCollectedThisCar_25
+  ΔCGarage
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::HasCraigCollectedThisCar(int32)
+  true
+end
+
+schema CGarage_IsGarageEmpty_26
+  ΔCGarage
+  result! : 𝔹
+where
+  -- Declared member operation CGarage::IsGarageEmpty()
+  true
+end
+
+schema CGarage_UpdateCrusherShake_27
+  ΔCGarage
+  arg_1? : ℝ
+  arg_2? : ℝ
+where
+  -- Declared member operation CGarage::UpdateCrusherShake(float, float)
+  true
+end
+
+schema CGarage_CountCarsWithCenterPointWithinGarage_28
+  ΔCGarage
+  pException? : Ref[CEntity]
+  result! : ℤ
+where
+  -- Declared member operation CGarage::CountCarsWithCenterPointWithinGarage(CEntity* pException)
+  true
+end
+
+schema CGarage_RemoveCarsBlockingDoorNotInside_29
+  ΔCGarage
+where
+  -- Declared member operation CGarage::RemoveCarsBlockingDoorNotInside()
+  true
+end
+
+schema CGarage_StoreAndRemoveCarsForThisHideout_30
+  ΔCGarage
+  arg_1? : Ref[CStoredCar]
+  arg_2? : ℤ
+where
+  -- Declared member operation CGarage::StoreAndRemoveCarsForThisHideout(CStoredCar*, int32)
+  true
+end
+
+schema CGarages
+  BankVansCollected : ℤ
+  BombsAreFree : 𝔹
+  RespraysAreFree : 𝔹
+  CarsCollected : ℤ
+  CarTypesCollected : seq ℤ  -- bounded array [TOTAL_COLLECTCARS_GARAGES]
+  CrushedCarId : ℤ
+  LastTimeHelpMessage : ℕ
+  MessageNumberInString : ℤ
+  MessageIDString : seq CHAR
+  MessageNumberInString2 : ℤ
+  MessageStartTime : ℕ
+  MessageEndTime : ℕ
+  NumGarages : ℕ
+  PlayerInGarage : 𝔹
+  PoliceCarsCollected : ℤ
+  aGarages : seq CGarage  -- bounded array [NUM_GARAGES]
+  bCamShouldBeOutisde : 𝔹
+  CrusherRewardMultiplier : ℕ
+  aCarsInSafeHouse2 : seq CStoredCar  -- bounded array [NUM_GARAGE_STORED_CARS]
+  aCarsInSafeHouse3 : seq CStoredCar  -- bounded array [NUM_GARAGE_STORED_CARS]
+where
+  LastTimeHelpMessage ≥ 0
+  MessageStartTime ≥ 0
+  MessageEndTime ≥ 0
+  NumGarages ≥ 0
+  CrusherRewardMultiplier ≥ 0
+end
+
+schema CGarages_Init
+  ΔCGarages
+where
+  -- Declared member operation CGarages::Init(void)
+  true
+end
+
+schema CGarages_AddOne_2
+  ΔCGarages
+  X1? : ℝ
+  Y1? : ℝ
+  Z1? : ℝ
+  X2? : ℝ
+  Y2? : ℝ
+  X3? : ℝ
+  Y3? : ℝ
+  Z2? : ℝ
+  type? : ℕ
+  targetId? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, uint8 type, int32 targetId)
+  true
+end
+
+schema CGarages_ChangeGarageType_3
+  ΔCGarages
+  arg_1? : ℤ
+  arg_2? : ℕ
+  arg_3? : ℤ
+where
+  -- Declared member operation CGarages::ChangeGarageType(int16, uint8, int32)
+  true
+end
+
+schema CGarages_PrintMessages_4
+  ΔCGarages
+where
+  -- Declared member operation CGarages::PrintMessages(void)
+  true
+end
+
+schema CGarages_TriggerMessage_5
+  ΔCGarages
+  text? : seq CHAR
+  arg_2? : ℤ
+  time? : ℕ
+  arg_4? : ℤ
+where
+  -- Declared member operation CGarages::TriggerMessage(const char* text, int16, uint16 time, int16)
+  true
+end
+
+schema CGarages_SetTargetCarForMissonGarage_6
+  ΔCGarages
+  arg_1? : ℤ
+  arg_2? : Ref[CVehicle]
+where
+  -- Declared member operation CGarages::SetTargetCarForMissonGarage(int16, CVehicle*)
+  true
+end
+
+schema CGarages_HasCarBeenDroppedOffYet_7
+  ΔCGarages
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::HasCarBeenDroppedOffYet(int16)
+  true
+end
+
+schema CGarages_DeActivateGarage_8
+  ΔCGarages
+  arg_1? : ℤ
+where
+  -- Declared member operation CGarages::DeActivateGarage(int16)
+  true
+end
+
+schema CGarages_ActivateGarage_9
+  ΔCGarages
+  arg_1? : ℤ
+where
+  -- Declared member operation CGarages::ActivateGarage(int16)
+  true
+end
+
+schema CGarages_QueryCarsCollected_10
+  ΔCGarages
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGarages::QueryCarsCollected(int16)
+  true
+end
+
+schema CGarages_HasImportExportGarageCollectedThisCar_11
+  ΔCGarages
+  arg_1? : ℤ
+  arg_2? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::HasImportExportGarageCollectedThisCar(int16, int8)
+  true
+end
+
+schema CGarages_IsGarageOpen_12
+  ΔCGarages
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::IsGarageOpen(int16)
+  true
+end
+
+schema CGarages_IsGarageClosed_13
+  ΔCGarages
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::IsGarageClosed(int16)
+  true
+end
+
+schema CGarages_HasThisCarBeenCollected_14
+  ΔCGarages
+  arg_1? : ℤ
+  arg_2? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::HasThisCarBeenCollected(int16, uint8)
+  true
+end
+
+schema CGarages_OpenGarage_15
+  ΔCGarages
+  garage? : ℤ
+where
+  -- Declared member operation CGarages::OpenGarage(int16 garage)
+  true
+end
+
+schema CGarages_CloseGarage_16
+  ΔCGarages
+  garage? : ℤ
+  result! : void
+where
+  -- Declared member operation CGarages::CloseGarage(int16 garage)
+  true
+end
+
+schema CGarages_HasResprayHappened_17
+  ΔCGarages
+  arg_1? : ℤ
+  result! : bool
+where
+  -- Declared member operation CGarages::HasResprayHappened(int16)
+  true
+end
+
+schema CGarages_SetGarageDoorToRotate_18
+  ΔCGarages
+  arg_1? : ℤ
+where
+  -- Declared member operation CGarages::SetGarageDoorToRotate(int16)
+  true
+end
+
+schema CGarages_SetLeaveCameraForThisGarage_19
+  ΔCGarages
+  arg_1? : ℤ
+where
+  -- Declared member operation CGarages::SetLeaveCameraForThisGarage(int16)
+  true
+end
+
+schema CGarages_IsThisCarWithinGarageArea_20
+  ΔCGarages
+  arg_1? : ℤ
+  arg_2? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::IsThisCarWithinGarageArea(int16, CEntity*)
+  true
+end
+
+schema CGarages_HasCarBeenCrushed_21
+  ΔCGarages
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::HasCarBeenCrushed(int32)
+  true
+end
+
+schema CGarages_IsPointInAGarageCameraZone_22
+  ΔCGarages
+  arg_1? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::IsPointInAGarageCameraZone(CVector)
+  true
+end
+
+schema CGarages_CameraShouldBeOutside_23
+  ΔCGarages
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::CameraShouldBeOutside(void)
+  true
+end
+
+schema CGarages_GivePlayerDetonator_24
+  ΔCGarages
+where
+  -- Declared member operation CGarages::GivePlayerDetonator(void)
+  true
+end
+
+schema CGarages_PlayerArrestedOrDied_25
+  ΔCGarages
+where
+  -- Declared member operation CGarages::PlayerArrestedOrDied(void)
+  true
+end
+
+schema CGarages_IsPointWithinHideOutGarage_26
+  ΔCGarages
+  arg_1? : Const_CVector
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::IsPointWithinHideOutGarage(Const CVector&)
+  true
+end
+
+schema CGarages_IsPointWithinAnyGarage_27
+  ΔCGarages
+  arg_1? : Const_CVector
+  result! : 𝔹
+where
+  -- Declared member operation CGarages::IsPointWithinAnyGarage(Const CVector&)
+  true
+end
+
+schema CGarages_SetAllDoorsBackToOriginalHeight_28
+  ΔCGarages
+where
+  -- Declared member operation CGarages::SetAllDoorsBackToOriginalHeight(void)
+  true
+end
+
+schema CGarages_Save_29
+  ΔCGarages
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CGarages::Save(uint8* buf, uint32* size)
+  true
+end
+
+schema CGarages_Load_30
+  ΔCGarages
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CGarages::Load(uint8* buf, uint32 size)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Garages_Init
+  ΔGaragesModuleState
+where
+  -- State update: m_nModelIndex' = 0
+  true
+end
+
+schema Garages_Clear
+  ΔGaragesModuleState
+where
+  -- State update: m_nModelIndex' = 0
+  true
+end
+
+schema Garages_HasCar
+  ΔGaragesModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_nModelIndex != 0
+  true
+end
+
+schema Garages_IsOpen
+  ΔGaragesModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_eGarageState == GS_OPENED || m_eGarageState == GS_OPENEDCONTAINSCAR
+  true
+end
+
+schema Garages_IsClosed
+  ΔGaragesModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_eGarageState == GS_FULLYCLOSED
+  true
+end
+
+schema Garages_IsUsed
+  ΔGaragesModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_eGarageType != GARAGE_NONE
+  true
+end
+
+schema Garages_GetGarageCenterX
+  ΔGaragesModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = (m_fInfX + m_fSupX) / 2
+  true
+end
+
+schema Garages_GetGarageCenterY
+  ΔGaragesModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = (m_fInfY + m_fSupY) / 2
+  true
+end
+
+schema Garages_IsFar
+  ΔGaragesModuleState
+  result! : 𝔹
+where
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema Garages_FindMaxNumStoredCarsForGarage
+  ΔGaragesModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = Min(NUM_GARAGE_STORED_CARS, m_nMaxStoredCars)
+  true
+end
+
+schema Garages_GetGarageCenterX_2
+  ΔGaragesModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = (m_fX1 + m_fX2) / 2
+  true
+end
+
+schema Garages_GetGarageCenterY_2
+  ΔGaragesModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = (m_fY1 + m_fY2) / 2
+  true
+end
+
+schema Garages_OpenGarage
+  ΔGaragesModuleState
+  garage? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Garages_CloseGarage
+  ΔGaragesModuleState
+  garage? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Garages_SetFreeBombs
+  ΔGaragesModuleState
+  bValue? : 𝔹
+where
+  -- State update: BombsAreFree' = bValue
+  true
+end
+
+schema Garages_SetFreeResprays
+  ΔGaragesModuleState
+  bValue? : 𝔹
+where
+  -- State update: RespraysAreFree' = bValue
+  true
+end
+
+schema Garages_SetMaxNumStoredCarsForGarage
+  ΔGaragesModuleState
+  garage? : ℤ
+  num? : ℕ
+where
+  -- State update: m_nMaxStoredCars' = num
+  true
+end
+
+schema Garages_GetBombTypeForGarageType
+  ΔGaragesModuleState
+  type? : ℕ
+  result! : ℤ
+where
+  -- Return postcondition: result! = type - GARAGE_BOMBSHOP1 + 1
+  true
+end
+
+schema Garages_GetCarsCollectedIndexForGarageType
+  ΔGaragesModuleState
+  type? : ℕ
+  total? : ℕ
+  result! : ℤ
+where
+  -- State update: total' = TOTAL_COLLECTCARS_CARS
+  -- State update: total' = 0
+  -- State update: total' = 0
+  -- State update: total' = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 2
+  true
+end
+
+schema Garages_FindSafeHouseIndexForGarageType
+  ΔGaragesModuleState
+  type? : ℕ
+  result! : ℤ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 2
+  true
+end
+
+schema Garages_IsThisGarageTypeSafehouse
+  ΔGaragesModuleState
+  type? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = FindSafeHouseIndexForGarageType(type) >= 0
+  true
+end
+
+schema Garages_GetCarsCollectedIndexForGarageType_2
+  ΔGaragesModuleState
+  type? : ℕ
+  result! : ℤ
+where
+  -- Return postcondition: result! = type - GARAGE_COLLECTCARS_1
+  true
+end

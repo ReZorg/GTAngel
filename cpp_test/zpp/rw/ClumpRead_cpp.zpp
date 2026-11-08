@@ -1,0 +1,117 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ClumpRead (rw)
+-- Source File(s): rw/ClumpRead.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema rpGeometryList
+  geometries : Ref[RpGeometry]
+  numGeoms : ℤ
+where
+  #geometries ≤ 1
+end
+
+schema rpAtomicBinary
+  frameIndex : ℤ
+  geomIndex : ℤ
+  flags : ℤ
+  unused : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ClumpRead_GeometryListStreamRead1
+  ΔClumpReadModuleState
+  stream? : Ref[RwStream]
+  geomlist? : Ref[rpGeometryList]
+where
+  -- State update: numberGeometrys' = 0
+  -- State update: numberGeometrys' = numGeoms/2
+  -- State update: geomlist.numGeoms' = numGeoms
+  -- State update: geomlist.geometries' = ∅
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema ClumpRead_GeometryListStreamRead2
+  ΔClumpReadModuleState
+  stream? : Ref[RwStream]
+  geomlist? : Ref[rpGeometryList]
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = geomlist
+  true
+end
+
+schema ClumpRead_GeometryListDeinitialize
+  ΔClumpReadModuleState
+  geomlist? : Ref[rpGeometryList]
+where
+  -- State update: geomlist.numGeoms' = 0
+  true
+end
+
+schema ClumpRead_ClumpAtomicStreamRead
+  ΔClumpReadModuleState
+  stream? : Ref[RwStream]
+  frmList? : Ref[rwFrameList]
+  geomList? : Ref[rpGeometryList]
+where
+  -- State update: numberGeometrys' = 0
+  -- State update: atomic' = RpAtomicCreate()
+  -- State update: geom' = RpGeometryStreamRead(stream)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema ClumpRead_RpClumpGtaStreamRead1
+  ΔClumpReadModuleState
+  stream? : Ref[RwStream]
+where
+  -- State update: streamPosition' = STREAMPOS(stream)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema ClumpRead_RpClumpGtaStreamRead2
+  ΔClumpReadModuleState
+  stream? : Ref[RwStream]
+where
+  -- State update: clump' = RpClumpCreate()
+  -- State update: atomic' = ClumpAtomicStreamRead(stream, &gFrameList, &gGeomList)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema ClumpRead_RpClumpGtaCancelStream
+  ΔClumpReadModuleState
+where
+  -- State update: gFrameList.numFrames' = 0
+  true
+end

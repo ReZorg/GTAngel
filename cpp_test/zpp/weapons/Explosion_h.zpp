@@ -1,0 +1,160 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Explosion (weapons)
+-- Source File(s): weapons/Explosion.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eExplosionType ::= EXPLOSION_GRENADE | EXPLOSION_MOLOTOV | EXPLOSION_ROCKET | EXPLOSION_CAR | EXPLOSION_CAR_QUICK | EXPLOSION_BOAT | EXPLOSION_HELI | EXPLOSION_HELI2 | EXPLOSION_MINE | EXPLOSION_BARREL | EXPLOSION_TANK_GRENADE | EXPLOSION_HELI_BOMB
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CExplosion
+  m_ExplosionType : eExplosionType
+  m_vecPosition : CVector
+  m_fRadius : ℝ
+  m_fPropagationRate : ℝ
+  m_pCreatorEntity : Ref[CEntity]
+  m_pVictimEntity : Ref[CEntity]
+  m_fStopTime : ℝ
+  m_nIteration : ℕ
+  m_nActiveCounter : ℕ
+  m_bIsBoat : 𝔹
+  m_bMakeSound : 𝔹
+  m_fStartTime : ℝ
+  m_nParticlesExpireTime : ℕ
+  m_fPower : ℝ
+  m_fZshift : ℝ
+where
+  #m_pCreatorEntity ≤ 1
+  #m_pVictimEntity ≤ 1
+  m_nIteration ≥ 0
+  m_nActiveCounter ≥ 0
+  m_nParticlesExpireTime ≥ 0
+end
+
+schema CExplosion_AddExplosion
+  ΔCExplosion
+  explodingEntity? : Ref[CEntity]
+  culprit? : Ref[CEntity]
+  type? : eExplosionType
+  pos? : CVector
+  lifetime? : ℕ
+  makeSound? : 𝔹
+  radius? : ℝ
+  result! : ifdef_SIMPLER_MISSIONS__bool
+where
+  -- Declared member operation CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool makeSound = true, float radius = -1.0f)
+  true
+end
+
+schema CExplosion_DoesExplosionMakeSound_2
+  ΔCExplosion
+  id? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CExplosion::DoesExplosionMakeSound(uint8 id)
+  true
+end
+
+schema CExplosion_GetExplosionActiveCounter_3
+  ΔCExplosion
+  id? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CExplosion::GetExplosionActiveCounter(uint8 id)
+  true
+end
+
+schema CExplosion_GetExplosionPosition_4
+  ΔCExplosion
+  id? : ℕ
+  result! : Ref[CVector]
+where
+  -- Declared member operation CExplosion::GetExplosionPosition(uint8 id)
+  true
+end
+
+schema CExplosion_GetExplosionType_5
+  ΔCExplosion
+  id? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation CExplosion::GetExplosionType(uint8 id)
+  true
+end
+
+schema CExplosion_Initialise_6
+  ΔCExplosion
+where
+  -- Declared member operation CExplosion::Initialise()
+  true
+end
+
+schema CExplosion_RemoveAllExplosionsInArea_7
+  ΔCExplosion
+  pos? : CVector
+  radius? : ℝ
+where
+  -- Declared member operation CExplosion::RemoveAllExplosionsInArea(CVector pos, float radius)
+  true
+end
+
+schema CExplosion_ResetExplosionActiveCounter_8
+  ΔCExplosion
+  id? : ℕ
+where
+  -- Declared member operation CExplosion::ResetExplosionActiveCounter(uint8 id)
+  true
+end
+
+schema CExplosion_Shutdown_9
+  ΔCExplosion
+where
+  -- Declared member operation CExplosion::Shutdown()
+  true
+end
+
+schema CExplosion_Update_10
+  ΔCExplosion
+where
+  -- Declared member operation CExplosion::Update()
+  true
+end
+
+schema CExplosion_TestForExplosionInArea_11
+  ΔCExplosion
+  type? : eExplosionType
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CExplosion::TestForExplosionInArea(eExplosionType type, float x1, float x2, float y1, float y2, float z1, float z2)
+  true
+end
+
+schema CExplosion_AddExplosion_12
+  ΔCExplosion
+  explodingEntity? : Ref[CEntity]
+  culprit? : Ref[CEntity]
+  type? : eExplosionType
+  pos? : CVector
+  lifetime? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime)
+  true
+end

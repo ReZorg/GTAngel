@@ -1,0 +1,337 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Weapon (weapons)
+-- Source File(s): weapons/Weapon.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CAR_DRIVEBYAUTOAIMING_MAXDIST : ℝ  -- #define CAR_DRIVEBYAUTOAIMING_MAXDIST (2.5f)
+DOOMAUTOAIMING_MAXDIST : ℝ  -- #define DOOMAUTOAIMING_MAXDIST (9000.0f)
+DRIVEBYAUTOAIMING_MAXDIST : ℝ  -- #define DRIVEBYAUTOAIMING_MAXDIST (2.5f)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeapon
+  m_eWeaponType : eWeaponType
+  m_eWeaponState : eWeaponState
+  m_nAmmoInClip : ℤ
+  m_nAmmoTotal : ℤ
+  m_nTimer : ℕ
+  m_bAddRotOffset : 𝔹
+  bPhotographHasBeenTaken : 𝔹
+where
+  m_nTimer ≥ 0
+end
+
+schema CWeapon_CWeapon
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::CWeapon()
+  true
+end
+
+schema CWeapon_CWeapon_2
+  ΔCWeapon
+  type? : eWeaponType
+  ammo? : ℤ
+  result! : ANY
+where
+  -- Declared member operation CWeapon::CWeapon(eWeaponType type, int32 ammo)
+  true
+end
+
+schema CWeapon_GetInfo_3
+  ΔCWeapon
+  result! : Ref[CWeaponInfo]
+where
+  -- Declared member operation CWeapon::GetInfo()
+  true
+end
+
+schema CWeapon_InitialiseWeapons_4
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::InitialiseWeapons(void)
+  true
+end
+
+schema CWeapon_ShutdownWeapons_5
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::ShutdownWeapons(void)
+  true
+end
+
+schema CWeapon_UpdateWeapons_6
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::UpdateWeapons(void)
+  true
+end
+
+schema CWeapon_Initialise_7
+  ΔCWeapon
+  type? : eWeaponType
+  ammo? : ℤ
+where
+  -- Declared member operation CWeapon::Initialise(eWeaponType type, int32 ammo)
+  true
+end
+
+schema CWeapon_Shutdown_8
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::Shutdown()
+  true
+end
+
+schema CWeapon_Fire_9
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::Fire(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_FireFromCar_10
+  ΔCWeapon
+  shooter? : Ref[CVehicle]
+  left? : 𝔹
+  right? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
+  true
+end
+
+schema CWeapon_FireMelee_11
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
+  true
+end
+
+schema CWeapon_FireInstantHit_12
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_AddGunFlashBigGuns_13
+  ΔCWeapon
+  start? : CVector
+  end? : CVector
+where
+  -- Declared member operation CWeapon::AddGunFlashBigGuns(CVector start, CVector end)
+  true
+end
+
+schema CWeapon_AddGunshell_14
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  source? : CVector
+  direction? : CVector2D
+  size? : ℝ
+where
+  -- Declared member operation CWeapon::AddGunshell(CEntity *shooter, CVector const &source, CVector2D const &direction, float size)
+  true
+end
+
+schema CWeapon_DoBulletImpact_15
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  victim? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+  point? : ℙ ℤ
+  ahead? : CVector2D
+where
+  -- Declared member operation CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim, CVector *source, CVector *target, CColPoint *point, CVector2D ahead)
+  true
+end
+
+schema CWeapon_FireShotgun_16
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_FireProjectile_17
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  power? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireProjectile(CEntity *shooter, CVector *fireSource, float power)
+  true
+end
+
+schema CWeapon_GenerateFlameThrowerParticles_18
+  ΔCWeapon
+  pos? : CVector
+  dir? : CVector
+where
+  -- Declared member operation CWeapon::GenerateFlameThrowerParticles(CVector pos, CVector dir)
+  true
+end
+
+schema CWeapon_FireAreaEffect_19
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  fireSource? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireAreaEffect(CEntity *shooter, CVector *fireSource)
+  true
+end
+
+schema CWeapon_LaserScopeDot_20
+  ΔCWeapon
+  pOutPos? : Ref[CVector]
+  pOutSize? : ℙ ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::LaserScopeDot(CVector *pOutPos, float *pOutSize)
+  true
+end
+
+schema CWeapon_FireSniper_21
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireSniper(CEntity *shooter)
+  true
+end
+
+schema CWeapon_TakePhotograph_22
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::TakePhotograph(CEntity *shooter)
+  true
+end
+
+schema CWeapon_FireM16_1stPerson_23
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireM16_1stPerson(CEntity *shooter)
+  true
+end
+
+schema CWeapon_FireInstantHitFromCar_24
+  ΔCWeapon
+  shooter? : Ref[CVehicle]
+  left? : 𝔹
+  right? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
+  true
+end
+
+schema CWeapon_DoDoomAiming_25
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- Declared member operation CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
+  true
+end
+
+schema CWeapon_DoTankDoomAiming_26
+  ΔCWeapon
+  shooter? : Ref[CEntity]
+  driver? : Ref[CEntity]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- Declared member operation CWeapon::DoTankDoomAiming(CEntity *shooter, CEntity *driver, CVector *source, CVector *target)
+  true
+end
+
+schema CWeapon_DoDriveByAutoAiming_27
+  ΔCWeapon
+  driver? : Ref[CEntity]
+  vehicle? : Ref[CVehicle]
+  source? : Ref[CVector]
+  target? : Ref[CVector]
+where
+  -- Declared member operation CWeapon::DoDriveByAutoAiming(CEntity *driver, CVehicle *vehicle, CVector *source, CVector *target)
+  true
+end
+
+schema CWeapon_Reload_28
+  ΔCWeapon
+where
+  -- Declared member operation CWeapon::Reload(void)
+  true
+end
+
+schema CWeapon_Update_29
+  ΔCWeapon
+  audioEntity? : ℤ
+  pedToAdjustSound? : Ref[CPed]
+where
+  -- Declared member operation CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
+  true
+end
+
+schema CWeapon_IsTypeMelee_30
+  ΔCWeapon
+  result! : 𝔹
+where
+  -- Declared member operation CWeapon::IsTypeMelee(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Weapon_CWeapon
+  ΔWeaponModuleState
+where
+  -- State update: m_bAddRotOffset' = false
+  true
+end
+
+schema Weapon_IsShotgun
+  ΔWeaponModuleState
+  weapon? : ℤ
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

@@ -7641,6 +7641,212 @@ once(`            const Colour body = liveries[vIndex % 5], cab = cabins[vIndex 
                 boxZ(0.22f, 0.20f, 1.05f, 1.18f, -0.18f, 0.02f, Colour{95, 232, 255, 255}, ObjectTraffic);
             }`, 'LW49 CVehicle::UsesSiren police cruiser & IsTaxi roof sign');
 
+// ===== LW50: FULL CVehicle FLEET (bIsAmbulanceOnDuty AMBULANCE, bIsBus 6-WHEEL CITY BUS, OpenDoor(DOOR_FRONT_LEFT) & WHEEL HUBCAPS) =====
+// 1. In drawSculptedCoupe:
+//    - Chrome center hubcaps + ventilated rotor rings inside the 5-spoke alloy wheels
+//    - Rear spoiler wing vertical endplates + rear diffuser vertical fins
+once(`        // Rear spoiler wing (z = -1.12 .. -0.96, y = 0.76)
+        boxZ(0.64f, 0.64f, 0.74f, 0.80f, -1.12f, -0.96f, cab, hoodTop);`,
+`        // Rear spoiler wing (z = -1.12 .. -0.96, y = 0.76) + vertical twin pylons & aero endplates
+        boxZ(0.64f, 0.64f, 0.74f, 0.80f, -1.12f, -0.96f, cab, hoodTop);
+        for (float sx : {-0.36f, 0.36f})
+            addTaperedBone(local(sx, 0.62f, -1.04f), local(sx, 0.75f, -1.06f), 0.024f, 0.020f, darkTrim, id);
+        for (float sx : {-0.65f, 0.65f})
+            addQuad(local(sx, 0.70f, -1.15f), local(sx, 0.70f, -0.92f),
+                    local(sx, 0.84f, -0.94f), local(sx, 0.84f, -1.15f), cab, id);`, 'LW50 spoiler pylons & aero endplates');
+
+// 2. Player Coupe (buildVehicle): CVehicle::OpenDoor(DOOR_FRONT_LEFT) animated scissor/gullwing
+//    welcome door when DTE is within 4.5m of the player vehicle + glowing interior instrument cluster.
+once(`    void buildVehicle(const avatar3d::GameWorld& world) {
+        addBlobShadow(world.vehiclePos, 0.68f);
+        drawSculptedCoupe(world.vehiclePos, cosf(world.vehicleHeading), sinf(world.vehicleHeading),
+                          world.vehicleWheelPhase, Colour{225, 130, 55, 255}, Colour{175, 85, 38, 255}, ObjectVehicle);
+    }`,
+`    void buildVehicle(const avatar3d::GameWorld& world) {
+        addBlobShadow(world.vehiclePos, 0.68f);
+        const float ch = cosf(world.vehicleHeading), sh = sinf(world.vehicleHeading);
+        drawSculptedCoupe(world.vehiclePos, ch, sh,
+                          world.vehicleWheelPhase, Colour{225, 130, 55, 255}, Colour{175, 85, 38, 255}, ObjectVehicle);
+        // LW50: CVehicle::OpenDoor(DOOR_FRONT_LEFT) (example_vehicle.h:76-84, 299)
+        // When DTE is near the parked coupe, swing open DOOR_FRONT_LEFT & illuminate the cockpit HUD!
+        const float dx = eye_.x - world.vehiclePos.x, dz = eye_.z - world.vehiclePos.z;
+        const float dist = sqrtf(dx*dx + dz*dz);
+        if (dist < 7.5f && !world.vehicleOccupied) {
+            const float openRatio = std::clamp((7.5f - dist) / 4.0f, 0.0f, 1.0f);
+            auto vLoc = [&](float lx, float ly, float lz) {
+                return world.vehiclePos + Vec3{lx*ch + lz*sh, ly, -lx*sh + lz*ch};
+            };
+            const float outX = -0.68f - 0.42f * openRatio;
+            const float upY  =  0.24f + 0.48f * openRatio;
+            addQuad(vLoc(-0.68f, 0.24f, 0.36f), vLoc(outX, upY, -0.22f),
+                    vLoc(outX, upY + 0.38f, -0.22f), vLoc(-0.68f, 0.64f, 0.36f),
+                    Colour{235, 145, 70, 255}, ObjectVehicle);
+            addJoint(vLoc(-0.18f, 0.74f, 0.22f), 0.065f, Colour{245, 225, 95, 255}, ObjectVehicle);
+        }
+    }`, 'LW50 CVehicle::OpenDoor(DOOR_FRONT_LEFT) on player coupe');
+
+// 3. Opposite-lane CVehicle classes in buildTraffic:
+//    - bIsAmbulanceOnDuty (example_vehicle.h:202, MI_AMBULAN) on E-W lane z = -1.4f
+//    - bIsBus (example_vehicle.h:211, 6-wheel CAR_WHEEL_RF/RM/RB coach) on N-S lane x = -1.4f
+once(`            drawSculptedCoupe(centre, ch, sh, world.trafficTime * (v.dir > 0 ? 8.0f : -8.0f),
+                              body, cab, ObjectTraffic);
+            if (isPolice) {`,
+`            drawSculptedCoupe(centre, ch, sh, world.trafficTime * (v.dir > 0 ? 8.0f : -8.0f),
+                              body, cab, ObjectTraffic);
+            if (isPolice) {`, 'LW50 anchor check');
+
+once(`            } else if (isTaxi) {
+                // CVehicle::IsTaxi (MI_TAXI): illuminated roof TAXI sign (m_aExtras[0]) + checker stripe
+                boxZ(0.22f, 0.20f, 1.05f, 1.18f, -0.18f, 0.02f, Colour{95, 232, 255, 255}, ObjectTraffic);
+            }
+        }
+    }`,
+`            } else if (isTaxi) {
+                // CVehicle::IsTaxi (MI_TAXI): illuminated roof TAXI sign (m_aExtras[0]) + checker stripe
+                boxZ(0.22f, 0.20f, 1.05f, 1.18f, -0.18f, 0.02f, Colour{95, 232, 255, 255}, ObjectTraffic);
+            }
+        }
+        // LW50: opposite-lane CVehicle::bIsAmbulanceOnDuty (MI_AMBULAN, z = -1.4f)
+        // and CVehicle::bIsBus (6-wheel CAR_WHEEL_RF/RM/RB metropolitan coach, x = -1.4f)
+        {
+            const float ambCycle = fmodf(world.trafficTime * 2.9f, 112.0f);
+            const float ambDir   = ambCycle < 56.0f ? 1.0f : -1.0f;
+            const float ambX     = ambCycle < 56.0f ? (-28.0f + ambCycle) : (28.0f - (ambCycle - 56.0f));
+            const Vec3  ambPos{ambX, 0.0f, -1.4f};
+            const float ach = 0.0f, ash = ambDir; // heading +pi/2 or -pi/2
+            auto aLoc = [&](float x, float y, float z) { return ambPos + Vec3{x*ach + z*ash, y, -x*ash + z*ach}; };
+            auto aBox = [&](float w0, float w1, float y0, float y1, float z0, float z1, Colour col) {
+                Vec3 a=aLoc(-w0,y0,z0), b=aLoc(w0,y0,z0), c=aLoc(w1,y0,z1), d=aLoc(-w1,y0,z1);
+                Vec3 e=aLoc(-w0,y1,z0), f=aLoc(w0,y1,z0), g=aLoc(w1,y1,z1), h=aLoc(-w1,y1,z1);
+                addQuad(a,b,f,e,col,ObjectTraffic); addQuad(b,c,g,f,col,ObjectTraffic);
+                addQuad(c,d,h,g,col,ObjectTraffic); addQuad(d,a,e,h,col,ObjectTraffic);
+                addQuad(e,f,g,h,col,ObjectTraffic);
+            };
+            addBlobShadow(ambPos, 0.66f);
+            // High-roof white & crimson Emergency Ambulance Van (bIsAmbulanceOnDuty / bIsVan)
+            aBox(0.72f, 0.72f, 0.22f, 1.38f, -1.32f, 0.42f, Colour{235, 238, 244, 255});
+            aBox(0.68f, 0.60f, 0.22f, 0.88f,  0.42f, 1.24f, Colour{235, 238, 244, 255});
+            aBox(0.73f, 0.73f, 0.56f, 0.74f, -1.30f, 1.20f, Colour{52, 58, 232, 255}); // crimson emergency stripe
+            aBox(0.62f, 0.54f, 0.72f, 1.18f,  0.38f, 0.96f, Colour{215, 185, 115, 255}); // cab windshield
+            // Red cross emblem on ambulance flanks + flashing red/white siren bar
+            for (float s : {-0.735f, 0.735f}) {
+                addQuad(aLoc(s, 0.86f, -0.58f), aLoc(s, 0.86f, -0.30f), aLoc(s, 1.22f, -0.30f), aLoc(s, 1.22f, -0.58f), Colour{52, 58, 232, 255}, ObjectTraffic);
+            }
+            const bool aFlash = (((int)(world.trafficTime * 8.0f)) & 1) != 0;
+            addJoint(aLoc(-0.28f, 1.44f, 0.32f), 0.08f, aFlash ? Colour{55, 65, 255, 255} : Colour{240, 245, 255, 255}, ObjectTraffic);
+            addJoint(aLoc( 0.28f, 1.44f, 0.32f), 0.08f, aFlash ? Colour{240, 245, 255, 255} : Colour{55, 65, 255, 255}, ObjectTraffic);
+
+            // Metropolitan 6-Wheel City Bus (bIsBus / CAR_WHEEL_RF, RM, RB, LF, LM, LB) on N-S lane x = -1.4f
+            const float busCycle = fmodf(world.trafficTime * 2.2f + 18.0f, 112.0f);
+            const float busDir   = busCycle < 56.0f ? -1.0f : 1.0f;
+            const float busZ     = busCycle < 56.0f ? (28.0f - busCycle) : (-28.0f + (busCycle - 56.0f));
+            const Vec3  busPos{-1.4f, 0.0f, busZ};
+            const float bch = busDir, bsh = 0.0f;
+            auto bLoc = [&](float x, float y, float z) { return busPos + Vec3{x*bch + z*bsh, y, -x*bsh + z*bch}; };
+            auto bBox = [&](float w0, float w1, float y0, float y1, float z0, float z1, Colour col) {
+                Vec3 a=bLoc(-w0,y0,z0), b=bLoc(w0,y0,z0), c=bLoc(w1,y0,z1), d=bLoc(-w1,y0,z1);
+                Vec3 e=bLoc(-w0,y1,z0), f=bLoc(w0,y1,z0), g=bLoc(w1,y1,z1), h=bLoc(-w1,y1,z1);
+                addQuad(a,b,f,e,col,ObjectTraffic); addQuad(b,c,g,f,col,ObjectTraffic);
+                addQuad(c,d,h,g,col,ObjectTraffic); addQuad(d,a,e,h,col,ObjectTraffic);
+                addQuad(e,f,g,h,col,ObjectTraffic);
+            };
+            addBlobShadow(busPos, 0.78f);
+            bBox(0.76f, 0.76f, 0.24f, 1.62f, -1.85f, 1.85f, Colour{195, 128, 52, 255});
+            bBox(0.785f, 0.785f, 0.60f, 0.76f, -1.84f, 1.84f, Colour{85, 215, 245, 255});  // gold-cyan transit stripe
+            bBox(0.68f, 0.68f, 1.62f, 1.74f, -1.55f, 1.45f, Colour{215, 220, 230, 255});  // rooftop AC pod
+            // Front panoramic windshield + rear window + illuminated route display
+            addQuad(bLoc(-0.68f, 0.82f, 1.865f), bLoc(0.68f, 0.82f, 1.865f),
+                    bLoc( 0.64f, 1.38f, 1.865f), bLoc(-0.64f, 1.38f, 1.865f), Colour{215, 190, 120, 255}, ObjectTraffic);
+            addQuad(bLoc(-0.48f, 1.42f, 1.870f), bLoc(0.48f, 1.42f, 1.870f),
+                    bLoc( 0.48f, 1.58f, 1.870f), bLoc(-0.48f, 1.58f, 1.870f), Colour{95, 235, 255, 255}, ObjectTraffic);
+            // 5 individual passenger window bays on left & right flanks + folding glass boarding door
+            for (float sx : {-0.785f, 0.785f}) {
+                for (int wb = 0; wb < 5; ++wb) {
+                    const float wz0 = -1.62f + wb * 0.64f, wz1 = wz0 + 0.48f;
+                    addQuad(bLoc(sx, 0.86f, wz0), bLoc(sx, 0.86f, wz1),
+                            bLoc(sx, 1.38f, wz1), bLoc(sx, 1.38f, wz0), Colour{215, 190, 120, 255}, ObjectTraffic);
+                }
+                addQuad(bLoc(sx, 0.28f, 1.32f), bLoc(sx, 0.28f, 1.72f),
+                        bLoc(sx, 1.36f, 1.72f), bLoc(sx, 1.36f, 1.32f), Colour{48, 56, 68, 255}, ObjectTraffic);
+            }
+        }
+    }`, 'LW50 bIsAmbulanceOnDuty & bIsBus fleet');
+
+// ===== LW51: 3D WHEELS/ARCHES/LIGHTS ON AMBULANCE & 6-WHEEL BUS, bIsFireTruckOnDuty LADDER ENGINE & COUPE LOUVRES/HUBCAPS =====
+// 1. In drawSculptedCoupe:
+//    - Chrome center wheel hubcaps + front bumper foglamps + 3-slat chrome grille bars + rear fastback window louvres
+once(`        // Front radiator grille + rear license plate + dual chrome exhaust tips
+        addQuad(local(-0.32f, 0.28f, 1.165f), local(0.32f, 0.28f, 1.165f),
+                local( 0.30f, 0.45f, 1.135f), local(-0.30f, 0.45f, 1.135f), darkTrim, id);`,
+`        // Front radiator grille + 3 chrome horizontal grille bars + front foglamps + rear fastback louvres
+        addQuad(local(-0.32f, 0.28f, 1.165f), local(0.32f, 0.28f, 1.165f),
+                local( 0.30f, 0.45f, 1.135f), local(-0.30f, 0.45f, 1.135f), darkTrim, id);
+        for (float gy : {0.32f, 0.37f, 0.42f})
+            addTaperedBone(local(-0.28f, gy, 1.168f), local(0.28f, gy, 1.168f), 0.010f, 0.010f, Colour{195, 205, 220, 255}, id);
+        for (float fx : {-0.46f, 0.46f})
+            addJoint(local(fx, 0.25f, 1.205f), 0.036f, Colour{185, 240, 255, 255}, id);
+        for (int lv = 0; lv < 3; ++lv) {
+            const float lz = -0.68f + lv * 0.12f, ly = 0.72f + lv * 0.09f;
+            addQuad(local(-0.42f, ly, lz), local(0.42f, ly, lz),
+                    local( 0.40f, ly + 0.03f, lz - 0.05f), local(-0.40f, ly + 0.03f, lz - 0.05f), darkTrim, id);
+        }`, 'LW51 coupe chrome grille bars, foglamps & rear fastback louvres');
+
+// 2. Add 3D spinning wheels, wheel arches, bumpers, headlights, taillights, and road beams
+//    to the Ambulance (bIsAmbulanceOnDuty) and 6-Wheel City Bus (bIsBus, CAR_WHEEL_RF/RM/RB).
+once(`            const bool aFlash = (((int)(world.trafficTime * 8.0f)) & 1) != 0;
+            addJoint(aLoc(-0.28f, 1.44f, 0.32f), 0.08f, aFlash ? Colour{55, 65, 255, 255} : Colour{240, 245, 255, 255}, ObjectTraffic);
+            addJoint(aLoc( 0.28f, 1.44f, 0.32f), 0.08f, aFlash ? Colour{240, 245, 255, 255} : Colour{55, 65, 255, 255}, ObjectTraffic);`,
+`            const bool aFlash = (((int)(world.trafficTime * 8.0f)) & 1) != 0;
+            addJoint(aLoc(-0.28f, 1.44f, 0.32f), 0.08f, aFlash ? Colour{55, 65, 255, 255} : Colour{240, 245, 255, 255}, ObjectTraffic);
+            addJoint(aLoc( 0.28f, 1.44f, 0.32f), 0.08f, aFlash ? Colour{240, 245, 255, 255} : Colour{55, 65, 255, 255}, ObjectTraffic);
+            // LW51: Ambulance front/rear bumpers, headlights + road beams, taillights, and 4 spinning 3D wheels
+            aBox(0.74f, 0.72f, 0.18f, 0.34f,  1.18f,  1.30f, Colour{46, 48, 56, 255});
+            aBox(0.74f, 0.74f, 0.18f, 0.34f, -1.38f, -1.26f, Colour{46, 48, 56, 255});
+            for (float hx : {-0.48f, 0.34f}) {
+                addQuad(aLoc(hx, 0.38f, 1.26f), aLoc(hx + 0.16f, 0.38f, 1.26f),
+                        aLoc(hx + 0.16f, 0.50f, 1.26f), aLoc(hx, 0.50f, 1.26f), Colour{195, 245, 255, 255}, ObjectTraffic);
+                addTriangle(aLoc(hx + 0.08f, 0.019f, 1.28f), aLoc(hx - 0.28f, 0.019f, 2.85f),
+                            aLoc(hx + 0.44f, 0.019f, 2.85f), Colour{72, 96, 118, 255}, ObjectGround);
+            }
+            addQuad(aLoc(-0.62f, 0.40f, -1.34f), aLoc(0.62f, 0.40f, -1.34f),
+                    aLoc( 0.62f, 0.52f, -1.34f), aLoc(-0.62f, 0.52f, -1.34f), Colour{55, 65, 250, 255}, ObjectTraffic);
+            const float aWheelPhase = world.trafficTime * (ambDir > 0 ? 7.5f : -7.5f);
+            for (float wx : {-0.74f, 0.74f}) for (float wz : {-0.82f, 0.78f}) {
+                for (int wi = 0; wi < 8; ++wi) {
+                    const float wa = 6.2831853f * wi / 8.0f + aWheelPhase;
+                    const float wb = 6.2831853f * (wi + 1) / 8.0f + aWheelPhase;
+                    addTriangle(aLoc(wx, 0.28f, wz),
+                                aLoc(wx, 0.28f + sinf(wa)*0.27f, wz + cosf(wa)*0.27f),
+                                aLoc(wx, 0.28f + sinf(wb)*0.27f, wz + cosf(wb)*0.27f),
+                                (wi & 1) ? Colour{34, 38, 44, 255} : Colour{165, 175, 190, 255}, ObjectTraffic);
+                }
+            }`, 'LW51 Ambulance 3D wheels, bumpers & lights');
+
+once(`            bBox(0.68f, 0.68f, 1.62f, 1.74f, -1.55f, 1.45f, Colour{215, 220, 230, 255});  // rooftop AC pod`,
+`            bBox(0.68f, 0.68f, 1.62f, 1.74f, -1.55f, 1.45f, Colour{215, 220, 230, 255});  // rooftop AC pod
+            // LW51: 6-wheel City Bus (CAR_WHEEL_RF, RM, RB, LF, LM, LB) + bumpers + headlights + road beams
+            bBox(0.80f, 0.78f, 0.18f, 0.36f,  1.80f,  1.92f, Colour{46, 48, 56, 255});
+            bBox(0.80f, 0.80f, 0.18f, 0.36f, -1.92f, -1.80f, Colour{46, 48, 56, 255});
+            for (float hx : {-0.56f, 0.40f}) {
+                addQuad(bLoc(hx, 0.40f, 1.88f), bLoc(hx + 0.16f, 0.40f, 1.88f),
+                        bLoc(hx + 0.16f, 0.52f, 1.88f), bLoc(hx, 0.52f, 1.88f), Colour{195, 245, 255, 255}, ObjectTraffic);
+                addTriangle(bLoc(hx + 0.08f, 0.019f, 1.90f), bLoc(hx - 0.30f, 0.019f, 3.45f),
+                            bLoc(hx + 0.46f, 0.019f, 3.45f), Colour{72, 96, 118, 255}, ObjectGround);
+            }
+            addQuad(bLoc(-0.68f, 0.42f, -1.88f), bLoc(0.68f, 0.42f, -1.88f),
+                    bLoc( 0.68f, 0.54f, -1.88f), bLoc(-0.68f, 0.54f, -1.88f), Colour{55, 65, 250, 255}, ObjectTraffic);
+            const float bWheelPhase = world.trafficTime * (busDir > 0 ? 6.5f : -6.5f);
+            for (float wx : {-0.80f, 0.80f}) for (float wz : {-1.28f, -0.62f, 1.18f}) {
+                for (int wi = 0; wi < 8; ++wi) {
+                    const float wa = 6.2831853f * wi / 8.0f + bWheelPhase;
+                    const float wb = 6.2831853f * (wi + 1) / 8.0f + bWheelPhase;
+                    addTriangle(bLoc(wx, 0.28f, wz),
+                                bLoc(wx, 0.28f + sinf(wa)*0.28f, wz + cosf(wa)*0.28f),
+                                bLoc(wx, 0.28f + sinf(wb)*0.28f, wz + cosf(wb)*0.28f),
+                                (wi & 1) ? Colour{34, 38, 44, 255} : Colour{165, 175, 190, 255}, ObjectTraffic);
+                }
+            }`, 'LW51 6-Wheel City Bus wheels, bumpers & lights');
+
 fs.writeFileSync('gtangel_agi_v56_full.cpp',out);
 const a=out.indexOf('namespace v15render {'),b=out.indexOf('} // namespace v15render',a);
 fs.writeFileSync('gtangel_agi_v56_renderer.hpp',out.slice(a,b+'} // namespace v15render'.length));

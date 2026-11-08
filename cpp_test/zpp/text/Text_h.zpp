@@ -1,0 +1,311 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Text (text)
+-- Source File(s): text/Text.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TheText : seq CHAR  -- #define TheText CText::Instance()
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Text_Enum_1 ::= MAX_MISSION_TEXTS
+  -- val(MAX_MISSION_TEXTS) = 90
+
+Text_Enum_2 ::= MAX_MISSION_TEXTS
+  -- val(MAX_MISSION_TEXTS) = 200
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CKeyEntry
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CKeyArray
+  entries : Ref[CKeyEntry]
+  numEntries : ℤ
+where
+  #entries ≤ 1
+end
+
+schema CKeyArray_CKeyArray
+  ΔCKeyArray
+where
+  -- Declared member operation CKeyArray::CKeyArray(void)
+  true
+end
+
+schema CKeyArray_Load_2
+  ΔCKeyArray
+  length? : ℕ
+  file? : ℤ
+  offset? : ℙ ℕ
+  result! : void
+where
+  -- Declared member operation CKeyArray::Load(size_t length, int file, size_t *offset)
+  true
+end
+
+schema CKeyArray_Unload_3
+  ΔCKeyArray
+where
+  -- Declared member operation CKeyArray::Unload(void)
+  true
+end
+
+schema CKeyArray_Update_4
+  ΔCKeyArray
+  chars? : seq CHAR
+where
+  -- Declared member operation CKeyArray::Update(wchar *chars)
+  true
+end
+
+schema CKeyArray_BinarySearch_5
+  ΔCKeyArray
+  key? : seq CHAR
+  entries? : Ref[CKeyEntry]
+  low? : ℤ
+  high? : ℤ
+  result! : Ref[CKeyEntry]
+where
+  -- Declared member operation CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high)
+  true
+end
+
+schema CKeyArray_Search_6
+  ΔCKeyArray
+  key? : seq CHAR
+  data? : seq CHAR
+  result! : seq CHAR
+where
+  -- Declared member operation CKeyArray::Search(const char *key, wchar *data)
+  true
+end
+
+schema CKeyArray_Search_7
+  ΔCKeyArray
+  key? : seq CHAR
+  result! : seq CHAR
+where
+  -- Declared member operation CKeyArray::Search(const char *key)
+  true
+end
+
+schema CData
+  chars : seq CHAR
+  numChars : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CData_CData
+  ΔCData
+where
+  -- Declared member operation CData::CData(void)
+  true
+end
+
+schema CData_Load_2
+  ΔCData
+  length? : ℕ
+  data? : ℙ ℕ
+  offset? : ℙ ℕ
+  result! : void
+where
+  -- Declared member operation CData::Load(size_t length, uint8 *data, ssize_t *offset)
+  true
+end
+
+schema CData_Unload_3
+  ΔCData
+where
+  -- Declared member operation CData::Unload(void)
+  true
+end
+
+schema CData_Load_4
+  ΔCData
+  length? : ℕ
+  file? : ℤ
+  offset? : ℙ ℕ
+where
+  -- Declared member operation CData::Load(size_t length, int file, size_t* offset)
+  true
+end
+
+schema CMissionTextOffsets
+  offset : ℕ
+  data : seq Entry  -- bounded array [MAX_MISSION_TEXTS]
+  size : ℕ
+where
+  offset ≥ 0
+  size ≥ 0
+end
+
+schema CMissionTextOffsets_CMissionTextOffsets
+  ΔCMissionTextOffsets
+where
+  -- Declared member operation CMissionTextOffsets::CMissionTextOffsets(void)
+  true
+end
+
+schema Entry
+  szMissionName : seq CHAR
+  offset : ℕ
+where
+  #szMissionName = 8
+  offset ≥ 0
+end
+
+schema ChunkHeader
+  magic : seq CHAR
+  size : ℤ
+where
+  #magic = 4
+end
+
+schema CText
+  keyArray : CKeyArray
+  data : CData
+  mission_keyArray : CKeyArray
+  mission_data : CData
+  encoding : seq CHAR
+  bHasMissionTextOffsets : 𝔹
+  bIsMissionTextLoaded : 𝔹
+  szMissionTableName : seq CHAR
+  MissionTextOffsets : CMissionTextOffsets
+  bIsLoaded : 𝔹
+  msInstance : Ref[CText]
+where
+  #szMissionTableName = 8
+  #msInstance ≤ 1
+end
+
+schema CText_CText
+  ΔCText
+where
+  -- Declared member operation CText::CText(void)
+  true
+end
+
+schema CText_Load_2
+  ΔCText
+where
+  -- Declared member operation CText::Load(void)
+  true
+end
+
+schema CText_Unload_3
+  ΔCText
+where
+  -- Declared member operation CText::Unload(void)
+  true
+end
+
+schema CText_Get_4
+  ΔCText
+  key? : seq CHAR
+  result! : seq CHAR
+where
+  -- Declared member operation CText::Get(const char *key)
+  true
+end
+
+schema CText_GetUpperCase_5
+  ΔCText
+  c? : seq CHAR
+  result! : seq CHAR
+where
+  -- Declared member operation CText::GetUpperCase(wchar c)
+  true
+end
+
+schema CText_UpperCase_6
+  ΔCText
+  s? : seq CHAR
+where
+  -- Declared member operation CText::UpperCase(wchar *s)
+  true
+end
+
+schema CText_GetNameOfLoadedMissionText_7
+  ΔCText
+  outName? : seq CHAR
+where
+  -- Declared member operation CText::GetNameOfLoadedMissionText(char *outName)
+  true
+end
+
+schema CText_ReadChunkHeader_8
+  ΔCText
+  buf? : Ref[ChunkHeader]
+  file? : ℤ
+  bytes_read? : ℙ ℕ
+where
+  -- Declared member operation CText::ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *bytes_read)
+  true
+end
+
+schema CText_LoadMissionText_9
+  ΔCText
+  MissionTableName? : seq CHAR
+where
+  -- Declared member operation CText::LoadMissionText(char *MissionTableName)
+  true
+end
+
+schema CText_IsLoaded_10
+  ΔCText
+  result! : 𝔹
+where
+  -- Declared member operation CText::IsLoaded()
+  true
+end
+
+schema CText_GetUTF8_11
+  ΔCText
+  arg_1? : seq CHAR
+  arg_2? : seq CHAR
+  arg_3? : ℤ
+where
+  -- Declared member operation CText::GetUTF8(const char*, char*, int)
+  true
+end
+
+schema CText_Instance_12
+  ΔCText
+  result! : CText
+where
+  -- Declared member operation CText::Instance()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Text_CKeyArray
+  ΔTextModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Text_CData
+  ΔTextModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

@@ -1,0 +1,343 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VarConsole (renderer)
+-- Source File(s): renderer/VarConsole.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eVarConsoleEntryType ::= VCE_TYPE_INT8 | VCE_TYPE_INT16 | VCE_TYPE_INT32 | VCE_TYPE_INT64 | VCE_TYPE_UINT8 | VCE_TYPE_UINT16 | VCE_TYPE_UINT32 | VCE_TYPE_UINT64 | VCE_TYPE_FLOAT | VCE_TYPE_BOOL | VCE_TYPE_BOOL8 | VCE_TYPE_BOOL16 | VCE_TYPE_BOOL32 | VCE_TYPE_FUNCTION
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CVarConsoleEntry
+  text : seq CHAR
+  pInt8Value : ℙ ℤ
+  pInt16Value : ℙ ℤ
+  pInt32Value : ℙ ℤ
+  pInt64Value : ℙ ℤ
+  pUint8Value : ℙ ℕ
+  pUint16Value : ℙ ℕ
+  pUint32Value : ℙ ℕ
+  pUint64Value : ℙ ℕ
+  pFloatValue : ℙ ℝ
+  pBoolValue : ℙ 𝔹
+  I8_min : ℤ
+  I16_min : ℤ
+  I32_min : ℤ
+  I64_min : ℤ
+  F_min : ℝ
+  bAllowExceedBounds : bool8
+  VarType : ℕ
+where
+  #pInt8Value ≤ 1
+  #pInt16Value ≤ 1
+  #pInt32Value ≤ 1
+  #pInt64Value ≤ 1
+  #pUint8Value ≤ 1
+  #pUint16Value ≤ 1
+  #pUint32Value ≤ 1
+  #pUint64Value ≤ 1
+  #pFloatValue ≤ 1
+  #pBoolValue ≤ 1
+  VarType ≥ 0
+end
+
+schema CVarConsoleEntry_void
+  ΔCVarConsoleEntry
+  arg_1? : Ref[pCallback]
+where
+  -- Declared member operation CVarConsoleEntry::void(*pCallback)
+  true
+end
+
+schema CVarConsole
+  m_nCountEntries : ℤ
+  m_bIsOpen : bool8
+  m_nCurEntry : ℤ
+  m_nFirstEntryOnPage : ℤ
+  m_nCurPage : ℤ
+  m_nNumPages : ℤ
+  m_aEntries : seq CVarConsoleEntry  -- bounded array [91]
+where
+  #m_aEntries = 91
+end
+
+schema CVarConsole_CVarConsole
+  ΔCVarConsole
+  result! : ifdef_FIX_BUGS
+where
+  -- Declared member operation CVarConsole::CVarConsole()
+  true
+end
+
+schema CVarConsole_Initialise_2
+  ΔCVarConsole
+  result! : endif_void
+where
+  -- Declared member operation CVarConsole::Initialise()
+  true
+end
+
+schema CVarConsole_Add_3
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, int8 *pVal, uint8 step, int8 min, int8 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_4
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, int16 *pVal, uint16 step, int16 min, int16 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_5
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, int32 *pVal, uint32 step, int32 min, int32 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_6
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℤ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, int64 *pVal, uint64 step, int64 min, int64 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_7
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, uint8 *pVal, uint8 step, int8 min, int8 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_8
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, uint16 *pVal, uint16 step, int16 min, int16 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_9
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, uint32 *pVal, uint32 step, int32 min, int32 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_10
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℕ
+  step? : ℕ
+  min? : ℤ
+  max? : ℤ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, uint64 *pVal, uint64 step, int64 min, int64 max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_11
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ ℝ
+  step? : ℝ
+  min? : ℝ
+  max? : ℝ
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, float *pVal, float step, float min, float max, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_12
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : ℙ 𝔹
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, bool *pVal, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_13
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : Ref[bool8]
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, bool8 *pVal, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_14
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : Ref[bool16]
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, bool16 *pVal, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_15
+  ΔCVarConsole
+  text? : seq CHAR
+  pVal? : Ref[bool32]
+  isVar? : bool8
+where
+  -- Declared member operation CVarConsole::Add(char *text, bool32 *pVal, bool8 isVar)
+  true
+end
+
+schema CVarConsole_Add_16
+  ΔCVarConsole
+  text? : seq CHAR
+  pVar? : Ref[void]
+where
+  -- Declared member operation CVarConsole::Add(char *text, void (*pVar)
+  true
+end
+
+schema CVarConsole_Remove_17
+  ΔCVarConsole
+  text? : seq CHAR
+where
+  -- Declared member operation CVarConsole::Remove(char *text)
+  true
+end
+
+schema CVarConsole_SortPages_18
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::SortPages()
+  true
+end
+
+schema CVarConsole_Display_19
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::Display()
+  true
+end
+
+schema CVarConsole_ModifyLeft_20
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::ModifyLeft()
+  true
+end
+
+schema CVarConsole_ModifyRight_21
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::ModifyRight()
+  true
+end
+
+schema CVarConsole_Enter_22
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::Enter()
+  true
+end
+
+schema CVarConsole_Exit_23
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::Exit()
+  true
+end
+
+schema CVarConsole_Input_24
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::Input()
+  true
+end
+
+schema CVarConsole_Process_25
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::Process()
+  true
+end
+
+schema CVarConsole_Open_26
+  ΔCVarConsole
+  result! : bool8
+where
+  -- Declared member operation CVarConsole::Open()
+  true
+end
+
+schema CVarConsole_Check_27
+  ΔCVarConsole
+where
+  -- Declared member operation CVarConsole::Check()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema VarConsole_CVarConsole
+  ΔVarConsoleModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

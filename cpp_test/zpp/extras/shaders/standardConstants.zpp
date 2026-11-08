@@ -1,0 +1,41 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: standardConstants (extras)
+-- Source File(s): extras/shaders/standardConstants.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include lighting.zpp  (from "lighting.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+surfAmbient : seq CHAR  -- #define surfAmbient (surfProps.x)
+surfSpecular : seq CHAR  -- #define surfSpecular (surfProps.y)
+surfDiffuse : seq CHAR  -- #define surfDiffuse (surfProps.z)
+fogStart : seq CHAR  -- #define fogStart (fogData.x)
+fogEnd : seq CHAR  -- #define fogEnd (fogData.y)
+fogRange : seq CHAR  -- #define fogRange (fogData.z)
+fogDisable : seq CHAR  -- #define fogDisable (fogData.w)
+firstDirLight : seq CHAR  -- #define firstDirLight (firstLight.x)
+firstPointLight : seq CHAR  -- #define firstPointLight (firstLight.y)
+firstSpotLight : seq CHAR  -- #define firstSpotLight (firstLight.z)
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema standardConstantsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 28
+end

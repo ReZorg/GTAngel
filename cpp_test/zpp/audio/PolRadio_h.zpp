@@ -1,0 +1,146 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PolRadio (audio)
+-- Source File(s): audio/PolRadio.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Crime.zpp  (from "Crime.h")
+-- include AudioSamples.zpp  (from "AudioSamples.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+POLICE_RADIO_QUEUE_MAX_SAMPLES : ℕ  -- #define POLICE_RADIO_QUEUE_MAX_SAMPLES 60
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cAMCrime
+  type : ℤ
+  position : CVector
+  timer : ℕ
+where
+  timer ≥ 0
+end
+
+schema cAMCrime_cAMCrime
+  ΔcAMCrime
+where
+  -- Declared member operation cAMCrime::cAMCrime()
+  true
+end
+
+schema cAMCrime_CVector_2
+  ΔcAMCrime
+  f? : 0_0
+  f? : 0_0
+  f? : 0_0
+  result! : position
+where
+  -- Declared member operation cAMCrime::CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema cPoliceRadioQueue
+  m_aSamples : seq ℕ  -- bounded array [POLICE_RADIO_QUEUE_MAX_SAMPLES]
+  m_nSamplesInQueue : ℕ
+  m_nAddOffset : ℕ
+  m_nRemoveOffset : ℕ
+  TRUE : return
+  sample : return
+where
+  m_nSamplesInQueue ≥ 0
+  m_nAddOffset ≥ 0
+  m_nRemoveOffset ≥ 0
+end
+
+schema cPoliceRadioQueue_cPoliceRadioQueue
+  ΔcPoliceRadioQueue
+where
+  -- Declared member operation cPoliceRadioQueue::cPoliceRadioQueue()
+  true
+end
+
+schema cPoliceRadioQueue_Reset_2
+  ΔcPoliceRadioQueue
+  result! : void
+where
+  -- Declared member operation cPoliceRadioQueue::Reset()
+  true
+end
+
+schema cPoliceRadioQueue_Add_3
+  ΔcPoliceRadioQueue
+  sample? : ℕ
+  result! : bool8
+where
+  -- Declared member operation cPoliceRadioQueue::Add(uint32 sample)
+  true
+end
+
+schema cPoliceRadioQueue_Remove_4
+  ΔcPoliceRadioQueue
+  result! : ℕ
+where
+  -- Declared member operation cPoliceRadioQueue::Remove()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PolRadio_cAMCrime
+  ΔPolRadioModuleState
+where
+  -- State update: type' = CRIME_NONE
+  -- State update: position' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: timer' = 0
+  true
+end
+
+schema PolRadio_cPoliceRadioQueue
+  ΔPolRadioModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema PolRadio_Reset
+  ΔPolRadioModuleState
+where
+  -- State update: m_nAddOffset' = 0
+  -- State update: m_nRemoveOffset' = 0
+  -- State update: m_nSamplesInQueue' = 0
+  true
+end
+
+schema PolRadio_Add
+  ΔPolRadioModuleState
+  sample? : ℕ
+  result! : bool8
+where
+  -- State update: m_nAddOffset' = (m_nAddOffset + 1) % POLICE_RADIO_QUEUE_MAX_SAMPLES
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema PolRadio_Remove
+  ΔPolRadioModuleState
+  result! : ℕ
+where
+  -- State update: sample' = m_aSamples[m_nRemoveOffset]
+  -- State update: m_nRemoveOffset' = (m_nRemoveOffset + 1) % POLICE_RADIO_QUEUE_MAX_SAMPLES
+  -- Return postcondition: result! = sample
+  -- Return postcondition: result! = TOTAL_AUDIO_SAMPLES
+  true
+end

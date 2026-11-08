@@ -1,0 +1,174 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: GameLogic (control)
+-- Source File(s): control/GameLogic.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+GameLogic_Enum_1 ::= SHORTCUT_NONE | SHORTCUT_INIT | SHORTCUT_IDLE | SHORTCUT_GETTING_IN | SHORTCUT_TRANSITION | SHORTCUT_ARRIVING | SHORTCUT_GETTING_OUT
+  -- val(SHORTCUT_NONE) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CGameLogic
+  ActivePlayers : ℕ
+  ShortCutState : ℕ
+  pShortCutTaxi : Ref[CAutomobile]
+  NumAfterDeathStartPoints : ℕ
+  ShortCutStart : CVector
+  ShortCutStartOrientation : ℝ
+  ShortCutDestination : CVector
+  ShortCutDestinationOrientation : ℝ
+  ShortCutTimer : ℕ
+  AfterDeathStartPoints : seq CVector  -- bounded array [NUM_SHORTCUT_START_POINTS]
+  AfterDeathStartPointOrientation : seq ℝ  -- bounded array [NUM_SHORTCUT_START_POINTS]
+  ShortCutDropOffForMission : CVector
+  ShortCutDropOffOrientationForMission : ℝ
+  MissionDropOffReadyToBeUsed : 𝔹
+  mStoredPlayerOutfit : seq CHAR
+where
+  ActivePlayers ≥ 0
+  ShortCutState ≥ 0
+  #pShortCutTaxi ≤ 1
+  NumAfterDeathStartPoints ≥ 0
+  ShortCutTimer ≥ 0
+  #mStoredPlayerOutfit = 8
+end
+
+schema CGameLogic_InitAtStartOfGame
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::InitAtStartOfGame()
+  true
+end
+
+schema CGameLogic_PassTime_2
+  ΔCGameLogic
+  time? : ℕ
+where
+  -- Declared member operation CGameLogic::PassTime(uint32 time)
+  true
+end
+
+schema CGameLogic_SortOutStreamingAndMemory_3
+  ΔCGameLogic
+  pos? : CVector
+where
+  -- Declared member operation CGameLogic::SortOutStreamingAndMemory(const CVector &pos)
+  true
+end
+
+schema CGameLogic_Update_4
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::Update()
+  true
+end
+
+schema CGameLogic_RestorePlayerStuffDuringResurrection_5
+  ΔCGameLogic
+  pPlayerPed? : Ref[class_CPlayerPed]
+  pos? : CVector
+  angle? : ℝ
+where
+  -- Declared member operation CGameLogic::RestorePlayerStuffDuringResurrection(class CPlayerPed *pPlayerPed, CVector pos, float angle)
+  true
+end
+
+schema CGameLogic_ClearShortCut_6
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::ClearShortCut()
+  true
+end
+
+schema CGameLogic_SetUpShortCut_7
+  ΔCGameLogic
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : CVector
+  arg_4? : ℝ
+where
+  -- Declared member operation CGameLogic::SetUpShortCut(CVector, float, CVector, float)
+  true
+end
+
+schema CGameLogic_AbandonShortCutIfTaxiHasBeenMessedWith_8
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::AbandonShortCutIfTaxiHasBeenMessedWith()
+  true
+end
+
+schema CGameLogic_AbandonShortCutIfPlayerMilesAway_9
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::AbandonShortCutIfPlayerMilesAway()
+  true
+end
+
+schema CGameLogic_UpdateShortCut_10
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::UpdateShortCut()
+  true
+end
+
+schema CGameLogic_AddShortCutPointAfterDeath_11
+  ΔCGameLogic
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CGameLogic::AddShortCutPointAfterDeath(CVector, float)
+  true
+end
+
+schema CGameLogic_AddShortCutDropOffPointForMission_12
+  ΔCGameLogic
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CGameLogic::AddShortCutDropOffPointForMission(CVector, float)
+  true
+end
+
+schema CGameLogic_RemoveShortCutDropOffPointForMission_13
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::RemoveShortCutDropOffPointForMission()
+  true
+end
+
+schema CGameLogic_AfterDeathArrestSetUpShortCutTaxi_14
+  ΔCGameLogic
+where
+  -- Declared member operation CGameLogic::AfterDeathArrestSetUpShortCutTaxi()
+  true
+end
+
+schema CGameLogic_Save_15
+  ΔCGameLogic
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CGameLogic::Save(uint8*, uint32*)
+  true
+end
+
+schema CGameLogic_Load_16
+  ΔCGameLogic
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Declared member operation CGameLogic::Load(uint8*, uint32)
+  true
+end

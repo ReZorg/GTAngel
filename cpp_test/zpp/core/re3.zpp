@@ -1,0 +1,577 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: re3 (core)
+-- Source File(s): core/re3.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include csignal.zpp  (from "csignal")
+-- include common.zpp  (from "common.h")
+-- include xinput.zpp  (from "xinput.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+-- include Credits.zpp  (from "Credits.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Console.zpp  (from "Console.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include SceneEdit.zpp  (from "SceneEdit.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include main.zpp  (from "main.h")
+-- include Script.zpp  (from "Script.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include postfx.zpp  (from "postfx.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Population.zpp  (from "Population.h")
+-- include IniFile.zpp  (from "IniFile.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include assert.zpp  (from "assert.h")
+-- include stdarg.zpp  (from "stdarg.h")
+-- include list.zpp  (from "list")
+-- include frontendoption.zpp  (from "frontendoption.h")
+-- include ini.zpp  (from "ini.h")
+-- include PathFind.zpp  (from "PathFind.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+MINI_CASE_SENSITIVE : seq CHAR  -- #define MINI_CASE_SENSITIVE #include "ini.h"
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema re3_myrand
+  Δre3ModuleState
+where
+  -- State update: myrand_seed' = 0x5851F42D4C957F2D * myrand_seed + 1
+  -- State update: myrand_seed' = myrand_seed * 1103515245 + 12345
+  -- Return postcondition: result! = ((myrand_seed >> 32) & 0x7FFFFFFF)
+  true
+end
+
+schema re3_mysrand
+  Δre3ModuleState
+  seed? : ℤ
+where
+  -- State update: myrand_seed' = seed
+  true
+end
+
+schema re3_LangPolSelect
+  Δre3ModuleState
+  action? : ℤ
+where
+  -- State update: FrontEndMenuManager.m_PrefsLanguage' = CMenuManager::LANGUAGE_POLISH
+  -- Invokes: FrontEndMenuManager.InitialiseChangedLanguageSettings, FrontEndMenuManager.SaveSettings
+  true
+end
+
+schema re3_LangRusSelect
+  Δre3ModuleState
+  action? : ℤ
+where
+  -- State update: FrontEndMenuManager.m_PrefsLanguage' = CMenuManager::LANGUAGE_RUSSIAN
+  -- Invokes: FrontEndMenuManager.InitialiseChangedLanguageSettings, FrontEndMenuManager.SaveSettings
+  true
+end
+
+schema re3_LangJapSelect
+  Δre3ModuleState
+  action? : ℤ
+where
+  -- State update: FrontEndMenuManager.m_PrefsLanguage' = CMenuManager::LANGUAGE_JAPANESE
+  -- Invokes: FrontEndMenuManager.InitialiseChangedLanguageSettings, FrontEndMenuManager.SaveSettings
+  true
+end
+
+schema re3_CustomFrontendOptionsPopulate
+  Δre3ModuleState
+where
+  -- State update: fd' = CFileMgr::OpenFile("neo/neo.txd","r")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile
+  true
+end
+
+schema re3_ReadIniIfExists
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : ℙ ℕ
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- State update: out' = strtoul(section.get(key).c_str(), &endPtr, 0)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_ReadIniIfExists_2
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : ℙ ℕ
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- State update: out' = strtoul(section.get(key).c_str(), &endPtr, 0)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_ReadIniIfExists_3
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : ℙ 𝔹
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- State update: out' = strtoul(section.get(key).c_str(), &endPtr, 0)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_ReadIniIfExists_4
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : ℙ ℤ
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- State update: out' = strtol(section.get(key).c_str(), &endPtr, 0)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_ReadIniIfExists_5
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : ℙ ℤ
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- State update: out' = strtol(section.get(key).c_str(), &endPtr, 0)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_ReadIniIfExists_6
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : ℙ ℝ
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- State update: out' = strtof(section.get(key).c_str(), &endPtr)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_ReadIniIfExists_7
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  out? : seq CHAR
+  size? : ℤ
+  result! : 𝔹
+where
+  -- State update: section' = cfg.get(cat)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: cfg.get, section.has, section.get
+  true
+end
+
+schema re3_StoreIni
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  val? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_StoreIni_2
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  val? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_StoreIni_3
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  val? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_StoreIni_4
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  val? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_StoreIni_5
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  val? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_StoreIni_6
+  Δre3ModuleState
+  cat? : seq CHAR
+  key? : seq CHAR
+  val? : seq CHAR
+  size? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_LoadINIControllerSettings
+  Δre3ModuleState
+where
+  -- State update: storedJoy1' = -1
+  -- State update: XInputJoy1' = -1
+  -- State update: XInputJoy2' = -1
+  -- State update: XInputJoy1' = storedJoy1
+  -- State update: XInputJoy1' = i
+  -- State update: XInputJoy2' = i
+  -- Invokes: cfg.get, ControlsManager.ClearSettingsAssociatedWithAction, ControlsManager.SetControllerKeyAssociatedWithAction
+  true
+end
+
+schema re3_SaveINIControllerSettings
+  Δre3ModuleState
+where
+  -- State update: len' = strlen(value)
+  -- Invokes: ini.write
+  true
+end
+
+schema re3_LoadINISettings
+  Δre3ModuleState
+  result! : 𝔹
+where
+  -- State update: option' = aScreens[i].m_aEntries[j]
+  -- State update: option.m_CFOSelect.displayedValue' = *(int8*)option.m_CFO.value
+  -- State update: MaxNumberOfPedsInUse' = DEFAULT_MAX_NUMBER_OF_PEDS * CIniFile::PedNumberMultiplier
+  -- State update: MaxNumberOfCarsInUse' = DEFAULT_MAX_NUMBER_OF_CARS * CIniFile::CarNumberMultiplier
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: ini.read, cfg.get
+  true
+end
+
+schema re3_SaveINISettings
+  Δre3ModuleState
+where
+  -- State update: option' = aScreens[i].m_aEntries[j]
+  -- Invokes: ini.write
+  true
+end
+
+schema re3_SpawnCar
+  Δre3ModuleState
+  id? : ℤ
+where
+  -- State update: playerpos' = FindPlayerCoors()
+  -- State update: v' = new CBoat(id, RANDOM_VEHICLE)
+  -- State update: v' = new CBike(id, RANDOM_VEHICLE)
+  -- State update: v' = new CAutomobile(id, RANDOM_VEHICLE)
+  -- State update: v.bHasBeenOwnedByPlayer' = true
+  -- State update: v.m_nDoorLock' = CARLOCK_UNLOCKED
+  -- Invokes: CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CStreaming::HasModelLoaded, CModelInfo::IsBoatModel, ThePaths.FindNodeClosestToCoors
+  true
+end
+
+schema re3_FixCar
+  Δre3ModuleState
+where
+  -- State update: veh' = FindPlayerVehicle()
+  -- State update: veh.m_fHealth' = 1000.0f
+  -- Invokes: veh->IsCar, Damage.SetEngineStatus, veh->IsBike
+  true
+end
+
+schema re3_TeleportToWaypoint
+  Δre3ModuleState
+where
+  -- State update: pEntityToTeleport' = FindPlayerEntity()
+  -- State update: vNewPos' = CRadar::TargetMarkerPos
+  -- State update: currLevel' = CTheZones::GetLevelFromPosition(&vNewPos)
+  -- Invokes: CTheZones::GetLevelFromPosition, CCollision::SortOutCollisionAfterLoad, CStreaming::LoadScene, CWorld::FindGroundZForCoord, pEntityToTeleport->GetDistanceFromCentreOfMassToBaseOfModel
+  true
+end
+
+schema re3_SwitchCarCollision
+  Δre3ModuleState
+where
+  -- State update: bUsesCollision' = !FindPlayerVehicle().bUsesCollision
+  true
+end
+
+schema re3_ToggleComedy
+  Δre3ModuleState
+where
+  -- State update: veh' = FindPlayerVehicle()
+  -- State update: veh.bComedyControls' = !veh.bComedyControls
+  true
+end
+
+schema re3_PlaceOnRoad
+  Δre3ModuleState
+where
+  -- State update: veh' = FindPlayerVehicle()
+  -- Invokes: veh->IsCar
+  true
+end
+
+schema re3_ResetCamStatics
+  Δre3ModuleState
+where
+  -- State update: ResetStatics' = true
+  true
+end
+
+schema re3_SwitchToMission
+  Δre3ModuleState
+where
+  -- Invokes: CTheScripts::SwitchToMission
+  true
+end
+
+schema CTweakVars_Add
+  ΔCTweakVars
+  var? : Ref[CTweakVar]
+where
+  -- State update: TweakVarsList' = (CTweakVar**)malloc(64 * sizeof(CTweakVar*))
+  -- State update: TweakVarsListSize' = 0
+  -- Invokes: var->AddDBG
+  true
+end
+
+schema CTweakVars_AddDBG
+  ΔCTweakVars
+  path? : seq CHAR
+where
+  -- State update: pTweakVarsDefaultPath' = path
+  -- State update: bAddTweakVarsNow' = true
+  true
+end
+
+schema CTweakSwitch_AddDBG
+  ΔCTweakSwitch
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakFunc_AddDBG
+  ΔCTweakFunc
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakBool_AddDBG
+  ΔCTweakBool
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakInt8_AddDBG
+  ΔCTweakInt8
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakUInt8_AddDBG
+  ΔCTweakUInt8
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakInt16_AddDBG
+  ΔCTweakInt16
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakUInt16_AddDBG
+  ΔCTweakUInt16
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakInt32_AddDBG
+  ΔCTweakInt32
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakUInt32_AddDBG
+  ΔCTweakUInt32
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTweakFloat_AddDBG
+  ΔCTweakFloat
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_DebugMenuPopulate
+  Δre3ModuleState
+where
+  -- State update: InterpolationValue' = CClock::GetMinutes()/60.0f
+  -- State update: spawnCarId' = MI_LANDSTAL
+  -- State update: DebugCamMode' = 0
+  -- Invokes: CClock::GetHoursRef, CClock::GetMinutesRef, CClock::GetMinutes, CTimer::GetTimeScale, CTweakVars::AddDBG
+  true
+end
+
+schema re3_DebugMenuPopulate_2
+  Δre3ModuleState
+where
+  -- State update: InterpolationValue' = CClock::GetMinutes()/60.0f
+  -- State update: spawnCarId' = MI_LANDSTAL
+  -- State update: DebugCamMode' = 0
+  -- Invokes: CClock::GetHoursRef, CClock::GetMinutesRef, CClock::GetMinutes, CTimer::GetTimeScale, CTweakVars::AddDBG
+  true
+end
+
+schema re3_re3_assert
+  Δre3ModuleState
+  expr? : seq CHAR
+  filename? : seq CHAR
+  lineno? : ℤ
+  func? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_re3_debug
+  Δre3ModuleState
+  format? : seq CHAR
+where
+  -- Invokes: CDebug::DebugAddText
+  true
+end
+
+schema re3_re3_trace
+  Δre3ModuleState
+  filename? : seq CHAR
+  lineno? : ℤ
+  func? : seq CHAR
+  format? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_re3_usererror
+  Δre3ModuleState
+  format? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema re3_ParseHeap
+  Δre3ModuleState
+where
+  -- Invokes: gMainHeap.ParseHeap
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema re3ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1720
+end

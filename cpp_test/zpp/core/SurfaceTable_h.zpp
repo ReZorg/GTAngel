@@ -1,0 +1,103 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SurfaceTable (core)
+-- Source File(s): core/SurfaceTable.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eSurfaceType ::= SURFACE_DEFAULT | SURFACE_TARMAC | SURFACE_GRASS | SURFACE_GRAVEL | SURFACE_MUD_DRY | SURFACE_PAVEMENT | SURFACE_CAR | SURFACE_GLASS | SURFACE_TRANSPARENT_CLOTH | SURFACE_GARAGE_DOOR | SURFACE_CAR_PANEL | SURFACE_THICK_METAL_PLATE | SURFACE_SCAFFOLD_POLE | SURFACE_LAMP_POST | SURFACE_FIRE_HYDRANT | SURFACE_GIRDER | SURFACE_METAL_CHAIN_FENCE | SURFACE_PED | SURFACE_SAND | SURFACE_WATER | SURFACE_WOOD_CRATES | SURFACE_WOOD_BENCH | SURFACE_WOOD_SOLID | SURFACE_RUBBER | SURFACE_PLASTIC | SURFACE_HEDGE | SURFACE_STEEP_CLIFF | SURFACE_CONTAINER | SURFACE_NEWS_VENDOR | SURFACE_WHEELBASE | SURFACE_CARDBOARDBOX | SURFACE_TRANSPARENT_STONE | SURFACE_METAL_GATE | SURFACE_SAND_BEACH | SURFACE_CONCRETE_BEACH
+
+SurfaceTable_Enum_2 ::= ADHESIVE_RUBBER | ADHESIVE_HARD | ADHESIVE_ROAD | ADHESIVE_LOOSE | ADHESIVE_SAND | ADHESIVE_WET | NUMADHESIVEGROUPS
+
+SurfaceTable_Enum_3 ::= ADHESIVE_RUBBER | ADHESIVE_HARD | ADHESIVE_ROAD | ADHESIVE_LOOSE | ADHESIVE_WET | NUMADHESIVEGROUPS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSurfaceTable
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSurfaceTable_Initialise
+  ΔCSurfaceTable
+  filename? : seq CHAR
+where
+  -- Declared member operation CSurfaceTable::Initialise(Const char *filename)
+  true
+end
+
+schema CSurfaceTable_GetAdhesionGroup_2
+  ΔCSurfaceTable
+  surfaceType? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CSurfaceTable::GetAdhesionGroup(uint8 surfaceType)
+  true
+end
+
+schema CSurfaceTable_GetWetMultiplier_3
+  ΔCSurfaceTable
+  surfaceType? : ℕ
+  result! : ℝ
+where
+  -- Declared member operation CSurfaceTable::GetWetMultiplier(uint8 surfaceType)
+  true
+end
+
+schema CSurfaceTable_GetAdhesiveLimit_4
+  ΔCSurfaceTable
+  colpoint? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CSurfaceTable::GetAdhesiveLimit(CColPoint &colpoint)
+  true
+end
+
+schema CSurfaceTable_IsSoftLanding_5
+  ΔCSurfaceTable
+  surf? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CSurfaceTable::IsSoftLanding(uint8 surf)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema SurfaceTable_IsSeeThrough
+  ΔSurfaceTableModuleState
+  surfType? : ℕ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema SurfaceTable_IsSeeThroughVertical
+  ΔSurfaceTableModuleState
+  surfType? : ℕ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema SurfaceTable_IsShootThrough
+  ΔSurfaceTableModuleState
+  surfType? : ℕ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end

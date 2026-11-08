@@ -1,0 +1,957 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Camera (core)
+-- Source File(s): core/Camera.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DEFAULT_NEAR : ℝ  -- #define DEFAULT_NEAR (0.9f)
+FREE_CAR_ZOOM_VALUE_1 : ℝ  -- #define FREE_CAR_ZOOM_VALUE_1 (-1.0f)
+FREE_CAR_ZOOM_VALUE_2 : ℝ  -- #define FREE_CAR_ZOOM_VALUE_2 (2.0f)
+FREE_CAR_ZOOM_VALUE_3 : ℝ  -- #define FREE_CAR_ZOOM_VALUE_3 (6.0f)
+FREE_BOAT_ZOOM_VALUE_1 : ℝ  -- #define FREE_BOAT_ZOOM_VALUE_1 (-2.41f)
+FREE_BOAT_ZOOM_VALUE_2 : ℝ  -- #define FREE_BOAT_ZOOM_VALUE_2 (6.49f)
+FREE_BOAT_ZOOM_VALUE_3 : ℝ  -- #define FREE_BOAT_ZOOM_VALUE_3 (15.0f)
+DEFAULT_CAR_ZOOM_VALUE_1 : ℝ  -- #define DEFAULT_CAR_ZOOM_VALUE_1 (0.05f)
+DEFAULT_CAR_ZOOM_VALUE_2 : ℝ  -- #define DEFAULT_CAR_ZOOM_VALUE_2 (1.9f)
+DEFAULT_CAR_ZOOM_VALUE_3 : ℝ  -- #define DEFAULT_CAR_ZOOM_VALUE_3 (3.9f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Camera_Enum_1 ::= NUMBER_OF_VECTORS_FOR_AVERAGE | MAX_NUM_OF_SPLINETYPES | MAX_NUM_OF_NODES
+  -- val(NUMBER_OF_VECTORS_FOR_AVERAGE) = 2
+  -- val(MAX_NUM_OF_SPLINETYPES) = 4
+  -- val(MAX_NUM_OF_NODES) = 800
+
+Camera_Enum_2 ::= CAM_ZOOM_1STPRS | CAM_ZOOM_1 | CAM_ZOOM_2 | CAM_ZOOM_3 | CAM_ZOOM_TOPDOWN | CAM_ZOOM_CINEMATIC
+
+Camera_Enum_3 ::= MODE_NONE | MODE_TOPDOWN | MODE_GTACLASSIC | MODE_BEHINDCAR | MODE_FOLLOWPED | MODE_AIMING | MODE_DEBUG | MODE_SNIPER | MODE_ROCKETLAUNCHER | MODE_MODELVIEW | MODE_BILL | MODE_SYPHON | MODE_CIRCLE | MODE_CHEESYZOOM | MODE_WHEELCAM | MODE_FIXED | MODE_1STPERSON | MODE_FLYBY | MODE_CAM_ON_A_STRING | MODE_REACTION | MODE_FOLLOW_PED_WITH_BIND | MODE_CHRIS | MODE_BEHINDBOAT | MODE_PLAYER_FALLEN_WATER | MODE_CAM_ON_TRAIN_ROOF | MODE_CAM_RUNNING_SIDE_TRAIN | MODE_BLOOD_ON_THE_TRACKS | MODE_IM_THE_PASSENGER_WOOWOO | MODE_SYPHON_CRIM_IN_FRONT | MODE_PED_DEAD_BABY | MODE_PILLOWS_PAPS | MODE_LOOK_AT_CARS | MODE_ARRESTCAM_ONE | MODE_ARRESTCAM_TWO | MODE_M16_1STPERSON | MODE_SPECIAL_FIXED_FOR_SYPHON | MODE_FIGHT_CAM | MODE_TOP_DOWN_PED | MODE_SNIPER_RUNABOUT | MODE_ROCKETLAUNCHER_RUNABOUT | MODE_1STPERSON_RUNABOUT | MODE_M16_1STPERSON_RUNABOUT | MODE_FIGHT_CAM_RUNABOUT | MODE_EDITOR | MODE_HELICANNON_1STPERSON
+  -- val(MODE_NONE) = 0
+
+Camera_Enum_4 ::= MAXPATHLENGTH
+  -- val(MAXPATHLENGTH) = 800
+
+Camera_Enum_5 ::= LOOKING_BEHIND | LOOKING_LEFT | LOOKING_RIGHT | LOOKING_FORWARD
+
+Camera_Enum_6 ::= FADE_0 | FADE_1 | FADE_2 | FADE_OUT | FADE_IN | FADE_NONE
+  -- val(FADE_OUT) = 0
+
+Camera_Enum_7 ::= MOTION_BLUR_NONE | MOTION_BLUR_SNIPER | MOTION_BLUR_LIGHT_SCENE | MOTION_BLUR_SECURITY_CAM | MOTION_BLUR_CUT_SCENE | MOTION_BLUR_INTRO | MOTION_BLUR_INTRO2 | MOTION_BLUR_SNIPER_ZOOM | MOTION_BLUR_INTRO3 | MOTION_BLUR_INTRO4
+  -- val(MOTION_BLUR_NONE) = 0
+
+Camera_Enum_8 ::= NONE | INTERPOLATION | JUMP_CUT
+  -- val(NONE) = 0
+
+Camera_Enum_9 ::= CAMCONTROL_GAME | CAMCONTROL_SCRIPT | CAMCONTROL_OBBE
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCam
+  bBelowMinDist : 𝔹
+  bBehindPlayerDesired : 𝔹
+  m_bCamLookingAtVector : 𝔹
+  m_bCollisionChecksOn : 𝔹
+  m_bFixingBeta : 𝔹
+  m_bTheHeightFixerVehicleIsATrain : 𝔹
+  LookBehindCamWasInFront : 𝔹
+  LookingBehind : 𝔹
+  LookingLeft : 𝔹
+  LookingRight : 𝔹
+  ResetStatics : 𝔹
+  Rotating : 𝔹
+  Mode : ℤ
+  m_uiFinishTime : ℕ
+  m_iDoCollisionChecksOnFrameNum : ℤ
+  m_iDoCollisionCheckEveryNumOfFrames : ℤ
+  m_iFrameNumWereAt : ℤ
+  m_iRunningVectorArrayPos : ℤ
+  m_iRunningVectorCounter : ℤ
+  DirectionWasLooking : ℤ
+  f_max_role_angle : ℝ
+  f_Roll : ℝ
+  f_rollSpeed : ℝ
+  m_fSyphonModeTargetZOffSet : ℝ
+  m_fRoadOffSet : ℝ
+  m_fAmountFractionObscured : ℝ
+  m_fAlphaSpeedOverOneFrame : ℝ
+  m_fBetaSpeedOverOneFrame : ℝ
+  m_fBufferedTargetBeta : ℝ
+  m_fBufferedTargetOrientation : ℝ
+  m_fBufferedTargetOrientationSpeed : ℝ
+  m_fCamBufferedHeight : ℝ
+  m_fCamBufferedHeightSpeed : ℝ
+  m_fCloseInPedHeightOffset : ℝ
+  m_fCloseInPedHeightOffsetSpeed : ℝ
+  m_fCloseInCarHeightOffset : ℝ
+  m_fCloseInCarHeightOffsetSpeed : ℝ
+  m_fDimensionOfHighestNearCar : ℝ
+  m_fDistanceBeforeChanges : ℝ
+  m_fFovSpeedOverOneFrame : ℝ
+  m_fMinDistAwayFromCamWhenInterPolating : ℝ
+  m_fPedBetweenCameraHeightOffset : ℝ
+  m_fPlayerInFrontSyphonAngleOffSet : ℝ
+  m_fRadiusForDead : ℝ
+  m_fRealGroundDist : ℝ
+  m_fTargetBeta : ℝ
+  m_fTimeElapsedFloat : ℝ
+  m_fTransitionBeta : ℝ
+  m_fTrueBeta : ℝ
+  m_fTrueAlpha : ℝ
+  m_fInitialPlayerOrientation : ℝ
+  Alpha : ℝ
+  AlphaSpeed : ℝ
+  FOV : ℝ
+  FOVSpeed : ℝ
+  Beta : ℝ
+  BetaSpeed : ℝ
+  Distance : ℝ
+  DistanceSpeed : ℝ
+  CA_MIN_DISTANCE : ℝ
+  CA_MAX_DISTANCE : ℝ
+  SpeedVar : ℝ
+  m_cvecSourceSpeedOverOneFrame : CVector
+  m_cvecTargetSpeedOverOneFrame : CVector
+  m_cvecUpOverOneFrame : CVector
+  m_cvecTargetCoorsForFudgeInter : CVector
+  m_cvecCamFixedModeVector : CVector
+  m_cvecCamFixedModeSource : CVector
+  m_cvecCamFixedModeUpOffSet : CVector
+  m_vecLastAboveWaterCamPosition : CVector
+  m_vecBufferedPlayerBodyOffset : CVector
+  Front : CVector
+  Source : CVector
+  SourceBeforeLookBehind : CVector
+  Up : CVector
+  m_arrPreviousVectors : seq CVector  -- bounded array [NUMBER_OF_VECTORS_FOR_AVERAGE]
+  CamTargetEntity : Ref[CEntity]
+  m_fCameraDistance : ℝ
+  m_fIdealAlpha : ℝ
+  m_fPlayerVelocity : ℝ
+  m_pLastCarEntered : Ref[CAutomobile]
+  m_pLastPedLookedAt : Ref[CPed]
+  m_bFirstPersonRunAboutActive : 𝔹
+  m_fTilt : ℝ
+  m_fTiltSpeed : ℝ
+  m_fTargetZoomGroundOne : ℝ
+  m_fTargetZoomGroundTwo : ℝ
+  m_fTargetZoomGroundThree : ℝ
+  m_fTargetZoomOneZExtra : ℝ
+  m_fTargetZoomTwoZExtra : ℝ
+  m_fTargetZoomThreeZExtra : ℝ
+  m_fTargetZoomZCloseIn : ℝ
+  m_fMinRealGroundDist : ℝ
+  m_fTargetCloseInDist : ℝ
+where
+  m_uiFinishTime ≥ 0
+  #CamTargetEntity ≤ 1
+  #m_pLastCarEntered ≤ 1
+  #m_pLastPedLookedAt ≤ 1
+end
+
+schema CCam_CCam
+  ΔCCam
+where
+  -- Declared member operation CCam::CCam(void)
+  true
+end
+
+schema CCam_Init_2
+  ΔCCam
+  result! : void
+where
+  -- Declared member operation CCam::Init(void)
+  true
+end
+
+schema CCam_Process_3
+  ΔCCam
+where
+  -- Declared member operation CCam::Process(void)
+  true
+end
+
+schema CCam_ProcessSpecialHeightRoutines_4
+  ΔCCam
+where
+  -- Declared member operation CCam::ProcessSpecialHeightRoutines(void)
+  true
+end
+
+schema CCam_GetVectorsReadyForRW_5
+  ΔCCam
+where
+  -- Declared member operation CCam::GetVectorsReadyForRW(void)
+  true
+end
+
+schema CCam_DoAverageOnVector_6
+  ΔCCam
+  vec? : CVector
+  result! : CVector
+where
+  -- Declared member operation CCam::DoAverageOnVector(const CVector &vec)
+  true
+end
+
+schema CCam_GetPedBetaAngleForClearView_7
+  ΔCCam
+  Target? : CVector
+  Dist? : ℝ
+  BetaOffset? : ℝ
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  result! : ℝ
+where
+  -- Declared member operation CCam::GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaOffset, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies)
+  true
+end
+
+schema CCam_WorkOutCamHeightWeeCar_8
+  ΔCCam
+  TargetCoors? : CVector
+  TargetOrientation? : ℝ
+where
+  -- Declared member operation CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
+  true
+end
+
+schema CCam_WorkOutCamHeight_9
+  ΔCCam
+  TargetCoors? : CVector
+  TargetOrientation? : ℝ
+  TargetHeight? : ℝ
+where
+  -- Declared member operation CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, float TargetHeight)
+  true
+end
+
+schema CCam_RotCamIfInFrontCar_10
+  ΔCCam
+  TargetCoors? : CVector
+  TargetOrientation? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCam::RotCamIfInFrontCar(CVector &TargetCoors, float TargetOrientation)
+  true
+end
+
+schema CCam_FixCamIfObscured_11
+  ΔCCam
+  TargetCoors? : CVector
+  TargetHeight? : ℝ
+  TargetOrientation? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCam::FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOrientation)
+  true
+end
+
+schema CCam_Cam_On_A_String_Unobscured_12
+  ΔCCam
+  TargetCoors? : CVector
+  BaseDist? : ℝ
+where
+  -- Declared member operation CCam::Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist)
+  true
+end
+
+schema CCam_FixCamWhenObscuredByVehicle_13
+  ΔCCam
+  TargetCoors? : CVector
+where
+  -- Declared member operation CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
+  true
+end
+
+schema CCam_LookBehind_14
+  ΔCCam
+where
+  -- Declared member operation CCam::LookBehind(void)
+  true
+end
+
+schema CCam_LookLeft_15
+  ΔCCam
+where
+  -- Declared member operation CCam::LookLeft(void)
+  true
+end
+
+schema CCam_LookRight_16
+  ΔCCam
+where
+  -- Declared member operation CCam::LookRight(void)
+  true
+end
+
+schema CCam_ClipIfPedInFrontOfPlayer_17
+  ΔCCam
+where
+  -- Declared member operation CCam::ClipIfPedInFrontOfPlayer(void)
+  true
+end
+
+schema CCam_KeepTrackOfTheSpeed_18
+  ΔCCam
+  source? : CVector
+  target? : CVector
+  up? : CVector
+  alpha? : ℝ
+  beta? : ℝ
+  fov? : ℝ
+where
+  -- Declared member operation CCam::KeepTrackOfTheSpeed(const CVector &source, const CVector &target, const CVector &up, const float &alpha, const float &beta, const float &fov)
+  true
+end
+
+schema CCam_Using3rdPersonMouseCam_19
+  ΔCCam
+  result! : 𝔹
+where
+  -- Declared member operation CCam::Using3rdPersonMouseCam(void)
+  true
+end
+
+schema CCam_GetWeaponFirstPersonOn_20
+  ΔCCam
+  result! : 𝔹
+where
+  -- Declared member operation CCam::GetWeaponFirstPersonOn(void)
+  true
+end
+
+schema CCam_IsTargetInWater_21
+  ΔCCam
+  CamCoors? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CCam::IsTargetInWater(const CVector &CamCoors)
+  true
+end
+
+schema CCam_AvoidWallsTopDownPed_22
+  ΔCCam
+  TargetCoors? : CVector
+  Offset? : CVector
+  Adjuster? : ℙ ℝ
+  AdjusterSpeed? : ℙ ℝ
+  yDistLimit? : ℝ
+where
+  -- Declared member operation CCam::AvoidWallsTopDownPed(const CVector &TargetCoors, const CVector &Offset, float *Adjuster, float *AdjusterSpeed, float yDistLimit)
+  true
+end
+
+schema CCam_PrintMode_23
+  ΔCCam
+where
+  -- Declared member operation CCam::PrintMode(void)
+  true
+end
+
+schema CCam_Process_Debug_24
+  ΔCCam
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCam::Process_Debug(const CVector&, float, float, float)
+  true
+end
+
+schema CCam_Process_FollowPed_25
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float)
+  true
+end
+
+schema CCam_Process_FollowPedWithMouse_26
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrientation, float, float)
+  true
+end
+
+schema CCam_Process_BehindCar_27
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, float, float)
+  true
+end
+
+schema CCam_Process_Cam_On_A_String_28
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCam::Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientation, float, float)
+  true
+end
+
+schema CCam_Process_TopDown_29
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  SpeedVar? : ℝ
+  TargetSpeedVar? : ℝ
+where
+  -- Declared member operation CCam::Process_TopDown(const CVector &CameraTarget, float TargetOrientation, float SpeedVar, float TargetSpeedVar)
+  true
+end
+
+schema CCam_Process_TopDownPed_30
+  ΔCCam
+  CameraTarget? : CVector
+  TargetOrientation? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCam::Process_TopDownPed(const CVector &CameraTarget, float TargetOrientation, float, float)
+  true
+end
+
+schema CCamPathSplines
+  m_arr_PathData : ℙ ℝ
+where
+  #m_arr_PathData ≤ 1
+end
+
+schema CCamPathSplines_CCamPathSplines
+  ΔCCamPathSplines
+where
+  -- Declared member operation CCamPathSplines::CCamPathSplines(void)
+  true
+end
+
+schema CTrainCamNode
+  m_cvecCamPosition : CVector
+  m_cvecPointToLookAt : CVector
+  m_cvecMinPointInRange : CVector
+  m_cvecMaxPointInRange : CVector
+  m_fDesiredFOV : ℝ
+  m_fNearClip : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CQueuedMode
+  Mode : ℤ
+  Duration : ℝ
+  MinZoom : ℤ
+  MaxZoom : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCamera
+  CPlaceable  -- inherits base schema
+  m_bAboveGroundTrainNodesLoaded : 𝔹
+  m_bBelowGroundTrainNodesLoaded : 𝔹
+  m_bCamDirectlyBehind : 𝔹
+  m_bCamDirectlyInFront : 𝔹
+  m_bCameraJustRestored : 𝔹
+  m_bcutsceneFinished : 𝔹
+  m_bCullZoneChecksOn : 𝔹
+  m_bFirstPersonBeingUsed : 𝔹
+  m_bJustJumpedOutOf1stPersonBecauseOfTarget : 𝔹
+  m_bIdleOn : 𝔹
+  m_bInATunnelAndABigVehicle : 𝔹
+  m_bInitialNodeFound : 𝔹
+  m_bInitialNoNodeStaticsSet : 𝔹
+  m_bIgnoreFadingStuffForMusic : 𝔹
+  m_bPlayerIsInGarage : 𝔹
+  m_bPlayerWasOnBike : 𝔹
+  m_bJustCameOutOfGarage : 𝔹
+  m_bJustInitalised : 𝔹
+  m_bJust_Switched : 𝔹
+  m_bLookingAtPlayer : 𝔹
+  m_bLookingAtVector : 𝔹
+  m_bMoveCamToAvoidGeom : 𝔹
+  m_bObbeCinematicPedCamOn : 𝔹
+  m_bObbeCinematicCarCamOn : 𝔹
+  m_bRestoreByJumpCut : 𝔹
+  m_bUseNearClipScript : 𝔹
+  m_bStartInterScript : 𝔹
+  m_bStartingSpline : 𝔹
+  m_bTargetJustBeenOnTrain : 𝔹
+  m_bTargetJustCameOffTrain : 𝔹
+  m_bUseSpecialFovTrain : 𝔹
+  m_bUseTransitionBeta : 𝔹
+  m_bUseScriptZoomValuePed : 𝔹
+  m_bUseScriptZoomValueCar : 𝔹
+  m_bWaitForInterpolToFinish : 𝔹
+  m_bItsOkToLookJustAtThePlayer : 𝔹
+  m_bWantsToSwitchWidescreenOff : 𝔹
+  m_WideScreenOn : 𝔹
+  m_1rstPersonRunCloseToAWall : 𝔹
+  m_bHeadBob : 𝔹
+  m_bVehicleSuspenHigh : 𝔹
+  m_bEnable1rstPersonCamCntrlsScript : 𝔹
+  m_bAllow1rstPersonWeaponsCamera : 𝔹
+  m_bFreezePedZoomSwitch : 𝔹
+  m_bFailedCullZoneTestPreviously : 𝔹
+  m_FadeTargetIsSplashScreen : 𝔹
+  WorldViewerBeingUsed : 𝔹
+  ActiveCam : ℕ
+  m_uiCamShakeStart : ℕ
+  m_uiFirstPersonCamLastInputTime : ℕ
+  m_uiLongestTimeInMill : ℕ
+  m_uiNumberOfTrainCamNodes : ℕ
+  m_uiTransitionJUSTStarted : ℕ
+  m_uiTransitionState : ℕ
+  m_uiTimeLastChange : ℕ
+  m_uiTimeWeLeftIdle_StillNoInput : ℕ
+  m_uiTimeWeEnteredIdle : ℕ
+  m_uiTimeTransitionStart : ℕ
+  m_uiTransitionDuration : ℕ
+  m_uiTransitionDurationTargetCoors : ℕ
+  m_BlurBlue : ℤ
+  m_BlurGreen : ℤ
+  m_BlurRed : ℤ
+  m_BlurType : ℤ
+  m_iWorkOutSpeedThisNumFrames : ℤ
+  m_iNumFramesSoFar : ℤ
+  m_iCurrentTrainCamNode : ℤ
+  m_motionBlur : ℤ
+  m_imotionBlurAddAlpha : ℤ
+  m_iCheckCullZoneThisNumFrames : ℤ
+  m_iZoneCullFrameNumWereAt : ℤ
+  WhoIsInControlOfTheCamera : ℤ
+  CamFrontXNorm : ℝ
+  CamFrontYNorm : ℝ
+  CarZoomValueSmooth : ℝ
+  DistanceToWater : ℝ
+  FOVDuringInter : ℝ
+  LODDistMultiplier : ℝ
+  GenerationDistMultiplier : ℝ
+  m_fAlphaSpeedAtStartInter : ℝ
+  m_fAlphaWhenInterPol : ℝ
+  m_fAlphaDuringInterPol : ℝ
+  m_fBetaDuringInterPol : ℝ
+  m_fBetaSpeedAtStartInter : ℝ
+  m_fBetaWhenInterPol : ℝ
+  m_fFOVWhenInterPol : ℝ
+  m_fFOVSpeedAtStartInter : ℝ
+  m_fStartingBetaForInterPol : ℝ
+  m_fStartingAlphaForInterPol : ℝ
+  m_PedOrientForBehindOrInFront : ℝ
+  m_CameraAverageSpeed : ℝ
+  m_CameraSpeedSoFar : ℝ
+  m_fCamShakeForce : ℝ
+  m_fCarZoomValueScript : ℝ
+  m_fFovForTrain : ℝ
+  m_fFOV_Wide_Screen : ℝ
+  m_fNearClipScript : ℝ
+  m_fOldBetaDiff : ℝ
+  m_fPedZoomValue : ℝ
+  m_fPedZoomValueScript : ℝ
+  m_fPedZoomValueSmooth : ℝ
+  m_fPositionAlongSpline : ℝ
+  m_ScreenReductionPercentage : ℝ
+  m_ScreenReductionSpeed : ℝ
+  m_AlphaForPlayerAnim1rstPerson : ℝ
+  Orientation : ℝ
+  SoundDistUp : ℝ
+  SoundDistUpAsRead : ℝ
+  SoundDistUpAsReadOld : ℝ
+  m_fAvoidTheGeometryProbsTimer : ℝ
+  m_nAvoidTheGeometryProbsDirn : ℤ
+  m_fWideScreenReductionAmount : ℝ
+  m_fStartingFOVForInterPol : ℝ
+  m_fMouseAccelHorzntl : ℝ
+  m_fMouseAccelVertical : ℝ
+  m_f3rdPersonCHairMultX : ℝ
+  m_f3rdPersonCHairMultY : ℝ
+  Cams : seq CCam  -- bounded array [3]
+  pToGarageWeAreIn : Ref[CGarage]
+  pToGarageWeAreInForHackAvoidFirstPerson : Ref[CGarage]
+  m_PlayerMode : CQueuedMode
+  PlayerWeaponMode : CQueuedMode
+  m_PreviousCameraPosition : CVector
+  m_RealPreviousCameraPosition : CVector
+  m_cvecAimingTargetCoors : CVector
+  m_vecFixedModeVector : CVector
+  m_vecFixedModeSource : CVector
+  m_vecFixedModeUpOffSet : CVector
+  m_vecCutSceneOffset : CVector
+  m_cvecStartingSourceForInterPol : CVector
+  m_cvecStartingTargetForInterPol : CVector
+  m_cvecStartingUpForInterPol : CVector
+  m_cvecSourceSpeedAtStartInter : CVector
+  m_cvecTargetSpeedAtStartInter : CVector
+  m_cvecUpSpeedAtStartInter : CVector
+  m_vecSourceWhenInterPol : CVector
+  m_vecTargetWhenInterPol : CVector
+  m_vecUpWhenInterPol : CVector
+  m_vecClearGeometryVec : CVector
+  m_vecGameCamPos : CVector
+  SourceDuringInter : CVector
+  TargetDuringInter : CVector
+  UpDuringInter : CVector
+  m_pRwCamera : Ref[RwCamera]
+  pTargetEntity : Ref[CEntity]
+  m_arrPathArray : seq CCamPathSplines  -- bounded array [MAX_NUM_OF_SPLINETYPES]
+  m_bGarageFixedCamPositionSet : 𝔹
+  m_vecDoingSpecialInterPolation : 𝔹
+  m_bScriptParametersSetForInterPol : 𝔹
+  m_bFading : 𝔹
+  m_bMusicFading : 𝔹
+  m_viewMatrix : CMatrix
+  m_vecFrustumNormals : seq CVector  -- bounded array [4]
+  m_vecOldSourceForInter : CVector
+  m_vecOldFrontForInter : CVector
+  m_vecOldUpForInter : CVector
+  m_vecOldFOVForInter : ℝ
+  m_fFLOATingFade : ℝ
+  m_fFLOATingFadeMusic : ℝ
+  m_fTimeToFadeOut : ℝ
+  m_fTimeToFadeMusic : ℝ
+  m_fFractionInterToStopMoving : ℝ
+  m_fFractionInterToStopCatchUp : ℝ
+  m_fFractionInterToStopMovingTarget : ℝ
+  m_fFractionInterToStopCatchUpTarget : ℝ
+  m_fGaitSwayBuffer : ℝ
+  m_fScriptPercentageInterToStopMoving : ℝ
+  m_fScriptPercentageInterToCatchUp : ℝ
+  m_fScriptTimeForInterPolation : ℕ
+  m_iFadingDirection : ℤ
+  m_iModeObbeCamIsInForCar : ℤ
+  m_iModeToGoTo : ℤ
+  m_iMusicFadingDirection : ℤ
+  m_iTypeOfSwitch : ℤ
+  m_uiFadeTimeStarted : ℕ
+  m_uiFadeTimeStartedMusic : ℕ
+  m_bUseMouse3rdPerson : 𝔹
+  m_bUnknown : 𝔹
+  unknown : ℕ
+  SoundDistRightAsRead : ℝ
+  SoundDistRightAsReadOld : ℝ
+where
+  ActiveCam ≥ 0
+  m_uiCamShakeStart ≥ 0
+  m_uiFirstPersonCamLastInputTime ≥ 0
+  m_uiLongestTimeInMill ≥ 0
+  m_uiNumberOfTrainCamNodes ≥ 0
+  m_uiTransitionJUSTStarted ≥ 0
+  m_uiTransitionState ≥ 0
+  m_uiTimeLastChange ≥ 0
+  m_uiTimeWeLeftIdle_StillNoInput ≥ 0
+  m_uiTimeWeEnteredIdle ≥ 0
+  m_uiTimeTransitionStart ≥ 0
+  m_uiTransitionDuration ≥ 0
+  m_uiTransitionDurationTargetCoors ≥ 0
+  #Cams = 3
+  #pToGarageWeAreIn ≤ 1
+  #pToGarageWeAreInForHackAvoidFirstPerson ≤ 1
+end
+
+schema CCamera_Init
+  ΔCCamera
+where
+  -- Declared member operation CCamera::Init(void)
+  true
+end
+
+schema CCamera_Process_2
+  ΔCCamera
+where
+  -- Declared member operation CCamera::Process(void)
+  true
+end
+
+schema CCamera_CamControl_3
+  ΔCCamera
+where
+  -- Declared member operation CCamera::CamControl(void)
+  true
+end
+
+schema CCamera_UpdateTargetEntity_4
+  ΔCCamera
+where
+  -- Declared member operation CCamera::UpdateTargetEntity(void)
+  true
+end
+
+schema CCamera_UpdateSoundDistances_5
+  ΔCCamera
+where
+  -- Declared member operation CCamera::UpdateSoundDistances(void)
+  true
+end
+
+schema CCamera_InitialiseCameraForDebugMode_6
+  ΔCCamera
+where
+  -- Declared member operation CCamera::InitialiseCameraForDebugMode(void)
+  true
+end
+
+schema CCamera_CamShake_7
+  ΔCCamera
+  strength? : ℝ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CCamera::CamShake(float strength, float x, float y, float z)
+  true
+end
+
+schema CCamera_Get_Just_Switched_Status_8
+  ΔCCamera
+  result! : 𝔹
+where
+  -- Declared member operation CCamera::Get_Just_Switched_Status()
+  true
+end
+
+schema CCamera_AvoidTheGeometry_9
+  ΔCCamera
+  Source? : CVector
+  TargetPos? : CVector
+  NewSource? : CVector
+  FOV? : ℝ
+  result! : void
+where
+  -- Declared member operation CCamera::AvoidTheGeometry(const CVector &Source, const CVector &TargetPos, CVector &NewSource, float FOV)
+  true
+end
+
+schema CCamera_GetArrPosForVehicleType_10
+  ΔCCamera
+  apperance? : ℤ
+  index? : ℤ
+where
+  -- Declared member operation CCamera::GetArrPosForVehicleType(int apperance, int &index)
+  true
+end
+
+schema CCamera_GetScreenRect_11
+  ΔCCamera
+  rect? : CRect
+where
+  -- Declared member operation CCamera::GetScreenRect(CRect &rect)
+  true
+end
+
+schema CCamera_TakeControl_12
+  ΔCCamera
+  target? : Ref[CEntity]
+  mode? : ℤ
+  typeOfSwitch? : ℤ
+  controller? : ℤ
+where
+  -- Declared member operation CCamera::TakeControl(CEntity *target, int16 mode, int16 typeOfSwitch, int32 controller)
+  true
+end
+
+schema CCamera_TakeControlNoEntity_13
+  ΔCCamera
+  position? : CVector
+  typeOfSwitch? : ℤ
+  controller? : ℤ
+where
+  -- Declared member operation CCamera::TakeControlNoEntity(const CVector &position, int16 typeOfSwitch, int32 controller)
+  true
+end
+
+schema CCamera_TakeControlWithSpline_14
+  ΔCCamera
+  typeOfSwitch? : ℤ
+where
+  -- Declared member operation CCamera::TakeControlWithSpline(int16 typeOfSwitch)
+  true
+end
+
+schema CCamera_Restore_15
+  ΔCCamera
+where
+  -- Declared member operation CCamera::Restore(void)
+  true
+end
+
+schema CCamera_RestoreWithJumpCut_16
+  ΔCCamera
+where
+  -- Declared member operation CCamera::RestoreWithJumpCut(void)
+  true
+end
+
+schema CCamera_SetCamPositionForFixedMode_17
+  ΔCCamera
+  Source? : CVector
+  UppOffSet? : CVector
+where
+  -- Declared member operation CCamera::SetCamPositionForFixedMode(const CVector &Source, const CVector &UppOffSet)
+  true
+end
+
+schema CCamera_StartTransition_18
+  ΔCCamera
+  mode? : ℤ
+where
+  -- Declared member operation CCamera::StartTransition(int16 mode)
+  true
+end
+
+schema CCamera_StartTransitionWhenNotFinishedInter_19
+  ΔCCamera
+  mode? : ℤ
+where
+  -- Declared member operation CCamera::StartTransitionWhenNotFinishedInter(int16 mode)
+  true
+end
+
+schema CCamera_StoreValuesDuringInterPol_20
+  ΔCCamera
+  source? : CVector
+  target? : CVector
+  up? : CVector
+  FOV? : ℝ
+where
+  -- Declared member operation CCamera::StoreValuesDuringInterPol(CVector &source, CVector &target, CVector &up, float &FOV)
+  true
+end
+
+schema CCamera_SetWideScreenOn_21
+  ΔCCamera
+where
+  -- Declared member operation CCamera::SetWideScreenOn(void)
+  true
+end
+
+schema CCamera_SetWideScreenOff_22
+  ΔCCamera
+where
+  -- Declared member operation CCamera::SetWideScreenOff(void)
+  true
+end
+
+schema CCamera_ProcessWideScreenOn_23
+  ΔCCamera
+where
+  -- Declared member operation CCamera::ProcessWideScreenOn(void)
+  true
+end
+
+schema CCamera_DrawBordersForWideScreen_24
+  ΔCCamera
+where
+  -- Declared member operation CCamera::DrawBordersForWideScreen(void)
+  true
+end
+
+schema CCamera_IsItTimeForNewcam_25
+  ΔCCamera
+  obbeMode? : ℤ
+  time? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CCamera::IsItTimeForNewcam(int32 obbeMode, int32 time)
+  true
+end
+
+schema CCamera_TryToStartNewCamMode_26
+  ΔCCamera
+  obbeMode? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CCamera::TryToStartNewCamMode(int32 obbeMode)
+  true
+end
+
+schema CCamera_DontProcessObbeCinemaCamera_27
+  ΔCCamera
+where
+  -- Declared member operation CCamera::DontProcessObbeCinemaCamera(void)
+  true
+end
+
+schema CCamera_ProcessObbeCinemaCameraCar_28
+  ΔCCamera
+where
+  -- Declared member operation CCamera::ProcessObbeCinemaCameraCar(void)
+  true
+end
+
+schema CCamera_ProcessObbeCinemaCameraHeli_29
+  ΔCCamera
+where
+  -- Declared member operation CCamera::ProcessObbeCinemaCameraHeli(void)
+  true
+end
+
+schema CCamera_ProcessObbeCinemaCameraPed_30
+  ΔCCamera
+where
+  -- Declared member operation CCamera::ProcessObbeCinemaCameraPed(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Camera_CCam
+  ΔCameraModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Camera_Get_Just_Switched_Status
+  ΔCameraModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bJust_Switched
+  true
+end
+
+schema Camera_GetPositionAlongSpline
+  ΔCameraModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fPositionAlongSpline
+  true
+end
+
+schema Camera_GetCameraMatrix
+  ΔCameraModuleState
+  result! : CMatrix
+where
+  -- Return postcondition: result! = m_cameraMatrix
+  true
+end

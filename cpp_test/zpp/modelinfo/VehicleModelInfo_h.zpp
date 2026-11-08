@@ -1,0 +1,438 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VehicleModelInfo (modelinfo)
+-- Source File(s): modelinfo/VehicleModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ClumpModelInfo.zpp  (from "ClumpModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+VehicleModelInfo_Enum_1 ::= NUM_FIRST_MATERIALS | NUM_SECOND_MATERIALS | NUM_VEHICLE_COLOURS
+  -- val(NUM_FIRST_MATERIALS) = 25
+  -- val(NUM_SECOND_MATERIALS) = 25
+  -- val(NUM_VEHICLE_COLOURS) = 8
+
+VehicleModelInfo_Enum_2 ::= ATOMIC_FLAG_NONE | ATOMIC_FLAG_OK | ATOMIC_FLAG_DAM | ATOMIC_FLAG_LEFT | ATOMIC_FLAG_RIGHT | ATOMIC_FLAG_FRONT | ATOMIC_FLAG_REAR | ATOMIC_FLAG_DRAWLAST | ATOMIC_FLAG_WINDSCREEN | ATOMIC_FLAG_ANGLECULL | ATOMIC_FLAG_REARDOOR | ATOMIC_FLAG_FRONTDOOR | ATOMIC_FLAG_NOCULL
+  -- val(ATOMIC_FLAG_NONE) = 0x0
+  -- val(ATOMIC_FLAG_OK) = 0x1
+  -- val(ATOMIC_FLAG_DAM) = 0x2
+  -- val(ATOMIC_FLAG_LEFT) = 0x4
+  -- val(ATOMIC_FLAG_RIGHT) = 0x8
+  -- val(ATOMIC_FLAG_FRONT) = 0x10
+  -- val(ATOMIC_FLAG_REAR) = 0x20
+  -- val(ATOMIC_FLAG_DRAWLAST) = 0x40
+  -- val(ATOMIC_FLAG_WINDSCREEN) = 0x80
+  -- val(ATOMIC_FLAG_ANGLECULL) = 0x100
+  -- val(ATOMIC_FLAG_REARDOOR) = 0x200
+  -- val(ATOMIC_FLAG_FRONTDOOR) = 0x400
+  -- val(ATOMIC_FLAG_NOCULL) = 0x800
+
+eVehicleType ::= VEHICLE_TYPE_CAR | VEHICLE_TYPE_BOAT | VEHICLE_TYPE_TRAIN | VEHICLE_TYPE_HELI | VEHICLE_TYPE_PLANE | VEHICLE_TYPE_BIKE | VEHICLE_TYPE_FERRY | NUM_VEHICLE_TYPES
+
+eCarPositions ::= CAR_POS_HEADLIGHTS | CAR_POS_TAILLIGHTS | CAR_POS_FRONTSEAT | CAR_POS_BACKSEAT | CAR_POS_BRAKELIGHTS | CAR_POS_INDICATORS_FRONT | CAR_POS_INDICATORS_BACK | CAR_POS_STEERWHEEL
+
+eBoatPositions ::= BOAT_POS_FRONTSEAT
+
+eFerryPositions ::= FERRY_POS_LIGHT_FRONT | FERRY_POS_LIGHT_REAR | FERRY_POS_CHIM_LEFT | FERRY_POS_PED_POINT | FERRY_POS_CAR1 | FERRY_POS_CAR2 | FERRY_POS_CAR3 | FERRY_POS_CAR4
+
+eTrainPositions ::= TRAIN_POS_LIGHT_FRONT | TRAIN_POS_LIGHT_REAR | TRAIN_POS_LEFT_ENTRY | TRAIN_POS_MID_ENTRY | TRAIN_POS_RIGHT_ENTRY
+
+ePlanePositions ::= PLANE_POS_LIGHT_LEFT | PLANE_POS_LIGHT_RIGHT | PLANE_POS_LIGHT_TAIL
+
+VehicleModelInfo_Enum_9 ::= NUM_VEHICLE_POSITIONS
+  -- val(NUM_VEHICLE_POSITIONS) = 5
+
+VehicleModelInfo_Enum_10 ::= NUM_FIRST_MATERIALS | NUM_SECOND_MATERIALS | NUM_VEHICLE_COLOURS
+  -- val(NUM_FIRST_MATERIALS) = 24
+  -- val(NUM_SECOND_MATERIALS) = 20
+  -- val(NUM_VEHICLE_COLOURS) = 8
+
+VehicleModelInfo_Enum_11 ::= NUM_FIRST_MATERIALS | NUM_SECOND_MATERIALS | NUM_VEHICLE_COLOURS | NUM_VEHICLE_ENVMAPS
+  -- val(NUM_FIRST_MATERIALS) = 26
+  -- val(NUM_SECOND_MATERIALS) = 26
+  -- val(NUM_VEHICLE_COLOURS) = 8
+  -- val(NUM_VEHICLE_ENVMAPS) = 1
+
+VehicleModelInfo_Enum_12 ::= NUM_VEHICLE_POSITIONS
+  -- val(NUM_VEHICLE_POSITIONS) = 10
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CVehicleModelInfo
+  CClumpModelInfo  -- inherits base schema
+  m_lastColour1 : ℕ
+  m_lastColour2 : ℕ
+  m_gameName : seq CHAR
+  m_vehicleType : ℤ
+  m_wheelScale : ℝ
+  m_planeLodId : ℤ
+  m_handlingId : ℤ
+  m_numDoors : ℤ
+  m_vehicleClass : ℤ
+  m_level : ℤ
+  m_numComps : ℤ
+  m_frequency : ℤ
+  m_positions : seq CVector  -- bounded array [NUM_VEHICLE_POSITIONS]
+  m_compRules : ℕ
+  m_bikeSteerAngle : ℝ
+  m_materials1 : seq Ref[RpMaterial]  -- bounded array [NUM_FIRST_MATERIALS]
+  m_materials2 : seq Ref[RpMaterial]  -- bounded array [NUM_SECOND_MATERIALS]
+  m_colours1 : seq ℕ  -- bounded array [NUM_VEHICLE_COLOURS]
+  m_colours2 : seq ℕ  -- bounded array [NUM_VEHICLE_COLOURS]
+  m_numColours : ℕ
+  m_lastColorVariation : ℕ
+  m_currentColour1 : ℕ
+  m_currentColour2 : ℕ
+  m_comps : Ref[RpAtomic]
+  m_normalSplay : ℝ
+  m_animFileName : seq CHAR
+  msClassInfo : base__cRelocatableChunkClassInfo
+  msClassInstance : CVehicleModelInfo
+  ms_vehicleColourTable : seq RwRGBA  -- bounded array [256]
+  ms_compsUsed : seq ℤ  -- bounded array [2]
+  ms_compsToUse : seq ℤ  -- bounded array [2]
+  mspInfo : Ref[Statics]
+  ms_vehicleDescs : seq Ref[RwObjectNameIdAssocation]  -- bounded array [NUM_VEHICLE_TYPES]
+  ms_colourTextureTable : seq Ref[RwTexture]  -- bounded array [256]
+  m_wheelId : ℤ
+  m_envMap : Ref[RwTexture]
+  ms_pEnvironmentMaps : seq Ref[RwTexture]  -- bounded array [NUM_VEHICLE_ENVMAPS]
+where
+  m_lastColour1 ≥ 0
+  m_lastColour2 ≥ 0
+  #m_gameName = 10
+  m_compRules ≥ 0
+  m_numColours ≥ 0
+  m_lastColorVariation ≥ 0
+  m_currentColour1 ≥ 0
+  m_currentColour2 ≥ 0
+  #m_comps ≤ 1
+  #ms_vehicleColourTable = 256
+  #ms_compsUsed = 2
+  #ms_compsToUse = 2
+  #mspInfo ≤ 1
+  #ms_colourTextureTable = 256
+  #m_envMap ≤ 1
+end
+
+schema CVehicleModelInfo_Load
+  ΔCVehicleModelInfo
+  inst? : ADDRESS
+where
+  -- Declared member operation CVehicleModelInfo::Load(void *inst)
+  true
+end
+
+schema CVehicleModelInfo_WriteStaticInfo_2
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : ADDRESS
+where
+  -- Declared member operation CVehicleModelInfo::WriteStaticInfo(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CVehicleModelInfo_CVehicleModelInfo_3
+  ΔCVehicleModelInfo
+where
+  -- Declared member operation CVehicleModelInfo::CVehicleModelInfo(void)
+  true
+end
+
+schema CVehicleModelInfo_DeleteRwObject_4
+  ΔCVehicleModelInfo
+where
+  -- Declared member operation CVehicleModelInfo::DeleteRwObject(void)
+  true
+end
+
+schema CVehicleModelInfo_CreateInstance_5
+  ΔCVehicleModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CVehicleModelInfo::CreateInstance(void)
+  true
+end
+
+schema CVehicleModelInfo_SetClump_6
+  ΔCVehicleModelInfo
+  arg_1? : Ref[RpClump]
+where
+  -- Declared member operation CVehicleModelInfo::SetClump(RpClump *)
+  true
+end
+
+schema CVehicleModelInfo_SetAnimFile_7
+  ΔCVehicleModelInfo
+  file? : seq CHAR
+where
+  -- Declared member operation CVehicleModelInfo::SetAnimFile(const char *file)
+  true
+end
+
+schema CVehicleModelInfo_ConvertAnimFileIndex_8
+  ΔCVehicleModelInfo
+where
+  -- Declared member operation CVehicleModelInfo::ConvertAnimFileIndex(void)
+  true
+end
+
+schema CVehicleModelInfo_GetAnimFileIndex_9
+  ΔCVehicleModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CVehicleModelInfo::GetAnimFileIndex(void)
+  true
+end
+
+schema CVehicleModelInfo_LoadModel_10
+  ΔCVehicleModelInfo
+  model? : ADDRESS
+  chunk? : ADDRESS
+  result! : void
+where
+  -- Declared member operation CVehicleModelInfo::LoadModel(void *model, const void *chunk)
+  true
+end
+
+schema CVehicleModelInfo_Write_11
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CVehicleModelInfo::Write(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CVehicleModelInfo_WriteModel_12
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : ADDRESS
+where
+  -- Declared member operation CVehicleModelInfo::WriteModel(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CVehicleModelInfo_RcWriteThis_13
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CVehicleModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CVehicleModelInfo_RcWriteEmpty_14
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CVehicleModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CVehicleModelInfo_CollapseFramesCB_15
+  ΔCVehicleModelInfo
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+  result! : Ref[RwFrame]
+where
+  -- Declared member operation CVehicleModelInfo::CollapseFramesCB(RwFrame *frame, void *data)
+  true
+end
+
+schema CVehicleModelInfo_MoveObjectsCB_16
+  ΔCVehicleModelInfo
+  object? : Ref[RwObject]
+  data? : ADDRESS
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CVehicleModelInfo::MoveObjectsCB(RwObject *object, void *data)
+  true
+end
+
+schema CVehicleModelInfo_HideDamagedAtomicCB_17
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::HideDamagedAtomicCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_HideAllComponentsAtomicCB_18
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::HideAllComponentsAtomicCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_HasAlphaMaterialCB_19
+  ΔCVehicleModelInfo
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+  result! : Ref[RpMaterial]
+where
+  -- Declared member operation CVehicleModelInfo::HasAlphaMaterialCB(RpMaterial *material, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_20
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_BigVehicle_21
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_BigVehicle(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Train_22
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_Train(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Ferry_23
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_Ferry(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Boat_24
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Boat_Far_25
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_Boat_Far(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Heli_26
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_Heli(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_RealHeli_27
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRendererCB_RealHeli(RpAtomic *atomic, void *data)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRenderCallbacks_28
+  ΔCVehicleModelInfo
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicRenderCallbacks(void)
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicFlagCB_29
+  ΔCVehicleModelInfo
+  object? : Ref[RwObject]
+  data? : ADDRESS
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CVehicleModelInfo::SetAtomicFlagCB(RwObject *object, void *data)
+  true
+end
+
+schema CVehicleModelInfo_ClearAtomicFlagCB_30
+  ΔCVehicleModelInfo
+  atomic? : Ref[RwObject]
+  data? : ADDRESS
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CVehicleModelInfo::ClearAtomicFlagCB(RwObject *atomic, void *data)
+  true
+end
+
+schema Statics
+  unknown : ADDRESS
+  ms_vehicleColourTable : seq RwRGBA  -- bounded array [256]
+  ms_compsUsed : seq ℤ  -- bounded array [2]
+  ms_compsToUse : seq ℤ  -- bounded array [2]
+where
+  #ms_vehicleColourTable = 256
+  #ms_compsUsed = 2
+  #ms_compsToUse = 2
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema VehicleModelInfo_GetAnimFileIndex
+  ΔVehicleModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_animFileIndex
+  true
+end
+
+schema VehicleModelInfo_SetComponentsToUse
+  ΔVehicleModelInfoModuleState
+  c1? : ℤ
+  c2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema VehicleModelInfo_SetComponentsToUse_2
+  ΔVehicleModelInfoModuleState
+  c1? : ℤ
+  c2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

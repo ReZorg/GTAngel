@@ -1,0 +1,277 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FileMgr (core)
+-- Source File(s): core/FileMgr.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include fcntl.zpp  (from "fcntl.h")
+-- include direct.zpp  (from "direct.h")
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include dirent.zpp  (from "dirent.h")
+-- include errno.zpp  (from "errno.h")
+-- include unistd.zpp  (from "unistd.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+_CRT_SECURE_NO_WARNINGS : seq CHAR  -- #define _CRT_SECURE_NO_WARNINGS #include <fcntl.h>
+NUMFILES : ℕ  -- #define NUMFILES 20
+_getcwd : seq CHAR  -- #define _getcwd getcwd
+mychdir : seq CHAR  -- #define mychdir chdir
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema myFILE
+  isText : 𝔹
+  file : Ref[FILE]
+where
+  #file ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema FileMgr_mychdir
+  ΔFileMgrModuleState
+  path? : seq CHAR
+where
+  -- State update: r' = casepath(path, false)
+  -- State update: errno' = ENOENT
+  true
+end
+
+schema FileMgr_myfopen
+  ΔFileMgrModuleState
+  filename? : seq CHAR
+  mode? : seq CHAR
+where
+  -- State update: fd' = 1
+  -- State update: p' = realmode
+  -- State update: p' = '\0'
+  -- State update: file' = fcaseopen(filename, realmode)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = fd
+  true
+end
+
+schema FileMgr_myfclose
+  ΔFileMgrModuleState
+  fd? : ℤ
+where
+  -- State update: file' = ∅
+  -- Return postcondition: result! = ret
+  -- Return postcondition: result! = EOF
+  true
+end
+
+schema FileMgr_myfgetc
+  ΔFileMgrModuleState
+  fd? : ℤ
+where
+  -- State update: c' = fgetc(myfiles[fd].file)
+  -- State update: c' = fgetc(myfiles[fd].file)
+  -- Return postcondition: result! = c
+  -- Return postcondition: result! = 015
+  -- Return postcondition: result! = c
+  true
+end
+
+schema FileMgr_myfputc
+  ΔFileMgrModuleState
+  c? : ℤ
+  fd? : ℤ
+where
+  -- Return postcondition: result! = fputc(c, myfiles[fd].file)
+  true
+end
+
+schema FileMgr_myfgets
+  ΔFileMgrModuleState
+  buf? : seq CHAR
+  len? : ℤ
+  fd? : ℤ
+where
+  -- State update: p' = buf
+  -- State update: c' = myfgetc(fd)
+  -- State update: p' = '\0'
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = buf
+  true
+end
+
+schema FileMgr_myfread
+  ΔFileMgrModuleState
+  buf? : ADDRESS
+  elt? : ℕ
+  n? : ℕ
+  fd? : ℤ
+where
+  -- State update: p' = (unsigned char*)buf
+  -- State update: c' = myfgetc(fd)
+  -- Return postcondition: result! = i / elt
+  -- Return postcondition: result! = fread(buf, elt, n, myfiles[fd].file)
+  true
+end
+
+schema FileMgr_myfwrite
+  ΔFileMgrModuleState
+  buf? : ADDRESS
+  elt? : ℕ
+  n? : ℕ
+  fd? : ℤ
+where
+  -- State update: p' = (unsigned char*)buf
+  -- State update: c' = *p++
+  -- Return postcondition: result! = i / elt
+  -- Return postcondition: result! = fwrite(buf, elt, n, myfiles[fd].file)
+  true
+end
+
+schema FileMgr_myfseek
+  ΔFileMgrModuleState
+  fd? : ℤ
+  offset? : ℤ
+  whence? : ℤ
+where
+  -- Return postcondition: result! = fseek(myfiles[fd].file, offset, whence)
+  true
+end
+
+schema FileMgr_myfeof
+  ΔFileMgrModuleState
+  fd? : ℤ
+where
+  -- Return postcondition: result! = feof(myfiles[fd].file)
+  true
+end
+
+schema CFileMgr_Initialise
+  ΔCFileMgr
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileMgr_ChangeDir
+  ΔCFileMgr
+  dir? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileMgr_SetDir
+  ΔCFileMgr
+  dir? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileMgr_SetDirMyDocuments
+  ΔCFileMgr
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFileMgr_LoadFile
+  ΔCFileMgr
+  file? : seq CHAR
+  buf? : ℙ ℕ
+  maxlen? : ℤ
+  mode? : seq CHAR
+where
+  -- State update: fd' = myfopen(file, mode)
+  -- State update: len' = 0
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = len
+  true
+end
+
+schema CFileMgr_OpenFile
+  ΔCFileMgr
+  file? : seq CHAR
+  mode? : seq CHAR
+where
+  -- Return postcondition: result! = myfopen(file, mode)
+  true
+end
+
+schema CFileMgr_OpenFileForWriting
+  ΔCFileMgr
+  file? : seq CHAR
+where
+  -- Return postcondition: result! = OpenFile(file, "wb")
+  true
+end
+
+schema CFileMgr_Read
+  ΔCFileMgr
+  fd? : ℤ
+  buf? : seq CHAR
+  len? : ℕ
+where
+  -- Return postcondition: result! = myfread((void*)buf, 1, len, fd)
+  true
+end
+
+schema CFileMgr_Write
+  ΔCFileMgr
+  fd? : ℤ
+  buf? : seq CHAR
+  len? : ℕ
+where
+  -- Return postcondition: result! = myfwrite((void*)buf, 1, len, fd)
+  true
+end
+
+schema CFileMgr_Seek
+  ΔCFileMgr
+  fd? : ℤ
+  offset? : ℤ
+  whence? : ℤ
+where
+  -- Return postcondition: result! = !!myfseek(fd, offset, whence)
+  true
+end
+
+schema CFileMgr_ReadLine
+  ΔCFileMgr
+  fd? : ℤ
+  buf? : seq CHAR
+  len? : ℤ
+where
+  -- Return postcondition: result! = myfgets(buf, len, fd) != nil
+  true
+end
+
+schema CFileMgr_CloseFile
+  ΔCFileMgr
+  fd? : ℤ
+where
+  -- Return postcondition: result! = myfclose(fd)
+  true
+end
+
+schema CFileMgr_GetErrorReadWrite
+  ΔCFileMgr
+  fd? : ℤ
+where
+  -- Return postcondition: result! = myfeof(fd)
+  true
+end

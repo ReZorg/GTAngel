@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: smallHeap (leeds)
+-- Source File(s): leeds/smallHeap.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cSmallHeap_cSmallHeap
+  ΔcSmallHeap
+where
+  -- State update: bLocked' = false
+  -- State update: bUnk' = false
+  true
+end
+
+schema cSmallHeap_Lock
+  ΔcSmallHeap
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSmallHeap_Unlock
+  ΔcSmallHeap
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema smallHeapModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 20
+end

@@ -1,0 +1,50 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: leedsVehicle_mobile (extras)
+-- Source File(s): extras/shaders/leedsVehicle_mobile.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+power : ℝ  -- #define power (4.0)
+preMult : ℝ  -- #define preMult (1.0)
+postMult : ℝ  -- #define postMult (1.0)
+minRefl : ℝ  -- #define minRefl (0.25)
+maxRefl : ℝ  -- #define maxRefl (3.0)
+minOpacity : ℝ  -- #define minOpacity (1.0)
+maxOpacity : ℝ  -- #define maxOpacity (1.0)
+v_NdotV : seq CHAR  -- #define v_NdotV (v_reflData.x)
+v_lightingCont : seq CHAR  -- #define v_lightingCont (v_reflData.y)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema leedsVehicle_mobile_main
+  ΔleedsVehicle_mobileModuleState
+where
+  -- State update: pass1' = v_color*texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: envtex' = texture(tex1, v_tex1).rgb
+  -- State update: skyColour' = mix(u_skyBot, u_skyTop, envtex.g)
+  -- State update: envOut' = mix(envtex.rrr, skyColour, envtex.b)
+  -- State update: fresnel' = mix(u_shininess, u_shininess * 2.0, v_NdotV)
+  -- State update: fresnel' = pow(v_NdotV * preMult, power)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema leedsVehicle_mobileModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 74
+end

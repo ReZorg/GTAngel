@@ -1,0 +1,349 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Bike (vehicles)
+-- Source File(s): vehicles/Bike.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include World.zpp  (from "World.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Record.zpp  (from "Record.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include Script.zpp  (from "Script.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include DamageManager.zpp  (from "DamageManager.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Garages.zpp  (from "Garages.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FAKESUSPENSION : ℝ  -- #define FAKESUSPENSION (99999.992f)
+SAND_SLOWDOWN : ℝ  -- #define SAND_SLOWDOWN (0.02f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Bike_GetRelativeMatrix
+  ΔBikeModuleState
+  mat? : Ref[RwMatrix]
+  frm? : Ref[RwFrame]
+  end? : Ref[RwFrame]
+where
+  -- State update: mat' = *RwFrameGetMatrix(frm)
+  -- State update: frm' = RwFrameGetParent(frm)
+  -- State update: frm' = RwFrameGetParent(frm)
+  -- State update: frm' = ∅
+  true
+end
+
+schema CBike_SetModelIndex
+  ΔCBike
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex
+  true
+end
+
+schema CBike_ProcessControl
+  ΔCBike
+where
+  -- State update: acceleration' = 0.0f
+  -- State update: bBalancedByRider' = false
+  -- State update: bStuckInSand' = false
+  -- State update: brake' = 0.0f
+  -- State update: colModel' = GetColModel()
+  -- State update: bWarnedPeds' = false
+  -- Invokes: CModelInfo::GetModelInfo, CReplay::IsPlayingBack, m_pBlowUpEntity->RegisterReference, DMAudio.PlayOneShot, CRubbish::StirUp
+  true
+end
+
+schema CBike_Teleport
+  ΔCBike
+  pos? : CVector
+where
+  -- Invokes: CWorld::Remove, CWorld::Add
+  true
+end
+
+schema CBike_PreRender
+  ΔCBike
+where
+  -- State update: smokeSize' = 0.2f
+  -- State update: groundPos' = m_aWheelColPoints[BIKESUSP_R2].point
+  -- State update: groundPos' = (groundPos + m_aWheelColPoints[BIKESUSP_R1].point)/2.0f
+  -- State update: groundPos' = m_aWheelColPoints[BIKESUSP_R2].point
+  -- State update: bLightsOn' = false
+  -- State update: bLightsOn' = shouldLightsBeOn
+  -- Invokes: CModelInfo::GetModelInfo, CParticle::AddParticle, CSkidmarks::RegisterOne, CSurfaceTable::GetAdhesionGroup, CClock::GetHours
+  true
+end
+
+schema CBike_Render
+  ΔCBike
+where
+  -- State update: m_nSetPieceExtendedRangeTime' = CTimer::GetTimeInMilliseconds() + 3000
+  -- Invokes: CModelInfo::GetModelInfo, CTimer::GetTimeInMilliseconds, mi->SetVehicleColour, CEntity::Render
+  true
+end
+
+schema CBike_ProcessEntityCollision
+  ΔCBike
+  ent? : Ref[CEntity]
+  colpoints? : ℙ ℤ
+where
+  -- State update: bVehicleColProcessed' = true
+  -- State update: colModel' = GetColModel()
+  -- State update: numWheelCollisions' = 0
+  -- State update: colModel.numLines' = 0
+  -- State update: phys' = (CPhysical*)ent
+  -- State update: m_nSurfaceTouched' = m_aWheelColPoints[i].surfaceB
+  -- Return postcondition: result! = numCollisions
+  -- Invokes: ent->IsPed, ent->IsVehicle, CCollision::ProcessColModels, ent->GetMatrix, ent->GetColModel
+  true
+end
+
+schema CBike_ProcessControlInputs
+  ΔCBike
+  pad? : ℕ
+where
+  -- State update: speed' = DotProduct(m_vecMoveSpeed, GetForward())
+  -- State update: bIsHandbrakeOn' = true
+  -- State update: bIsHandbrakeOn' = !!CPad::GetPad(pad).GetHandBrake()
+  -- State update: nLastControlInput' = 2
+  -- State update: nLastControlInput' = 0
+  -- State update: nLastControlInput' = 0
+  -- Invokes: CPad::GetPad, CTimer::GetTimeStep, CTimer::GetTimeInMilliseconds, m_vecMoveSpeed.Magnitude
+  true
+end
+
+schema CBike_ProcessBuoyancy
+  ΔCBike
+where
+  -- State update: bTouchingWater' = true
+  -- State update: timeStep' = Max(CTimer::GetTimeStep(), 0.01f)
+  -- State update: impulseRatio' = impulse.z / (GRAVITY * m_fMass * timeStep)
+  -- State update: waterResistance' = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep())
+  -- State update: bIsInWater' = true
+  -- State update: bIsDrowning' = true
+  -- Invokes: mod_Buoyancy.ProcessBuoyancy, CTimer::GetTimeStep, pDriver->IsPlayer, pDriver->InflictDamage
+  true
+end
+
+schema CBike_DoDriveByShootings
+  ΔCBike
+where
+  -- State update: playerInfo' = ((CPlayerPed*)pDriver).GetPlayerInfoForThisPlayerPed()
+  -- State update: weapon' = pDriver.GetWeapon()
+  -- State update: lookingLeft' = false
+  -- State update: lookingRight' = false
+  -- State update: lookingLeft' = true
+  -- State update: lookingRight' = true
+  -- Invokes: pDriver->GetWeapon, CWeaponInfo::GetWeaponInfo, weapon->Update, CPad::GetPad, pDriver->GetClump
+  true
+end
+
+schema CBike_VehicleDamage
+  ΔCBike
+where
+  -- State update: impulse' = m_fDamageImpulse
+  -- State update: colSpeed' = 800.0f*impulse/m_fMass
+  -- State update: bIsStanding' = false
+  -- State update: fwd' = 0.6f
+  -- State update: u' = 0.0f
+  -- State update: up' = 0.05f
+  -- Invokes: CStats::GetPercentageProgress, pDriver->GetPedState, pDriver->IsPlayer, CCullZones::CamStairsForPlayer, CCullZones::FindZoneWithStairsAttributeForPlayer
+  true
+end
+
+schema CBike_AddDamagedVehicleParticles
+  ΔCBike
+where
+  -- State update: direction' = 0.5f*m_vecMoveSpeed
+  -- State update: damagePos' = GetMatrix()*damagePos
+  -- State update: rnd' = CTimer::GetFrameCounter() + m_randomSeed
+  -- State update: direction' = 0.8f*m_vecMoveSpeed
+  -- Invokes: TheCamera.GetLookingForwardFirstPerson, CTimer::GetFrameCounter, CModelInfo::GetModelInfo, CParticle::AddParticle, m_leanMatrix.GetRight
+  true
+end
+
+schema CBike_AddWheelDirtAndWater
+  ΔCBike
+  colpoint? : ℙ ℤ
+  belowEffectSpeed? : ℕ
+where
+  -- State update: minSize' = 0.02f
+  -- State update: maxSize' = 0.04f
+  -- State update: grassCol' = { 8, 24, 8, 255 }
+  -- State update: gravelCol' = { 64, 64, 64, 255 }
+  -- State update: mudCol' = { 64, 32, 16, 255 }
+  -- State update: sandCol' = { 170, 165, 140, 255 }
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 1
+  -- Invokes: CGeneral::GetRandomNumberInRange, CParticle::AddParticle, CTimer::GetFrameCounter, m_vecMoveSpeed.Magnitude
+  true
+end
+
+schema CBike_GetComponentWorldPosition
+  ΔCBike
+  component? : ℤ
+  pos? : CVector
+where
+  -- State update: ltm' = RwFrameGetLTM(m_aBikeNodes[component])
+  -- State update: pos' = *RwMatrixGetPos(ltm)
+  true
+end
+
+schema CBike_IsComponentPresent
+  ΔCBike
+  component? : ℤ
+where
+  -- Return postcondition: result! = m_aBikeNodes[component] != nil
+  true
+end
+
+schema CBike_SetComponentRotation
+  ΔCBike
+  component? : ℤ
+  rotation? : CVector
+where
+  -- State update: pos' = mat.GetPosition()
+  -- Invokes: mat.GetPosition, mat.SetRotateX, mat.SetRotateY, mat.SetRotateZ, mat.Translate
+  true
+end
+
+schema CBike_IsDoorReady
+  ΔCBike
+  door? : eDoors
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CBike_IsDoorFullyOpen
+  ΔCBike
+  door? : eDoors
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CBike_IsDoorClosed
+  ΔCBike
+  door? : eDoors
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CBike_IsDoorMissing
+  ΔCBike
+  door? : eDoors
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CBike_RemoveRefsToVehicle
+  ΔCBike
+  ent? : Ref[CEntity]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CBike_BlowUpCar
+  ΔCBike
+  culprit? : Ref[CEntity]
+where
+  -- State update: bRenderScorched' = true
+  -- State update: m_fHealth' = 0.0f
+  -- State update: m_nBombTimer' = 0
+  -- State update: bEngineOn' = false
+  -- State update: bLightsOn' = false
+  -- Invokes: CGeneral::GetRandomNumber, TheCamera.CamShake, CExplosion::AddExplosion, CDarkel::RegisterCarBlownUpByPlayer
+  true
+end
+
+schema CBike_SetUpWheelColModel
+  ΔCBike
+  colModel? : Ref[CColModel]
+where
+  -- State update: mat' = RwMatrixCreate()
+  -- State update: vehColModel' = mi.GetColModel()
+  -- State update: colModel.boundingSphere' = vehColModel.boundingSphere
+  -- State update: colModel.boundingBox' = vehColModel.boundingBox
+  -- State update: colModel.numSpheres' = 2
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetModelInfo, mi->GetColModel
+  true
+end
+
+schema CBike_BurstTyre
+  ΔCBike
+  wheel? : ℕ
+  applyForces? : 𝔹
+where
+  -- State update: wheel' = BIKEWHEEL_FRONT
+  -- State update: wheel' = BIKEWHEEL_REAR
+  -- State update: speedSq' = m_vecMoveSpeed.MagnitudeSqr()
+  -- State update: colpoint.point' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: seatPos' = mi.GetFrontSeatPosn()
+  -- State update: seatPos' = mi.m_positions[CAR_POS_BACKSEAT]
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: DMAudio.PlayOneShot, CCarCtrl::SwitchVehicleToRealPhysics, CGeneral::GetRandomNumberInRange, m_vecMoveSpeed.MagnitudeSqr, CBike::IsRoomForPedToLeaveCar
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema BikeModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3080
+end

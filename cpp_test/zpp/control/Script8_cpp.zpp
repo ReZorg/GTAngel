@@ -1,0 +1,71 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script8 (control)
+-- Source File(s): control/Script8.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Population.zpp  (from "Population.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include General.zpp  (from "General.h")
+-- include maths.zpp  (from "maths.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_ProcessCommands1400To1499
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed.m_pVehicleAnim' = ∅
+  -- State update: pPed.m_nLastPedState' = PED_NONE
+  -- State update: pPed.bIsPointingGunAt' = false
+  -- State update: m_fMoveSpeed' = 0.0f
+  -- State update: pPed.m_nStoredMoveState' = PEDMOVE_STILL
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CStats::RegisterLevelVigilanteMission, CPools::GetPedPool, pPed->GetPedState, pPed->RestartNonPartialAnims, pPed->GetClump
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script8ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 841
+end

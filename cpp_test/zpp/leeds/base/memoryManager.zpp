@@ -1,0 +1,210 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: memoryManager (leeds)
+-- Source File(s): leeds/base/memoryManager.cpp, leeds/base/memoryManager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include memoryManager.zpp  (from "memoryManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cMemoryManager
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cMemoryManager_cMemoryManager
+  ΔcMemoryManager
+where
+  -- Declared member operation cMemoryManager::cMemoryManager()
+  true
+end
+
+schema cMemoryManager_Allocate_2
+  ΔcMemoryManager
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation cMemoryManager::Allocate(uint32 size)
+  true
+end
+
+schema cMemoryManager_AllocateAligned_3
+  ΔcMemoryManager
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation cMemoryManager::AllocateAligned(uint32 size)
+  true
+end
+
+schema cMemoryManager_Realloc_4
+  ΔcMemoryManager
+  buf? : ADDRESS
+  newSize? : ℕ
+  unk? : 𝔹
+  result! : ADDRESS
+where
+  -- Declared member operation cMemoryManager::Realloc(void* buf, uint32 newSize, bool unk)
+  true
+end
+
+schema cMemoryManager_Free_5
+  ΔcMemoryManager
+  buf? : ADDRESS
+where
+  -- Declared member operation cMemoryManager::Free(void* buf)
+  true
+end
+
+schema cMemoryManager_IsFree_6
+  ΔcMemoryManager
+  buf? : ADDRESS
+  result! : 𝔹
+where
+  -- Declared member operation cMemoryManager::IsFree(void* buf)
+  true
+end
+
+schema cMainMemoryManager
+  cMemoryManager  -- inherits base schema
+  m_pInstance : Ref[cMainMemoryManager]
+where
+  #m_pInstance ≤ 1
+end
+
+schema cMainMemoryManager_Init
+  ΔcMainMemoryManager
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation cMainMemoryManager::Init(void*, uint32)
+  true
+end
+
+schema cMainMemoryManager_cMainMemoryManager_2
+  ΔcMainMemoryManager
+where
+  -- Declared member operation cMainMemoryManager::cMainMemoryManager()
+  true
+end
+
+schema cMainMemoryManager_Instance_3
+  ΔcMainMemoryManager
+  result! : Ref[cMainMemoryManager]
+where
+  -- Declared member operation cMainMemoryManager::Instance()
+  true
+end
+
+schema cMemoryBlock
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cMemoryManager_cMemoryManager
+  ΔcMemoryManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cMemoryManager_Allocate
+  ΔcMemoryManager
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- State update: buf' = malloc(size)
+  -- Return postcondition: result! = buf
+  true
+end
+
+schema cMemoryManager_AllocateAligned
+  ΔcMemoryManager
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- State update: buf' = malloc(size)
+  -- Return postcondition: result! = buf
+  true
+end
+
+schema cMemoryManager_Realloc
+  ΔcMemoryManager
+  buf? : ADDRESS
+  newSize? : ℕ
+  unk? : 𝔹
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = realloc(buf, newSize)
+  true
+end
+
+schema cMemoryManager_Free
+  ΔcMemoryManager
+  buf? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cMemoryManager_IsFree
+  ΔcMemoryManager
+  buf? : ADDRESS
+  result! : 𝔹
+where
+  -- Return postcondition: result! = buf == nil
+  true
+end
+
+schema cMainMemoryManager_cMainMemoryManager
+  ΔcMainMemoryManager
+where
+  -- State update: m_pInstance' = this
+  true
+end
+
+schema cMainMemoryManager_Init
+  ΔcMainMemoryManager
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema memoryManager_operator_new
+  ΔmemoryManagerModuleState
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = base::cMainMemoryManager::Instance()->Allocate(size)
+  -- Invokes: cMainMemoryManager::Instance
+  true
+end
+
+schema memoryManager_operator_new_2
+  ΔmemoryManagerModuleState
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- Return postcondition: result! = base::cMainMemoryManager::Instance()->Allocate(size)
+  -- Invokes: cMainMemoryManager::Instance
+  true
+end

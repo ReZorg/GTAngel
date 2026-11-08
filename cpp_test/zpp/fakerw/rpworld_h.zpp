@@ -1,0 +1,77 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: rpworld (fakerw)
+-- Source File(s): fakerw/rpworld.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+rpATOMIC : seq CHAR  -- #define rpATOMIC rw::Atomic::ID
+rpCLUMP : seq CHAR  -- #define rpCLUMP rw::Clump::ID
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RpLightType ::= rpNALIGHTTYPE | rpLIGHTDIRECTIONAL | rpLIGHTAMBIENT | rpLIGHTPOINT | rpLIGHTSPOT | rpLIGHTSPOTSOFT
+  -- val(rpNALIGHTTYPE) = 0
+  -- val(rpLIGHTPOINT) = 0x80
+
+RpLightFlag ::= rpLIGHTLIGHTATOMICS | rpLIGHTLIGHTWORLD
+  -- val(rpLIGHTLIGHTATOMICS) = 0x01
+  -- val(rpLIGHTLIGHTWORLD) = 0x02
+
+RpGeometryFlag ::= rpGEOMETRYTRISTRIP | rpGEOMETRYPOSITIONS | rpGEOMETRYTEXTURED | rpGEOMETRYPRELIT | rpGEOMETRYNORMALS | rpGEOMETRYLIGHT | rpGEOMETRYMODULATEMATERIALCOLOR | rpGEOMETRYTEXTURED2 | rpGEOMETRYNATIVE | rpGEOMETRYNATIVEINSTANCE | rpGEOMETRYFLAGSMASK | rpGEOMETRYNATIVEFLAGSMASK
+  -- val(rpGEOMETRYTRISTRIP) = rw::Geometry::TRISTRIP
+  -- val(rpGEOMETRYPOSITIONS) = rw::Geometry::POSITIONS
+  -- val(rpGEOMETRYTEXTURED) = rw::Geometry::TEXTURED
+  -- val(rpGEOMETRYPRELIT) = rw::Geometry::PRELIT
+  -- val(rpGEOMETRYNORMALS) = rw::Geometry::NORMALS
+  -- val(rpGEOMETRYLIGHT) = rw::Geometry::LIGHT
+  -- val(rpGEOMETRYMODULATEMATERIALCOLOR) = rw::Geometry::MODULATE
+  -- val(rpGEOMETRYTEXTURED2) = rw::Geometry::TEXTURED2
+  -- val(rpGEOMETRYNATIVE) = rw::Geometry::NATIVE
+  -- val(rpGEOMETRYNATIVEINSTANCE) = rw::Geometry::NATIVEINSTANCE
+  -- val(rpGEOMETRYFLAGSMASK) = 0x000000FF
+  -- val(rpGEOMETRYNATIVEFLAGSMASK) = 0x0F000000
+
+RpGeometryLockMode ::= rpGEOMETRYLOCKPOLYGONS | rpGEOMETRYLOCKVERTICES | rpGEOMETRYLOCKNORMALS | rpGEOMETRYLOCKPRELIGHT | rpGEOMETRYLOCKTEXCOORDS | rpGEOMETRYLOCKTEXCOORDS1 | rpGEOMETRYLOCKTEXCOORDS2 | rpGEOMETRYLOCKTEXCOORDS3 | rpGEOMETRYLOCKTEXCOORDS4 | rpGEOMETRYLOCKTEXCOORDS5 | rpGEOMETRYLOCKTEXCOORDS6 | rpGEOMETRYLOCKTEXCOORDS7 | rpGEOMETRYLOCKTEXCOORDS8 | rpGEOMETRYLOCKTEXCOORDSALL | rpGEOMETRYLOCKALL
+  -- val(rpGEOMETRYLOCKPOLYGONS) = rw::Geometry::LOCKPOLYGONS
+  -- val(rpGEOMETRYLOCKVERTICES) = rw::Geometry::LOCKVERTICES
+  -- val(rpGEOMETRYLOCKNORMALS) = rw::Geometry::LOCKNORMALS
+  -- val(rpGEOMETRYLOCKPRELIGHT) = rw::Geometry::LOCKPRELIGHT
+  -- val(rpGEOMETRYLOCKTEXCOORDS) = rw::Geometry::LOCKTEXCOORDS
+  -- val(rpGEOMETRYLOCKTEXCOORDS1) = rw::Geometry::LOCKTEXCOORDS1
+  -- val(rpGEOMETRYLOCKTEXCOORDS2) = rw::Geometry::LOCKTEXCOORDS2
+  -- val(rpGEOMETRYLOCKTEXCOORDS3) = rw::Geometry::LOCKTEXCOORDS3
+  -- val(rpGEOMETRYLOCKTEXCOORDS4) = rw::Geometry::LOCKTEXCOORDS4
+  -- val(rpGEOMETRYLOCKTEXCOORDS5) = rw::Geometry::LOCKTEXCOORDS5
+  -- val(rpGEOMETRYLOCKTEXCOORDS6) = rw::Geometry::LOCKTEXCOORDS6
+  -- val(rpGEOMETRYLOCKTEXCOORDS7) = rw::Geometry::LOCKTEXCOORDS7
+  -- val(rpGEOMETRYLOCKTEXCOORDS8) = rw::Geometry::LOCKTEXCOORDS8
+  -- val(rpGEOMETRYLOCKTEXCOORDSALL) = rw::Geometry::LOCKTEXCOORDSALL
+  -- val(rpGEOMETRYLOCKALL) = rw::Geometry::LOCKALL
+
+RpAtomicFlag ::= rpATOMICCOLLISIONTEST | rpATOMICRENDER
+  -- val(rpATOMICCOLLISIONTEST) = 0x01
+  -- val(rpATOMICRENDER) = 0x04
+
+RpAtomicSetGeomFlag ::= rpATOMICSAMEBOUNDINGSPHERE
+  -- val(rpATOMICSAMEBOUNDINGSPHERE) = 0x01
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema RpClumpChunkInfo
+  numAtomics : ℤ
+  numLights : ℤ
+  numCameras : ℤ
+where
+  instance_addr ∈ ADDRESS
+end

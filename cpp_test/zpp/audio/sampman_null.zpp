@@ -1,0 +1,584 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: sampman_null (audio)
+-- Source File(s): audio/sampman_null.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cSampleManager_cSampleManager
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_cSampleManager_2
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetSpeakerConfig
+  ΔcSampleManager
+  nConfig? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetMaximumSupportedChannels
+  ΔcSampleManager
+  result! : ℕ
+where
+  -- Return postcondition: result! = MAXCHANNELS
+  true
+end
+
+schema cSampleManager_GetNum3DProvidersAvailable
+  ΔcSampleManager
+  result! : ℕ
+where
+  -- Return postcondition: result! = 1
+  true
+end
+
+schema cSampleManager_SetNum3DProvidersAvailable
+  ΔcSampleManager
+  num? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_Set3DProviderName
+  ΔcSampleManager
+  id? : ℕ
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetCurrent3DProviderIndex
+  ΔcSampleManager
+  result! : ℤ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_SetCurrent3DProvider
+  ΔcSampleManager
+  nProvider? : ℕ
+  result! : ℤ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_IsMP3RadioChannelAvailable
+  ΔcSampleManager
+where
+  -- Return postcondition: result! = nNumMP3s != 0
+  true
+end
+
+schema cSampleManager_ReleaseDigitalHandle
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_ReacquireDigitalHandle
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_Initialise
+  ΔcSampleManager
+where
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema cSampleManager_Terminate
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_CheckForAnAudioFileOnCD
+  ΔcSampleManager
+  result! : bool8
+where
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema cSampleManager_GetCDAudioDriveLetter
+  ΔcSampleManager
+  result! : seq CHAR
+where
+  -- Return postcondition: result! = '\0'
+  true
+end
+
+schema cSampleManager_UpdateEffectsVolume
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetEffectsMasterVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetMusicMasterVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetMP3BoostVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetEffectsFadeVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetMusicFadeVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetMonoMode
+  ΔcSampleManager
+  nMode? : bool8
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_LoadSampleBank
+  ΔcSampleManager
+  nBank? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_UnloadSampleBank
+  ΔcSampleManager
+  nBank? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_IsSampleBankLoaded
+  ΔcSampleManager
+  nBank? : ℕ
+where
+  -- Return postcondition: result! = LOADING_STATUS_NOT_LOADED
+  true
+end
+
+schema cSampleManager_IsMissionAudioLoaded
+  ΔcSampleManager
+  nSlot? : ℕ
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = LOADING_STATUS_NOT_LOADED
+  true
+end
+
+schema cSampleManager_LoadMissionAudio
+  ΔcSampleManager
+  nSlot? : ℕ
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_IsPedCommentLoaded
+  ΔcSampleManager
+  nComment? : ℕ
+where
+  -- Return postcondition: result! = LOADING_STATUS_NOT_LOADED
+  true
+end
+
+schema cSampleManager_GetPedCommentSlot
+  ΔcSampleManager
+  nComment? : ℕ
+where
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema cSampleManager_LoadPedComment
+  ΔcSampleManager
+  nComment? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_GetBankContainingSound
+  ΔcSampleManager
+  offset? : ℕ
+where
+  -- Return postcondition: result! = INVALID_SFX_BANK
+  true
+end
+
+schema cSampleManager_GetSampleBaseFrequency
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_GetSampleLoopStartOffset
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_GetSampleLoopEndOffset
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_GetSampleLength
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_UpdateReverb
+  ΔcSampleManager
+  result! : bool8
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_SetChannelReverbFlag
+  ΔcSampleManager
+  nChannel? : ℕ
+  nReverbFlag? : bool8
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_InitialiseChannel
+  ΔcSampleManager
+  nChannel? : ℕ
+  nSfx? : ℕ
+  nBank? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_SetChannelEmittingVolume
+  ΔcSampleManager
+  nChannel? : ℕ
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannel3DPosition
+  ΔcSampleManager
+  nChannel? : ℕ
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannel3DDistances
+  ΔcSampleManager
+  nChannel? : ℕ
+  fMax? : ℝ
+  fMin? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelVolume
+  ΔcSampleManager
+  nChannel? : ℕ
+  nVolume? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelPan
+  ΔcSampleManager
+  nChannel? : ℕ
+  nPan? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelFrequency
+  ΔcSampleManager
+  nChannel? : ℕ
+  nFreq? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelLoopPoints
+  ΔcSampleManager
+  nChannel? : ℕ
+  nLoopStart? : ℕ
+  nLoopEnd? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelLoopCount
+  ΔcSampleManager
+  nChannel? : ℕ
+  nLoopCount? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetChannelUsedFlag
+  ΔcSampleManager
+  nChannel? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_StartChannel
+  ΔcSampleManager
+  nChannel? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_StopChannel
+  ΔcSampleManager
+  nChannel? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_PreloadStreamedFile
+  ΔcSampleManager
+  nFile? : ℕ
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_PauseStream
+  ΔcSampleManager
+  nPauseFlag? : bool8
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_StartPreloadedStreamedFile
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_StartStreamedFile
+  ΔcSampleManager
+  nFile? : ℕ
+  nPos? : ℕ
+  nStream? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_StopStreamedFile
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetStreamedFilePosition
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema cSampleManager_SetStreamedVolumeAndPan
+  ΔcSampleManager
+  nVolume? : ℕ
+  nPan? : ℕ
+  nEffectFlag? : bool8
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetStreamedFileLength
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- Return postcondition: result! = 1
+  true
+end
+
+schema cSampleManager_IsStreamPlaying
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_InitialiseSampleBanks
+  ΔcSampleManager
+where
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema cSampleManager_SetStreamedFileLoopFlag
+  ΔcSampleManager
+  nLoopFlag? : bool8
+  nChannel? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_AutoDetect3DProviders
+  ΔcSampleManager
+  result! : ℤ
+where
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema cSampleManager_SetMonoMode_2
+  ΔcSampleManager
+  nMode? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_PreloadStreamedFile_2
+  ΔcSampleManager
+  nFile? : ℕ
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_StartStreamedFile_2
+  ΔcSampleManager
+  nFile? : ℕ
+  nPos? : ℕ
+  nStream? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_SetStreamedVolumeAndPan_2
+  ΔcSampleManager
+  nVolume? : ℕ
+  nPan? : ℕ
+  nEffectFlag? : ℕ
+  nStream? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema sampman_nullModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 499
+end

@@ -1,0 +1,114 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RoadBlocks (control)
+-- Source File(s): control/RoadBlocks.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CScriptRoadblock
+  m_vInf : CVector
+  m_vSup : CVector
+  m_bInUse : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CScriptRoadblock_GetPosition
+  ΔCScriptRoadblock
+  result! : CVector
+where
+  -- Declared member operation CScriptRoadblock::GetPosition()
+  true
+end
+
+schema CRoadBlocks
+  NumRoadBlocks : ℤ
+  RoadBlockNodes : seq ℤ  -- bounded array [NUMROADBLOCKS]
+  InOrOut : seq 𝔹  -- bounded array [NUMROADBLOCKS]
+  aScriptRoadBlocks : seq CScriptRoadblock  -- bounded array [NUM_SCRIPT_ROADBLOCKS]
+  RoadBlockObjects : seq ℤ  -- bounded array [NUMROADBLOCKS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRoadBlocks_Init
+  ΔCRoadBlocks
+where
+  -- Declared member operation CRoadBlocks::Init(void)
+  true
+end
+
+schema CRoadBlocks_GenerateRoadBlockCopsForCar_2
+  ΔCRoadBlocks
+  pVehicle? : Ref[CVehicle]
+  roadBlockType? : ℤ
+where
+  -- Declared member operation CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType)
+  true
+end
+
+schema CRoadBlocks_GenerateRoadBlocks_3
+  ΔCRoadBlocks
+where
+  -- Declared member operation CRoadBlocks::GenerateRoadBlocks(void)
+  true
+end
+
+schema CRoadBlocks_CreateRoadBlockBetween2Points_4
+  ΔCRoadBlocks
+  arg_1? : CVector
+  arg_2? : CVector
+where
+  -- Declared member operation CRoadBlocks::CreateRoadBlockBetween2Points(CVector, CVector)
+  true
+end
+
+schema CRoadBlocks_RegisterScriptRoadBlock_5
+  ΔCRoadBlocks
+  arg_1? : CVector
+  arg_2? : CVector
+where
+  -- Declared member operation CRoadBlocks::RegisterScriptRoadBlock(CVector, CVector)
+  true
+end
+
+schema CRoadBlocks_ClearScriptRoadBlocks_6
+  ΔCRoadBlocks
+where
+  -- Declared member operation CRoadBlocks::ClearScriptRoadBlocks()
+  true
+end
+
+schema CRoadBlocks_GenerateRoadBlockCopsForCar_7
+  ΔCRoadBlocks
+  pVehicle? : Ref[CVehicle]
+  roadBlockType? : ℤ
+  roadBlockNode? : ℤ
+where
+  -- Declared member operation CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType, int16 roadBlockNode)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema RoadBlocks_GetPosition
+  ΔRoadBlocksModuleState
+  result! : CVector
+where
+  -- Return postcondition: result! = (m_vInf + m_vSup) / 2
+  true
+end

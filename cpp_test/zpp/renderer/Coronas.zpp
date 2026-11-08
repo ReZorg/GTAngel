@@ -1,0 +1,462 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Coronas (renderer)
+-- Source File(s): renderer/Coronas.cpp, renderer/Coronas.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include World.zpp  (from "World.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Bridge.zpp  (from "Bridge.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Coronas_Enum_1 ::= SUN_CORE | SUN_CORONA
+  -- val(SUN_CORE) = 1
+
+Coronas_Enum_2 ::= TYPE_STAR | TYPE_NORMAL | TYPE_MOON | TYPE_REFLECT | TYPE_HEADLIGHT | TYPE_HEX | TYPE_CIRCLE | TYPE_RING | TYPE_STREAK
+
+Coronas_Enum_3 ::= FLARE_NONE | FLARE_SUN | FLARE_HEADLIGHTS
+
+Coronas_Enum_4 ::= REFLECTION_OFF | REFLECTION_ON
+
+Coronas_Enum_5 ::= LOSCHECK_OFF | LOSCHECK_ON
+
+Coronas_Enum_6 ::= STREAK_OFF | STREAK_ON
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema FlareDef
+  position : ℝ
+  size : ℝ
+  red : ℤ
+  green : ℤ
+  blue : ℤ
+  alpha : ℤ
+  texture : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRegisteredCorona
+  coors : CVector
+  id : ℕ
+  lastLOScheck : ℕ
+  texture : Ref[RwTexture]
+  size : ℝ
+  someAngle : ℝ
+  drawDist : ℝ
+  nearDist : ℝ
+  heightAboveRoad : ℝ
+  red : ℕ
+  green : ℕ
+  blue : ℕ
+  alpha : ℕ
+  fadeAlpha : ℕ
+  registeredThisFrame : 𝔹
+  flareType : ℤ
+  reflection : ℤ
+  LOScheck : 𝔹
+  offScreen : 𝔹
+  firstUpdate : 𝔹
+  drawStreak : 𝔹
+  sightClear : 𝔹
+  useNearDist : 𝔹
+  renderReflection : 𝔹
+  prevX : seq ℤ  -- bounded array [6]
+  prevY : seq ℤ  -- bounded array [6]
+  prevRed : seq ℕ  -- bounded array [6]
+  prevGreen : seq ℕ  -- bounded array [6]
+  prevBlue : seq ℕ  -- bounded array [6]
+  hasValue : seq 𝔹  -- bounded array [6]
+where
+  id ≥ 0
+  lastLOScheck ≥ 0
+  #texture ≤ 1
+  red ≥ 0
+  green ≥ 0
+  blue ≥ 0
+  alpha ≥ 0
+  fadeAlpha ≥ 0
+  #LOScheck = 1
+  #offScreen = 1
+  #firstUpdate = 1
+  #drawStreak = 1
+  #sightClear = 1
+  #useNearDist = 1
+  #renderReflection = 1
+  #prevX = 6
+end
+
+schema CRegisteredCorona_Update
+  ΔCRegisteredCorona
+where
+  -- Declared member operation CRegisteredCorona::Update(void)
+  true
+end
+
+schema CCoronas
+  aCoronas : seq CRegisteredCorona  -- bounded array [NUMCORONAS]
+  LightsMult : ℝ
+  SunScreenY : ℝ
+  SunScreenX : ℝ
+  MoonSize : ℤ
+  SunBlockedByClouds : 𝔹
+  bChangeBrightnessImmediately : ℤ
+  bSmallMoon : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCoronas_Init
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::Init(void)
+  true
+end
+
+schema CCoronas_Shutdown_2
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::Shutdown(void)
+  true
+end
+
+schema CCoronas_Update_3
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::Update(void)
+  true
+end
+
+schema CCoronas_RegisterCorona_4
+  ΔCCoronas
+  id? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  coors? : CVector
+  size? : ℝ
+  drawDist? : ℝ
+  tex? : Ref[RwTexture]
+  flareType? : ℤ
+  reflection? : ℕ
+  LOScheck? : ℕ
+  drawStreak? : ℕ
+  someAngle? : ℝ
+  useNearDist? : 𝔹
+  nearDist? : ℝ
+where
+  -- Declared member operation CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha, const CVector &coors, float size, float drawDist, RwTexture *tex, int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle, bool useNearDist = false, float nearDist = 1.5f)
+  true
+end
+
+schema CCoronas_RegisterCorona_5
+  ΔCCoronas
+  id? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  coors? : CVector
+  size? : ℝ
+  drawDist? : ℝ
+  type? : ℕ
+  flareType? : ℤ
+  reflection? : ℕ
+  LOScheck? : ℕ
+  drawStreak? : ℕ
+  someAngle? : ℝ
+  useNearDist? : 𝔹
+  nearDist? : ℝ
+where
+  -- Declared member operation CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha, const CVector &coors, float size, float drawDist, uint8 type, int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle, bool useNearDist = false, float nearDist = 1.5f)
+  true
+end
+
+schema CCoronas_UpdateCoronaCoors_6
+  ΔCCoronas
+  id? : ℕ
+  coors? : CVector
+  drawDist? : ℝ
+  someAngle? : ℝ
+where
+  -- Declared member operation CCoronas::UpdateCoronaCoors(uint32 id, const CVector &coors, float drawDist, float someAngle)
+  true
+end
+
+schema CCoronas_Render_7
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::Render(void)
+  true
+end
+
+schema CCoronas_RenderReflections_8
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::RenderReflections(void)
+  true
+end
+
+schema CCoronas_RenderSunReflection_9
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::RenderSunReflection(void)
+  true
+end
+
+schema CCoronas_DoSunAndMoon_10
+  ΔCCoronas
+where
+  -- Declared member operation CCoronas::DoSunAndMoon(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCoronas_Init
+  ΔCCoronas
+where
+  -- State update: id' = 0
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::FindTxdSlot, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CCoronas_Shutdown
+  ΔCCoronas
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCoronas_Update
+  ΔCCoronas
+where
+  -- State update: LastCamLook' = 0
+  -- State update: LightsMult' = Min(LightsMult + 0.03f * CTimer::GetTimeStep(), 1.0f)
+  -- State update: CamLook' = 0
+  -- State update: bChangeBrightnessImmediately' = 3
+  -- State update: bChangeBrightnessImmediately' = Max(bChangeBrightnessImmediately-1, 0)
+  -- State update: LastCamLook' = CamLook
+  -- Invokes: CTimer::GetTimeStep, TheCamera.GetLookDirection
+  true
+end
+
+schema CCoronas_RegisterCorona
+  ΔCCoronas
+  id? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  coors? : CVector
+  size? : ℝ
+  drawDist? : ℝ
+  tex? : Ref[RwTexture]
+  flareType? : ℤ
+  reflection? : ℕ
+  LOScheck? : ℕ
+  drawStreak? : ℕ
+  someAngle? : ℝ
+  useNearDist? : 𝔹
+  nearDist? : ℝ
+where
+  -- State update: dist' = (TheCamera.GetPosition() - coors).Magnitude()
+  -- State update: fadeAlpha' = 0
+  -- State update: offScreen' = true
+  -- State update: firstUpdate' = true
+  -- State update: renderReflection' = false
+  -- State update: lastLOScheck' = 0
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CCoronas_RegisterCorona_2
+  ΔCCoronas
+  id? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  coors? : CVector
+  size? : ℝ
+  drawDist? : ℝ
+  type? : ℕ
+  flareType? : ℤ
+  reflection? : ℕ
+  LOScheck? : ℕ
+  drawStreak? : ℕ
+  someAngle? : ℝ
+  useNearDist? : 𝔹
+  nearDist? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCoronas_UpdateCoronaCoors
+  ΔCCoronas
+  id? : ℕ
+  coors? : CVector
+  drawDist? : ℝ
+  someAngle? : ℝ
+where
+  -- State update: id' = 0
+  -- State update: coors' = coors
+  -- State update: someAngle' = someAngle
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CCoronas_Render
+  ΔCCoronas
+where
+  -- State update: screenw' = RwRasterGetWidth(RwCameraGetRaster(Scene.camera))
+  -- State update: screenh' = RwRasterGetHeight(RwCameraGetRaster(Scene.camera))
+  -- State update: offScreen' = true
+  -- State update: sightClear' = false
+  -- State update: offScreen' = false
+  -- State update: offScreen' = true
+  -- Invokes: CSprite::CalcScreenCoors, CTimer::GetTimeInMilliseconds, CWorld::GetIsLineOfSightClear, CSprite::RenderOneXLUSprite, CSprite::RenderOneXLUSprite_Rotate_Aspect
+  true
+end
+
+schema CCoronas_RenderReflections
+  ΔCCoronas
+where
+  -- State update: heightAboveRoad' = aCoronas[i].coors.z - point.point.z
+  -- State update: heightAboveRoad' = aCoronas[i].coors.z - point.point.z
+  -- State update: renderReflection' = true
+  -- State update: coors' = aCoronas[i].coors
+  -- State update: drawDist' = 0.75f * aCoronas[i].drawDist
+  -- State update: drawDist' = Min(drawDist, 55.0f)
+  -- Invokes: CSprite::InitSpriteBuffer, CTimer::GetFrameCounter, CWorld::ProcessVerticalLine, TheCamera.GetPosition, CSprite::CalcScreenCoors
+  true
+end
+
+schema CCoronas_RenderSunReflection
+  ΔCCoronas
+where
+  -- State update: sunZDir' = CTimeCycle::GetSunDirection().z
+  -- State update: sunPos.z' = 0.5f*CWeather::Wind + 6.1f
+  -- State update: sunDir' = CTimeCycle::GetSunDirection()
+  -- State update: sunDir.z' = 0.0
+  -- State update: TempBufferIndicesStored' = 6
+  -- State update: TempBufferVerticesStored' = 4
+  -- Invokes: CTimeCycle::GetSunDirection, CTimeCycle::GetSunCoreRed, CTimeCycle::GetSunCoronaRed, CTimeCycle::GetSunCoreGreen, CTimeCycle::GetSunCoronaGreen
+  true
+end
+
+schema CCoronas_DoSunAndMoon
+  ΔCCoronas
+where
+  -- State update: sunCoors' = CTimeCycle::GetSunDirection()
+  -- State update: SunScreenX' = spriteCoors.x
+  -- State update: SunScreenY' = spriteCoors.y
+  -- State update: SunScreenX' = 1000000.0f
+  -- State update: SunScreenY' = 1000000.0f
+  -- Invokes: CTimeCycle::GetSunDirection, TheCamera.GetPosition, CGeneral::GetRandomNumber, CTimeCycle::GetSunSize, CTimeCycle::GetSunCoreRed
+  true
+end
+
+schema CRegisteredCorona_Update
+  ΔCRegisteredCorona
+where
+  -- State update: alpha' = 0
+  -- State update: fadeAlpha' = Max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), 0.0f)
+  -- State update: fadeAlpha' = Max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), 0.0f)
+  -- State update: fadeAlpha' = Min(fadeAlpha + 15.0f*CTimer::GetTimeStep(), alpha)
+  -- State update: fadeAlpha' = alpha
+  -- State update: fadeAlpha' = Max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), alpha)
+  -- Invokes: CWorld::GetIsLineOfSightClear, TheCamera.GetPosition, CTimer::GetTimeStep
+  true
+end
+
+schema CEntity_ProcessLightsForEntity
+  ΔCEntity
+where
+  -- State update: flashTimer1' = 0
+  -- State update: flashTimer2' = 0
+  -- State update: flashTimer3' = 0
+  -- State update: effect' = CModelInfo::GetModelInfo(GetModelIndex()).Get2dEffect(i)
+  -- State update: pos' = GetMatrix() * effect.pos
+  -- State update: lightOn' = false
+  -- Invokes: CModelInfo::GetModelInfo, CClock::GetHours, CTimer::GetTimeInMilliseconds, CBridge::ShouldLightsBeFlashing, CCoronas::RegisterCorona
+  true
+end
+
+schema CCoronas_RegisterCorona_3
+  ΔCCoronas
+  id? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  coors? : CVector
+  size? : ℝ
+  drawDist? : ℝ
+  tex? : Ref[RwTexture]
+  flareType? : ℤ
+  reflection? : ℕ
+  LOScheck? : ℕ
+  drawStreak? : ℕ
+  someAngle? : ℝ
+where
+  -- State update: fadeAlpha' = 0
+  -- State update: offScreen' = true
+  -- State update: firstUpdate' = true
+  -- State update: renderReflection' = false
+  -- State update: lastLOScheck' = 0
+  -- State update: sightClear' = false
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CCoronas_RegisterCorona_4
+  ΔCCoronas
+  id? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  coors? : CVector
+  size? : ℝ
+  drawDist? : ℝ
+  type? : ℕ
+  flareType? : ℤ
+  reflection? : ℕ
+  LOScheck? : ℕ
+  drawStreak? : ℕ
+  someAngle? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

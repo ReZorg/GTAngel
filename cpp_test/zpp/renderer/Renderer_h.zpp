@@ -1,0 +1,284 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Renderer (renderer)
+-- Source File(s): renderer/Renderer.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+LOD_DISTANCE : ℝ  -- #define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
+FADE_DISTANCE : ℝ  -- #define FADE_DISTANCE 20.0f
+STREAM_DISTANCE : ℝ  -- #define STREAM_DISTANCE 30.0f
+BACKFACE_CULLING_ON : seq CHAR  -- #define BACKFACE_CULLING_ON SetCullMode(rwCULLMODECULLBACK)
+BACKFACE_CULLING_OFF : seq CHAR  -- #define BACKFACE_CULLING_OFF SetCullMode(rwCULLMODECULLNONE)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema BlockedRange
+  b : ℝ
+  next : Ref[BlockedRange_prev]
+where
+  #next ≤ 1
+end
+
+schema CRenderer
+  ms_nNoOfVisibleEntities : ℤ
+  ms_aVisibleEntityPtrs : seq Ref[CEntity]  -- bounded array [NUMVISIBLEENTITIES]
+  ms_nNoOfInVisibleEntities : ℤ
+  ms_aInVisibleEntityPtrs : seq Ref[CEntity]  -- bounded array [NUMINVISIBLEENTITIES]
+  ms_aVisibleVehiclePtrs : seq Ref[CEntity]  -- bounded array [NUMVISIBLEENTITIES]
+  ms_nNoOfVisibleBuildings : ℤ
+  ms_aVisibleBuildingPtrs : seq Ref[CEntity]  -- bounded array [NUMVISIBLEENTITIES]
+  m_pFirstPersonVehicle : Ref[CVehicle]
+  aBlockedRanges : seq BlockedRange  -- bounded array [16]
+  pFullBlockedRanges : Ref[BlockedRange]
+  pEmptyBlockedRanges : Ref[BlockedRange]
+  ms_lodDistScale : ℝ
+  m_loadingPriority : 𝔹
+where
+  #m_pFirstPersonVehicle ≤ 1
+  #aBlockedRanges = 16
+  #pFullBlockedRanges ≤ 1
+  #pEmptyBlockedRanges ≤ 1
+end
+
+schema CRenderer_Init
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::Init(void)
+  true
+end
+
+schema CRenderer_Shutdown_2
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::Shutdown(void)
+  true
+end
+
+schema CRenderer_PreRender_3
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::PreRender(void)
+  true
+end
+
+schema CRenderer_RenderRoads_4
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderRoads(void)
+  true
+end
+
+schema CRenderer_RenderFadingInEntities_5
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderFadingInEntities(void)
+  true
+end
+
+schema CRenderer_RenderEverythingBarRoads_6
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderEverythingBarRoads(void)
+  true
+end
+
+schema CRenderer_RenderVehiclesButNotBoats_7
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderVehiclesButNotBoats(void)
+  true
+end
+
+schema CRenderer_RenderBoats_8
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderBoats(void)
+  true
+end
+
+schema CRenderer_RenderOneRoad_9
+  ΔCRenderer
+  arg_1? : Ref[CEntity]
+where
+  -- Declared member operation CRenderer::RenderOneRoad(CEntity *)
+  true
+end
+
+schema CRenderer_RenderOneNonRoad_10
+  ΔCRenderer
+  arg_1? : Ref[CEntity]
+where
+  -- Declared member operation CRenderer::RenderOneNonRoad(CEntity *)
+  true
+end
+
+schema CRenderer_RenderFirstPersonVehicle_11
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderFirstPersonVehicle(void)
+  true
+end
+
+schema CRenderer_RenderCollisionLines_12
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderCollisionLines(void)
+  true
+end
+
+schema CRenderer_RenderBlockBuildingLines_13
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RenderBlockBuildingLines(void)
+  true
+end
+
+schema CRenderer_SetupEntityVisibility_14
+  ΔCRenderer
+  ent? : Ref[CEntity]
+  result! : ℤ
+where
+  -- Declared member operation CRenderer::SetupEntityVisibility(CEntity *ent)
+  true
+end
+
+schema CRenderer_SetupBigBuildingVisibility_15
+  ΔCRenderer
+  ent? : Ref[CEntity]
+  result! : ℤ
+where
+  -- Declared member operation CRenderer::SetupBigBuildingVisibility(CEntity *ent)
+  true
+end
+
+schema CRenderer_ConstructRenderList_16
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::ConstructRenderList(void)
+  true
+end
+
+schema CRenderer_ScanWorld_17
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::ScanWorld(void)
+  true
+end
+
+schema CRenderer_RequestObjectsInFrustum_18
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::RequestObjectsInFrustum(void)
+  true
+end
+
+schema CRenderer_ScanSectorPoly_19
+  ΔCRenderer
+  poly? : Ref[RwV2d]
+  numVertices? : ℤ
+  scanfunc? : Ref[void]
+where
+  -- Declared member operation CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)
+  true
+end
+
+schema CRenderer_ScanBigBuildingList_20
+  ΔCRenderer
+  list? : CPtrList
+where
+  -- Declared member operation CRenderer::ScanBigBuildingList(CPtrList &list)
+  true
+end
+
+schema CRenderer_ScanSectorList_21
+  ΔCRenderer
+  lists? : Ref[CPtrList]
+where
+  -- Declared member operation CRenderer::ScanSectorList(CPtrList *lists)
+  true
+end
+
+schema CRenderer_ScanSectorList_Priority_22
+  ΔCRenderer
+  lists? : Ref[CPtrList]
+where
+  -- Declared member operation CRenderer::ScanSectorList_Priority(CPtrList *lists)
+  true
+end
+
+schema CRenderer_ScanSectorList_Subway_23
+  ΔCRenderer
+  lists? : Ref[CPtrList]
+where
+  -- Declared member operation CRenderer::ScanSectorList_Subway(CPtrList *lists)
+  true
+end
+
+schema CRenderer_ScanSectorList_RequestModels_24
+  ΔCRenderer
+  lists? : Ref[CPtrList]
+where
+  -- Declared member operation CRenderer::ScanSectorList_RequestModels(CPtrList *lists)
+  true
+end
+
+schema CRenderer_SortBIGBuildings_25
+  ΔCRenderer
+where
+  -- Declared member operation CRenderer::SortBIGBuildings(void)
+  true
+end
+
+schema CRenderer_SortBIGBuildingsForSectorList_26
+  ΔCRenderer
+  list? : Ref[CPtrList]
+where
+  -- Declared member operation CRenderer::SortBIGBuildingsForSectorList(CPtrList *list)
+  true
+end
+
+schema CRenderer_ShouldModelBeStreamed_27
+  ΔCRenderer
+  ent? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CRenderer::ShouldModelBeStreamed(CEntity *ent)
+  true
+end
+
+schema CRenderer_IsEntityCullZoneVisible_28
+  ΔCRenderer
+  ent? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CRenderer::IsEntityCullZoneVisible(CEntity *ent)
+  true
+end
+
+schema CRenderer_IsVehicleCullZoneVisible_29
+  ΔCRenderer
+  ent? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
+  true
+end
+
+schema CRenderer_RemoveVehiclePedLights_30
+  ΔCRenderer
+  ent? : Ref[CEntity]
+  reset? : 𝔹
+where
+  -- Declared member operation CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
+  true
+end

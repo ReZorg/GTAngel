@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Leeds (core)
+-- Source File(s): core/Leeds.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Leeds.zpp  (from "Leeds.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Leeds_LoadResource
+  ΔLeedsModuleState
+  atomic? : Ref[RpAtomic]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_LoadResource_2
+  ΔLeedsModuleState
+  clump? : Ref[RpClump]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource
+  ΔLeedsModuleState
+  tex? : Ref[RwTexture]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource_2
+  ΔLeedsModuleState
+  txd? : Ref[RwTexDictionary]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource_3
+  ΔLeedsModuleState
+  mat? : Ref[RpMaterial]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource_4
+  ΔLeedsModuleState
+  matlist? : Ref[RpMaterialList]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource_5
+  ΔLeedsModuleState
+  geo? : Ref[RpGeometry]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource_6
+  ΔLeedsModuleState
+  atomic? : Ref[RpAtomic]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Leeds_SaveResource_7
+  ΔLeedsModuleState
+  clump? : Ref[RpClump]
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema LeedsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 14
+end

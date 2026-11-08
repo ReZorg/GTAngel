@@ -1,0 +1,135 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Rubbish (renderer)
+-- Source File(s): renderer/Rubbish.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Stats.zpp  (from "Stats.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+RUBBISH_MAX_DIST : ℝ  -- #define RUBBISH_MAX_DIST (18.0f)
+RUBBISH_FADE_DIST : ℝ  -- #define RUBBISH_FADE_DIST (16.5f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema COneSheet_AddToList
+  ΔCOneSheet
+  list? : Ref[COneSheet]
+where
+  -- State update: m_next' = list.m_next
+  -- State update: m_prev' = list
+  -- State update: list.m_next' = this
+  -- State update: m_next.m_prev' = this
+  true
+end
+
+schema COneSheet_RemoveFromList
+  ΔCOneSheet
+where
+  -- State update: m_next.m_prev' = m_prev
+  -- State update: m_prev.m_next' = m_next
+  true
+end
+
+schema CRubbish_Render
+  ΔCRubbish
+where
+  -- State update: type' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: sheet' = &aSheets[type*NUM_RUBBISH_SHEETS / 4]
+  -- State update: alpha' = 100
+  -- State update: pos' = sheet.m_basePos
+  -- Invokes: CTimer::GetTimeInMilliseconds, TheCamera.GetPosition
+  true
+end
+
+schema CRubbish_StirUp
+  ΔCRubbish
+  veh? : Ref[CVehicle]
+where
+  -- State update: speed' = veh.GetMoveSpeed().Magnitude2D()
+  -- State update: movingForward' = DotProduct2D(veh.GetMoveSpeed(), veh.GetForward()) > 0.0f
+  -- State update: sheet' = StartStaticsList.m_next
+  -- State update: size' = veh.GetColModel().boundingBox.max
+  -- State update: next' = sheet.m_next
+  -- State update: carToSheet' = sheet.m_basePos - veh.GetPosition()
+  -- Invokes: CTimer::GetFrameCounter, veh->GetPosition, TheCamera.GetPosition, veh->GetMoveSpeed, veh->GetForward
+  true
+end
+
+schema CRubbish_Update
+  ΔCRubbish
+where
+  -- State update: RubbishVisibility' = Max(RubbishVisibility-5, 0)
+  -- State update: RubbishVisibility' = Min(RubbishVisibility+5, 255)
+  -- State update: sheet' = StartEmptyList.m_next
+  -- State update: r' = CGeneral::GetRandomNumber()
+  -- State update: spawnAngle' = (CGeneral::GetRandomNumber()&0xFF)/256.0f * 6.28f
+  -- State update: spawnAngle' = (r-128)/160.0f + TheCamera.Orientation
+  -- Invokes: CGeneral::GetRandomNumber, TheCamera.GetPosition, CWorld::FindGroundZFor3DCoord, CCullZones::FindAttributesForCoors, sheet->RemoveFromList
+  true
+end
+
+schema CRubbish_SetVisibility
+  ΔCRubbish
+  visible? : 𝔹
+where
+  -- State update: bRubbishInvisible' = !visible
+  true
+end
+
+schema CRubbish_Init
+  ΔCRubbish
+where
+  -- State update: m_state' = 0
+  -- State update: m_next' = &aSheets[i+1]
+  -- State update: m_next' = &EndEmptyList
+  -- State update: m_prev' = &aSheets[i-1]
+  -- State update: m_prev' = &StartEmptyList
+  -- State update: StartEmptyList.m_next' = &aSheets[0]
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::FindTxdSlot, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CRubbish_Shutdown
+  ΔCRubbish
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RubbishModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 492
+end

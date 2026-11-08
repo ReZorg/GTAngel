@@ -1,0 +1,216 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: relocatableChunk (leeds)
+-- Source File(s): leeds/base/relocatableChunk.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cRelocatableChunk
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cRelocatableChunk_Load
+  ΔcRelocatableChunk
+  data? : ADDRESS
+  bShrink? : 𝔹
+  result! : ADDRESS
+where
+  -- Declared member operation cRelocatableChunk::Load(void* data, bool bShrink)
+  true
+end
+
+schema cRelocatableChunk_Load_2
+  ΔcRelocatableChunk
+  name? : seq CHAR
+  bShrink? : 𝔹
+  result! : ADDRESS
+where
+  -- Declared member operation cRelocatableChunk::Load(const char* name, bool bShrink)
+  true
+end
+
+schema cRelocatableChunk_Fixup_3
+  ΔcRelocatableChunk
+  header? : sChunkHeader
+  data? : ADDRESS
+where
+  -- Declared member operation cRelocatableChunk::Fixup(const sChunkHeader& header, void* data)
+  true
+end
+
+schema cRelocatableChunk_Fixup_4
+  ΔcRelocatableChunk
+  data? : ADDRESS
+where
+  -- Declared member operation cRelocatableChunk::Fixup(void* data)
+  true
+end
+
+schema cRelocatableChunk_Shrink_5
+  ΔcRelocatableChunk
+  header? : sChunkHeader
+  data? : ADDRESS
+  result! : ADDRESS
+where
+  -- Declared member operation cRelocatableChunk::Shrink(const sChunkHeader& header, void* data)
+  true
+end
+
+schema cRelocatableChunk_Shrink_6
+  ΔcRelocatableChunk
+  data? : ADDRESS
+  result! : ADDRESS
+where
+  -- Declared member operation cRelocatableChunk::Shrink(void* data)
+  true
+end
+
+schema cRelocatableChunkClassInfo
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cRelocatableChunkClassInfo_cRelocatableChunkClassInfo
+  ΔcRelocatableChunkClassInfo
+  class_name? : seq CHAR
+  pVmt? : ADDRESS
+  size? : ℤ
+where
+  -- Declared member operation cRelocatableChunkClassInfo::cRelocatableChunkClassInfo(const char* class_name, const void* pVmt, int size)
+  true
+end
+
+schema cRelocatableChunkWriter
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cRelocatableChunkWriter_cRelocatableChunkWriter
+  ΔcRelocatableChunkWriter
+where
+  -- Declared member operation cRelocatableChunkWriter::cRelocatableChunkWriter()
+  true
+end
+
+schema cRelocatableChunkWriter_cRelocatableChunkWriter_2
+  ΔcRelocatableChunkWriter
+  result! : ANY
+where
+  -- Declared member operation cRelocatableChunkWriter::cRelocatableChunkWriter()
+  true
+end
+
+schema cRelocatableChunkWriter_AddPatch_3
+  ΔcRelocatableChunkWriter
+  addr? : ADDRESS
+where
+  -- Declared member operation cRelocatableChunkWriter::AddPatch(void* addr)
+  true
+end
+
+schema cRelocatableChunkWriter_AddPatchWithInfo_4
+  ΔcRelocatableChunkWriter
+  str? : seq CHAR
+  unk? : ℤ
+  addr? : ADDRESS
+where
+  -- Declared member operation cRelocatableChunkWriter::AddPatchWithInfo(const char* str, int unk, void* addr)
+  true
+end
+
+schema cRelocatableChunkWriter_AllocateRaw_5
+  ΔcRelocatableChunkWriter
+  addr? : ADDRESS
+  size? : ℕ
+  align? : ℕ
+  a5? : 𝔹
+  a6? : 𝔹
+where
+  -- Declared member operation cRelocatableChunkWriter::AllocateRaw(void* addr, uint32 size, uint32 align, bool a5 = false, bool a6 = false)
+  true
+end
+
+schema cRelocatableChunkWriter_Clear_6
+  ΔcRelocatableChunkWriter
+where
+  -- Declared member operation cRelocatableChunkWriter::Clear()
+  true
+end
+
+schema cRelocatableChunkWriter_Class_7
+  ΔcRelocatableChunkWriter
+  ptr? : ADDRESS
+  classInfo? : cRelocatableChunkClassInfo
+where
+  -- Declared member operation cRelocatableChunkWriter::Class(void* ptr, const cRelocatableChunkClassInfo& classInfo)
+  true
+end
+
+schema cRelocatableChunkWriter_DebugFileLine_8
+  ΔcRelocatableChunkWriter
+  arg_1? : ADDRESS
+where
+  -- Declared member operation cRelocatableChunkWriter::DebugFileLine(void*)
+  true
+end
+
+schema cRelocatableChunkWriter_PatchFunc_9
+  ΔcRelocatableChunkWriter
+  ptr? : ADDRESS
+where
+  -- Declared member operation cRelocatableChunkWriter::PatchFunc(void* ptr)
+  true
+end
+
+schema cRelocatableChunkWriter_IsAllocated_10
+  ΔcRelocatableChunkWriter
+  addr? : ADDRESS
+  result! : 𝔹
+where
+  -- Declared member operation cRelocatableChunkWriter::IsAllocated(void* addr)
+  true
+end
+
+schema cRelocatableChunkWriter_Reserve_11
+  ΔcRelocatableChunkWriter
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation cRelocatableChunkWriter::Reserve(int, int)
+  true
+end
+
+schema cRelocatableChunkWriter_Save_12
+  ΔcRelocatableChunkWriter
+  filename? : seq CHAR
+  a3? : ℕ
+  a4? : ℕ
+  a5? : 𝔹
+where
+  -- Declared member operation cRelocatableChunkWriter::Save(const char* filename, uint32 a3, uint32 a4, bool a5)
+  true
+end
+
+schema cRelocatableChunkWriter_Save_13
+  ΔcRelocatableChunkWriter
+  file? : ADDRESS
+  a3? : ℕ
+  a4? : ℕ
+  a5? : 𝔹
+  pHeader? : Ref[sChunkHeader]
+where
+  -- Declared member operation cRelocatableChunkWriter::Save(void* file, uint32 a3, uint32 a4, bool a5, sChunkHeader* pHeader)
+  true
+end

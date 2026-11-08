@@ -1,0 +1,330 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MBlur (renderer)
+-- Source File(s): renderer/MBlur.cpp, renderer/MBlur.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include d3d8caps.zpp  (from "d3d8caps.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include postfx.zpp  (from "postfx.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #endif
+NUM_RENDER_FX : ℕ  -- #define NUM_RENDER_FX 64
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+FxType ::= FXTYPE_WATER1 | FXTYPE_WATER2 | FXTYPE_BLOOD1 | FXTYPE_BLOOD2 | FXTYPE_HEATHAZE | FXTYPE_SPLASH1 | FXTYPE_SPLASH2 | FXTYPE_SPLASH3
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CMBlur
+  pFrontBuffer : Ref[RwRaster]
+  ms_bJustInitialised : 𝔹
+  ms_bScaledBlur : 𝔹
+  BlurOn : 𝔹
+  Drunkness : ℝ
+  pBufVertCount : ℤ
+where
+  #pFrontBuffer ≤ 1
+end
+
+schema CMBlur_MotionBlurOpen
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::MotionBlurOpen(RwCamera *cam)
+  true
+end
+
+schema CMBlur_MotionBlurClose_2
+  ΔCMBlur
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::MotionBlurClose(void)
+  true
+end
+
+schema CMBlur_CreateImmediateModeData_3
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+where
+  -- Declared member operation CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
+  true
+end
+
+schema CMBlur_CreateImmediateModeData_4
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  verts? : Ref[RwIm2DVertex]
+  color? : RwRGBA
+  u1Off? : ℝ
+  v1Off? : ℝ
+  u2Off? : ℝ
+  v2Off? : ℝ
+  z? : ℝ
+  fullTexture? : ℤ
+where
+  -- Declared member operation CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect, RwIm2DVertex *verts, RwRGBA color, float u1Off, float v1Off, float u2Off, float v2Off, float z, int fullTexture)
+  true
+end
+
+schema CMBlur_MotionBlurRender_5
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- Declared member operation CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
+  true
+end
+
+schema CMBlur_OverlayRender_6
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  raster? : Ref[RwRaster]
+  color? : RwRGBA
+  type? : ℤ
+  bluralpha? : ℤ
+where
+  -- Declared member operation CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, int32 bluralpha)
+  true
+end
+
+schema CMBlur_SetDrunkBlur_7
+  ΔCMBlur
+  drunkness? : ℝ
+where
+  -- Declared member operation CMBlur::SetDrunkBlur(float drunkness)
+  true
+end
+
+schema CMBlur_ClearDrunkBlur_8
+  ΔCMBlur
+where
+  -- Declared member operation CMBlur::ClearDrunkBlur()
+  true
+end
+
+schema CMBlur_PosInside_9
+  ΔCMBlur
+  rect? : Ref[RwRect]
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::PosInside(RwRect *rect, float x1, float y1, float x2, float y2)
+  true
+end
+
+schema CMBlur_AddRenderFx_10
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  z? : ℝ
+  type? : FxType
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::AddRenderFx(RwCamera *cam, RwRect *rect, float z, FxType type)
+  true
+end
+
+schema CMBlur_OverlayRenderFx_11
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  frontBuf? : Ref[RwRaster]
+where
+  -- Declared member operation CMBlur::OverlayRenderFx(RwCamera *cam, RwRaster *frontBuf)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMBlur_MotionBlurOpen
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+where
+  -- State update: rect' = {0, 0, 0, 0}
+  -- State update: BlurOn' = true
+  -- State update: rect.w' = RwRasterGetWidth(RwCameraGetRaster(cam))
+  -- State update: rect.h' = RwRasterGetHeight(RwCameraGetRaster(cam))
+  -- State update: pFrontBuffer' = ∅
+  -- State update: rect' = { 0, 0, 0, 0 }
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CPostFX::Open
+  true
+end
+
+schema CMBlur_MotionBlurClose
+  ΔCMBlur
+where
+  -- State update: pFrontBuffer' = ∅
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CPostFX::Close
+  true
+end
+
+schema CMBlur_CreateImmediateModeData
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+where
+  -- State update: zero' = HALFPX
+  -- State update: xmax' = rect.w + HALFPX
+  -- State update: ymax' = rect.h + HALFPX
+  -- State update: zero' = -HALFPX
+  -- State update: xmax' = rect.w - HALFPX
+  -- State update: ymax' = rect.h - HALFPX
+  true
+end
+
+schema CMBlur_CreateImmediateModeData_2
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  verts? : Ref[RwIm2DVertex]
+  color? : RwRGBA
+  u1Off? : ℝ
+  v1Off? : ℝ
+  u2Off? : ℝ
+  v2Off? : ℝ
+  z? : ℝ
+  fullTexture? : ℤ
+where
+  -- State update: x1' = rect.x
+  -- State update: y1' = rect.y
+  -- State update: x2' = rect.w
+  -- State update: y2' = rect.h
+  -- State update: u1' = 0.0f
+  -- State update: v1' = 0.0f
+  true
+end
+
+schema CMBlur_MotionBlurRender
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- State update: ms_bJustInitialised' = false
+  -- Invokes: CPostFX::Render
+  true
+end
+
+schema CMBlur_OverlayRender
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  raster? : Ref[RwRaster]
+  color? : RwRGBA
+  type? : ℤ
+  bluralpha? : ℤ
+where
+  -- State update: r' = color.red
+  -- State update: g' = color.green
+  -- State update: b' = color.blue
+  -- State update: a' = color.alpha
+  -- State update: r' = 0
+  -- State update: g' = 255
+  true
+end
+
+schema CMBlur_SetDrunkBlur
+  ΔCMBlur
+  drunkness? : ℝ
+where
+  -- State update: Drunkness' = Clamp(drunkness, 0.0f, 1.0f)
+  true
+end
+
+schema CMBlur_ClearDrunkBlur
+  ΔCMBlur
+where
+  -- State update: Drunkness' = 0.0f
+  -- Invokes: CTimer::SetTimeScale
+  true
+end
+
+schema CMBlur_PosInside
+  ΔCMBlur
+  rect? : Ref[RwRect]
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMBlur_AddRenderFx
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  z? : ℝ
+  type? : FxType
+where
+  -- State update: rect.x' = Max(rect.x, 0)
+  -- State update: rect.y' = Max(rect.y, 0)
+  -- State update: rect.w' = Min(rect.w, SCREEN_WIDTH)
+  -- State update: rect.h' = Min(rect.h, SCREEN_HEIGHT)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CMBlur_OverlayRenderFx
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  frontBuf? : Ref[RwRaster]
+where
+  -- State update: drawWaterDrops' = false
+  -- State update: red' = Clamp(red, 0, 255)
+  -- State update: green' = Clamp(green, 0, 255)
+  -- State update: blue' = Clamp(blue, 0, 255)
+  -- State update: drawWaterDrops' = true
+  -- State update: u1Off' = (fxRect[i].w - fxRect[i].x)/width
+  -- Invokes: CTimeCycle::GetDirectionalRed, CTimeCycle::GetAmbientRed, CTimeCycle::GetDirectionalGreen, CTimeCycle::GetAmbientGreen, CTimeCycle::GetDirectionalBlue
+  true
+end

@@ -1,0 +1,37 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: colourfilterIII (extras)
+-- Source File(s): extras/shaders/colourfilterIII.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema colourfilterIII_main
+  ΔcolourfilterIIIModuleState
+where
+  -- State update: a' = u_blurcolor.a
+  -- State update: dst' = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: prev' = dst
+  -- State update: tmp' = dst*(1.0-a) + prev*u_blurcolor*a
+  -- State update: prev' = clamp(tmp, 0.0, 1.0)
+  -- State update: color.rgb' = prev.rgb
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema colourfilterIIIModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 24
+end

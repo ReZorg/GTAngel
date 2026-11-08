@@ -1,0 +1,42 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: DummyObject (objects)
+-- Source File(s): objects/DummyObject.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include DummyObject.zpp  (from "DummyObject.h")
+-- include Pools.zpp  (from "Pools.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDummyObject_CDummyObject
+  ΔCDummyObject
+  obj? : Ref[CObject]
+where
+  -- State update: m_level' = obj.m_level
+  -- State update: m_area' = obj.m_area
+  -- Invokes: obj->GetModelIndex, obj->DetachFromRwObject
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DummyObjectModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 17
+end

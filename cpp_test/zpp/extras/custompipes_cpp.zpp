@@ -1,0 +1,979 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: custompipes (extras)
+-- Source File(s): extras/custompipes.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include World.zpp  (from "World.h")
+-- include custompipes.zpp  (from "custompipes.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema custompipes_CustomMatCtor
+  ΔcustompipesModuleState
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- State update: ext' = GetCustomMatExt((rw::Material*)object)
+  -- State update: ext.glossTex' = ∅
+  -- State update: ext.haveGloss' = false
+  -- Return postcondition: result! = object
+  true
+end
+
+schema custompipes_CustomMatCopy
+  ΔcustompipesModuleState
+  dst? : ADDRESS
+  src? : ADDRESS
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- State update: srcext' = GetCustomMatExt((rw::Material*)src)
+  -- State update: dstext' = GetCustomMatExt((rw::Material*)dst)
+  -- State update: dstext.glossTex' = srcext.glossTex
+  -- State update: dstext.haveGloss' = srcext.haveGloss
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema custompipes_CreateEnvMapCam
+  ΔcustompipesModuleState
+  world? : Ref[rw__World]
+where
+  -- State update: frame' = rw::Frame::create()
+  -- State update: cam' = rw::Camera::create()
+  -- State update: cam.frameBuffer' = fbuf
+  -- State update: cam.zBuffer' = zbuf
+  -- State update: vw' = { 2.0f, 2.0f }
+  -- State update: EnvMapTex' = rw::Texture::create(fbuf)
+  -- Return postcondition: result! = cam
+  -- Return postcondition: result! = nil
+  -- Invokes: Raster::create, Frame::create, Camera::create, cam->setFrame, cam->setNearPlane
+  true
+end
+
+schema custompipes_DestroyCam
+  ΔcustompipesModuleState
+  cam? : Ref[rw__Camera]
+where
+  -- State update: cam.frameBuffer' = ∅
+  -- State update: cam.zBuffer' = ∅
+  -- State update: f' = cam.getFrame()
+  -- Invokes: frameBuffer->destroy, zBuffer->destroy, cam->getFrame, cam->setFrame, f->destroy
+  true
+end
+
+schema custompipes_RenderEnvMapScene
+  ΔcustompipesModuleState
+where
+  -- Invokes: CRenderer::RenderRoads, CRenderer::RenderEverythingBarRoads, CRenderer::RenderFadingInEntities
+  true
+end
+
+schema custompipes_EnvMapRender
+  ΔcustompipesModuleState
+where
+  -- State update: camPos' = FindPlayerCoors()
+  -- State update: matrix.pos' = camPos
+  -- State update: skycol.red' = CTimeCycle::GetSkyBottomRed()
+  -- State update: skycol.green' = CTimeCycle::GetSkyBottomGreen()
+  -- State update: skycol.blue' = CTimeCycle::GetSkyBottomBlue()
+  -- State update: skycol.alpha' = 255
+  -- Invokes: EnvMapCam->getFrame, CTimeCycle::GetSkyBottomRed, CTimeCycle::GetSkyBottomGreen, CTimeCycle::GetSkyBottomBlue, EnvMapCam->clear
+  true
+end
+
+schema custompipes_EnvMapInit
+  ΔcustompipesModuleState
+where
+  -- State update: EnvMaskTex' = neoTxd.find("CarReflectionMask")
+  -- State update: EnvMapCam' = CreateEnvMapCam(Scene.world)
+  -- State update: width' = EnvMapCam.frameBuffer.width
+  -- State update: height' = EnvMapCam.frameBuffer.height
+  -- State update: screenZ' = RwIm2DGetNearScreenZ()
+  -- State update: recipZ' = 1.0f/EnvMapCam.nearPlane
+  -- Invokes: neoTxd->find
+  true
+end
+
+schema custompipes_EnvMapShutdown
+  ΔcustompipesModuleState
+where
+  -- State update: EnvMapTex.raster' = ∅
+  -- State update: EnvMapTex' = ∅
+  -- State update: EnvMapCam' = ∅
+  -- Invokes: EnvMapTex->destroy
+  true
+end
+
+schema InterpolatedFloat_InterpolatedFloat
+  ΔInterpolatedFloat
+  init? : ℝ
+where
+  -- State update: curInterpolator' = 61
+  -- State update: h' = 0
+  -- State update: w' = 0
+  true
+end
+
+schema InterpolatedFloat_Read
+  ΔInterpolatedFloat
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema InterpolatedFloat_Get
+  ΔInterpolatedFloat
+where
+  -- State update: curVal' = INTERP(data)
+  -- State update: curInterpolator' = CClock::GetSeconds()
+  -- Return postcondition: result! = curVal
+  -- Invokes: CClock::GetSeconds
+  true
+end
+
+schema InterpolatedColor_InterpolatedColor
+  ΔInterpolatedColor
+  init? : Color
+where
+  -- State update: curInterpolator' = 61
+  -- State update: h' = 0
+  -- State update: w' = 0
+  true
+end
+
+schema InterpolatedColor_Read
+  ΔInterpolatedColor
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema InterpolatedColor_Get
+  ΔInterpolatedColor
+where
+  -- State update: curVal.r' = INTERPF(data, r)
+  -- State update: curVal.g' = INTERPF(data, g)
+  -- State update: curVal.b' = INTERPF(data, b)
+  -- State update: curVal.a' = INTERPF(data, a)
+  -- State update: curInterpolator' = CClock::GetSeconds()
+  -- Return postcondition: result! = curVal
+  -- Invokes: CClock::GetSeconds
+  true
+end
+
+schema InterpolatedLight_Read
+  ΔInterpolatedLight
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema custompipes_ReadTweakValueTable
+  ΔcustompipesModuleState
+  fp? : seq CHAR
+  interp? : ℤ
+where
+  -- State update: line' = 0
+  -- State update: c' = *fp++
+  -- State update: field' = 0
+  -- State update: p' = buf
+  -- State update: c' = *fp++
+  -- State update: c' = *fp++
+  -- Return postcondition: result! = fp-1
+  -- Invokes: interp.Read
+  true
+end
+
+schema custompipes_AttachVehiclePipe
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = vehiclePipe
+  true
+end
+
+schema custompipes_AttachVehiclePipe_2
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_AttachWorldPipe
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = worldPipe
+  true
+end
+
+schema custompipes_AttachWorldPipe_2
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_GetGlossTex
+  ΔcustompipesModuleState
+  mat? : Ref[rw__Material]
+where
+  -- State update: ext' = GetCustomMatExt(mat)
+  -- State update: ext.glossTex' = neoTxd.find(glossname)
+  -- State update: ext.haveGloss' = true
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = ext->glossTex
+  -- Invokes: neoTxd->find
+  true
+end
+
+schema custompipes_AttachGlossPipe
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = glossPipe
+  true
+end
+
+schema custompipes_AttachGlossPipe_2
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_AttachRimPipe
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = rimSkinPipe
+  -- State update: atomic.pipeline' = rimPipe
+  -- Invokes: Skin::get
+  true
+end
+
+schema custompipes_AttachRimPipe_2
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_CustomPipeInit
+  ΔcustompipesModuleState
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "neo/neo.txd")
+  -- State update: neoTxd' = RwTexDictionaryGtaStreamRead(stream)
+  true
+end
+
+schema custompipes_CustomPipeShutdown
+  ΔcustompipesModuleState
+where
+  -- State update: neoTxd' = ∅
+  -- Invokes: neoTxd->destroy
+  true
+end
+
+schema custompipes_CustomPipeRegister
+  ΔcustompipesModuleState
+where
+  -- Invokes: Material::registerPlugin
+  true
+end
+
+schema custompipes_customFindCB
+  ΔcustompipesModuleState
+  name? : seq CHAR
+where
+  -- State update: res' = defaultFindCB(name)
+  -- State update: res' = genericTxd.find(name)
+  -- Return postcondition: result! = res
+  -- Invokes: genericTxd->find
+  true
+end
+
+schema custompipes_SetTxdFindCallback
+  ΔcustompipesModuleState
+where
+  -- State update: slot' = CTxdStore::FindTxdSlot("generic")
+  -- State update: genericTxd' = CTxdStore::GetSlot(slot).texDict
+  -- State update: defaultFindCB' = rw::Texture::findCB
+  -- State update: findCB' = customFindCB
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::AddRef, CTxdStore::GetSlot
+  true
+end
+
+schema custompipes_CustomMatCtor_2
+  ΔcustompipesModuleState
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- State update: ext' = GetCustomMatExt((rw::Material*)object)
+  -- State update: ext.glossTex' = ∅
+  -- State update: ext.haveGloss' = false
+  -- Return postcondition: result! = object
+  true
+end
+
+schema custompipes_CustomMatCopy_2
+  ΔcustompipesModuleState
+  dst? : ADDRESS
+  src? : ADDRESS
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- State update: srcext' = GetCustomMatExt((rw::Material*)src)
+  -- State update: dstext' = GetCustomMatExt((rw::Material*)dst)
+  -- State update: dstext.glossTex' = srcext.glossTex
+  -- State update: dstext.haveGloss' = srcext.haveGloss
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema custompipes_CreateEnvMapCam_2
+  ΔcustompipesModuleState
+  world? : Ref[rw__World]
+where
+  -- State update: frame' = rw::Frame::create()
+  -- State update: cam' = rw::Camera::create()
+  -- State update: cam.frameBuffer' = fbuf
+  -- State update: cam.zBuffer' = zbuf
+  -- State update: vw' = { 2.0f, 2.0f }
+  -- State update: EnvMapTex' = rw::Texture::create(fbuf)
+  -- Return postcondition: result! = cam
+  -- Return postcondition: result! = nil
+  -- Invokes: Raster::create, Frame::create, Camera::create, cam->setFrame, cam->setNearPlane
+  true
+end
+
+schema custompipes_DestroyCam_2
+  ΔcustompipesModuleState
+  cam? : Ref[rw__Camera]
+where
+  -- State update: cam.frameBuffer' = ∅
+  -- State update: cam.zBuffer' = ∅
+  -- State update: f' = cam.getFrame()
+  -- Invokes: frameBuffer->destroy, zBuffer->destroy, cam->getFrame, cam->setFrame, f->destroy
+  true
+end
+
+schema custompipes_RenderEnvMapScene_2
+  ΔcustompipesModuleState
+where
+  -- Invokes: CRenderer::RenderRoads, CRenderer::RenderEverythingBarRoads, CRenderer::RenderFadingInEntities
+  true
+end
+
+schema custompipes_EnvMapRender_2
+  ΔcustompipesModuleState
+where
+  -- State update: camPos' = FindPlayerCoors()
+  -- State update: matrix.pos' = camPos
+  -- State update: skycol.red' = CTimeCycle::GetSkyBottomRed()
+  -- State update: skycol.green' = CTimeCycle::GetSkyBottomGreen()
+  -- State update: skycol.blue' = CTimeCycle::GetSkyBottomBlue()
+  -- State update: skycol.alpha' = 255
+  -- Invokes: EnvMapCam->getFrame, CTimeCycle::GetSkyBottomRed, CTimeCycle::GetSkyBottomGreen, CTimeCycle::GetSkyBottomBlue, EnvMapCam->clear
+  true
+end
+
+schema custompipes_EnvMapInit_2
+  ΔcustompipesModuleState
+where
+  -- State update: EnvMaskTex' = neoTxd.find("CarReflectionMask")
+  -- State update: EnvMapCam' = CreateEnvMapCam(Scene.world)
+  -- State update: width' = EnvMapCam.frameBuffer.width
+  -- State update: height' = EnvMapCam.frameBuffer.height
+  -- State update: screenZ' = RwIm2DGetNearScreenZ()
+  -- State update: recipZ' = 1.0f/EnvMapCam.nearPlane
+  -- Invokes: neoTxd->find
+  true
+end
+
+schema custompipes_EnvMapShutdown_2
+  ΔcustompipesModuleState
+where
+  -- State update: EnvMapTex.raster' = ∅
+  -- State update: EnvMapTex' = ∅
+  -- State update: EnvMapCam' = ∅
+  -- Invokes: EnvMapTex->destroy
+  true
+end
+
+schema InterpolatedFloat_InterpolatedFloat_2
+  ΔInterpolatedFloat
+  init? : ℝ
+where
+  -- State update: curInterpolator' = 61
+  -- State update: h' = 0
+  -- State update: w' = 0
+  true
+end
+
+schema InterpolatedFloat_Read_2
+  ΔInterpolatedFloat
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema InterpolatedFloat_Get_2
+  ΔInterpolatedFloat
+where
+  -- State update: curVal' = INTERP(data)
+  -- State update: curInterpolator' = CClock::GetSeconds()
+  -- Return postcondition: result! = curVal
+  -- Invokes: CClock::GetSeconds
+  true
+end
+
+schema InterpolatedColor_InterpolatedColor_2
+  ΔInterpolatedColor
+  init? : Color
+where
+  -- State update: curInterpolator' = 61
+  -- State update: h' = 0
+  -- State update: w' = 0
+  true
+end
+
+schema InterpolatedColor_Read_2
+  ΔInterpolatedColor
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema InterpolatedColor_Get_2
+  ΔInterpolatedColor
+where
+  -- State update: curVal.r' = INTERPF(data, r)
+  -- State update: curVal.g' = INTERPF(data, g)
+  -- State update: curVal.b' = INTERPF(data, b)
+  -- State update: curVal.a' = INTERPF(data, a)
+  -- State update: curInterpolator' = CClock::GetSeconds()
+  -- Return postcondition: result! = curVal
+  -- Invokes: CClock::GetSeconds
+  true
+end
+
+schema InterpolatedLight_Read_2
+  ΔInterpolatedLight
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema custompipes_ReadTweakValueTable_2
+  ΔcustompipesModuleState
+  fp? : seq CHAR
+  interp? : ℤ
+where
+  -- State update: line' = 0
+  -- State update: c' = *fp++
+  -- State update: field' = 0
+  -- State update: p' = buf
+  -- State update: c' = *fp++
+  -- State update: c' = *fp++
+  -- Return postcondition: result! = fp-1
+  -- Invokes: interp.Read
+  true
+end
+
+schema custompipes_AttachVehiclePipe_3
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = vehiclePipe
+  true
+end
+
+schema custompipes_AttachVehiclePipe_4
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_AttachWorldPipe_3
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = worldPipe
+  true
+end
+
+schema custompipes_AttachWorldPipe_4
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_GetGlossTex_2
+  ΔcustompipesModuleState
+  mat? : Ref[rw__Material]
+where
+  -- State update: ext' = GetCustomMatExt(mat)
+  -- State update: ext.glossTex' = neoTxd.find(glossname)
+  -- State update: ext.haveGloss' = true
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = ext->glossTex
+  -- Invokes: neoTxd->find
+  true
+end
+
+schema custompipes_AttachGlossPipe_3
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = glossPipe
+  true
+end
+
+schema custompipes_AttachGlossPipe_4
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_AttachRimPipe_3
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = rimSkinPipe
+  -- State update: atomic.pipeline' = rimPipe
+  -- Invokes: Skin::get
+  true
+end
+
+schema custompipes_AttachRimPipe_4
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_CustomPipeInit_2
+  ΔcustompipesModuleState
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "neo/neo.txd")
+  -- State update: neoTxd' = RwTexDictionaryGtaStreamRead(stream)
+  true
+end
+
+schema custompipes_CustomPipeShutdown_2
+  ΔcustompipesModuleState
+where
+  -- State update: neoTxd' = ∅
+  -- Invokes: neoTxd->destroy
+  true
+end
+
+schema custompipes_CustomPipeRegister_2
+  ΔcustompipesModuleState
+where
+  -- Invokes: Material::registerPlugin
+  true
+end
+
+schema custompipes_customFindCB_2
+  ΔcustompipesModuleState
+  name? : seq CHAR
+where
+  -- State update: res' = defaultFindCB(name)
+  -- State update: res' = genericTxd.find(name)
+  -- Return postcondition: result! = res
+  -- Invokes: genericTxd->find
+  true
+end
+
+schema custompipes_SetTxdFindCallback_2
+  ΔcustompipesModuleState
+where
+  -- State update: slot' = CTxdStore::FindTxdSlot("generic")
+  -- State update: genericTxd' = CTxdStore::GetSlot(slot).texDict
+  -- State update: defaultFindCB' = rw::Texture::findCB
+  -- State update: findCB' = customFindCB
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::AddRef, CTxdStore::GetSlot
+  true
+end
+
+schema custompipes_CustomMatCtor_3
+  ΔcustompipesModuleState
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- State update: ext' = GetCustomMatExt((rw::Material*)object)
+  -- State update: ext.glossTex' = ∅
+  -- State update: ext.haveGloss' = false
+  -- Return postcondition: result! = object
+  true
+end
+
+schema custompipes_CustomMatCopy_3
+  ΔcustompipesModuleState
+  dst? : ADDRESS
+  src? : ADDRESS
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- State update: srcext' = GetCustomMatExt((rw::Material*)src)
+  -- State update: dstext' = GetCustomMatExt((rw::Material*)dst)
+  -- State update: dstext.glossTex' = srcext.glossTex
+  -- State update: dstext.haveGloss' = srcext.haveGloss
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema custompipes_CreateEnvMapCam_3
+  ΔcustompipesModuleState
+  world? : Ref[rw__World]
+where
+  -- State update: frame' = rw::Frame::create()
+  -- State update: cam' = rw::Camera::create()
+  -- State update: cam.frameBuffer' = fbuf
+  -- State update: cam.zBuffer' = zbuf
+  -- State update: vw' = { 2.0f, 2.0f }
+  -- State update: EnvMapTex' = rw::Texture::create(fbuf)
+  -- Return postcondition: result! = cam
+  -- Return postcondition: result! = nil
+  -- Invokes: Raster::create, Frame::create, Camera::create, cam->setFrame, cam->setNearPlane
+  true
+end
+
+schema custompipes_DestroyCam_3
+  ΔcustompipesModuleState
+  cam? : Ref[rw__Camera]
+where
+  -- State update: cam.frameBuffer' = ∅
+  -- State update: cam.zBuffer' = ∅
+  -- State update: f' = cam.getFrame()
+  -- Invokes: frameBuffer->destroy, zBuffer->destroy, cam->getFrame, cam->setFrame, f->destroy
+  true
+end
+
+schema custompipes_RenderEnvMapScene_3
+  ΔcustompipesModuleState
+where
+  -- Invokes: CRenderer::RenderRoads, CRenderer::RenderEverythingBarRoads, CRenderer::RenderFadingInEntities
+  true
+end
+
+schema custompipes_EnvMapRender_3
+  ΔcustompipesModuleState
+where
+  -- State update: camPos' = FindPlayerCoors()
+  -- State update: matrix.pos' = camPos
+  -- State update: skycol.red' = CTimeCycle::GetSkyBottomRed()
+  -- State update: skycol.green' = CTimeCycle::GetSkyBottomGreen()
+  -- State update: skycol.blue' = CTimeCycle::GetSkyBottomBlue()
+  -- State update: skycol.alpha' = 255
+  -- Invokes: EnvMapCam->getFrame, CTimeCycle::GetSkyBottomRed, CTimeCycle::GetSkyBottomGreen, CTimeCycle::GetSkyBottomBlue, EnvMapCam->clear
+  true
+end
+
+schema custompipes_EnvMapInit_3
+  ΔcustompipesModuleState
+where
+  -- State update: EnvMaskTex' = neoTxd.find("CarReflectionMask")
+  -- State update: EnvMapCam' = CreateEnvMapCam(Scene.world)
+  -- State update: width' = EnvMapCam.frameBuffer.width
+  -- State update: height' = EnvMapCam.frameBuffer.height
+  -- State update: screenZ' = RwIm2DGetNearScreenZ()
+  -- State update: recipZ' = 1.0f/EnvMapCam.nearPlane
+  -- Invokes: neoTxd->find
+  true
+end
+
+schema custompipes_EnvMapShutdown_3
+  ΔcustompipesModuleState
+where
+  -- State update: EnvMapTex.raster' = ∅
+  -- State update: EnvMapTex' = ∅
+  -- State update: EnvMapCam' = ∅
+  -- Invokes: EnvMapTex->destroy
+  true
+end
+
+schema InterpolatedFloat_InterpolatedFloat_3
+  ΔInterpolatedFloat
+  init? : ℝ
+where
+  -- State update: curInterpolator' = 61
+  -- State update: h' = 0
+  -- State update: w' = 0
+  true
+end
+
+schema InterpolatedFloat_Read_3
+  ΔInterpolatedFloat
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema InterpolatedFloat_Get_3
+  ΔInterpolatedFloat
+where
+  -- State update: curVal' = INTERP(data)
+  -- State update: curInterpolator' = CClock::GetSeconds()
+  -- Return postcondition: result! = curVal
+  -- Invokes: CClock::GetSeconds
+  true
+end
+
+schema InterpolatedColor_InterpolatedColor_3
+  ΔInterpolatedColor
+  init? : Color
+where
+  -- State update: curInterpolator' = 61
+  -- State update: h' = 0
+  -- State update: w' = 0
+  true
+end
+
+schema InterpolatedColor_Read_3
+  ΔInterpolatedColor
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema InterpolatedColor_Get_3
+  ΔInterpolatedColor
+where
+  -- State update: curVal.r' = INTERPF(data, r)
+  -- State update: curVal.g' = INTERPF(data, g)
+  -- State update: curVal.b' = INTERPF(data, b)
+  -- State update: curVal.a' = INTERPF(data, a)
+  -- State update: curInterpolator' = CClock::GetSeconds()
+  -- Return postcondition: result! = curVal
+  -- Invokes: CClock::GetSeconds
+  true
+end
+
+schema InterpolatedLight_Read_3
+  ΔInterpolatedLight
+  s? : seq CHAR
+  line? : ℤ
+  field? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema custompipes_ReadTweakValueTable_3
+  ΔcustompipesModuleState
+  fp? : seq CHAR
+  interp? : ℤ
+where
+  -- State update: line' = 0
+  -- State update: c' = *fp++
+  -- State update: field' = 0
+  -- State update: p' = buf
+  -- State update: c' = *fp++
+  -- State update: c' = *fp++
+  -- Return postcondition: result! = fp-1
+  -- Invokes: interp.Read
+  true
+end
+
+schema custompipes_AttachVehiclePipe_5
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = vehiclePipe
+  true
+end
+
+schema custompipes_AttachVehiclePipe_6
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_AttachWorldPipe_5
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = worldPipe
+  true
+end
+
+schema custompipes_AttachWorldPipe_6
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_GetGlossTex_3
+  ΔcustompipesModuleState
+  mat? : Ref[rw__Material]
+where
+  -- State update: ext' = GetCustomMatExt(mat)
+  -- State update: ext.glossTex' = neoTxd.find(glossname)
+  -- State update: ext.haveGloss' = true
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = ext->glossTex
+  -- Invokes: neoTxd->find
+  true
+end
+
+schema custompipes_AttachGlossPipe_5
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = glossPipe
+  true
+end
+
+schema custompipes_AttachGlossPipe_6
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_AttachRimPipe_5
+  ΔcustompipesModuleState
+  atomic? : Ref[rw__Atomic]
+where
+  -- State update: atomic.pipeline' = rimSkinPipe
+  -- State update: atomic.pipeline' = rimPipe
+  -- Invokes: Skin::get
+  true
+end
+
+schema custompipes_AttachRimPipe_6
+  ΔcustompipesModuleState
+  clump? : Ref[rw__Clump]
+where
+  -- Invokes: Atomic::fromClump
+  true
+end
+
+schema custompipes_CustomPipeInit_3
+  ΔcustompipesModuleState
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "neo/neo.txd")
+  -- State update: neoTxd' = RwTexDictionaryGtaStreamRead(stream)
+  true
+end
+
+schema custompipes_CustomPipeShutdown_3
+  ΔcustompipesModuleState
+where
+  -- State update: neoTxd' = ∅
+  -- Invokes: neoTxd->destroy
+  true
+end
+
+schema custompipes_CustomPipeRegister_3
+  ΔcustompipesModuleState
+where
+  -- Invokes: Material::registerPlugin
+  true
+end
+
+schema custompipes_customFindCB_3
+  ΔcustompipesModuleState
+  name? : seq CHAR
+where
+  -- State update: res' = defaultFindCB(name)
+  -- State update: res' = genericTxd.find(name)
+  -- Return postcondition: result! = res
+  -- Invokes: genericTxd->find
+  true
+end
+
+schema custompipes_SetTxdFindCallback_3
+  ΔcustompipesModuleState
+where
+  -- State update: slot' = CTxdStore::FindTxdSlot("generic")
+  -- State update: genericTxd' = CTxdStore::GetSlot(slot).texDict
+  -- State update: defaultFindCB' = rw::Texture::findCB
+  -- State update: findCB' = customFindCB
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::AddRef, CTxdStore::GetSlot
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema custompipesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1604
+end

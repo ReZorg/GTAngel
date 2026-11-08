@@ -1,0 +1,163 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Transmission (vehicles)
+-- Source File(s): vehicles/Transmission.cpp, vehicles/Transmission.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Transmission.zpp  (from "Transmission.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tGear
+  fMaxVelocity : ℝ
+  fShiftUpVelocity : ℝ
+  fShiftDownVelocity : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cTransmission
+  Gears : seq tGear  -- bounded array [6]
+  nDriveType : seq CHAR
+  nEngineType : seq CHAR
+  nNumberOfGears : ℤ
+  Flags : ℕ
+  fEngineAcceleration : ℝ
+  fEngineInertia : ℝ
+  fMaxVelocity : ℝ
+  fMaxCruiseVelocity : ℝ
+  fMaxReverseVelocity : ℝ
+  fCurVelocity : ℝ
+where
+  #Gears = 6
+  Flags ≥ 0
+end
+
+schema cTransmission_InitGearRatios
+  ΔcTransmission
+where
+  -- Declared member operation cTransmission::InitGearRatios(void)
+  true
+end
+
+schema cTransmission_CalculateGearForSimpleCar_2
+  ΔcTransmission
+  speed? : ℝ
+  gear? : ℕ
+where
+  -- Declared member operation cTransmission::CalculateGearForSimpleCar(float speed, uint8 &gear)
+  true
+end
+
+schema cTransmission_CalculateDriveAcceleration_3
+  ΔcTransmission
+  gasPedal? : ℝ
+  gear? : ℕ
+  time? : ℝ
+  velocity? : ℝ
+  inertiaVar1? : ℙ ℝ
+  inertiaVar2? : ℙ ℝ
+  nDriveWheels? : ℕ
+  cheat? : ℕ
+  result! : ℝ
+where
+  -- Declared member operation cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, float &time, const float &velocity, float *inertiaVar1, float *inertiaVar2, uint8 nDriveWheels, uint8 cheat)
+  true
+end
+
+schema cTransmission_CalculateDriveAcceleration_4
+  ΔcTransmission
+  gasPedal? : ℝ
+  gear? : ℕ
+  time? : ℝ
+  velocity? : ℝ
+  cheat? : 𝔹
+  result! : ℝ
+where
+  -- Declared member operation cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, float &time, const float &velocity, bool cheat)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cTransmission_InitGearRatios
+  ΔcTransmission
+where
+  -- State update: pGearRatio0' = ∅
+  -- State update: pGearRatio1' = ∅
+  -- State update: baseVelocity' = 0.5f*fMaxVelocity / nNumberOfGears
+  -- State update: step' = (fMaxVelocity - baseVelocity) / nNumberOfGears
+  -- State update: pGearRatio0' = &Gears[i-1]
+  -- State update: pGearRatio1' = &Gears[i]
+  true
+end
+
+schema cTransmission_CalculateGearForSimpleCar
+  ΔcTransmission
+  speed? : ℝ
+  gear? : ℕ
+where
+  -- State update: pGearRatio' = &Gears[gear]
+  -- State update: fCurVelocity' = speed
+  -- State update: gear' = nNumberOfGears
+  -- State update: gear' = 0
+  true
+end
+
+schema cTransmission_CalculateDriveAcceleration
+  ΔcTransmission
+  gasPedal? : ℝ
+  gear? : ℕ
+  time? : ℝ
+  velocity? : ℝ
+  inertiaVar1? : ℙ ℝ
+  inertiaVar2? : ℙ ℝ
+  nDriveWheels? : ℕ
+  cheat? : ℕ
+where
+  -- State update: fAcceleration' = 0.0f
+  -- State update: fVelocity' = velocity
+  -- State update: fCurVelocity' = fVelocity
+  -- State update: pGearRatio' = &Gears[gear]
+  -- State update: accelMul' = 1.0f
+  -- State update: accelMul' = 4.5f
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = 0.0f
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema cTransmission_CalculateDriveAcceleration_2
+  ΔcTransmission
+  gasPedal? : ℝ
+  gear? : ℕ
+  time? : ℝ
+  velocity? : ℝ
+  cheat? : 𝔹
+where
+  -- State update: fAcceleration' = 0.0f
+  -- State update: fVelocity' = velocity
+  -- State update: fVelocity' = fMaxReverseVelocity
+  -- State update: fVelocity' = fMaxVelocity
+  -- State update: fCurVelocity' = fVelocity
+  -- State update: pGearRatio' = &Gears[gear]
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = CalculateDriveAcceleration(gasPedal, gear, time, fVelocity, false)
+  -- Invokes: CTimer::GetTimeStepInSeconds, CTimer::GetTimeStep
+  true
+end

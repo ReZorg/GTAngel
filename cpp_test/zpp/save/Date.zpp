@@ -1,0 +1,140 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Date (save)
+-- Source File(s): save/Date.cpp, save/Date.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Date.zpp  (from "Date.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDate
+  m_nSecond : ℤ
+  m_nMinute : ℤ
+  m_nHour : ℤ
+  m_nDay : ℤ
+  m_nMonth : ℤ
+  m_nYear : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CDate_CDate
+  ΔCDate
+where
+  -- Declared member operation CDate::CDate()
+  true
+end
+
+schema CDate_operator_2
+  ΔCDate
+  right? : CDate
+  result! : 𝔹
+where
+  -- Declared member operation CDate::operator>(const CDate &right)
+  true
+end
+
+schema CDate_operator_3
+  ΔCDate
+  right? : CDate
+  result! : 𝔹
+where
+  -- Declared member operation CDate::operator<(const CDate &right)
+  true
+end
+
+schema CDate_operator_4
+  ΔCDate
+  right? : CDate
+  result! : 𝔹
+where
+  -- Declared member operation CDate::operator==(const CDate &right)
+  true
+end
+
+schema CDate_PopulateDateFields_5
+  ΔCDate
+  second? : ℤ
+  minute? : ℤ
+  hour? : ℤ
+  day? : ℤ
+  month? : ℤ
+  year? : ℤ
+where
+  -- Declared member operation CDate::PopulateDateFields(int8 &second, int8 &minute, int8 &hour, int8 &day, int8 &month, int16 year)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDate_CDate
+  ΔCDate
+where
+  -- State update: m_nYear' = 0
+  -- State update: m_nSecond' = 0
+  -- State update: m_nMinute' = 0
+  -- State update: m_nHour' = 0
+  -- State update: m_nDay' = 0
+  -- State update: m_nMonth' = 0
+  true
+end
+
+schema CDate_operator
+  ΔCDate
+  right? : CDate
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDate_operator_2
+  ΔCDate
+  right? : CDate
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDate_operator_3
+  ΔCDate
+  right? : CDate
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = m_nSecond == right.m_nSecond
+  true
+end
+
+schema CDate_PopulateDateFields
+  ΔCDate
+  second? : ℤ
+  minute? : ℤ
+  hour? : ℤ
+  day? : ℤ
+  month? : ℤ
+  year? : ℤ
+where
+  -- State update: m_nSecond' = second
+  -- State update: m_nMinute' = minute
+  -- State update: m_nHour' = hour
+  -- State update: m_nDay' = day
+  -- State update: m_nMonth' = month
+  -- State update: m_nYear' = year
+  true
+end

@@ -1,0 +1,46 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TempColModels (collision)
+-- Source File(s): collision/TempColModels.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include Game.zpp  (from "Game.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTempColModels_Initialise
+  ΔCTempColModels
+where
+  -- State update: colmodel.numSpheres' = ARRAY_SIZE(sphrs)
+  -- State update: colmodel.spheres' = sphrs
+  -- State update: colmodel.level' = LEVEL_GENERIC
+  -- State update: colmodel.ownsCollisionVolumes' = false
+  -- State update: gpTempColModels' = new CTempColModels
+  -- State update: ms_colModelBBox.level' = LEVEL_GENERIC
+  -- Invokes: gpTempColModels->Initialise, boundingSphere.Set, boundingBox.Set, CTempColModels::Write, writer.AllocateRaw
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TempColModelsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 397
+end

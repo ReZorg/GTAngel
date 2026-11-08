@@ -1,0 +1,448 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneMgr (animation)
+-- Source File(s): animation/CutsceneMgr.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include CutsceneObject.zpp  (from "CutsceneObject.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CUTSCENENAMESIZE : ℕ  -- #define CUTSCENENAMESIZE 8
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CutsceneMgr_Enum_1 ::= CUTSCENE_NOT_LOADED | CUTSCENE_LOADING | CUTSCENE_LOADED
+  -- val(CUTSCENE_NOT_LOADED) = 0
+
+CutsceneMgr_Enum_2 ::= CUTSCENE_PLAYING_0 | CUTSCENE_STARTED | CUTSCENE_PLAYING_2 | CUTSCENE_PLAYING_3 | CUTSCENE_PLAYING_4
+  -- val(CUTSCENE_PLAYING_0) = 0
+
+CutsceneMgr_Enum_3 ::= NAMELENGTH | NUM_CUTS_PARTICLE_EFFECTS | NUM_CUTS_MAX_TEXTS | NUM_CUTS_UNCOMPRESSED_ANIMS | TEXT_KEY_SIZE | CUTSCENENAMESIZE
+  -- val(NAMELENGTH) = 32
+  -- val(NUM_CUTS_PARTICLE_EFFECTS) = 8
+  -- val(NUM_CUTS_MAX_TEXTS) = 64
+  -- val(NUM_CUTS_UNCOMPRESSED_ANIMS) = 8
+  -- val(TEXT_KEY_SIZE) = 8
+  -- val(CUTSCENENAMESIZE) = 8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema sToHideItem
+  z : ℝ
+  name : seq CHAR
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema sParticleEffect
+  name : seq CHAR
+  bPlayed : 𝔹
+  iTime : ℤ
+  unk1 : ℤ
+  unk2 : ℤ
+  name2 : seq CHAR
+  x : ℝ
+  y : ℝ
+  z : ℝ
+  unkX : ℝ
+  unkY : ℝ
+  unkZ : ℝ
+  unk10 : 𝔹
+  unk11 : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema sAttachInfo
+  boneId : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCutsceneMgr
+  ms_running : 𝔹
+  ms_pCutsceneObjects : seq Ref[CCutsceneObject]  -- bounded array [NUMCUTSCENEOBJECTS]
+  ms_numCutsceneObjs : ℤ
+  ms_loaded : 𝔹
+  ms_animLoaded : 𝔹
+  ms_useLodMultiplier : 𝔹
+  ms_cutsceneName : seq CHAR
+  ms_cutsceneAssociations : CAnimBlendAssocGroup
+  ms_cutsceneOffset : CVector
+  ms_cutsceneTimer : ℝ
+  ms_wasCutsceneSkipped : 𝔹
+  ms_cutsceneProcessing : 𝔹
+  ms_useCutsceneShadows : 𝔹
+  ms_hasFileInfo : 𝔹
+  ms_numLoadObjectNames : ℤ
+  ms_numAppendObjectNames : ℤ
+  ms_pCutsceneDir : Ref[CDirectory]
+  ms_cutsceneLoadStatus : ℕ
+  mCutsceneSkipFading : 𝔹
+  mCutsceneSkipFadeTime : ℤ
+  m_fPrevCarDensity : ℝ
+  m_fPrevPedDensity : ℝ
+  m_PrevExtraColourOn : 𝔹
+  m_PrevExtraColour : ℕ
+  ms_iNumParticleEffects : ℕ
+  ms_pParticleEffects : seq sParticleEffect  -- bounded array [NUM_CUTS_PARTICLE_EFFECTS]
+  ms_crToHideItems : seq sToHideItem  -- bounded array [NUMCUTSCENEOBJECTS]
+  ms_iNumHiddenEntities : ℕ
+  ms_pHiddenEntities : seq Ref[CEntity]  -- bounded array [NUMCUTSCENEOBJECTS]
+  ms_numAttachObjectToBones : ℤ
+  ms_bRepeatObject : seq 𝔹  -- bounded array [NUMCUTSCENEOBJECTS]
+  ms_iAttachObjectToBone : seq sAttachInfo  -- bounded array [NUMCUTSCENEOBJECTS]
+  ms_numUncompressedCutsceneAnims : ℕ
+  ms_iTextDuration : seq ℕ  -- bounded array [NUM_CUTS_MAX_TEXTS]
+  ms_iTextStartTime : seq ℕ  -- bounded array [NUM_CUTS_MAX_TEXTS]
+  ms_currTextOutput : ℕ
+  ms_numTextOutput : ℕ
+  ms_iModelIndex : seq ℕ  -- bounded array [NUMCUTSCENEOBJECTS]
+  ms_cutscenePlayStatus : ℕ
+where
+  #ms_pCutsceneDir ≤ 1
+  ms_cutsceneLoadStatus ≥ 0
+  m_PrevExtraColour ≥ 0
+  ms_iNumParticleEffects ≥ 0
+  ms_iNumHiddenEntities ≥ 0
+  ms_numUncompressedCutsceneAnims ≥ 0
+  ms_currTextOutput ≥ 0
+  ms_numTextOutput ≥ 0
+  ms_cutscenePlayStatus ≥ 0
+end
+
+schema CCutsceneMgr_StartCutscene
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::StartCutscene()
+  true
+end
+
+schema CCutsceneMgr_StartCutsceneProcessing_2
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::StartCutsceneProcessing()
+  true
+end
+
+schema CCutsceneMgr_IsRunning_3
+  ΔCCutsceneMgr
+  result! : bool
+where
+  -- Declared member operation CCutsceneMgr::IsRunning(void)
+  true
+end
+
+schema CCutsceneMgr_HasLoaded_4
+  ΔCCutsceneMgr
+  result! : bool
+where
+  -- Declared member operation CCutsceneMgr::HasLoaded(void)
+  true
+end
+
+schema CCutsceneMgr_IsCutsceneProcessing_5
+  ΔCCutsceneMgr
+  result! : bool
+where
+  -- Declared member operation CCutsceneMgr::IsCutsceneProcessing(void)
+  true
+end
+
+schema CCutsceneMgr_WasCutsceneSkipped_6
+  ΔCCutsceneMgr
+  result! : bool
+where
+  -- Declared member operation CCutsceneMgr::WasCutsceneSkipped(void)
+  true
+end
+
+schema CCutsceneMgr_UseLodMultiplier_7
+  ΔCCutsceneMgr
+  result! : bool
+where
+  -- Declared member operation CCutsceneMgr::UseLodMultiplier(void)
+  true
+end
+
+schema CCutsceneMgr_GetCutsceneObject_8
+  ΔCCutsceneMgr
+  id? : ℤ
+  result! : Ref[CCutsceneObject]
+where
+  -- Declared member operation CCutsceneMgr::GetCutsceneObject(int id)
+  true
+end
+
+schema CCutsceneMgr_GetCutsceneTimeInMilleseconds_9
+  ΔCCutsceneMgr
+  result! : ℕ
+where
+  -- Declared member operation CCutsceneMgr::GetCutsceneTimeInMilleseconds(void)
+  true
+end
+
+schema CCutsceneMgr_GetCutsceneName_10
+  ΔCCutsceneMgr
+  result! : seq CHAR
+where
+  -- Declared member operation CCutsceneMgr::GetCutsceneName(void)
+  true
+end
+
+schema CCutsceneMgr_SetCutsceneOffset_11
+  ΔCCutsceneMgr
+  vec? : CVector
+  result! : void
+where
+  -- Declared member operation CCutsceneMgr::SetCutsceneOffset(const CVector& vec)
+  true
+end
+
+schema CCutsceneMgr_HasCutsceneFinished_12
+  ΔCCutsceneMgr
+  result! : bool
+where
+  -- Declared member operation CCutsceneMgr::HasCutsceneFinished(void)
+  true
+end
+
+schema CCutsceneMgr_Initialise_13
+  ΔCCutsceneMgr
+  dir? : ADDRESS
+where
+  -- Declared member operation CCutsceneMgr::Initialise(void *dir = nil)
+  true
+end
+
+schema CCutsceneMgr_Shutdown_14
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::Shutdown(void)
+  true
+end
+
+schema CCutsceneMgr_LoadCutsceneData_15
+  ΔCCutsceneMgr
+  szCutsceneName? : seq CHAR
+where
+  -- Declared member operation CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
+  true
+end
+
+schema CCutsceneMgr_FinishCutscene_16
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::FinishCutscene(void)
+  true
+end
+
+schema CCutsceneMgr_SetupCutsceneToStart_17
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::SetupCutsceneToStart(void)
+  true
+end
+
+schema CCutsceneMgr_SetCutsceneAnim_18
+  ΔCCutsceneMgr
+  animName? : seq CHAR
+  pObject? : Ref[CObject]
+where
+  -- Declared member operation CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
+  true
+end
+
+schema CCutsceneMgr_SetCutsceneAnimToLoop_19
+  ΔCCutsceneMgr
+  animName? : seq CHAR
+where
+  -- Declared member operation CCutsceneMgr::SetCutsceneAnimToLoop(const char *animName)
+  true
+end
+
+schema CCutsceneMgr_SetHeadAnim_20
+  ΔCCutsceneMgr
+  arg_1? : seq CHAR
+  pObject? : Ref[CObject]
+  result! : Ref[CCutsceneHead]
+where
+  -- Declared member operation CCutsceneMgr::SetHeadAnim(const char*, CObject *pObject)
+  true
+end
+
+schema CCutsceneMgr_CreateCutsceneObject_21
+  ΔCCutsceneMgr
+  modelId? : ℤ
+  result! : Ref[CCutsceneObject]
+where
+  -- Declared member operation CCutsceneMgr::CreateCutsceneObject(int modelId)
+  true
+end
+
+schema CCutsceneMgr_DeleteCutsceneData_22
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::DeleteCutsceneData(void)
+  true
+end
+
+schema CCutsceneMgr_LoadAnimationUncompressed_23
+  ΔCCutsceneMgr
+  arg_1? : seq CHAR
+where
+  -- Declared member operation CCutsceneMgr::LoadAnimationUncompressed(char const*)
+  true
+end
+
+schema CCutsceneMgr_Update_24
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::Update(void)
+  true
+end
+
+schema CCutsceneMgr_AttachObjectToParent_25
+  ΔCCutsceneMgr
+  pObject? : Ref[CObject]
+  pAttachTo? : Ref[CEntity]
+where
+  -- Declared member operation CCutsceneMgr::AttachObjectToParent(CObject *pObject, CEntity *pAttachTo)
+  true
+end
+
+schema CCutsceneMgr_AttachObjectToFrame_26
+  ΔCCutsceneMgr
+  pObject? : Ref[CObject]
+  pAttachTo? : Ref[CEntity]
+  frame? : seq CHAR
+where
+  -- Declared member operation CCutsceneMgr::AttachObjectToFrame(CObject *pObject, CEntity *pAttachTo, const char *frame)
+  true
+end
+
+schema CCutsceneMgr_AttachObjectToBone_27
+  ΔCCutsceneMgr
+  pObject? : Ref[CObject]
+  pAttachTo? : Ref[CObject]
+  frame? : ℤ
+where
+  -- Declared member operation CCutsceneMgr::AttachObjectToBone(CObject *pObject, CObject *pAttachTo, int frame)
+  true
+end
+
+schema CCutsceneMgr_RemoveEverythingBecauseCutsceneDoesntFitInMemory_28
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::RemoveEverythingBecauseCutsceneDoesntFitInMemory()
+  true
+end
+
+schema CCutsceneMgr_LoadEverythingBecauseCutsceneDeletedAllOfIt_29
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::LoadEverythingBecauseCutsceneDeletedAllOfIt()
+  true
+end
+
+schema CCutsceneMgr_DisableCutsceneShadows_30
+  ΔCCutsceneMgr
+where
+  -- Declared member operation CCutsceneMgr::DisableCutsceneShadows()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CutsceneMgr_StartCutsceneProcessing
+  ΔCutsceneMgrModuleState
+where
+  -- State update: ms_cutsceneProcessing' = true
+  true
+end
+
+schema CutsceneMgr_IsRunning
+  ΔCutsceneMgrModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_running
+  true
+end
+
+schema CutsceneMgr_HasLoaded
+  ΔCutsceneMgrModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_loaded
+  true
+end
+
+schema CutsceneMgr_IsCutsceneProcessing
+  ΔCutsceneMgrModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_cutsceneProcessing
+  true
+end
+
+schema CutsceneMgr_WasCutsceneSkipped
+  ΔCutsceneMgrModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_wasCutsceneSkipped
+  true
+end
+
+schema CutsceneMgr_UseLodMultiplier
+  ΔCutsceneMgrModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_useLodMultiplier
+  true
+end
+
+schema CutsceneMgr_GetCutsceneObject
+  ΔCutsceneMgrModuleState
+  id? : ℤ
+  result! : Ref[CCutsceneObject]
+where
+  -- Return postcondition: result! = ms_pCutsceneObjects[id]
+  true
+end
+
+schema CutsceneMgr_SetCutsceneOffset
+  ΔCutsceneMgrModuleState
+  vec? : CVector
+where
+  -- State update: ms_cutsceneOffset' = vec
+  true
+end
+
+schema CutsceneMgr_DisableCutsceneShadows
+  ΔCutsceneMgrModuleState
+where
+  -- State update: ms_useCutsceneShadows' = false
+  true
+end
+
+schema CutsceneMgr_GetCutsceneTimeInMilleseconds
+  ΔCutsceneMgrModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = 1000.0f * ms_cutsceneTimer
+  true
+end

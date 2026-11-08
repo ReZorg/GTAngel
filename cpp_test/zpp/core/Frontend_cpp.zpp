@@ -1,0 +1,302 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Frontend (core)
+-- Source File(s): core/Frontend.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include platform.zpp  (from "platform.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Text.zpp  (from "Text.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Game.zpp  (from "Game.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include General.zpp  (from "General.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Script.zpp  (from "Script.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include World.zpp  (from "World.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include frontendoption.zpp  (from "frontendoption.h")
+-- include User.zpp  (from "User.h")
+-- include sampman.zpp  (from "sampman.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FORCE_PC_SCALING : seq CHAR  -- #define FORCE_PC_SCALING #define WITHWINDOWS
+WITHDINPUT : seq CHAR  -- #define WITHDINPUT #include "common.h"
+TIDY_UP_PBP : seq CHAR  -- #define TIDY_UP_PBP #define MAX_VISIBLE_LIST_ROW 30
+SCROLLBAR_MAX_HEIGHT : ℝ  -- #define SCROLLBAR_MAX_HEIGHT 263.0f
+SCROLLABLE_PAGES : seq CHAR  -- #define SCROLLABLE_PAGES #define RED_DELETE_BACKGROUND
+MAX_VISIBLE_OPTION : ℕ  -- #define MAX_VISIBLE_OPTION 12
+MAX_VISIBLE_OPTION_ON_SCREEN : seq CHAR  -- #define MAX_VISIBLE_OPTION_ON_SCREEN (hasNativeList(m_nCurrScreen) ? MAX_VISIBLE_LIST_ROW : MAX_VISIBLE_OPTION)
+SCREEN_HAS_AUTO_SCROLLBAR : seq CHAR  -- #define SCREEN_HAS_AUTO_SCROLLBAR (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen))
+GetBackJustUp : seq CHAR  -- #define GetBackJustUp GetTriangleJustUp
+GetBackJustDown : seq CHAR  -- #define GetBackJustDown GetTriangleJustDown
+PAGE_NAME_X : seq CHAR  -- #define PAGE_NAME_X MENU_X_RIGHT_ALIGNED
+SCROLLBAR_BOTTOM_Y : ℝ  -- #define SCROLLBAR_BOTTOM_Y 125.0f
+SCROLLBAR_RIGHT_X : ℝ  -- #define SCROLLBAR_RIGHT_X 36.0f
+SCROLLBAR_WIDTH : ℝ  -- #define SCROLLBAR_WIDTH 9.5f
+SCROLLBAR_TOP_Y : ℕ  -- #define SCROLLBAR_TOP_Y 64
+optionWidth : ℝ  -- #define optionWidth MENU_X(66.0f)
+rawOptionHeight : ℝ  -- #define rawOptionHeight 22.0f
+optionBottom : ℝ  -- #define optionBottom SCREEN_SCALE_FROM_BOTTOM(20.0f)
+optionTop : ℝ  -- #define optionTop SCREEN_SCALE_FROM_BOTTOM(20.0f + rawOptionHeight)
+leftPadding : ℝ  -- #define leftPadding MENU_X_LEFT_ALIGNED(90.0f)
+int_STAT_IS_FLOAT : seq CHAR  -- #define int_STAT_IS_FLOAT false
+float_STAT_IS_FLOAT : seq CHAR  -- #define float_STAT_IS_FLOAT true
+DEFAULT_BRIGHTNESS : seq CHAR  -- #define DEFAULT_BRIGHTNESS 0x150
+MIN_BRIGHTNESS : ℕ  -- #define MIN_BRIGHTNESS 180
+MAX_BRIGHTNESS : ℕ  -- #define MAX_BRIGHTNESS 700
+MAP_MIN_SIZE : ℝ  -- #define MAP_MIN_SIZE 162.f
+MAP_SIZE_TO_ALLOW_X_MOVE : ℝ  -- #define MAP_SIZE_TO_ALLOW_X_MOVE 297.f
+MINUS_SCROLL_OFFSET : seq CHAR  -- #define MINUS_SCROLL_OFFSET - scrollOffset
+PLUS_LINE_HEIGHT_ON_SCREEN : seq CHAR  -- #define PLUS_LINE_HEIGHT_ON_SCREEN + MENU_DEFAULT_LINE_HEIGHT
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Frontend_GetOptionCount
+  ΔFrontendModuleState
+  screen? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = i
+  true
+end
+
+schema CMenuManager_ScrollUpListByOne
+  ΔCMenuManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuManager_ScrollDownListByOne
+  ΔCMenuManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuManager_PageUpList
+  ΔCMenuManager
+  playSoundOnSuccess? : 𝔹
+where
+  -- State update: m_nFirstVisibleRowOnList' = 0
+  -- State update: m_nSelectedListRow' = 0
+  -- Invokes: DMAudio.PlayFrontEndSound
+  true
+end
+
+schema CMenuManager_PageDownList
+  ΔCMenuManager
+  playSoundOnSuccess? : 𝔹
+where
+  -- State update: m_nSelectedListRow' = Max(m_nSelectedListRow, m_nFirstVisibleRowOnList)
+  -- State update: m_nFirstVisibleRowOnList' = m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN
+  -- State update: m_nSelectedListRow' = m_nTotalListRow - 1
+  -- Invokes: DMAudio.PlayFrontEndSound
+  true
+end
+
+schema Frontend_ScreenHasOption
+  ΔFrontendModuleState
+  screen? : ℤ
+  gxtKey? : seq CHAR
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CMenuManager_ThingsToDoBeforeGoingBack
+  ΔCMenuManager
+where
+  -- State update: m_nPrefsAudio3DProviderIndex' = DMAudio.GetCurrent3DProviderIndex()
+  -- State update: m_nDisplayVideoMode' = m_nPrefsVideoMode
+  -- State update: m_nTotalListRow' = 0
+  -- State update: m_nSelectedListRow' = 0
+  -- State update: m_nFirstVisibleRowOnList' = 0
+  -- State update: m_nScrollbarTopMargin' = 0
+  -- Invokes: DMAudio.GetCurrent3DProviderIndex, DMAudio.StopFrontEndTrack, CPlayerSkin::EndFrontendSkinEdit, m_CFODynamic->buttonPressFunc
+  true
+end
+
+schema CMenuManager_GetPreviousPageOption
+  ΔCMenuManager
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = i
+  true
+end
+
+schema CMenuManager_ProcessList
+  ΔCMenuManager
+  goBack? : 𝔹
+  optionSelected? : 𝔹
+where
+  -- State update: m_nTotalListRow' = m_nSkinsTotal
+  -- State update: m_nSelectedListRow' = m_nTotalListRow - 1
+  -- State update: m_bShowMouse' = 0
+  -- State update: optionSelected' = true
+  -- State update: m_nHoverOption' = HOVEROPTION_NOT_HOVERING
+  -- State update: m_bWaitingForNewKeyBind' = true
+  -- Invokes: CPad::GetPad, CTimer::GetTimeInMillisecondsPauseMode, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema CMenuManager_BuildStatLine
+  ΔCMenuManager
+  text? : seq CHAR
+  stat? : ADDRESS
+  itsFloat? : 𝔹
+  stat2? : ADDRESS
+where
+  -- Invokes: CFont::IsJapanese, TheText.Get
+  true
+end
+
+schema CMenuManager_CentreMousePointer
+  ΔCMenuManager
+where
+  -- State update: Point.x' = SCREEN_WIDTH / 2
+  -- State update: Point.y' = SCREEN_HEIGHT / 2
+  true
+end
+
+schema CMenuManager_CheckCodesForControls
+  ΔCMenuManager
+  typeOfControl? : ℤ
+where
+  -- State update: DisplayComboButtonErrMsg' = false
+  -- State update: invalidKey' = false
+  -- State update: escPressed' = false
+  -- State update: action' = (e_ControllerAction) m_CurrCntrlAction
+  -- State update: escPressed' = true
+  -- State update: typeToSave' = KEYBOARD
+  -- Invokes: ControlsManager.GetControllerKeyAssociatedWithAction, ControlsManager.GetIsActionAButtonCombo, ControlsManager.ClearSettingsAssociatedWithAction, ControlsManager.DeleteMatchingActionInitiators, ControlsManager.SetControllerKeyAssociatedWithAction
+  true
+end
+
+schema CMenuManager_CheckHover
+  ΔCMenuManager
+  x1? : ℤ
+  x2? : ℤ
+  y1? : ℤ
+  y2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuManager_CheckSliderMovement
+  ΔCMenuManager
+  value? : ℤ
+where
+  -- State update: m_PrefsBrightness' = Clamp(m_PrefsBrightness, 0, 384)
+  -- State update: m_PrefsLOD' = Clamp(m_PrefsLOD, 0.925f, 1.8f)
+  -- State update: ms_lodDistScale' = m_PrefsLOD
+  -- State update: m_PrefsMusicVolume' = Clamp(m_PrefsMusicVolume, 0, 65)
+  -- State update: m_PrefsSfxVolume' = Clamp(m_PrefsSfxVolume, 0, 65)
+  -- State update: m_PrefsMP3BoostVolume' = Clamp(m_PrefsMP3BoostVolume, 0, 65)
+  -- Invokes: DMAudio.SetMusicMasterVolume, DMAudio.SetEffectsMasterVolume, DMAudio.IsMP3RadioChannelAvailable, DMAudio.SetMP3BoostVolume, m_CFOSlider->changeFunc
+  true
+end
+
+schema CMenuManager_DisplayHelperText
+  ΔCMenuManager
+where
+  -- State update: LastFlash' = 0
+  -- State update: LastFlash' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: alpha' = m_nHelperTextAlpha > 255 ? 255 : m_nHelperTextAlpha
+  -- State update: action' = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, CTimer::GetLogicalFramesPassed, CFont::SetColor, CFont::PrintString, TheText.Get
+  true
+end
+
+schema CMenuManager_DisplaySlider
+  ΔCMenuManager
+  x? : ℝ
+  y? : ℝ
+  mostLeftBarSize? : ℝ
+  mostRightBarSize? : ℝ
+  rectSize? : ℝ
+  progress? : ℝ
+where
+  -- State update: lastActiveBarX' = 0
+  -- State update: curBarX' = 0.0f
+  -- State update: spacing' = SCREEN_SCALE_X(10.0f)
+  -- State update: curBarX' = i * rectSize/MENUSLIDER_BARS + x
+  -- State update: lastActiveBarX' = curBarX
+  -- State update: maxBarHeight' = Max(mostLeftBarSize, mostRightBarSize)
+  -- Return postcondition: result! = lastActiveBarX
+  -- Invokes: CSprite2d::DrawRect
+  true
+end
+
+schema CMenuManager_DoSettingsBeforeStartingAGame
+  ΔCMenuManager
+where
+  -- State update: m_PrefsVsync' = m_PrefsVsyncDisp
+  -- State update: m_bShutDownFrontEndRequested' = true
+  -- State update: m_bWantToRestart' = true
+  -- Invokes: DMAudio.DestroyAllGameCreatedEntities, DMAudio.Service, DMAudio.SetEffectsFadeVol, DMAudio.SetMusicFadeVol, DMAudio.ResetTimers
+  true
+end
+
+schema CMenuManager_Draw
+  ΔCMenuManager
+where
+  -- State update: nextYToUse' = 40.0f
+  -- State update: str' = TheText.Get("FES_LCG")
+  -- State update: str' = TheText.Get("FESZ_QZ")
+  -- State update: str' = TheText.Get("FEQ_SRW")
+  -- State update: itemsAreSelectable' = !bottomBarActive
+  -- State update: itemsAreSelectable' = true
+  -- Return postcondition: result! = number
+  -- Return postcondition: result! = alpha
+  -- Return postcondition: result! = Min(m_nMenuFadeAlpha, alpha)
+  -- Invokes: CFont::SetBackgroundOff, CFont::SetPropOn, CFont::SetCentreOff, CFont::SetJustifyOn, CFont::SetBackGroundOnlyTextOn
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FrontendModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 13384
+end

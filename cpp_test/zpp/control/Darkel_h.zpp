@@ -1,0 +1,171 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Darkel (control)
+-- Source File(s): control/Darkel.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Darkel_Enum_1 ::= KILLFRENZY_NONE | KILLFRENZY_ONGOING | KILLFRENZY_PASSED | KILLFRENZY_FAILED
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDarkel
+  TimeLimit : ℤ
+  PreviousTime : ℤ
+  TimeOfFrenzyStart : ℤ
+  WeaponType : ℤ
+  AmmoInterruptedWeapon : ℤ
+  KillsNeeded : ℤ
+  InterruptedWeaponType : ℤ
+  InterruptedWeaponSelected : ℤ
+  bStandardSoundAndMessages : 𝔹
+  bNeedHeadShot : 𝔹
+  bProperKillFrenzy : 𝔹
+  Status : ℕ
+  RegisteredKills : seq ℕ  -- bounded array [NUM_DEFAULT_MODELS]
+  ModelToKill : ℤ
+  ModelToKill2 : ℤ
+  ModelToKill3 : ℤ
+  ModelToKill4 : ℤ
+  pStartMessage : seq CHAR
+  InterruptedWeapon : ℤ
+where
+  Status ≥ 0
+end
+
+schema CDarkel_CalcFade
+  ΔCDarkel
+  time? : ℕ
+  min? : ℕ
+  max? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation CDarkel::CalcFade(uint32 time, uint32 min, uint32 max)
+  true
+end
+
+schema CDarkel_DrawMessages_2
+  ΔCDarkel
+where
+  -- Declared member operation CDarkel::DrawMessages(void)
+  true
+end
+
+schema CDarkel_FrenzyOnGoing_3
+  ΔCDarkel
+  result! : 𝔹
+where
+  -- Declared member operation CDarkel::FrenzyOnGoing()
+  true
+end
+
+schema CDarkel_Init_4
+  ΔCDarkel
+where
+  -- Declared member operation CDarkel::Init()
+  true
+end
+
+schema CDarkel_QueryModelsKilledByPlayer_5
+  ΔCDarkel
+  modelId? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CDarkel::QueryModelsKilledByPlayer(int32 modelId)
+  true
+end
+
+schema CDarkel_ReadStatus_6
+  ΔCDarkel
+  result! : ℕ
+where
+  -- Declared member operation CDarkel::ReadStatus()
+  true
+end
+
+schema CDarkel_RegisterCarBlownUpByPlayer_7
+  ΔCDarkel
+  vehicle? : Ref[CVehicle]
+where
+  -- Declared member operation CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
+  true
+end
+
+schema CDarkel_RegisterKillByPlayer_8
+  ΔCDarkel
+  victim? : Ref[CPed]
+  weapontype? : eWeaponType
+  headshot? : 𝔹
+where
+  -- Declared member operation CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot = false)
+  true
+end
+
+schema CDarkel_RegisterKillNotByPlayer_9
+  ΔCDarkel
+  victim? : Ref[CPed]
+  weapontype? : eWeaponType
+where
+  -- Declared member operation CDarkel::RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype)
+  true
+end
+
+schema CDarkel_ResetModelsKilledByPlayer_10
+  ΔCDarkel
+where
+  -- Declared member operation CDarkel::ResetModelsKilledByPlayer()
+  true
+end
+
+schema CDarkel_ResetOnPlayerDeath_11
+  ΔCDarkel
+where
+  -- Declared member operation CDarkel::ResetOnPlayerDeath()
+  true
+end
+
+schema CDarkel_StartFrenzy_12
+  ΔCDarkel
+  weaponType? : eWeaponType
+  time? : ℤ
+  kill? : ℕ
+  modelId0? : ℤ
+  text? : seq CHAR
+  modelId2? : ℤ
+  modelId3? : ℤ
+  modelId4? : ℤ
+  standardSound? : 𝔹
+  needHeadShot? : 𝔹
+where
+  -- Declared member operation CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot)
+  true
+end
+
+schema CDarkel_Update_13
+  ΔCDarkel
+where
+  -- Declared member operation CDarkel::Update()
+  true
+end
+
+schema CDarkel_DealWithWeaponChangeAtEndOfFrenzy_14
+  ΔCDarkel
+where
+  -- Declared member operation CDarkel::DealWithWeaponChangeAtEndOfFrenzy()
+  true
+end

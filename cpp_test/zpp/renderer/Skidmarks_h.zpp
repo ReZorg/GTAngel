@@ -1,0 +1,126 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Skidmarks (renderer)
+-- Source File(s): renderer/Skidmarks.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Skidmarks_Enum_1 ::= SKIDMARK_LENGTH
+  -- val(SKIDMARK_LENGTH) = 16
+
+eSkidmarkType ::= SKIDMARK_NORMAL | SKIDMARK_MUDDY | SKIDMARK_SANDY | SKIDMARK_BLOODY
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSkidmark
+  m_pos : seq CVector  -- bounded array [SKIDMARK_LENGTH]
+  m_sideX : seq ℝ  -- bounded array [SKIDMARK_LENGTH]
+  m_sideY : seq ℝ  -- bounded array [SKIDMARK_LENGTH]
+  m_id : ℕ
+  m_lastUpdate : ℕ
+  m_fadeStart : ℕ
+  m_fadeEnd : ℕ
+  m_type : ℕ
+  m_last : ℤ
+  m_state : ℕ
+  m_wasUpdated : 𝔹
+  m_isBloody : 𝔹
+  m_isMuddy : 𝔹
+  m_side : seq CVector  -- bounded array [SKIDMARK_LENGTH]
+where
+  m_id ≥ 0
+  m_lastUpdate ≥ 0
+  m_fadeStart ≥ 0
+  m_fadeEnd ≥ 0
+  m_type ≥ 0
+  m_state ≥ 0
+end
+
+schema CSkidmarks
+  aSkidmarks : seq CSkidmark  -- bounded array [NUMSKIDMARKS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSkidmarks_Init
+  ΔCSkidmarks
+where
+  -- Declared member operation CSkidmarks::Init(void)
+  true
+end
+
+schema CSkidmarks_Shutdown_2
+  ΔCSkidmarks
+where
+  -- Declared member operation CSkidmarks::Shutdown(void)
+  true
+end
+
+schema CSkidmarks_Clear_3
+  ΔCSkidmarks
+where
+  -- Declared member operation CSkidmarks::Clear(void)
+  true
+end
+
+schema CSkidmarks_Update_4
+  ΔCSkidmarks
+where
+  -- Declared member operation CSkidmarks::Update(void)
+  true
+end
+
+schema CSkidmarks_Render_5
+  ΔCSkidmarks
+where
+  -- Declared member operation CSkidmarks::Render(void)
+  true
+end
+
+schema CSkidmarks_RegisterOne_6
+  ΔCSkidmarks
+  id? : ℕ
+  pos? : CVector
+  fwdX? : ℝ
+  fwdY? : ℝ
+  type? : eSkidmarkType
+  isBloody? : ℙ 𝔹
+where
+  -- Declared member operation CSkidmarks::RegisterOne(uintptr id, const CVector &pos, float fwdX, float fwdY, eSkidmarkType type, bool *isBloody)
+  true
+end
+
+schema CSkidmarks_RegisterOne_7
+  ΔCSkidmarks
+  id? : ℕ
+  pos? : CVector
+  fwdX? : ℝ
+  fwdY? : ℝ
+  isMuddy? : ℙ 𝔹
+  isBloody? : ℙ 𝔹
+where
+  -- Declared member operation CSkidmarks::RegisterOne(uintptr id, const CVector &pos, float fwdX, float fwdY, bool *isMuddy, bool *isBloody)
+  true
+end
+
+schema CSkidmarks_RegisterOne_8
+  ΔCSkidmarks
+  id? : ℕ
+  pos? : CVector
+  fwdX? : ℝ
+  fwdY? : ℝ
+  isMuddy? : ℙ 𝔹
+  isBloody? : ℙ 𝔹
+where
+  -- Declared member operation CSkidmarks::RegisterOne(uintptr id, CVector pos, float fwdX, float fwdY, bool *isMuddy, bool *isBloody)
+  true
+end

@@ -1,0 +1,37 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: colourfilterVC (extras)
+-- Source File(s): extras/shaders/colourfilterVC.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema colourfilterVC_main
+  ΔcolourfilterVCModuleState
+where
+  -- State update: a' = u_blurcolor.a
+  -- State update: doublec' = clamp(u_blurcolor*2.0, 0.0, 1.0)
+  -- State update: dst' = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: prev' = dst
+  -- State update: tmp' = dst*(1.0-a) + prev*doublec*a
+  -- State update: prev' = clamp(tmp, 0.0, 1.0)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema colourfilterVCModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 27
+end

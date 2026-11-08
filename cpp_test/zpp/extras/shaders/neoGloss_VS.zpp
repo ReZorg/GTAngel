@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoGloss_VS (extras)
+-- Source File(s): extras/shaders/neoGloss_VS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include standardConstants.zpp  (from "standardConstants.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VS_in
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema VS_out
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+  COLOR0 : ℝ
+  COLOR1 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema neoGloss_VS_main
+  ΔneoGloss_VSModuleState
+  input? : in_VS_in
+  result! : VS_out
+where
+  -- State update: output.Position' = mul(combinedMat, input.Position)
+  -- State update: Vertex' = mul(worldMat, input.Position).xyz
+  -- State update: output.TexCoord0.xy' = input.TexCoord
+  -- State update: viewVec' = normalize(eye - Vertex)
+  -- State update: Light' = normalize(viewVec - lights[0].direction.xyz)
+  -- State update: output.Normal' = 0.5*(1.0 + float3(0.0, 0.0, 1.0))
+  -- Return postcondition: result! = output
+  true
+end

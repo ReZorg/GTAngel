@@ -1,0 +1,148 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MBlur (renderer)
+-- Source File(s): renderer/MBlur.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+FxType ::= FXTYPE_WATER1 | FXTYPE_WATER2 | FXTYPE_BLOOD1 | FXTYPE_BLOOD2 | FXTYPE_HEATHAZE | FXTYPE_SPLASH1 | FXTYPE_SPLASH2 | FXTYPE_SPLASH3
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CMBlur
+  pFrontBuffer : Ref[RwRaster]
+  ms_bJustInitialised : 𝔹
+  ms_bScaledBlur : 𝔹
+  BlurOn : 𝔹
+  Drunkness : ℝ
+  pBufVertCount : ℤ
+where
+  #pFrontBuffer ≤ 1
+end
+
+schema CMBlur_MotionBlurOpen
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::MotionBlurOpen(RwCamera *cam)
+  true
+end
+
+schema CMBlur_MotionBlurClose_2
+  ΔCMBlur
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::MotionBlurClose(void)
+  true
+end
+
+schema CMBlur_CreateImmediateModeData_3
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+where
+  -- Declared member operation CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
+  true
+end
+
+schema CMBlur_CreateImmediateModeData_4
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  verts? : Ref[RwIm2DVertex]
+  color? : RwRGBA
+  u1Off? : ℝ
+  v1Off? : ℝ
+  u2Off? : ℝ
+  v2Off? : ℝ
+  z? : ℝ
+  fullTexture? : ℤ
+where
+  -- Declared member operation CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect, RwIm2DVertex *verts, RwRGBA color, float u1Off, float v1Off, float u2Off, float v2Off, float z, int fullTexture)
+  true
+end
+
+schema CMBlur_MotionBlurRender_5
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- Declared member operation CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
+  true
+end
+
+schema CMBlur_OverlayRender_6
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  raster? : Ref[RwRaster]
+  color? : RwRGBA
+  type? : ℤ
+  bluralpha? : ℤ
+where
+  -- Declared member operation CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, int32 bluralpha)
+  true
+end
+
+schema CMBlur_SetDrunkBlur_7
+  ΔCMBlur
+  drunkness? : ℝ
+where
+  -- Declared member operation CMBlur::SetDrunkBlur(float drunkness)
+  true
+end
+
+schema CMBlur_ClearDrunkBlur_8
+  ΔCMBlur
+where
+  -- Declared member operation CMBlur::ClearDrunkBlur()
+  true
+end
+
+schema CMBlur_PosInside_9
+  ΔCMBlur
+  rect? : Ref[RwRect]
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::PosInside(RwRect *rect, float x1, float y1, float x2, float y2)
+  true
+end
+
+schema CMBlur_AddRenderFx_10
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  rect? : Ref[RwRect]
+  z? : ℝ
+  type? : FxType
+  result! : 𝔹
+where
+  -- Declared member operation CMBlur::AddRenderFx(RwCamera *cam, RwRect *rect, float z, FxType type)
+  true
+end
+
+schema CMBlur_OverlayRenderFx_11
+  ΔCMBlur
+  cam? : Ref[RwCamera]
+  frontBuf? : Ref[RwRaster]
+where
+  -- Declared member operation CMBlur::OverlayRenderFx(RwCamera *cam, RwRaster *frontBuf)
+  true
+end

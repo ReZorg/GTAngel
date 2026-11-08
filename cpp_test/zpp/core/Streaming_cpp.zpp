@@ -1,0 +1,228 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Streaming (core)
+-- Source File(s): core/Streaming.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Text.zpp  (from "Text.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Directory.zpp  (from "Directory.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include World.zpp  (from "World.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Record.zpp  (from "Record.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Population.zpp  (from "Population.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include main.zpp  (from "main.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Script.zpp  (from "Script.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MB : seq CHAR  -- #define MB (1024*1024)
+BIGBUILDINGFLAGS : seq CHAR  -- #define BIGBUILDINGFLAGS STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY
+STREAM_DIST : ℝ  -- #define STREAM_DIST 80.0f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CStreamingInfo_GetCdPosnAndSize
+  ΔCStreamingInfo
+  posn? : ℕ
+  size? : ℕ
+where
+  -- State update: posn' = m_position
+  -- State update: size' = m_size
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CStreamingInfo_SetCdPosnAndSize
+  ΔCStreamingInfo
+  posn? : ℕ
+  size? : ℕ
+where
+  -- State update: m_position' = posn
+  -- State update: m_size' = size
+  true
+end
+
+schema CStreamingInfo_AddToList
+  ΔCStreamingInfo
+  link? : Ref[CStreamingInfo]
+where
+  -- State update: m_next' = link.m_next
+  -- State update: m_prev' = link
+  -- State update: link.m_next' = this
+  -- State update: m_next.m_prev' = this
+  true
+end
+
+schema CStreamingInfo_RemoveFromList
+  ΔCStreamingInfo
+where
+  -- State update: m_next.m_prev' = m_prev
+  -- State update: m_prev.m_next' = m_next
+  -- State update: m_next' = ∅
+  -- State update: m_prev' = ∅
+  true
+end
+
+schema CStreaming_Init2
+  ΔCStreaming
+where
+  -- State update: m_loadState' = STREAMSTATE_NOTLOADED
+  -- State update: m_next' = ∅
+  -- State update: m_prev' = ∅
+  -- State update: m_nextID' = -1
+  -- State update: m_size' = 0
+  -- State update: m_position' = 0
+  -- Invokes: CModelInfo::GetModelInfo, mi->GetRwObject, mi->IsSimple, CTxdStore::GetSlot, CPools::GetBuildingPool
+  true
+end
+
+schema CStreaming_Init
+  ΔCStreaming
+where
+  -- State update: txdHandle' = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile, CStreaming::Init2, CStreaming::Shutdown
+  true
+end
+
+schema CStreaming_ReInit
+  ΔCStreaming
+where
+  -- State update: ms_disableStreaming' = false
+  -- Invokes: CStreaming::FlushRequestList, CStreaming::DeleteAllRwObjects, CStreaming::RemoveAllUnusedModels, CModelInfo::GetModelInfo
+  true
+end
+
+schema CStreaming_Shutdown
+  ΔCStreaming
+where
+  -- State update: ms_streamingBufferSize' = 0
+  -- State update: ms_pExtraObjectsDir' = ∅
+  true
+end
+
+schema CStreaming_Update
+  ΔCStreaming
+where
+  -- State update: requestedSubway' = false
+  -- State update: timeProcessingTXD' = 0
+  -- State update: timeProcessingDFF' = 0
+  -- State update: si' = ms_endRequestedList.m_prev
+  -- State update: prev' = si.m_prev
+  -- Invokes: CTimer::GetIsPaused, TheCamera.GetPosition, CCutsceneMgr::IsCutsceneProcessing, CReplay::IsPlayingBack, CColStore::AddCollisionNeededAtPosn
+  true
+end
+
+schema CStreaming_LoadCdDirectory
+  ΔCStreaming
+where
+  -- State update: ms_imageSize' = GetGTA3ImgSize()
+  -- State update: ms_lastImageRead' = 0
+  true
+end
+
+schema CStreaming_LoadCdDirectory_2
+  ΔCStreaming
+  dirname? : seq CHAR
+  n? : ℤ
+where
+  -- State update: lastID' = -1
+  -- State update: fd' = CFileMgr::OpenFile(dirname, "rb")
+  -- State update: imgSelector' = n<<24
+  -- State update: bAddToStreaming' = false
+  -- State update: ms_streamingBufferSize' = direntry.size
+  -- State update: dot' = strchr(direntry.name, '.')
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CModelInfo::GetModelInfo, ms_pExtraObjectsDir->AddItem, CTxdStore::FindTxdSlot
+  true
+end
+
+schema Streaming_GetObjectName
+  ΔStreamingModuleState
+  streamId? : ℤ
+where
+  -- Return postcondition: result! = objname
+  -- Invokes: CModelInfo::GetModelInfo, CTxdStore::GetTxdName, CColStore::GetColName, CAnimManager::GetAnimationBlock
+  true
+end
+
+schema Streaming_RegisterAtomicMemPtrsCB
+  ΔStreamingModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CStreaming_ConvertBufferToObject
+  ΔCStreaming
+  buf? : ℙ ℤ
+  streamId? : ℤ
+where
+  -- State update: cdsize' = ms_aInfoForModel[streamId].GetCdSize()
+  -- State update: mem.start' = (uint8*)buf
+  -- State update: mem.length' = cdsize * CDSTREAM_SECTOR_SIZE
+  -- State update: stream' = RwStreamOpen(rwSTREAMMEMORY, rwSTREAMREAD, &mem)
+  -- State update: mi' = CModelInfo::GetModelInfo(streamId)
+  -- State update: success' = CFileLoader::LoadAtomicFile(stream, streamId)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerMillisecond, CModelInfo::GetModelInfo, mi->GetTxdSlot, CTxdStore::GetSlot
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema StreamingModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 5756
+end

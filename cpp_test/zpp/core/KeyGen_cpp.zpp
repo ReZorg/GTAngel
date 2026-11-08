@@ -1,0 +1,73 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: KeyGen (core)
+-- Source File(s): core/KeyGen.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include ctype.zpp  (from "ctype.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CKeyGen_GetKey
+  ΔCKeyGen
+  str? : seq CHAR
+  size? : ℤ
+where
+  -- State update: key' = 0xffffffff
+  -- State update: key' = keyTable[(key ^ str[i]) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+schema CKeyGen_GetKey_2
+  ΔCKeyGen
+  str? : seq CHAR
+where
+  -- State update: key' = 0xffffffff
+  -- State update: key' = keyTable[(key ^ *(str++)) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+schema CKeyGen_GetUppercaseKey
+  ΔCKeyGen
+  str? : seq CHAR
+where
+  -- State update: key' = 0xffffffff
+  -- State update: key' = keyTable[(key ^ toupper(*(str++))) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+schema CKeyGen_AppendStringToKey
+  ΔCKeyGen
+  key? : ℕ
+  str? : seq CHAR
+where
+  -- State update: key' = keyTable[(key ^ *(str++)) & 0xFF] ^ (key >> 8)
+  -- Return postcondition: result! = key
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema KeyGenModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 106
+end

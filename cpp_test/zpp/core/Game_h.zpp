@@ -1,0 +1,204 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Game (core)
+-- Source File(s): core/Game.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eLevelName ::= LEVEL_IGNORE | LEVEL_GENERIC | LEVEL_BEACH | LEVEL_MAINLAND | LEVEL_COMMERCIAL | LEVEL_SUBURBAN | LEVEL_UNDERGROUND
+  -- val(LEVEL_IGNORE) = -1
+  -- val(LEVEL_GENERIC) = 0
+
+eAreaName ::= AREA_MAIN_MAP | AREA_HOTEL | AREA_MANSION | AREA_BANK | AREA_MALL | AREA_STRIP_CLUB | AREA_LAWYERS | AREA_COFFEE_SHOP | AREA_CONCERT_HALL | AREA_STUDIO | AREA_RIFLE_RANGE | AREA_BIKER_BAR | AREA_POLICE_STATION | AREA_EVERYWHERE | AREA_DIRT | AREA_BLOOD | AREA_OVALRING | AREA_MALIBU_CLUB | AREA_PRINT_WORKS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CGame
+  currLevel : eLevelName
+  currArea : ℤ
+  bDemoMode : 𝔹
+  nastyGame : 𝔹
+  frenchGame : 𝔹
+  germanGame : 𝔹
+  japaneseGame : 𝔹
+  playingIntro : 𝔹
+  aDatFile : seq CHAR
+  VarUpdatePlayerCoords : bool8
+where
+  #aDatFile = 32
+end
+
+schema CGame_InitialiseRenderWare
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::InitialiseRenderWare(void)
+  true
+end
+
+schema CGame_ShutdownRenderWare_2
+  ΔCGame
+where
+  -- Declared member operation CGame::ShutdownRenderWare(void)
+  true
+end
+
+schema CGame_InitialiseOnceAfterRW_3
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::InitialiseOnceAfterRW(void)
+  true
+end
+
+schema CGame_FinalShutdown_4
+  ΔCGame
+where
+  -- Declared member operation CGame::FinalShutdown(void)
+  true
+end
+
+schema CGame_Initialise_5
+  ΔCGame
+  datFile? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CGame::Initialise(const char *datFile)
+  true
+end
+
+schema CGame_ShutDown_6
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::ShutDown(void)
+  true
+end
+
+schema CGame_ReInitGameObjectVariables_7
+  ΔCGame
+where
+  -- Declared member operation CGame::ReInitGameObjectVariables(void)
+  true
+end
+
+schema CGame_ReloadIPLs_8
+  ΔCGame
+where
+  -- Declared member operation CGame::ReloadIPLs(void)
+  true
+end
+
+schema CGame_ShutDownForRestart_9
+  ΔCGame
+where
+  -- Declared member operation CGame::ShutDownForRestart(void)
+  true
+end
+
+schema CGame_InitialiseWhenRestarting_10
+  ΔCGame
+where
+  -- Declared member operation CGame::InitialiseWhenRestarting(void)
+  true
+end
+
+schema CGame_Process_11
+  ΔCGame
+where
+  -- Declared member operation CGame::Process(void)
+  true
+end
+
+schema CGame_InitAfterFocusLoss_12
+  ΔCGame
+where
+  -- Declared member operation CGame::InitAfterFocusLoss(void)
+  true
+end
+
+schema CGame_IsInInterior_13
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::IsInInterior(void)
+  true
+end
+
+schema CGame_CanSeeWaterFromCurrArea_14
+  ΔCGame
+  result! : bool
+where
+  -- Declared member operation CGame::CanSeeWaterFromCurrArea(void)
+  true
+end
+
+schema CGame_CanSeeOutSideFromCurrArea_15
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::CanSeeOutSideFromCurrArea(void)
+  true
+end
+
+schema CGame_TidyUpMemory_16
+  ΔCGame
+  arg_1? : 𝔹
+  arg_2? : 𝔹
+where
+  -- Declared member operation CGame::TidyUpMemory(bool, bool)
+  true
+end
+
+schema CGame_DrasticTidyUpMemory_17
+  ΔCGame
+  arg_1? : 𝔹
+where
+  -- Declared member operation CGame::DrasticTidyUpMemory(bool)
+  true
+end
+
+schema CGame_ProcessTidyUpMemory_18
+  ΔCGame
+where
+  -- Declared member operation CGame::ProcessTidyUpMemory(void)
+  true
+end
+
+schema CGame_ReInitGameObjectVariables_19
+  ΔCGame
+  arg_1? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CGame::ReInitGameObjectVariables(bool)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Game_IsInInterior
+  ΔGameModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = currArea != AREA_MAIN_MAP
+  true
+end
+
+schema Game_IsAreaVisible
+  ΔGameModuleState
+  area? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = area == CGame::currArea || area == AREA_EVERYWHERE
+  true
+end

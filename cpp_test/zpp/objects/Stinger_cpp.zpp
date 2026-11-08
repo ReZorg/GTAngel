@@ -1,0 +1,124 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Stinger (objects)
+-- Source File(s): objects/Stinger.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Stinger.zpp  (from "Stinger.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include World.zpp  (from "World.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include General.zpp  (from "General.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CStingerSegment_CStingerSegment
+  ΔCStingerSegment
+where
+  -- State update: m_fMass' = 1.0f
+  -- State update: m_fTurnMass' = 1.0f
+  -- State update: m_fAirResistance' = 0.99999f
+  -- State update: m_fElasticity' = 0.75f
+  -- State update: m_fBuoyancy' = GRAVITY * m_fMass * 0.1f
+  -- State update: bExplosionProof' = true
+  true
+end
+
+schema CStingerSegment_CStingerSegment_2
+  ΔCStingerSegment
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStinger_CStinger
+  ΔCStinger
+where
+  -- State update: bIsDeployed' = false
+  true
+end
+
+schema CStinger_Init
+  ΔCStinger
+  pPed? : Ref[CPed]
+where
+  -- State update: pOwner' = pPed
+  -- State update: bUsesCollision' = false
+  -- State update: bIsDeployed' = true
+  -- State update: m_vPos' = pPed.GetPosition()
+  -- State update: m_fMax_Z' = Atan2(-pPed.GetForward().x, pPed.GetForward().y) + HALFPI
+  -- State update: m_nSpikeState' = STINGERSTATE_NONE
+  -- Invokes: pPed->GetPosition, pPed->GetForward, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CStinger_Remove
+  ΔCStinger
+where
+  -- State update: spikeSegment' = pSpikes[i]
+  -- State update: spikeSegment.bRemoveFromWorld' = true
+  -- State update: bIsDeployed' = false
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CStinger_Deploy
+  ΔCStinger
+  pPed? : Ref[CPed]
+where
+  -- Invokes: pPed->IsPedInControl, pPed->GetClump, pPed->SetPedState, CAnimManager::AddAnimation
+  true
+end
+
+schema CStinger_CheckForBurstTyres
+  ΔCStinger
+where
+  -- State update: firstPos' = pSpikes[0].GetPosition()
+  -- State update: lastPos' = pSpikes[NUM_STINGER_SEGMENTS - 1].GetPosition()
+  -- State update: dist' = (lastPos - firstPos).Magnitude()
+  -- State update: pAutomobile' = ∅
+  -- State update: pBike' = ∅
+  -- State update: pAutomobile' = (CAutomobile*)vehsInRange[i]
+  -- Invokes: CWorld::FindObjectsInRange, CModelInfo::GetModelInfo, CParticle::AddParticle
+  true
+end
+
+schema CStinger_Process
+  ΔCStinger
+where
+  -- State update: m_nSpikeState' = STINGERSTATE_DEPLOYING
+  -- State update: m_bThrowsSpikeTrap' = false
+  -- State update: m_nSpikeState' = STINGERSTATE_REMOVE
+  -- State update: m_nSpikeState' = STINGERSTATE_DEPLOYED
+  -- State update: progress' = 1.0f - progress
+  -- State update: degangle' = progress * ARRAY_SIZE(m_vPositions)
+  -- Invokes: pOwner->GetPedState, pOwner->GetClump, CWorld::Add, pOwner->SetIdle, CTimer::GetTimeInMilliseconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema StingerModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 259
+end
