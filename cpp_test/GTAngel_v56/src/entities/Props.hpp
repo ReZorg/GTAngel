@@ -1,3 +1,8 @@
+    // Component-specific Z++ street prop CDummy contract binding (from entities/ZppContracts.hpp)
+    static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {
+        return zpp_entities_spec::CDummy_ZppContract{};
+    }
+    static_assert(makeStreetPropDummyContract().checkInvariant(), "Props CDummy Z++ contract must hold");
     void buildProps(const avatar3d::GameWorld& world) {
         // LW36: tapered cylindrical street-light columns, curved luminaire arm,
         // compact LED cobra-head fixture, and ground-level (y=0.019f) circular

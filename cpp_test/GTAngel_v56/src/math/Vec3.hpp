@@ -496,3 +496,10 @@ static Vec3 norm(Vec3 a) { float l = len(a); return l > 1e-6f ? a*(1.0f/l) : Vec
 // namespace avatar3d; it never moves the body or writes a motor/world commit.
 // LW21: baked v25 pose clips (DTEP25L). Clean-room offline bake of the
 // user-supplied pose rig; runtime samples per-joint displacements only.
+// Component-specific Z++ math bindings (from math/ZppContracts.hpp)
+constexpr zpp_math_spec::ZppVec3 toZppVec3(Vec3 v) { return {v.x, v.y, v.z}; }
+constexpr Vec3 fromZppVec3(zpp_math_spec::ZppVec3 v) { return {v.x, v.y, v.z}; }
+constexpr zpp_math_spec::CRect_ZppContract makeWorldBoundsZppRect(float halfExtent) {
+    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, halfExtent, halfExtent, -halfExtent);
+}
+static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, 64.0f, 64.0f, -64.0f), "World bounds CRect Z++ contract must hold");

@@ -1,6 +1,10 @@
-    // ── Z++ Formal Spec Contract (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
-    static constexpr int zpp_vehicles_modules() { return 15; }
-    static constexpr int zpp_vehicles_schemas() { return 700; }
+    // ── Z++ Formal Spec Component Binding (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
+    static constexpr int zpp_vehicles_modules() { return zpp_vehicles_spec::kZppModuleCount; }
+    static constexpr int zpp_vehicles_schemas() { return zpp_vehicles_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_vehicles_zpp() {
+        return zpp_vehicles_spec::verify_vehicles_zpp_invariants() && (zpp_vehicles_spec::CBike_ZppContract{}.checkInvariant()) && (zpp_vehicles_spec::op_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{}, zpp_vehicles_spec::apply_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{})));
+    }
+    static_assert(verifyComponent_vehicles_zpp(), "RasterEngine component Z++ binding failed for vehicles");
     void drawSculptedCoupe(Vec3 centre, float ch, float sh, float wheelPhase,
                           Colour body, Colour cab, uint16_t id) {
         // LW34: true 3D fastback coupe — sloped front hood, angled windshield,

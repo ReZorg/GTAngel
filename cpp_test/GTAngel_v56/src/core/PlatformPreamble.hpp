@@ -359,6 +359,34 @@ struct CSelectable_ZppContract {
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShText_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShTextTwoLines_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShOption_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShOptionTwoLines_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CPlaceableSprite_ZppContract {
     uint8_t m_pSprite_card{0u}; // Z++: Ref[CSprite2d]
     int32_t m_position{0}; // Z++: CVector2D
@@ -1635,6 +1663,34 @@ constexpr bool verify_core_zpp_invariants() {
         CSelectable_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CSelectable_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShText_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShText_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShTextTwoLines_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShTextTwoLines_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShOption_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShOption_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShOptionTwoLines_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShOptionTwoLines_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }

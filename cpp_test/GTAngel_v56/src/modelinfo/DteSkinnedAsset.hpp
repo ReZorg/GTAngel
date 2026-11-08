@@ -1228,3 +1228,8 @@ public:
     static const char* sourceLabel() { return "ORIGINAL CLUMP / 17 FRAMES / 15 ATOMICS"; }
 };
 
+// Component-specific Z++ modelinfo bindings (from modelinfo/ZppContracts.hpp)
+constexpr zpp_modelinfo_spec::CBaseModelInfo_ZppContract makeDteSkinnedModelInfoContract() {
+    return zpp_modelinfo_spec::apply_CBaseModelInfo_Init2dEffects(zpp_modelinfo_spec::CBaseModelInfo_ZppContract{});
+}
+static_assert(zpp_modelinfo_spec::op_CBaseModelInfo_Init2dEffects(zpp_modelinfo_spec::CBaseModelInfo_ZppContract{}, makeDteSkinnedModelInfoContract()), "DteSkinnedAsset CBaseModelInfo Z++ contract must hold");

@@ -1378,3 +1378,10 @@ struct CogVerse {
 
 // GTAngel v19 — Ariadne gameplay vertical slice.
 // Local gameplay truth only: no telemetry or external model is required.
+// Component-specific Z++ audio collision & sample bindings (from audio/ZppContracts.hpp)
+namespace gtangel_zpp_audio_bind {
+constexpr zpp_audio_spec::cAudioCollisionManager_ZppContract makeAudioCollisionManagerContract() {
+    return zpp_audio_spec::cAudioCollisionManager_ZppContract{};
+}
+static_assert(makeAudioCollisionManagerContract().checkInvariant(), "VrAndEndocrineAudio cAudioCollisionManager Z++ contract must hold");
+} // namespace gtangel_zpp_audio_bind

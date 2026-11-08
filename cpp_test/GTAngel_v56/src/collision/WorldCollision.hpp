@@ -996,3 +996,8 @@ struct GameWorld {
     }
 };
 
+// Component-specific Z++ collision bindings (from collision/ZppContracts.hpp)
+constexpr zpp_collision_spec::CColSphere_ZppContract makePillarZppColSphere(Vec3 pos, float radius) {
+    return zpp_collision_spec::apply_CColSphere_Set(zpp_collision_spec::CColSphere_ZppContract{}, radius, zpp_collision_spec::ZppVec3{pos.x, pos.y, pos.z}, 1, 0);
+}
+static_assert(zpp_collision_spec::op_CColSphere_Set(zpp_collision_spec::CColSphere_ZppContract{}, makePillarZppColSphere(Vec3{10.0f, 0.0f, -10.0f}, 0.55f), 0.55f, zpp_collision_spec::ZppVec3{10.0f, 0.0f, -10.0f}, 1, 0), "GameWorld pillar CColSphere Z++ contract must hold");

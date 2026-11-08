@@ -771,3 +771,10 @@ private:
 // GTAngel v20: original, portable local CNS vertical slice. No supplied engine code/assets.
 // This module is inserted after v19game in the deterministic generated Win32 source.
 #include <optional>
+// Component-specific Z++ text & pager bindings (from text/ZppContracts.hpp)
+namespace gtangel_zpp_text_bind {
+constexpr zpp_text_spec::CPager_ZppContract makeInitialisedStoryPager() {
+    return zpp_text_spec::apply_CPager_Init(zpp_text_spec::CPager_ZppContract{});
+}
+static_assert(zpp_text_spec::op_CPager_Init(zpp_text_spec::CPager_ZppContract{}, makeInitialisedStoryPager()), "StoryAndQuestText CPager Z++ contract must hold");
+} // namespace gtangel_zpp_text_bind

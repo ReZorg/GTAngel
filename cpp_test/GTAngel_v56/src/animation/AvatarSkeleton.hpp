@@ -935,3 +935,8 @@ struct AvatarSkeleton {
 // ── Gameworld ──// ── Gameworld ──
 // Ground plane + obstacle pillars + goal beacon. The avatar must navigate
 // from spawn to the beacon while avoiding obstacles.
+// Component-specific Z++ animation blend bindings (from animation/ZppContracts.hpp)
+constexpr zpp_animation_spec::CAnimBlendAssociation_ZppContract makeAvatarZppBlendState(float blendAmount, float blendDelta) {
+    return zpp_animation_spec::apply_CAnimBlendAssociation_SetBlend(zpp_animation_spec::CAnimBlendAssociation_ZppContract{}, blendAmount, blendDelta);
+}
+static_assert(zpp_animation_spec::op_CAnimBlendAssociation_SetBlend(zpp_animation_spec::CAnimBlendAssociation_ZppContract{}, makeAvatarZppBlendState(0.75f, 0.25f), 0.75f, 0.25f), "AvatarSkeleton CAnimBlendAssociation SetBlend Z++ contract must hold");

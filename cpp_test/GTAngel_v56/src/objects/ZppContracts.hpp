@@ -53,6 +53,13 @@ struct CCutsceneObject_ZppContract {
             && (m_pAttachmentObject_card <= 1u);
     }
 };
+// State Schema Contract from zpp/objects/DummyObject.zpp
+struct CDummyObject_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/objects/ObjectData.zpp
 struct CObjectInfo_ZppContract {
     float m_fMass{0.0f}; // Z++: ℝ
@@ -124,6 +131,20 @@ struct CAudioHydrant_ZppContract {
         return (pParticleObject_card <= 1u);
     }
 };
+// State Schema Contract from zpp/objects/Projectile.zpp
+struct CProjectile_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/objects/Stinger.zpp
+struct CStingerSegment_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/objects/Stinger.zpp
 struct CStinger_ZppContract {
     bool bIsDeployed{false}; // Z++: 𝔹
@@ -186,6 +207,13 @@ constexpr bool verify_objects_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CDummyObject_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CDummyObject_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CObjectInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CObjectInfo_ZppContract bad{};
@@ -211,6 +239,20 @@ constexpr bool verify_objects_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CAudioHydrant_ZppContract bad{};
         bad.pParticleObject_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CProjectile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CProjectile_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CStingerSegment_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CStingerSegment_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {

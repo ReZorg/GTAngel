@@ -484,6 +484,15 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         }
       }
 
+      for (const rawW of whereLines) {
+        const mAddr = rawW.match(/^([A-Za-z_]\w*)\s*∈\s*ADDRESS$/);
+        if (mAddr && !fields.has(mAddr[1])) {
+          const addrName = mAddr[1];
+          const safeAddr = safeFieldName(addrName);
+          fields.set(addrName, { rawName: addrName, fname: safeAddr, kind: 'scalar_int', ct: 'int64_t', defVal: '0', zt: 'ADDRESS' });
+        }
+      }
+
       if (hasUnresolvedField || fields.size === 0) continue;
 
       const cppPreds = [];
@@ -575,10 +584,20 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
   if (insideClass) {
     const modList = zfiles.slice(0, 8).join(', ');
+    const firstSchema = sampleSchemas.length > 0 ? `zpp_${folder}_spec::${sampleSchemas[0].sname}_ZppContract{}.checkInvariant()` : 'true';
+    const firstOp = deltaOps.length > 0
+      ? `zpp_${folder}_spec::op_${deltaOps[0].opName}(zpp_${folder}_spec::${deltaOps[0].targetState}_ZppContract{}, zpp_${folder}_spec::apply_${deltaOps[0].opName}(zpp_${folder}_spec::${deltaOps[0].targetState}_ZppContract{}))`
+      : (queryOps.length > 0
+        ? `zpp_${folder}_spec::op_${queryOps[0].opName}(zpp_${folder}_spec::${queryOps[0].targetState}_ZppContract{})`
+        : 'true');
     return [
-      `    // ── Z++ Formal Spec Contract (${folder}): ${zfiles.length} modules, ${totalSchemas} schemas, ${totalEnums} enums (${modList}) ──`,
-      `    static constexpr int zpp_${folder}_modules() { return ${zfiles.length}; }`,
-      `    static constexpr int zpp_${folder}_schemas() { return ${totalSchemas}; }`,
+      `    // ── Z++ Formal Spec Component Binding (${folder}): ${zfiles.length} modules, ${totalSchemas} schemas, ${totalEnums} enums (${modList}) ──`,
+      `    static constexpr int zpp_${folder}_modules() { return zpp_${folder}_spec::kZppModuleCount; }`,
+      `    static constexpr int zpp_${folder}_schemas() { return zpp_${folder}_spec::kZppSchemaCount; }`,
+      `    static constexpr bool verifyComponent_${folder}_zpp() {`,
+      `        return zpp_${folder}_spec::verify_${folder}_zpp_invariants() && (${firstSchema}) && (${firstOp});`,
+      `    }`,
+      `    static_assert(verifyComponent_${folder}_zpp(), "RasterEngine component Z++ binding failed for ${folder}");`,
       ''
     ].join('\n');
   }
@@ -764,30 +783,149 @@ for (const rootDir of ['src', '../src']) {
   };
 
   writeMod('core/PlatformPreamble.hpp', '#pragma once\n' + sliceLines(1, L_avatar3d - 1) + buildZppCppContractBlock('core', false));
-  writeMod('math/Vec3.hpp', buildZppCppContractBlock('math', false) + sliceLines(L_avatar3d, L_poseLib - 1));
-  writeMod('animation/AvatarSkeleton.hpp', buildZppCppContractBlock('animation', false) + sliceLines(L_poseLib, L_gameWorld - 1));
-  writeMod('collision/WorldCollision.hpp', buildZppCppContractBlock('collision', false) + sliceLines(L_gameWorld, L_navTrainer - 1));
-  writeMod('core/CognitiveSubsystems.hpp', '#pragma once\n' + sliceLines(L_navTrainer, L_v15render - 1));
+  writeMod('math/Vec3.hpp', buildZppCppContractBlock('math', false) + sliceLines(L_avatar3d, L_poseLib - 1) + [
+    '// Component-specific Z++ math bindings (from math/ZppContracts.hpp)',
+    'constexpr zpp_math_spec::ZppVec3 toZppVec3(Vec3 v) { return {v.x, v.y, v.z}; }',
+    'constexpr Vec3 fromZppVec3(zpp_math_spec::ZppVec3 v) { return {v.x, v.y, v.z}; }',
+    'constexpr zpp_math_spec::CRect_ZppContract makeWorldBoundsZppRect(float halfExtent) {',
+    '    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, halfExtent, halfExtent, -halfExtent);',
+    '}',
+    'static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, 64.0f, 64.0f, -64.0f), "World bounds CRect Z++ contract must hold");',
+    ''
+  ].join('\n'));
+  writeMod('animation/AvatarSkeleton.hpp', buildZppCppContractBlock('animation', false) + sliceLines(L_poseLib, L_gameWorld - 1) + [
+    '// Component-specific Z++ animation blend bindings (from animation/ZppContracts.hpp)',
+    'constexpr zpp_animation_spec::CAnimBlendAssociation_ZppContract makeAvatarZppBlendState(float blendAmount, float blendDelta) {',
+    '    return zpp_animation_spec::apply_CAnimBlendAssociation_SetBlend(zpp_animation_spec::CAnimBlendAssociation_ZppContract{}, blendAmount, blendDelta);',
+    '}',
+    'static_assert(zpp_animation_spec::op_CAnimBlendAssociation_SetBlend(zpp_animation_spec::CAnimBlendAssociation_ZppContract{}, makeAvatarZppBlendState(0.75f, 0.25f), 0.75f, 0.25f), "AvatarSkeleton CAnimBlendAssociation SetBlend Z++ contract must hold");',
+    ''
+  ].join('\n'));
+  writeMod('collision/WorldCollision.hpp', buildZppCppContractBlock('collision', false) + sliceLines(L_gameWorld, L_navTrainer - 1) + [
+    '// Component-specific Z++ collision bindings (from collision/ZppContracts.hpp)',
+    'constexpr zpp_collision_spec::CColSphere_ZppContract makePillarZppColSphere(Vec3 pos, float radius) {',
+    '    return zpp_collision_spec::apply_CColSphere_Set(zpp_collision_spec::CColSphere_ZppContract{}, radius, zpp_collision_spec::ZppVec3{pos.x, pos.y, pos.z}, 1, 0);',
+    '}',
+    'static_assert(zpp_collision_spec::op_CColSphere_Set(zpp_collision_spec::CColSphere_ZppContract{}, makePillarZppColSphere(Vec3{10.0f, 0.0f, -10.0f}, 0.55f), 0.55f, zpp_collision_spec::ZppVec3{10.0f, 0.0f, -10.0f}, 1, 0), "GameWorld pillar CColSphere Z++ contract must hold");',
+    ''
+  ].join('\n'));
+  writeMod('core/CognitiveSubsystems.hpp', '#pragma once\n' + sliceLines(L_navTrainer, L_v15render - 1) + [
+    '// Component-specific Z++ core clock & pool bindings (from core/ZppContracts.hpp)',
+    'namespace gtangel_zpp_core_bind {',
+    'constexpr zpp_core_spec::CClock_ZppContract makeInitialisedGameClock(int64_t msPerMin, int64_t tickMs) {',
+    '    const auto c0 = zpp_core_spec::apply_CClock_Initialise(zpp_core_spec::CClock_ZppContract{}, msPerMin, tickMs);',
+    '    return zpp_core_spec::apply_CClock_StoreClock(c0);',
+    '}',
+    'static_assert(makeInitialisedGameClock(1000, 16).ms_bClockHasBeenStored && makeInitialisedGameClock(1000, 16).ms_Stored_nGameClockHours == 12, "CognitiveSubsystems CClock Z++ store transition must hold");',
+    '} // namespace gtangel_zpp_core_bind',
+    ''
+  ].join('\n'));
   writeMod('fakerw/RwTypes.hpp', buildZppCppContractBlock('fakerw', false) + sliceLines(L_v15render, L_dteSkinned - 1));
-  writeMod('modelinfo/DteSkinnedAsset.hpp', buildZppCppContractBlock('modelinfo', false) + sliceLines(L_dteSkinned, L_rasterEngine - 1));
-  writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1));
+  writeMod('modelinfo/DteSkinnedAsset.hpp', buildZppCppContractBlock('modelinfo', false) + sliceLines(L_dteSkinned, L_rasterEngine - 1) + [
+    '// Component-specific Z++ modelinfo bindings (from modelinfo/ZppContracts.hpp)',
+    'constexpr zpp_modelinfo_spec::CBaseModelInfo_ZppContract makeDteSkinnedModelInfoContract() {',
+    '    return zpp_modelinfo_spec::apply_CBaseModelInfo_Init2dEffects(zpp_modelinfo_spec::CBaseModelInfo_ZppContract{});',
+    '}',
+    'static_assert(zpp_modelinfo_spec::op_CBaseModelInfo_Init2dEffects(zpp_modelinfo_spec::CBaseModelInfo_ZppContract{}, makeDteSkinnedModelInfoContract()), "DteSkinnedAsset CBaseModelInfo Z++ contract must hold");',
+    ''
+  ].join('\n'));
+  writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1) + buildZppCppContractBlock('rw', true));
   writeMod('leeds/SkyAndRoads.hpp', buildZppCppContractBlock('leeds', true) + sliceLines(L_buildSun, L_buildBuildings - 1));
   writeMod('buildings/Buildings.hpp', buildZppCppContractBlock('buildings', true) + sliceLines(L_buildBuildings, L_buildPillars - 1));
   writeMod('entities/Pillars.hpp', buildZppCppContractBlock('entities', true) + sliceLines(L_buildPillars, L_buildGoal - 1));
-  writeMod('entities/Props.hpp', sliceLines(L_buildProps, L_buildAvatar - 1));
+  writeMod('entities/Props.hpp', [
+    '    // Component-specific Z++ street prop CDummy contract binding (from entities/ZppContracts.hpp)',
+    '    static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {',
+    '        return zpp_entities_spec::CDummy_ZppContract{};',
+    '    }',
+    '    static_assert(makeStreetPropDummyContract().checkInvariant(), "Props CDummy Z++ contract must hold");',
+    ''
+  ].join('\n') + sliceLines(L_buildProps, L_buildAvatar - 1));
   writeMod('objects/WorldObjects.hpp', buildZppCppContractBlock('objects', true) + sliceLines(L_buildGoal, L_buildWalkers - 1));
-  writeMod('objects/QuestShard.hpp', sliceLines(L_buildShard, L_drawCoupe - 1));
-  writeMod('objects/Pickups.hpp', sliceLines(L_buildPickups, L_buildProps - 1));
+  writeMod('objects/QuestShard.hpp', [
+    '    // Component-specific Z++ quest shard CObjectInfo contract binding (from objects/ZppContracts.hpp)',
+    '    static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {',
+    '        return zpp_objects_spec::CObjectInfo_ZppContract{};',
+    '    }',
+    '    static_assert(makeQuestShardObjectContract().checkInvariant(), "QuestShard CObjectInfo Z++ contract must hold");',
+    ''
+  ].join('\n') + sliceLines(L_buildShard, L_drawCoupe - 1));
+  writeMod('objects/Pickups.hpp', [
+    '    // Component-specific Z++ pickup CParticleObject contract binding (from objects/ZppContracts.hpp)',
+    '    static constexpr zpp_objects_spec::CParticleObject_ZppContract makePickupParticleContract() {',
+    '        return zpp_objects_spec::apply_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{});',
+    '    }',
+    '    static_assert(zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, makePickupParticleContract()), "Pickups CParticleObject Z++ contract must hold");',
+    ''
+  ].join('\n') + sliceLines(L_buildPickups, L_buildProps - 1));
   writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + sliceLines(L_buildWalkers, L_buildShard - 1));
   writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + sliceLines(L_drawCoupe, L_buildPickups - 1));
   writeMod('renderer/SoftwareRasterizer.hpp', buildZppCppContractBlock('renderer', true) + sliceLines(L_buildAvatar, L_v16motor - 1) + buildZppCppContractBlock('renderer', false));
-  writeMod('control/MotorAndLearning.hpp', buildZppCppContractBlock('control', false) + sliceLines(L_v16motor, L_v18peer - 1) + '#endif\n#endif\n');
-  writeMod('weapons/SafetyAndPeerShield.hpp', buildZppCppContractBlock('weapons', false) + sliceLines(L_v18peer, L_v18peerEnd));
-  writeMod('audio/VrAndEndocrineAudio.hpp', buildZppCppContractBlock('audio', false) + sliceLines(L_uechovr, L_v20cnsFwd - 1));
-  writeMod('text/StoryAndQuestText.hpp', buildZppCppContractBlock('text', false) + sliceLines(L_v20cnsFwd, L_v20cns - 1));
-  writeMod('extras/DteBridgeAndCommons.hpp', buildZppCppContractBlock('extras', false) + sliceLines(L_v20cns, L_v20save - 1));
-  writeMod('save/Persistence.hpp', buildZppCppContractBlock('save', false) + sliceLines(L_v20save, L_gtangelStruct - 1));
-  writeMod('core/GTAngelAGI.hpp', '#pragma once\n' + sliceLines(L_gtangelStruct, L_renderV15Frame - 1));
+  writeMod('control/MotorAndLearning.hpp', buildZppCppContractBlock('control', false) + sliceLines(L_v16motor, L_v18peer - 1) + '#endif\n#endif\n' + [
+    '// Component-specific Z++ control & CCarCtrl bindings (from control/ZppContracts.hpp)',
+    'namespace gtangel_zpp_control_bind {',
+    'constexpr zpp_control_spec::CCarCtrl_ZppContract makeInitialisedCarCtrl() {',
+    '    return zpp_control_spec::apply_CCarCtrl_Init(zpp_control_spec::CCarCtrl_ZppContract{});',
+    '}',
+    'static_assert(zpp_control_spec::op_CCarCtrl_Init(zpp_control_spec::CCarCtrl_ZppContract{}, makeInitialisedCarCtrl()), "MotorAndLearning CCarCtrl Z++ contract must hold");',
+    '} // namespace gtangel_zpp_control_bind',
+    ''
+  ].join('\n'));
+  writeMod('weapons/SafetyAndPeerShield.hpp', buildZppCppContractBlock('weapons', false) + sliceLines(L_v18peer, L_v18peerEnd) + [
+    '// Component-specific Z++ weapon & explosion safety bindings (from weapons/ZppContracts.hpp)',
+    'namespace gtangel_zpp_weapons_bind {',
+    'constexpr zpp_weapons_spec::CExplosion_ZppContract makeClearedExplosionState() {',
+    '    return zpp_weapons_spec::apply_CExplosion_ResetExplosionActiveCounter(zpp_weapons_spec::CExplosion_ZppContract{});',
+    '}',
+    'static_assert(zpp_weapons_spec::op_CExplosion_ResetExplosionActiveCounter(zpp_weapons_spec::CExplosion_ZppContract{}, makeClearedExplosionState()), "SafetyAndPeerShield CExplosion Z++ contract must hold");',
+    '} // namespace gtangel_zpp_weapons_bind',
+    ''
+  ].join('\n'));
+  writeMod('audio/VrAndEndocrineAudio.hpp', buildZppCppContractBlock('audio', false) + sliceLines(L_uechovr, L_v20cnsFwd - 1) + [
+    '// Component-specific Z++ audio collision & sample bindings (from audio/ZppContracts.hpp)',
+    'namespace gtangel_zpp_audio_bind {',
+    'constexpr zpp_audio_spec::cAudioCollisionManager_ZppContract makeAudioCollisionManagerContract() {',
+    '    return zpp_audio_spec::cAudioCollisionManager_ZppContract{};',
+    '}',
+    'static_assert(makeAudioCollisionManagerContract().checkInvariant(), "VrAndEndocrineAudio cAudioCollisionManager Z++ contract must hold");',
+    '} // namespace gtangel_zpp_audio_bind',
+    ''
+  ].join('\n'));
+  writeMod('text/StoryAndQuestText.hpp', buildZppCppContractBlock('text', false) + sliceLines(L_v20cnsFwd, L_v20cns - 1) + [
+    '// Component-specific Z++ text & pager bindings (from text/ZppContracts.hpp)',
+    'namespace gtangel_zpp_text_bind {',
+    'constexpr zpp_text_spec::CPager_ZppContract makeInitialisedStoryPager() {',
+    '    return zpp_text_spec::apply_CPager_Init(zpp_text_spec::CPager_ZppContract{});',
+    '}',
+    'static_assert(zpp_text_spec::op_CPager_Init(zpp_text_spec::CPager_ZppContract{}, makeInitialisedStoryPager()), "StoryAndQuestText CPager Z++ contract must hold");',
+    '} // namespace gtangel_zpp_text_bind',
+    ''
+  ].join('\n'));
+  writeMod('extras/DteBridgeAndCommons.hpp', buildZppCppContractBlock('extras', false) + sliceLines(L_v20cns, L_v20save - 1) + [
+    '// Component-specific Z++ extras & INI map bindings (from extras/ZppContracts.hpp)',
+    'namespace gtangel_zpp_extras_bind {',
+    'static_assert(zpp_extras_spec::op_INIMap_get_9(zpp_extras_spec::INIMap_ZppContract{}), "DteBridgeAndCommons INIMap Z++ query contract must hold");',
+    '} // namespace gtangel_zpp_extras_bind',
+    ''
+  ].join('\n'));
+  writeMod('save/Persistence.hpp', buildZppCppContractBlock('save', false) + sliceLines(L_v20save, L_gtangelStruct - 1) + [
+    '// Component-specific Z++ save date bindings (from save/ZppContracts.hpp)',
+    'namespace gtangel_zpp_save_bind {',
+    'constexpr zpp_save_spec::CDate_ZppContract makeStampedSaveDate(int32_t sec, int32_t min, int32_t hr, int32_t day, int32_t mon, int32_t yr) {',
+    '    const auto d0 = zpp_save_spec::apply_CDate_CDate(zpp_save_spec::CDate_ZppContract{});',
+    '    return zpp_save_spec::apply_CDate_PopulateDateFields(d0, sec, min, hr, day, mon, yr);',
+    '}',
+    'static_assert(zpp_save_spec::op_CDate_PopulateDateFields(zpp_save_spec::CDate_ZppContract{}, makeStampedSaveDate(30, 45, 14, 8, 11, 2026), 30, 45, 14, 8, 11, 2026), "Persistence CDate PopulateDateFields Z++ contract must hold");',
+    '} // namespace gtangel_zpp_save_bind',
+    ''
+  ].join('\n'));
+  writeMod('core/GTAngelAGI.hpp', '#pragma once\n' + sliceLines(L_gtangelStruct, L_renderV15Frame - 1) + [
+    '// Component-specific Z++ GTAngelAGI clock & weather bindings',
+    'namespace gtangel_zpp_agi_bind {',
+    'static_assert(zpp_core_spec::op_CClock_SetGameClock(zpp_core_spec::CClock_ZppContract{}, zpp_core_spec::apply_CClock_SetGameClock(zpp_core_spec::CClock_ZppContract{}, 6, 18, 0), 6, 18, 0), "GTAngelAGI CClock SetGameClock Z++ contract must hold");',
+    '} // namespace gtangel_zpp_agi_bind',
+    ''
+  ].join('\n'));
   writeMod('skel/Win32CockpitSkel.hpp', buildZppCppContractBlock('skel', false) + sliceLines(L_renderV15Frame, lines.length));
 
   const docsHeader = [

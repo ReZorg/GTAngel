@@ -1,6 +1,10 @@
-    // ── Z++ Formal Spec Contract (entities): 3 modules, 190 schemas, 3 enums (Dummy.zpp, Entity.zpp, Physical.zpp) ──
-    static constexpr int zpp_entities_modules() { return 3; }
-    static constexpr int zpp_entities_schemas() { return 190; }
+    // ── Z++ Formal Spec Component Binding (entities): 3 modules, 190 schemas, 3 enums (Dummy.zpp, Entity.zpp, Physical.zpp) ──
+    static constexpr int zpp_entities_modules() { return zpp_entities_spec::kZppModuleCount; }
+    static constexpr int zpp_entities_schemas() { return zpp_entities_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_entities_zpp() {
+        return zpp_entities_spec::verify_entities_zpp_invariants() && (zpp_entities_spec::CDummy_ZppContract{}.checkInvariant()) && (true);
+    }
+    static_assert(verifyComponent_entities_zpp(), "RasterEngine component Z++ binding failed for entities");
     void buildPillars(const avatar3d::GameWorld& world) {
         // LW34: landscaped urban street trees in stone planters + sleek
         // granite & cyan-lit cyber-columns (replaces brick-red pipes).

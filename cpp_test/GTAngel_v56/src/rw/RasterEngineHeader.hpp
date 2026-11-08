@@ -775,3 +775,10 @@ private:
         addTriangle(a, c, d, colour, objectId);
     }
 
+    // ── Z++ Formal Spec Component Binding (rw): 12 modules, 395 schemas, 4 enums (ClumpRead.zpp, Lights.zpp, MemoryHeap.zpp, MemoryMgr.zpp, NodeName.zpp, RwHelper.zpp, RwMatFX.zpp, RwPS2AlphaTest.zpp) ──
+    static constexpr int zpp_rw_modules() { return zpp_rw_spec::kZppModuleCount; }
+    static constexpr int zpp_rw_schemas() { return zpp_rw_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_rw_zpp() {
+        return zpp_rw_spec::verify_rw_zpp_invariants() && (zpp_rw_spec::rpGeometryList_ZppContract{}.checkInvariant()) && (zpp_rw_spec::op_CMemoryHeap_PushMemId(zpp_rw_spec::CMemoryHeap_ZppContract{}, zpp_rw_spec::apply_CMemoryHeap_PushMemId(zpp_rw_spec::CMemoryHeap_ZppContract{})));
+    }
+    static_assert(verifyComponent_rw_zpp(), "RasterEngine component Z++ binding failed for rw");

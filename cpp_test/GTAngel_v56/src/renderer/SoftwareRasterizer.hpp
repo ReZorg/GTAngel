@@ -1,6 +1,10 @@
-    // ── Z++ Formal Spec Contract (renderer): 38 modules, 1267 schemas, 51 enums (2dEffect.zpp, Antennas.zpp, Clouds.zpp, Console.zpp, Coronas.zpp, Credits.zpp, CutsceneShadow.zpp, Draw.zpp) ──
-    static constexpr int zpp_renderer_modules() { return 38; }
-    static constexpr int zpp_renderer_schemas() { return 1267; }
+    // ── Z++ Formal Spec Component Binding (renderer): 38 modules, 1267 schemas, 51 enums (2dEffect.zpp, Antennas.zpp, Clouds.zpp, Console.zpp, Coronas.zpp, Credits.zpp, CutsceneShadow.zpp, Draw.zpp) ──
+    static constexpr int zpp_renderer_modules() { return zpp_renderer_spec::kZppModuleCount; }
+    static constexpr int zpp_renderer_schemas() { return zpp_renderer_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_renderer_zpp() {
+        return zpp_renderer_spec::verify_renderer_zpp_invariants() && (zpp_renderer_spec::C2dEffect_ZppContract{}.checkInvariant()) && (zpp_renderer_spec::op_CClouds_Init(zpp_renderer_spec::CClouds_ZppContract{}, zpp_renderer_spec::apply_CClouds_Init(zpp_renderer_spec::CClouds_ZppContract{})));
+    }
+    static_assert(verifyComponent_renderer_zpp(), "RasterEngine component Z++ binding failed for renderer");
     void buildAvatar(const avatar3d::AvatarSkeleton& avatar) {
         using avatar3d::AvatarSkeleton;
         const auto& frames=Re3InformedAvatarClump::frames();

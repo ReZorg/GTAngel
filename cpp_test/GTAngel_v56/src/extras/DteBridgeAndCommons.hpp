@@ -98,6 +98,13 @@ struct InterpolatedColor_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/extras/custompipes.zpp
+struct InterpolatedLight_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/extras/custompipes_d3d9.zpp
 struct VsLight_ZppContract {
     int32_t color{0}; // Z++: rw__RGBAf
@@ -183,6 +190,13 @@ struct CTweakSwitch_ZppContract {
     int32_t m_pIntVar{0}; // Z++: ADDRESS
     int32_t m_nMax{0}; // Z++: ℤ
     int32_t m_aStr{0}; // Z++: seq CHAR
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct name_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -435,6 +449,13 @@ constexpr bool verify_extras_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        InterpolatedLight_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        InterpolatedLight_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         VsLight_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         VsLight_ZppContract bad{};
@@ -494,6 +515,13 @@ constexpr bool verify_extras_zpp_invariants() {
         CTweakSwitch_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CTweakSwitch_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        name_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        name_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
@@ -1238,3 +1266,7 @@ static_assert(system78::Roots7.size()==115 && system78::Roots8.size()==286,
 
 
 // Single-file v20 atomic JSON save. Strict bounded primitive parser; no external JSON library.
+// Component-specific Z++ extras & INI map bindings (from extras/ZppContracts.hpp)
+namespace gtangel_zpp_extras_bind {
+static_assert(zpp_extras_spec::op_INIMap_get_9(zpp_extras_spec::INIMap_ZppContract{}), "DteBridgeAndCommons INIMap Z++ query contract must hold");
+} // namespace gtangel_zpp_extras_bind

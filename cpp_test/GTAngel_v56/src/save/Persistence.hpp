@@ -370,3 +370,11 @@ static bool load(const char* path,const char* legacyPath,v19game::GameplayLoop& 
 
 
 // ═══ Application State ═══
+// Component-specific Z++ save date bindings (from save/ZppContracts.hpp)
+namespace gtangel_zpp_save_bind {
+constexpr zpp_save_spec::CDate_ZppContract makeStampedSaveDate(int32_t sec, int32_t min, int32_t hr, int32_t day, int32_t mon, int32_t yr) {
+    const auto d0 = zpp_save_spec::apply_CDate_CDate(zpp_save_spec::CDate_ZppContract{});
+    return zpp_save_spec::apply_CDate_PopulateDateFields(d0, sec, min, hr, day, mon, yr);
+}
+static_assert(zpp_save_spec::op_CDate_PopulateDateFields(zpp_save_spec::CDate_ZppContract{}, makeStampedSaveDate(30, 45, 14, 8, 11, 2026), 30, 45, 14, 8, 11, 2026), "Persistence CDate PopulateDateFields Z++ contract must hold");
+} // namespace gtangel_zpp_save_bind

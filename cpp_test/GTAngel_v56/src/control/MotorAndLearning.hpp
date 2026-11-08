@@ -2856,3 +2856,10 @@ private:
 
 #endif
 #endif
+// Component-specific Z++ control & CCarCtrl bindings (from control/ZppContracts.hpp)
+namespace gtangel_zpp_control_bind {
+constexpr zpp_control_spec::CCarCtrl_ZppContract makeInitialisedCarCtrl() {
+    return zpp_control_spec::apply_CCarCtrl_Init(zpp_control_spec::CCarCtrl_ZppContract{});
+}
+static_assert(zpp_control_spec::op_CCarCtrl_Init(zpp_control_spec::CCarCtrl_ZppContract{}, makeInitialisedCarCtrl()), "MotorAndLearning CCarCtrl Z++ contract must hold");
+} // namespace gtangel_zpp_control_bind

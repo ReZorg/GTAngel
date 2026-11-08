@@ -1,6 +1,10 @@
-    // ── Z++ Formal Spec Contract (leeds): 2 modules, 13 schemas, 0 enums (CustomSoundTrack.zpp, smallHeap.zpp) ──
-    static constexpr int zpp_leeds_modules() { return 2; }
-    static constexpr int zpp_leeds_schemas() { return 13; }
+    // ── Z++ Formal Spec Component Binding (leeds): 2 modules, 13 schemas, 0 enums (CustomSoundTrack.zpp, smallHeap.zpp) ──
+    static constexpr int zpp_leeds_modules() { return zpp_leeds_spec::kZppModuleCount; }
+    static constexpr int zpp_leeds_schemas() { return zpp_leeds_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_leeds_zpp() {
+        return zpp_leeds_spec::verify_leeds_zpp_invariants() && (zpp_leeds_spec::cCustomSoundTrack_ZppContract{}.checkInvariant()) && (zpp_leeds_spec::op_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{}, zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{})));
+    }
+    static_assert(verifyComponent_leeds_zpp(), "RasterEngine component Z++ binding failed for leeds");
     void buildSun() {
         const Vec3 light = normalize3({-0.35f, 0.82f, -0.44f});
         const Vec3 centre = {eye_.x + light.x * 260.0f, eye_.y + light.y * 260.0f, eye_.z + light.z * 260.0f};

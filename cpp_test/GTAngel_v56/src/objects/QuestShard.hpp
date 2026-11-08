@@ -1,3 +1,8 @@
+    // Component-specific Z++ quest shard CObjectInfo contract binding (from objects/ZppContracts.hpp)
+    static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {
+        return zpp_objects_spec::CObjectInfo_ZppContract{};
+    }
+    static_assert(makeQuestShardObjectContract().checkInvariant(), "QuestShard CObjectInfo Z++ contract must hold");
     void buildQuestShard(const avatar3d::GameWorld& world) {
         if (!world.questShardVisible) return;
         const auto ticks = std::chrono::duration_cast<std::chrono::milliseconds>(

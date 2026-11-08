@@ -210,8 +210,43 @@ struct CPedAttractor_ZppContract {
     }
 };
 // State Schema Contract from zpp/peds/PedAttractor.zpp
+struct CPedAtmAttractor_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedAttractor.zpp
+struct CPedIceCreamAttractor_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedAttractor.zpp
+struct CPedPizzaAttractor_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedAttractor.zpp
+struct CPedSeatAttractor_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedAttractor.zpp
 struct CPedShelterAttractor_ZppContract {
     int32_t ms_displacements{0}; // Z++: std__vector_CVector
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/peds/PedAttractor.zpp
+struct CPedStopAttractor_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -494,6 +529,38 @@ constexpr bool op_CPedAttractor_GetDistanceToCountSeekDone_23(const CPedAttracto
 constexpr bool op_CPedAttractor_GetAcceptableHeading_24(const CPedAttractor_ZppContract& state) {
     return state.checkInvariant();
 }
+// Query Operation Schema Contract (ΞCPedAtmAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAtmAttractor_GetType(const CPedAtmAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAtmAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAtmAttractor_UpdatePedStateOnDeparture_2(const CPedAtmAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedIceCreamAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedIceCreamAttractor_GetType_2(const CPedIceCreamAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedIceCreamAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedIceCreamAttractor_UpdatePedStateOnDeparture_3(const CPedIceCreamAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedPizzaAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedPizzaAttractor_GetType_2(const CPedPizzaAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedPizzaAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedPizzaAttractor_UpdatePedStateOnDeparture_3(const CPedPizzaAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedSeatAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedSeatAttractor_GetType(const CPedSeatAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedSeatAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedSeatAttractor_UpdatePedStateOnDeparture_2(const CPedSeatAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
 // Query Operation Schema Contract (ΞCPedShelterAttractor) from zpp/peds/PedAttractor.zpp
 constexpr bool op_CPedShelterAttractor_GetType(const CPedShelterAttractor_ZppContract& state) {
     return state.checkInvariant();
@@ -518,12 +585,28 @@ constexpr bool op_CPedShelterAttractor_ComputeAttractHeading_6(const CPedShelter
 constexpr bool op_CPedShelterAttractor_GetDisplacement_8(const CPedShelterAttractor_ZppContract& state) {
     return state.checkInvariant();
 }
+// Query Operation Schema Contract (ΞCPedStopAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedStopAttractor_GetType(const CPedStopAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedStopAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedStopAttractor_UpdatePedStateOnDeparture_2(const CPedStopAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
 // Query Operation Schema Contract (ΞCVehicleToEffect) from zpp/peds/PedAttractor.zpp
 constexpr bool op_CVehicleToEffect_ChooseEffect(const CVehicleToEffect_ZppContract& state) {
     return state.checkInvariant();
 }
 // Query Operation Schema Contract (ΞCVehicleToEffect) from zpp/peds/PedAttractor.zpp
 constexpr bool op_CVehicleToEffect_HasThisEffect(const CVehicleToEffect_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedPizzaAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedPizzaAttractor_UpdatePedStateOnDeparture(const CPedPizzaAttractor_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞCPedAtmAttractor) from zpp/peds/PedAttractor.zpp
+constexpr bool op_CPedAtmAttractor_UpdatePedStateOnDeparture(const CPedAtmAttractor_ZppContract& state) {
     return state.checkInvariant();
 }
 // Query Operation Schema Contract (ΞCPedAttractor) from zpp/peds/PedAttractor.zpp
@@ -675,9 +758,44 @@ constexpr bool verify_peds_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CPedAtmAttractor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedAtmAttractor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedIceCreamAttractor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedIceCreamAttractor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedPizzaAttractor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedPizzaAttractor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedSeatAttractor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedSeatAttractor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CPedShelterAttractor_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CPedShelterAttractor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPedStopAttractor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedStopAttractor_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
@@ -850,6 +968,38 @@ constexpr bool verify_peds_zpp_invariants() {
         if (!op_CPedAttractor_GetAcceptableHeading_24(st)) return false;
     }
     {
+        const CPedAtmAttractor_ZppContract st{};
+        if (!op_CPedAtmAttractor_GetType(st)) return false;
+    }
+    {
+        const CPedAtmAttractor_ZppContract st{};
+        if (!op_CPedAtmAttractor_UpdatePedStateOnDeparture_2(st)) return false;
+    }
+    {
+        const CPedIceCreamAttractor_ZppContract st{};
+        if (!op_CPedIceCreamAttractor_GetType_2(st)) return false;
+    }
+    {
+        const CPedIceCreamAttractor_ZppContract st{};
+        if (!op_CPedIceCreamAttractor_UpdatePedStateOnDeparture_3(st)) return false;
+    }
+    {
+        const CPedPizzaAttractor_ZppContract st{};
+        if (!op_CPedPizzaAttractor_GetType_2(st)) return false;
+    }
+    {
+        const CPedPizzaAttractor_ZppContract st{};
+        if (!op_CPedPizzaAttractor_UpdatePedStateOnDeparture_3(st)) return false;
+    }
+    {
+        const CPedSeatAttractor_ZppContract st{};
+        if (!op_CPedSeatAttractor_GetType(st)) return false;
+    }
+    {
+        const CPedSeatAttractor_ZppContract st{};
+        if (!op_CPedSeatAttractor_UpdatePedStateOnDeparture_2(st)) return false;
+    }
+    {
         const CPedShelterAttractor_ZppContract st{};
         if (!op_CPedShelterAttractor_GetType(st)) return false;
     }
@@ -874,12 +1024,28 @@ constexpr bool verify_peds_zpp_invariants() {
         if (!op_CPedShelterAttractor_GetDisplacement_8(st)) return false;
     }
     {
+        const CPedStopAttractor_ZppContract st{};
+        if (!op_CPedStopAttractor_GetType(st)) return false;
+    }
+    {
+        const CPedStopAttractor_ZppContract st{};
+        if (!op_CPedStopAttractor_UpdatePedStateOnDeparture_2(st)) return false;
+    }
+    {
         const CVehicleToEffect_ZppContract st{};
         if (!op_CVehicleToEffect_ChooseEffect(st)) return false;
     }
     {
         const CVehicleToEffect_ZppContract st{};
         if (!op_CVehicleToEffect_HasThisEffect(st)) return false;
+    }
+    {
+        const CPedPizzaAttractor_ZppContract st{};
+        if (!op_CPedPizzaAttractor_UpdatePedStateOnDeparture(st)) return false;
+    }
+    {
+        const CPedAtmAttractor_ZppContract st{};
+        if (!op_CPedAtmAttractor_UpdatePedStateOnDeparture(st)) return false;
     }
     {
         const CPedAttractor_ZppContract st{};

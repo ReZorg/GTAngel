@@ -1,6 +1,10 @@
-    // ── Z++ Formal Spec Contract (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
-    static constexpr int zpp_peds_modules() { return 17; }
-    static constexpr int zpp_peds_schemas() { return 673; }
+    // ── Z++ Formal Spec Component Binding (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
+    static constexpr int zpp_peds_modules() { return zpp_peds_spec::kZppModuleCount; }
+    static constexpr int zpp_peds_schemas() { return zpp_peds_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_peds_zpp() {
+        return zpp_peds_spec::verify_peds_zpp_invariants() && (zpp_peds_spec::CCivilianPed_ZppContract{}.checkInvariant()) && (zpp_peds_spec::op_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{}, zpp_peds_spec::apply_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{})));
+    }
+    static_assert(verifyComponent_peds_zpp(), "RasterEngine component Z++ binding failed for peds");
     void buildWalkers(const avatar3d::GameWorld& world) {
         // Population rendering: compact humanoids (torso + head + legs) so
         // the retina sees real social entities, not empty pillars.
