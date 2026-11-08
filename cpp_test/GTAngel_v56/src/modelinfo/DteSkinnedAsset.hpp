@@ -160,22 +160,6 @@ struct editableMatCBData_ZppContract {
     }
 };
 // State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
-struct VehicleChunk_ZppContract {
-    uint8_t clump_card{0u}; // Z++: Ref[RpClump]
-    int32_t numComps{0}; // Z++: ℤ
-    uint8_t comp_card{0u}; // Z++: Ref[RpAtomic]
-    std::array<int32_t, 26> materials1{}; // Z++: seq Ref[RpMaterial]  -- bounded array [NUM_FIRST_MATERIALS]
-    size_t materials1_len{26u}; // Z++ cardinality #materials1
-    std::array<int32_t, 26> materials2{}; // Z++: seq Ref[RpMaterial]  -- bounded array [NUM_SECOND_MATERIALS]
-    size_t materials2_len{26u}; // Z++ cardinality #materials2
-    constexpr bool checkInvariant() const {
-        return (materials1_len == 26u && materials1.size() == 26u)
-            && (materials2_len == 26u && materials2.size() == 26u)
-            && (clump_card <= 1u)
-            && (comp_card <= 1u);
-    }
-};
-// State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
 struct Statics_ZppContract {
     int32_t unknown{0}; // Z++: ADDRESS
     std::array<int32_t, 256> ms_vehicleColourTable{}; // Z++: seq RwRGBA  -- bounded array [256]
@@ -217,15 +201,6 @@ constexpr bool op_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContra
 constexpr CClumpModelInfo_ZppContract apply_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContract& pre) {
     CClumpModelInfo_ZppContract post = pre;
     post.m_clump_card = 0u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCPedModelInfo) from zpp/modelinfo/PedModelInfo.zpp
-constexpr bool op_CPedModelInfo_DeleteRwObject(const CPedModelInfo_ZppContract& pre, const CPedModelInfo_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_hitColModel_card == 0u);
-}
-constexpr CPedModelInfo_ZppContract apply_CPedModelInfo_DeleteRwObject(const CPedModelInfo_ZppContract& pre) {
-    CPedModelInfo_ZppContract post = pre;
-    post.m_hitColModel_card = 0u;
     return post;
 }
 constexpr bool verify_modelinfo_zpp_invariants() {
@@ -314,13 +289,6 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        VehicleChunk_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        VehicleChunk_ZppContract bad{};
-        bad.materials1_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
         Statics_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         Statics_ZppContract bad{};
@@ -346,18 +314,11 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         pre.m_clump_card = 1u;
         const auto post = apply_CClumpModelInfo_DeleteRwObject(pre);
         if (!op_CClumpModelInfo_DeleteRwObject(pre, post)) return false;
-        CClumpModelInfo_ZppContract badPost = post;
-        badPost.m_clump_card = 1u;
-        if (op_CClumpModelInfo_DeleteRwObject(pre, badPost)) return false;
-    }
-    {
-        CPedModelInfo_ZppContract pre{};
-        pre.m_hitColModel_card = 1u;
-        const auto post = apply_CPedModelInfo_DeleteRwObject(pre);
-        if (!op_CPedModelInfo_DeleteRwObject(pre, post)) return false;
-        CPedModelInfo_ZppContract badPost = post;
-        badPost.m_hitColModel_card = 1u;
-        if (op_CPedModelInfo_DeleteRwObject(pre, badPost)) return false;
+        {
+            CClumpModelInfo_ZppContract badPost = post;
+            badPost.m_clump_card = 1u;
+            if (op_CClumpModelInfo_DeleteRwObject(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

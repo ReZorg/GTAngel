@@ -193,24 +193,6 @@ struct CCarStateEachFrame_ZppContract {
         return (instance_addr >= 0);
     }
 };
-// Delta Operation Schema Contract (ΔCBridge) from zpp/control/Bridge.zpp
-constexpr bool op_CBridge_Update(const CBridge_ZppContract& pre, const CBridge_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.TimeOfBridgeBecomingOperational == 0);
-}
-constexpr CBridge_ZppContract apply_CBridge_Update(const CBridge_ZppContract& pre) {
-    CBridge_ZppContract post = pre;
-    post.TimeOfBridgeBecomingOperational = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCBridge) from zpp/control/Bridge.zpp
-constexpr bool op_CBridge_FindBridgeEntities(const CBridge_ZppContract& pre, const CBridge_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.pWeight_card == 0u);
-}
-constexpr CBridge_ZppContract apply_CBridge_FindBridgeEntities(const CBridge_ZppContract& pre) {
-    CBridge_ZppContract post = pre;
-    post.pWeight_card = 0u;
-    return post;
-}
 constexpr bool verify_control_zpp_invariants() {
     {
         CBridge_ZppContract valid{};
@@ -323,24 +305,6 @@ constexpr bool verify_control_zpp_invariants() {
         CCarStateEachFrame_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
-    }
-    {
-        CBridge_ZppContract pre{};
-        pre.TimeOfBridgeBecomingOperational = 1;
-        const auto post = apply_CBridge_Update(pre);
-        if (!op_CBridge_Update(pre, post)) return false;
-        CBridge_ZppContract badPost = post;
-        badPost.TimeOfBridgeBecomingOperational = 1;
-        if (op_CBridge_Update(pre, badPost)) return false;
-    }
-    {
-        CBridge_ZppContract pre{};
-        pre.pWeight_card = 1u;
-        const auto post = apply_CBridge_FindBridgeEntities(pre);
-        if (!op_CBridge_FindBridgeEntities(pre, post)) return false;
-        CBridge_ZppContract badPost = post;
-        badPost.pWeight_card = 1u;
-        if (op_CBridge_FindBridgeEntities(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

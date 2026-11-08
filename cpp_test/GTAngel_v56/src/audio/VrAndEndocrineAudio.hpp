@@ -42,24 +42,6 @@ struct cAudioCollision_ZppContract {
             && (m_bSurface2 >= 0);
     }
 };
-// State Schema Contract from zpp/audio/AudioCollision.zpp
-struct cAudioCollisionManager_ZppContract {
-    std::array<int32_t, 10> m_asCollisions1{}; // Z++: seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
-    size_t m_asCollisions1_len{10u}; // Z++ cardinality #m_asCollisions1
-    std::array<int32_t, 10> m_asCollisions2{}; // Z++: seq cAudioCollision  -- bounded array [NUMAUDIOCOLLISIONS]
-    size_t m_asCollisions2_len{10u}; // Z++ cardinality #m_asCollisions2
-    std::array<uint32_t, 10> m_bIndicesTable{}; // Z++: seq ℕ  -- bounded array [NUMAUDIOCOLLISIONS]
-    size_t m_bIndicesTable_len{10u}; // Z++ cardinality #m_bIndicesTable
-    int64_t m_bCollisionsInQueue{0}; // Z++: ℕ
-    int32_t m_sQueue{0}; // Z++: cAudioCollision
-    int32_t NUMAUDIOCOLLISIONS{0}; // Z++: i
-    constexpr bool checkInvariant() const {
-        return (m_asCollisions1_len == 10u && m_asCollisions1.size() == 10u)
-            && (m_asCollisions2_len == 10u && m_asCollisions2.size() == 10u)
-            && (m_bIndicesTable_len == 10u && m_bIndicesTable.size() == 10u)
-            && (m_bCollisionsInQueue >= 0);
-    }
-};
 // State Schema Contract from zpp/audio/AudioLogic.zpp
 struct tVehicleSampleData_ZppContract {
     int32_t m_nAccelerationSampleIndex{0}; // Z++: eSfxSample
@@ -216,19 +198,25 @@ struct tSample_ZppContract {
             && (nLoopStart >= 0);
     }
 };
+// State Schema Contract from zpp/audio/sampman_miles.zpp
+struct tMP3Entry_ZppContract {
+    int32_t aFilename{0}; // Z++: seq CHAR
+    int64_t nTrackLength{0}; // Z++: ℕ
+    int64_t nTrackStreamPos{0}; // Z++: ℕ
+    uint8_t pNext_card{0u}; // Z++: Ref[tMP3Entry]
+    int32_t pLinkPath{0}; // Z++: seq CHAR
+    constexpr bool checkInvariant() const {
+        return (nTrackLength >= 0)
+            && (nTrackStreamPos >= 0)
+            && (pNext_card <= 1u);
+    }
+};
 constexpr bool verify_audio_zpp_invariants() {
     {
         cAudioCollision_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         cAudioCollision_ZppContract bad{};
         bad.m_pEntity1_card = 2u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        cAudioCollisionManager_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        cAudioCollisionManager_ZppContract bad{};
-        bad.m_asCollisions1_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -327,6 +315,13 @@ constexpr bool verify_audio_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         tSample_ZppContract bad{};
         bad.nOffset = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tMP3Entry_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tMP3Entry_ZppContract bad{};
+        bad.nTrackLength = -1;
         if (bad.checkInvariant()) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

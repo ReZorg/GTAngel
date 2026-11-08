@@ -36,9 +36,23 @@ const folders = [
 ];
 
 // Pass 1: Build a global symbol table of resolved integer constants and enum
-// branch valuations across all .zpp files (and C++ headers in ../../src)
-// so imported symbolic bounds are resolved accurately without inventing a fallback.
+// branch valuations across all .zpp files and C++ headers in ../../src, while
+// tracking any symbol that has conflicting valuations across variants
+// (e.g. MAX_MISSION_TEXTS = 90 vs 200) so conflicting bounds are never guessed.
 const globalSymValues = new Map();
+const conflictingSyms = new Set();
+
+function recordSymbolValue(map, conflicts, name, val) {
+  if (!(val > 0 && val <= 4096)) return;
+  if (conflicts.has(name)) return;
+  if (map.has(name) && map.get(name) !== val) {
+    map.delete(name);
+    conflicts.add(name);
+    return;
+  }
+  map.set(name, val);
+}
+
 const srcRefRoot = path.resolve('../../src');
 if (fs.existsSync(srcRefRoot)) {
   const walkSrc = (d) => {
@@ -50,10 +64,7 @@ if (fs.existsSync(srcRefRoot)) {
         const defRe = /^\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/gm;
         let dm;
         while ((dm = defRe.exec(txt)) !== null) {
-          const v = Number(dm[2]);
-          if (v > 0 && v <= 4096 && !globalSymValues.has(dm[1])) {
-            globalSymValues.set(dm[1], v);
-          }
+          recordSymbolValue(globalSymValues, conflictingSyms, dm[1], Number(dm[2]));
         }
       }
     }
@@ -71,8 +82,7 @@ for (const folder of folders) {
     for (let li = 0; li < txtLines.length; ++li) {
       const dm = txtLines[li].match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/);
       if (dm) {
-        const v = Number(dm[2]);
-        if (v > 0 && v <= 4096) globalSymValues.set(dm[1], v);
+        recordSymbolValue(globalSymValues, conflictingSyms, dm[1], Number(dm[2]));
       }
       const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
       if (em) {
@@ -93,9 +103,7 @@ for (const folder of folders) {
         let nextVal = 0;
         for (const b of uniq) {
           if (explicitVals.has(b)) nextVal = explicitVals.get(b);
-          if (nextVal > 0 && nextVal <= 4096 && !globalSymValues.has(b)) {
-            globalSymValues.set(b, nextVal);
-          }
+          recordSymbolValue(globalSymValues, conflictingSyms, b, nextVal);
           nextVal++;
         }
       }
@@ -116,8 +124,8 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   const queryOps = [];
   const deltaOps = [];
 
-  // Local per-folder symbol table overrides (so module-local enums like NUM_GANGS = 9 take precedence)
   const localSymValues = new Map(globalSymValues);
+  const localConflicts = new Set(conflictingSyms);
 
   for (const zf of zfiles) {
     const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
@@ -126,8 +134,8 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     // 1. Parse enums with full branch lists and explicit `-- val(BRANCH) = V` annotations
     for (let li = 0; li < txtLines.length; ++li) {
       const dm = txtLines[li].match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/);
-      if (dm && Number(dm[2]) > 0 && Number(dm[2]) <= 4096) {
-        localSymValues.set(dm[1], Number(dm[2]));
+      if (dm) {
+        recordSymbolValue(localSymValues, localConflicts, dm[1], Number(dm[2]));
       }
       const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
       if (!em) continue;
@@ -154,7 +162,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       const valuedBranches = uniq.map(b => {
         if (explicitVals.has(b)) nextVal = explicitVals.get(b);
         const cur = nextVal;
-        if (cur > 0 && cur <= 4096) localSymValues.set(b, cur);
+        recordSymbolValue(localSymValues, localConflicts, b, cur);
         nextVal = cur + 1;
         return { name: b, val: cur };
       });
@@ -190,62 +198,75 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             });
           }
         } else {
-          // For ΔState operations, require a concrete `-- State update: field' = val`
-          // on a field that exists in targetSchema so the pre->post transition is genuinely verified!
-          for (const wl of rawWhereLines) {
+          // For ΔState operations, collect ALL `-- State update: field' = val`
+          // annotations and require that EVERY update line is supported on targetSchema!
+          const updateLines = rawWhereLines.filter(wl => wl.startsWith('-- State update:'));
+          if (updateLines.length === 0) continue;
+
+          const updates = [];
+          const seenUpdatedFields = new Set();
+          let allUpdatesSupported = true;
+
+          for (const wl of updateLines) {
             const um = wl.match(/^--\s*State update:\s*([A-Za-z_]\w*)'\s*=\s*(.+)$/);
-            if (!um) continue;
+            if (!um) {
+              allUpdatesSupported = false;
+              break;
+            }
             const lhsRaw = um[1];
             const rhsRaw = um[2].trim();
             const f = targetSchema.fields.find(fl => fl.rawName === lhsRaw);
-            if (!f) continue;
+            if (!f || seenUpdatedFields.has(f.fname)) {
+              allUpdatesSupported = false;
+              break;
+            }
+            seenUpdatedFields.add(f.fname);
 
             if (f.kind === 'opt_ref' && rhsRaw === '∅') {
-              if (deltaOps.length < 6 && !deltaOps.some(o => o.opName === sname)) {
-                deltaOps.push({
-                  opName: sname,
-                  targetState: targetSchema.sname,
-                  field: f.fname,
-                  preInit: `pre.${f.fname} = 1u;`,
-                  applyExpr: `post.${f.fname} = 0u;`,
-                  postCond: `(post.${f.fname} == 0u)`,
-                  badPostMut: `badPost.${f.fname} = 1u;`,
-                  source: zf
-                });
-              }
-              break;
+              updates.push({
+                field: f.fname,
+                preInit: `pre.${f.fname} = 1u;`,
+                applyExpr: `post.${f.fname} = 0u;`,
+                postCond: `(post.${f.fname} == 0u)`,
+                badPostMut: `badPost.${f.fname} = 1u;`
+              });
             } else if (f.kind === 'scalar_int' && /^-?\d+$/.test(rhsRaw) && Number(rhsRaw) >= 0) {
               const nv = Number(rhsRaw);
               const altVal = nv === 0 ? 1 : 0;
-              if (deltaOps.length < 6 && !deltaOps.some(o => o.opName === sname)) {
-                deltaOps.push({
-                  opName: sname,
-                  targetState: targetSchema.sname,
-                  field: f.fname,
-                  preInit: `pre.${f.fname} = ${altVal};`,
-                  applyExpr: `post.${f.fname} = ${nv};`,
-                  postCond: `(post.${f.fname} == ${nv})`,
-                  badPostMut: `badPost.${f.fname} = ${altVal};`,
-                  source: zf
-                });
-              }
-              break;
+              updates.push({
+                field: f.fname,
+                preInit: `pre.${f.fname} = ${altVal};`,
+                applyExpr: `post.${f.fname} = ${nv};`,
+                postCond: `(post.${f.fname} == ${nv})`,
+                badPostMut: `badPost.${f.fname} = ${altVal};`
+              });
             } else if (f.kind === 'scalar_bool' && (rhsRaw === 'true' || rhsRaw === 'false')) {
               const altBool = rhsRaw === 'true' ? 'false' : 'true';
-              if (deltaOps.length < 6 && !deltaOps.some(o => o.opName === sname)) {
-                deltaOps.push({
-                  opName: sname,
-                  targetState: targetSchema.sname,
-                  field: f.fname,
-                  preInit: `pre.${f.fname} = ${altBool};`,
-                  applyExpr: `post.${f.fname} = ${rhsRaw};`,
-                  postCond: `(post.${f.fname} == ${rhsRaw})`,
-                  badPostMut: `badPost.${f.fname} = ${altBool};`,
-                  source: zf
-                });
-              }
+              updates.push({
+                field: f.fname,
+                preInit: `pre.${f.fname} = ${altBool};`,
+                applyExpr: `post.${f.fname} = ${rhsRaw};`,
+                postCond: `(post.${f.fname} == ${rhsRaw})`,
+                badPostMut: `badPost.${f.fname} = ${altBool};`
+              });
+            } else {
+              allUpdatesSupported = false;
               break;
             }
+          }
+
+          if (
+            allUpdatesSupported &&
+            updates.length === updateLines.length &&
+            deltaOps.length < 8 &&
+            !deltaOps.some(o => o.opName === sname)
+          ) {
+            deltaOps.push({
+              opName: sname,
+              targetState: targetSchema.sname,
+              updates,
+              source: zf
+            });
           }
         }
         continue;
@@ -273,10 +294,10 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           let len = null;
           if (/^\d+$/.test(rawDim)) {
             len = Number(rawDim);
-          } else if (localSymValues.has(rawDim)) {
+          } else if (!localConflicts.has(rawDim) && localSymValues.has(rawDim)) {
             len = localSymValues.get(rawDim);
           } else {
-            // Never invent a fallback capacity when a symbolic dimension cannot be resolved
+            // Never invent or guess a bound when a symbol is unresolved or conflicting across variants
             hasUnresolvedField = true;
             break;
           }
@@ -376,7 +397,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
               allPredsSupported = false;
             }
           } else if ((m = w.match(/^([A-Za-z_]\w*)\s*∈\s*ADDRESS$/))) {
-            // Model `instance_addr ∈ ADDRESS` explicitly even when omitted from the field list
             const addrName = m[1];
             let f = fields.get(addrName);
             if (!f) {
@@ -463,11 +483,13 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   for (const dop of deltaOps) {
     out.push(`// Delta Operation Schema Contract (Δ${dop.targetState}) from zpp/${folder}/${dop.source}`);
     out.push(`constexpr bool op_${dop.opName}(const ${dop.targetState}_ZppContract& pre, const ${dop.targetState}_ZppContract& post) {`);
-    out.push(`    return pre.checkInvariant() && post.checkInvariant() && ${dop.postCond};`);
+    out.push(`    return pre.checkInvariant() && post.checkInvariant() && ${dop.updates.map(u => u.postCond).join(' && ')};`);
     out.push(`}`);
     out.push(`constexpr ${dop.targetState}_ZppContract apply_${dop.opName}(const ${dop.targetState}_ZppContract& pre) {`);
     out.push(`    ${dop.targetState}_ZppContract post = pre;`);
-    out.push(`    ${dop.applyExpr}`);
+    for (const u of dop.updates) {
+      out.push(`    ${u.applyExpr}`);
+    }
     out.push(`    return post;`);
     out.push(`}`);
   }
@@ -491,12 +513,18 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   for (const dop of deltaOps) {
     out.push(`    {`);
     out.push(`        ${dop.targetState}_ZppContract pre{};`);
-    out.push(`        ${dop.preInit}`);
+    for (const u of dop.updates) {
+      out.push(`        ${u.preInit}`);
+    }
     out.push(`        const auto post = apply_${dop.opName}(pre);`);
     out.push(`        if (!op_${dop.opName}(pre, post)) return false;`);
-    out.push(`        ${dop.targetState}_ZppContract badPost = post;`);
-    out.push(`        ${dop.badPostMut}`);
-    out.push(`        if (op_${dop.opName}(pre, badPost)) return false;`);
+    for (const u of dop.updates) {
+      out.push(`        {`);
+      out.push(`            ${dop.targetState}_ZppContract badPost = post;`);
+      out.push(`            ${u.badPostMut}`);
+      out.push(`            if (op_${dop.opName}(pre, badPost)) return false;`);
+      out.push(`        }`);
+    }
     out.push(`    }`);
   }
   out.push(`    return kZppModuleCount >= 0 && kZppSchemaCount >= 0;`);

@@ -58,11 +58,16 @@ struct SaveBufModuleState_ZppContract {
 };
 // Delta Operation Schema Contract (ΔCDate) from zpp/save/Date.zpp
 constexpr bool op_CDate_CDate(const CDate_ZppContract& pre, const CDate_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nYear == 0);
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nYear == 0) && (post.m_nSecond == 0) && (post.m_nMinute == 0) && (post.m_nHour == 0) && (post.m_nDay == 0) && (post.m_nMonth == 0);
 }
 constexpr CDate_ZppContract apply_CDate_CDate(const CDate_ZppContract& pre) {
     CDate_ZppContract post = pre;
     post.m_nYear = 0;
+    post.m_nSecond = 0;
+    post.m_nMinute = 0;
+    post.m_nHour = 0;
+    post.m_nDay = 0;
+    post.m_nMonth = 0;
     return post;
 }
 constexpr bool verify_save_zpp_invariants() {
@@ -90,11 +95,43 @@ constexpr bool verify_save_zpp_invariants() {
     {
         CDate_ZppContract pre{};
         pre.m_nYear = 1;
+        pre.m_nSecond = 1;
+        pre.m_nMinute = 1;
+        pre.m_nHour = 1;
+        pre.m_nDay = 1;
+        pre.m_nMonth = 1;
         const auto post = apply_CDate_CDate(pre);
         if (!op_CDate_CDate(pre, post)) return false;
-        CDate_ZppContract badPost = post;
-        badPost.m_nYear = 1;
-        if (op_CDate_CDate(pre, badPost)) return false;
+        {
+            CDate_ZppContract badPost = post;
+            badPost.m_nYear = 1;
+            if (op_CDate_CDate(pre, badPost)) return false;
+        }
+        {
+            CDate_ZppContract badPost = post;
+            badPost.m_nSecond = 1;
+            if (op_CDate_CDate(pre, badPost)) return false;
+        }
+        {
+            CDate_ZppContract badPost = post;
+            badPost.m_nMinute = 1;
+            if (op_CDate_CDate(pre, badPost)) return false;
+        }
+        {
+            CDate_ZppContract badPost = post;
+            badPost.m_nHour = 1;
+            if (op_CDate_CDate(pre, badPost)) return false;
+        }
+        {
+            CDate_ZppContract badPost = post;
+            badPost.m_nDay = 1;
+            if (op_CDate_CDate(pre, badPost)) return false;
+        }
+        {
+            CDate_ZppContract badPost = post;
+            badPost.m_nMonth = 1;
+            if (op_CDate_CDate(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

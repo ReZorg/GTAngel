@@ -303,24 +303,6 @@ constexpr bool op_CPedShelterAttractor_UpdatePedStateOnDeparture_3(const CPedShe
 constexpr bool op_CPedShelterAttractor_IsAtHeadOfQueue_4(const CPedShelterAttractor_ZppContract& state) {
     return state.checkInvariant();
 }
-// Delta Operation Schema Contract (ΔCCivilianPed) from zpp/peds/CivilianPed.zpp
-constexpr bool op_CCivilianPed_UseNearbyAttractors(const CCivilianPed_ZppContract& pre, const CCivilianPed_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nAttractorCycleState == 0);
-}
-constexpr CCivilianPed_ZppContract apply_CCivilianPed_UseNearbyAttractors(const CCivilianPed_ZppContract& pre) {
-    CCivilianPed_ZppContract post = pre;
-    post.m_nAttractorCycleState = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCCivilianPed) from zpp/peds/CivilianPed.zpp
-constexpr bool op_CCivilianPed_EnterVacantNearbyCars(const CCivilianPed_ZppContract& pre, const CCivilianPed_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_bJustStoleACar == false);
-}
-constexpr CCivilianPed_ZppContract apply_CCivilianPed_EnterVacantNearbyCars(const CCivilianPed_ZppContract& pre) {
-    CCivilianPed_ZppContract post = pre;
-    post.m_bJustStoleACar = false;
-    return post;
-}
 constexpr bool verify_peds_zpp_invariants() {
     {
         CCivilianPed_ZppContract valid{};
@@ -529,24 +511,6 @@ constexpr bool verify_peds_zpp_invariants() {
     {
         const CPedShelterAttractor_ZppContract st{};
         if (!op_CPedShelterAttractor_IsAtHeadOfQueue_4(st)) return false;
-    }
-    {
-        CCivilianPed_ZppContract pre{};
-        pre.m_nAttractorCycleState = 1;
-        const auto post = apply_CCivilianPed_UseNearbyAttractors(pre);
-        if (!op_CCivilianPed_UseNearbyAttractors(pre, post)) return false;
-        CCivilianPed_ZppContract badPost = post;
-        badPost.m_nAttractorCycleState = 1;
-        if (op_CCivilianPed_UseNearbyAttractors(pre, badPost)) return false;
-    }
-    {
-        CCivilianPed_ZppContract pre{};
-        pre.m_bJustStoleACar = true;
-        const auto post = apply_CCivilianPed_EnterVacantNearbyCars(pre);
-        if (!op_CCivilianPed_EnterVacantNearbyCars(pre, post)) return false;
-        CCivilianPed_ZppContract badPost = post;
-        badPost.m_bJustStoleACar = true;
-        if (op_CCivilianPed_EnterVacantNearbyCars(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -240,39 +240,13 @@ struct CTrainInterpolationLine_ZppContract {
     }
 };
 // Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
-constexpr bool op_CDamageManager_CDamageManager(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_bSmashedDoorDoesntClose == false);
-}
-constexpr CDamageManager_ZppContract apply_CDamageManager_CDamageManager(const CDamageManager_ZppContract& pre) {
-    CDamageManager_ZppContract post = pre;
-    post.m_bSmashedDoorDoesntClose = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
-constexpr bool op_CDamageManager_ResetDamageStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_engineStatus == 0);
-}
-constexpr CDamageManager_ZppContract apply_CDamageManager_ResetDamageStatus(const CDamageManager_ZppContract& pre) {
-    CDamageManager_ZppContract post = pre;
-    post.m_engineStatus = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
 constexpr bool op_CDamageManager_FuckCarCompletely(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_lightStatus == 0);
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_lightStatus == 0) && (post.m_panelStatus == 0);
 }
 constexpr CDamageManager_ZppContract apply_CDamageManager_FuckCarCompletely(const CDamageManager_ZppContract& pre) {
     CDamageManager_ZppContract post = pre;
     post.m_lightStatus = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
-constexpr bool op_CDamageManager_SetEngineStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_engineStatus == 250);
-}
-constexpr CDamageManager_ZppContract apply_CDamageManager_SetEngineStatus(const CDamageManager_ZppContract& pre) {
-    CDamageManager_ZppContract post = pre;
-    post.m_engineStatus = 250;
+    post.m_panelStatus = 0;
     return post;
 }
 constexpr bool verify_vehicles_zpp_invariants() {
@@ -390,39 +364,20 @@ constexpr bool verify_vehicles_zpp_invariants() {
     }
     {
         CDamageManager_ZppContract pre{};
-        pre.m_bSmashedDoorDoesntClose = true;
-        const auto post = apply_CDamageManager_CDamageManager(pre);
-        if (!op_CDamageManager_CDamageManager(pre, post)) return false;
-        CDamageManager_ZppContract badPost = post;
-        badPost.m_bSmashedDoorDoesntClose = true;
-        if (op_CDamageManager_CDamageManager(pre, badPost)) return false;
-    }
-    {
-        CDamageManager_ZppContract pre{};
-        pre.m_engineStatus = 1;
-        const auto post = apply_CDamageManager_ResetDamageStatus(pre);
-        if (!op_CDamageManager_ResetDamageStatus(pre, post)) return false;
-        CDamageManager_ZppContract badPost = post;
-        badPost.m_engineStatus = 1;
-        if (op_CDamageManager_ResetDamageStatus(pre, badPost)) return false;
-    }
-    {
-        CDamageManager_ZppContract pre{};
         pre.m_lightStatus = 1;
+        pre.m_panelStatus = 1;
         const auto post = apply_CDamageManager_FuckCarCompletely(pre);
         if (!op_CDamageManager_FuckCarCompletely(pre, post)) return false;
-        CDamageManager_ZppContract badPost = post;
-        badPost.m_lightStatus = 1;
-        if (op_CDamageManager_FuckCarCompletely(pre, badPost)) return false;
-    }
-    {
-        CDamageManager_ZppContract pre{};
-        pre.m_engineStatus = 0;
-        const auto post = apply_CDamageManager_SetEngineStatus(pre);
-        if (!op_CDamageManager_SetEngineStatus(pre, post)) return false;
-        CDamageManager_ZppContract badPost = post;
-        badPost.m_engineStatus = 0;
-        if (op_CDamageManager_SetEngineStatus(pre, badPost)) return false;
+        {
+            CDamageManager_ZppContract badPost = post;
+            badPost.m_lightStatus = 1;
+            if (op_CDamageManager_FuckCarCompletely(pre, badPost)) return false;
+        }
+        {
+            CDamageManager_ZppContract badPost = post;
+            badPost.m_panelStatus = 1;
+            if (op_CDamageManager_FuckCarCompletely(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -199,20 +199,12 @@ constexpr bool op_CVector2D_operator_15(const CVector2D_ZppContract& state) {
 }
 // Delta Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
 constexpr bool op_CMatrix_CMatrix(const CMatrix_ZppContract& pre, const CMatrix_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_attachment_card == 0u);
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_attachment_card == 0u) && (post.m_hasRwMatrix == false);
 }
 constexpr CMatrix_ZppContract apply_CMatrix_CMatrix(const CMatrix_ZppContract& pre) {
     CMatrix_ZppContract post = pre;
     post.m_attachment_card = 0u;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
-constexpr bool op_CMatrix_CMatrix_2(const CMatrix_ZppContract& pre, const CMatrix_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_attachment_card == 0u);
-}
-constexpr CMatrix_ZppContract apply_CMatrix_CMatrix_2(const CMatrix_ZppContract& pre) {
-    CMatrix_ZppContract post = pre;
-    post.m_attachment_card = 0u;
+    post.m_hasRwMatrix = false;
     return post;
 }
 // Delta Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
@@ -395,38 +387,41 @@ constexpr bool verify_math_zpp_invariants() {
     {
         CMatrix_ZppContract pre{};
         pre.m_attachment_card = 1u;
+        pre.m_hasRwMatrix = true;
         const auto post = apply_CMatrix_CMatrix(pre);
         if (!op_CMatrix_CMatrix(pre, post)) return false;
-        CMatrix_ZppContract badPost = post;
-        badPost.m_attachment_card = 1u;
-        if (op_CMatrix_CMatrix(pre, badPost)) return false;
-    }
-    {
-        CMatrix_ZppContract pre{};
-        pre.m_attachment_card = 1u;
-        const auto post = apply_CMatrix_CMatrix_2(pre);
-        if (!op_CMatrix_CMatrix_2(pre, post)) return false;
-        CMatrix_ZppContract badPost = post;
-        badPost.m_attachment_card = 1u;
-        if (op_CMatrix_CMatrix_2(pre, badPost)) return false;
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_attachment_card = 1u;
+            if (op_CMatrix_CMatrix(pre, badPost)) return false;
+        }
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_hasRwMatrix = true;
+            if (op_CMatrix_CMatrix(pre, badPost)) return false;
+        }
     }
     {
         CMatrix_ZppContract pre{};
         pre.m_attachment_card = 1u;
         const auto post = apply_CMatrix_CMatrix_3(pre);
         if (!op_CMatrix_CMatrix_3(pre, post)) return false;
-        CMatrix_ZppContract badPost = post;
-        badPost.m_attachment_card = 1u;
-        if (op_CMatrix_CMatrix_3(pre, badPost)) return false;
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_attachment_card = 1u;
+            if (op_CMatrix_CMatrix_3(pre, badPost)) return false;
+        }
     }
     {
         CMatrix_ZppContract pre{};
         pre.m_attachment_card = 1u;
         const auto post = apply_CMatrix_Detach(pre);
         if (!op_CMatrix_Detach(pre, post)) return false;
-        CMatrix_ZppContract badPost = post;
-        badPost.m_attachment_card = 1u;
-        if (op_CMatrix_Detach(pre, badPost)) return false;
+        {
+            CMatrix_ZppContract badPost = post;
+            badPost.m_attachment_card = 1u;
+            if (op_CMatrix_Detach(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -372,9 +372,11 @@ constexpr bool verify_collision_zpp_invariants() {
         pre.ms_pColPool_card = 1u;
         const auto post = apply_CColStore_Shutdown(pre);
         if (!op_CColStore_Shutdown(pre, post)) return false;
-        CColStore_ZppContract badPost = post;
-        badPost.ms_pColPool_card = 1u;
-        if (op_CColStore_Shutdown(pre, badPost)) return false;
+        {
+            CColStore_ZppContract badPost = post;
+            badPost.ms_pColPool_card = 1u;
+            if (op_CColStore_Shutdown(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -612,27 +612,6 @@ struct CClouds_ZppContract {
         return (IndividualRotation >= 0);
     }
 };
-// State Schema Contract from zpp/renderer/Console.zpp
-struct CConsole_ZppContract {
-    int64_t m_nLineCount{0}; // Z++: ℕ
-    int64_t m_nCurrentLine{0}; // Z++: ℕ
-    std::array<uint32_t, 8> m_aTimer{}; // Z++: seq ℕ  -- bounded array [MAX_LINES]
-    size_t m_aTimer_len{8u}; // Z++ cardinality #m_aTimer
-    std::array<uint32_t, 8> m_aRed{}; // Z++: seq ℕ  -- bounded array [MAX_LINES]
-    size_t m_aRed_len{8u}; // Z++ cardinality #m_aRed
-    std::array<uint32_t, 8> m_aGreen{}; // Z++: seq ℕ  -- bounded array [MAX_LINES]
-    size_t m_aGreen_len{8u}; // Z++ cardinality #m_aGreen
-    std::array<uint32_t, 8> m_aBlue{}; // Z++: seq ℕ  -- bounded array [MAX_LINES]
-    size_t m_aBlue_len{8u}; // Z++ cardinality #m_aBlue
-    constexpr bool checkInvariant() const {
-        return (m_aTimer_len == 8u && m_aTimer.size() == 8u)
-            && (m_aRed_len == 8u && m_aRed.size() == 8u)
-            && (m_aGreen_len == 8u && m_aGreen.size() == 8u)
-            && (m_aBlue_len == 8u && m_aBlue.size() == 8u)
-            && (m_nLineCount >= 0)
-            && (m_nCurrentLine >= 0);
-    }
-};
 // State Schema Contract from zpp/renderer/Coronas.zpp
 struct FlareDef_ZppContract {
     float position{0.0f}; // Z++: ℝ
@@ -746,38 +725,20 @@ struct CMovingThing_ZppContract {
             && (m_pEntity_card <= 1u);
     }
 };
-// Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
-constexpr bool op_CCredits_Start(const CCredits_ZppContract& pre, const CCredits_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == true);
-}
-constexpr CCredits_ZppContract apply_CCredits_Start(const CCredits_ZppContract& pre) {
-    CCredits_ZppContract post = pre;
-    post.bCreditsGoing = true;
-    return post;
-}
+// State Schema Contract from zpp/renderer/Fluff.zpp
+struct CSmokeTrails_ZppContract {
+    std::array<int32_t, 3> aSmoke{}; // Z++: seq CSmokeTrail  -- bounded array [3]
+    size_t aSmoke_len{3u}; // Z++ cardinality #aSmoke
+    bool CigOn{false}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (aSmoke_len == 3u && aSmoke.size() == 3u);
+    }
+};
 // Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
 constexpr bool op_CCredits_Stop(const CCredits_ZppContract& pre, const CCredits_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == false);
 }
 constexpr CCredits_ZppContract apply_CCredits_Stop(const CCredits_ZppContract& pre) {
-    CCredits_ZppContract post = pre;
-    post.bCreditsGoing = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
-constexpr bool op_CCredits_PrintCreditText(const CCredits_ZppContract& pre, const CCredits_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == false);
-}
-constexpr CCredits_ZppContract apply_CCredits_PrintCreditText(const CCredits_ZppContract& pre) {
-    CCredits_ZppContract post = pre;
-    post.bCreditsGoing = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
-constexpr bool op_CCredits_Render(const CCredits_ZppContract& pre, const CCredits_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == false);
-}
-constexpr CCredits_ZppContract apply_CCredits_Render(const CCredits_ZppContract& pre) {
     CCredits_ZppContract post = pre;
     post.bCreditsGoing = false;
     return post;
@@ -816,13 +777,6 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CClouds_ZppContract bad{};
         bad.IndividualRotation = -1;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CConsole_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CConsole_ZppContract bad{};
-        bad.m_aTimer_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -896,40 +850,22 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CCredits_ZppContract pre{};
-        pre.bCreditsGoing = false;
-        const auto post = apply_CCredits_Start(pre);
-        if (!op_CCredits_Start(pre, post)) return false;
-        CCredits_ZppContract badPost = post;
-        badPost.bCreditsGoing = false;
-        if (op_CCredits_Start(pre, badPost)) return false;
+        CSmokeTrails_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CSmokeTrails_ZppContract bad{};
+        bad.aSmoke_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
         CCredits_ZppContract pre{};
         pre.bCreditsGoing = true;
         const auto post = apply_CCredits_Stop(pre);
         if (!op_CCredits_Stop(pre, post)) return false;
-        CCredits_ZppContract badPost = post;
-        badPost.bCreditsGoing = true;
-        if (op_CCredits_Stop(pre, badPost)) return false;
-    }
-    {
-        CCredits_ZppContract pre{};
-        pre.bCreditsGoing = true;
-        const auto post = apply_CCredits_PrintCreditText(pre);
-        if (!op_CCredits_PrintCreditText(pre, post)) return false;
-        CCredits_ZppContract badPost = post;
-        badPost.bCreditsGoing = true;
-        if (op_CCredits_PrintCreditText(pre, badPost)) return false;
-    }
-    {
-        CCredits_ZppContract pre{};
-        pre.bCreditsGoing = true;
-        const auto post = apply_CCredits_Render(pre);
-        if (!op_CCredits_Render(pre, post)) return false;
-        CCredits_ZppContract badPost = post;
-        badPost.bCreditsGoing = true;
-        if (op_CCredits_Render(pre, badPost)) return false;
+        {
+            CCredits_ZppContract badPost = post;
+            badPost.bCreditsGoing = true;
+            if (op_CCredits_Stop(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

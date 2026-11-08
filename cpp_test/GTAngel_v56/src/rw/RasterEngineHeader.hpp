@@ -189,15 +189,6 @@ struct GPUcaps_ZppContract {
             && (dxtSupport >= 0);
     }
 };
-// Delta Operation Schema Contract (ΔCommonSize) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_failed == 0);
-}
-constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre) {
-    CommonSize_ZppContract post = pre;
-    post.m_failed = 0;
-    return post;
-}
 constexpr bool verify_rw_zpp_invariants() {
     {
         rpGeometryList_ZppContract valid{};
@@ -310,15 +301,6 @@ constexpr bool verify_rw_zpp_invariants() {
         GPUcaps_ZppContract bad{};
         bad.version = -1;
         if (bad.checkInvariant()) return false;
-    }
-    {
-        CommonSize_ZppContract pre{};
-        pre.m_failed = 1;
-        const auto post = apply_CommonSize_Init(pre);
-        if (!op_CommonSize_Init(pre, post)) return false;
-        CommonSize_ZppContract badPost = post;
-        badPost.m_failed = 1;
-        if (op_CommonSize_Init(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

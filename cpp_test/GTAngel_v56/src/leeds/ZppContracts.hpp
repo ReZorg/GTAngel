@@ -36,11 +36,12 @@ constexpr bool op_cSmallHeap_IsLocked_4(const cSmallHeap_ZppContract& state) {
 }
 // Delta Operation Schema Contract (ΔcSmallHeap) from zpp/leeds/smallHeap.zpp
 constexpr bool op_cSmallHeap_cSmallHeap(const cSmallHeap_ZppContract& pre, const cSmallHeap_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bLocked == false);
+    return pre.checkInvariant() && post.checkInvariant() && (post.bLocked == false) && (post.bUnk == false);
 }
 constexpr cSmallHeap_ZppContract apply_cSmallHeap_cSmallHeap(const cSmallHeap_ZppContract& pre) {
     cSmallHeap_ZppContract post = pre;
     post.bLocked = false;
+    post.bUnk = false;
     return post;
 }
 constexpr bool verify_leeds_zpp_invariants() {
@@ -65,11 +66,19 @@ constexpr bool verify_leeds_zpp_invariants() {
     {
         cSmallHeap_ZppContract pre{};
         pre.bLocked = true;
+        pre.bUnk = true;
         const auto post = apply_cSmallHeap_cSmallHeap(pre);
         if (!op_cSmallHeap_cSmallHeap(pre, post)) return false;
-        cSmallHeap_ZppContract badPost = post;
-        badPost.bLocked = true;
-        if (op_cSmallHeap_cSmallHeap(pre, badPost)) return false;
+        {
+            cSmallHeap_ZppContract badPost = post;
+            badPost.bLocked = true;
+            if (op_cSmallHeap_cSmallHeap(pre, badPost)) return false;
+        }
+        {
+            cSmallHeap_ZppContract badPost = post;
+            badPost.bUnk = true;
+            if (op_cSmallHeap_cSmallHeap(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

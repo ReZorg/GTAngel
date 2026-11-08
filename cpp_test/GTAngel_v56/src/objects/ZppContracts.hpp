@@ -94,38 +94,11 @@ constexpr CCutsceneObject_ZppContract apply_CCutsceneObject_CCutsceneObject_2(co
     post.m_pShadow_card = 0u;
     return post;
 }
-// Delta Operation Schema Contract (ΔCAudioHydrant) from zpp/objects/ParticleObject.zpp
-constexpr bool op_CAudioHydrant_Remove(const CAudioHydrant_ZppContract& pre, const CAudioHydrant_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.pParticleObject_card == 0u);
-}
-constexpr CAudioHydrant_ZppContract apply_CAudioHydrant_Remove(const CAudioHydrant_ZppContract& pre) {
-    CAudioHydrant_ZppContract post = pre;
-    post.pParticleObject_card = 0u;
-    return post;
-}
 // Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
 constexpr bool op_CStinger_CStinger(const CStinger_ZppContract& pre, const CStinger_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.bIsDeployed == false);
 }
 constexpr CStinger_ZppContract apply_CStinger_CStinger(const CStinger_ZppContract& pre) {
-    CStinger_ZppContract post = pre;
-    post.bIsDeployed = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
-constexpr bool op_CStinger_Init(const CStinger_ZppContract& pre, const CStinger_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bIsDeployed == true);
-}
-constexpr CStinger_ZppContract apply_CStinger_Init(const CStinger_ZppContract& pre) {
-    CStinger_ZppContract post = pre;
-    post.bIsDeployed = true;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
-constexpr bool op_CStinger_Remove(const CStinger_ZppContract& pre, const CStinger_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bIsDeployed == false);
-}
-constexpr CStinger_ZppContract apply_CStinger_Remove(const CStinger_ZppContract& pre) {
     CStinger_ZppContract post = pre;
     post.bIsDeployed = false;
     return post;
@@ -171,45 +144,22 @@ constexpr bool verify_objects_zpp_invariants() {
         pre.m_pShadow_card = 1u;
         const auto post = apply_CCutsceneObject_CCutsceneObject_2(pre);
         if (!op_CCutsceneObject_CCutsceneObject_2(pre, post)) return false;
-        CCutsceneObject_ZppContract badPost = post;
-        badPost.m_pShadow_card = 1u;
-        if (op_CCutsceneObject_CCutsceneObject_2(pre, badPost)) return false;
-    }
-    {
-        CAudioHydrant_ZppContract pre{};
-        pre.pParticleObject_card = 1u;
-        const auto post = apply_CAudioHydrant_Remove(pre);
-        if (!op_CAudioHydrant_Remove(pre, post)) return false;
-        CAudioHydrant_ZppContract badPost = post;
-        badPost.pParticleObject_card = 1u;
-        if (op_CAudioHydrant_Remove(pre, badPost)) return false;
+        {
+            CCutsceneObject_ZppContract badPost = post;
+            badPost.m_pShadow_card = 1u;
+            if (op_CCutsceneObject_CCutsceneObject_2(pre, badPost)) return false;
+        }
     }
     {
         CStinger_ZppContract pre{};
         pre.bIsDeployed = true;
         const auto post = apply_CStinger_CStinger(pre);
         if (!op_CStinger_CStinger(pre, post)) return false;
-        CStinger_ZppContract badPost = post;
-        badPost.bIsDeployed = true;
-        if (op_CStinger_CStinger(pre, badPost)) return false;
-    }
-    {
-        CStinger_ZppContract pre{};
-        pre.bIsDeployed = false;
-        const auto post = apply_CStinger_Init(pre);
-        if (!op_CStinger_Init(pre, post)) return false;
-        CStinger_ZppContract badPost = post;
-        badPost.bIsDeployed = false;
-        if (op_CStinger_Init(pre, badPost)) return false;
-    }
-    {
-        CStinger_ZppContract pre{};
-        pre.bIsDeployed = true;
-        const auto post = apply_CStinger_Remove(pre);
-        if (!op_CStinger_Remove(pre, post)) return false;
-        CStinger_ZppContract badPost = post;
-        badPost.bIsDeployed = true;
-        if (op_CStinger_Remove(pre, badPost)) return false;
+        {
+            CStinger_ZppContract badPost = post;
+            badPost.bIsDeployed = true;
+            if (op_CStinger_CStinger(pre, badPost)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

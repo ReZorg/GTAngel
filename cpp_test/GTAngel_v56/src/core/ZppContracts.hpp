@@ -204,42 +204,6 @@ struct ColHeader_ZppContract {
             && (size >= 0);
     }
 };
-// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
-constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == 12);
-}
-constexpr CClock_ZppContract apply_CClock_Initialise(const CClock_ZppContract& pre) {
-    CClock_ZppContract post = pre;
-    post.ms_nGameClockHours = 12;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
-constexpr bool op_CClock_Update(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockMinutes == 0);
-}
-constexpr CClock_ZppContract apply_CClock_Update(const CClock_ZppContract& pre) {
-    CClock_ZppContract post = pre;
-    post.ms_nGameClockMinutes = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
-constexpr bool op_CClock_SetGameClock(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockSeconds == 0);
-}
-constexpr CClock_ZppContract apply_CClock_SetGameClock(const CClock_ZppContract& pre) {
-    CClock_ZppContract post = pre;
-    post.ms_nGameClockSeconds = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCEventList) from zpp/core/EventList.zpp
-constexpr bool op_CEventList_Update(const CEventList_ZppContract& pre, const CEventList_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nFirstFreeSlotIndex == 0);
-}
-constexpr CEventList_ZppContract apply_CEventList_Update(const CEventList_ZppContract& pre) {
-    CEventList_ZppContract post = pre;
-    post.ms_nFirstFreeSlotIndex = 0;
-    return post;
-}
 constexpr bool verify_core_zpp_invariants() {
     {
         CAccident_ZppContract valid{};
@@ -352,42 +316,6 @@ constexpr bool verify_core_zpp_invariants() {
         ColHeader_ZppContract bad{};
         bad.ident = -1;
         if (bad.checkInvariant()) return false;
-    }
-    {
-        CClock_ZppContract pre{};
-        pre.ms_nGameClockHours = 0;
-        const auto post = apply_CClock_Initialise(pre);
-        if (!op_CClock_Initialise(pre, post)) return false;
-        CClock_ZppContract badPost = post;
-        badPost.ms_nGameClockHours = 0;
-        if (op_CClock_Initialise(pre, badPost)) return false;
-    }
-    {
-        CClock_ZppContract pre{};
-        pre.ms_nGameClockMinutes = 1;
-        const auto post = apply_CClock_Update(pre);
-        if (!op_CClock_Update(pre, post)) return false;
-        CClock_ZppContract badPost = post;
-        badPost.ms_nGameClockMinutes = 1;
-        if (op_CClock_Update(pre, badPost)) return false;
-    }
-    {
-        CClock_ZppContract pre{};
-        pre.ms_nGameClockSeconds = 1;
-        const auto post = apply_CClock_SetGameClock(pre);
-        if (!op_CClock_SetGameClock(pre, post)) return false;
-        CClock_ZppContract badPost = post;
-        badPost.ms_nGameClockSeconds = 1;
-        if (op_CClock_SetGameClock(pre, badPost)) return false;
-    }
-    {
-        CEventList_ZppContract pre{};
-        pre.ms_nFirstFreeSlotIndex = 1;
-        const auto post = apply_CEventList_Update(pre);
-        if (!op_CEventList_Update(pre, post)) return false;
-        CEventList_ZppContract badPost = post;
-        badPost.ms_nFirstFreeSlotIndex = 1;
-        if (op_CEventList_Update(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
