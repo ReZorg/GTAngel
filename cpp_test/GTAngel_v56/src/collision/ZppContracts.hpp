@@ -44,11 +44,14 @@ struct CColBox_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColBox.zpp
 struct CColTriBBox_ZppContract {
+    ZppVec3 min_field{}; // Z++: CVector
+    ZppVec3 max_field{}; // Z++: CVector
     int32_t first{0}; // Z++: ℤ
     int32_t last{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/collision/ColLine.zpp
@@ -111,12 +114,14 @@ struct CColPoint_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColSphere.zpp
 struct CColSphere_ZppContract {
-    int64_t surface{0}; // Z++: ℕ
-    int64_t piece{0}; // Z++: ℕ
     ZppVec3 center{}; // Z++: CVector
     float radius{0.0f}; // Z++: ℝ
+    int64_t surface{0}; // Z++: ℕ
+    int64_t piece{0}; // Z++: ℕ
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (surface >= 0)
+        return (instance_addr >= 0)
+            && (surface >= 0)
             && (piece >= 0);
     }
 };
@@ -412,7 +417,7 @@ constexpr bool verify_collision_zpp_invariants() {
         CColSphere_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CColSphere_ZppContract bad{};
-        bad.surface = -1;
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {

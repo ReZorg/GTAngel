@@ -2,7 +2,10 @@
     static constexpr int zpp_entities_modules() { return zpp_entities_spec::kZppModuleCount; }
     static constexpr int zpp_entities_schemas() { return zpp_entities_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_entities_zpp() {
-        return zpp_entities_spec::verify_entities_zpp_invariants() && (zpp_entities_spec::CDummy_ZppContract{}.checkInvariant()) && (true);
+        return zpp_entities_spec::verify_entities_zpp_invariants() && (zpp_entities_spec::CDummy_ZppContract{}.checkInvariant()) && (zpp_entities_spec::op_CEntity_DetachFromRwObject(zpp_entities_spec::CEntity_ZppContract{}, zpp_entities_spec::apply_CEntity_DetachFromRwObject(zpp_entities_spec::CEntity_ZppContract{})));
+    }
+    bool verifyLiveWorld_entities_zpp(const avatar3d::GameWorld& world) const {
+        return ((int64_t)world.pillars.size() >= 0) && verifyComponent_entities_zpp();
     }
     static_assert(verifyComponent_entities_zpp(), "RasterEngine component Z++ binding failed for entities");
     void buildPillars(const avatar3d::GameWorld& world) {

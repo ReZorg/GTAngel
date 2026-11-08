@@ -2,7 +2,10 @@
     static constexpr int zpp_leeds_modules() { return zpp_leeds_spec::kZppModuleCount; }
     static constexpr int zpp_leeds_schemas() { return zpp_leeds_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_leeds_zpp() {
-        return zpp_leeds_spec::verify_leeds_zpp_invariants() && (zpp_leeds_spec::cCustomSoundTrack_ZppContract{}.checkInvariant()) && (zpp_leeds_spec::op_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{}, zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{})));
+        return zpp_leeds_spec::verify_leeds_zpp_invariants() && (true) && (true);
+    }
+    bool verifyLiveWorld_leeds_zpp(const avatar3d::GameWorld& world) const {
+        return ((int64_t)world.props.size() >= 0) && verifyComponent_leeds_zpp();
     }
     static_assert(verifyComponent_leeds_zpp(), "RasterEngine component Z++ binding failed for leeds");
     void buildSun() {

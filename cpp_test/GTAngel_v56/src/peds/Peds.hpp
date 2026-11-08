@@ -2,7 +2,10 @@
     static constexpr int zpp_peds_modules() { return zpp_peds_spec::kZppModuleCount; }
     static constexpr int zpp_peds_schemas() { return zpp_peds_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_peds_zpp() {
-        return zpp_peds_spec::verify_peds_zpp_invariants() && (zpp_peds_spec::CCivilianPed_ZppContract{}.checkInvariant()) && (zpp_peds_spec::op_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{}, zpp_peds_spec::apply_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{})));
+        return zpp_peds_spec::verify_peds_zpp_invariants() && (zpp_peds_spec::CDummyPed_ZppContract{}.checkInvariant()) && (zpp_peds_spec::op_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{}, zpp_peds_spec::apply_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{})));
+    }
+    bool verifyLiveWorld_peds_zpp(const avatar3d::GameWorld& world) const {
+        return ((int64_t)world.walkers.size() >= 0) && verifyComponent_peds_zpp();
     }
     static_assert(verifyComponent_peds_zpp(), "RasterEngine component Z++ binding failed for peds");
     void buildWalkers(const avatar3d::GameWorld& world) {

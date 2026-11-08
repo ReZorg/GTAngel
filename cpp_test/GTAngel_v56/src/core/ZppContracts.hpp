@@ -298,30 +298,72 @@ struct CSelectable_ZppContract {
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CPlaceableShText_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    int32_t m_color{0}; // Z++: CRGBA
+    int32_t m_text{0}; // Z++: seq CHAR
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CPlaceableShTextTwoLines_ZppContract {
+    int32_t m_line1{0}; // Z++: CPlaceableText
+    int32_t m_line2{0}; // Z++: CPlaceableText
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CPlaceableShOption_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    int32_t m_color{0}; // Z++: CRGBA
+    int32_t m_text{0}; // Z++: seq CHAR
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    bool m_bSelected{false}; // Z++: 𝔹
+    int32_t m_selectedColor{0}; // Z++: CRGBA
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CPlaceableShOptionTwoLines_ZppContract {
+    int32_t m_line1{0}; // Z++: CPlaceableText
+    int32_t m_line2{0}; // Z++: CPlaceableText
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    bool m_bSelected{false}; // Z++: 𝔹
+    int32_t m_selectedColor{0}; // Z++: CRGBA
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
@@ -355,16 +397,21 @@ struct CMenuBase_ZppContract {
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuDummy_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     bool m_bActive{false}; // Z++: 𝔹
     int32_t false_field{0}; // Z++: return
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuPictureAndText_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_numSprites{0}; // Z++: ℤ
     std::array<int32_t, 5> m_sprites{}; // Z++: seq CPlaceableShSprite  -- bounded array [5]
     size_t m_sprites_len{5u}; // Z++ cardinality #m_sprites
@@ -377,13 +424,17 @@ struct CMenuPictureAndText_ZppContract {
     float m_wrapX{0.0f}; // Z++: ℝ
     float m_oldWrapx{0.0f}; // Z++: ℝ
     bool m_bWrap{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_sprites_len == 5u && m_sprites.size() == 5u)
-            && (m_texts_len == 20u && m_texts.size() == 20u);
+            && (m_texts_len == 20u && m_texts.size() == 20u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoice_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_numOptions{0}; // Z++: ℤ
     int32_t m_title{0}; // Z++: CPlaceableShText
     std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
@@ -397,66 +448,168 @@ struct CMenuMultiChoice_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
     std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_triggers_len == 16u && m_triggers.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTriggeredAlways_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
+    std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
+    int32_t m_defaultCancel{0}; // Z++: Trigger
     int32_t m_alwaysNormalTrigger{0}; // Z++: Trigger
     int32_t m_alwaysHighlightTrigger{0}; // Z++: Trigger
     int32_t m_alwaysTrigger{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoicePictured_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
     std::array<int32_t, 16> m_sprites{}; // Z++: seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_sprites_len{16u}; // Z++ cardinality #m_sprites
     std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_sprites_len == 16u && m_sprites.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_sprites_len == 16u && m_sprites.size() == 16u)
             && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoicePicturedTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
+    std::array<int32_t, 16> m_sprites{}; // Z++: seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_sprites_len{16u}; // Z++ cardinality #m_sprites
+    std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
     std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_triggers_len == 16u && m_triggers.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_sprites_len == 16u && m_sprites.size() == 16u)
+            && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
+    std::array<int32_t, 16> m_sprites{}; // Z++: seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_sprites_len{16u}; // Z++ cardinality #m_sprites
+    std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
+    std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
+    int32_t m_defaultCancel{0}; // Z++: Trigger
     std::array<int32_t, 16> m_moveTab{}; // Z++: seq FEC_MOVETAB  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_moveTab_len{16u}; // Z++ cardinality #m_moveTab
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_moveTab_len == 16u && m_moveTab.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_sprites_len == 16u && m_sprites.size() == 16u)
+            && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (m_moveTab_len == 16u && m_moveTab.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTwoLines_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_numOptions{0}; // Z++: ℤ
     int32_t m_title{0}; // Z++: CPlaceableShText
     std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOptionTwoLines  -- bounded array [NUM_MULTICHOICE_OPTIONS]
@@ -470,22 +623,40 @@ struct CMenuMultiChoiceTwoLines_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTwoLinesTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOptionTwoLines  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
     std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_triggers_len == 16u && m_triggers.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuOnOff_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_title{0}; // Z++: CPlaceableShOption
     std::array<int32_t, 2> m_options{}; // Z++: seq CPlaceableShText  -- bounded array [2]
     size_t m_options_len{2u}; // Z++ cardinality #m_options
@@ -497,29 +668,39 @@ struct CMenuOnOff_ZppContract {
     int32_t m_type{0}; // Z++: ℤ
     int32_t false_field{0}; // Z++: return
     int32_t true_field{0}; // Z++: return
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_options_len == 2u && m_options.size() == 2u);
+        return (m_options_len == 2u && m_options.size() == 2u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuOnOffTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_title{0}; // Z++: CPlaceableShOption
+    std::array<int32_t, 2> m_options{}; // Z++: seq CPlaceableShText  -- bounded array [2]
+    size_t m_options_len{2u}; // Z++ cardinality #m_options
+    bool m_bActive{false}; // Z++: 𝔹
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t m_textScale{0}; // Z++: CVector2D
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_type{0}; // Z++: ℤ
+    int32_t false_field{0}; // Z++: return
+    int32_t true_field{0}; // Z++: return
     int32_t m_trigger{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
-    }
-};
-// State Schema Contract from zpp/core/FrontEndControls.zpp
-struct CMenuSliderTriggered_ZppContract {
-    int32_t m_trigger{0}; // Z++: Trigger
-    int32_t m_alwaysTrigger{0}; // Z++: Trigger
-    int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_options_len == 2u && m_options.size() == 2u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuLineLister_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     float m_width{0.0f}; // Z++: ℝ
     float m_height{0.0f}; // Z++: ℝ
     int32_t m_numLines{0}; // Z++: ℤ
@@ -542,6 +723,7 @@ struct CMenuLineLister_ZppContract {
             && (m_linesRight_len == 51u && m_linesRight.size() == 51u)
             && (m_lineAlphas_len == 51u && m_lineAlphas.size() == 51u)
             && (m_lineFade_len == 51u && m_lineFade.size() == 51u)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
@@ -559,11 +741,18 @@ struct CMenuPage_ZppContract {
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuPageAnyMove_ZppContract {
+    std::array<int32_t, 10> m_controls{}; // Z++: seq Ref[CMenuBase]  -- bounded array [NUM_PAGE_WIDGETS]
+    size_t m_controls_len{10u}; // Z++ cardinality #m_controls
+    int32_t m_numControls{0}; // Z++: ℤ
+    uint8_t m_pCurrentControl_card{0u}; // Z++: Ref[CMenuBase]
+    int32_t m_cursor{0}; // Z++: ℤ
     std::array<int32_t, 10> m_moveTab{}; // Z++: seq FEC_MOVETAB  -- bounded array [NUM_PAGE_WIDGETS]
     size_t m_moveTab_len{10u}; // Z++ cardinality #m_moveTab
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_moveTab_len == 10u && m_moveTab.size() == 10u)
+        return (m_controls_len == 10u && m_controls.size() == 10u)
+            && (m_moveTab_len == 10u && m_moveTab.size() == 10u)
+            && (m_pCurrentControl_card <= 1u)
             && (instance_addr >= 0);
     }
 };
@@ -599,6 +788,9 @@ struct CCFO_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFOSelect_ZppContract {
+    int32_t value{0}; // Z++: ADDRESS
+    int32_t saveCat{0}; // Z++: seq CHAR
+    int32_t save{0}; // Z++: seq CHAR
     int32_t rightTexts{0}; // Z++: seq CHAR
     int32_t numRightTexts{0}; // Z++: ℤ
     bool onlyApplyOnEnter{false}; // Z++: 𝔹
@@ -608,26 +800,35 @@ struct CCFOSelect_ZppContract {
     bool disableIfGameLoaded{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFOSlider_ZppContract {
+    int32_t value{0}; // Z++: ADDRESS
+    int32_t saveCat{0}; // Z++: seq CHAR
+    int32_t save{0}; // Z++: seq CHAR
     float changeFunc{0.0f}; // Z++: ℝ
     float min_field{0.0f}; // Z++: ℝ
     float max_field{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFODynamic_ZppContract {
+    int32_t value{0}; // Z++: ADDRESS
+    int32_t saveCat{0}; // Z++: seq CHAR
+    int32_t save{0}; // Z++: seq CHAR
     int32_t drawFunc{0}; // Z++: DrawFunc
     int32_t buttonPressFunc{0}; // Z++: ButtonPressFunc
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/Frontend.zpp
@@ -1162,6 +1363,48 @@ struct CUserDisplay_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/core/Wanted.zpp
+struct CWanted_ZppContract {
+    int32_t m_nChaos{0}; // Z++: ℤ
+    int32_t m_nMinChaos{0}; // Z++: ℤ
+    int32_t m_nLastUpdateTime{0}; // Z++: ℤ
+    int64_t m_nLastWantedLevelChange{0}; // Z++: ℕ
+    int64_t m_nLastTimeSuspended{0}; // Z++: ℕ
+    float m_fCrimeSensitivity{0.0f}; // Z++: ℝ
+    int64_t m_CurrentCops{0}; // Z++: ℕ
+    int64_t m_MaxCops{0}; // Z++: ℕ
+    int64_t m_MaximumLawEnforcerVehicles{0}; // Z++: ℕ
+    int64_t m_CopsBeatingSuspect{0}; // Z++: ℕ
+    int32_t m_RoadblockDensity{0}; // Z++: ℤ
+    uint32_t m_bIgnoredByCops{0u}; // Z++: 𝔹
+    uint32_t m_bIgnoredByEveryone{0u}; // Z++: 𝔹
+    uint32_t m_bSwatRequired{0u}; // Z++: 𝔹
+    uint32_t m_bFbiRequired{0u}; // Z++: 𝔹
+    uint32_t m_bArmyRequired{0u}; // Z++: 𝔹
+    int32_t m_nWantedLevel{0}; // Z++: ℤ
+    int32_t m_nMinWantedLevel{0}; // Z++: ℤ
+    std::array<int32_t, 16> m_aCrimes{}; // Z++: seq CCrimeBeingQd  -- bounded array [16]
+    size_t m_aCrimes_len{16u}; // Z++ cardinality #m_aCrimes
+    std::array<int32_t, 10> m_pCops{}; // Z++: seq Ref[CCopPed]  -- bounded array [10]
+    size_t m_pCops_len{10u}; // Z++ cardinality #m_pCops
+    int32_t MaximumWantedLevel{0}; // Z++: ℤ
+    int32_t nMaximumWantedLevel{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (m_aCrimes_len == 16u && m_aCrimes.size() == 16u)
+            && (m_pCops_len == 10u && m_pCops.size() == 10u)
+            && (m_nLastWantedLevelChange >= 0)
+            && (m_nLastTimeSuspended >= 0)
+            && (m_CurrentCops >= 0)
+            && (m_MaxCops >= 0)
+            && (m_MaximumLawEnforcerVehicles >= 0)
+            && (m_CopsBeatingSuspect >= 0)
+            && (m_bIgnoredByCops <= 1u)
+            && (m_bIgnoredByEveryone <= 1u)
+            && (m_bSwatRequired <= 1u)
+            && (m_bFbiRequired <= 1u)
+            && (m_bArmyRequired <= 1u);
+    }
+};
 // State Schema Contract from zpp/core/ZoneCull.zpp
 struct CCullZone_ZppContract {
     ZppVec3 position{}; // Z++: CVector
@@ -1442,6 +1685,20 @@ constexpr CCurrentVehicle_ZppContract apply_CCurrentVehicle_Init(const CCurrentV
     post.m_pCurrentVehicle_card = 0u;
     return post;
 }
+// Delta Operation Schema Contract (ΔCWanted) from zpp/core/Wanted.zpp
+constexpr bool op_CWanted_Initialise(const CWanted_ZppContract& pre, const CWanted_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nChaos == 0) && (post.m_nMinChaos == 0) && (post.m_nLastUpdateTime == 0) && (post.m_nLastWantedLevelChange == 0) && (post.m_nLastTimeSuspended == 0) && (post.m_CurrentCops == 0);
+}
+constexpr CWanted_ZppContract apply_CWanted_Initialise(const CWanted_ZppContract& pre) {
+    CWanted_ZppContract post = pre;
+    post.m_nChaos = 0;
+    post.m_nMinChaos = 0;
+    post.m_nLastUpdateTime = 0;
+    post.m_nLastWantedLevelChange = 0;
+    post.m_nLastTimeSuspended = 0;
+    post.m_CurrentCops = 0;
+    return post;
+}
 constexpr bool verify_core_zpp_invariants() {
     {
         CAccident_ZppContract valid{};
@@ -1678,35 +1935,35 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuMultiChoiceTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoiceTriggered_ZppContract bad{};
-        bad.m_triggers_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoiceTriggeredAlways_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoiceTriggeredAlways_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoicePictured_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoicePictured_ZppContract bad{};
-        bad.m_sprites_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoicePicturedTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoicePicturedTriggered_ZppContract bad{};
-        bad.m_triggers_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract bad{};
-        bad.m_moveTab_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1720,7 +1977,7 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuMultiChoiceTwoLinesTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoiceTwoLinesTriggered_ZppContract bad{};
-        bad.m_triggers_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1734,14 +1991,7 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuOnOffTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuOnOffTriggered_ZppContract bad{};
-        bad.instance_addr = -1;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CMenuSliderTriggered_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CMenuSliderTriggered_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1762,7 +2012,7 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuPageAnyMove_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuPageAnyMove_ZppContract bad{};
-        bad.m_moveTab_len = 0u;
+        bad.m_controls_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -2057,6 +2307,13 @@ constexpr bool verify_core_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CUserDisplay_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CWanted_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CWanted_ZppContract bad{};
+        bad.m_aCrimes_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -2489,6 +2746,47 @@ constexpr bool verify_core_zpp_invariants() {
             CCurrentVehicle_ZppContract badPost = post;
             badPost.m_pCurrentVehicle_card = 1u;
             if (op_CCurrentVehicle_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CWanted_ZppContract pre{};
+        pre.m_nChaos = 1;
+        pre.m_nMinChaos = 1;
+        pre.m_nLastUpdateTime = 1;
+        pre.m_nLastWantedLevelChange = 1;
+        pre.m_nLastTimeSuspended = 1;
+        pre.m_CurrentCops = 1;
+        const auto post = apply_CWanted_Initialise(pre);
+        if (!op_CWanted_Initialise(pre, post)) return false;
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nChaos = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nMinChaos = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nLastUpdateTime = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nLastWantedLevelChange = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nLastTimeSuspended = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_CurrentCops = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

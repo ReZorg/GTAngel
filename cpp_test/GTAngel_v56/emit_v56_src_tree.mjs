@@ -47,6 +47,7 @@ const folders = [
 
 const globalSymValues = new Map();
 const conflictingSyms = new Set();
+const globalRawSchemas = new Map();
 
 function recordSymbolValue(map, conflicts, name, val) {
   if (!(val > 0 && val <= 4096)) return;
@@ -114,7 +115,41 @@ for (const folder of folders) {
         }
       }
     }
+    const sRe = /^schema\s+([A-Za-z_]\w*)\r?\n([\s\S]*?)^where\r?\n([\s\S]*?)^end/gm;
+    let sm0;
+    while ((sm0 = sRe.exec(txt)) !== null) {
+      const sn = sm0[1].replace(/[^A-Za-z0-9_]/g, '_');
+      if (!sn.includes('_') && !/^\s+[ΔΞ]/m.test(sm0[2]) && !globalRawSchemas.has(sn)) {
+        globalRawSchemas.set(sn, {
+          decls: sm0[2].split(/\r?\n/),
+          whereLines: sm0[3].split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('--'))
+        });
+      }
+    }
   }
+}
+
+function expandInheritedSchema(sname, decls, whereLines, visited = new Set()) {
+  if (visited.has(sname)) return { decls: [], whereLines: [], ok: false };
+  visited.add(sname);
+  const allDecls = [];
+  const allWheres = [];
+  for (const d of decls) {
+    const bm = d.match(/^\s+([A-Za-z_]\w*)\s+--\s*inherits base schema$/);
+    if (bm) {
+      const baseName = bm[1].replace(/[^A-Za-z0-9_]/g, '_');
+      const baseRaw = globalRawSchemas.get(baseName);
+      if (!baseRaw) return { decls: [], whereLines: [], ok: false };
+      const exp = expandInheritedSchema(baseName, baseRaw.decls, baseRaw.whereLines, visited);
+      if (!exp.ok) return { decls: [], whereLines: [], ok: false };
+      allDecls.push(...exp.decls);
+      allWheres.push(...exp.whereLines);
+    } else {
+      allDecls.push(d);
+    }
+  }
+  allWheres.push(...whereLines);
+  return { decls: allDecls, whereLines: allWheres, ok: true };
 }
 
 function buildZppCppContractBlock(folder, insideClass = false) {
@@ -414,10 +449,16 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         continue;
       }
 
+      const expanded = expandInheritedSchema(sname, decls, whereLines);
+      if (!expanded.ok) continue;
+      const effDecls = expanded.decls;
+      const effWhereLines = expanded.whereLines;
+
       const fields = new Map();
       let hasUnresolvedField = false;
 
-      for (const d of decls) {
+      for (const d of effDecls) {
+        if (hasUnresolvedField) break;
         const fm = d.match(/^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/);
         if (!fm) continue;
         const rawName = fm[1];
@@ -484,7 +525,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         }
       }
 
-      for (const rawW of whereLines) {
+      for (const rawW of effWhereLines) {
         const mAddr = rawW.match(/^([A-Za-z_]\w*)\s*∈\s*ADDRESS$/);
         if (mAddr && !fields.has(mAddr[1])) {
           const addrName = mAddr[1];
@@ -501,12 +542,13 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
       for (const f of fields.values()) {
         if (f.kind === 'array') {
-          cppPreds.push(`(${f.fname}_len == ${f.len}u && ${f.fname}.size() == ${f.len}u)`);
+          const arrExpr = `(${f.fname}_len == ${f.len}u && ${f.fname}.size() == ${f.len}u)`;
+          if (!cppPreds.includes(arrExpr)) cppPreds.push(arrExpr);
           if (!negMutation) negMutation = `bad.${f.fname}_len = 0u;`;
         }
       }
 
-      for (const rawW of whereLines) {
+      for (const rawW of effWhereLines) {
         const parts = rawW.split('∧').map(p => p.trim()).filter(Boolean);
         for (const w of parts) {
           let m;
@@ -517,6 +559,15 @@ function buildZppCppContractBlock(folder, insideClass = false) {
               const expr = `(${f.fname}_len == ${n}u && ${f.fname}.size() == ${n}u)`;
               if (!cppPreds.includes(expr)) cppPreds.push(expr);
               if (!negMutation) negMutation = `bad.${f.fname}_len = 0u;`;
+            } else if (f && (f.kind === 'scalar_bool' || f.kind === 'scalar_int') && n >= 1 && n <= 16) {
+              // Bitfield width invariant `#bitfield = W`: value in [0, (1 << W) - 1]
+              const maxMask = (1 << n) - 1;
+              f.kind = 'bitfield';
+              f.ct = 'uint32_t';
+              f.defVal = '0u';
+              const expr = `(${f.fname} <= ${maxMask}u)`;
+              if (!cppPreds.includes(expr)) cppPreds.push(expr);
+              if (!negMutation) negMutation = `bad.${f.fname} = ${maxMask + 1}u;`;
             } else {
               allPredsSupported = false;
             }
@@ -590,12 +641,23 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       : (queryOps.length > 0
         ? `zpp_${folder}_spec::op_${queryOps[0].opName}(zpp_${folder}_spec::${queryOps[0].targetState}_ZppContract{})`
         : 'true');
+    const liveCountExpr =
+      folder === 'buildings' ? '(int64_t)world.buildings.size()' :
+      folder === 'entities'  ? '(int64_t)world.pillars.size()' :
+      folder === 'peds'      ? '(int64_t)world.walkers.size()' :
+      folder === 'vehicles'  ? '(int64_t)world.traffic.size()' :
+      folder === 'objects'   ? '(int64_t)world.pickups.size()' :
+      folder === 'renderer'  ? '(int64_t)triangles_.size()' :
+      '(int64_t)world.props.size()';
     return [
       `    // ── Z++ Formal Spec Component Binding (${folder}): ${zfiles.length} modules, ${totalSchemas} schemas, ${totalEnums} enums (${modList}) ──`,
       `    static constexpr int zpp_${folder}_modules() { return zpp_${folder}_spec::kZppModuleCount; }`,
       `    static constexpr int zpp_${folder}_schemas() { return zpp_${folder}_spec::kZppSchemaCount; }`,
       `    static constexpr bool verifyComponent_${folder}_zpp() {`,
       `        return zpp_${folder}_spec::verify_${folder}_zpp_invariants() && (${firstSchema}) && (${firstOp});`,
+      `    }`,
+      `    bool verifyLiveWorld_${folder}_zpp(const avatar3d::GameWorld& world) const {`,
+      `        return (${liveCountExpr} >= 0) && verifyComponent_${folder}_zpp();`,
       `    }`,
       `    static_assert(verifyComponent_${folder}_zpp(), "RasterEngine component Z++ binding failed for ${folder}");`,
       ''
@@ -714,6 +776,9 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   if (folder === 'peds' && sampleSchemas.some(s => s.sname === 'CGangs')) {
     out.push(`static_assert(CGangs_ZppContract{}.GangAttackWithCops.size() == 9u, "CGangs NUM_GANGS must be 9");`);
   }
+  if (folder === 'peds' && sampleSchemas.some(s => s.sname === 'CPedAtmAttractor') && queryOps.some(q => q.opName === 'CPedAtmAttractor_GetType')) {
+    out.push(`static_assert([]() constexpr { CPedAtmAttractor_ZppContract bad{}; bad.vWaitingQueue_card = 2u; return !bad.checkInvariant() && !op_CPedAtmAttractor_GetType(bad); }(), "CPedAtmAttractor must inherit CPedAttractor reference cardinality constraints");`);
+  }
   if (folder === 'renderer' && sampleSchemas.some(s => s.sname === 'CConsole')) {
     out.push(`static_assert(CConsole_ZppContract{}.m_aTimer.size() == 8u, "CConsole MAX_LINES must be 8");`);
   }
@@ -788,9 +853,9 @@ for (const rootDir of ['src', '../src']) {
     'constexpr zpp_math_spec::ZppVec3 toZppVec3(Vec3 v) { return {v.x, v.y, v.z}; }',
     'constexpr Vec3 fromZppVec3(zpp_math_spec::ZppVec3 v) { return {v.x, v.y, v.z}; }',
     'constexpr zpp_math_spec::CRect_ZppContract makeWorldBoundsZppRect(float halfExtent) {',
-    '    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, halfExtent, halfExtent, -halfExtent);',
+    '    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, -halfExtent, halfExtent, halfExtent);',
     '}',
-    'static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, 64.0f, 64.0f, -64.0f), "World bounds CRect Z++ contract must hold");',
+    'static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, -64.0f, 64.0f, 64.0f), "World bounds CRect Z++ contract must hold");',
     ''
   ].join('\n'));
   writeMod('animation/AvatarSkeleton.hpp', buildZppCppContractBlock('animation', false) + sliceLines(L_poseLib, L_gameWorld - 1) + [

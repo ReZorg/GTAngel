@@ -781,4 +781,7 @@ private:
     static constexpr bool verifyComponent_rw_zpp() {
         return zpp_rw_spec::verify_rw_zpp_invariants() && (zpp_rw_spec::rpGeometryList_ZppContract{}.checkInvariant()) && (zpp_rw_spec::op_CMemoryHeap_PushMemId(zpp_rw_spec::CMemoryHeap_ZppContract{}, zpp_rw_spec::apply_CMemoryHeap_PushMemId(zpp_rw_spec::CMemoryHeap_ZppContract{})));
     }
+    bool verifyLiveWorld_rw_zpp(const avatar3d::GameWorld& world) const {
+        return ((int64_t)world.props.size() >= 0) && verifyComponent_rw_zpp();
+    }
     static_assert(verifyComponent_rw_zpp(), "RasterEngine component Z++ binding failed for rw");

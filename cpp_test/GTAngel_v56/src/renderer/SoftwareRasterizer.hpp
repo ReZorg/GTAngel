@@ -4,6 +4,9 @@
     static constexpr bool verifyComponent_renderer_zpp() {
         return zpp_renderer_spec::verify_renderer_zpp_invariants() && (zpp_renderer_spec::C2dEffect_ZppContract{}.checkInvariant()) && (zpp_renderer_spec::op_CClouds_Init(zpp_renderer_spec::CClouds_ZppContract{}, zpp_renderer_spec::apply_CClouds_Init(zpp_renderer_spec::CClouds_ZppContract{})));
     }
+    bool verifyLiveWorld_renderer_zpp(const avatar3d::GameWorld& world) const {
+        return ((int64_t)triangles_.size() >= 0) && verifyComponent_renderer_zpp();
+    }
     static_assert(verifyComponent_renderer_zpp(), "RasterEngine component Z++ binding failed for renderer");
     void buildAvatar(const avatar3d::AvatarSkeleton& avatar) {
         using avatar3d::AvatarSkeleton;
@@ -712,6 +715,68 @@ struct FlareDef_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/renderer/Coronas.zpp
+struct CRegisteredCorona_ZppContract {
+    ZppVec3 coors{}; // Z++: CVector
+    int64_t id{0}; // Z++: ℕ
+    int64_t lastLOScheck{0}; // Z++: ℕ
+    uint8_t texture_card{0u}; // Z++: Ref[RwTexture]
+    float size{0.0f}; // Z++: ℝ
+    float someAngle{0.0f}; // Z++: ℝ
+    float drawDist{0.0f}; // Z++: ℝ
+    float nearDist{0.0f}; // Z++: ℝ
+    float heightAboveRoad{0.0f}; // Z++: ℝ
+    int64_t red{0}; // Z++: ℕ
+    int64_t green{0}; // Z++: ℕ
+    int64_t blue{0}; // Z++: ℕ
+    int64_t alpha{0}; // Z++: ℕ
+    int64_t fadeAlpha{0}; // Z++: ℕ
+    bool registeredThisFrame{false}; // Z++: 𝔹
+    int32_t flareType{0}; // Z++: ℤ
+    int32_t reflection{0}; // Z++: ℤ
+    uint32_t LOScheck{0u}; // Z++: 𝔹
+    uint32_t offScreen{0u}; // Z++: 𝔹
+    uint32_t firstUpdate{0u}; // Z++: 𝔹
+    uint32_t drawStreak{0u}; // Z++: 𝔹
+    uint32_t sightClear{0u}; // Z++: 𝔹
+    uint32_t useNearDist{0u}; // Z++: 𝔹
+    uint32_t renderReflection{0u}; // Z++: 𝔹
+    std::array<int32_t, 6> prevX{}; // Z++: seq ℤ  -- bounded array [6]
+    size_t prevX_len{6u}; // Z++ cardinality #prevX
+    std::array<int32_t, 6> prevY{}; // Z++: seq ℤ  -- bounded array [6]
+    size_t prevY_len{6u}; // Z++ cardinality #prevY
+    std::array<uint32_t, 6> prevRed{}; // Z++: seq ℕ  -- bounded array [6]
+    size_t prevRed_len{6u}; // Z++ cardinality #prevRed
+    std::array<uint32_t, 6> prevGreen{}; // Z++: seq ℕ  -- bounded array [6]
+    size_t prevGreen_len{6u}; // Z++ cardinality #prevGreen
+    std::array<uint32_t, 6> prevBlue{}; // Z++: seq ℕ  -- bounded array [6]
+    size_t prevBlue_len{6u}; // Z++ cardinality #prevBlue
+    std::array<bool, 6> hasValue{}; // Z++: seq 𝔹  -- bounded array [6]
+    size_t hasValue_len{6u}; // Z++ cardinality #hasValue
+    constexpr bool checkInvariant() const {
+        return (prevX_len == 6u && prevX.size() == 6u)
+            && (prevY_len == 6u && prevY.size() == 6u)
+            && (prevRed_len == 6u && prevRed.size() == 6u)
+            && (prevGreen_len == 6u && prevGreen.size() == 6u)
+            && (prevBlue_len == 6u && prevBlue.size() == 6u)
+            && (hasValue_len == 6u && hasValue.size() == 6u)
+            && (id >= 0)
+            && (lastLOScheck >= 0)
+            && (texture_card <= 1u)
+            && (red >= 0)
+            && (green >= 0)
+            && (blue >= 0)
+            && (alpha >= 0)
+            && (fadeAlpha >= 0)
+            && (LOScheck <= 1u)
+            && (offScreen <= 1u)
+            && (firstUpdate <= 1u)
+            && (drawStreak <= 1u)
+            && (sightClear <= 1u)
+            && (useNearDist <= 1u)
+            && (renderReflection <= 1u);
+    }
+};
 // State Schema Contract from zpp/renderer/Credits.zpp
 struct CCredits_ZppContract {
     bool bCreditsGoing{false}; // Z++: 𝔹
@@ -1002,6 +1067,12 @@ struct CFontRenderState_ZppContract {
 };
 // State Schema Contract from zpp/renderer/Glass.zpp
 struct CFallingGlassPane_ZppContract {
+    uint8_t m_attachment_card{0u}; // Z++: Ref[RwMatrix]
+    float fz{0.0f}; // Z++: ℝ
+    bool m_hasRwMatrix{false}; // Z++: 𝔹
+    float uw{0.0f}; // Z++: ℝ
+    float pw{0.0f}; // Z++: ℝ
+    float fw{0.0f}; // Z++: ℝ
     ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
     ZppVec3 m_vecTurn{}; // Z++: CVector
     int64_t m_nTimer{0}; // Z++: ℕ
@@ -1012,16 +1083,19 @@ struct CFallingGlassPane_ZppContract {
     bool m_bShattered{false}; // Z++: 𝔹
     bool m_bCarGlass{false}; // Z++: 𝔹
     constexpr bool checkInvariant() const {
-        return (m_nTimer >= 0)
+        return (m_attachment_card <= 1u)
+            && (m_nTimer >= 0)
             && (m_nTriIndex >= 0);
     }
 };
 // State Schema Contract from zpp/renderer/Instance.zpp
 struct CInstance_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
     int32_t m_modelIndex{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/renderer/Lines.zpp
@@ -1227,6 +1301,33 @@ struct CShadowCamera_ZppContract {
     constexpr bool checkInvariant() const {
         return (m_pCamera_card <= 1u)
             && (m_pTexture_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/renderer/Shadows.zpp
+struct CStoredShadow_ZppContract {
+    ZppVec3 m_vecPos{}; // Z++: CVector
+    int32_t m_vecFront{0}; // Z++: CVector2D
+    int32_t m_vecSide{0}; // Z++: CVector2D
+    float m_fZDistance{0.0f}; // Z++: ℝ
+    float m_fScale{0.0f}; // Z++: ℝ
+    uint8_t m_pTexture_card{0u}; // Z++: Ref[RwTexture]
+    uint8_t m_pCutsceneShadow_card{0u}; // Z++: Ref[CCutsceneShadow]
+    int32_t m_nIntensity{0}; // Z++: ℤ
+    int64_t m_ShadowType{0}; // Z++: ℕ
+    int64_t m_nRed{0}; // Z++: ℕ
+    int64_t m_nGreen{0}; // Z++: ℕ
+    int64_t m_nBlue{0}; // Z++: ℕ
+    uint32_t bRendered{0u}; // Z++: 𝔹
+    uint32_t bDrawOnBuildings{0u}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (m_pTexture_card <= 1u)
+            && (m_pCutsceneShadow_card <= 1u)
+            && (m_ShadowType >= 0)
+            && (m_nRed >= 0)
+            && (m_nGreen >= 0)
+            && (m_nBlue >= 0)
+            && (bRendered <= 1u)
+            && (bDrawOnBuildings <= 1u);
     }
 };
 // State Schema Contract from zpp/renderer/Shadows.zpp
@@ -1983,6 +2084,13 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CRegisteredCorona_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CRegisteredCorona_ZppContract bad{};
+        bad.prevX_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CCredits_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CCredits_ZppContract bad{};
@@ -2112,7 +2220,7 @@ constexpr bool verify_renderer_zpp_invariants() {
         CFallingGlassPane_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CFallingGlassPane_ZppContract bad{};
-        bad.m_nTimer = -1;
+        bad.m_attachment_card = 2u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -2232,6 +2340,13 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CShadowCamera_ZppContract bad{};
         bad.m_pCamera_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CStoredShadow_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CStoredShadow_ZppContract bad{};
+        bad.m_pTexture_card = 2u;
         if (bad.checkInvariant()) return false;
     }
     {

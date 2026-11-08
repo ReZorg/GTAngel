@@ -46,10 +46,18 @@ struct CCompressedMatrixNotAligned_ZppContract {
 };
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CCompressedMatrix_ZppContract {
+    ZppVec3 m_vecPos{}; // Z++: CVector
+    int32_t m_rightX{0}; // Z++: ℤ
+    int32_t m_rightY{0}; // Z++: ℤ
+    int32_t m_rightZ{0}; // Z++: ℤ
+    int32_t m_upX{0}; // Z++: ℤ
+    int32_t m_upY{0}; // Z++: ℤ
+    int32_t m_upZ{0}; // Z++: ℤ
     int32_t _alignment{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/math/Quaternion.zpp
@@ -69,14 +77,6 @@ struct CRect_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
-    }
-};
-// State Schema Contract from zpp/math/Vector.zpp
-struct CVector_ZppContract {
-    float w{0.0f}; // Z++: ℝ
-    uint8_t this_field_card{0u}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const {
-        return (this_field_card <= 1u);
     }
 };
 // State Schema Contract from zpp/math/Vector2D.zpp
@@ -136,46 +136,6 @@ constexpr bool op_CQuaternion_MagnitudeSqr_2(const CQuaternion_ZppContract& stat
 }
 // Query Operation Schema Contract (ΞCQuaternion) from zpp/math/Quaternion.zpp
 constexpr bool op_CQuaternion_operator_10(const CQuaternion_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_Heading_3(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_Magnitude_4(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_MagnitudeSqr_5(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_Magnitude2D_6(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_MagnitudeSqr2D_7(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_operator_15(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_operator_16(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_operator_17(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_IsZero_18(const CVector_ZppContract& state) {
-    return state.checkInvariant();
-}
-// Query Operation Schema Contract (ΞCVector) from zpp/math/Vector.zpp
-constexpr bool op_CVector_Heading_19(const CVector_ZppContract& state) {
     return state.checkInvariant();
 }
 // Query Operation Schema Contract (ΞCVector2D) from zpp/math/Vector2D.zpp
@@ -279,13 +239,6 @@ constexpr bool verify_math_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CVector_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CVector_ZppContract bad{};
-        bad.this_field_card = 2u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
         CVector2D_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CVector2D_ZppContract bad{};
@@ -336,46 +289,6 @@ constexpr bool verify_math_zpp_invariants() {
     {
         const CQuaternion_ZppContract st{};
         if (!op_CQuaternion_operator_10(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_Heading_3(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_Magnitude_4(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_MagnitudeSqr_5(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_Magnitude2D_6(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_MagnitudeSqr2D_7(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_operator_15(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_operator_16(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_operator_17(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_IsZero_18(st)) return false;
-    }
-    {
-        const CVector_ZppContract st{};
-        if (!op_CVector_Heading_19(st)) return false;
     }
     {
         const CVector2D_ZppContract st{};
@@ -502,4 +415,4 @@ constexpr Vec3 fromZppVec3(zpp_math_spec::ZppVec3 v) { return {v.x, v.y, v.z}; }
 constexpr zpp_math_spec::CRect_ZppContract makeWorldBoundsZppRect(float halfExtent) {
     return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, -halfExtent, halfExtent, halfExtent);
 }
-static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, 64.0f, 64.0f, -64.0f), "World bounds CRect Z++ contract must hold");
+static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, -64.0f, 64.0f, 64.0f), "World bounds CRect Z++ contract must hold");

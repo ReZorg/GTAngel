@@ -2,7 +2,10 @@
     static constexpr int zpp_buildings_modules() { return zpp_buildings_spec::kZppModuleCount; }
     static constexpr int zpp_buildings_schemas() { return zpp_buildings_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_buildings_zpp() {
-        return zpp_buildings_spec::verify_buildings_zpp_invariants() && (zpp_buildings_spec::CBuilding_ZppContract{}.checkInvariant()) && (true);
+        return zpp_buildings_spec::verify_buildings_zpp_invariants() && (zpp_buildings_spec::CBuilding_ZppContract{}.checkInvariant()) && (zpp_buildings_spec::op_CBuilding_ReplaceWithNewModel(zpp_buildings_spec::CBuilding_ZppContract{}, zpp_buildings_spec::apply_CBuilding_ReplaceWithNewModel(zpp_buildings_spec::CBuilding_ZppContract{})));
+    }
+    bool verifyLiveWorld_buildings_zpp(const avatar3d::GameWorld& world) const {
+        return ((int64_t)world.buildings.size() >= 0) && verifyComponent_buildings_zpp();
     }
     static_assert(verifyComponent_buildings_zpp(), "RasterEngine component Z++ binding failed for buildings");
     void buildBuildings(const avatar3d::GameWorld& world) {

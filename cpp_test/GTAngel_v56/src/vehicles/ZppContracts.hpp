@@ -30,119 +30,6 @@ enum class Automobile_Enum_4 : int32_t { CAR_DOOR_FLAG_UNKNOWN_v = 0, CAR_DOOR_F
 enum class eBikeNodes : int32_t { BIKE_NODE_NONE_v = 0, BIKE_CHASSIS_v = 1, BIKE_FORKS_FRONT_v = 2, BIKE_FORKS_REAR_v = 3, BIKE_WHEEL_FRONT_v = 4, BIKE_WHEEL_REAR_v = 5, BIKE_MUDGUARD_v = 6, BIKE_HANDLEBARS_v = 7, BIKE_NUM_NODES_v = 8 };
 // Free Type from zpp/vehicles/Bike.zpp
 enum class Bike_Enum_2 : int32_t { BIKEWHEEL_FRONT_v = 0, BIKEWHEEL_REAR_v = 1 };
-// State Schema Contract from zpp/vehicles/Bike.zpp
-struct CBike_ZppContract {
-    std::array<int32_t, 8> m_aBikeNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [BIKE_NUM_NODES]
-    size_t m_aBikeNodes_len{8u}; // Z++ cardinality #m_aBikeNodes
-    bool bLeanMatrixClean{false}; // Z++: 𝔹
-    int32_t m_leanMatrix{0}; // Z++: CMatrix
-    ZppVec3 m_vecAvgSurfaceNormal{}; // Z++: CVector
-    ZppVec3 m_vecAvgSurfaceRight{}; // Z++: CVector
-    uint8_t pBikeHandling_card{0u}; // Z++: Ref[tBikeHandlingData]
-    int32_t m_bikeAnimType{0}; // Z++: AssocGroupId
-    std::array<uint32_t, 2> m_wheelStatus{}; // Z++: seq ℕ  -- bounded array [2]
-    size_t m_wheelStatus_len{2u}; // Z++ cardinality #m_wheelStatus
-    std::array<int32_t, 4> m_aWheelColPoints{}; // Z++: seq ℤ  -- bounded array [4]
-    size_t m_aWheelColPoints_len{4u}; // Z++ cardinality #m_aWheelColPoints
-    std::array<float, 4> m_aSuspensionSpringRatio{}; // Z++: seq ℝ  -- bounded array [4]
-    size_t m_aSuspensionSpringRatio_len{4u}; // Z++ cardinality #m_aSuspensionSpringRatio
-    std::array<float, 4> m_aSuspensionSpringRatioPrev{}; // Z++: seq ℝ  -- bounded array [4]
-    size_t m_aSuspensionSpringRatioPrev_len{4u}; // Z++ cardinality #m_aSuspensionSpringRatioPrev
-    std::array<float, 4> m_aWheelTimer{}; // Z++: seq ℝ  -- bounded array [4]
-    size_t m_aWheelTimer_len{4u}; // Z++ cardinality #m_aWheelTimer
-    float m_bike_unused1{0.0f}; // Z++: ℝ
-    std::array<int32_t, 2> m_aWheelSkidmarkType{}; // Z++: seq eSkidmarkType  -- bounded array [2]
-    size_t m_aWheelSkidmarkType_len{2u}; // Z++ cardinality #m_aWheelSkidmarkType
-    std::array<bool, 2> m_aWheelSkidmarkBloody{}; // Z++: seq 𝔹  -- bounded array [2]
-    size_t m_aWheelSkidmarkBloody_len{2u}; // Z++ cardinality #m_aWheelSkidmarkBloody
-    std::array<bool, 2> m_aWheelSkidmarkUnk{}; // Z++: seq 𝔹  -- bounded array [2]
-    size_t m_aWheelSkidmarkUnk_len{2u}; // Z++ cardinality #m_aWheelSkidmarkUnk
-    std::array<float, 2> m_aWheelRotation{}; // Z++: seq ℝ  -- bounded array [2]
-    size_t m_aWheelRotation_len{2u}; // Z++ cardinality #m_aWheelRotation
-    std::array<float, 2> m_aWheelSpeed{}; // Z++: seq ℝ  -- bounded array [2]
-    size_t m_aWheelSpeed_len{2u}; // Z++ cardinality #m_aWheelSpeed
-    std::array<float, 2> m_aWheelPosition{}; // Z++: seq ℝ  -- bounded array [2]
-    size_t m_aWheelPosition_len{2u}; // Z++ cardinality #m_aWheelPosition
-    std::array<float, 2> m_aWheelBasePosition{}; // Z++: seq ℝ  -- bounded array [2]
-    size_t m_aWheelBasePosition_len{2u}; // Z++ cardinality #m_aWheelBasePosition
-    std::array<float, 4> m_aSuspensionSpringLength{}; // Z++: seq ℝ  -- bounded array [4]
-    size_t m_aSuspensionSpringLength_len{4u}; // Z++ cardinality #m_aSuspensionSpringLength
-    std::array<float, 4> m_aSuspensionLineLength{}; // Z++: seq ℝ  -- bounded array [4]
-    size_t m_aSuspensionLineLength_len{4u}; // Z++ cardinality #m_aSuspensionLineLength
-    float m_fHeightAboveRoad{0.0f}; // Z++: ℝ
-    float m_fTraction{0.0f}; // Z++: ℝ
-    float m_fRearForkLength{0.0f}; // Z++: ℝ
-    float m_fFrontForkY{0.0f}; // Z++: ℝ
-    float m_fFrontForkZ{0.0f}; // Z++: ℝ
-    float m_fFrontForkSlope{0.0f}; // Z++: ℝ
-    float m_fWheelAngle{0.0f}; // Z++: ℝ
-    float m_fLeanLRAngle{0.0f}; // Z++: ℝ
-    float m_fLeanLRAngle2{0.0f}; // Z++: ℝ
-    float m_fLeanInput{0.0f}; // Z++: ℝ
-    float m_fPedLeanAmountLR{0.0f}; // Z++: ℝ
-    float m_fPedLeanAmountUD{0.0f}; // Z++: ℝ
-    int64_t m_bike_unused2{0}; // Z++: ℕ
-    std::array<uint32_t, 3> unused{}; // Z++: seq ℕ  -- bounded array [3]
-    size_t unused_len{3u}; // Z++ cardinality #unused
-    bool m_bombType{false}; // Z++: 𝔹
-    bool bDriverLastFrame{false}; // Z++: 𝔹
-    bool m_bike_flag01{false}; // Z++: 𝔹
-    bool m_bike_flag02{false}; // Z++: 𝔹
-    bool bWaterTight{false}; // Z++: 𝔹
-    bool bIsBeingPickedUp{false}; // Z++: 𝔹
-    bool bIsStanding{false}; // Z++: 𝔹
-    bool bExtraSpeed{false}; // Z++: 𝔹
-    bool bIsOnFire{false}; // Z++: 𝔹
-    bool bWheelieCam{false}; // Z++: 𝔹
-    bool bFixedColour{false}; // Z++: 𝔹
-    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
-    int32_t m_doingBurnout{0}; // Z++: ℤ
-    float m_fTireTemperature{0.0f}; // Z++: ℝ
-    float m_fBrakeDestabilization{0.0f}; // Z++: ℝ
-    float m_fVelocityChangeForAudio{0.0f}; // Z++: ℝ
-    float m_fFireBlowUpTimer{0.0f}; // Z++: ℝ
-    std::array<int32_t, 4> m_aGroundPhysical{}; // Z++: seq Ref[CPhysical]  -- bounded array [4]
-    size_t m_aGroundPhysical_len{4u}; // Z++ cardinality #m_aGroundPhysical
-    std::array<ZppVec3, 4> m_aGroundOffset{}; // Z++: seq CVector  -- bounded array [4]
-    size_t m_aGroundOffset_len{4u}; // Z++ cardinality #m_aGroundOffset
-    uint8_t m_pSetOnFireEntity_card{0u}; // Z++: Ref[CEntity]
-    int64_t m_nWheelsOnGround{0}; // Z++: ℕ
-    int64_t m_nDriveWheelsOnGround{0}; // Z++: ℕ
-    int64_t m_nDriveWheelsOnGroundPrev{0}; // Z++: ℕ
-    float m_fGasPedalAudio{0.0f}; // Z++: ℝ
-    std::array<int32_t, 2> m_aWheelState{}; // Z++: seq tWheelState  -- bounded array [2]
-    size_t m_aWheelState_len{2u}; // Z++ cardinality #m_aWheelState
-    std::array<uint32_t, 96> unk1{}; // Z++: seq ℕ  -- bounded array [96]
-    size_t unk1_len{96u}; // Z++ cardinality #unk1
-    int32_t m_bikeSitAnimation{0}; // Z++: AnimationId
-    std::array<uint32_t, 180> unk2{}; // Z++: seq ℕ  -- bounded array [180]
-    size_t unk2_len{180u}; // Z++ cardinality #unk2
-    constexpr bool checkInvariant() const {
-        return (m_aBikeNodes_len == 8u && m_aBikeNodes.size() == 8u)
-            && (m_wheelStatus_len == 2u && m_wheelStatus.size() == 2u)
-            && (m_aWheelColPoints_len == 4u && m_aWheelColPoints.size() == 4u)
-            && (m_aSuspensionSpringRatio_len == 4u && m_aSuspensionSpringRatio.size() == 4u)
-            && (m_aSuspensionSpringRatioPrev_len == 4u && m_aSuspensionSpringRatioPrev.size() == 4u)
-            && (m_aWheelTimer_len == 4u && m_aWheelTimer.size() == 4u)
-            && (m_aWheelSkidmarkType_len == 2u && m_aWheelSkidmarkType.size() == 2u)
-            && (m_aWheelSkidmarkBloody_len == 2u && m_aWheelSkidmarkBloody.size() == 2u)
-            && (m_aWheelSkidmarkUnk_len == 2u && m_aWheelSkidmarkUnk.size() == 2u)
-            && (m_aWheelRotation_len == 2u && m_aWheelRotation.size() == 2u)
-            && (m_aWheelSpeed_len == 2u && m_aWheelSpeed.size() == 2u)
-            && (m_aWheelPosition_len == 2u && m_aWheelPosition.size() == 2u)
-            && (m_aWheelBasePosition_len == 2u && m_aWheelBasePosition.size() == 2u)
-            && (m_aSuspensionSpringLength_len == 4u && m_aSuspensionSpringLength.size() == 4u)
-            && (m_aSuspensionLineLength_len == 4u && m_aSuspensionLineLength.size() == 4u)
-            && (unused_len == 3u && unused.size() == 3u)
-            && (m_aGroundPhysical_len == 4u && m_aGroundPhysical.size() == 4u)
-            && (m_aGroundOffset_len == 4u && m_aGroundOffset.size() == 4u)
-            && (m_aWheelState_len == 2u && m_aWheelState.size() == 2u)
-            && (unk1_len == 96u && unk1.size() == 96u)
-            && (unk2_len == 180u && unk2.size() == 180u)
-            && (pBikeHandling_card <= 1u)
-            && (m_bike_unused2 >= 0);
-    }
-};
 // State Schema Contract from zpp/vehicles/CarGen.zpp
 struct CCarGenerator_ZppContract {
     int32_t m_nModelIndex{0}; // Z++: ℤ
@@ -312,44 +199,6 @@ struct CFerryPath_ZppContract {
             && (aLineBits_card <= 1u);
     }
 };
-// State Schema Contract from zpp/vehicles/Ferry.zpp
-struct CFerry_ZppContract {
-    int32_t m_nFerryId{0}; // Z++: ℤ
-    int64_t m_isFarAway{0}; // Z++: ℕ
-    int64_t m_nCurTrackNode{0}; // Z++: ℕ
-    float m_fSpeed{0.0f}; // Z++: ℝ
-    bool m_bFerryDocked{false}; // Z++: 𝔹
-    int64_t m_nDoorTimer{0}; // Z++: ℕ
-    int64_t m_nTimeLeftStation{0}; // Z++: ℕ
-    int32_t m_nDoorState{0}; // Z++: ℤ
-    bool m_bApproachingDock{false}; // Z++: 𝔹
-    int64_t m_nSkipFerryStatus{0}; // Z++: ℕ
-    int64_t m_nTimeAlongPath{0}; // Z++: ℕ
-    bool m_bUseFrontDoor{false}; // Z++: 𝔹
-    ZppVec3 m_vecForwardSpeed{}; // Z++: CVector
-    uint8_t m_pDefaultColModel_card{0u}; // Z++: Ref[CColModel]
-    int64_t m_nCollision{0}; // Z++: ℕ
-    std::array<int32_t, 4> m_doors{}; // Z++: seq CDoor  -- bounded array [4]
-    size_t m_doors_len{4u}; // Z++ cardinality #m_doors
-    std::array<int32_t, 5> m_aFerryNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_FERRY_NODES]
-    size_t m_aFerryNodes_len{5u}; // Z++ cardinality #m_aFerryNodes
-    bool m_bAlreadyRendered{false}; // Z++: 𝔹
-    bool m_bPlayerArrivedHorn{false}; // Z++: 𝔹
-    uint8_t mspInst_card{0u}; // Z++: Ref[CFerryInst]
-    constexpr bool checkInvariant() const {
-        return (m_doors_len == 4u && m_doors.size() == 4u)
-            && (m_aFerryNodes_len == 5u && m_aFerryNodes.size() == 5u)
-            && (m_isFarAway >= 0)
-            && (m_nCurTrackNode >= 0)
-            && (m_nDoorTimer >= 0)
-            && (m_nTimeLeftStation >= 0)
-            && (m_nSkipFerryStatus >= 0)
-            && (m_nTimeAlongPath >= 0)
-            && (m_pDefaultColModel_card <= 1u)
-            && (m_nCollision >= 0)
-            && (mspInst_card <= 1u);
-    }
-};
 // State Schema Contract from zpp/vehicles/Floater.zpp
 struct cBuoyancy_ZppContract {
     ZppVec3 m_position{}; // Z++: CVector
@@ -480,62 +329,6 @@ struct tFlyingHandlingData_ZppContract {
         return (instance_addr >= 0);
     }
 };
-// State Schema Contract from zpp/vehicles/Heli.zpp
-struct CHeli_ZppContract {
-    std::array<int32_t, 8> m_aHeliNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_HELI_NODES]
-    size_t m_aHeliNodes_len{8u}; // Z++ cardinality #m_aHeliNodes
-    int32_t m_heliStatus{0}; // Z++: ℤ
-    float m_fSearchLightX{0.0f}; // Z++: ℝ
-    float m_fSearchLightY{0.0f}; // Z++: ℝ
-    int64_t m_nExplosionTimer{0}; // Z++: ℕ
-    float m_fRotation{0.0f}; // Z++: ℝ
-    float m_fAngularSpeed{0.0f}; // Z++: ℝ
-    float m_fTargetZ{0.0f}; // Z++: ℝ
-    float m_fSearchLightIntensity{0.0f}; // Z++: ℝ
-    int32_t m_nHeliId{0}; // Z++: ℤ
-    int32_t m_heliType{0}; // Z++: ℤ
-    int32_t m_pathState{0}; // Z++: ℤ
-    int32_t m_numSwat{0}; // Z++: ℤ
-    std::array<uint32_t, 4> m_aSwatState{}; // Z++: seq ℕ  -- bounded array [4]
-    size_t m_aSwatState_len{4u}; // Z++ cardinality #m_aSwatState
-    std::array<float, 6> m_aSearchLightHistoryX{}; // Z++: seq ℝ  -- bounded array [6]
-    size_t m_aSearchLightHistoryX_len{6u}; // Z++ cardinality #m_aSearchLightHistoryX
-    std::array<float, 6> m_aSearchLightHistoryY{}; // Z++: seq ℝ  -- bounded array [6]
-    size_t m_aSearchLightHistoryY_len{6u}; // Z++ cardinality #m_aSearchLightHistoryY
-    int64_t m_nSearchLightTimer{0}; // Z++: ℕ
-    int64_t m_nShootTimer{0}; // Z++: ℕ
-    int64_t m_nLastShotTime{0}; // Z++: ℕ
-    int64_t m_nBulletDamage{0}; // Z++: ℕ
-    float m_fRotorRotation{0.0f}; // Z++: ℝ
-    std::array<float, 8> m_fHeliDustZ{}; // Z++: seq ℝ  -- bounded array [8]
-    size_t m_fHeliDustZ_len{8u}; // Z++ cardinality #m_fHeliDustZ
-    int64_t m_nPoliceShoutTimer{0}; // Z++: ℕ
-    float m_fTargetOffset{0.0f}; // Z++: ℝ
-    bool m_bTestRight{false}; // Z++: 𝔹
-    std::array<int32_t, 4> pHelis{}; // Z++: seq Ref[CHeli]  -- bounded array [NUM_HELIS]
-    size_t pHelis_len{4u}; // Z++ cardinality #pHelis
-    int32_t NumRandomHelis{0}; // Z++: ℤ
-    int64_t TestForNewRandomHelisTimer{0}; // Z++: ℕ
-    bool CatalinaHeliOn{false}; // Z++: 𝔹
-    bool CatalinaHasBeenShotDown{false}; // Z++: 𝔹
-    bool ScriptHeliOn{false}; // Z++: 𝔹
-    int32_t NumScriptHelis{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
-        return (m_aHeliNodes_len == 8u && m_aHeliNodes.size() == 8u)
-            && (m_aSwatState_len == 4u && m_aSwatState.size() == 4u)
-            && (m_aSearchLightHistoryX_len == 6u && m_aSearchLightHistoryX.size() == 6u)
-            && (m_aSearchLightHistoryY_len == 6u && m_aSearchLightHistoryY.size() == 6u)
-            && (m_fHeliDustZ_len == 8u && m_fHeliDustZ.size() == 8u)
-            && (pHelis_len == 4u && pHelis.size() == 4u)
-            && (m_nExplosionTimer >= 0)
-            && (m_nSearchLightTimer >= 0)
-            && (m_nShootTimer >= 0)
-            && (m_nLastShotTime >= 0)
-            && (m_nBulletDamage >= 0)
-            && (m_nPoliceShoutTimer >= 0)
-            && (TestForNewRandomHelisTimer >= 0);
-    }
-};
 // State Schema Contract from zpp/vehicles/Plane.zpp
 struct CPlaneNode_ZppContract {
     ZppVec3 p{}; // Z++: CVector
@@ -557,21 +350,6 @@ struct CPlaneInterpolationLine_ZppContract {
         return (type >= 0);
     }
 };
-// State Schema Contract from zpp/vehicles/Plane.zpp
-struct CPlane_ZppContract {
-    float m_fRotorRotation{0.0f}; // Z++: ℝ
-    int32_t m_isFarAway{0}; // Z++: ℤ
-    int32_t m_nCurPathNode{0}; // Z++: ℤ
-    float m_fSpeed{0.0f}; // Z++: ℝ
-    int64_t m_nFrameWhenHit{0}; // Z++: ℕ
-    bool m_bHasBeenHit{false}; // Z++: 𝔹
-    bool m_bIsDrugRunCesna{false}; // Z++: 𝔹
-    bool m_bIsDropOffCesna{false}; // Z++: 𝔹
-    bool m_bTempPlane{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
-        return (m_nFrameWhenHit >= 0);
-    }
-};
 // State Schema Contract from zpp/vehicles/Train.zpp
 struct CTrainNode_ZppContract {
     ZppVec3 p{}; // Z++: CVector
@@ -590,38 +368,6 @@ struct CTrainInterpolationLine_ZppContract {
     float acceleration{0.0f}; // Z++: ℝ
     constexpr bool checkInvariant() const {
         return (type >= 0);
-    }
-};
-// State Schema Contract from zpp/vehicles/Train.zpp
-struct CTrain_ZppContract {
-    float m_fWagonPosition{0.0f}; // Z++: ℝ
-    int32_t m_nWagonId{0}; // Z++: ℤ
-    int32_t m_isFarAway{0}; // Z++: ℤ
-    int32_t m_nCurTrackNode{0}; // Z++: ℤ
-    int32_t m_nWagonGroup{0}; // Z++: ℤ
-    float m_fSpeed{0.0f}; // Z++: ℝ
-    bool m_bProcessDoor{false}; // Z++: 𝔹
-    bool m_bTrainStopping{false}; // Z++: 𝔹
-    bool m_bIsFirstWagon{false}; // Z++: 𝔹
-    bool m_bIsLastWagon{false}; // Z++: 𝔹
-    int64_t m_nTrackId{0}; // Z++: ℕ
-    int64_t m_nDoorTimer{0}; // Z++: ℕ
-    int32_t m_nDoorState{0}; // Z++: ℤ
-    std::array<int32_t, 2> Doors{}; // Z++: seq CTrainDoor  -- bounded array [2]
-    size_t Doors_len{2u}; // Z++ cardinality #Doors
-    std::array<int32_t, 3> m_aTrainNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_TRAIN_NODES]
-    size_t m_aTrainNodes_len{3u}; // Z++ cardinality #m_aTrainNodes
-    std::array<ZppVec3, 3> aStationCoors{}; // Z++: seq CVector  -- bounded array [3]
-    size_t aStationCoors_len{3u}; // Z++ cardinality #aStationCoors
-    std::array<ZppVec3, 4> aStationCoors_S{}; // Z++: seq CVector  -- bounded array [4]
-    size_t aStationCoors_S_len{4u}; // Z++ cardinality #aStationCoors_S
-    constexpr bool checkInvariant() const {
-        return (Doors_len == 2u && Doors.size() == 2u)
-            && (m_aTrainNodes_len == 3u && m_aTrainNodes.size() == 3u)
-            && (aStationCoors_len == 3u && aStationCoors.size() == 3u)
-            && (aStationCoors_S_len == 4u && aStationCoors_S.size() == 4u)
-            && (m_nTrackId >= 0)
-            && (m_nDoorTimer >= 0);
     }
 };
 // State Schema Contract from zpp/vehicles/Transmission.zpp
@@ -721,100 +467,7 @@ constexpr CDamageManager_ZppContract apply_CDamageManager_FuckCarCompletely(cons
     post.m_panelStatus = 0;
     return post;
 }
-// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
-constexpr bool op_CFerry_Render(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_bAlreadyRendered == true);
-}
-constexpr CFerry_ZppContract apply_CFerry_Render(const CFerry_ZppContract& pre) {
-    CFerry_ZppContract post = pre;
-    post.m_bAlreadyRendered = true;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
-constexpr bool op_CFerry_CompleteDorrMovement(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nDoorTimer == 0);
-}
-constexpr CFerry_ZppContract apply_CFerry_CompleteDorrMovement(const CFerry_ZppContract& pre) {
-    CFerry_ZppContract post = pre;
-    post.m_nDoorTimer = 0;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
-constexpr bool op_CFerry_SkipFerryToNextDock(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nSkipFerryStatus == 1);
-}
-constexpr CFerry_ZppContract apply_CFerry_SkipFerryToNextDock(const CFerry_ZppContract& pre) {
-    CFerry_ZppContract post = pre;
-    post.m_nSkipFerryStatus = 1;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_InitHelis(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.NumRandomHelis == 0) && (post.TestForNewRandomHelisTimer == 0) && (post.NumScriptHelis == 0) && (post.CatalinaHeliOn == false) && (post.ScriptHeliOn == false);
-}
-constexpr CHeli_ZppContract apply_CHeli_InitHelis(const CHeli_ZppContract& pre) {
-    CHeli_ZppContract post = pre;
-    post.NumRandomHelis = 0;
-    post.TestForNewRandomHelisTimer = 0;
-    post.NumScriptHelis = 0;
-    post.CatalinaHeliOn = false;
-    post.ScriptHeliOn = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_StartCatalinaFlyBy(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.CatalinaHeliOn == true) && (post.CatalinaHasBeenShotDown == false);
-}
-constexpr CHeli_ZppContract apply_CHeli_StartCatalinaFlyBy(const CHeli_ZppContract& pre) {
-    CHeli_ZppContract post = pre;
-    post.CatalinaHeliOn = true;
-    post.CatalinaHasBeenShotDown = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_RemoveCatalinaHeli(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.CatalinaHeliOn == false);
-}
-constexpr CHeli_ZppContract apply_CHeli_RemoveCatalinaHeli(const CHeli_ZppContract& pre) {
-    CHeli_ZppContract post = pre;
-    post.CatalinaHeliOn = false;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_CatalinaTakeOff(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_pathState == 8);
-}
-constexpr CHeli_ZppContract apply_CHeli_CatalinaTakeOff(const CHeli_ZppContract& pre) {
-    CHeli_ZppContract post = pre;
-    post.m_pathState = 8;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_MakeCatalinaHeliFlyAway(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_pathState == 12);
-}
-constexpr CHeli_ZppContract apply_CHeli_MakeCatalinaHeliFlyAway(const CHeli_ZppContract& pre) {
-    CHeli_ZppContract post = pre;
-    post.m_pathState = 12;
-    return post;
-}
-// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_ActivateHeli(const CHeli_ZppContract& pre, const CHeli_ZppContract& post, bool activate_in = true) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ScriptHeliOn == activate_in);
-}
-constexpr CHeli_ZppContract apply_CHeli_ActivateHeli(const CHeli_ZppContract& pre, bool activate_in = true) {
-    CHeli_ZppContract post = pre;
-    post.ScriptHeliOn = activate_in;
-    return post;
-}
 constexpr bool verify_vehicles_zpp_invariants() {
-    {
-        CBike_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CBike_ZppContract bad{};
-        bad.m_aBikeNodes_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
     {
         CCarGenerator_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
@@ -879,13 +532,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CFerry_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CFerry_ZppContract bad{};
-        bad.m_doors_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
         cBuoyancy_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         cBuoyancy_ZppContract bad{};
@@ -921,13 +567,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CHeli_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CHeli_ZppContract bad{};
-        bad.m_aHeliNodes_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
         CPlaneNode_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CPlaneNode_ZppContract bad{};
@@ -942,13 +581,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CPlane_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CPlane_ZppContract bad{};
-        bad.m_nFrameWhenHit = -1;
-        if (bad.checkInvariant()) return false;
-    }
-    {
         CTrainNode_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CTrainNode_ZppContract bad{};
@@ -960,13 +592,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CTrainInterpolationLine_ZppContract bad{};
         bad.type = -1;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CTrain_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CTrain_ZppContract bad{};
-        bad.Doors_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1095,136 +720,6 @@ constexpr bool verify_vehicles_zpp_invariants() {
             CDamageManager_ZppContract badPost = post;
             badPost.m_panelStatus = 1;
             if (op_CDamageManager_FuckCarCompletely(pre, badPost)) return false;
-        }
-    }
-    {
-        CFerry_ZppContract pre{};
-        pre.m_bAlreadyRendered = false;
-        const auto post = apply_CFerry_Render(pre);
-        if (!op_CFerry_Render(pre, post)) return false;
-        {
-            CFerry_ZppContract badPost = post;
-            badPost.m_bAlreadyRendered = false;
-            if (op_CFerry_Render(pre, badPost)) return false;
-        }
-    }
-    {
-        CFerry_ZppContract pre{};
-        pre.m_nDoorTimer = 1;
-        const auto post = apply_CFerry_CompleteDorrMovement(pre);
-        if (!op_CFerry_CompleteDorrMovement(pre, post)) return false;
-        {
-            CFerry_ZppContract badPost = post;
-            badPost.m_nDoorTimer = 1;
-            if (op_CFerry_CompleteDorrMovement(pre, badPost)) return false;
-        }
-    }
-    {
-        CFerry_ZppContract pre{};
-        pre.m_nSkipFerryStatus = 0;
-        const auto post = apply_CFerry_SkipFerryToNextDock(pre);
-        if (!op_CFerry_SkipFerryToNextDock(pre, post)) return false;
-        {
-            CFerry_ZppContract badPost = post;
-            badPost.m_nSkipFerryStatus = 0;
-            if (op_CFerry_SkipFerryToNextDock(pre, badPost)) return false;
-        }
-    }
-    {
-        CHeli_ZppContract pre{};
-        pre.NumRandomHelis = 1;
-        pre.TestForNewRandomHelisTimer = 1;
-        pre.NumScriptHelis = 1;
-        pre.CatalinaHeliOn = true;
-        pre.ScriptHeliOn = true;
-        const auto post = apply_CHeli_InitHelis(pre);
-        if (!op_CHeli_InitHelis(pre, post)) return false;
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.NumRandomHelis = 1;
-            if (op_CHeli_InitHelis(pre, badPost)) return false;
-        }
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.TestForNewRandomHelisTimer = 1;
-            if (op_CHeli_InitHelis(pre, badPost)) return false;
-        }
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.NumScriptHelis = 1;
-            if (op_CHeli_InitHelis(pre, badPost)) return false;
-        }
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.CatalinaHeliOn = true;
-            if (op_CHeli_InitHelis(pre, badPost)) return false;
-        }
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.ScriptHeliOn = true;
-            if (op_CHeli_InitHelis(pre, badPost)) return false;
-        }
-    }
-    {
-        CHeli_ZppContract pre{};
-        pre.CatalinaHeliOn = false;
-        pre.CatalinaHasBeenShotDown = true;
-        const auto post = apply_CHeli_StartCatalinaFlyBy(pre);
-        if (!op_CHeli_StartCatalinaFlyBy(pre, post)) return false;
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.CatalinaHeliOn = false;
-            if (op_CHeli_StartCatalinaFlyBy(pre, badPost)) return false;
-        }
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.CatalinaHasBeenShotDown = true;
-            if (op_CHeli_StartCatalinaFlyBy(pre, badPost)) return false;
-        }
-    }
-    {
-        CHeli_ZppContract pre{};
-        pre.CatalinaHeliOn = true;
-        const auto post = apply_CHeli_RemoveCatalinaHeli(pre);
-        if (!op_CHeli_RemoveCatalinaHeli(pre, post)) return false;
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.CatalinaHeliOn = true;
-            if (op_CHeli_RemoveCatalinaHeli(pre, badPost)) return false;
-        }
-    }
-    {
-        CHeli_ZppContract pre{};
-        pre.m_pathState = 0;
-        const auto post = apply_CHeli_CatalinaTakeOff(pre);
-        if (!op_CHeli_CatalinaTakeOff(pre, post)) return false;
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.m_pathState = 0;
-            if (op_CHeli_CatalinaTakeOff(pre, badPost)) return false;
-        }
-    }
-    {
-        CHeli_ZppContract pre{};
-        pre.m_pathState = 0;
-        const auto post = apply_CHeli_MakeCatalinaHeliFlyAway(pre);
-        if (!op_CHeli_MakeCatalinaHeliFlyAway(pre, post)) return false;
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.m_pathState = 0;
-            if (op_CHeli_MakeCatalinaHeliFlyAway(pre, badPost)) return false;
-        }
-    }
-    {
-        CHeli_ZppContract pre{};
-        const bool activate_in = true;
-        pre.ScriptHeliOn = false;
-        const auto post = apply_CHeli_ActivateHeli(pre, activate_in);
-        if (!op_CHeli_ActivateHeli(pre, post, activate_in)) return false;
-        {
-            CHeli_ZppContract badPost = post;
-            badPost.ScriptHeliOn = !activate_in;
-            if (op_CHeli_ActivateHeli(pre, badPost, activate_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

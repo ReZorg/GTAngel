@@ -84,24 +84,71 @@ struct RwObjectIdAssociation_ZppContract {
 };
 // State Schema Contract from zpp/modelinfo/ClumpModelInfo.zpp
 struct CClumpModelInfo_ZppContract {
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
     uint8_t m_clump_card{0u}; // Z++: Ref[RpClump]
     int32_t m_animFileName{0}; // Z++: seq CHAR
     int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
     int32_t msClassInstance{0}; // Z++: CClumpModelInfo
     constexpr bool checkInvariant() const {
-        return (m_clump_card <= 1u);
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_clump_card <= 1u);
     }
 };
 // State Schema Contract from zpp/modelinfo/MloModelInfo.zpp
 struct CMloModelInfo_ZppContract {
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
+    uint8_t m_clump_card{0u}; // Z++: Ref[RpClump]
+    int32_t m_animFileName{0}; // Z++: seq CHAR
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CClumpModelInfo
     float drawDist{0.0f}; // Z++: ℝ
     int32_t firstInstance{0}; // Z++: ℤ
     int32_t lastInstance{0}; // Z++: ℤ
-    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
-    int32_t msClassInstance{0}; // Z++: CMloModelInfo
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_clump_card <= 1u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/modelinfo/ModelIndices.zpp
@@ -231,6 +278,25 @@ struct PedChunk_ZppContract {
 };
 // State Schema Contract from zpp/modelinfo/PedModelInfo.zpp
 struct CPedModelInfo_ZppContract {
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
+    uint8_t m_clump_card{0u}; // Z++: Ref[RpClump]
+    int32_t m_animFileName{0}; // Z++: seq CHAR
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CClumpModelInfo
     int64_t m_animGroup{0}; // Z++: ℕ
     int32_t m_pedType{0}; // Z++: ePedType
     int32_t m_pedStatType{0}; // Z++: ePedStats
@@ -238,26 +304,157 @@ struct CPedModelInfo_ZppContract {
     uint8_t m_hitColModel_card{0u}; // Z++: Ref[CColModel]
     uint8_t m_lhand_card{0u}; // Z++: Ref[RpAtomic]
     uint8_t m_rhand_card{0u}; // Z++: Ref[RpAtomic]
-    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
-    int32_t msClassInstance{0}; // Z++: CPedModelInfo
     constexpr bool checkInvariant() const {
-        return (m_animGroup >= 0)
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_clump_card <= 1u)
+            && (m_animGroup >= 0)
             && (m_carsCanDrive >= 0)
             && (m_hitColModel_card <= 1u)
             && (m_lhand_card <= 1u)
             && (m_rhand_card <= 1u);
     }
 };
+// State Schema Contract from zpp/modelinfo/SimpleModelInfo.zpp
+struct CSimpleModelInfo_ZppContract {
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
+    uint8_t m_atomics_card{0u}; // Z++: Ref[RpAtomic]
+    std::array<float, 3> m_lodDistances{}; // Z++: seq ℝ  -- bounded array [3]
+    size_t m_lodDistances_len{3u}; // Z++ cardinality #m_lodDistances
+    int64_t m_numAtomics{0}; // Z++: ℕ
+    int64_t m_alpha{0}; // Z++: ℕ
+    uint32_t m_firstDamaged{0u}; // Z++: 𝔹
+    uint32_t m_wetRoadReflection{0u}; // Z++: 𝔹
+    uint32_t m_isDamaged{0u}; // Z++: 𝔹
+    uint32_t m_isBigBuilding{0u}; // Z++: 𝔹
+    uint32_t m_noFade{0u}; // Z++: 𝔹
+    uint32_t m_drawLast{0u}; // Z++: 𝔹
+    uint32_t m_additive{0u}; // Z++: 𝔹
+    uint32_t m_isSubway{0u}; // Z++: 𝔹
+    uint32_t m_ignoreLight{0u}; // Z++: 𝔹
+    uint32_t m_noZwrite{0u}; // Z++: 𝔹
+    uint32_t m_noShadows{0u}; // Z++: 𝔹
+    uint32_t m_ignoreDrawDist{0u}; // Z++: 𝔹
+    bool m_isCodeGlass{false}; // Z++: 𝔹
+    bool m_isArtistGlass{false}; // Z++: 𝔹
+    uint8_t m_relatedModel_card{0u}; // Z++: Ref[CSimpleModelInfo]
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CSimpleModelInfo
+    bool m_normalCull{false}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_lodDistances_len == 3u && m_lodDistances.size() == 3u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_atomics_card <= 1u)
+            && (m_numAtomics >= 0)
+            && (m_alpha >= 0)
+            && (m_firstDamaged <= 3u)
+            && (m_wetRoadReflection <= 1u)
+            && (m_isDamaged <= 1u)
+            && (m_isBigBuilding <= 1u)
+            && (m_noFade <= 1u)
+            && (m_drawLast <= 1u)
+            && (m_additive <= 1u)
+            && (m_isSubway <= 1u)
+            && (m_ignoreLight <= 1u)
+            && (m_noZwrite <= 1u)
+            && (m_noShadows <= 1u)
+            && (m_ignoreDrawDist <= 1u);
+    }
+};
 // State Schema Contract from zpp/modelinfo/TimeModelInfo.zpp
 struct CTimeModelInfo_ZppContract {
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
+    uint8_t m_atomics_card{0u}; // Z++: Ref[RpAtomic]
+    std::array<float, 3> m_lodDistances{}; // Z++: seq ℝ  -- bounded array [3]
+    size_t m_lodDistances_len{3u}; // Z++ cardinality #m_lodDistances
+    int64_t m_numAtomics{0}; // Z++: ℕ
+    int64_t m_alpha{0}; // Z++: ℕ
+    uint32_t m_firstDamaged{0u}; // Z++: 𝔹
+    uint32_t m_wetRoadReflection{0u}; // Z++: 𝔹
+    uint32_t m_isDamaged{0u}; // Z++: 𝔹
+    uint32_t m_isBigBuilding{0u}; // Z++: 𝔹
+    uint32_t m_noFade{0u}; // Z++: 𝔹
+    uint32_t m_drawLast{0u}; // Z++: 𝔹
+    uint32_t m_additive{0u}; // Z++: 𝔹
+    uint32_t m_isSubway{0u}; // Z++: 𝔹
+    uint32_t m_ignoreLight{0u}; // Z++: 𝔹
+    uint32_t m_noZwrite{0u}; // Z++: 𝔹
+    uint32_t m_noShadows{0u}; // Z++: 𝔹
+    uint32_t m_ignoreDrawDist{0u}; // Z++: 𝔹
+    bool m_isCodeGlass{false}; // Z++: 𝔹
+    bool m_isArtistGlass{false}; // Z++: 𝔹
+    uint8_t m_relatedModel_card{0u}; // Z++: Ref[CSimpleModelInfo]
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CSimpleModelInfo
+    bool m_normalCull{false}; // Z++: 𝔹
     int32_t m_timeOn{0}; // Z++: ℤ
     int32_t m_timeOff{0}; // Z++: ℤ
     int32_t m_otherTimeModelID{0}; // Z++: ℤ
-    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
-    int32_t msClassInstance{0}; // Z++: CTimeModelInfo
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_lodDistances_len == 3u && m_lodDistances.size() == 3u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_atomics_card <= 1u)
+            && (m_numAtomics >= 0)
+            && (m_alpha >= 0)
+            && (m_firstDamaged <= 3u)
+            && (m_wetRoadReflection <= 1u)
+            && (m_isDamaged <= 1u)
+            && (m_isBigBuilding <= 1u)
+            && (m_noFade <= 1u)
+            && (m_drawLast <= 1u)
+            && (m_additive <= 1u)
+            && (m_isSubway <= 1u)
+            && (m_ignoreLight <= 1u)
+            && (m_noZwrite <= 1u)
+            && (m_noShadows <= 1u)
+            && (m_ignoreDrawDist <= 1u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
@@ -286,22 +483,106 @@ struct Statics_ZppContract {
 };
 // State Schema Contract from zpp/modelinfo/WeaponModelInfo.zpp
 struct CWeaponModelInfo_ZppContract {
-    int32_t m_animFileName{0}; // Z++: seq CHAR
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
+    uint8_t m_atomics_card{0u}; // Z++: Ref[RpAtomic]
+    std::array<float, 3> m_lodDistances{}; // Z++: seq ℝ  -- bounded array [3]
+    size_t m_lodDistances_len{3u}; // Z++ cardinality #m_lodDistances
+    int64_t m_numAtomics{0}; // Z++: ℕ
+    int64_t m_alpha{0}; // Z++: ℕ
+    uint32_t m_firstDamaged{0u}; // Z++: 𝔹
+    uint32_t m_wetRoadReflection{0u}; // Z++: 𝔹
+    uint32_t m_isDamaged{0u}; // Z++: 𝔹
+    uint32_t m_isBigBuilding{0u}; // Z++: 𝔹
+    uint32_t m_noFade{0u}; // Z++: 𝔹
+    uint32_t m_drawLast{0u}; // Z++: 𝔹
+    uint32_t m_additive{0u}; // Z++: 𝔹
+    uint32_t m_isSubway{0u}; // Z++: 𝔹
+    uint32_t m_ignoreLight{0u}; // Z++: 𝔹
+    uint32_t m_noZwrite{0u}; // Z++: 𝔹
+    uint32_t m_noShadows{0u}; // Z++: 𝔹
+    uint32_t m_ignoreDrawDist{0u}; // Z++: 𝔹
+    bool m_isCodeGlass{false}; // Z++: 𝔹
+    bool m_isArtistGlass{false}; // Z++: 𝔹
+    uint8_t m_relatedModel_card{0u}; // Z++: Ref[CSimpleModelInfo]
     int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
-    int32_t msClassInstance{0}; // Z++: CWeaponModelInfo
+    int32_t msClassInstance{0}; // Z++: CSimpleModelInfo
+    bool m_normalCull{false}; // Z++: 𝔹
+    int32_t m_animFileName{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_lodDistances_len == 3u && m_lodDistances.size() == 3u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_atomics_card <= 1u)
+            && (m_numAtomics >= 0)
+            && (m_alpha >= 0)
+            && (m_firstDamaged <= 3u)
+            && (m_wetRoadReflection <= 1u)
+            && (m_isDamaged <= 1u)
+            && (m_isBigBuilding <= 1u)
+            && (m_noFade <= 1u)
+            && (m_drawLast <= 1u)
+            && (m_additive <= 1u)
+            && (m_isSubway <= 1u)
+            && (m_ignoreLight <= 1u)
+            && (m_noZwrite <= 1u)
+            && (m_noShadows <= 1u)
+            && (m_ignoreDrawDist <= 1u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/modelinfo/XtraCompsModelInfo.zpp
 struct CXtraCompsModelInfo_ZppContract {
-    int32_t field_34{0}; // Z++: ℤ
+    std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_unk_len{2u}; // Z++ cardinality #m_unk
+    int64_t m_nameKey{0}; // Z++: ℕ
+    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_type{0}; // Z++: ℕ
+    int64_t m_num2dEffects{0}; // Z++: ℕ
+    bool m_bOwnsColModel{false}; // Z++: 𝔹
+    uint8_t m_colModel_card{0u}; // Z++: Ref[CColModel]
+    int32_t m_2dEffectsID{0}; // Z++: ℤ
+    int32_t m_objectId{0}; // Z++: ℤ
+    int64_t m_refCount{0}; // Z++: ℕ
+    int32_t m_txdSlot{0}; // Z++: ℤ
+    uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
+    bool m_bIsTree{false}; // Z++: 𝔹
+    bool m_bCanBeIgnored{false}; // Z++: 𝔹
+    uint8_t m_clump_card{0u}; // Z++: Ref[RpClump]
+    int32_t m_animFileName{0}; // Z++: seq CHAR
     int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
-    int32_t msClassInstance{0}; // Z++: CXtraCompsModelInfo
+    int32_t msClassInstance{0}; // Z++: CClumpModelInfo
+    int32_t field_34{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_unk_len == 2u && m_unk.size() == 2u)
+            && (m_nameKey >= 0)
+            && (m_type >= 0)
+            && (m_num2dEffects >= 0)
+            && (m_colModel_card <= 1u)
+            && (m_refCount >= 0)
+            && (m_twodEffects_card <= 1u)
+            && (m_clump_card <= 1u)
+            && (instance_addr >= 0);
     }
 };
 // Query Operation Schema Contract (ΞCBaseModelInfo) from zpp/modelinfo/BaseModelInfo.zpp
@@ -334,6 +615,15 @@ constexpr bool op_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContra
 constexpr CClumpModelInfo_ZppContract apply_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContract& pre) {
     CClumpModelInfo_ZppContract post = pre;
     post.m_clump_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCSimpleModelInfo) from zpp/modelinfo/SimpleModelInfo.zpp
+constexpr bool op_CSimpleModelInfo_Write(const CSimpleModelInfo_ZppContract& pre, const CSimpleModelInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_atomics_card == 0u);
+}
+constexpr CSimpleModelInfo_ZppContract apply_CSimpleModelInfo_Write(const CSimpleModelInfo_ZppContract& pre) {
+    CSimpleModelInfo_ZppContract post = pre;
+    post.m_atomics_card = 0u;
     return post;
 }
 constexpr bool verify_modelinfo_zpp_invariants() {
@@ -369,14 +659,14 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         CClumpModelInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CClumpModelInfo_ZppContract bad{};
-        bad.m_clump_card = 2u;
+        bad.m_unk_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMloModelInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMloModelInfo_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_unk_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -418,14 +708,21 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         CPedModelInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CPedModelInfo_ZppContract bad{};
-        bad.m_animGroup = -1;
+        bad.m_unk_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CSimpleModelInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CSimpleModelInfo_ZppContract bad{};
+        bad.m_unk_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CTimeModelInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CTimeModelInfo_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_unk_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -446,14 +743,14 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         CWeaponModelInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CWeaponModelInfo_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_unk_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CXtraCompsModelInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CXtraCompsModelInfo_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_unk_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -497,6 +794,17 @@ constexpr bool verify_modelinfo_zpp_invariants() {
             CClumpModelInfo_ZppContract badPost = post;
             badPost.m_clump_card = 1u;
             if (op_CClumpModelInfo_DeleteRwObject(pre, badPost)) return false;
+        }
+    }
+    {
+        CSimpleModelInfo_ZppContract pre{};
+        pre.m_atomics_card = 1u;
+        const auto post = apply_CSimpleModelInfo_Write(pre);
+        if (!op_CSimpleModelInfo_Write(pre, post)) return false;
+        {
+            CSimpleModelInfo_ZppContract badPost = post;
+            badPost.m_atomics_card = 1u;
+            if (op_CSimpleModelInfo_Write(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

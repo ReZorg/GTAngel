@@ -213,6 +213,103 @@ struct CPedPath_ZppContract {
     }
 };
 // State Schema Contract from zpp/control/PathFind.zpp
+struct CPathNode_ZppContract {
+    int32_t prevIndex{0}; // Z++: ℤ
+    int32_t nextIndex{0}; // Z++: ℤ
+    int32_t x{0}; // Z++: ℤ
+    int32_t y{0}; // Z++: ℤ
+    int32_t z{0}; // Z++: ℤ
+    int32_t distance{0}; // Z++: ℤ
+    int32_t firstLink{0}; // Z++: ℤ
+    int64_t width{0}; // Z++: ℕ
+    int32_t group{0}; // Z++: ℤ
+    uint32_t numLinks{0u}; // Z++: 𝔹
+    uint32_t bDeadEnd{0u}; // Z++: 𝔹
+    uint32_t bDisabled{0u}; // Z++: 𝔹
+    uint32_t bBetweenLevels{0u}; // Z++: 𝔹
+    uint32_t bUseInRoadBlock{0u}; // Z++: 𝔹
+    uint32_t bWaterPath{0u}; // Z++: 𝔹
+    uint32_t bOnlySmallBoats{0u}; // Z++: 𝔹
+    uint32_t bSelected{0u}; // Z++: 𝔹
+    uint32_t speedLimit{0u}; // Z++: 𝔹
+    uint32_t spawnRate{0u}; // Z++: 𝔹
+    uint32_t flagsC{0u}; // Z++: 𝔹
+    ZppVec3 pos{}; // Z++: CVector
+    uint8_t prev_card{0u}; // Z++: Ref[CPathNode]
+    uint8_t next_card{0u}; // Z++: Ref[CPathNode]
+    int32_t objectIndex{0}; // Z++: ℤ
+    uint32_t unkBits{0u}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (width >= 0)
+            && (numLinks <= 15u)
+            && (bDeadEnd <= 1u)
+            && (bDisabled <= 1u)
+            && (bBetweenLevels <= 1u)
+            && (bUseInRoadBlock <= 1u)
+            && (bWaterPath <= 1u)
+            && (bOnlySmallBoats <= 1u)
+            && (bSelected <= 1u)
+            && (speedLimit <= 3u)
+            && (spawnRate <= 15u)
+            && (flagsC <= 15u)
+            && (prev_card <= 1u)
+            && (next_card <= 1u)
+            && (unkBits <= 3u);
+    }
+};
+// State Schema Contract from zpp/control/PathFind.zpp
+struct CCarPathLink_ZppContract {
+    int32_t x{0}; // Z++: ℤ
+    int32_t y{0}; // Z++: ℤ
+    int32_t pathNodeIndex{0}; // Z++: ℤ
+    int32_t dirX{0}; // Z++: ℤ
+    int32_t dirY{0}; // Z++: ℤ
+    uint32_t numLeftLanes{0u}; // Z++: 𝔹
+    uint32_t numRightLanes{0u}; // Z++: 𝔹
+    uint32_t trafficLightDirection{0u}; // Z++: 𝔹
+    uint32_t trafficLightType{0u}; // Z++: 𝔹
+    uint32_t bBridgeLights{0u}; // Z++: 𝔹
+    int64_t width{0}; // Z++: ℕ
+    int32_t dir{0}; // Z++: CVector2D
+    constexpr bool checkInvariant() const {
+        return (numLeftLanes <= 7u)
+            && (numRightLanes <= 7u)
+            && (trafficLightDirection <= 1u)
+            && (trafficLightType <= 3u)
+            && (bBridgeLights <= 1u)
+            && (width >= 0);
+    }
+};
+// State Schema Contract from zpp/control/PathFind.zpp
+struct CPathInfoForObject_ZppContract {
+    float x{0.0f}; // Z++: ℝ
+    float y{0.0f}; // Z++: ℝ
+    float z{0.0f}; // Z++: ℝ
+    int32_t type{0}; // Z++: ℤ
+    int32_t next{0}; // Z++: ℤ
+    int32_t numLeftLanes{0}; // Z++: ℤ
+    int32_t numRightLanes{0}; // Z++: ℤ
+    int32_t speedLimit{0}; // Z++: ℤ
+    int64_t width{0}; // Z++: ℕ
+    uint32_t crossing{0u}; // Z++: 𝔹
+    uint32_t onlySmallBoats{0u}; // Z++: 𝔹
+    uint32_t roadBlock{0u}; // Z++: 𝔹
+    uint32_t disabled{0u}; // Z++: 𝔹
+    uint32_t waterPath{0u}; // Z++: 𝔹
+    uint32_t betweenLevels{0u}; // Z++: 𝔹
+    uint32_t spawnRate{0u}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (width >= 0)
+            && (crossing <= 1u)
+            && (onlySmallBoats <= 1u)
+            && (roadBlock <= 1u)
+            && (disabled <= 1u)
+            && (waterPath <= 1u)
+            && (betweenLevels <= 1u)
+            && (spawnRate <= 15u);
+    }
+};
+// State Schema Contract from zpp/control/PathFind.zpp
 struct CTempNode_ZppContract {
     ZppVec3 pos{}; // Z++: CVector
     int32_t dirX{0}; // Z++: ℤ
@@ -811,6 +908,22 @@ struct tParticlePacket_ZppContract {
             && (a >= 0);
     }
 };
+// State Schema Contract from zpp/control/Replay.zpp
+struct tMiscPacket_ZppContract {
+    int64_t type{0}; // Z++: ℕ
+    int64_t cam_shake_start{0}; // Z++: ℕ
+    float cam_shake_strength{0.0f}; // Z++: ℝ
+    int64_t cur_area{0}; // Z++: ℕ
+    uint32_t video_cam{0u}; // Z++: 𝔹
+    uint32_t lift_cam{0u}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (type >= 0)
+            && (cam_shake_start >= 0)
+            && (cur_area >= 0)
+            && (video_cam <= 1u)
+            && (lift_cam <= 1u);
+    }
+};
 // State Schema Contract from zpp/control/Restart.zpp
 struct CRestart_ZppContract {
     int64_t OverrideHospitalLevel{0}; // Z++: ℕ
@@ -1214,6 +1327,27 @@ constexpr bool verify_control_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CPathNode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPathNode_ZppContract bad{};
+        bad.width = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CCarPathLink_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCarPathLink_ZppContract bad{};
+        bad.numLeftLanes = 8u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPathInfoForObject_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPathInfoForObject_ZppContract bad{};
+        bad.width = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CTempNode_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CTempNode_ZppContract bad{};
@@ -1420,6 +1554,13 @@ constexpr bool verify_control_zpp_invariants() {
         tParticlePacket_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         tParticlePacket_ZppContract bad{};
+        bad.type = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tMiscPacket_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tMiscPacket_ZppContract bad{};
         bad.type = -1;
         if (bad.checkInvariant()) return false;
     }
