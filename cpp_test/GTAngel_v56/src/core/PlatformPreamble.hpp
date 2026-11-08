@@ -121,6 +121,111 @@ struct CamModuleState_ZppContract {
     }
 };
 // State Schema Contract from zpp/core/Camera.zpp
+struct CCam_ZppContract {
+    bool bBelowMinDist{false}; // Z++: 𝔹
+    bool bBehindPlayerDesired{false}; // Z++: 𝔹
+    bool m_bCamLookingAtVector{false}; // Z++: 𝔹
+    bool m_bCollisionChecksOn{false}; // Z++: 𝔹
+    bool m_bFixingBeta{false}; // Z++: 𝔹
+    bool m_bTheHeightFixerVehicleIsATrain{false}; // Z++: 𝔹
+    bool LookBehindCamWasInFront{false}; // Z++: 𝔹
+    bool LookingBehind{false}; // Z++: 𝔹
+    bool LookingLeft{false}; // Z++: 𝔹
+    bool LookingRight{false}; // Z++: 𝔹
+    bool ResetStatics{false}; // Z++: 𝔹
+    bool Rotating{false}; // Z++: 𝔹
+    int32_t Mode{0}; // Z++: ℤ
+    int64_t m_uiFinishTime{0}; // Z++: ℕ
+    int32_t m_iDoCollisionChecksOnFrameNum{0}; // Z++: ℤ
+    int32_t m_iDoCollisionCheckEveryNumOfFrames{0}; // Z++: ℤ
+    int32_t m_iFrameNumWereAt{0}; // Z++: ℤ
+    int32_t m_iRunningVectorArrayPos{0}; // Z++: ℤ
+    int32_t m_iRunningVectorCounter{0}; // Z++: ℤ
+    int32_t DirectionWasLooking{0}; // Z++: ℤ
+    float f_max_role_angle{0.0f}; // Z++: ℝ
+    float f_Roll{0.0f}; // Z++: ℝ
+    float f_rollSpeed{0.0f}; // Z++: ℝ
+    float m_fSyphonModeTargetZOffSet{0.0f}; // Z++: ℝ
+    float m_fRoadOffSet{0.0f}; // Z++: ℝ
+    float m_fAmountFractionObscured{0.0f}; // Z++: ℝ
+    float m_fAlphaSpeedOverOneFrame{0.0f}; // Z++: ℝ
+    float m_fBetaSpeedOverOneFrame{0.0f}; // Z++: ℝ
+    float m_fBufferedTargetBeta{0.0f}; // Z++: ℝ
+    float m_fBufferedTargetOrientation{0.0f}; // Z++: ℝ
+    float m_fBufferedTargetOrientationSpeed{0.0f}; // Z++: ℝ
+    float m_fCamBufferedHeight{0.0f}; // Z++: ℝ
+    float m_fCamBufferedHeightSpeed{0.0f}; // Z++: ℝ
+    float m_fCloseInPedHeightOffset{0.0f}; // Z++: ℝ
+    float m_fCloseInPedHeightOffsetSpeed{0.0f}; // Z++: ℝ
+    float m_fCloseInCarHeightOffset{0.0f}; // Z++: ℝ
+    float m_fCloseInCarHeightOffsetSpeed{0.0f}; // Z++: ℝ
+    float m_fDimensionOfHighestNearCar{0.0f}; // Z++: ℝ
+    float m_fDistanceBeforeChanges{0.0f}; // Z++: ℝ
+    float m_fFovSpeedOverOneFrame{0.0f}; // Z++: ℝ
+    float m_fMinDistAwayFromCamWhenInterPolating{0.0f}; // Z++: ℝ
+    float m_fPedBetweenCameraHeightOffset{0.0f}; // Z++: ℝ
+    float m_fPlayerInFrontSyphonAngleOffSet{0.0f}; // Z++: ℝ
+    float m_fRadiusForDead{0.0f}; // Z++: ℝ
+    float m_fRealGroundDist{0.0f}; // Z++: ℝ
+    float m_fTargetBeta{0.0f}; // Z++: ℝ
+    float m_fTimeElapsedFloat{0.0f}; // Z++: ℝ
+    float m_fTransitionBeta{0.0f}; // Z++: ℝ
+    float m_fTrueBeta{0.0f}; // Z++: ℝ
+    float m_fTrueAlpha{0.0f}; // Z++: ℝ
+    float m_fInitialPlayerOrientation{0.0f}; // Z++: ℝ
+    float Alpha{0.0f}; // Z++: ℝ
+    float AlphaSpeed{0.0f}; // Z++: ℝ
+    float FOV{0.0f}; // Z++: ℝ
+    float FOVSpeed{0.0f}; // Z++: ℝ
+    float Beta{0.0f}; // Z++: ℝ
+    float BetaSpeed{0.0f}; // Z++: ℝ
+    float Distance{0.0f}; // Z++: ℝ
+    float DistanceSpeed{0.0f}; // Z++: ℝ
+    float CA_MIN_DISTANCE{0.0f}; // Z++: ℝ
+    float CA_MAX_DISTANCE{0.0f}; // Z++: ℝ
+    float SpeedVar{0.0f}; // Z++: ℝ
+    ZppVec3 m_cvecSourceSpeedOverOneFrame{}; // Z++: CVector
+    ZppVec3 m_cvecTargetSpeedOverOneFrame{}; // Z++: CVector
+    ZppVec3 m_cvecUpOverOneFrame{}; // Z++: CVector
+    ZppVec3 m_cvecTargetCoorsForFudgeInter{}; // Z++: CVector
+    ZppVec3 m_cvecCamFixedModeVector{}; // Z++: CVector
+    ZppVec3 m_cvecCamFixedModeSource{}; // Z++: CVector
+    ZppVec3 m_cvecCamFixedModeUpOffSet{}; // Z++: CVector
+    ZppVec3 m_vecLastAboveWaterCamPosition{}; // Z++: CVector
+    ZppVec3 m_vecBufferedPlayerBodyOffset{}; // Z++: CVector
+    ZppVec3 Front{}; // Z++: CVector
+    ZppVec3 Source{}; // Z++: CVector
+    ZppVec3 SourceBeforeLookBehind{}; // Z++: CVector
+    ZppVec3 Up{}; // Z++: CVector
+    std::array<ZppVec3, 2> m_arrPreviousVectors{}; // Z++: seq CVector  -- bounded array [NUMBER_OF_VECTORS_FOR_AVERAGE]
+    size_t m_arrPreviousVectors_len{2u}; // Z++ cardinality #m_arrPreviousVectors
+    uint8_t CamTargetEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fCameraDistance{0.0f}; // Z++: ℝ
+    float m_fIdealAlpha{0.0f}; // Z++: ℝ
+    float m_fPlayerVelocity{0.0f}; // Z++: ℝ
+    uint8_t m_pLastCarEntered_card{0u}; // Z++: Ref[CAutomobile]
+    uint8_t m_pLastPedLookedAt_card{0u}; // Z++: Ref[CPed]
+    bool m_bFirstPersonRunAboutActive{false}; // Z++: 𝔹
+    float m_fTilt{0.0f}; // Z++: ℝ
+    float m_fTiltSpeed{0.0f}; // Z++: ℝ
+    float m_fTargetZoomGroundOne{0.0f}; // Z++: ℝ
+    float m_fTargetZoomGroundTwo{0.0f}; // Z++: ℝ
+    float m_fTargetZoomGroundThree{0.0f}; // Z++: ℝ
+    float m_fTargetZoomOneZExtra{0.0f}; // Z++: ℝ
+    float m_fTargetZoomTwoZExtra{0.0f}; // Z++: ℝ
+    float m_fTargetZoomThreeZExtra{0.0f}; // Z++: ℝ
+    float m_fTargetZoomZCloseIn{0.0f}; // Z++: ℝ
+    float m_fMinRealGroundDist{0.0f}; // Z++: ℝ
+    float m_fTargetCloseInDist{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (m_arrPreviousVectors_len == 2u && m_arrPreviousVectors.size() == 2u)
+            && (m_uiFinishTime >= 0)
+            && (CamTargetEntity_card <= 1u)
+            && (m_pLastCarEntered_card <= 1u)
+            && (m_pLastPedLookedAt_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/core/Camera.zpp
 struct CCamPathSplines_ZppContract {
     uint8_t m_arr_PathData_card{0u}; // Z++: ℙ ℝ
     constexpr bool checkInvariant() const {
@@ -151,17 +256,227 @@ struct CQueuedMode_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/core/Camera.zpp
+struct CCamera_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    bool m_bAboveGroundTrainNodesLoaded{false}; // Z++: 𝔹
+    bool m_bBelowGroundTrainNodesLoaded{false}; // Z++: 𝔹
+    bool m_bCamDirectlyBehind{false}; // Z++: 𝔹
+    bool m_bCamDirectlyInFront{false}; // Z++: 𝔹
+    bool m_bCameraJustRestored{false}; // Z++: 𝔹
+    bool m_bcutsceneFinished{false}; // Z++: 𝔹
+    bool m_bCullZoneChecksOn{false}; // Z++: 𝔹
+    bool m_bFirstPersonBeingUsed{false}; // Z++: 𝔹
+    bool m_bJustJumpedOutOf1stPersonBecauseOfTarget{false}; // Z++: 𝔹
+    bool m_bIdleOn{false}; // Z++: 𝔹
+    bool m_bInATunnelAndABigVehicle{false}; // Z++: 𝔹
+    bool m_bInitialNodeFound{false}; // Z++: 𝔹
+    bool m_bInitialNoNodeStaticsSet{false}; // Z++: 𝔹
+    bool m_bIgnoreFadingStuffForMusic{false}; // Z++: 𝔹
+    bool m_bPlayerIsInGarage{false}; // Z++: 𝔹
+    bool m_bPlayerWasOnBike{false}; // Z++: 𝔹
+    bool m_bJustCameOutOfGarage{false}; // Z++: 𝔹
+    bool m_bJustInitalised{false}; // Z++: 𝔹
+    bool m_bJust_Switched{false}; // Z++: 𝔹
+    bool m_bLookingAtPlayer{false}; // Z++: 𝔹
+    bool m_bLookingAtVector{false}; // Z++: 𝔹
+    bool m_bMoveCamToAvoidGeom{false}; // Z++: 𝔹
+    bool m_bObbeCinematicPedCamOn{false}; // Z++: 𝔹
+    bool m_bObbeCinematicCarCamOn{false}; // Z++: 𝔹
+    bool m_bRestoreByJumpCut{false}; // Z++: 𝔹
+    bool m_bUseNearClipScript{false}; // Z++: 𝔹
+    bool m_bStartInterScript{false}; // Z++: 𝔹
+    bool m_bStartingSpline{false}; // Z++: 𝔹
+    bool m_bTargetJustBeenOnTrain{false}; // Z++: 𝔹
+    bool m_bTargetJustCameOffTrain{false}; // Z++: 𝔹
+    bool m_bUseSpecialFovTrain{false}; // Z++: 𝔹
+    bool m_bUseTransitionBeta{false}; // Z++: 𝔹
+    bool m_bUseScriptZoomValuePed{false}; // Z++: 𝔹
+    bool m_bUseScriptZoomValueCar{false}; // Z++: 𝔹
+    bool m_bWaitForInterpolToFinish{false}; // Z++: 𝔹
+    bool m_bItsOkToLookJustAtThePlayer{false}; // Z++: 𝔹
+    bool m_bWantsToSwitchWidescreenOff{false}; // Z++: 𝔹
+    bool m_WideScreenOn{false}; // Z++: 𝔹
+    bool m_1rstPersonRunCloseToAWall{false}; // Z++: 𝔹
+    bool m_bHeadBob{false}; // Z++: 𝔹
+    bool m_bVehicleSuspenHigh{false}; // Z++: 𝔹
+    bool m_bEnable1rstPersonCamCntrlsScript{false}; // Z++: 𝔹
+    bool m_bAllow1rstPersonWeaponsCamera{false}; // Z++: 𝔹
+    bool m_bFreezePedZoomSwitch{false}; // Z++: 𝔹
+    bool m_bFailedCullZoneTestPreviously{false}; // Z++: 𝔹
+    bool m_FadeTargetIsSplashScreen{false}; // Z++: 𝔹
+    bool WorldViewerBeingUsed{false}; // Z++: 𝔹
+    int64_t ActiveCam{0}; // Z++: ℕ
+    int64_t m_uiCamShakeStart{0}; // Z++: ℕ
+    int64_t m_uiFirstPersonCamLastInputTime{0}; // Z++: ℕ
+    int64_t m_uiLongestTimeInMill{0}; // Z++: ℕ
+    int64_t m_uiNumberOfTrainCamNodes{0}; // Z++: ℕ
+    int64_t m_uiTransitionJUSTStarted{0}; // Z++: ℕ
+    int64_t m_uiTransitionState{0}; // Z++: ℕ
+    int64_t m_uiTimeLastChange{0}; // Z++: ℕ
+    int64_t m_uiTimeWeLeftIdle_StillNoInput{0}; // Z++: ℕ
+    int64_t m_uiTimeWeEnteredIdle{0}; // Z++: ℕ
+    int64_t m_uiTimeTransitionStart{0}; // Z++: ℕ
+    int64_t m_uiTransitionDuration{0}; // Z++: ℕ
+    int64_t m_uiTransitionDurationTargetCoors{0}; // Z++: ℕ
+    int32_t m_BlurBlue{0}; // Z++: ℤ
+    int32_t m_BlurGreen{0}; // Z++: ℤ
+    int32_t m_BlurRed{0}; // Z++: ℤ
+    int32_t m_BlurType{0}; // Z++: ℤ
+    int32_t m_iWorkOutSpeedThisNumFrames{0}; // Z++: ℤ
+    int32_t m_iNumFramesSoFar{0}; // Z++: ℤ
+    int32_t m_iCurrentTrainCamNode{0}; // Z++: ℤ
+    int32_t m_motionBlur{0}; // Z++: ℤ
+    int32_t m_imotionBlurAddAlpha{0}; // Z++: ℤ
+    int32_t m_iCheckCullZoneThisNumFrames{0}; // Z++: ℤ
+    int32_t m_iZoneCullFrameNumWereAt{0}; // Z++: ℤ
+    int32_t WhoIsInControlOfTheCamera{0}; // Z++: ℤ
+    float CamFrontXNorm{0.0f}; // Z++: ℝ
+    float CamFrontYNorm{0.0f}; // Z++: ℝ
+    float CarZoomValueSmooth{0.0f}; // Z++: ℝ
+    float DistanceToWater{0.0f}; // Z++: ℝ
+    float FOVDuringInter{0.0f}; // Z++: ℝ
+    float LODDistMultiplier{0.0f}; // Z++: ℝ
+    float GenerationDistMultiplier{0.0f}; // Z++: ℝ
+    float m_fAlphaSpeedAtStartInter{0.0f}; // Z++: ℝ
+    float m_fAlphaWhenInterPol{0.0f}; // Z++: ℝ
+    float m_fAlphaDuringInterPol{0.0f}; // Z++: ℝ
+    float m_fBetaDuringInterPol{0.0f}; // Z++: ℝ
+    float m_fBetaSpeedAtStartInter{0.0f}; // Z++: ℝ
+    float m_fBetaWhenInterPol{0.0f}; // Z++: ℝ
+    float m_fFOVWhenInterPol{0.0f}; // Z++: ℝ
+    float m_fFOVSpeedAtStartInter{0.0f}; // Z++: ℝ
+    float m_fStartingBetaForInterPol{0.0f}; // Z++: ℝ
+    float m_fStartingAlphaForInterPol{0.0f}; // Z++: ℝ
+    float m_PedOrientForBehindOrInFront{0.0f}; // Z++: ℝ
+    float m_CameraAverageSpeed{0.0f}; // Z++: ℝ
+    float m_CameraSpeedSoFar{0.0f}; // Z++: ℝ
+    float m_fCamShakeForce{0.0f}; // Z++: ℝ
+    float m_fCarZoomValueScript{0.0f}; // Z++: ℝ
+    float m_fFovForTrain{0.0f}; // Z++: ℝ
+    float m_fFOV_Wide_Screen{0.0f}; // Z++: ℝ
+    float m_fNearClipScript{0.0f}; // Z++: ℝ
+    float m_fOldBetaDiff{0.0f}; // Z++: ℝ
+    float m_fPedZoomValue{0.0f}; // Z++: ℝ
+    float m_fPedZoomValueScript{0.0f}; // Z++: ℝ
+    float m_fPedZoomValueSmooth{0.0f}; // Z++: ℝ
+    float m_fPositionAlongSpline{0.0f}; // Z++: ℝ
+    float m_ScreenReductionPercentage{0.0f}; // Z++: ℝ
+    float m_ScreenReductionSpeed{0.0f}; // Z++: ℝ
+    float m_AlphaForPlayerAnim1rstPerson{0.0f}; // Z++: ℝ
+    float Orientation{0.0f}; // Z++: ℝ
+    float SoundDistUp{0.0f}; // Z++: ℝ
+    float SoundDistUpAsRead{0.0f}; // Z++: ℝ
+    float SoundDistUpAsReadOld{0.0f}; // Z++: ℝ
+    float m_fAvoidTheGeometryProbsTimer{0.0f}; // Z++: ℝ
+    int32_t m_nAvoidTheGeometryProbsDirn{0}; // Z++: ℤ
+    float m_fWideScreenReductionAmount{0.0f}; // Z++: ℝ
+    float m_fStartingFOVForInterPol{0.0f}; // Z++: ℝ
+    float m_fMouseAccelHorzntl{0.0f}; // Z++: ℝ
+    float m_fMouseAccelVertical{0.0f}; // Z++: ℝ
+    float m_f3rdPersonCHairMultX{0.0f}; // Z++: ℝ
+    float m_f3rdPersonCHairMultY{0.0f}; // Z++: ℝ
+    std::array<int32_t, 3> Cams{}; // Z++: seq CCam  -- bounded array [3]
+    size_t Cams_len{3u}; // Z++ cardinality #Cams
+    uint8_t pToGarageWeAreIn_card{0u}; // Z++: Ref[CGarage]
+    uint8_t pToGarageWeAreInForHackAvoidFirstPerson_card{0u}; // Z++: Ref[CGarage]
+    int32_t m_PlayerMode{0}; // Z++: CQueuedMode
+    int32_t PlayerWeaponMode{0}; // Z++: CQueuedMode
+    ZppVec3 m_PreviousCameraPosition{}; // Z++: CVector
+    ZppVec3 m_RealPreviousCameraPosition{}; // Z++: CVector
+    ZppVec3 m_cvecAimingTargetCoors{}; // Z++: CVector
+    ZppVec3 m_vecFixedModeVector{}; // Z++: CVector
+    ZppVec3 m_vecFixedModeSource{}; // Z++: CVector
+    ZppVec3 m_vecFixedModeUpOffSet{}; // Z++: CVector
+    ZppVec3 m_vecCutSceneOffset{}; // Z++: CVector
+    ZppVec3 m_cvecStartingSourceForInterPol{}; // Z++: CVector
+    ZppVec3 m_cvecStartingTargetForInterPol{}; // Z++: CVector
+    ZppVec3 m_cvecStartingUpForInterPol{}; // Z++: CVector
+    ZppVec3 m_cvecSourceSpeedAtStartInter{}; // Z++: CVector
+    ZppVec3 m_cvecTargetSpeedAtStartInter{}; // Z++: CVector
+    ZppVec3 m_cvecUpSpeedAtStartInter{}; // Z++: CVector
+    ZppVec3 m_vecSourceWhenInterPol{}; // Z++: CVector
+    ZppVec3 m_vecTargetWhenInterPol{}; // Z++: CVector
+    ZppVec3 m_vecUpWhenInterPol{}; // Z++: CVector
+    ZppVec3 m_vecClearGeometryVec{}; // Z++: CVector
+    ZppVec3 m_vecGameCamPos{}; // Z++: CVector
+    ZppVec3 SourceDuringInter{}; // Z++: CVector
+    ZppVec3 TargetDuringInter{}; // Z++: CVector
+    ZppVec3 UpDuringInter{}; // Z++: CVector
+    uint8_t m_pRwCamera_card{0u}; // Z++: Ref[RwCamera]
+    uint8_t pTargetEntity_card{0u}; // Z++: Ref[CEntity]
+    std::array<int32_t, 4> m_arrPathArray{}; // Z++: seq CCamPathSplines  -- bounded array [MAX_NUM_OF_SPLINETYPES]
+    size_t m_arrPathArray_len{4u}; // Z++ cardinality #m_arrPathArray
+    bool m_bGarageFixedCamPositionSet{false}; // Z++: 𝔹
+    bool m_vecDoingSpecialInterPolation{false}; // Z++: 𝔹
+    bool m_bScriptParametersSetForInterPol{false}; // Z++: 𝔹
+    bool m_bFading{false}; // Z++: 𝔹
+    bool m_bMusicFading{false}; // Z++: 𝔹
+    int32_t m_viewMatrix{0}; // Z++: CMatrix
+    std::array<ZppVec3, 4> m_vecFrustumNormals{}; // Z++: seq CVector  -- bounded array [4]
+    size_t m_vecFrustumNormals_len{4u}; // Z++ cardinality #m_vecFrustumNormals
+    ZppVec3 m_vecOldSourceForInter{}; // Z++: CVector
+    ZppVec3 m_vecOldFrontForInter{}; // Z++: CVector
+    ZppVec3 m_vecOldUpForInter{}; // Z++: CVector
+    float m_vecOldFOVForInter{0.0f}; // Z++: ℝ
+    float m_fFLOATingFade{0.0f}; // Z++: ℝ
+    float m_fFLOATingFadeMusic{0.0f}; // Z++: ℝ
+    float m_fTimeToFadeOut{0.0f}; // Z++: ℝ
+    float m_fTimeToFadeMusic{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopMoving{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopCatchUp{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopMovingTarget{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopCatchUpTarget{0.0f}; // Z++: ℝ
+    float m_fGaitSwayBuffer{0.0f}; // Z++: ℝ
+    float m_fScriptPercentageInterToStopMoving{0.0f}; // Z++: ℝ
+    float m_fScriptPercentageInterToCatchUp{0.0f}; // Z++: ℝ
+    int64_t m_fScriptTimeForInterPolation{0}; // Z++: ℕ
+    int32_t m_iFadingDirection{0}; // Z++: ℤ
+    int32_t m_iModeObbeCamIsInForCar{0}; // Z++: ℤ
+    int32_t m_iModeToGoTo{0}; // Z++: ℤ
+    int32_t m_iMusicFadingDirection{0}; // Z++: ℤ
+    int32_t m_iTypeOfSwitch{0}; // Z++: ℤ
+    int64_t m_uiFadeTimeStarted{0}; // Z++: ℕ
+    int64_t m_uiFadeTimeStartedMusic{0}; // Z++: ℕ
+    bool m_bUseMouse3rdPerson{false}; // Z++: 𝔹
+    bool m_bUnknown{false}; // Z++: 𝔹
+    int64_t unknown{0}; // Z++: ℕ
+    float SoundDistRightAsRead{0.0f}; // Z++: ℝ
+    float SoundDistRightAsReadOld{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (Cams_len == 3u && Cams.size() == 3u)
+            && (m_arrPathArray_len == 4u && m_arrPathArray.size() == 4u)
+            && (m_vecFrustumNormals_len == 4u && m_vecFrustumNormals.size() == 4u)
+            && (instance_addr >= 0)
+            && (ActiveCam >= 0)
+            && (m_uiCamShakeStart >= 0)
+            && (m_uiFirstPersonCamLastInputTime >= 0)
+            && (m_uiLongestTimeInMill >= 0)
+            && (m_uiNumberOfTrainCamNodes >= 0)
+            && (m_uiTransitionJUSTStarted >= 0)
+            && (m_uiTransitionState >= 0)
+            && (m_uiTimeLastChange >= 0)
+            && (m_uiTimeWeLeftIdle_StillNoInput >= 0)
+            && (m_uiTimeWeEnteredIdle >= 0)
+            && (m_uiTimeTransitionStart >= 0)
+            && (m_uiTransitionDuration >= 0)
+            && (m_uiTransitionDurationTargetCoors >= 0)
+            && (pToGarageWeAreIn_card <= 1u)
+            && (pToGarageWeAreInForHackAvoidFirstPerson_card <= 1u);
+    }
+};
 // State Schema Contract from zpp/core/CdStream.zpp
 struct CdReadInfo_ZppContract {
     int64_t nSectorOffset{0}; // Z++: ℕ
     int64_t nSectorsToRead{0}; // Z++: ℕ
-    int32_t pBuffer{0}; // Z++: ADDRESS
+    int64_t pBuffer{0}; // Z++: ADDRESS
     int32_t field_C{0}; // Z++: seq CHAR
     bool bLocked{false}; // Z++: 𝔹
     bool bReading{false}; // Z++: 𝔹
     int32_t nStatus{0}; // Z++: ℤ
-    int32_t pDoneSemaphore{0}; // Z++: HANDLE
-    int32_t hFile{0}; // Z++: HANDLE
+    int64_t pDoneSemaphore{0}; // Z++: HANDLE
+    int64_t hFile{0}; // Z++: HANDLE
     int32_t Overlapped{0}; // Z++: OVERLAPPED
     constexpr bool checkInvariant() const {
         return (nSectorOffset >= 0)
@@ -312,7 +627,7 @@ struct CFire_ZppContract {
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CTriggerCaller_ZppContract {
     bool bHasTrigger{false}; // Z++: 𝔹
-    int32_t pTrigger{0}; // Z++: ADDRESS
+    int64_t pTrigger{0}; // Z++: ADDRESS
     int32_t field_C{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
@@ -359,6 +674,76 @@ struct CSelectable_ZppContract {
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShText_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    int32_t m_color{0}; // Z++: CRGBA
+    int32_t m_text{0}; // Z++: seq CHAR
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShTextTwoLines_ZppContract {
+    int32_t m_line1{0}; // Z++: CPlaceableText
+    int32_t m_line2{0}; // Z++: CPlaceableText
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShOption_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    int32_t m_color{0}; // Z++: CRGBA
+    int32_t m_text{0}; // Z++: seq CHAR
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    bool m_bSelected{false}; // Z++: 𝔹
+    int32_t m_selectedColor{0}; // Z++: CRGBA
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
+struct CPlaceableShOptionTwoLines_ZppContract {
+    int32_t m_line1{0}; // Z++: CPlaceableText
+    int32_t m_line2{0}; // Z++: CPlaceableText
+    bool m_bRightJustify{false}; // Z++: 𝔹
+    bool m_bDropShadow{false}; // Z++: 𝔹
+    int32_t m_shadowColor{0}; // Z++: CRGBA
+    int32_t m_shadowOffset{0}; // Z++: CVector2D
+    bool m_bSelected{false}; // Z++: 𝔹
+    int32_t m_selectedColor{0}; // Z++: CRGBA
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CPlaceableSprite_ZppContract {
     uint8_t m_pSprite_card{0u}; // Z++: Ref[CSprite2d]
     int32_t m_position{0}; // Z++: CVector2D
@@ -389,16 +774,21 @@ struct CMenuBase_ZppContract {
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuDummy_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     bool m_bActive{false}; // Z++: 𝔹
     int32_t false_field{0}; // Z++: return
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuPictureAndText_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_numSprites{0}; // Z++: ℤ
     std::array<int32_t, 5> m_sprites{}; // Z++: seq CPlaceableShSprite  -- bounded array [5]
     size_t m_sprites_len{5u}; // Z++ cardinality #m_sprites
@@ -411,13 +801,17 @@ struct CMenuPictureAndText_ZppContract {
     float m_wrapX{0.0f}; // Z++: ℝ
     float m_oldWrapx{0.0f}; // Z++: ℝ
     bool m_bWrap{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_sprites_len == 5u && m_sprites.size() == 5u)
-            && (m_texts_len == 20u && m_texts.size() == 20u);
+            && (m_texts_len == 20u && m_texts.size() == 20u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoice_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_numOptions{0}; // Z++: ℤ
     int32_t m_title{0}; // Z++: CPlaceableShText
     std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
@@ -431,66 +825,168 @@ struct CMenuMultiChoice_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
     std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_triggers_len == 16u && m_triggers.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTriggeredAlways_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
+    std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
+    int32_t m_defaultCancel{0}; // Z++: Trigger
     int32_t m_alwaysNormalTrigger{0}; // Z++: Trigger
     int32_t m_alwaysHighlightTrigger{0}; // Z++: Trigger
     int32_t m_alwaysTrigger{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoicePictured_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
     std::array<int32_t, 16> m_sprites{}; // Z++: seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_sprites_len{16u}; // Z++ cardinality #m_sprites
     std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_sprites_len == 16u && m_sprites.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_sprites_len == 16u && m_sprites.size() == 16u)
             && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoicePicturedTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
+    std::array<int32_t, 16> m_sprites{}; // Z++: seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_sprites_len{16u}; // Z++ cardinality #m_sprites
+    std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
     std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_triggers_len == 16u && m_triggers.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_sprites_len == 16u && m_sprites.size() == 16u)
+            && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOption  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
+    std::array<int32_t, 16> m_sprites{}; // Z++: seq CPlaceableSprite  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_sprites_len{16u}; // Z++ cardinality #m_sprites
+    std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
+    std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
+    int32_t m_defaultCancel{0}; // Z++: Trigger
     std::array<int32_t, 16> m_moveTab{}; // Z++: seq FEC_MOVETAB  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_moveTab_len{16u}; // Z++ cardinality #m_moveTab
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_moveTab_len == 16u && m_moveTab.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_sprites_len == 16u && m_sprites.size() == 16u)
+            && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (m_moveTab_len == 16u && m_moveTab.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTwoLines_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_numOptions{0}; // Z++: ℤ
     int32_t m_title{0}; // Z++: CPlaceableShText
     std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOptionTwoLines  -- bounded array [NUM_MULTICHOICE_OPTIONS]
@@ -504,22 +1000,40 @@ struct CMenuMultiChoiceTwoLines_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuMultiChoiceTwoLinesTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_numOptions{0}; // Z++: ℤ
+    int32_t m_title{0}; // Z++: CPlaceableShText
+    std::array<int32_t, 16> m_options{}; // Z++: seq CPlaceableShOptionTwoLines  -- bounded array [NUM_MULTICHOICE_OPTIONS]
+    size_t m_options_len{16u}; // Z++ cardinality #m_options
+    int32_t m_cursor{0}; // Z++: ℤ
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_textScale{0}; // Z++: CVector2D
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t true_field{0}; // Z++: return
     std::array<int32_t, 16> m_triggers{}; // Z++: seq Trigger  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_triggers_len == 16u && m_triggers.size() == 16u)
+        return (m_options_len == 16u && m_options.size() == 16u)
+            && (m_triggers_len == 16u && m_triggers.size() == 16u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuOnOff_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     int32_t m_title{0}; // Z++: CPlaceableShOption
     std::array<int32_t, 2> m_options{}; // Z++: seq CPlaceableShText  -- bounded array [2]
     size_t m_options_len{2u}; // Z++ cardinality #m_options
@@ -531,29 +1045,39 @@ struct CMenuOnOff_ZppContract {
     int32_t m_type{0}; // Z++: ℤ
     int32_t false_field{0}; // Z++: return
     int32_t true_field{0}; // Z++: return
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_options_len == 2u && m_options.size() == 2u);
+        return (m_options_len == 2u && m_options.size() == 2u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuOnOffTriggered_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
+    int32_t m_title{0}; // Z++: CPlaceableShOption
+    std::array<int32_t, 2> m_options{}; // Z++: seq CPlaceableShText  -- bounded array [2]
+    size_t m_options_len{2u}; // Z++ cardinality #m_options
+    bool m_bActive{false}; // Z++: 𝔹
+    bool m_bSetTextScale{false}; // Z++: 𝔹
+    bool m_bSetTitleTextScale{false}; // Z++: 𝔹
+    int32_t m_textScale{0}; // Z++: CVector2D
+    int32_t m_oldTextScale{0}; // Z++: CVector2D
+    int32_t m_type{0}; // Z++: ℤ
+    int32_t false_field{0}; // Z++: return
+    int32_t true_field{0}; // Z++: return
     int32_t m_trigger{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
-    }
-};
-// State Schema Contract from zpp/core/FrontEndControls.zpp
-struct CMenuSliderTriggered_ZppContract {
-    int32_t m_trigger{0}; // Z++: Trigger
-    int32_t m_alwaysTrigger{0}; // Z++: Trigger
-    int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (m_options_len == 2u && m_options.size() == 2u)
+            && (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuLineLister_ZppContract {
+    int32_t m_position{0}; // Z++: CVector2D
+    bool m_bTwoState{false}; // Z++: 𝔹
     float m_width{0.0f}; // Z++: ℝ
     float m_height{0.0f}; // Z++: ℝ
     int32_t m_numLines{0}; // Z++: ℤ
@@ -576,6 +1100,7 @@ struct CMenuLineLister_ZppContract {
             && (m_linesRight_len == 51u && m_linesRight.size() == 51u)
             && (m_lineAlphas_len == 51u && m_lineAlphas.size() == 51u)
             && (m_lineFade_len == 51u && m_lineFade.size() == 51u)
+            && (instance_addr >= 0)
             && (instance_addr >= 0);
     }
 };
@@ -593,11 +1118,18 @@ struct CMenuPage_ZppContract {
 };
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CMenuPageAnyMove_ZppContract {
+    std::array<int32_t, 10> m_controls{}; // Z++: seq Ref[CMenuBase]  -- bounded array [NUM_PAGE_WIDGETS]
+    size_t m_controls_len{10u}; // Z++ cardinality #m_controls
+    int32_t m_numControls{0}; // Z++: ℤ
+    uint8_t m_pCurrentControl_card{0u}; // Z++: Ref[CMenuBase]
+    int32_t m_cursor{0}; // Z++: ℤ
     std::array<int32_t, 10> m_moveTab{}; // Z++: seq FEC_MOVETAB  -- bounded array [NUM_PAGE_WIDGETS]
     size_t m_moveTab_len{10u}; // Z++ cardinality #m_moveTab
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_moveTab_len == 10u && m_moveTab.size() == 10u)
+        return (m_controls_len == 10u && m_controls.size() == 10u)
+            && (m_moveTab_len == 10u && m_moveTab.size() == 10u)
+            && (m_pCurrentControl_card <= 1u)
             && (instance_addr >= 0);
     }
 };
@@ -623,7 +1155,7 @@ struct CCustomScreenLayout_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFO_ZppContract {
-    int32_t value{0}; // Z++: ADDRESS
+    int64_t value{0}; // Z++: ADDRESS
     int32_t saveCat{0}; // Z++: seq CHAR
     int32_t save{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
@@ -633,6 +1165,9 @@ struct CCFO_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFOSelect_ZppContract {
+    int64_t value{0}; // Z++: ADDRESS
+    int32_t saveCat{0}; // Z++: seq CHAR
+    int32_t save{0}; // Z++: seq CHAR
     int32_t rightTexts{0}; // Z++: seq CHAR
     int32_t numRightTexts{0}; // Z++: ℤ
     bool onlyApplyOnEnter{false}; // Z++: 𝔹
@@ -642,26 +1177,35 @@ struct CCFOSelect_ZppContract {
     bool disableIfGameLoaded{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFOSlider_ZppContract {
+    int64_t value{0}; // Z++: ADDRESS
+    int32_t saveCat{0}; // Z++: seq CHAR
+    int32_t save{0}; // Z++: seq CHAR
     float changeFunc{0.0f}; // Z++: ℝ
     float min_field{0.0f}; // Z++: ℝ
     float max_field{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFODynamic_ZppContract {
+    int64_t value{0}; // Z++: ADDRESS
+    int32_t saveCat{0}; // Z++: seq CHAR
+    int32_t save{0}; // Z++: seq CHAR
     int32_t drawFunc{0}; // Z++: DrawFunc
     int32_t buttonPressFunc{0}; // Z++: ButtonPressFunc
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/Frontend.zpp
@@ -773,7 +1317,7 @@ struct LeedsModuleState_ZppContract {
 };
 // State Schema Contract from zpp/core/Lists.zpp
 struct CPtrNode_ZppContract {
-    int32_t item{0}; // Z++: ADDRESS
+    int64_t item{0}; // Z++: ADDRESS
     uint8_t prev_card{0u}; // Z++: Ref[CPtrNode]
     uint8_t next_card{0u}; // Z++: Ref[CPtrNode]
     constexpr bool checkInvariant() const {
@@ -1132,7 +1676,7 @@ struct CStreamingChannel_ZppContract {
 };
 // State Schema Contract from zpp/core/SurfaceTable.zpp
 struct CSurfaceTable_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -1194,6 +1738,48 @@ struct CUserDisplay_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/Wanted.zpp
+struct CWanted_ZppContract {
+    int32_t m_nChaos{0}; // Z++: ℤ
+    int32_t m_nMinChaos{0}; // Z++: ℤ
+    int32_t m_nLastUpdateTime{0}; // Z++: ℤ
+    int64_t m_nLastWantedLevelChange{0}; // Z++: ℕ
+    int64_t m_nLastTimeSuspended{0}; // Z++: ℕ
+    float m_fCrimeSensitivity{0.0f}; // Z++: ℝ
+    int64_t m_CurrentCops{0}; // Z++: ℕ
+    int64_t m_MaxCops{0}; // Z++: ℕ
+    int64_t m_MaximumLawEnforcerVehicles{0}; // Z++: ℕ
+    int64_t m_CopsBeatingSuspect{0}; // Z++: ℕ
+    int32_t m_RoadblockDensity{0}; // Z++: ℤ
+    uint32_t m_bIgnoredByCops{0u}; // Z++: 𝔹
+    uint32_t m_bIgnoredByEveryone{0u}; // Z++: 𝔹
+    uint32_t m_bSwatRequired{0u}; // Z++: 𝔹
+    uint32_t m_bFbiRequired{0u}; // Z++: 𝔹
+    uint32_t m_bArmyRequired{0u}; // Z++: 𝔹
+    int32_t m_nWantedLevel{0}; // Z++: ℤ
+    int32_t m_nMinWantedLevel{0}; // Z++: ℤ
+    std::array<int32_t, 16> m_aCrimes{}; // Z++: seq CCrimeBeingQd  -- bounded array [16]
+    size_t m_aCrimes_len{16u}; // Z++ cardinality #m_aCrimes
+    std::array<int32_t, 10> m_pCops{}; // Z++: seq Ref[CCopPed]  -- bounded array [10]
+    size_t m_pCops_len{10u}; // Z++ cardinality #m_pCops
+    int32_t MaximumWantedLevel{0}; // Z++: ℤ
+    int32_t nMaximumWantedLevel{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (m_aCrimes_len == 16u && m_aCrimes.size() == 16u)
+            && (m_pCops_len == 10u && m_pCops.size() == 10u)
+            && (m_nLastWantedLevelChange >= 0)
+            && (m_nLastTimeSuspended >= 0)
+            && (m_CurrentCops >= 0)
+            && (m_MaxCops >= 0)
+            && (m_MaximumLawEnforcerVehicles >= 0)
+            && (m_CopsBeatingSuspect >= 0)
+            && (m_bIgnoredByCops <= 1u)
+            && (m_bIgnoredByEveryone <= 1u)
+            && (m_bSwatRequired <= 1u)
+            && (m_bFbiRequired <= 1u)
+            && (m_bArmyRequired <= 1u);
     }
 };
 // State Schema Contract from zpp/core/ZoneCull.zpp
@@ -1326,6 +1912,16 @@ constexpr bool op_CPool_GetIsFree_5(const CPool_ZppContract& state) {
 // Query Operation Schema Contract (ΞCPool) from zpp/core/templates.zpp
 constexpr bool op_CPool_GetSize_10(const CPool_ZppContract& state) {
     return state.checkInvariant();
+}
+// Delta Operation Schema Contract (ΔCCamera) from zpp/core/Camera.zpp
+constexpr bool op_CCamera_CCamera(const CCamera_ZppContract& pre, const CCamera_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_fMouseAccelHorzntl == 0.0025f) && (post.m_fMouseAccelVertical == 0.003f);
+}
+constexpr CCamera_ZppContract apply_CCamera_CCamera(const CCamera_ZppContract& pre) {
+    CCamera_ZppContract post = pre;
+    post.m_fMouseAccelHorzntl = 0.0025f;
+    post.m_fMouseAccelVertical = 0.003f;
+    return post;
 }
 // Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
 constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t scale_in = 25, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
@@ -1476,6 +2072,20 @@ constexpr CCurrentVehicle_ZppContract apply_CCurrentVehicle_Init(const CCurrentV
     post.m_pCurrentVehicle_card = 0u;
     return post;
 }
+// Delta Operation Schema Contract (ΔCWanted) from zpp/core/Wanted.zpp
+constexpr bool op_CWanted_Initialise(const CWanted_ZppContract& pre, const CWanted_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nChaos == 0) && (post.m_nMinChaos == 0) && (post.m_nLastUpdateTime == 0) && (post.m_nLastWantedLevelChange == 0) && (post.m_nLastTimeSuspended == 0) && (post.m_CurrentCops == 0);
+}
+constexpr CWanted_ZppContract apply_CWanted_Initialise(const CWanted_ZppContract& pre) {
+    CWanted_ZppContract post = pre;
+    post.m_nChaos = 0;
+    post.m_nMinChaos = 0;
+    post.m_nLastUpdateTime = 0;
+    post.m_nLastWantedLevelChange = 0;
+    post.m_nLastTimeSuspended = 0;
+    post.m_CurrentCops = 0;
+    return post;
+}
 constexpr bool verify_core_zpp_invariants() {
     {
         CAccident_ZppContract valid{};
@@ -1499,6 +2109,13 @@ constexpr bool verify_core_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CCam_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCam_ZppContract bad{};
+        bad.m_arrPreviousVectors_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CCamPathSplines_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CCamPathSplines_ZppContract bad{};
@@ -1517,6 +2134,13 @@ constexpr bool verify_core_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CQueuedMode_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CCamera_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCamera_ZppContract bad{};
+        bad.Cams_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1639,6 +2263,34 @@ constexpr bool verify_core_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CPlaceableShText_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShText_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShTextTwoLines_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShTextTwoLines_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShOption_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShOption_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlaceableShOptionTwoLines_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaceableShOptionTwoLines_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CPlaceableSprite_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CPlaceableSprite_ZppContract bad{};
@@ -1684,35 +2336,35 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuMultiChoiceTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoiceTriggered_ZppContract bad{};
-        bad.m_triggers_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoiceTriggeredAlways_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoiceTriggeredAlways_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoicePictured_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoicePictured_ZppContract bad{};
-        bad.m_sprites_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoicePicturedTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoicePicturedTriggered_ZppContract bad{};
-        bad.m_triggers_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
         CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract bad{};
-        bad.m_moveTab_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1726,7 +2378,7 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuMultiChoiceTwoLinesTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuMultiChoiceTwoLinesTriggered_ZppContract bad{};
-        bad.m_triggers_len = 0u;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1740,14 +2392,7 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuOnOffTriggered_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuOnOffTriggered_ZppContract bad{};
-        bad.instance_addr = -1;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CMenuSliderTriggered_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CMenuSliderTriggered_ZppContract bad{};
-        bad.instance_addr = -1;
+        bad.m_options_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1768,7 +2413,7 @@ constexpr bool verify_core_zpp_invariants() {
         CMenuPageAnyMove_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CMenuPageAnyMove_ZppContract bad{};
-        bad.m_moveTab_len = 0u;
+        bad.m_controls_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -2066,6 +2711,13 @@ constexpr bool verify_core_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CWanted_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CWanted_ZppContract bad{};
+        bad.m_aCrimes_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CCullZone_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CCullZone_ZppContract bad{};
@@ -2150,6 +2802,23 @@ constexpr bool verify_core_zpp_invariants() {
     {
         const CPool_ZppContract st{};
         if (!op_CPool_GetSize_10(st)) return false;
+    }
+    {
+        CCamera_ZppContract pre{};
+        pre.m_fMouseAccelHorzntl = 0.0f;
+        pre.m_fMouseAccelVertical = 0.0f;
+        const auto post = apply_CCamera_CCamera(pre);
+        if (!op_CCamera_CCamera(pre, post)) return false;
+        {
+            CCamera_ZppContract badPost = post;
+            badPost.m_fMouseAccelHorzntl = 0.0f;
+            if (op_CCamera_CCamera(pre, badPost)) return false;
+        }
+        {
+            CCamera_ZppContract badPost = post;
+            badPost.m_fMouseAccelVertical = 0.0f;
+            if (op_CCamera_CCamera(pre, badPost)) return false;
+        }
     }
     {
         CClock_ZppContract pre{};
@@ -2495,6 +3164,47 @@ constexpr bool verify_core_zpp_invariants() {
             CCurrentVehicle_ZppContract badPost = post;
             badPost.m_pCurrentVehicle_card = 1u;
             if (op_CCurrentVehicle_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CWanted_ZppContract pre{};
+        pre.m_nChaos = 1;
+        pre.m_nMinChaos = 1;
+        pre.m_nLastUpdateTime = 1;
+        pre.m_nLastWantedLevelChange = 1;
+        pre.m_nLastTimeSuspended = 1;
+        pre.m_CurrentCops = 1;
+        const auto post = apply_CWanted_Initialise(pre);
+        if (!op_CWanted_Initialise(pre, post)) return false;
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nChaos = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nMinChaos = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nLastUpdateTime = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nLastWantedLevelChange = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_nLastTimeSuspended = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
+        }
+        {
+            CWanted_ZppContract badPost = post;
+            badPost.m_CurrentCops = 1;
+            if (op_CWanted_Initialise(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

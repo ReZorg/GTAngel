@@ -1,7 +1,18 @@
-    // ── Z++ Formal Spec Contract (objects): 8 modules, 160 schemas, 7 enums (CutsceneHead.zpp, CutsceneObject.zpp, DummyObject.zpp, Object.zpp, ObjectData.zpp, ParticleObject.zpp, Projectile.zpp, Stinger.zpp) ──
-    static constexpr int zpp_objects_modules() { return 8; }
-    static constexpr int zpp_objects_schemas() { return 160; }
+    // ── Z++ Formal Spec Component Binding (objects): 8 modules, 160 schemas, 7 enums (CutsceneHead.zpp, CutsceneObject.zpp, DummyObject.zpp, Object.zpp, ObjectData.zpp, ParticleObject.zpp, Projectile.zpp, Stinger.zpp) ──
+    static constexpr int zpp_objects_modules() { return zpp_objects_spec::kZppModuleCount; }
+    static constexpr int zpp_objects_schemas() { return zpp_objects_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_objects_zpp() {
+        return zpp_objects_spec::verify_objects_zpp_invariants() && (zpp_objects_spec::CCutsceneHead_ZppContract{}.checkInvariant()) && (zpp_objects_spec::op_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{}, zpp_objects_spec::apply_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{})));
+    }
+    bool verifyLiveWorld_objects_zpp(const avatar3d::GameWorld& world) const {
+        zpp_objects_spec::CObjectInfo_ZppContract c{};
+        const bool goalFinite = std::isfinite(world.goal.x) && std::isfinite(world.goal.y) && std::isfinite(world.goal.z);
+        c.m_nCollisionDamageEffect = goalFinite ? 1 : -1;
+        return c.checkInvariant();
+    }
+    static_assert(verifyComponent_objects_zpp(), "RasterEngine component Z++ binding failed for objects");
     void buildGoal(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_objects_zpp(world)) return;
         static constexpr int Segments = 16;
         const auto pulseTicks = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();

@@ -46,10 +46,18 @@ struct CCompressedMatrixNotAligned_ZppContract {
 };
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CCompressedMatrix_ZppContract {
+    ZppVec3 m_vecPos{}; // Z++: CVector
+    int32_t m_rightX{0}; // Z++: ℤ
+    int32_t m_rightY{0}; // Z++: ℤ
+    int32_t m_rightZ{0}; // Z++: ℤ
+    int32_t m_upX{0}; // Z++: ℤ
+    int32_t m_upY{0}; // Z++: ℤ
+    int32_t m_upZ{0}; // Z++: ℤ
     int32_t _alignment{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/math/Quaternion.zpp
@@ -73,6 +81,9 @@ struct CRect_ZppContract {
 };
 // State Schema Contract from zpp/math/Vector.zpp
 struct CVector_ZppContract {
+    float x{0.0f}; // Z++: ℝ
+    float y{0.0f}; // Z++: ℝ
+    float z{0.0f}; // Z++: ℝ
     float w{0.0f}; // Z++: ℝ
     uint8_t this_field_card{0u}; // Z++: Ref[return]
     constexpr bool checkInvariant() const {
@@ -496,3 +507,10 @@ static Vec3 norm(Vec3 a) { float l = len(a); return l > 1e-6f ? a*(1.0f/l) : Vec
 // namespace avatar3d; it never moves the body or writes a motor/world commit.
 // LW21: baked v25 pose clips (DTEP25L). Clean-room offline bake of the
 // user-supplied pose rig; runtime samples per-joint displacements only.
+// Component-specific Z++ math bindings (from math/ZppContracts.hpp)
+constexpr zpp_math_spec::ZppVec3 toZppVec3(Vec3 v) { return {v.x, v.y, v.z}; }
+constexpr Vec3 fromZppVec3(zpp_math_spec::ZppVec3 v) { return {v.x, v.y, v.z}; }
+constexpr zpp_math_spec::CRect_ZppContract makeWorldBoundsZppRect(float halfExtent) {
+    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, -halfExtent, halfExtent, halfExtent);
+}
+static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, -64.0f, 64.0f, 64.0f), "World bounds CRect Z++ contract must hold");

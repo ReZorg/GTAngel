@@ -3270,3 +3270,11 @@ private:
 // This module is spliced after namespace gtangel and therefore reuses the
 // v13 avatar/world contracts plus GTAngel-Cls framebuffer concepts.
 
+// Component-specific Z++ core clock & pool bindings (from core/ZppContracts.hpp)
+namespace gtangel_zpp_core_bind {
+constexpr zpp_core_spec::CClock_ZppContract makeInitialisedGameClock(int64_t msPerMin, int64_t tickMs) {
+    const auto c0 = zpp_core_spec::apply_CClock_Initialise(zpp_core_spec::CClock_ZppContract{}, msPerMin, tickMs);
+    return zpp_core_spec::apply_CClock_StoreClock(c0);
+}
+static_assert(makeInitialisedGameClock(1000, 16).ms_bClockHasBeenStored && makeInitialisedGameClock(1000, 16).ms_Stored_nGameClockHours == 12, "CognitiveSubsystems CClock Z++ store transition must hold");
+} // namespace gtangel_zpp_core_bind

@@ -1,6 +1,19 @@
-    // ── Z++ Formal Spec Contract (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
-    static constexpr int zpp_vehicles_modules() { return 15; }
-    static constexpr int zpp_vehicles_schemas() { return 700; }
+    // ── Z++ Formal Spec Component Binding (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
+    static constexpr int zpp_vehicles_modules() { return zpp_vehicles_spec::kZppModuleCount; }
+    static constexpr int zpp_vehicles_schemas() { return zpp_vehicles_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_vehicles_zpp() {
+        return zpp_vehicles_spec::verify_vehicles_zpp_invariants() && (zpp_vehicles_spec::CAutomobile_ZppContract{}.checkInvariant()) && (zpp_vehicles_spec::op_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{}, zpp_vehicles_spec::apply_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{})));
+    }
+    bool verifyLiveWorld_vehicles_zpp(const avatar3d::GameWorld& world) const {
+        for (size_t i = 0; i < world.traffic.size(); ++i) {
+            const auto& v = world.traffic[i];
+            zpp_vehicles_spec::CDamageManager_ZppContract dmg{};
+            dmg.m_engineStatus = (v.speed >= 0.0f && v.orbitR >= 0.0f) ? (int64_t)i : -1;
+            if (!dmg.checkInvariant()) return false;
+        }
+        return true;
+    }
+    static_assert(verifyComponent_vehicles_zpp(), "RasterEngine component Z++ binding failed for vehicles");
     void drawSculptedCoupe(Vec3 centre, float ch, float sh, float wheelPhase,
                           Colour body, Colour cab, uint16_t id) {
         // LW34: true 3D fastback coupe — sloped front hood, angled windshield,
@@ -217,6 +230,7 @@
     // re3 CVehicle family: lane traffic rendered as compact vehicles with
     // spinning wheels, train as linked boxes, heli with rotor disc.
     void buildTraffic(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_vehicles_zpp(world)) return;
         int trafficIndex = 0;
         for (const auto& v : world.traffic) {
             addBlobShadow(v.pos, v.orbitR > 0.0f ? 0.68f : 0.55f); // LW32: ground traffic (heli casts wide)

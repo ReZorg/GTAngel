@@ -734,3 +734,10 @@ private:
 
 } // namespace v18peer
 #endif
+// Component-specific Z++ weapon & explosion safety bindings (from weapons/ZppContracts.hpp)
+namespace gtangel_zpp_weapons_bind {
+constexpr zpp_weapons_spec::CExplosion_ZppContract makeClearedExplosionState() {
+    return zpp_weapons_spec::apply_CExplosion_ResetExplosionActiveCounter(zpp_weapons_spec::CExplosion_ZppContract{});
+}
+static_assert(zpp_weapons_spec::op_CExplosion_ResetExplosionActiveCounter(zpp_weapons_spec::CExplosion_ZppContract{}, makeClearedExplosionState()), "SafetyAndPeerShield CExplosion Z++ contract must hold");
+} // namespace gtangel_zpp_weapons_bind

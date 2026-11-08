@@ -1,7 +1,21 @@
-    // ── Z++ Formal Spec Contract (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
-    static constexpr int zpp_peds_modules() { return 17; }
-    static constexpr int zpp_peds_schemas() { return 673; }
+    // ── Z++ Formal Spec Component Binding (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
+    static constexpr int zpp_peds_modules() { return zpp_peds_spec::kZppModuleCount; }
+    static constexpr int zpp_peds_schemas() { return zpp_peds_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_peds_zpp() {
+        return zpp_peds_spec::verify_peds_zpp_invariants() && (zpp_peds_spec::CDummyPed_ZppContract{}.checkInvariant()) && (zpp_peds_spec::op_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{}, zpp_peds_spec::apply_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{})));
+    }
+    bool verifyLiveWorld_peds_zpp(const avatar3d::GameWorld& world) const {
+        for (size_t i = 0; i < world.walkers.size(); ++i) {
+            const auto& w = world.walkers[i];
+            zpp_peds_spec::CDummyPed_ZppContract c{};
+            c.instance_addr = (w.speed >= 0.0f) ? (int64_t)(i + 1) : -1;
+            if (!c.checkInvariant()) return false;
+        }
+        return true;
+    }
+    static_assert(verifyComponent_peds_zpp(), "RasterEngine component Z++ binding failed for peds");
     void buildWalkers(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_peds_zpp(world)) return;
         // Population rendering: compact humanoids (torso + head + legs) so
         // the retina sees real social entities, not empty pillars.
         for (const auto& w : world.walkers) {

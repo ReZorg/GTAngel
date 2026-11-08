@@ -44,11 +44,14 @@ struct CColBox_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColBox.zpp
 struct CColTriBBox_ZppContract {
+    ZppVec3 min_field{}; // Z++: CVector
+    ZppVec3 max_field{}; // Z++: CVector
     int32_t first{0}; // Z++: ℤ
     int32_t last{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/collision/ColLine.zpp
@@ -111,12 +114,14 @@ struct CColPoint_ZppContract {
 };
 // State Schema Contract from zpp/collision/ColSphere.zpp
 struct CColSphere_ZppContract {
-    int64_t surface{0}; // Z++: ℕ
-    int64_t piece{0}; // Z++: ℕ
     ZppVec3 center{}; // Z++: CVector
     float radius{0.0f}; // Z++: ℝ
+    int64_t surface{0}; // Z++: ℕ
+    int64_t piece{0}; // Z++: ℕ
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (surface >= 0)
+        return (instance_addr >= 0)
+            && (surface >= 0)
             && (piece >= 0);
     }
 };
@@ -168,7 +173,7 @@ struct CColTrianglePlane_ZppContract {
 };
 // State Schema Contract from zpp/collision/Collision.zpp
 struct CStoredCollPoly_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -183,7 +188,7 @@ struct CCollision_ZppContract {
 };
 // State Schema Contract from zpp/collision/CompressedVector.zpp
 struct CompressedVector_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -412,7 +417,7 @@ constexpr bool verify_collision_zpp_invariants() {
         CColSphere_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CColSphere_ZppContract bad{};
-        bad.surface = -1;
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -996,3 +1001,8 @@ struct GameWorld {
     }
 };
 
+// Component-specific Z++ collision bindings (from collision/ZppContracts.hpp)
+constexpr zpp_collision_spec::CColSphere_ZppContract makePillarZppColSphere(Vec3 pos, float radius) {
+    return zpp_collision_spec::apply_CColSphere_Set(zpp_collision_spec::CColSphere_ZppContract{}, radius, zpp_collision_spec::ZppVec3{pos.x, pos.y, pos.z}, 1, 0);
+}
+static_assert(zpp_collision_spec::op_CColSphere_Set(zpp_collision_spec::CColSphere_ZppContract{}, makePillarZppColSphere(Vec3{10.0f, 0.0f, -10.0f}, 0.55f), 0.55f, zpp_collision_spec::ZppVec3{10.0f, 0.0f, -10.0f}, 1, 0), "GameWorld pillar CColSphere Z++ contract must hold");

@@ -180,6 +180,68 @@ struct FlareDef_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/renderer/Coronas.zpp
+struct CRegisteredCorona_ZppContract {
+    ZppVec3 coors{}; // Z++: CVector
+    int64_t id{0}; // Z++: ℕ
+    int64_t lastLOScheck{0}; // Z++: ℕ
+    uint8_t texture_card{0u}; // Z++: Ref[RwTexture]
+    float size{0.0f}; // Z++: ℝ
+    float someAngle{0.0f}; // Z++: ℝ
+    float drawDist{0.0f}; // Z++: ℝ
+    float nearDist{0.0f}; // Z++: ℝ
+    float heightAboveRoad{0.0f}; // Z++: ℝ
+    int64_t red{0}; // Z++: ℕ
+    int64_t green{0}; // Z++: ℕ
+    int64_t blue{0}; // Z++: ℕ
+    int64_t alpha{0}; // Z++: ℕ
+    int64_t fadeAlpha{0}; // Z++: ℕ
+    bool registeredThisFrame{false}; // Z++: 𝔹
+    int32_t flareType{0}; // Z++: ℤ
+    int32_t reflection{0}; // Z++: ℤ
+    uint32_t LOScheck{0u}; // Z++: 𝔹
+    uint32_t offScreen{0u}; // Z++: 𝔹
+    uint32_t firstUpdate{0u}; // Z++: 𝔹
+    uint32_t drawStreak{0u}; // Z++: 𝔹
+    uint32_t sightClear{0u}; // Z++: 𝔹
+    uint32_t useNearDist{0u}; // Z++: 𝔹
+    uint32_t renderReflection{0u}; // Z++: 𝔹
+    std::array<int32_t, 6> prevX{}; // Z++: seq ℤ  -- bounded array [6]
+    size_t prevX_len{6u}; // Z++ cardinality #prevX
+    std::array<int32_t, 6> prevY{}; // Z++: seq ℤ  -- bounded array [6]
+    size_t prevY_len{6u}; // Z++ cardinality #prevY
+    std::array<uint32_t, 6> prevRed{}; // Z++: seq ℕ  -- bounded array [6]
+    size_t prevRed_len{6u}; // Z++ cardinality #prevRed
+    std::array<uint32_t, 6> prevGreen{}; // Z++: seq ℕ  -- bounded array [6]
+    size_t prevGreen_len{6u}; // Z++ cardinality #prevGreen
+    std::array<uint32_t, 6> prevBlue{}; // Z++: seq ℕ  -- bounded array [6]
+    size_t prevBlue_len{6u}; // Z++ cardinality #prevBlue
+    std::array<bool, 6> hasValue{}; // Z++: seq 𝔹  -- bounded array [6]
+    size_t hasValue_len{6u}; // Z++ cardinality #hasValue
+    constexpr bool checkInvariant() const {
+        return (prevX_len == 6u && prevX.size() == 6u)
+            && (prevY_len == 6u && prevY.size() == 6u)
+            && (prevRed_len == 6u && prevRed.size() == 6u)
+            && (prevGreen_len == 6u && prevGreen.size() == 6u)
+            && (prevBlue_len == 6u && prevBlue.size() == 6u)
+            && (hasValue_len == 6u && hasValue.size() == 6u)
+            && (id >= 0)
+            && (lastLOScheck >= 0)
+            && (texture_card <= 1u)
+            && (red >= 0)
+            && (green >= 0)
+            && (blue >= 0)
+            && (alpha >= 0)
+            && (fadeAlpha >= 0)
+            && (LOScheck <= 1u)
+            && (offScreen <= 1u)
+            && (firstUpdate <= 1u)
+            && (drawStreak <= 1u)
+            && (sightClear <= 1u)
+            && (useNearDist <= 1u)
+            && (renderReflection <= 1u);
+    }
+};
 // State Schema Contract from zpp/renderer/Credits.zpp
 struct CCredits_ZppContract {
     bool bCreditsGoing{false}; // Z++: 𝔹
@@ -470,6 +532,12 @@ struct CFontRenderState_ZppContract {
 };
 // State Schema Contract from zpp/renderer/Glass.zpp
 struct CFallingGlassPane_ZppContract {
+    uint8_t m_attachment_card{0u}; // Z++: Ref[RwMatrix]
+    float fz{0.0f}; // Z++: ℝ
+    bool m_hasRwMatrix{false}; // Z++: 𝔹
+    float uw{0.0f}; // Z++: ℝ
+    float pw{0.0f}; // Z++: ℝ
+    float fw{0.0f}; // Z++: ℝ
     ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
     ZppVec3 m_vecTurn{}; // Z++: CVector
     int64_t m_nTimer{0}; // Z++: ℕ
@@ -480,21 +548,24 @@ struct CFallingGlassPane_ZppContract {
     bool m_bShattered{false}; // Z++: 𝔹
     bool m_bCarGlass{false}; // Z++: 𝔹
     constexpr bool checkInvariant() const {
-        return (m_nTimer >= 0)
+        return (m_attachment_card <= 1u)
+            && (m_nTimer >= 0)
             && (m_nTriIndex >= 0);
     }
 };
 // State Schema Contract from zpp/renderer/Instance.zpp
 struct CInstance_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
     int32_t m_modelIndex{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/renderer/Lines.zpp
 struct CLines_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -695,6 +766,33 @@ struct CShadowCamera_ZppContract {
     constexpr bool checkInvariant() const {
         return (m_pCamera_card <= 1u)
             && (m_pTexture_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/renderer/Shadows.zpp
+struct CStoredShadow_ZppContract {
+    ZppVec3 m_vecPos{}; // Z++: CVector
+    int32_t m_vecFront{0}; // Z++: CVector2D
+    int32_t m_vecSide{0}; // Z++: CVector2D
+    float m_fZDistance{0.0f}; // Z++: ℝ
+    float m_fScale{0.0f}; // Z++: ℝ
+    uint8_t m_pTexture_card{0u}; // Z++: Ref[RwTexture]
+    uint8_t m_pCutsceneShadow_card{0u}; // Z++: Ref[CCutsceneShadow]
+    int32_t m_nIntensity{0}; // Z++: ℤ
+    int64_t m_ShadowType{0}; // Z++: ℕ
+    int64_t m_nRed{0}; // Z++: ℕ
+    int64_t m_nGreen{0}; // Z++: ℕ
+    int64_t m_nBlue{0}; // Z++: ℕ
+    uint32_t bRendered{0u}; // Z++: 𝔹
+    uint32_t bDrawOnBuildings{0u}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (m_pTexture_card <= 1u)
+            && (m_pCutsceneShadow_card <= 1u)
+            && (m_ShadowType >= 0)
+            && (m_nRed >= 0)
+            && (m_nGreen >= 0)
+            && (m_nBlue >= 0)
+            && (bRendered <= 1u)
+            && (bDrawOnBuildings <= 1u);
     }
 };
 // State Schema Contract from zpp/renderer/Shadows.zpp
@@ -986,6 +1084,94 @@ struct CTexList_ZppContract {
     constexpr bool checkInvariant() const {
         return (ms_nTexUsed_len == 400u && ms_nTexUsed.size() == 400u)
             && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/renderer/Timecycle.zpp
+struct CTimeCycle_ZppContract {
+    float m_fCurrentAmbientRed{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientGreen{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientBlue{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientRed_Obj{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientGreen_Obj{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientBlue_Obj{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientRed_Bl{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientGreen_Bl{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientBlue_Bl{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientRed_Obj_Bl{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientGreen_Obj_Bl{0.0f}; // Z++: ℝ
+    float m_fCurrentAmbientBlue_Obj_Bl{0.0f}; // Z++: ℝ
+    float m_fCurrentDirectionalRed{0.0f}; // Z++: ℝ
+    float m_fCurrentDirectionalGreen{0.0f}; // Z++: ℝ
+    float m_fCurrentDirectionalBlue{0.0f}; // Z++: ℝ
+    int32_t m_nCurrentSkyTopRed{0}; // Z++: ℤ
+    int32_t m_nCurrentSkyTopGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentSkyTopBlue{0}; // Z++: ℤ
+    int32_t m_nCurrentSkyBottomRed{0}; // Z++: ℤ
+    int32_t m_nCurrentSkyBottomGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentSkyBottomBlue{0}; // Z++: ℤ
+    int32_t m_nCurrentSunCoreRed{0}; // Z++: ℤ
+    int32_t m_nCurrentSunCoreGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentSunCoreBlue{0}; // Z++: ℤ
+    int32_t m_nCurrentSunCoronaRed{0}; // Z++: ℤ
+    int32_t m_nCurrentSunCoronaGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentSunCoronaBlue{0}; // Z++: ℤ
+    float m_fCurrentSunSize{0.0f}; // Z++: ℝ
+    float m_fCurrentSpriteSize{0.0f}; // Z++: ℝ
+    float m_fCurrentSpriteBrightness{0.0f}; // Z++: ℝ
+    int32_t m_nCurrentShadowStrength{0}; // Z++: ℤ
+    int32_t m_nCurrentLightShadowStrength{0}; // Z++: ℤ
+    int32_t m_nCurrentPoleShadowStrength{0}; // Z++: ℤ
+    float m_fCurrentFogStart{0.0f}; // Z++: ℝ
+    float m_fCurrentFarClip{0.0f}; // Z++: ℝ
+    float m_fCurrentLightsOnGroundBrightness{0.0f}; // Z++: ℝ
+    int32_t m_nCurrentLowCloudsRed{0}; // Z++: ℤ
+    int32_t m_nCurrentLowCloudsGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentLowCloudsBlue{0}; // Z++: ℤ
+    int32_t m_nCurrentFluffyCloudsTopRed{0}; // Z++: ℤ
+    int32_t m_nCurrentFluffyCloudsTopGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentFluffyCloudsTopBlue{0}; // Z++: ℤ
+    int32_t m_nCurrentFluffyCloudsBottomRed{0}; // Z++: ℤ
+    int32_t m_nCurrentFluffyCloudsBottomGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentFluffyCloudsBottomBlue{0}; // Z++: ℤ
+    float m_fCurrentBlurRed{0.0f}; // Z++: ℝ
+    float m_fCurrentBlurGreen{0.0f}; // Z++: ℝ
+    float m_fCurrentBlurBlue{0.0f}; // Z++: ℝ
+    float m_fCurrentWaterRed{0.0f}; // Z++: ℝ
+    float m_fCurrentWaterGreen{0.0f}; // Z++: ℝ
+    float m_fCurrentWaterBlue{0.0f}; // Z++: ℝ
+    float m_fCurrentWaterAlpha{0.0f}; // Z++: ℝ
+    int32_t m_nCurrentFogColourRed{0}; // Z++: ℤ
+    int32_t m_nCurrentFogColourGreen{0}; // Z++: ℤ
+    int32_t m_nCurrentFogColourBlue{0}; // Z++: ℤ
+    int32_t m_FogReduction{0}; // Z++: ℤ
+    int32_t m_bExtraColourOn{0}; // Z++: ℤ
+    int32_t m_ExtraColour{0}; // Z++: ℤ
+    float m_ExtraColourInter{0.0f}; // Z++: ℝ
+    int32_t m_CurrentStoredValue{0}; // Z++: ℤ
+    std::array<ZppVec3, 16> m_VectorToSun{}; // Z++: seq CVector  -- bounded array [16]
+    size_t m_VectorToSun_len{16u}; // Z++ cardinality #m_VectorToSun
+    std::array<float, 16> m_fShadowFrontX{}; // Z++: seq ℝ  -- bounded array [16]
+    size_t m_fShadowFrontX_len{16u}; // Z++ cardinality #m_fShadowFrontX
+    std::array<float, 16> m_fShadowFrontY{}; // Z++: seq ℝ  -- bounded array [16]
+    size_t m_fShadowFrontY_len{16u}; // Z++ cardinality #m_fShadowFrontY
+    std::array<float, 16> m_fShadowSideX{}; // Z++: seq ℝ  -- bounded array [16]
+    size_t m_fShadowSideX_len{16u}; // Z++ cardinality #m_fShadowSideX
+    std::array<float, 16> m_fShadowSideY{}; // Z++: seq ℝ  -- bounded array [16]
+    size_t m_fShadowSideY_len{16u}; // Z++ cardinality #m_fShadowSideY
+    std::array<float, 16> m_fShadowDisplacementX{}; // Z++: seq ℝ  -- bounded array [16]
+    size_t m_fShadowDisplacementX_len{16u}; // Z++ cardinality #m_fShadowDisplacementX
+    std::array<float, 16> m_fShadowDisplacementY{}; // Z++: seq ℝ  -- bounded array [16]
+    size_t m_fShadowDisplacementY_len{16u}; // Z++ cardinality #m_fShadowDisplacementY
+    int32_t m_nCurrentTreeShadowStrength{0}; // Z++: ℤ
+    float m_fCurrentBlurAlpha{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (m_VectorToSun_len == 16u && m_VectorToSun.size() == 16u)
+            && (m_fShadowFrontX_len == 16u && m_fShadowFrontX.size() == 16u)
+            && (m_fShadowFrontY_len == 16u && m_fShadowFrontY.size() == 16u)
+            && (m_fShadowSideX_len == 16u && m_fShadowSideX.size() == 16u)
+            && (m_fShadowSideY_len == 16u && m_fShadowSideY.size() == 16u)
+            && (m_fShadowDisplacementX_len == 16u && m_fShadowDisplacementX.size() == 16u)
+            && (m_fShadowDisplacementY_len == 16u && m_fShadowDisplacementY.size() == 16u);
     }
 };
 // State Schema Contract from zpp/renderer/VarConsole.zpp
@@ -1451,6 +1637,13 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CRegisteredCorona_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CRegisteredCorona_ZppContract bad{};
+        bad.prevX_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CCredits_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CCredits_ZppContract bad{};
@@ -1580,7 +1773,7 @@ constexpr bool verify_renderer_zpp_invariants() {
         CFallingGlassPane_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CFallingGlassPane_ZppContract bad{};
-        bad.m_nTimer = -1;
+        bad.m_attachment_card = 2u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -1703,6 +1896,13 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CStoredShadow_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CStoredShadow_ZppContract bad{};
+        bad.m_pTexture_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CPolyBunch_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CPolyBunch_ZppContract bad{};
@@ -1805,6 +2005,13 @@ constexpr bool verify_renderer_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CTexList_ZppContract bad{};
         bad.ms_nTexUsed_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTimeCycle_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTimeCycle_ZppContract bad{};
+        bad.m_VectorToSun_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {

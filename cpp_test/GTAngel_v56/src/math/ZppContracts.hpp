@@ -46,10 +46,18 @@ struct CCompressedMatrixNotAligned_ZppContract {
 };
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CCompressedMatrix_ZppContract {
+    ZppVec3 m_vecPos{}; // Z++: CVector
+    int32_t m_rightX{0}; // Z++: ℤ
+    int32_t m_rightY{0}; // Z++: ℤ
+    int32_t m_rightZ{0}; // Z++: ℤ
+    int32_t m_upX{0}; // Z++: ℤ
+    int32_t m_upY{0}; // Z++: ℤ
+    int32_t m_upZ{0}; // Z++: ℤ
     int32_t _alignment{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/math/Quaternion.zpp
@@ -73,6 +81,9 @@ struct CRect_ZppContract {
 };
 // State Schema Contract from zpp/math/Vector.zpp
 struct CVector_ZppContract {
+    float x{0.0f}; // Z++: ℝ
+    float y{0.0f}; // Z++: ℝ
+    float z{0.0f}; // Z++: ℝ
     float w{0.0f}; // Z++: ℝ
     uint8_t this_field_card{0u}; // Z++: Ref[return]
     constexpr bool checkInvariant() const {

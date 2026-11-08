@@ -7,11 +7,11 @@
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/leeds
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/leeds/*.zpp
-// Modules: 2 | Formal Schemas: 13 | Free Types: 0
+// Modules: 6 | Formal Schemas: 106 | Free Types: 0
 // ============================================================================
 namespace zpp_leeds_spec {
-static constexpr int kZppModuleCount = 2;
-static constexpr int kZppSchemaCount = 13;
+static constexpr int kZppModuleCount = 6;
+static constexpr int kZppSchemaCount = 106;
 static constexpr int kZppEnumCount   = 0;
 struct ZppVec3 {
     float x{0.0f}, y{0.0f}, z{0.0f};
@@ -20,19 +20,107 @@ struct ZppVec3 {
 };
 // State Schema Contract from zpp/leeds/CustomSoundTrack.zpp
 struct cCustomSoundTrack_ZppContract {
+    uint8_t m_pSingleton_card{0u}; // Z++: Ref[cCustomSoundTrack]
     bool m_bIsPlaying{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_pSingleton_card <= 1u)
+            && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/leeds/base/memoryManager.zpp
+struct cMemoryManager_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
-// State Schema Contract from zpp/leeds/smallHeap.zpp
-struct cSmallHeap_ZppContract {
-    bool bLocked{false}; // Z++: 𝔹
-    bool bUnk{false}; // Z++: 𝔹
+// State Schema Contract from zpp/leeds/base/memoryManager.zpp
+struct cMainMemoryManager_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    uint8_t m_pInstance_card{0u}; // Z++: Ref[cMainMemoryManager]
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (m_pInstance_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/leeds/base/memoryManager.zpp
+struct cMemoryBlock_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/leeds/base/relocatableChunk.zpp
+struct cRelocatableChunk_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/leeds/base/relocatableChunk.zpp
+struct cRelocatableChunkClassInfo_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/leeds/base/relocatableChunk.zpp
+struct cRelocatableChunkWriter_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/leeds/base/sList.zpp
+struct cSList_ZppContract {
+    int32_t item{0}; // Z++: T
+    uint8_t first_card{0u}; // Z++: Ref[tSItem]
+    constexpr bool checkInvariant() const {
+        return (first_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/leeds/base/sList.zpp
+struct tSItem_ZppContract {
+    uint8_t next_card{0u}; // Z++: Ref[tSItem]
+    int32_t item{0}; // Z++: T
+    constexpr bool checkInvariant() const {
+        return (next_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/leeds/base/singletonManager.zpp
+struct cSingletonManager_ZppContract {
+    uint8_t head_card{0u}; // Z++: Ref[cSingletonBase]
+    uint8_t tail_card{0u}; // Z++: Ref[cSingletonBase]
+    constexpr bool checkInvariant() const {
+        return (head_card <= 1u)
+            && (tail_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/leeds/base/singletonManager.zpp
+struct cSingletonBase_ZppContract {
+    uint8_t next_card{0u}; // Z++: Ref[cSingletonBase]
+    constexpr bool checkInvariant() const {
+        return (next_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/leeds/base/singletonManager.zpp
+struct cSingleton_ZppContract {
+    uint8_t next_card{0u}; // Z++: Ref[cSingletonBase]
+    uint8_t mspInstance_card{0u}; // Z++: Ref[T]
+    constexpr bool checkInvariant() const {
+        return (next_card <= 1u)
+            && (mspInstance_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/leeds/smallHeap.zpp
+struct cSmallHeap_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    bool bLocked{false}; // Z++: 𝔹
+    bool bUnk{false}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // Query Operation Schema Contract (ΞcSmallHeap) from zpp/leeds/smallHeap.zpp
@@ -54,7 +142,84 @@ constexpr bool verify_leeds_zpp_invariants() {
         cCustomSoundTrack_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         cCustomSoundTrack_ZppContract bad{};
+        bad.m_pSingleton_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cMemoryManager_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cMemoryManager_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cMainMemoryManager_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cMainMemoryManager_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cMemoryBlock_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cMemoryBlock_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cRelocatableChunk_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cRelocatableChunk_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cRelocatableChunkClassInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cRelocatableChunkClassInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cRelocatableChunkWriter_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cRelocatableChunkWriter_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cSList_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cSList_ZppContract bad{};
+        bad.first_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tSItem_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tSItem_ZppContract bad{};
+        bad.next_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cSingletonManager_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cSingletonManager_ZppContract bad{};
+        bad.head_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cSingletonBase_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cSingletonBase_ZppContract bad{};
+        bad.next_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cSingleton_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cSingleton_ZppContract bad{};
+        bad.next_card = 2u;
         if (bad.checkInvariant()) return false;
     }
     {

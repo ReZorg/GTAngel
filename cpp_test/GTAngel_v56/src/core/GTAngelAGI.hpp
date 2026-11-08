@@ -1512,3 +1512,7 @@ static void DrawLine(HDC hdc, int x1, int y1, int x2, int y2, COLORREF c) {
     SelectObject(hdc, old); DeleteObject(p);
 }
 
+// Component-specific Z++ GTAngelAGI clock & weather bindings
+namespace gtangel_zpp_agi_bind {
+static_assert(zpp_core_spec::op_CClock_SetGameClock(zpp_core_spec::CClock_ZppContract{}, zpp_core_spec::apply_CClock_SetGameClock(zpp_core_spec::CClock_ZppContract{}, 6, 18, 0), 6, 18, 0), "GTAngelAGI CClock SetGameClock Z++ contract must hold");
+} // namespace gtangel_zpp_agi_bind

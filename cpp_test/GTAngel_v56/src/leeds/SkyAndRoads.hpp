@@ -1,6 +1,15 @@
-    // ── Z++ Formal Spec Contract (leeds): 2 modules, 13 schemas, 0 enums (CustomSoundTrack.zpp, smallHeap.zpp) ──
-    static constexpr int zpp_leeds_modules() { return 2; }
-    static constexpr int zpp_leeds_schemas() { return 13; }
+    // ── Z++ Formal Spec Component Binding (leeds): 6 modules, 106 schemas, 0 enums (CustomSoundTrack.zpp, base/memoryManager.zpp, base/relocatableChunk.zpp, base/sList.zpp, base/singletonManager.zpp, smallHeap.zpp) ──
+    static constexpr int zpp_leeds_modules() { return zpp_leeds_spec::kZppModuleCount; }
+    static constexpr int zpp_leeds_schemas() { return zpp_leeds_spec::kZppSchemaCount; }
+    static constexpr bool verifyComponent_leeds_zpp() {
+        return zpp_leeds_spec::verify_leeds_zpp_invariants() && (zpp_leeds_spec::cCustomSoundTrack_ZppContract{}.checkInvariant()) && (zpp_leeds_spec::op_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{}, zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{})));
+    }
+    bool verifyLiveWorld_leeds_zpp(const avatar3d::GameWorld& world) const {
+        auto h = zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{});
+        h.instance_addr = (world.worldSize > 0.0f) ? (int64_t)triangles_.size() : -1;
+        return h.checkInvariant() && !h.bLocked;
+    }
+    static_assert(verifyComponent_leeds_zpp(), "RasterEngine component Z++ binding failed for leeds");
     void buildSun() {
         const Vec3 light = normalize3({-0.35f, 0.82f, -0.44f});
         const Vec3 centre = {eye_.x + light.x * 260.0f, eye_.y + light.y * 260.0f, eye_.z + light.z * 260.0f};
@@ -79,6 +88,7 @@
     }
 
     void buildRoads(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_leeds_zpp(world)) return;
         // LW52 (Skidmarks.zpp CSkidmarks): stationary world-space braking tire marks on intersection approaches
         for (float laneZ : {-1.4f, 1.4f}) {
             for (float trackOff : {-0.62f, 0.62f}) {

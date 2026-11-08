@@ -57,7 +57,7 @@ struct CAnimBlendAssociation_ZppContract {
     int32_t animId{0}; // Z++: ℤ
     int32_t flags{0}; // Z++: ℤ
     int32_t callbackType{0}; // Z++: ℤ
-    int32_t callbackArg{0}; // Z++: ADDRESS
+    int64_t callbackArg{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (nodes_card <= 1u)
             && (hierarchy_card <= 1u);
@@ -119,10 +119,13 @@ struct KeyFrame_ZppContract {
 };
 // State Schema Contract from zpp/animation/AnimBlendSequence.zpp
 struct KeyFrameTrans_ZppContract {
+    int32_t rotation{0}; // Z++: CQuaternion
+    float deltaTime{0.0f}; // Z++: ℝ
     ZppVec3 translation{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (instance_addr >= 0);
+        return (instance_addr >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/animation/AnimBlendSequence.zpp
@@ -136,10 +139,14 @@ struct KeyFrameCompressed_ZppContract {
 };
 // State Schema Contract from zpp/animation/AnimBlendSequence.zpp
 struct KeyFrameTransCompressed_ZppContract {
+    std::array<int32_t, 4> rot{}; // Z++: seq ℤ  -- bounded array [4]
+    size_t rot_len{4u}; // Z++ cardinality #rot
+    int32_t deltaTime{0}; // Z++: ℤ
     std::array<int32_t, 3> trans{}; // Z++: seq ℤ  -- bounded array [3]
     size_t trans_len{3u}; // Z++ cardinality #trans
     constexpr bool checkInvariant() const {
-        return (trans_len == 3u && trans.size() == 3u);
+        return (rot_len == 4u && rot.size() == 4u)
+            && (trans_len == 3u && trans.size() == 3u);
     }
 };
 // State Schema Contract from zpp/animation/AnimManager.zpp
@@ -464,7 +471,7 @@ constexpr bool verify_animation_zpp_invariants() {
         KeyFrameTransCompressed_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         KeyFrameTransCompressed_ZppContract bad{};
-        bad.trans_len = 0u;
+        bad.rot_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -935,3 +942,8 @@ struct AvatarSkeleton {
 // ── Gameworld ──// ── Gameworld ──
 // Ground plane + obstacle pillars + goal beacon. The avatar must navigate
 // from spawn to the beacon while avoiding obstacles.
+// Component-specific Z++ animation blend bindings (from animation/ZppContracts.hpp)
+constexpr zpp_animation_spec::CAnimBlendAssociation_ZppContract makeAvatarZppBlendState(float blendAmount, float blendDelta) {
+    return zpp_animation_spec::apply_CAnimBlendAssociation_SetBlend(zpp_animation_spec::CAnimBlendAssociation_ZppContract{}, blendAmount, blendDelta);
+}
+static_assert(zpp_animation_spec::op_CAnimBlendAssociation_SetBlend(zpp_animation_spec::CAnimBlendAssociation_ZppContract{}, makeAvatarZppBlendState(0.75f, 0.25f), 0.75f, 0.25f), "AvatarSkeleton CAnimBlendAssociation SetBlend Z++ contract must hold");
