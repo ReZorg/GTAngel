@@ -1119,12 +1119,12 @@ constexpr CCarCtrl_ZppContract apply_CCarCtrl_UpdateCarCount(const CCarCtrl_ZppC
     return post;
 }
 // Delta Operation Schema Contract (ΔCCarCtrl) from zpp/control/CarCtrl.zpp
-constexpr bool op_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post, bool scriptControlsMpCarLimit_in = true) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.scriptControlsMpCarLimit == scriptControlsMpCarLimit_in);
+constexpr bool op_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post, bool toggle_in = true) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.scriptControlsMpCarLimit == toggle_in);
 }
-constexpr CCarCtrl_ZppContract apply_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, bool scriptControlsMpCarLimit_in = true) {
+constexpr CCarCtrl_ZppContract apply_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, bool toggle_in = true) {
     CCarCtrl_ZppContract post = pre;
-    post.scriptControlsMpCarLimit = scriptControlsMpCarLimit_in;
+    post.scriptControlsMpCarLimit = toggle_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCReplay) from zpp/control/Replay.zpp
@@ -1137,14 +1137,14 @@ constexpr CReplay_ZppContract apply_CReplay_FastForwardToTime(const CReplay_ZppC
     return post;
 }
 // Delta Operation Schema Contract (ΔCRestart) from zpp/control/Restart.zpp
-constexpr bool op_CRestart_OverrideNextRestart(const CRestart_ZppContract& pre, const CRestart_ZppContract& post, ZppVec3 OverridePosition_in = ZppVec3{1.0f, 2.0f, 3.0f}, float OverrideHeading_in = 2.5f) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bOverrideRestart == true) && (post.OverridePosition == OverridePosition_in) && (post.OverrideHeading == OverrideHeading_in);
+constexpr bool op_CRestart_OverrideNextRestart(const CRestart_ZppContract& pre, const CRestart_ZppContract& post, ZppVec3 pos_in = ZppVec3{1.0f, 2.0f, 3.0f}, float heading_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bOverrideRestart == true) && (post.OverridePosition == pos_in) && (post.OverrideHeading == heading_in);
 }
-constexpr CRestart_ZppContract apply_CRestart_OverrideNextRestart(const CRestart_ZppContract& pre, ZppVec3 OverridePosition_in = ZppVec3{1.0f, 2.0f, 3.0f}, float OverrideHeading_in = 2.5f) {
+constexpr CRestart_ZppContract apply_CRestart_OverrideNextRestart(const CRestart_ZppContract& pre, ZppVec3 pos_in = ZppVec3{1.0f, 2.0f, 3.0f}, float heading_in = 2.5f) {
     CRestart_ZppContract post = pre;
     post.bOverrideRestart = true;
-    post.OverridePosition = OverridePosition_in;
-    post.OverrideHeading = OverrideHeading_in;
+    post.OverridePosition = pos_in;
+    post.OverrideHeading = heading_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCRestart) from zpp/control/Restart.zpp
@@ -1696,14 +1696,14 @@ constexpr bool verify_control_zpp_invariants() {
     }
     {
         CCarCtrl_ZppContract pre{};
-        const bool scriptControlsMpCarLimit_in = true;
+        const bool toggle_in = true;
         pre.scriptControlsMpCarLimit = false;
-        const auto post = apply_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, scriptControlsMpCarLimit_in);
-        if (!op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, post, scriptControlsMpCarLimit_in)) return false;
+        const auto post = apply_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, toggle_in);
+        if (!op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, post, toggle_in)) return false;
         {
             CCarCtrl_ZppContract badPost = post;
-            badPost.scriptControlsMpCarLimit = !scriptControlsMpCarLimit_in;
-            if (op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, badPost, scriptControlsMpCarLimit_in)) return false;
+            badPost.scriptControlsMpCarLimit = !toggle_in;
+            if (op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, badPost, toggle_in)) return false;
         }
     }
     {
@@ -1719,27 +1719,27 @@ constexpr bool verify_control_zpp_invariants() {
     }
     {
         CRestart_ZppContract pre{};
-        const ZppVec3 OverridePosition_in = ZppVec3{1.0f, 2.0f, 3.0f};
-        const float OverrideHeading_in = 2.5f;
+        const ZppVec3 pos_in = ZppVec3{1.0f, 2.0f, 3.0f};
+        const float heading_in = 2.5f;
         pre.bOverrideRestart = false;
         pre.OverridePosition = ZppVec3{0.0f, 0.0f, 0.0f};
         pre.OverrideHeading = 0.0f;
-        const auto post = apply_CRestart_OverrideNextRestart(pre, OverridePosition_in, OverrideHeading_in);
-        if (!op_CRestart_OverrideNextRestart(pre, post, OverridePosition_in, OverrideHeading_in)) return false;
+        const auto post = apply_CRestart_OverrideNextRestart(pre, pos_in, heading_in);
+        if (!op_CRestart_OverrideNextRestart(pre, post, pos_in, heading_in)) return false;
         {
             CRestart_ZppContract badPost = post;
             badPost.bOverrideRestart = false;
-            if (op_CRestart_OverrideNextRestart(pre, badPost, OverridePosition_in, OverrideHeading_in)) return false;
+            if (op_CRestart_OverrideNextRestart(pre, badPost, pos_in, heading_in)) return false;
         }
         {
             CRestart_ZppContract badPost = post;
-            badPost.OverridePosition = ZppVec3{OverridePosition_in.x + 1.0f, OverridePosition_in.y, OverridePosition_in.z};
-            if (op_CRestart_OverrideNextRestart(pre, badPost, OverridePosition_in, OverrideHeading_in)) return false;
+            badPost.OverridePosition = ZppVec3{pos_in.x + 1.0f, pos_in.y, pos_in.z};
+            if (op_CRestart_OverrideNextRestart(pre, badPost, pos_in, heading_in)) return false;
         }
         {
             CRestart_ZppContract badPost = post;
-            badPost.OverrideHeading = OverrideHeading_in + 1.0f;
-            if (op_CRestart_OverrideNextRestart(pre, badPost, OverridePosition_in, OverrideHeading_in)) return false;
+            badPost.OverrideHeading = heading_in + 1.0f;
+            if (op_CRestart_OverrideNextRestart(pre, badPost, pos_in, heading_in)) return false;
         }
     }
     {

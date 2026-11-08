@@ -245,6 +245,23 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
           const updates = [];
           const extraParams = [];
+          const rhsParamMap = new Map();
+          const getOrAddInputParam = (rhsKey, kind, ct, defIn) => {
+            if (rhsParamMap.has(rhsKey)) {
+              const existing = rhsParamMap.get(rhsKey);
+              if (existing.kind !== kind) return null;
+              if (existing.ct !== ct && kind === 'scalar_int') {
+                existing.ct = 'int64_t';
+              }
+              return existing.pName;
+            }
+            const cleanBase = rhsKey.replace(/[^A-Za-z0-9_]/g, '_').replace(/_+$/, '');
+            const pName = `${cleanBase}_in`;
+            const entry = { pName, kind, ct, defIn };
+            rhsParamMap.set(rhsKey, entry);
+            extraParams.push(entry);
+            return pName;
+          };
           const rhsCopyTargets = new Set();
           for (const { rhsRaw } of rawFieldToRhs.values()) {
             const rf = targetSchema.fields.find(fl => fl.rawName === rhsRaw);
@@ -277,8 +294,8 @@ function buildZppCppContractBlock(folder, insideClass = false) {
               }
             } else if (f.kind === 'vec3' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
               // Category C (3D vector): declared CVector input parameter (e.g. CColSphere_Set center)
-              const pName = `${f.fname}_in`;
-              extraParams.push({ pName, ct: 'ZppVec3', defIn: 'ZppVec3{1.0f, 2.0f, 3.0f}' });
+              const pName = getOrAddInputParam(rhsRaw, f.kind, 'ZppVec3', 'ZppVec3{1.0f, 2.0f, 3.0f}');
+              if (!pName) { allUpdatesSupported = false; break; }
               updates.push({
                 field: f.fname,
                 preInit: rhsCopyTargets.has(f.fname) ? '' : `pre.${f.fname} = ZppVec3{0.0f, 0.0f, 0.0f};`,
@@ -304,8 +321,8 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = ${altBool};`
               });
             } else if (f.kind === 'scalar_bool' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
-              const pName = `${f.fname}_in`;
-              extraParams.push({ pName, ct: 'bool', defIn: 'true' });
+              const pName = getOrAddInputParam(rhsRaw, f.kind, 'bool', 'true');
+              if (!pName) { allUpdatesSupported = false; break; }
               updates.push({
                 field: f.fname,
                 preInit: `pre.${f.fname} = false;`,
@@ -325,8 +342,8 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = ${altLit};`
               });
             } else if (f.kind === 'scalar_float' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
-              const pName = `${f.fname}_in`;
-              extraParams.push({ pName, ct: 'float', defIn: '2.5f' });
+              const pName = getOrAddInputParam(rhsRaw, f.kind, 'float', '2.5f');
+              if (!pName) { allUpdatesSupported = false; break; }
               updates.push({
                 field: f.fname,
                 preInit: rhsCopyTargets.has(f.fname) ? '' : `pre.${f.fname} = 0.0f;`,
@@ -356,15 +373,14 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                   badPostMut: `badPost.${f.fname} = ${altVal};`
                 });
               } else if (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw)) {
-                const pName = `${f.fname}_in`;
-                const defIn = 25;
-                extraParams.push({ pName, ct: f.ct, defIn });
+                const pName = getOrAddInputParam(rhsRaw, f.kind, f.ct, 25);
+                if (!pName) { allUpdatesSupported = false; break; }
                 updates.push({
                   field: f.fname,
                   preInit: rhsCopyTargets.has(f.fname) ? '' : `pre.${f.fname} = 0;`,
-                  applyExpr: `post.${f.fname} = ${pName};`,
-                  postCond: `(post.${f.fname} == ${pName})`,
-                  badPostMut: `badPost.${f.fname} = ${pName} + 1;`
+                  applyExpr: `post.${f.fname} = (${f.ct})${pName};`,
+                  postCond: `(post.${f.fname} == (${f.ct})${pName})`,
+                  badPostMut: `badPost.${f.fname} = (${f.ct})(${pName} + 1);`
                 });
               } else {
                 allUpdatesSupported = false;
@@ -684,6 +700,9 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   }
   if (folder === 'renderer' && deltaOps.some(d => d.opName === 'CWeather_StoreWeatherState')) {
     out.push(`static_assert(op_CWeather_StoreWeatherState(CWeather_ZppContract{}, apply_CWeather_StoreWeatherState(CWeather_ZppContract{})), "CWeather_StoreWeatherState float-copy delta contract must hold");`);
+  }
+  if (folder === 'renderer' && deltaOps.some(d => d.opName === 'CWeather_ForceWeatherNow')) {
+    out.push(`static_assert(op_CWeather_ForceWeatherNow(CWeather_ZppContract{}, apply_CWeather_ForceWeatherNow(CWeather_ZppContract{}, 3), 3) && []() constexpr { auto bad = apply_CWeather_ForceWeatherNow(CWeather_ZppContract{}, 3); bad.NewWeatherType = 2; return !op_CWeather_ForceWeatherNow(CWeather_ZppContract{}, bad, 3); }(), "CWeather_ForceWeatherNow must require equal weather types from single weather_in input");`);
   }
   if (folder === 'collision' && deltaOps.some(d => d.opName === 'CColSphere_Set')) {
     out.push(`static_assert(op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(CColSphere_ZppContract{}, 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5), 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5) && !op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(CColSphere_ZppContract{}, 2.5f, ZppVec3{4.0f, 5.0f, 6.0f}, 4, 5), 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5), "CColSphere_Set must verify 3D CVector center");`);

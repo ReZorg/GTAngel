@@ -679,13 +679,13 @@ constexpr CCarGenerator_ZppContract apply_CCarGenerator_SwitchOff(const CCarGene
     return post;
 }
 // Delta Operation Schema Contract (ΔCCarGenerator) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, const CCarGenerator_ZppContract& post, int64_t m_nTimer_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nUsesRemaining == 65535) && (post.m_nTimer == m_nTimer_in);
+constexpr bool op_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, const CCarGenerator_ZppContract& post, int64_t CalcNextGen_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nUsesRemaining == 65535) && (post.m_nTimer == (int64_t)CalcNextGen_in);
 }
-constexpr CCarGenerator_ZppContract apply_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, int64_t m_nTimer_in = 25) {
+constexpr CCarGenerator_ZppContract apply_CCarGenerator_SwitchOn(const CCarGenerator_ZppContract& pre, int64_t CalcNextGen_in = 25) {
     CCarGenerator_ZppContract post = pre;
     post.m_nUsesRemaining = 65535;
-    post.m_nTimer = m_nTimer_in;
+    post.m_nTimer = (int64_t)CalcNextGen_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
@@ -799,12 +799,12 @@ constexpr CHeli_ZppContract apply_CHeli_MakeCatalinaHeliFlyAway(const CHeli_ZppC
     return post;
 }
 // Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
-constexpr bool op_CHeli_ActivateHeli(const CHeli_ZppContract& pre, const CHeli_ZppContract& post, bool ScriptHeliOn_in = true) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ScriptHeliOn == ScriptHeliOn_in);
+constexpr bool op_CHeli_ActivateHeli(const CHeli_ZppContract& pre, const CHeli_ZppContract& post, bool activate_in = true) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ScriptHeliOn == activate_in);
 }
-constexpr CHeli_ZppContract apply_CHeli_ActivateHeli(const CHeli_ZppContract& pre, bool ScriptHeliOn_in = true) {
+constexpr CHeli_ZppContract apply_CHeli_ActivateHeli(const CHeli_ZppContract& pre, bool activate_in = true) {
     CHeli_ZppContract post = pre;
-    post.ScriptHeliOn = ScriptHeliOn_in;
+    post.ScriptHeliOn = activate_in;
     return post;
 }
 constexpr bool verify_vehicles_zpp_invariants() {
@@ -1012,20 +1012,20 @@ constexpr bool verify_vehicles_zpp_invariants() {
     }
     {
         CCarGenerator_ZppContract pre{};
-        const int64_t m_nTimer_in = 25;
+        const int64_t CalcNextGen_in = 25;
         pre.m_nUsesRemaining = 0;
         pre.m_nTimer = 0;
-        const auto post = apply_CCarGenerator_SwitchOn(pre, m_nTimer_in);
-        if (!op_CCarGenerator_SwitchOn(pre, post, m_nTimer_in)) return false;
+        const auto post = apply_CCarGenerator_SwitchOn(pre, CalcNextGen_in);
+        if (!op_CCarGenerator_SwitchOn(pre, post, CalcNextGen_in)) return false;
         {
             CCarGenerator_ZppContract badPost = post;
             badPost.m_nUsesRemaining = 0;
-            if (op_CCarGenerator_SwitchOn(pre, badPost, m_nTimer_in)) return false;
+            if (op_CCarGenerator_SwitchOn(pre, badPost, CalcNextGen_in)) return false;
         }
         {
             CCarGenerator_ZppContract badPost = post;
-            badPost.m_nTimer = m_nTimer_in + 1;
-            if (op_CCarGenerator_SwitchOn(pre, badPost, m_nTimer_in)) return false;
+            badPost.m_nTimer = (int64_t)(CalcNextGen_in + 1);
+            if (op_CCarGenerator_SwitchOn(pre, badPost, CalcNextGen_in)) return false;
         }
     }
     {
@@ -1217,14 +1217,14 @@ constexpr bool verify_vehicles_zpp_invariants() {
     }
     {
         CHeli_ZppContract pre{};
-        const bool ScriptHeliOn_in = true;
+        const bool activate_in = true;
         pre.ScriptHeliOn = false;
-        const auto post = apply_CHeli_ActivateHeli(pre, ScriptHeliOn_in);
-        if (!op_CHeli_ActivateHeli(pre, post, ScriptHeliOn_in)) return false;
+        const auto post = apply_CHeli_ActivateHeli(pre, activate_in);
+        if (!op_CHeli_ActivateHeli(pre, post, activate_in)) return false;
         {
             CHeli_ZppContract badPost = post;
-            badPost.ScriptHeliOn = !ScriptHeliOn_in;
-            if (op_CHeli_ActivateHeli(pre, badPost, ScriptHeliOn_in)) return false;
+            badPost.ScriptHeliOn = !activate_in;
+            if (op_CHeli_ActivateHeli(pre, badPost, activate_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

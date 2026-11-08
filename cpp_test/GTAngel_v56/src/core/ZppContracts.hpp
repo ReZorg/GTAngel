@@ -1266,40 +1266,40 @@ constexpr bool op_CPool_GetSize_10(const CPool_ZppContract& state) {
     return state.checkInvariant();
 }
 // Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
-constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t ms_nMillisecondsPerGameMinute_in = 25, int64_t ms_nLastClockTick_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == 12) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockSeconds == 0) && (post.ms_nMillisecondsPerGameMinute == ms_nMillisecondsPerGameMinute_in) && (post.ms_nLastClockTick == ms_nLastClockTick_in) && (post.ms_bClockHasBeenStored == false);
+constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t scale_in = 25, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == 12) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockSeconds == 0) && (post.ms_nMillisecondsPerGameMinute == (int64_t)scale_in) && (post.ms_nLastClockTick == (int64_t)CTimer__GetTimeInMilliseconds_in) && (post.ms_bClockHasBeenStored == false);
 }
-constexpr CClock_ZppContract apply_CClock_Initialise(const CClock_ZppContract& pre, int64_t ms_nMillisecondsPerGameMinute_in = 25, int64_t ms_nLastClockTick_in = 25) {
+constexpr CClock_ZppContract apply_CClock_Initialise(const CClock_ZppContract& pre, int64_t scale_in = 25, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     CClock_ZppContract post = pre;
     post.ms_nGameClockHours = 12;
     post.ms_nGameClockMinutes = 0;
     post.ms_nGameClockSeconds = 0;
-    post.ms_nMillisecondsPerGameMinute = ms_nMillisecondsPerGameMinute_in;
-    post.ms_nLastClockTick = ms_nLastClockTick_in;
+    post.ms_nMillisecondsPerGameMinute = (int64_t)scale_in;
+    post.ms_nLastClockTick = (int64_t)CTimer__GetTimeInMilliseconds_in;
     post.ms_bClockHasBeenStored = false;
     return post;
 }
 // Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
-constexpr bool op_CClock_Update(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t ms_nLastClockTick_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nLastClockTick == ms_nLastClockTick_in) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockHours == 0);
+constexpr bool op_CClock_Update(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nLastClockTick == (int64_t)CTimer__GetTimeInMilliseconds_in) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockHours == 0);
 }
-constexpr CClock_ZppContract apply_CClock_Update(const CClock_ZppContract& pre, int64_t ms_nLastClockTick_in = 25) {
+constexpr CClock_ZppContract apply_CClock_Update(const CClock_ZppContract& pre, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     CClock_ZppContract post = pre;
-    post.ms_nLastClockTick = ms_nLastClockTick_in;
+    post.ms_nLastClockTick = (int64_t)CTimer__GetTimeInMilliseconds_in;
     post.ms_nGameClockMinutes = 0;
     post.ms_nGameClockHours = 0;
     return post;
 }
 // Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
-constexpr bool op_CClock_SetGameClock(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t ms_nGameClockMinutes_in = 25, int64_t ms_nGameClockHours_in = 25, int64_t ms_nLastClockTick_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockMinutes == ms_nGameClockMinutes_in) && (post.ms_nGameClockHours == ms_nGameClockHours_in) && (post.ms_nGameClockSeconds == 0) && (post.ms_nLastClockTick == ms_nLastClockTick_in);
+constexpr bool op_CClock_SetGameClock(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t m_in = 25, int64_t h_in = 25, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockMinutes == (int64_t)m_in) && (post.ms_nGameClockHours == (int64_t)h_in) && (post.ms_nGameClockSeconds == 0) && (post.ms_nLastClockTick == (int64_t)CTimer__GetTimeInMilliseconds_in);
 }
-constexpr CClock_ZppContract apply_CClock_SetGameClock(const CClock_ZppContract& pre, int64_t ms_nGameClockMinutes_in = 25, int64_t ms_nGameClockHours_in = 25, int64_t ms_nLastClockTick_in = 25) {
+constexpr CClock_ZppContract apply_CClock_SetGameClock(const CClock_ZppContract& pre, int64_t m_in = 25, int64_t h_in = 25, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     CClock_ZppContract post = pre;
-    post.ms_nGameClockMinutes = ms_nGameClockMinutes_in;
-    post.ms_nGameClockHours = ms_nGameClockHours_in;
+    post.ms_nGameClockMinutes = (int64_t)m_in;
+    post.ms_nGameClockHours = (int64_t)h_in;
     post.ms_nGameClockSeconds = 0;
-    post.ms_nLastClockTick = ms_nLastClockTick_in;
+    post.ms_nLastClockTick = (int64_t)CTimer__GetTimeInMilliseconds_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
@@ -1326,14 +1326,14 @@ constexpr CClock_ZppContract apply_CClock_RestoreClock(const CClock_ZppContract&
     return post;
 }
 // Delta Operation Schema Contract (ΔCMenuPictureAndText) from zpp/core/FrontEndControls.zpp
-constexpr bool op_CMenuPictureAndText_SetNewOldShadowWrapX(const CMenuPictureAndText_ZppContract& pre, const CMenuPictureAndText_ZppContract& post, bool m_bWrap_in = true, float m_wrapX_in = 2.5f, float m_oldWrapx_in = 2.5f) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_bWrap == m_bWrap_in) && (post.m_wrapX == m_wrapX_in) && (post.m_oldWrapx == m_oldWrapx_in);
+constexpr bool op_CMenuPictureAndText_SetNewOldShadowWrapX(const CMenuPictureAndText_ZppContract& pre, const CMenuPictureAndText_ZppContract& post, bool bWrapX_in = true, float newWrapX_in = 2.5f, float oldWrapX_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_bWrap == bWrapX_in) && (post.m_wrapX == newWrapX_in) && (post.m_oldWrapx == oldWrapX_in);
 }
-constexpr CMenuPictureAndText_ZppContract apply_CMenuPictureAndText_SetNewOldShadowWrapX(const CMenuPictureAndText_ZppContract& pre, bool m_bWrap_in = true, float m_wrapX_in = 2.5f, float m_oldWrapx_in = 2.5f) {
+constexpr CMenuPictureAndText_ZppContract apply_CMenuPictureAndText_SetNewOldShadowWrapX(const CMenuPictureAndText_ZppContract& pre, bool bWrapX_in = true, float newWrapX_in = 2.5f, float oldWrapX_in = 2.5f) {
     CMenuPictureAndText_ZppContract post = pre;
-    post.m_bWrap = m_bWrap_in;
-    post.m_wrapX = m_wrapX_in;
-    post.m_oldWrapx = m_oldWrapx_in;
+    post.m_bWrap = bWrapX_in;
+    post.m_wrapX = newWrapX_in;
+    post.m_oldWrapx = oldWrapX_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCMenuPage) from zpp/core/FrontEndControls.zpp
@@ -1376,13 +1376,13 @@ constexpr CKeyboardState_ZppContract apply_CKeyboardState_Clear(const CKeyboardS
     return post;
 }
 // Delta Operation Schema Contract (ΔCStreamingInfo) from zpp/core/Streaming.zpp
-constexpr bool op_CStreamingInfo_SetCdPosnAndSize(const CStreamingInfo_ZppContract& pre, const CStreamingInfo_ZppContract& post, int64_t m_position_in = 25, int64_t m_size_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_position == m_position_in) && (post.m_size == m_size_in);
+constexpr bool op_CStreamingInfo_SetCdPosnAndSize(const CStreamingInfo_ZppContract& pre, const CStreamingInfo_ZppContract& post, int64_t posn_in = 25, int64_t size_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_position == (int64_t)posn_in) && (post.m_size == (int64_t)size_in);
 }
-constexpr CStreamingInfo_ZppContract apply_CStreamingInfo_SetCdPosnAndSize(const CStreamingInfo_ZppContract& pre, int64_t m_position_in = 25, int64_t m_size_in = 25) {
+constexpr CStreamingInfo_ZppContract apply_CStreamingInfo_SetCdPosnAndSize(const CStreamingInfo_ZppContract& pre, int64_t posn_in = 25, int64_t size_in = 25) {
     CStreamingInfo_ZppContract post = pre;
-    post.m_position = m_position_in;
-    post.m_size = m_size_in;
+    post.m_position = (int64_t)posn_in;
+    post.m_size = (int64_t)size_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCTimer) from zpp/core/Timer.zpp
@@ -2091,101 +2091,101 @@ constexpr bool verify_core_zpp_invariants() {
     }
     {
         CClock_ZppContract pre{};
-        const int64_t ms_nMillisecondsPerGameMinute_in = 25;
-        const int64_t ms_nLastClockTick_in = 25;
+        const int64_t scale_in = 25;
+        const int64_t CTimer__GetTimeInMilliseconds_in = 25;
         pre.ms_nGameClockHours = 0;
         pre.ms_nGameClockMinutes = 1;
         pre.ms_nGameClockSeconds = 1;
         pre.ms_nMillisecondsPerGameMinute = 0;
         pre.ms_nLastClockTick = 0;
         pre.ms_bClockHasBeenStored = true;
-        const auto post = apply_CClock_Initialise(pre, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in);
-        if (!op_CClock_Initialise(pre, post, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+        const auto post = apply_CClock_Initialise(pre, scale_in, CTimer__GetTimeInMilliseconds_in);
+        if (!op_CClock_Initialise(pre, post, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         {
             CClock_ZppContract badPost = post;
             badPost.ms_nGameClockHours = 0;
-            if (op_CClock_Initialise(pre, badPost, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+            if (op_CClock_Initialise(pre, badPost, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
             badPost.ms_nGameClockMinutes = 1;
-            if (op_CClock_Initialise(pre, badPost, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+            if (op_CClock_Initialise(pre, badPost, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
             badPost.ms_nGameClockSeconds = 1;
-            if (op_CClock_Initialise(pre, badPost, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+            if (op_CClock_Initialise(pre, badPost, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
-            badPost.ms_nMillisecondsPerGameMinute = ms_nMillisecondsPerGameMinute_in + 1;
-            if (op_CClock_Initialise(pre, badPost, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+            badPost.ms_nMillisecondsPerGameMinute = (int64_t)(scale_in + 1);
+            if (op_CClock_Initialise(pre, badPost, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
-            badPost.ms_nLastClockTick = ms_nLastClockTick_in + 1;
-            if (op_CClock_Initialise(pre, badPost, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+            badPost.ms_nLastClockTick = (int64_t)(CTimer__GetTimeInMilliseconds_in + 1);
+            if (op_CClock_Initialise(pre, badPost, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
             badPost.ms_bClockHasBeenStored = true;
-            if (op_CClock_Initialise(pre, badPost, ms_nMillisecondsPerGameMinute_in, ms_nLastClockTick_in)) return false;
+            if (op_CClock_Initialise(pre, badPost, scale_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
     }
     {
         CClock_ZppContract pre{};
-        const int64_t ms_nLastClockTick_in = 25;
+        const int64_t CTimer__GetTimeInMilliseconds_in = 25;
         pre.ms_nLastClockTick = 0;
         pre.ms_nGameClockMinutes = 1;
         pre.ms_nGameClockHours = 1;
-        const auto post = apply_CClock_Update(pre, ms_nLastClockTick_in);
-        if (!op_CClock_Update(pre, post, ms_nLastClockTick_in)) return false;
+        const auto post = apply_CClock_Update(pre, CTimer__GetTimeInMilliseconds_in);
+        if (!op_CClock_Update(pre, post, CTimer__GetTimeInMilliseconds_in)) return false;
         {
             CClock_ZppContract badPost = post;
-            badPost.ms_nLastClockTick = ms_nLastClockTick_in + 1;
-            if (op_CClock_Update(pre, badPost, ms_nLastClockTick_in)) return false;
+            badPost.ms_nLastClockTick = (int64_t)(CTimer__GetTimeInMilliseconds_in + 1);
+            if (op_CClock_Update(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
             badPost.ms_nGameClockMinutes = 1;
-            if (op_CClock_Update(pre, badPost, ms_nLastClockTick_in)) return false;
+            if (op_CClock_Update(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
             badPost.ms_nGameClockHours = 1;
-            if (op_CClock_Update(pre, badPost, ms_nLastClockTick_in)) return false;
+            if (op_CClock_Update(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
     }
     {
         CClock_ZppContract pre{};
-        const int64_t ms_nGameClockMinutes_in = 25;
-        const int64_t ms_nGameClockHours_in = 25;
-        const int64_t ms_nLastClockTick_in = 25;
+        const int64_t m_in = 25;
+        const int64_t h_in = 25;
+        const int64_t CTimer__GetTimeInMilliseconds_in = 25;
         pre.ms_nGameClockMinutes = 0;
         pre.ms_nGameClockHours = 0;
         pre.ms_nGameClockSeconds = 1;
         pre.ms_nLastClockTick = 0;
-        const auto post = apply_CClock_SetGameClock(pre, ms_nGameClockMinutes_in, ms_nGameClockHours_in, ms_nLastClockTick_in);
-        if (!op_CClock_SetGameClock(pre, post, ms_nGameClockMinutes_in, ms_nGameClockHours_in, ms_nLastClockTick_in)) return false;
+        const auto post = apply_CClock_SetGameClock(pre, m_in, h_in, CTimer__GetTimeInMilliseconds_in);
+        if (!op_CClock_SetGameClock(pre, post, m_in, h_in, CTimer__GetTimeInMilliseconds_in)) return false;
         {
             CClock_ZppContract badPost = post;
-            badPost.ms_nGameClockMinutes = ms_nGameClockMinutes_in + 1;
-            if (op_CClock_SetGameClock(pre, badPost, ms_nGameClockMinutes_in, ms_nGameClockHours_in, ms_nLastClockTick_in)) return false;
+            badPost.ms_nGameClockMinutes = (int64_t)(m_in + 1);
+            if (op_CClock_SetGameClock(pre, badPost, m_in, h_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
-            badPost.ms_nGameClockHours = ms_nGameClockHours_in + 1;
-            if (op_CClock_SetGameClock(pre, badPost, ms_nGameClockMinutes_in, ms_nGameClockHours_in, ms_nLastClockTick_in)) return false;
+            badPost.ms_nGameClockHours = (int64_t)(h_in + 1);
+            if (op_CClock_SetGameClock(pre, badPost, m_in, h_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
             badPost.ms_nGameClockSeconds = 1;
-            if (op_CClock_SetGameClock(pre, badPost, ms_nGameClockMinutes_in, ms_nGameClockHours_in, ms_nLastClockTick_in)) return false;
+            if (op_CClock_SetGameClock(pre, badPost, m_in, h_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CClock_ZppContract badPost = post;
-            badPost.ms_nLastClockTick = ms_nLastClockTick_in + 1;
-            if (op_CClock_SetGameClock(pre, badPost, ms_nGameClockMinutes_in, ms_nGameClockHours_in, ms_nLastClockTick_in)) return false;
+            badPost.ms_nLastClockTick = (int64_t)(CTimer__GetTimeInMilliseconds_in + 1);
+            if (op_CClock_SetGameClock(pre, badPost, m_in, h_in, CTimer__GetTimeInMilliseconds_in)) return false;
         }
     }
     {
@@ -2242,28 +2242,28 @@ constexpr bool verify_core_zpp_invariants() {
     }
     {
         CMenuPictureAndText_ZppContract pre{};
-        const bool m_bWrap_in = true;
-        const float m_wrapX_in = 2.5f;
-        const float m_oldWrapx_in = 2.5f;
+        const bool bWrapX_in = true;
+        const float newWrapX_in = 2.5f;
+        const float oldWrapX_in = 2.5f;
         pre.m_bWrap = false;
         pre.m_wrapX = 0.0f;
         pre.m_oldWrapx = 0.0f;
-        const auto post = apply_CMenuPictureAndText_SetNewOldShadowWrapX(pre, m_bWrap_in, m_wrapX_in, m_oldWrapx_in);
-        if (!op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, post, m_bWrap_in, m_wrapX_in, m_oldWrapx_in)) return false;
+        const auto post = apply_CMenuPictureAndText_SetNewOldShadowWrapX(pre, bWrapX_in, newWrapX_in, oldWrapX_in);
+        if (!op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, post, bWrapX_in, newWrapX_in, oldWrapX_in)) return false;
         {
             CMenuPictureAndText_ZppContract badPost = post;
-            badPost.m_bWrap = !m_bWrap_in;
-            if (op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, badPost, m_bWrap_in, m_wrapX_in, m_oldWrapx_in)) return false;
+            badPost.m_bWrap = !bWrapX_in;
+            if (op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, badPost, bWrapX_in, newWrapX_in, oldWrapX_in)) return false;
         }
         {
             CMenuPictureAndText_ZppContract badPost = post;
-            badPost.m_wrapX = m_wrapX_in + 1.0f;
-            if (op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, badPost, m_bWrap_in, m_wrapX_in, m_oldWrapx_in)) return false;
+            badPost.m_wrapX = newWrapX_in + 1.0f;
+            if (op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, badPost, bWrapX_in, newWrapX_in, oldWrapX_in)) return false;
         }
         {
             CMenuPictureAndText_ZppContract badPost = post;
-            badPost.m_oldWrapx = m_oldWrapx_in + 1.0f;
-            if (op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, badPost, m_bWrap_in, m_wrapX_in, m_oldWrapx_in)) return false;
+            badPost.m_oldWrapx = oldWrapX_in + 1.0f;
+            if (op_CMenuPictureAndText_SetNewOldShadowWrapX(pre, badPost, bWrapX_in, newWrapX_in, oldWrapX_in)) return false;
         }
     }
     {
@@ -2373,21 +2373,21 @@ constexpr bool verify_core_zpp_invariants() {
     }
     {
         CStreamingInfo_ZppContract pre{};
-        const int64_t m_position_in = 25;
-        const int64_t m_size_in = 25;
+        const int64_t posn_in = 25;
+        const int64_t size_in = 25;
         pre.m_position = 0;
         pre.m_size = 0;
-        const auto post = apply_CStreamingInfo_SetCdPosnAndSize(pre, m_position_in, m_size_in);
-        if (!op_CStreamingInfo_SetCdPosnAndSize(pre, post, m_position_in, m_size_in)) return false;
+        const auto post = apply_CStreamingInfo_SetCdPosnAndSize(pre, posn_in, size_in);
+        if (!op_CStreamingInfo_SetCdPosnAndSize(pre, post, posn_in, size_in)) return false;
         {
             CStreamingInfo_ZppContract badPost = post;
-            badPost.m_position = m_position_in + 1;
-            if (op_CStreamingInfo_SetCdPosnAndSize(pre, badPost, m_position_in, m_size_in)) return false;
+            badPost.m_position = (int64_t)(posn_in + 1);
+            if (op_CStreamingInfo_SetCdPosnAndSize(pre, badPost, posn_in, size_in)) return false;
         }
         {
             CStreamingInfo_ZppContract badPost = post;
-            badPost.m_size = m_size_in + 1;
-            if (op_CStreamingInfo_SetCdPosnAndSize(pre, badPost, m_position_in, m_size_in)) return false;
+            badPost.m_size = (int64_t)(size_in + 1);
+            if (op_CStreamingInfo_SetCdPosnAndSize(pre, badPost, posn_in, size_in)) return false;
         }
     }
     {

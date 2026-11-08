@@ -1716,13 +1716,13 @@ constexpr CClouds_ZppContract apply_CClouds_Init(const CClouds_ZppContract& pre)
     return post;
 }
 // Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
-constexpr bool op_CCredits_Start(const CCredits_ZppContract& pre, const CCredits_ZppContract& post, int64_t CreditsStartTime_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == true) && (post.CreditsStartTime == CreditsStartTime_in);
+constexpr bool op_CCredits_Start(const CCredits_ZppContract& pre, const CCredits_ZppContract& post, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bCreditsGoing == true) && (post.CreditsStartTime == (int64_t)CTimer__GetTimeInMilliseconds_in);
 }
-constexpr CCredits_ZppContract apply_CCredits_Start(const CCredits_ZppContract& pre, int64_t CreditsStartTime_in = 25) {
+constexpr CCredits_ZppContract apply_CCredits_Start(const CCredits_ZppContract& pre, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     CCredits_ZppContract post = pre;
     post.bCreditsGoing = true;
-    post.CreditsStartTime = CreditsStartTime_in;
+    post.CreditsStartTime = (int64_t)CTimer__GetTimeInMilliseconds_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCCredits) from zpp/renderer/Credits.zpp
@@ -1781,22 +1781,22 @@ constexpr CShadowCamera_ZppContract apply_CShadowCamera_CShadowCamera(const CSha
     return post;
 }
 // Delta Operation Schema Contract (ΔCSpecialParticleStuff) from zpp/renderer/SpecialFX.zpp
-constexpr bool op_CSpecialParticleStuff_StartBoatFoamAnimation(const CSpecialParticleStuff_ZppContract& pre, const CSpecialParticleStuff_ZppContract& post, int64_t BoatFromStart_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.BoatFromStart == BoatFromStart_in);
+constexpr bool op_CSpecialParticleStuff_StartBoatFoamAnimation(const CSpecialParticleStuff_ZppContract& pre, const CSpecialParticleStuff_ZppContract& post, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.BoatFromStart == (int64_t)CTimer__GetTimeInMilliseconds_in);
 }
-constexpr CSpecialParticleStuff_ZppContract apply_CSpecialParticleStuff_StartBoatFoamAnimation(const CSpecialParticleStuff_ZppContract& pre, int64_t BoatFromStart_in = 25) {
+constexpr CSpecialParticleStuff_ZppContract apply_CSpecialParticleStuff_StartBoatFoamAnimation(const CSpecialParticleStuff_ZppContract& pre, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     CSpecialParticleStuff_ZppContract post = pre;
-    post.BoatFromStart = BoatFromStart_in;
+    post.BoatFromStart = (int64_t)CTimer__GetTimeInMilliseconds_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCSprite) from zpp/renderer/Sprite.zpp
-constexpr bool op_CSprite_InitSpriteBuffer(const CSprite_ZppContract& pre, const CSprite_ZppContract& post, float m_f2DNearScreenZ_in = 2.5f, float m_f2DFarScreenZ_in = 2.5f) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_f2DNearScreenZ == m_f2DNearScreenZ_in) && (post.m_f2DFarScreenZ == m_f2DFarScreenZ_in);
+constexpr bool op_CSprite_InitSpriteBuffer(const CSprite_ZppContract& pre, const CSprite_ZppContract& post, float RwIm2DGetNearScreenZ_in = 2.5f, float RwIm2DGetFarScreenZ_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_f2DNearScreenZ == RwIm2DGetNearScreenZ_in) && (post.m_f2DFarScreenZ == RwIm2DGetFarScreenZ_in);
 }
-constexpr CSprite_ZppContract apply_CSprite_InitSpriteBuffer(const CSprite_ZppContract& pre, float m_f2DNearScreenZ_in = 2.5f, float m_f2DFarScreenZ_in = 2.5f) {
+constexpr CSprite_ZppContract apply_CSprite_InitSpriteBuffer(const CSprite_ZppContract& pre, float RwIm2DGetNearScreenZ_in = 2.5f, float RwIm2DGetFarScreenZ_in = 2.5f) {
     CSprite_ZppContract post = pre;
-    post.m_f2DNearScreenZ = m_f2DNearScreenZ_in;
-    post.m_f2DFarScreenZ = m_f2DFarScreenZ_in;
+    post.m_f2DNearScreenZ = RwIm2DGetNearScreenZ_in;
+    post.m_f2DFarScreenZ = RwIm2DGetFarScreenZ_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCSprite) from zpp/renderer/Sprite.zpp
@@ -1828,14 +1828,14 @@ constexpr CSprite2d_ZppContract apply_CSprite2d_RenderVertexBuffer(const CSprite
     return post;
 }
 // Delta Operation Schema Contract (ΔCWaterCannon) from zpp/renderer/WaterCannon.zpp
-constexpr bool op_CWaterCannon_Init(const CWaterCannon_ZppContract& pre, const CWaterCannon_ZppContract& post, int64_t m_nTimeCreated_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_nId == 0) && (post.m_nCur == 0) && (post.m_nTimeCreated == m_nTimeCreated_in);
+constexpr bool op_CWaterCannon_Init(const CWaterCannon_ZppContract& pre, const CWaterCannon_ZppContract& post, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nId == 0) && (post.m_nCur == 0) && (post.m_nTimeCreated == (int64_t)CTimer__GetTimeInMilliseconds_in);
 }
-constexpr CWaterCannon_ZppContract apply_CWaterCannon_Init(const CWaterCannon_ZppContract& pre, int64_t m_nTimeCreated_in = 25) {
+constexpr CWaterCannon_ZppContract apply_CWaterCannon_Init(const CWaterCannon_ZppContract& pre, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     CWaterCannon_ZppContract post = pre;
     post.m_nId = 0;
     post.m_nCur = 0;
-    post.m_nTimeCreated = m_nTimeCreated_in;
+    post.m_nTimeCreated = (int64_t)CTimer__GetTimeInMilliseconds_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCWaterLevel) from zpp/renderer/WaterLevel.zpp
@@ -1848,23 +1848,23 @@ constexpr CWaterLevel_ZppContract apply_CWaterLevel_FreeBoatWakeArray(const CWat
     return post;
 }
 // Delta Operation Schema Contract (ΔCWeather) from zpp/renderer/Weather.zpp
-constexpr bool op_CWeather_ForceWeather(const CWeather_ZppContract& pre, const CWeather_ZppContract& post, int32_t ForcedWeatherType_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.ForcedWeatherType == ForcedWeatherType_in);
+constexpr bool op_CWeather_ForceWeather(const CWeather_ZppContract& pre, const CWeather_ZppContract& post, int32_t weather_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ForcedWeatherType == (int32_t)weather_in);
 }
-constexpr CWeather_ZppContract apply_CWeather_ForceWeather(const CWeather_ZppContract& pre, int32_t ForcedWeatherType_in = 25) {
+constexpr CWeather_ZppContract apply_CWeather_ForceWeather(const CWeather_ZppContract& pre, int32_t weather_in = 25) {
     CWeather_ZppContract post = pre;
-    post.ForcedWeatherType = ForcedWeatherType_in;
+    post.ForcedWeatherType = (int32_t)weather_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCWeather) from zpp/renderer/Weather.zpp
-constexpr bool op_CWeather_ForceWeatherNow(const CWeather_ZppContract& pre, const CWeather_ZppContract& post, int32_t OldWeatherType_in = 25, int32_t NewWeatherType_in = 25, int32_t ForcedWeatherType_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.OldWeatherType == OldWeatherType_in) && (post.NewWeatherType == NewWeatherType_in) && (post.ForcedWeatherType == ForcedWeatherType_in);
+constexpr bool op_CWeather_ForceWeatherNow(const CWeather_ZppContract& pre, const CWeather_ZppContract& post, int32_t weather_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.OldWeatherType == (int32_t)weather_in) && (post.NewWeatherType == (int32_t)weather_in) && (post.ForcedWeatherType == (int32_t)weather_in);
 }
-constexpr CWeather_ZppContract apply_CWeather_ForceWeatherNow(const CWeather_ZppContract& pre, int32_t OldWeatherType_in = 25, int32_t NewWeatherType_in = 25, int32_t ForcedWeatherType_in = 25) {
+constexpr CWeather_ZppContract apply_CWeather_ForceWeatherNow(const CWeather_ZppContract& pre, int32_t weather_in = 25) {
     CWeather_ZppContract post = pre;
-    post.OldWeatherType = OldWeatherType_in;
-    post.NewWeatherType = NewWeatherType_in;
-    post.ForcedWeatherType = ForcedWeatherType_in;
+    post.OldWeatherType = (int32_t)weather_in;
+    post.NewWeatherType = (int32_t)weather_in;
+    post.ForcedWeatherType = (int32_t)weather_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCWeather) from zpp/renderer/Weather.zpp
@@ -1905,13 +1905,13 @@ constexpr CWeather_ZppContract apply_CWeather_ForceHurricaneWeather(const CWeath
     return post;
 }
 // Delta Operation Schema Contract (ΔCWindModifiers) from zpp/renderer/WindModifiers.zpp
-constexpr bool op_CWindModifiers_RegisterOne(const CWindModifiers_ZppContract& pre, const CWindModifiers_ZppContract& post, ZppVec3 m_pos_in = ZppVec3{1.0f, 2.0f, 3.0f}, int32_t m_type_in = 25) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.m_pos == m_pos_in) && (post.m_type == m_type_in);
+constexpr bool op_CWindModifiers_RegisterOne(const CWindModifiers_ZppContract& pre, const CWindModifiers_ZppContract& post, ZppVec3 pos_in = ZppVec3{1.0f, 2.0f, 3.0f}, int32_t type_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_pos == pos_in) && (post.m_type == (int32_t)type_in);
 }
-constexpr CWindModifiers_ZppContract apply_CWindModifiers_RegisterOne(const CWindModifiers_ZppContract& pre, ZppVec3 m_pos_in = ZppVec3{1.0f, 2.0f, 3.0f}, int32_t m_type_in = 25) {
+constexpr CWindModifiers_ZppContract apply_CWindModifiers_RegisterOne(const CWindModifiers_ZppContract& pre, ZppVec3 pos_in = ZppVec3{1.0f, 2.0f, 3.0f}, int32_t type_in = 25) {
     CWindModifiers_ZppContract post = pre;
-    post.m_pos = m_pos_in;
-    post.m_type = m_type_in;
+    post.m_pos = pos_in;
+    post.m_type = (int32_t)type_in;
     return post;
 }
 constexpr bool verify_renderer_zpp_invariants() {
@@ -2426,20 +2426,20 @@ constexpr bool verify_renderer_zpp_invariants() {
     }
     {
         CCredits_ZppContract pre{};
-        const int64_t CreditsStartTime_in = 25;
+        const int64_t CTimer__GetTimeInMilliseconds_in = 25;
         pre.bCreditsGoing = false;
         pre.CreditsStartTime = 0;
-        const auto post = apply_CCredits_Start(pre, CreditsStartTime_in);
-        if (!op_CCredits_Start(pre, post, CreditsStartTime_in)) return false;
+        const auto post = apply_CCredits_Start(pre, CTimer__GetTimeInMilliseconds_in);
+        if (!op_CCredits_Start(pre, post, CTimer__GetTimeInMilliseconds_in)) return false;
         {
             CCredits_ZppContract badPost = post;
             badPost.bCreditsGoing = false;
-            if (op_CCredits_Start(pre, badPost, CreditsStartTime_in)) return false;
+            if (op_CCredits_Start(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CCredits_ZppContract badPost = post;
-            badPost.CreditsStartTime = CreditsStartTime_in + 1;
-            if (op_CCredits_Start(pre, badPost, CreditsStartTime_in)) return false;
+            badPost.CreditsStartTime = (int64_t)(CTimer__GetTimeInMilliseconds_in + 1);
+            if (op_CCredits_Start(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
     }
     {
@@ -2516,33 +2516,33 @@ constexpr bool verify_renderer_zpp_invariants() {
     }
     {
         CSpecialParticleStuff_ZppContract pre{};
-        const int64_t BoatFromStart_in = 25;
+        const int64_t CTimer__GetTimeInMilliseconds_in = 25;
         pre.BoatFromStart = 0;
-        const auto post = apply_CSpecialParticleStuff_StartBoatFoamAnimation(pre, BoatFromStart_in);
-        if (!op_CSpecialParticleStuff_StartBoatFoamAnimation(pre, post, BoatFromStart_in)) return false;
+        const auto post = apply_CSpecialParticleStuff_StartBoatFoamAnimation(pre, CTimer__GetTimeInMilliseconds_in);
+        if (!op_CSpecialParticleStuff_StartBoatFoamAnimation(pre, post, CTimer__GetTimeInMilliseconds_in)) return false;
         {
             CSpecialParticleStuff_ZppContract badPost = post;
-            badPost.BoatFromStart = BoatFromStart_in + 1;
-            if (op_CSpecialParticleStuff_StartBoatFoamAnimation(pre, badPost, BoatFromStart_in)) return false;
+            badPost.BoatFromStart = (int64_t)(CTimer__GetTimeInMilliseconds_in + 1);
+            if (op_CSpecialParticleStuff_StartBoatFoamAnimation(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
     }
     {
         CSprite_ZppContract pre{};
-        const float m_f2DNearScreenZ_in = 2.5f;
-        const float m_f2DFarScreenZ_in = 2.5f;
+        const float RwIm2DGetNearScreenZ_in = 2.5f;
+        const float RwIm2DGetFarScreenZ_in = 2.5f;
         pre.m_f2DNearScreenZ = 0.0f;
         pre.m_f2DFarScreenZ = 0.0f;
-        const auto post = apply_CSprite_InitSpriteBuffer(pre, m_f2DNearScreenZ_in, m_f2DFarScreenZ_in);
-        if (!op_CSprite_InitSpriteBuffer(pre, post, m_f2DNearScreenZ_in, m_f2DFarScreenZ_in)) return false;
+        const auto post = apply_CSprite_InitSpriteBuffer(pre, RwIm2DGetNearScreenZ_in, RwIm2DGetFarScreenZ_in);
+        if (!op_CSprite_InitSpriteBuffer(pre, post, RwIm2DGetNearScreenZ_in, RwIm2DGetFarScreenZ_in)) return false;
         {
             CSprite_ZppContract badPost = post;
-            badPost.m_f2DNearScreenZ = m_f2DNearScreenZ_in + 1.0f;
-            if (op_CSprite_InitSpriteBuffer(pre, badPost, m_f2DNearScreenZ_in, m_f2DFarScreenZ_in)) return false;
+            badPost.m_f2DNearScreenZ = RwIm2DGetNearScreenZ_in + 1.0f;
+            if (op_CSprite_InitSpriteBuffer(pre, badPost, RwIm2DGetNearScreenZ_in, RwIm2DGetFarScreenZ_in)) return false;
         }
         {
             CSprite_ZppContract badPost = post;
-            badPost.m_f2DFarScreenZ = m_f2DFarScreenZ_in + 1.0f;
-            if (op_CSprite_InitSpriteBuffer(pre, badPost, m_f2DNearScreenZ_in, m_f2DFarScreenZ_in)) return false;
+            badPost.m_f2DFarScreenZ = RwIm2DGetFarScreenZ_in + 1.0f;
+            if (op_CSprite_InitSpriteBuffer(pre, badPost, RwIm2DGetNearScreenZ_in, RwIm2DGetFarScreenZ_in)) return false;
         }
     }
     {
@@ -2586,26 +2586,26 @@ constexpr bool verify_renderer_zpp_invariants() {
     }
     {
         CWaterCannon_ZppContract pre{};
-        const int64_t m_nTimeCreated_in = 25;
+        const int64_t CTimer__GetTimeInMilliseconds_in = 25;
         pre.m_nId = 1;
         pre.m_nCur = 1;
         pre.m_nTimeCreated = 0;
-        const auto post = apply_CWaterCannon_Init(pre, m_nTimeCreated_in);
-        if (!op_CWaterCannon_Init(pre, post, m_nTimeCreated_in)) return false;
+        const auto post = apply_CWaterCannon_Init(pre, CTimer__GetTimeInMilliseconds_in);
+        if (!op_CWaterCannon_Init(pre, post, CTimer__GetTimeInMilliseconds_in)) return false;
         {
             CWaterCannon_ZppContract badPost = post;
             badPost.m_nId = 1;
-            if (op_CWaterCannon_Init(pre, badPost, m_nTimeCreated_in)) return false;
+            if (op_CWaterCannon_Init(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CWaterCannon_ZppContract badPost = post;
             badPost.m_nCur = 1;
-            if (op_CWaterCannon_Init(pre, badPost, m_nTimeCreated_in)) return false;
+            if (op_CWaterCannon_Init(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
         {
             CWaterCannon_ZppContract badPost = post;
-            badPost.m_nTimeCreated = m_nTimeCreated_in + 1;
-            if (op_CWaterCannon_Init(pre, badPost, m_nTimeCreated_in)) return false;
+            badPost.m_nTimeCreated = (int64_t)(CTimer__GetTimeInMilliseconds_in + 1);
+            if (op_CWaterCannon_Init(pre, badPost, CTimer__GetTimeInMilliseconds_in)) return false;
         }
     }
     {
@@ -2621,40 +2621,38 @@ constexpr bool verify_renderer_zpp_invariants() {
     }
     {
         CWeather_ZppContract pre{};
-        const int32_t ForcedWeatherType_in = 25;
+        const int32_t weather_in = 25;
         pre.ForcedWeatherType = 0;
-        const auto post = apply_CWeather_ForceWeather(pre, ForcedWeatherType_in);
-        if (!op_CWeather_ForceWeather(pre, post, ForcedWeatherType_in)) return false;
+        const auto post = apply_CWeather_ForceWeather(pre, weather_in);
+        if (!op_CWeather_ForceWeather(pre, post, weather_in)) return false;
         {
             CWeather_ZppContract badPost = post;
-            badPost.ForcedWeatherType = ForcedWeatherType_in + 1;
-            if (op_CWeather_ForceWeather(pre, badPost, ForcedWeatherType_in)) return false;
+            badPost.ForcedWeatherType = (int32_t)(weather_in + 1);
+            if (op_CWeather_ForceWeather(pre, badPost, weather_in)) return false;
         }
     }
     {
         CWeather_ZppContract pre{};
-        const int32_t OldWeatherType_in = 25;
-        const int32_t NewWeatherType_in = 25;
-        const int32_t ForcedWeatherType_in = 25;
+        const int32_t weather_in = 25;
         pre.OldWeatherType = 0;
         pre.NewWeatherType = 0;
         pre.ForcedWeatherType = 0;
-        const auto post = apply_CWeather_ForceWeatherNow(pre, OldWeatherType_in, NewWeatherType_in, ForcedWeatherType_in);
-        if (!op_CWeather_ForceWeatherNow(pre, post, OldWeatherType_in, NewWeatherType_in, ForcedWeatherType_in)) return false;
+        const auto post = apply_CWeather_ForceWeatherNow(pre, weather_in);
+        if (!op_CWeather_ForceWeatherNow(pre, post, weather_in)) return false;
         {
             CWeather_ZppContract badPost = post;
-            badPost.OldWeatherType = OldWeatherType_in + 1;
-            if (op_CWeather_ForceWeatherNow(pre, badPost, OldWeatherType_in, NewWeatherType_in, ForcedWeatherType_in)) return false;
+            badPost.OldWeatherType = (int32_t)(weather_in + 1);
+            if (op_CWeather_ForceWeatherNow(pre, badPost, weather_in)) return false;
         }
         {
             CWeather_ZppContract badPost = post;
-            badPost.NewWeatherType = NewWeatherType_in + 1;
-            if (op_CWeather_ForceWeatherNow(pre, badPost, OldWeatherType_in, NewWeatherType_in, ForcedWeatherType_in)) return false;
+            badPost.NewWeatherType = (int32_t)(weather_in + 1);
+            if (op_CWeather_ForceWeatherNow(pre, badPost, weather_in)) return false;
         }
         {
             CWeather_ZppContract badPost = post;
-            badPost.ForcedWeatherType = ForcedWeatherType_in + 1;
-            if (op_CWeather_ForceWeatherNow(pre, badPost, OldWeatherType_in, NewWeatherType_in, ForcedWeatherType_in)) return false;
+            badPost.ForcedWeatherType = (int32_t)(weather_in + 1);
+            if (op_CWeather_ForceWeatherNow(pre, badPost, weather_in)) return false;
         }
     }
     {
@@ -2752,21 +2750,21 @@ constexpr bool verify_renderer_zpp_invariants() {
     }
     {
         CWindModifiers_ZppContract pre{};
-        const ZppVec3 m_pos_in = ZppVec3{1.0f, 2.0f, 3.0f};
-        const int32_t m_type_in = 25;
+        const ZppVec3 pos_in = ZppVec3{1.0f, 2.0f, 3.0f};
+        const int32_t type_in = 25;
         pre.m_pos = ZppVec3{0.0f, 0.0f, 0.0f};
         pre.m_type = 0;
-        const auto post = apply_CWindModifiers_RegisterOne(pre, m_pos_in, m_type_in);
-        if (!op_CWindModifiers_RegisterOne(pre, post, m_pos_in, m_type_in)) return false;
+        const auto post = apply_CWindModifiers_RegisterOne(pre, pos_in, type_in);
+        if (!op_CWindModifiers_RegisterOne(pre, post, pos_in, type_in)) return false;
         {
             CWindModifiers_ZppContract badPost = post;
-            badPost.m_pos = ZppVec3{m_pos_in.x + 1.0f, m_pos_in.y, m_pos_in.z};
-            if (op_CWindModifiers_RegisterOne(pre, badPost, m_pos_in, m_type_in)) return false;
+            badPost.m_pos = ZppVec3{pos_in.x + 1.0f, pos_in.y, pos_in.z};
+            if (op_CWindModifiers_RegisterOne(pre, badPost, pos_in, type_in)) return false;
         }
         {
             CWindModifiers_ZppContract badPost = post;
-            badPost.m_type = m_type_in + 1;
-            if (op_CWindModifiers_RegisterOne(pre, badPost, m_pos_in, m_type_in)) return false;
+            badPost.m_type = (int32_t)(type_in + 1);
+            if (op_CWindModifiers_RegisterOne(pre, badPost, pos_in, type_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
@@ -2774,5 +2772,6 @@ constexpr bool verify_renderer_zpp_invariants() {
 static_assert(verify_renderer_zpp_invariants(), "Z++ formal contract invariant failed for renderer");
 static_assert(CConsole_ZppContract{}.m_aTimer.size() == 8u, "CConsole MAX_LINES must be 8");
 static_assert(op_CWeather_StoreWeatherState(CWeather_ZppContract{}, apply_CWeather_StoreWeatherState(CWeather_ZppContract{})), "CWeather_StoreWeatherState float-copy delta contract must hold");
+static_assert(op_CWeather_ForceWeatherNow(CWeather_ZppContract{}, apply_CWeather_ForceWeatherNow(CWeather_ZppContract{}, 3), 3) && []() constexpr { auto bad = apply_CWeather_ForceWeatherNow(CWeather_ZppContract{}, 3); bad.NewWeatherType = 2; return !op_CWeather_ForceWeatherNow(CWeather_ZppContract{}, bad, 3); }(), "CWeather_ForceWeatherNow must require equal weather types from single weather_in input");
 } // namespace zpp_renderer_spec
 #endif // GTANGEL_ZPP_RENDERER_SPEC_GUARD

@@ -231,15 +231,15 @@ constexpr CMatrix_ZppContract apply_CMatrix_Detach(const CMatrix_ZppContract& pr
     return post;
 }
 // Delta Operation Schema Contract (ΔCRect) from zpp/math/Rect.zpp
-constexpr bool op_CRect_CRect_2(const CRect_ZppContract& pre, const CRect_ZppContract& post, float left_in = 2.5f, float top_in = 2.5f, float right_in = 2.5f, float bottom_in = 2.5f) {
-    return pre.checkInvariant() && post.checkInvariant() && (post.left == left_in) && (post.top == top_in) && (post.right == right_in) && (post.bottom == bottom_in);
+constexpr bool op_CRect_CRect_2(const CRect_ZppContract& pre, const CRect_ZppContract& post, float l_in = 2.5f, float t_in = 2.5f, float r_in = 2.5f, float b_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.left == l_in) && (post.top == t_in) && (post.right == r_in) && (post.bottom == b_in);
 }
-constexpr CRect_ZppContract apply_CRect_CRect_2(const CRect_ZppContract& pre, float left_in = 2.5f, float top_in = 2.5f, float right_in = 2.5f, float bottom_in = 2.5f) {
+constexpr CRect_ZppContract apply_CRect_CRect_2(const CRect_ZppContract& pre, float l_in = 2.5f, float t_in = 2.5f, float r_in = 2.5f, float b_in = 2.5f) {
     CRect_ZppContract post = pre;
-    post.left = left_in;
-    post.top = top_in;
-    post.right = right_in;
-    post.bottom = bottom_in;
+    post.left = l_in;
+    post.top = t_in;
+    post.right = r_in;
+    post.bottom = b_in;
     return post;
 }
 constexpr bool verify_math_zpp_invariants() {
@@ -442,35 +442,35 @@ constexpr bool verify_math_zpp_invariants() {
     }
     {
         CRect_ZppContract pre{};
-        const float left_in = 2.5f;
-        const float top_in = 2.5f;
-        const float right_in = 2.5f;
-        const float bottom_in = 2.5f;
+        const float l_in = 2.5f;
+        const float t_in = 2.5f;
+        const float r_in = 2.5f;
+        const float b_in = 2.5f;
         pre.left = 0.0f;
         pre.top = 0.0f;
         pre.right = 0.0f;
         pre.bottom = 0.0f;
-        const auto post = apply_CRect_CRect_2(pre, left_in, top_in, right_in, bottom_in);
-        if (!op_CRect_CRect_2(pre, post, left_in, top_in, right_in, bottom_in)) return false;
+        const auto post = apply_CRect_CRect_2(pre, l_in, t_in, r_in, b_in);
+        if (!op_CRect_CRect_2(pre, post, l_in, t_in, r_in, b_in)) return false;
         {
             CRect_ZppContract badPost = post;
-            badPost.left = left_in + 1.0f;
-            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+            badPost.left = l_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
         }
         {
             CRect_ZppContract badPost = post;
-            badPost.top = top_in + 1.0f;
-            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+            badPost.top = t_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
         }
         {
             CRect_ZppContract badPost = post;
-            badPost.right = right_in + 1.0f;
-            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+            badPost.right = r_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
         }
         {
             CRect_ZppContract badPost = post;
-            badPost.bottom = bottom_in + 1.0f;
-            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+            badPost.bottom = b_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, l_in, t_in, r_in, b_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
