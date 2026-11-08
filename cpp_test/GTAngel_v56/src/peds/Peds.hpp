@@ -1,3 +1,6 @@
+    // ── Z++ Formal Spec Contract (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
+    static constexpr int zpp_peds_modules() { return 17; }
+    static constexpr int zpp_peds_schemas() { return 673; }
     void buildWalkers(const avatar3d::GameWorld& world) {
         // Population rendering: compact humanoids (torso + head + legs) so
         // the retina sees real social entities, not empty pillars.
@@ -58,6 +61,11 @@
                 addTaperedBone(sk.joints[sh], sk.joints[el], 0.058f, 0.048f, suit, ObjectNpc);
                 addJoint(sk.joints[el], 0.048f, suit, ObjectNpc);
                 addTaperedBone(sk.joints[el], sk.joints[hd], 0.046f, 0.036f, skin, ObjectNpc);
+                if (side == 0 && ((wh & 1u) != 0u)) {
+                    // LW52 (Ped.zpp / Bones.zpp BONE_spine = 2): commuter backpack on citizen torso
+                    const Vec3 backDir{-sinf(w.heading) * 0.11f, 0.02f, -cosf(w.heading) * 0.11f};
+                    addTaperedBone(sk.joints[J::Spine] + backDir, sk.joints[J::Neck] + backDir, 0.078f, 0.068f, accent, ObjectNpc);
+                }
                 addJoint(sk.joints[hd], 0.042f, skin, ObjectNpc);
                 addTaperedBone(sk.joints[hip], sk.joints[knee], 0.078f, 0.062f, pants, ObjectNpc);
                 addJoint(sk.joints[knee], 0.058f, pants, ObjectNpc);

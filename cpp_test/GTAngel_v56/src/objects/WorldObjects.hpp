@@ -1,3 +1,6 @@
+    // ── Z++ Formal Spec Contract (objects): 8 modules, 160 schemas, 7 enums (CutsceneHead.zpp, CutsceneObject.zpp, DummyObject.zpp, Object.zpp, ObjectData.zpp, ParticleObject.zpp, Projectile.zpp, Stinger.zpp) ──
+    static constexpr int zpp_objects_modules() { return 8; }
+    static constexpr int zpp_objects_schemas() { return 160; }
     void buildGoal(const avatar3d::GameWorld& world) {
         static constexpr int Segments = 16;
         const auto pulseTicks = std::chrono::duration_cast<std::chrono::milliseconds>(

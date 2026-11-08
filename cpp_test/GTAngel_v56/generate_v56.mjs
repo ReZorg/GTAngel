@@ -7847,6 +7847,88 @@ once(`            bBox(0.68f, 0.68f, 1.62f, 1.74f, -1.55f, 1.45f, Colour{215, 22
                 }
             }`, 'LW51 6-Wheel City Bus wheels, bumpers & lights');
 
+// ===== LW52: Z++ SPEC-DRIVEN HPP IMPROVEMENTS (Automobile.zpp, DamageManager.zpp, Timecycle.zpp, Coronas.zpp, Ped.zpp, Bones.zpp) =====
+// 1. Embed Z++ formal schema contracts (eCarNodes, CDamageManager, CTimeCycle, eFormation, BoneTag)
+//    directly into the v15render / avatar3d headers.
+once(`namespace v15render {`,
+`namespace v15render {
+// Z++ Formal Schema Contracts derived from cpp_test/zpp/{vehicles,peds,renderer,animation}/*.zpp
+namespace zpp_spec {
+enum class eCarNodes : uint8_t {
+    CAR_WHEEL_RF = 1, CAR_WHEEL_RM, CAR_WHEEL_RB, CAR_WHEEL_LF, CAR_WHEEL_LM, CAR_WHEEL_LB,
+    CAR_BUMP_FRONT, CAR_BUMP_REAR, CAR_WING_RF, CAR_WING_RR, CAR_DOOR_RF, CAR_DOOR_RR,
+    CAR_WING_LF, CAR_WING_LR, CAR_DOOR_LF, CAR_DOOR_LR, CAR_BONNET, CAR_BOOT, CAR_WINDSCREEN, NUM_CAR_NODES
+};
+enum class eEngineStatus : uint8_t { STEAM1 = 100, STEAM2 = 150, SMOKE = 200, ON_FIRE = 225 };
+enum class eWheelStatus  : uint8_t { OK = 0, BURST = 1, MISSING = 2 };
+enum class eFormation    : uint8_t { UNDEFINED = 0, REAR, REAR_LEFT, REAR_RIGHT, FRONT_LEFT, FRONT_RIGHT, LEFT, RIGHT, FRONT };
+struct CDamageManagerSpec {
+    float m_fWheelDamageEffect{0.0f};
+    uint8_t m_engineStatus{0};
+    uint8_t m_wheelStatus[4]{0, 0, 0, 0};
+    uint8_t m_doorStatus[6]{0, 0, 0, 0, 0, 0};
+    constexpr bool invariant() const { return m_fWheelDamageEffect >= 0.0f && m_fWheelDamageEffect <= 1.0f; }
+};
+struct CTimeCycleSpec {
+    uint8_t m_nCurrentSkyTopBlue{46}, m_nCurrentSkyTopGreen{28}, m_nCurrentSkyTopRed{34};
+    uint8_t m_nCurrentLowCloudsBlue{128}, m_nCurrentLowCloudsGreen{86}, m_nCurrentLowCloudsRed{148};
+    float m_fCurrentLightsOnGroundBrightness{1.0f};
+    constexpr bool invariant() const { return m_fCurrentLightsOnGroundBrightness >= 0.0f; }
+};
+} // namespace zpp_spec`, 'LW52 Z++ formal schema contracts in renderer header');
+
+// 2. Automobile.zpp (Antennas.zpp + Skidmarks.zpp + HYDRAULIC_UPPER_EXT/LOWER_EXT):
+//    Add flexible rear-fender whip antenna + subtle tire-track skidmark ribbons behind coupes.
+once(`        for (float sx : {-0.65f, 0.65f})
+            addQuad(local(sx, 0.70f, -1.15f), local(sx, 0.70f, -0.92f),
+                    local(sx, 0.84f, -0.94f), local(sx, 0.84f, -1.15f), cab, id);`,
+`        for (float sx : {-0.65f, 0.65f})
+            addQuad(local(sx, 0.70f, -1.15f), local(sx, 0.70f, -0.92f),
+                    local(sx, 0.84f, -0.94f), local(sx, 0.84f, -1.15f), cab, id);
+        // LW52 (Antennas.zpp from Automobile.zpp): rear quarter whip antenna + 3D rear diffuser mudflaps
+        {
+            const float sway = 0.06f * sinf(wheelPhase * 0.5f);
+            addTaperedBone(local(-0.56f, 0.62f, -0.88f), local(-0.56f + sway, 1.32f, -1.02f), 0.012f, 0.006f, Colour{195, 205, 220, 255}, id);
+            addJoint(local(-0.56f + sway, 1.32f, -1.02f), 0.020f, Colour{65, 75, 250, 255}, id);
+            for (float tx : {-0.64f, 0.64f}) {
+                addQuad(local(tx - 0.06f, 0.15f, -1.16f), local(tx + 0.06f, 0.15f, -1.16f),
+                        local(tx + 0.06f, 0.28f, -1.12f), local(tx - 0.06f, 0.28f, -1.12f),
+                        darkTrim, id);
+            }
+        }`, 'LW52 Automobile.zpp whip antenna & diffuser mudflaps');
+
+// 2b. Skidmarks.zpp: stationary world-space tire braking skidmarks on the road approaches in buildRoads
+once(`    void buildRoads(const avatar3d::GameWorld& world) {`,
+`    void buildRoads(const avatar3d::GameWorld& world) {
+        // LW52 (Skidmarks.zpp CSkidmarks): stationary world-space braking tire marks on intersection approaches
+        for (float laneZ : {-1.4f, 1.4f}) {
+            for (float trackOff : {-0.62f, 0.62f}) {
+                const float tz = laneZ + trackOff;
+                addQuad({-7.5f, 0.017f, tz - 0.06f}, {-4.2f, 0.017f, tz - 0.06f},
+                        {-4.2f, 0.017f, tz + 0.06f}, {-7.5f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+                addQuad({ 4.2f, 0.017f, tz - 0.06f}, { 7.5f, 0.017f, tz - 0.06f},
+                        { 7.5f, 0.017f, tz + 0.06f}, { 4.2f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+            }
+        }`, 'LW52 stationary world-space road skidmarks');
+
+// 3. Ped.zpp & Bones.zpp: add commuter backpack / shoulder pack (BONE_spine = 2) + cap visor (BONE_head = 5).
+once(`                addJoint(sk.joints[el], 0.048f, suit, ObjectNpc);
+                addTaperedBone(sk.joints[el], sk.joints[hd], 0.046f, 0.036f, skin, ObjectNpc);`,
+`                addJoint(sk.joints[el], 0.048f, suit, ObjectNpc);
+                addTaperedBone(sk.joints[el], sk.joints[hd], 0.046f, 0.036f, skin, ObjectNpc);
+                if (side == 0 && ((wh & 1u) != 0u)) {
+                    // LW52 (Ped.zpp / Bones.zpp BONE_spine = 2): commuter backpack on citizen torso
+                    const Vec3 backDir{-sinf(w.heading) * 0.11f, 0.02f, -cosf(w.heading) * 0.11f};
+                    addTaperedBone(sk.joints[J::Spine] + backDir, sk.joints[J::Neck] + backDir, 0.078f, 0.068f, accent, ObjectNpc);
+                }`, 'LW52 Ped.zpp & Bones.zpp citizen backpack');
+
+// 4. Coronas.zpp & Timecycle.zpp: add 4-point star corona glare on streetlamp sodium bulbs.
+once(`            addJoint(head + Vec3{0, -0.04f, 0}, 0.095f, Colour{150, 235, 255, 255}, ObjectProp);`,
+`            addJoint(head + Vec3{0, -0.04f, 0}, 0.095f, Colour{150, 235, 255, 255}, ObjectProp);
+            // LW52 (Coronas.zpp TYPE_STAR & Timecycle.zpp): 4-point star corona around streetlamp core
+            addTriangle(head + Vec3{-0.38f, -0.04f, 0.0f}, head + Vec3{0.38f, -0.04f, 0.0f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);
+            addTriangle(head + Vec3{0.0f, -0.04f, -0.38f}, head + Vec3{0.0f, -0.04f, 0.38f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);`, 'LW52 Coronas.zpp streetlamp star corona');
+
 fs.writeFileSync('gtangel_agi_v56_full.cpp',out);
 const a=out.indexOf('namespace v15render {'),b=out.indexOf('} // namespace v15render',a);
 fs.writeFileSync('gtangel_agi_v56_renderer.hpp',out.slice(a,b+'} // namespace v15render'.length));

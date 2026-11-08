@@ -1,3 +1,6 @@
+    // ── Z++ Formal Spec Contract (entities): 3 modules, 190 schemas, 3 enums (Dummy.zpp, Entity.zpp, Physical.zpp) ──
+    static constexpr int zpp_entities_modules() { return 3; }
+    static constexpr int zpp_entities_schemas() { return 190; }
     void buildPillars(const avatar3d::GameWorld& world) {
         // LW34: landscaped urban street trees in stone planters + sleek
         // granite & cyan-lit cyber-columns (replaces brick-red pipes).

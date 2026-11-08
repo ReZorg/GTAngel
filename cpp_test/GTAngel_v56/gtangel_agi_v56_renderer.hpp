@@ -1,4 +1,28 @@
 namespace v15render {
+// Z++ Formal Schema Contracts derived from cpp_test/zpp/{vehicles,peds,renderer,animation}/*.zpp
+namespace zpp_spec {
+enum class eCarNodes : uint8_t {
+    CAR_WHEEL_RF = 1, CAR_WHEEL_RM, CAR_WHEEL_RB, CAR_WHEEL_LF, CAR_WHEEL_LM, CAR_WHEEL_LB,
+    CAR_BUMP_FRONT, CAR_BUMP_REAR, CAR_WING_RF, CAR_WING_RR, CAR_DOOR_RF, CAR_DOOR_RR,
+    CAR_WING_LF, CAR_WING_LR, CAR_DOOR_LF, CAR_DOOR_LR, CAR_BONNET, CAR_BOOT, CAR_WINDSCREEN, NUM_CAR_NODES
+};
+enum class eEngineStatus : uint8_t { STEAM1 = 100, STEAM2 = 150, SMOKE = 200, ON_FIRE = 225 };
+enum class eWheelStatus  : uint8_t { OK = 0, BURST = 1, MISSING = 2 };
+enum class eFormation    : uint8_t { UNDEFINED = 0, REAR, REAR_LEFT, REAR_RIGHT, FRONT_LEFT, FRONT_RIGHT, LEFT, RIGHT, FRONT };
+struct CDamageManagerSpec {
+    float m_fWheelDamageEffect{0.0f};
+    uint8_t m_engineStatus{0};
+    uint8_t m_wheelStatus[4]{0, 0, 0, 0};
+    uint8_t m_doorStatus[6]{0, 0, 0, 0, 0, 0};
+    constexpr bool invariant() const { return m_fWheelDamageEffect >= 0.0f && m_fWheelDamageEffect <= 1.0f; }
+};
+struct CTimeCycleSpec {
+    uint8_t m_nCurrentSkyTopBlue{46}, m_nCurrentSkyTopGreen{28}, m_nCurrentSkyTopRed{34};
+    uint8_t m_nCurrentLowCloudsBlue{128}, m_nCurrentLowCloudsGreen{86}, m_nCurrentLowCloudsRed{148};
+    float m_fCurrentLightsOnGroundBrightness{1.0f};
+    constexpr bool invariant() const { return m_fCurrentLightsOnGroundBrightness >= 0.0f; }
+};
+} // namespace zpp_spec
 
 using avatar3d::Vec3;
 
@@ -929,6 +953,16 @@ private:
     }
 
     void buildRoads(const avatar3d::GameWorld& world) {
+        // LW52 (Skidmarks.zpp CSkidmarks): stationary world-space braking tire marks on intersection approaches
+        for (float laneZ : {-1.4f, 1.4f}) {
+            for (float trackOff : {-0.62f, 0.62f}) {
+                const float tz = laneZ + trackOff;
+                addQuad({-7.5f, 0.017f, tz - 0.06f}, {-4.2f, 0.017f, tz - 0.06f},
+                        {-4.2f, 0.017f, tz + 0.06f}, {-7.5f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+                addQuad({ 4.2f, 0.017f, tz - 0.06f}, { 7.5f, 0.017f, tz - 0.06f},
+                        { 7.5f, 0.017f, tz + 0.06f}, { 4.2f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+            }
+        }
         // LW34: roads, sidewalks, curbs, and lane markings tiled in 2m chunks
         // within the local 42m camera window so near-plane culling never drops
         // long quads when vertices lie behind the camera.
@@ -1446,6 +1480,11 @@ private:
                 addTaperedBone(sk.joints[sh], sk.joints[el], 0.058f, 0.048f, suit, ObjectNpc);
                 addJoint(sk.joints[el], 0.048f, suit, ObjectNpc);
                 addTaperedBone(sk.joints[el], sk.joints[hd], 0.046f, 0.036f, skin, ObjectNpc);
+                if (side == 0 && ((wh & 1u) != 0u)) {
+                    // LW52 (Ped.zpp / Bones.zpp BONE_spine = 2): commuter backpack on citizen torso
+                    const Vec3 backDir{-sinf(w.heading) * 0.11f, 0.02f, -cosf(w.heading) * 0.11f};
+                    addTaperedBone(sk.joints[J::Spine] + backDir, sk.joints[J::Neck] + backDir, 0.078f, 0.068f, accent, ObjectNpc);
+                }
                 addJoint(sk.joints[hd], 0.042f, skin, ObjectNpc);
                 addTaperedBone(sk.joints[hip], sk.joints[knee], 0.078f, 0.062f, pants, ObjectNpc);
                 addJoint(sk.joints[knee], 0.058f, pants, ObjectNpc);
@@ -1682,6 +1721,17 @@ private:
         for (float sx : {-0.65f, 0.65f})
             addQuad(local(sx, 0.70f, -1.15f), local(sx, 0.70f, -0.92f),
                     local(sx, 0.84f, -0.94f), local(sx, 0.84f, -1.15f), cab, id);
+        // LW52 (Antennas.zpp from Automobile.zpp): rear quarter whip antenna + 3D rear diffuser mudflaps
+        {
+            const float sway = 0.06f * sinf(wheelPhase * 0.5f);
+            addTaperedBone(local(-0.56f, 0.62f, -0.88f), local(-0.56f + sway, 1.32f, -1.02f), 0.012f, 0.006f, Colour{195, 205, 220, 255}, id);
+            addJoint(local(-0.56f + sway, 1.32f, -1.02f), 0.020f, Colour{65, 75, 250, 255}, id);
+            for (float tx : {-0.64f, 0.64f}) {
+                addQuad(local(tx - 0.06f, 0.15f, -1.16f), local(tx + 0.06f, 0.15f, -1.16f),
+                        local(tx + 0.06f, 0.28f, -1.12f), local(tx - 0.06f, 0.28f, -1.12f),
+                        darkTrim, id);
+            }
+        }
         // Headlights (+z) and full-width taillight bar (-z)
         for (float x : {-0.48f, 0.34f}) {
             addQuad(local(x, 0.38f, 1.15f), local(x + 0.16f, 0.38f, 1.15f),
@@ -2085,6 +2135,9 @@ private:
             addTaperedBone(base + Vec3{0, 2.75f, 0}, head, 0.042f, 0.032f, poleCol, ObjectProp);
             addTaperedBone(head + Vec3{-armDir*0.18f, 0.04f, 0}, head + Vec3{armDir*0.18f, 0.02f, 0}, 0.085f, 0.065f, baseCol, ObjectProp);
             addJoint(head + Vec3{0, -0.04f, 0}, 0.095f, Colour{150, 235, 255, 255}, ObjectProp);
+            // LW52 (Coronas.zpp TYPE_STAR & Timecycle.zpp): 4-point star corona around streetlamp core
+            addTriangle(head + Vec3{-0.38f, -0.04f, 0.0f}, head + Vec3{0.38f, -0.04f, 0.0f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);
+            addTriangle(head + Vec3{0.0f, -0.04f, -0.38f}, head + Vec3{0.0f, -0.04f, 0.38f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);
             const Vec3 pool{head.x, 0.019f, head.z};
             for (int i = 0; i < 10; ++i) {
                 const float a0 = 6.2831853f * i / 10.0f, a1 = 6.2831853f * (i + 1) / 10.0f;
