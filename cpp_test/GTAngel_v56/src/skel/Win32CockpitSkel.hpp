@@ -608,10 +608,14 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
             g_agi.phasor.invariants().t8Coherence ? "OK" : "NO",
             g_agi.phasor.invariants().budget7E5R ? "OK" : "NO");
         DrawText(hdc, bx + 8, by + 40, eb, COL_GOLD, g_hFontSmall);
-        snprintf(eb, sizeof(eb), "Echo KSM c=%d s=%d (%s) Mode=%s Load=%.2f Align=%.3f Keep=%d/%d",
-            g_agi.echoSnap.cycle, g_agi.echoSnap.step, echo::discoveryPhaseName(g_agi.echoSnap.phase),
-            echo::cognitiveModeName(g_agi.echoSnap.mode), g_agi.echoSnap.cognitiveLoad,
-            g_agi.echoSnap.alignment, g_agi.echoLedger.keepCount(), g_agi.echoLedger.totalCount());
+        const int ksmCyc6 = g_agi.echoField.activeKsmCycle();
+        const int wkP = g_agi.echoField.weakestProperty(), stP = g_agi.echoField.strongestProperty();
+        snprintf(eb, sizeof(eb), "Echo KSM C%d s=%d (%s) A15:+%s(%.2f) Target:%s(%.2f) Keep=%d/%d",
+            ksmCyc6, g_agi.echoSnap.step,
+            echo::discoveryPhaseName(g_agi.echoSnap.phase),
+            echo::ALEXANDER_15_PROPERTIES[stP].name, g_agi.echoField.propScore(stP),
+            echo::ALEXANDER_15_PROPERTIES[wkP].name, g_agi.echoField.propScore(wkP),
+            g_agi.echoLedger.keepCount(), g_agi.echoLedger.totalCount());
         DrawText(hdc, bx + 8, by + 58, eb, COL_CYAN, g_hFontSmall);
         snprintf(eb, sizeof(eb), "CogZero c=%d Atoms=%d Tasks=%d/%d (%.1fms) | Layla:%s Q=%d (%.1fms)",
             g_agi.cogzeroStats.cycleNumber, g_agi.cogzeroAgent.atomCount(),

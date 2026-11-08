@@ -1304,6 +1304,7 @@ struct GTAngelAGI {
             float coherence = echoField.evaluate(echoGrid); // live arena field
             float contradiction = navMeanContradiction; // real visual contradiction
             echoSnap = echoController.tick(coherence, contradiction);
+            echoField.setActiveKsmCycle(echoSnap.cycle);
             echo::EvolutionRecord rec;
             rec.tick = tickCount;
             rec.step = echoSnap.step;

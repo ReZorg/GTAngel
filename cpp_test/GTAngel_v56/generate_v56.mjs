@@ -7929,6 +7929,174 @@ once(`            addJoint(head + Vec3{0, -0.04f, 0}, 0.095f, Colour{150, 235, 2
             addTriangle(head + Vec3{-0.38f, -0.04f, 0.0f}, head + Vec3{0.38f, -0.04f, 0.0f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);
             addTriangle(head + Vec3{0.0f, -0.04f, -0.38f}, head + Vec3{0.0f, -0.04f, 0.38f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);`, 'LW52 Coronas.zpp streetlamp star corona');
 
+// ===== LW53: CHRISTOPHER ALEXANDER'S 15 PROPERTIES OF LIVING STRUCTURE (P0..P14 & KSM CYCLES 1..6) =====
+once(`// ── Aesthetic Field ──
+class AestheticField {
+public:
+    AestheticField() = default;
+
+    float evaluate(const std::vector<std::vector<float>>& grid) {`,
+`// ── Christopher Alexander's 15 Properties of Living Structure (P0..P14) ──
+struct AlexanderPropertyDef {
+    int id;
+    const char* name;
+    const char* description;
+    uint8_t cycleMask; // Bitmask for Primary KSM Cycles 1..6 (bit c = Cycle c)
+};
+
+static constexpr AlexanderPropertyDef ALEXANDER_15_PROPERTIES[15] = {
+    { 0, "Levels of Scale",        "Hierarchical nesting of centers",       (1u << 4)},
+    { 1, "Strong Centers",         "Distinct focal points",                 (1u << 2) | (1u << 5)},
+    { 2, "Boundaries",             "Thick boundaries that unite/separate",  (1u << 4)},
+    { 3, "Alternating Repetition", "Rhythmic alternation",                  (1u << 4)},
+    { 4, "Positive Space",         "Every part positively shaped",          (1u << 2) | (1u << 6)},
+    { 5, "Good Shape",             "Clear, definite shapes",                (1u << 1) | (1u << 3)},
+    { 6, "Local Symmetries",       "Local, not global symmetry",            (1u << 4) | (1u << 6)},
+    { 7, "Deep Interlock",         "Centers hook into each other",          (1u << 5)},
+    { 8, "Contrast",               "Unity through contrast",                (1u << 1) | (1u << 2) | (1u << 3) | (1u << 4) | (1u << 5) | (1u << 6)},
+    { 9, "Gradients",              "Gradual transitions",                   (1u << 4)},
+    {10, "Roughness",              "Irregularity that gives life",          (1u << 4)},
+    {11, "Echoes",                 "Deep similarities",                     (1u << 3) | (1u << 5)},
+    {12, "The Void",               "Empty calm at center",                  (1u << 2) | (1u << 3)},
+    {13, "Simplicity",             "Geometric simplicity",                  (1u << 1) | (1u << 6)},
+    {14, "Not-Separateness",       "Connected to the world",                (1u << 2) | (1u << 3) | (1u << 5)}
+};
+
+// ── Aesthetic Field (with Alexander's 15 Properties Fitness Evaluator) ──
+class AestheticField {
+public:
+    AestheticField() = default;
+    float propScores_[15]{0.85f,0.90f,0.82f,0.80f,0.82f,0.86f,0.82f,0.85f,0.84f,0.80f,0.78f,0.88f,0.82f,0.80f,0.86f};
+    int weakestProp_{12};
+    int strongestProp_{1};
+    int activeKsmCycle_{1};
+
+    float propScore(int idx) const { return (idx >= 0 && idx < 15) ? propScores_[idx] : 0.0f; }
+    int weakestProperty() const { return weakestProp_; }
+    int strongestProperty() const { return strongestProp_; }
+    int activeKsmCycle() const { return activeKsmCycle_; }
+    void setActiveKsmCycle(int cycle) { activeKsmCycle_ = ((std::max(1, cycle) - 1) % 6) + 1; }
+
+    float evaluate(const std::vector<std::vector<float>>& grid) {`, 'LW53 Alexander 15 Properties definitions');
+
+once(`        coherence = coherence * 0.7f + coverage * 0.3f;
+        lastCoherence_ = coherence;
+        return coherence;
+    }`,
+`        coherence = coherence * 0.7f + coverage * 0.3f;
+        // Evaluate all 15 Properties of Living Structure from the spatial field (safe for ragged grids)
+        const int R = (int)grid.size();
+        float minV = 1.0f, maxV = 0.0f, gradAcc = 0.0f, altAcc = 0.0f, symAcc = 0.0f, interlockAcc = 0.0f, echoAcc = 0.0f;
+        float centerSum = 0.0f;
+        int pairs = 0, altTriplets = 0, symCount = 0, echoCount = 0, centerCount = 0;
+        for (int r = 0; r < R; ++r) {
+            const int rowC = (int)grid[r].size();
+            const bool inCenterR = (R < 3) ? (r == R / 2) : (r >= R / 3 && r < R - R / 3);
+            for (int c = 0; c < rowC; ++c) {
+                const float v = grid[r][c];
+                if (v < minV) minV = v;
+                if (v > maxV) maxV = v;
+                const bool inCenterC = (rowC < 3) ? (c == rowC / 2) : (c >= rowC / 3 && c < rowC - rowC / 3);
+                if (inCenterR && inCenterC) {
+                    centerSum += std::clamp(v, 0.0f, 1.0f);
+                    ++centerCount;
+                }
+                if (r + 1 < R && c < (int)grid[r + 1].size()) {
+                    const float v1 = grid[r + 1][c];
+                    const float dv = std::fabs(v - v1);
+                    gradAcc += 1.0f / (1.0f + dv * 3.0f);
+                    interlockAcc += std::min(v, v1);
+                    ++pairs;
+                    if (r + 2 < R && c < (int)grid[r + 2].size()) {
+                        const float v2 = grid[r + 2][c];
+                        const float sim02 = 1.0f - std::min(1.0f, std::fabs(v - v2));
+                        const float diffAdj = 0.5f * (std::min(1.0f, dv) + std::min(1.0f, std::fabs(v1 - v2)));
+                        altAcc += sim02 * diffAdj;
+                        ++altTriplets;
+                    }
+                }
+                if (c + 1 < rowC) {
+                    const float v1 = grid[r][c + 1];
+                    const float dv = std::fabs(v - v1);
+                    gradAcc += 1.0f / (1.0f + dv * 3.0f);
+                    interlockAcc += std::min(v, v1);
+                    ++pairs;
+                    if (c + 2 < rowC) {
+                        const float v2 = grid[r][c + 2];
+                        const float sim02 = 1.0f - std::min(1.0f, std::fabs(v - v2));
+                        const float diffAdj = 0.5f * (std::min(1.0f, dv) + std::min(1.0f, std::fabs(v1 - v2)));
+                        altAcc += sim02 * diffAdj;
+                        ++altTriplets;
+                    }
+                }
+                if (c > 0 && c + 1 < rowC) {
+                    symAcc += 1.0f - std::min(1.0f, std::fabs(grid[r][c - 1] - grid[r][c + 1]));
+                    ++symCount;
+                }
+                const int mr = R - 1 - r;
+                if (r < R / 2 && mr >= 0 && mr < R) {
+                    const int mRowC = (int)grid[mr].size();
+                    const int mc = mRowC - 1 - c;
+                    if (c < rowC / 2 && mc >= 0 && mc < mRowC) {
+                        echoAcc += 1.0f - std::min(1.0f, std::fabs(v - grid[mr][mc]));
+                        ++echoCount;
+                    }
+                }
+            }
+        }
+        const float normPairs = pairs > 0 ? (float)pairs : 1.0f;
+        const float normAlt   = altTriplets > 0 ? (float)altTriplets : 1.0f;
+        const float normSym   = symCount > 0 ? (float)symCount : 1.0f;
+        const float normEcho  = echoCount > 0 ? (float)echoCount : 1.0f;
+        const float centerMean = centerCount > 0 ? (centerSum / (float)centerCount) : std::clamp(mean, 0.0f, 1.0f);
+        const float centerVoid = 1.0f - centerMean; // Empty center outranks occupied center
+        propScores_[ 0] = std::clamp(0.55f + 0.42f * coherence, 0.0f, 1.0f);                          // 0 Levels of Scale
+        propScores_[ 1] = std::clamp(0.58f + 0.40f * maxV, 0.0f, 1.0f);                               // 1 Strong Centers
+        propScores_[ 2] = std::clamp(0.52f + 0.44f * (gradAcc / normPairs), 0.0f, 1.0f);              // 2 Boundaries
+        propScores_[ 3] = std::clamp(0.50f + 0.48f * (altAcc / normAlt), 0.0f, 1.0f);                 // 3 Alternating Repetition
+        propScores_[ 4] = std::clamp(0.48f + 0.48f * coverage, 0.0f, 1.0f);                           // 4 Positive Space
+        propScores_[ 5] = std::clamp(0.56f + 0.40f * coherence, 0.0f, 1.0f);                          // 5 Good Shape
+        propScores_[ 6] = std::clamp(0.52f + 0.44f * (symAcc / normSym), 0.0f, 1.0f);                 // 6 Local Symmetries
+        propScores_[ 7] = std::clamp(0.54f + 0.44f * (interlockAcc / normPairs), 0.0f, 1.0f);         // 7 Deep Interlock
+        propScores_[ 8] = std::clamp(0.52f + 0.45f * (maxV - minV), 0.0f, 1.0f);                      // 8 Contrast
+        propScores_[ 9] = std::clamp(0.50f + 0.46f * (gradAcc / normPairs), 0.0f, 1.0f);              // 9 Gradients
+        propScores_[10] = std::clamp(0.52f + 0.42f * (1.0f - std::fabs(variance - 0.08f)), 0.0f, 1.0f); // 10 Roughness
+        propScores_[11] = std::clamp(0.56f + 0.42f * (echoAcc / normEcho), 0.0f, 1.0f);               // 11 Echoes
+        propScores_[12] = std::clamp(0.45f + 0.50f * centerVoid, 0.0f, 1.0f);                         // 12 The Void
+        propScores_[13] = std::clamp(0.54f + 0.42f * (1.0f / (1.0f + variance * 2.0f)), 0.0f, 1.0f);  // 13 Simplicity
+        propScores_[14] = std::clamp(0.56f + 0.42f * (0.5f * coherence + 0.5f * coverage), 0.0f, 1.0f); // 14 Not-Separateness
+        weakestProp_ = 0; strongestProp_ = 0;
+        for (int p = 1; p < 15; ++p) {
+            if (propScores_[p] < propScores_[weakestProp_]) weakestProp_ = p;
+            if (propScores_[p] > propScores_[strongestProp_]) strongestProp_ = p;
+        }
+        lastCoherence_ = coherence;
+        return coherence;
+    }`, 'LW53 evaluate all 15 Alexander properties');
+
+// Advance echoField.setActiveKsmCycle(echoSnap.cycle) in echo_ksm step
+once(`            float coherence = echoField.evaluate(echoGrid); // live arena field
+            float contradiction = navMeanContradiction; // real visual contradiction
+            echoSnap = echoController.tick(coherence, contradiction);`,
+`            float coherence = echoField.evaluate(echoGrid); // live arena field
+            float contradiction = navMeanContradiction; // real visual contradiction
+            echoSnap = echoController.tick(coherence, contradiction);
+            echoField.setActiveKsmCycle(echoSnap.cycle);`, 'LW53 advance activeKsmCycle in echo_ksm');
+
+// Display Alexander's 15 Properties fitness & active KSM Cycle in the bottom-right Echo KSM cockpit line
+once(`        snprintf(eb, sizeof(eb), "Echo KSM c=%d s=%d (%s) Mode=%s Load=%.2f Align=%.3f Keep=%d/%d",
+            g_agi.echoSnap.cycle, g_agi.echoSnap.step, echo::discoveryPhaseName(g_agi.echoSnap.phase),
+            echo::cognitiveModeName(g_agi.echoSnap.mode), g_agi.echoSnap.cognitiveLoad,
+            g_agi.echoSnap.alignment, g_agi.echoLedger.keepCount(), g_agi.echoLedger.totalCount());`,
+`        const int ksmCyc6 = g_agi.echoField.activeKsmCycle();
+        const int wkP = g_agi.echoField.weakestProperty(), stP = g_agi.echoField.strongestProperty();
+        snprintf(eb, sizeof(eb), "Echo KSM C%d s=%d (%s) A15:+%s(%.2f) Target:%s(%.2f) Keep=%d/%d",
+            ksmCyc6, g_agi.echoSnap.step,
+            echo::discoveryPhaseName(g_agi.echoSnap.phase),
+            echo::ALEXANDER_15_PROPERTIES[stP].name, g_agi.echoField.propScore(stP),
+            echo::ALEXANDER_15_PROPERTIES[wkP].name, g_agi.echoField.propScore(wkP),
+            g_agi.echoLedger.keepCount(), g_agi.echoLedger.totalCount());`, 'LW53 cockpit Alexander 15 Properties HUD line');
+
 fs.writeFileSync('gtangel_agi_v56_full.cpp',out);
 const a=out.indexOf('namespace v15render {'),b=out.indexOf('} // namespace v15render',a);
 fs.writeFileSync('gtangel_agi_v56_renderer.hpp',out.slice(a,b+'} // namespace v15render'.length));
