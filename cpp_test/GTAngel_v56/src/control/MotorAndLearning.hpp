@@ -430,6 +430,15 @@ constexpr CCarCtrl_ZppContract apply_CCarCtrl_UpdateCarCount(const CCarCtrl_ZppC
     post.NumPermanentCars = 0;
     return post;
 }
+// Delta Operation Schema Contract (ΔCCarCtrl) from zpp/control/CarCtrl.zpp
+constexpr bool op_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, const CCarCtrl_ZppContract& post, bool scriptControlsMpCarLimit_in = true) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.scriptControlsMpCarLimit == scriptControlsMpCarLimit_in);
+}
+constexpr CCarCtrl_ZppContract apply_CCarCtrl_ToggleScriptControlsMpCarLimit(const CCarCtrl_ZppContract& pre, bool scriptControlsMpCarLimit_in = true) {
+    CCarCtrl_ZppContract post = pre;
+    post.scriptControlsMpCarLimit = scriptControlsMpCarLimit_in;
+    return post;
+}
 constexpr bool verify_control_zpp_invariants() {
     {
         CBridge_ZppContract valid{};
@@ -714,6 +723,18 @@ constexpr bool verify_control_zpp_invariants() {
             CCarCtrl_ZppContract badPost = post;
             badPost.NumPermanentCars = 1;
             if (op_CCarCtrl_UpdateCarCount(pre, badPost)) return false;
+        }
+    }
+    {
+        CCarCtrl_ZppContract pre{};
+        const bool scriptControlsMpCarLimit_in = true;
+        pre.scriptControlsMpCarLimit = false;
+        const auto post = apply_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, scriptControlsMpCarLimit_in);
+        if (!op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, post, scriptControlsMpCarLimit_in)) return false;
+        {
+            CCarCtrl_ZppContract badPost = post;
+            badPost.scriptControlsMpCarLimit = !scriptControlsMpCarLimit_in;
+            if (op_CCarCtrl_ToggleScriptControlsMpCarLimit(pre, badPost, scriptControlsMpCarLimit_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

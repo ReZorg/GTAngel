@@ -254,14 +254,17 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
           for (const { f, rhsRaw } of rawFieldToRhs.values()) {
             const rhsField = targetSchema.fields.find(fl => fl.rawName === rhsRaw && fl.fname !== f.fname);
-            if (rhsField && rhsField.kind === f.kind && f.kind === 'scalar_int' && !rawFieldToRhs.has(rhsField.fname)) {
+            if (rhsField && rhsField.kind === f.kind && (f.kind === 'scalar_int' || f.kind === 'scalar_float') && !rawFieldToRhs.has(rhsField.fname)) {
               // Category B: pre-state field copy `lhs' = rhsField`
+              const initRhs = f.kind === 'scalar_float' ? '7.0f' : '7';
+              const initLhs = f.kind === 'scalar_float' ? '0.0f' : '0';
+              const step = f.kind === 'scalar_float' ? '1.0f' : '1';
               updates.push({
                 field: f.fname,
-                preInit: `pre.${rhsField.fname} = 7; pre.${f.fname} = 0;`,
+                preInit: `pre.${rhsField.fname} = ${initRhs}; pre.${f.fname} = ${initLhs};`,
                 applyExpr: `post.${f.fname} = pre.${rhsField.fname};`,
                 postCond: `(post.${f.fname} == pre.${rhsField.fname})`,
-                badPostMut: `badPost.${f.fname} = pre.${rhsField.fname} + 1;`
+                badPostMut: `badPost.${f.fname} = pre.${rhsField.fname} + ${step};`
               });
             } else if (f.kind === 'opt_ref' && rhsRaw === '∅') {
               // Category A1: null pointer/reference literal `∅`
@@ -282,6 +285,17 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 postCond: `(post.${f.fname} == ${rhsRaw})`,
                 badPostMut: `badPost.${f.fname} = ${altBool};`
               });
+            } else if (f.kind === 'scalar_bool' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
+              // Category C (bool): declared boolean parameter or runtime query
+              const pName = `${f.fname}_in`;
+              extraParams.push({ pName, ct: 'bool', defIn: 'true' });
+              updates.push({
+                field: f.fname,
+                preInit: `pre.${f.fname} = false;`,
+                applyExpr: `post.${f.fname} = ${pName};`,
+                postCond: `(post.${f.fname} == ${pName})`,
+                badPostMut: `badPost.${f.fname} = !${pName};`
+              });
             } else if (f.kind === 'scalar_float' && /^\d+(?:\.\d+)?f?$/.test(rhsRaw)) {
               // Category A3: non-negative float literal
               const fval = parseFloat(rhsRaw);
@@ -293,6 +307,17 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 applyExpr: `post.${f.fname} = ${fLit};`,
                 postCond: `(post.${f.fname} == ${fLit})`,
                 badPostMut: `badPost.${f.fname} = ${altLit};`
+              });
+            } else if (f.kind === 'scalar_float' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
+              // Category C (float): declared float parameter (e.g. SetBlend, CRect_CRect_2, CDraw_SetFOV)
+              const pName = `${f.fname}_in`;
+              extraParams.push({ pName, ct: 'float', defIn: '2.5f' });
+              updates.push({
+                field: f.fname,
+                preInit: rhsCopyTargets.has(f.fname) ? '' : `pre.${f.fname} = 0.0f;`,
+                applyExpr: `post.${f.fname} = ${pName};`,
+                postCond: `(post.${f.fname} == ${pName})`,
+                badPostMut: `badPost.${f.fname} = ${pName} + 1.0f;`
               });
             } else if (f.kind === 'scalar_int') {
               // Category A4: integer literal, standard constant (UINT16_MAX), or unambiguous symbol

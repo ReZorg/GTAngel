@@ -225,6 +225,18 @@ constexpr CMatrix_ZppContract apply_CMatrix_Detach(const CMatrix_ZppContract& pr
     post.m_attachment_card = 0u;
     return post;
 }
+// Delta Operation Schema Contract (ΔCRect) from zpp/math/Rect.zpp
+constexpr bool op_CRect_CRect_2(const CRect_ZppContract& pre, const CRect_ZppContract& post, float left_in = 2.5f, float top_in = 2.5f, float right_in = 2.5f, float bottom_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.left == left_in) && (post.top == top_in) && (post.right == right_in) && (post.bottom == bottom_in);
+}
+constexpr CRect_ZppContract apply_CRect_CRect_2(const CRect_ZppContract& pre, float left_in = 2.5f, float top_in = 2.5f, float right_in = 2.5f, float bottom_in = 2.5f) {
+    CRect_ZppContract post = pre;
+    post.left = left_in;
+    post.top = top_in;
+    post.right = right_in;
+    post.bottom = bottom_in;
+    return post;
+}
 constexpr bool verify_math_zpp_invariants() {
     {
         CMatrix_ZppContract valid{};
@@ -421,6 +433,39 @@ constexpr bool verify_math_zpp_invariants() {
             CMatrix_ZppContract badPost = post;
             badPost.m_attachment_card = 1u;
             if (op_CMatrix_Detach(pre, badPost)) return false;
+        }
+    }
+    {
+        CRect_ZppContract pre{};
+        const float left_in = 2.5f;
+        const float top_in = 2.5f;
+        const float right_in = 2.5f;
+        const float bottom_in = 2.5f;
+        pre.left = 0.0f;
+        pre.top = 0.0f;
+        pre.right = 0.0f;
+        pre.bottom = 0.0f;
+        const auto post = apply_CRect_CRect_2(pre, left_in, top_in, right_in, bottom_in);
+        if (!op_CRect_CRect_2(pre, post, left_in, top_in, right_in, bottom_in)) return false;
+        {
+            CRect_ZppContract badPost = post;
+            badPost.left = left_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.top = top_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.right = right_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
+        }
+        {
+            CRect_ZppContract badPost = post;
+            badPost.bottom = bottom_in + 1.0f;
+            if (op_CRect_CRect_2(pre, badPost, left_in, top_in, right_in, bottom_in)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

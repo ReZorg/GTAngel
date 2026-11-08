@@ -327,6 +327,18 @@ constexpr CColModel_ZppContract apply_CColModel_RemoveTrianglePlanes(const CColM
     post.trianglePlanes_card = 0u;
     return post;
 }
+// Delta Operation Schema Contract (ΔCColSphere) from zpp/collision/ColSphere.zpp
+constexpr bool op_CColSphere_Set(const CColSphere_ZppContract& pre, const CColSphere_ZppContract& post, float radius_in = 2.5f, int32_t center_in = 25, int64_t surface_in = 25, int64_t piece_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.radius == radius_in) && (post.center == center_in) && (post.surface == surface_in) && (post.piece == piece_in);
+}
+constexpr CColSphere_ZppContract apply_CColSphere_Set(const CColSphere_ZppContract& pre, float radius_in = 2.5f, int32_t center_in = 25, int64_t surface_in = 25, int64_t piece_in = 25) {
+    CColSphere_ZppContract post = pre;
+    post.radius = radius_in;
+    post.center = center_in;
+    post.surface = surface_in;
+    post.piece = piece_in;
+    return post;
+}
 // Delta Operation Schema Contract (ΔCColStore) from zpp/collision/ColStore.zpp
 constexpr bool op_CColStore_Shutdown(const CColStore_ZppContract& pre, const CColStore_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.ms_pColPool_card == 0u);
@@ -658,6 +670,36 @@ constexpr bool verify_collision_zpp_invariants() {
             CColModel_ZppContract badPost = post;
             badPost.trianglePlanes_card = 1u;
             if (op_CColModel_RemoveTrianglePlanes(pre, badPost)) return false;
+        }
+    }
+    {
+        CColSphere_ZppContract pre{};
+        const float radius_in = 2.5f;
+        const int32_t center_in = 25;
+        const int64_t surface_in = 25;
+        const int64_t piece_in = 25;
+        pre.surface = 0;
+        const auto post = apply_CColSphere_Set(pre, radius_in, center_in, surface_in, piece_in);
+        if (!op_CColSphere_Set(pre, post, radius_in, center_in, surface_in, piece_in)) return false;
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.radius = radius_in + 1.0f;
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surface_in, piece_in)) return false;
+        }
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.center = center_in + 1;
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surface_in, piece_in)) return false;
+        }
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.surface = surface_in + 1;
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surface_in, piece_in)) return false;
+        }
+        {
+            CColSphere_ZppContract badPost = post;
+            badPost.piece = piece_in + 1;
+            if (op_CColSphere_Set(pre, badPost, radius_in, center_in, surface_in, piece_in)) return false;
         }
     }
     {
