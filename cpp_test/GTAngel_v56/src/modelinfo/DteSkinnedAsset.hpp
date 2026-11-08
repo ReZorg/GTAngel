@@ -13,6 +13,11 @@ namespace zpp_modelinfo_spec {
 static constexpr int kZppModuleCount = 11;
 static constexpr int kZppSchemaCount = 453;
 static constexpr int kZppEnumCount   = 20;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/modelinfo/BaseModelInfo.zpp
 enum class ModelInfoType : int32_t { MITYPE_NA_v = 0, MITYPE_SIMPLE_v = 1, MITYPE_MLO_v = 2, MITYPE_TIME_v = 3, MITYPE_WEAPON_v = 4, MITYPE_CLUMP_v = 5, MITYPE_VEHICLE_v = 6, MITYPE_PED_v = 7, MITYPE_XTRACOMPS_v = 8, MITYPE_HAND_v = 9 };
 // Free Type from zpp/modelinfo/ModelIndices.zpp
@@ -125,6 +130,46 @@ struct CModelIndices_ZppContract {
     int32_t TREE4{0}; // Z++: ℤ
     int32_t TREE5{0}; // Z++: ℤ
     int32_t TREE7{0}; // Z++: ℤ
+    int32_t TREE9{0}; // Z++: ℤ
+    int32_t TREE10{0}; // Z++: ℤ
+    int32_t TREE11{0}; // Z++: ℤ
+    int32_t TREE12{0}; // Z++: ℤ
+    int32_t TREE13{0}; // Z++: ℤ
+    int32_t TREE14{0}; // Z++: ℤ
+    int32_t CRANE_1{0}; // Z++: ℤ
+    int32_t CRANE_2{0}; // Z++: ℤ
+    int32_t CRANE_3{0}; // Z++: ℤ
+    int32_t CRANE_4{0}; // Z++: ℤ
+    int32_t CRANE_5{0}; // Z++: ℤ
+    int32_t CRANE_6{0}; // Z++: ℤ
+    int32_t PARKINGMETER{0}; // Z++: ℤ
+    int32_t PARKINGMETER2{0}; // Z++: ℤ
+    int32_t MALLFAN{0}; // Z++: ℤ
+    int32_t HOTELFAN_NIGHT{0}; // Z++: ℤ
+    int32_t HOTELFAN_DAY{0}; // Z++: ℤ
+    int32_t HOTROOMFAN{0}; // Z++: ℤ
+    int32_t PHONEBOOTH1{0}; // Z++: ℤ
+    int32_t WASTEBIN{0}; // Z++: ℤ
+    int32_t BIN{0}; // Z++: ℤ
+    int32_t POSTBOX1{0}; // Z++: ℤ
+    int32_t NEWSSTAND{0}; // Z++: ℤ
+    int32_t TRAFFICCONE{0}; // Z++: ℤ
+    int32_t DUMP1{0}; // Z++: ℤ
+    int32_t ROADWORKBARRIER1{0}; // Z++: ℤ
+    int32_t BUSSIGN1{0}; // Z++: ℤ
+    int32_t NOPARKINGSIGN1{0}; // Z++: ℤ
+    int32_t PHONESIGN{0}; // Z++: ℤ
+    int32_t TAXISIGN{0}; // Z++: ℤ
+    int32_t FISHSTALL01{0}; // Z++: ℤ
+    int32_t FISHSTALL02{0}; // Z++: ℤ
+    int32_t FISHSTALL03{0}; // Z++: ℤ
+    int32_t FISHSTALL04{0}; // Z++: ℤ
+    int32_t BAGELSTAND2{0}; // Z++: ℤ
+    int32_t FIRE_HYDRANT{0}; // Z++: ℤ
+    int32_t COLLECTABLE1{0}; // Z++: ℤ
+    int32_t MONEY{0}; // Z++: ℤ
+    int32_t CARMINE{0}; // Z++: ℤ
+    int32_t GARAGEDOOR1{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);

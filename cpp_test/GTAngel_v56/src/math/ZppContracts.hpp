@@ -13,6 +13,11 @@ namespace zpp_math_spec {
 static constexpr int kZppModuleCount = 8;
 static constexpr int kZppSchemaCount = 264;
 static constexpr int kZppEnumCount   = 0;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CMatrix_ZppContract {
     uint8_t m_attachment_card{0u}; // Z++: Ref[RwMatrix]
@@ -27,7 +32,7 @@ struct CMatrix_ZppContract {
 };
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CCompressedMatrixNotAligned_ZppContract {
-    int32_t m_vecPos{0}; // Z++: CVector
+    ZppVec3 m_vecPos{}; // Z++: CVector
     int32_t m_rightX{0}; // Z++: ℤ
     int32_t m_rightY{0}; // Z++: ℤ
     int32_t m_rightZ{0}; // Z++: ℤ

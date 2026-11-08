@@ -13,6 +13,11 @@ namespace zpp_extras_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 568;
 static constexpr int kZppEnumCount   = 11;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/extras/custompipes.zpp
 enum class custompipes_Enum_1 : int32_t { VEHICLEPIPE_PSP_v = 0, VEHICLEPIPE_PS2_v = 1, VEHICLEPIPE_MOBILE_v = 2, VEHICLEPIPE_NEO_v = -1 };
 // Free Type from zpp/extras/custompipes.zpp
@@ -256,6 +261,94 @@ struct INIWriter_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/extras/ini.zpp
+struct INIFile_ZppContract {
+    int32_t filename{0}; // Z++: std__string
+    int32_t data{0}; // Z++: return_reader
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/postfx.zpp
+struct CPostFX_ZppContract {
+    uint8_t pFrontBuffer_card{0u}; // Z++: Ref[RwRaster]
+    uint8_t pBackBuffer_card{0u}; // Z++: Ref[RwRaster]
+    bool bJustInitialised{false}; // Z++: 𝔹
+    int32_t EffectSwitch{0}; // Z++: ℤ
+    bool BlurOn{false}; // Z++: 𝔹
+    bool MotionBlurOn{false}; // Z++: 𝔹
+    float Intensity{0.0f}; // Z++: ℝ
+    int32_t Next{0}; // Z++: ℤ
+    int32_t NumValues{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (pFrontBuffer_card <= 1u)
+            && (pBackBuffer_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/extras/screendroplets.zpp
+struct Im2DVertexUV2_ZppContract {
+    float v2{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/screendroplets.zpp
+struct ScreenDroplets_ZppContract {
+    float lifetime{0.0f}; // Z++: ℝ
+    int32_t color{0}; // Z++: CRGBA
+    bool active{false}; // Z++: 𝔹
+    bool fades{false}; // Z++: 𝔹
+    float dist{0.0f}; // Z++: ℝ
+    int32_t ms_initialised{0}; // Z++: ℤ
+    uint8_t ms_maskTex_card{0u}; // Z++: Ref[RwTexture]
+    uint8_t ms_screenTex_card{0u}; // Z++: Ref[RwTexture]
+    bool ms_enabled{false}; // Z++: 𝔹
+    bool ms_movingEnabled{false}; // Z++: 𝔹
+    std::array<int32_t, 2000> ms_drops{}; // Z++: seq ScreenDrop  -- bounded array [MAXDROPS]
+    size_t ms_drops_len{2000u}; // Z++ cardinality #ms_drops
+    int32_t ms_numDrops{0}; // Z++: ℤ
+    std::array<int32_t, 700> ms_dropsMoving{}; // Z++: seq ScreenDropMoving  -- bounded array [MAXDROPSMOVING]
+    size_t ms_dropsMoving_len{700u}; // Z++ cardinality #ms_dropsMoving
+    int32_t ms_numDropsMoving{0}; // Z++: ℤ
+    ZppVec3 ms_prevCamUp{}; // Z++: CVector
+    ZppVec3 ms_prevCamPos{}; // Z++: CVector
+    ZppVec3 ms_camMoveDelta{}; // Z++: CVector
+    float ms_camMoveDist{0.0f}; // Z++: ℝ
+    ZppVec3 ms_screenMoveDelta{}; // Z++: CVector
+    float ms_screenMoveDist{0.0f}; // Z++: ℝ
+    float ms_camUpAngle{0.0f}; // Z++: ℝ
+    int32_t ms_splashDuration{0}; // Z++: ℤ
+    uint8_t ms_splashObject_card{0u}; // Z++: Ref[CParticleObject]
+    constexpr bool checkInvariant() const {
+        return (ms_drops_len == 2000u && ms_drops.size() == 2000u)
+            && (ms_dropsMoving_len == 700u && ms_dropsMoving.size() == 700u)
+            && (ms_maskTex_card <= 1u)
+            && (ms_screenTex_card <= 1u)
+            && (ms_splashObject_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/extras/screendroplets.zpp
+struct ScreenDrop_ZppContract {
+    float time{0.0f}; // Z++: ℝ
+    float lifetime{0.0f}; // Z++: ℝ
+    int32_t color{0}; // Z++: CRGBA
+    bool active{false}; // Z++: 𝔹
+    bool fades{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/screendroplets.zpp
+struct ScreenDropMoving_ZppContract {
+    uint8_t drop_card{0u}; // Z++: Ref[ScreenDrop]
+    float dist{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (drop_card <= 1u);
+    }
+};
 // Query Operation Schema Contract (ΞINIMap) from zpp/extras/ini.zpp
 constexpr bool op_INIMap_get_9(const INIMap_ZppContract& state) {
     return state.checkInvariant();
@@ -274,6 +367,14 @@ constexpr bool op_INIMap_begin_28(const INIMap_ZppContract& state) {
 }
 // Query Operation Schema Contract (ΞINIMap) from zpp/extras/ini.zpp
 constexpr bool op_INIMap_end_29(const INIMap_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞINIFile) from zpp/extras/ini.zpp
+constexpr bool op_INIFile_generate_4(const INIFile_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Query Operation Schema Contract (ΞINIFile) from zpp/extras/ini.zpp
+constexpr bool op_INIFile_write_6(const INIFile_ZppContract& state) {
     return state.checkInvariant();
 }
 constexpr bool verify_extras_zpp_invariants() {
@@ -446,6 +547,48 @@ constexpr bool verify_extras_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        INIFile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        INIFile_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPostFX_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPostFX_ZppContract bad{};
+        bad.pFrontBuffer_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        Im2DVertexUV2_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Im2DVertexUV2_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ScreenDroplets_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ScreenDroplets_ZppContract bad{};
+        bad.ms_drops_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ScreenDrop_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ScreenDrop_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ScreenDropMoving_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ScreenDropMoving_ZppContract bad{};
+        bad.drop_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         const INIMap_ZppContract st{};
         if (!op_INIMap_get_9(st)) return false;
     }
@@ -464,6 +607,14 @@ constexpr bool verify_extras_zpp_invariants() {
     {
         const INIMap_ZppContract st{};
         if (!op_INIMap_end_29(st)) return false;
+    }
+    {
+        const INIFile_ZppContract st{};
+        if (!op_INIFile_generate_4(st)) return false;
+    }
+    {
+        const INIFile_ZppContract st{};
+        if (!op_INIFile_write_6(st)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

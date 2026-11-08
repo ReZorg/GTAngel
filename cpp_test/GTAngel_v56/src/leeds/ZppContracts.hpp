@@ -13,6 +13,11 @@ namespace zpp_leeds_spec {
 static constexpr int kZppModuleCount = 2;
 static constexpr int kZppSchemaCount = 13;
 static constexpr int kZppEnumCount   = 0;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // State Schema Contract from zpp/leeds/CustomSoundTrack.zpp
 struct cCustomSoundTrack_ZppContract {
     bool m_bIsPlaying{false}; // Z++: 𝔹

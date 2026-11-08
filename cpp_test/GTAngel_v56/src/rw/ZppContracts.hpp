@@ -13,6 +13,11 @@ namespace zpp_rw_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 395;
 static constexpr int kZppEnumCount   = 4;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/rw/MemoryHeap.zpp
 enum class MemoryHeap_Enum_1 : int32_t { MEMID_FREE_v = 0, MEMID_GAME_v = 1, MEMID_WORLD_v = 2, MEMID_ANIMATION_v = 3, MEMID_POOLS_v = 4, MEMID_DEF_MODELS_v = 5, MEMID_STREAM_v = 6, MEMID_STREAM_MODELS_v = 7, MEMID_STREAM_LODS_v = 8, MEMID_STREAM_TEXUTRES_v = 9, MEMID_STREAM_COLLISION_v = 10, MEMID_STREAM_ANIMATION_v = 11, MEMID_TEXTURES_v = 12, MEMID_COLLISION_v = 13, MEMID_PRE_ALLOC_v = 14, MEMID_GAME_PROCESS_v = 15, MEMID_SCRIPT_v = 16, MEMID_CARS_v = 17, MEMID_RENDER_v = 18, MEMID_PED_ATTR_v = 19, NUM_MEMIDS_v = 20, NUM_FIXED_MEMBLOCKS_v = 6 };
 // Free Type from zpp/rw/MemoryHeap.zpp
@@ -304,6 +309,15 @@ struct FrameExt_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/rw/VisibilityPlugins.zpp
+struct ClumpExt_ZppContract {
+    int32_t visibilityCB{0}; // Z++: ClumpVisibilityCB
+    int32_t alpha{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // Delta Operation Schema Contract (ΔCMemoryHeap) from zpp/rw/MemoryHeap.zpp
 constexpr bool op_CMemoryHeap_PushMemId(const CMemoryHeap_ZppContract& pre, const CMemoryHeap_ZppContract& post, int64_t m_currentMemID_in = 25) {
     return pre.checkInvariant() && post.checkInvariant() && (post.m_currentMemID == m_currentMemID_in);
@@ -547,6 +561,13 @@ constexpr bool verify_rw_zpp_invariants() {
         FrameExt_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         FrameExt_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ClumpExt_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ClumpExt_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }

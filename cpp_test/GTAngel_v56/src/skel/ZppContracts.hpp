@@ -13,6 +13,11 @@ namespace zpp_skel_spec {
 static constexpr int kZppModuleCount = 4;
 static constexpr int kZppSchemaCount = 44;
 static constexpr int kZppEnumCount   = 9;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/skel/crossplatform.zpp
 enum class eWinVersion : int32_t { OS_WIN95_v = 0, OS_WIN98_v = 1, OS_WINNT_v = 2, OS_WIN2000_v = 3, OS_WINXP_v = 4 };
 // Free Type from zpp/skel/crossplatform.zpp

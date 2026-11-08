@@ -13,6 +13,11 @@ namespace zpp_audio_spec {
 static constexpr int kZppModuleCount = 14;
 static constexpr int kZppSchemaCount = 598;
 static constexpr int kZppEnumCount   = 28;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/audio/AudioLogic.zpp
 enum class AudioLogic_Enum_1 : int32_t { CAR_HELI_MAX_DIST_v = 250, CAR_HELI_ENGINE_MAX_DIST_v = 140, CAR_HELI_ENGINE_START_MAX_DIST_v = 30, CAR_HELI_ENGINE_START_VOLUME_v = 70, CAR_HELI_SEAPLANE_MAX_DIST_v = 20, CAR_HELI_SEAPLANE_VOLUME_v = 100, CAR_HELI_REAR_MAX_DIST_v = 27, CAR_HELI_REAR_VOLUME_v = 25, FLAT_TYRE_MAX_DIST_v = 60, FLAT_TYRE_VOLUME_v = 100, RAIN_ON_VEHICLE_MAX_DIST_v = 22, RAIN_ON_VEHICLE_VOLUME_v = 30, REVERSE_GEAR_MAX_DIST_v = 30, REVERSE_GEAR_VOLUME_v = 24, MODEL_CAR_ENGINE_MAX_DIST_v = 35, MODEL_CAR_ENGINE_VOLUME_v = 90, MODEL_HELI_ENGINE_VOLUME_v = 70, VEHICLE_ROAD_NOISE_MAX_DIST_v = 95, VEHICLE_ROAD_NOISE_VOLUME_v = 30, WET_ROAD_NOISE_MAX_DIST_v = 30, WET_ROAD_NOISE_VOLUME_v = 23, VEHICLE_ENGINE_MAX_DIST_v = 50, VEHICLE_ENGINE_BASE_VOLUME_v = 75, VEHICLE_ENGINE_FULL_VOLUME_v = 90, CESNA_IDLE_MAX_DIST_v = 91, CESNA_REV_MAX_DIST_v = 92, CESNA_VOLUME_v = 93, PLAYER_VEHICLE_ENGINE_VOLUME_v = 94, VEHICLE_SKIDDING_MAX_DIST_v = 95, VEHICLE_SKIDDING_VOLUME_v = 96, VEHICLE_HORN_MAX_DIST_v = 97, VEHICLE_HORN_VOLUME_v = 98, VEHICLE_SIREN_MAX_DIST_v = 99, VEHICLE_SIREN_VOLUME_v = 100, VEHICLE_REVERSE_WARNING_MAX_DIST_v = 101, VEHICLE_REVERSE_WARNING_VOLUME_v = 102, VEHICLE_DOORS_MAX_DIST_v = 103, VEHICLE_DOORS_VOLUME_v = 104, AIR_BRAKES_MAX_DIST_v = 105, AIR_BRAKES_VOLUME_v = 106, ENGINE_DAMAGE_MAX_DIST_v = 107, ENGINE_DAMAGE_VOLUME_v = 108, ENGINE_DAMAGE_ON_FIRE_VOLUME_v = 109, CAR_BOMB_TICK_MAX_DIST_v = 110, CAR_BOMB_TICK_VOLUME_v = 111, VEHICLE_ONE_SHOT_HELI_BLADE_MAX_DIST_v = 112, VEHICLE_ONE_SHOT_HELI_BLADE_VOLUME_v = 113, VEHICLE_ONE_SHOT_CAR_TYRE_POP_MAX_DIST_v = 114 };
 // Free Type from zpp/audio/AudioLogic.zpp
@@ -33,7 +38,7 @@ struct cAudioCollision_ZppContract {
     int64_t m_bSurface2{0}; // Z++: ℕ
     float m_fIntensity1{0.0f}; // Z++: ℝ
     float m_fIntensity2{0.0f}; // Z++: ℝ
-    int32_t m_vecPosition{0}; // Z++: CVector
+    ZppVec3 m_vecPosition{}; // Z++: CVector
     float m_fDistance{0.0f}; // Z++: ℝ
     int32_t m_nBaseVolume{0}; // Z++: ℤ
     constexpr bool checkInvariant() const {
@@ -115,7 +120,7 @@ struct tSound_ZppContract {
     float m_fDistance{0.0f}; // Z++: ℝ
     int64_t m_nLoopCount{0}; // Z++: ℕ
     int32_t m_nLoopEnd{0}; // Z++: ℤ
-    int32_t m_vecPos{0}; // Z++: CVector
+    ZppVec3 m_vecPos{}; // Z++: CVector
     int32_t m_bReverb{0}; // Z++: bool8
     int32_t m_bReflections{0}; // Z++: bool8
     int32_t m_bIsPlayingFinished{0}; // Z++: bool8
@@ -134,7 +139,7 @@ struct tSound_ZppContract {
 struct tPedComment_ZppContract {
     int64_t m_nSampleIndex{0}; // Z++: ℕ
     int32_t m_nEntityIndex{0}; // Z++: ℤ
-    int32_t m_vecPos{0}; // Z++: CVector
+    ZppVec3 m_vecPos{}; // Z++: CVector
     float m_fDistance{0.0f}; // Z++: ℝ
     int64_t m_nVolume{0}; // Z++: ℕ
     int32_t m_nLoadingTimeout{0}; // Z++: ℤ
@@ -179,7 +184,7 @@ struct AudioSamplesModuleState_ZppContract {
 // State Schema Contract from zpp/audio/AudioScriptObject.zpp
 struct cAudioScriptObject_ZppContract {
     int32_t AudioId{0}; // Z++: ℤ
-    int32_t Posn{0}; // Z++: CVector
+    ZppVec3 Posn{}; // Z++: CVector
     int32_t AudioEntity{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
@@ -207,7 +212,7 @@ struct tStreamedSample_ZppContract {
 // State Schema Contract from zpp/audio/PolRadio.zpp
 struct cAMCrime_ZppContract {
     int32_t type{0}; // Z++: ℤ
-    int32_t position{0}; // Z++: CVector
+    ZppVec3 position{}; // Z++: CVector
     int64_t timer{0}; // Z++: ℕ
     constexpr bool checkInvariant() const {
         return (timer >= 0);

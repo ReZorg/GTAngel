@@ -13,6 +13,11 @@ namespace zpp_entities_spec {
 static constexpr int kZppModuleCount = 3;
 static constexpr int kZppSchemaCount = 190;
 static constexpr int kZppEnumCount   = 3;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/entities/Entity.zpp
 enum class eEntityType : int32_t { ENTITY_TYPE_NOTHING_v = 0, ENTITY_TYPE_BUILDING_v = 1, ENTITY_TYPE_VEHICLE_v = 2, ENTITY_TYPE_PED_v = 3, ENTITY_TYPE_OBJECT_v = 4, ENTITY_TYPE_DUMMY_v = 5, ENTITY_TYPE_MULTIPLAYER_v = 6 };
 // Free Type from zpp/entities/Entity.zpp

@@ -13,6 +13,11 @@ namespace zpp_objects_spec {
 static constexpr int kZppModuleCount = 8;
 static constexpr int kZppSchemaCount = 160;
 static constexpr int kZppEnumCount   = 7;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/objects/Object.zpp
 enum class Object_Enum_1 : int32_t { UNKNOWN_OBJECT_v = 0, GAME_OBJECT_v = 1, MISSION_OBJECT_v = 2, TEMP_OBJECT_v = 3, CUTSCENE_OBJECT_v = 4, CONTROLLED_SUB_OBJECT_v = 5 };
 // Free Type from zpp/objects/Object.zpp
@@ -87,7 +92,7 @@ struct CParticleObject_ZppContract {
     int64_t m_nSkipFrames{0}; // Z++: ℕ
     int64_t m_nFrameCounter{0}; // Z++: ℕ
     int64_t m_nState{0}; // Z++: ℕ
-    int32_t m_vecTarget{0}; // Z++: CVector
+    ZppVec3 m_vecTarget{}; // Z++: CVector
     float m_fRandVal{0.0f}; // Z++: ℝ
     float m_fSize{0.0f}; // Z++: ℝ
     int32_t m_Color{0}; // Z++: CRGBA
@@ -123,7 +128,7 @@ struct CAudioHydrant_ZppContract {
 struct CStinger_ZppContract {
     bool bIsDeployed{false}; // Z++: 𝔹
     int64_t m_nTimeOfDeploy{0}; // Z++: ℕ
-    int32_t m_vPos{0}; // Z++: CVector
+    ZppVec3 m_vPos{}; // Z++: CVector
     float m_fMax_Z{0.0f}; // Z++: ℝ
     float m_fMin_Z{0.0f}; // Z++: ℝ
     std::array<int32_t, 60> m_vPositions{}; // Z++: seq CVector2D  -- bounded array [60]

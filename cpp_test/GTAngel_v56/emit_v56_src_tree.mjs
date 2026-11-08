@@ -21,7 +21,8 @@ const CPP_KEYWORDS = new Set([
   'case','switch','if','else','for','while','do','int','float','bool','void',
   'char','short','long','unsigned','signed','const','static','virtual','inline',
   'public','private','protected','TRUE','FALSE','NULL','near','far','min','max',
-  'IN','OUT','ERROR','small','hyper'
+  'IN','OUT','ERROR','small','hyper','true','false','nullptr','try','catch',
+  'throw','namespace','using','template','typename'
 ]);
 
 function safeFieldName(raw) {
@@ -135,6 +136,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
     const fileSymValues = new Map();
     const fileConflicts = new Set();
+    const fileEnumNames = new Set();
 
     // 1. Parse enums with full branch lists and explicit `-- val(BRANCH) = V` annotations
     for (let li = 0; li < txtLines.length; ++li) {
@@ -146,6 +148,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       if (!em) continue;
       totalEnums++;
       const ename = em[1].replace(/[^A-Za-z0-9_]/g, '_');
+      fileEnumNames.add(ename);
       const rawBranches = em[2]
         .split('|')
         .map(s => s.trim())
@@ -195,7 +198,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         if (!targetSchema) continue;
 
         if (mode === 'Ξ') {
-          if (queryOps.length < 24 && !queryOps.some(o => o.opName === sname)) {
+          if (queryOps.length < 128 && !queryOps.some(o => o.opName === sname)) {
             queryOps.push({
               opName: sname,
               targetState: targetSchema.sname,
@@ -206,15 +209,12 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           const updateLines = rawWhereLines.filter(wl => wl.startsWith('-- State update:'));
           if (updateLines.length === 0) continue;
 
-          // Collect declared input parameters `param? : ZType` on the operation schema
           const opInputs = new Set();
           for (const d of decls) {
             const pm = d.match(/^\s+([A-Za-z_]\w*)\?\s*:/);
             if (pm) opInputs.add(pm[1]);
           }
 
-          // Reject operations that assign two DIFFERENT RHS expressions to the same field
-          // (e.g. CParticleObject_Initialise setting m_pPrev' = ∅ for i==0 and &gPObjectArray[i-1] for i>0)
           const rawFieldToRhs = new Map();
           let allUpdatesSupported = true;
 
@@ -233,7 +233,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             }
             if (rawFieldToRhs.has(f.fname)) {
               if (rawFieldToRhs.get(f.fname).rhsRaw !== rhsRaw) {
-                // Conflicting branch assignments to the same field within one operation
                 allUpdatesSupported = false;
                 break;
               }
@@ -254,20 +253,40 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
           for (const { f, rhsRaw } of rawFieldToRhs.values()) {
             const rhsField = targetSchema.fields.find(fl => fl.rawName === rhsRaw && fl.fname !== f.fname);
-            if (rhsField && rhsField.kind === f.kind && (f.kind === 'scalar_int' || f.kind === 'scalar_float') && !rawFieldToRhs.has(rhsField.fname)) {
-              // Category B: pre-state field copy `lhs' = rhsField`
-              const initRhs = f.kind === 'scalar_float' ? '7.0f' : '7';
-              const initLhs = f.kind === 'scalar_float' ? '0.0f' : '0';
-              const step = f.kind === 'scalar_float' ? '1.0f' : '1';
+            if (rhsField && rhsField.kind === f.kind && (f.kind === 'scalar_int' || f.kind === 'scalar_float' || f.kind === 'vec3') && !rawFieldToRhs.has(rhsField.fname)) {
+              // Category B: pre-state field copy `lhs' = rhsField` (int, float, or 3D vector)
+              if (f.kind === 'vec3') {
+                updates.push({
+                  field: f.fname,
+                  preInit: `pre.${rhsField.fname} = ZppVec3{4.0f, 5.0f, 6.0f}; pre.${f.fname} = ZppVec3{0.0f, 0.0f, 0.0f};`,
+                  applyExpr: `post.${f.fname} = pre.${rhsField.fname};`,
+                  postCond: `(post.${f.fname} == pre.${rhsField.fname})`,
+                  badPostMut: `badPost.${f.fname} = ZppVec3{pre.${rhsField.fname}.x + 1.0f, pre.${rhsField.fname}.y, pre.${rhsField.fname}.z};`
+                });
+              } else {
+                const initRhs = f.kind === 'scalar_float' ? '7.0f' : '7';
+                const initLhs = f.kind === 'scalar_float' ? '0.0f' : '0';
+                const step = f.kind === 'scalar_float' ? '1.0f' : '1';
+                updates.push({
+                  field: f.fname,
+                  preInit: `pre.${rhsField.fname} = ${initRhs}; pre.${f.fname} = ${initLhs};`,
+                  applyExpr: `post.${f.fname} = pre.${rhsField.fname};`,
+                  postCond: `(post.${f.fname} == pre.${rhsField.fname})`,
+                  badPostMut: `badPost.${f.fname} = pre.${rhsField.fname} + ${step};`
+                });
+              }
+            } else if (f.kind === 'vec3' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
+              // Category C (3D vector): declared CVector input parameter (e.g. CColSphere_Set center)
+              const pName = `${f.fname}_in`;
+              extraParams.push({ pName, ct: 'ZppVec3', defIn: 'ZppVec3{1.0f, 2.0f, 3.0f}' });
               updates.push({
                 field: f.fname,
-                preInit: `pre.${rhsField.fname} = ${initRhs}; pre.${f.fname} = ${initLhs};`,
-                applyExpr: `post.${f.fname} = pre.${rhsField.fname};`,
-                postCond: `(post.${f.fname} == pre.${rhsField.fname})`,
-                badPostMut: `badPost.${f.fname} = pre.${rhsField.fname} + ${step};`
+                preInit: rhsCopyTargets.has(f.fname) ? '' : `pre.${f.fname} = ZppVec3{0.0f, 0.0f, 0.0f};`,
+                applyExpr: `post.${f.fname} = ${pName};`,
+                postCond: `(post.${f.fname} == ${pName})`,
+                badPostMut: `badPost.${f.fname} = ZppVec3{${pName}.x + 1.0f, ${pName}.y, ${pName}.z};`
               });
             } else if (f.kind === 'opt_ref' && rhsRaw === '∅') {
-              // Category A1: null pointer/reference literal `∅`
               updates.push({
                 field: f.fname,
                 preInit: `pre.${f.fname} = 1u;`,
@@ -276,7 +295,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = 1u;`
               });
             } else if (f.kind === 'scalar_bool' && (rhsRaw === 'true' || rhsRaw === 'false')) {
-              // Category A2: boolean literal
               const altBool = rhsRaw === 'true' ? 'false' : 'true';
               updates.push({
                 field: f.fname,
@@ -286,7 +304,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = ${altBool};`
               });
             } else if (f.kind === 'scalar_bool' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
-              // Category C (bool): declared boolean parameter or runtime query
               const pName = `${f.fname}_in`;
               extraParams.push({ pName, ct: 'bool', defIn: 'true' });
               updates.push({
@@ -297,7 +314,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = !${pName};`
               });
             } else if (f.kind === 'scalar_float' && /^\d+(?:\.\d+)?f?$/.test(rhsRaw)) {
-              // Category A3: non-negative float literal
               const fval = parseFloat(rhsRaw);
               const fLit = Number.isInteger(fval) ? `${fval}.0f` : `${fval}f`;
               const altLit = fval === 0 ? '1.0f' : '0.0f';
@@ -309,7 +325,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = ${altLit};`
               });
             } else if (f.kind === 'scalar_float' && (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw))) {
-              // Category C (float): declared float parameter (e.g. SetBlend, CRect_CRect_2, CDraw_SetFOV)
               const pName = `${f.fname}_in`;
               extraParams.push({ pName, ct: 'float', defIn: '2.5f' });
               updates.push({
@@ -320,7 +335,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                 badPostMut: `badPost.${f.fname} = ${pName} + 1.0f;`
               });
             } else if (f.kind === 'scalar_int') {
-              // Category A4: integer literal, standard constant (UINT16_MAX), or unambiguous symbol
               let constVal = null;
               if (/^\d+$/.test(rhsRaw)) {
                 constVal = Number(rhsRaw);
@@ -342,10 +356,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
                   badPostMut: `badPost.${f.fname} = ${altVal};`
                 });
               } else if (opInputs.has(rhsRaw) || /^[A-Za-z_][\w:]*\(\)$/.test(rhsRaw)) {
-                // Category C: declared operation input parameter (e.g. `scale`, `h`, `m`)
-                // or zero-arg runtime query (e.g. `CTimer::GetTimeInMilliseconds()`, `CalcNextGen()`).
-                // Expose as an explicit parameter on `op_<Op>` and `apply_<Op>` so any valid
-                // caller-supplied value is accepted!
                 const pName = `${f.fname}_in`;
                 const defIn = 25;
                 extraParams.push({ pName, ct: f.ct, defIn });
@@ -369,7 +379,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           if (
             allUpdatesSupported &&
             updates.length === rawFieldToRhs.size &&
-            deltaOps.length < 16 &&
+            deltaOps.length < 128 &&
             !deltaOps.some(o => o.opName === sname)
           ) {
             deltaOps.push({
@@ -384,7 +394,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         continue;
       }
 
-      if (sampleSchemas.length >= 24 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
+      if (sampleSchemas.length >= 128 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
         continue;
       }
 
@@ -396,7 +406,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         if (!fm) continue;
         const rawName = fm[1];
         const fname = safeFieldName(rawName);
-        if (fields.has(rawName) || fields.size >= 24) continue;
+        if (fields.has(rawName) || fields.size >= 64) continue;
         const zt = fm[2].trim();
 
         const arrMatch = zt.match(/^seq\s+(\S+)\s+--\s*bounded array\s*\[([^\]]+)\]/);
@@ -421,6 +431,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           if (elemZ === 'ℝ') elemC = 'float';
           else if (elemZ === '𝔹') elemC = 'bool';
           else if (elemZ === 'ℕ') elemC = 'uint32_t';
+          else if (elemZ === 'CVector' || elemZ === 'RwV3d') elemC = 'ZppVec3';
           fields.set(rawName, {
             rawName,
             fname,
@@ -440,14 +451,20 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             defVal: '0u',
             zt
           });
+        } else if (zt === 'CVector' || zt === 'RwV3d') {
+          fields.set(rawName, { rawName, fname, kind: 'vec3', ct: 'ZppVec3', defVal: '{}', zt });
         } else if (zt.startsWith('ℝ')) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_float', ct: 'float', defVal: '0.0f', zt });
         } else if (zt.startsWith('𝔹')) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_bool', ct: 'bool', defVal: 'false', zt });
         } else if (zt.startsWith('ℕ')) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_int', ct: 'int64_t', defVal: '0', zt });
-        } else {
+        } else if (zt.startsWith('ℤ') || zt === 'ADDRESS' || zt === 'HANDLE' || fileEnumNames.has(zt)) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_int', ct: 'int32_t', defVal: '0', zt });
+        } else {
+          // Non-primitive aggregate/opaque type: keep field for schema layout, but mark kind='opaque'
+          // so deltaOps never substitutes an integer placeholder for a non-integer field!
+          fields.set(rawName, { rawName, fname, kind: 'opaque', ct: 'int32_t', defVal: '0', zt });
         }
       }
 
@@ -567,6 +584,11 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     `static constexpr int kZppModuleCount = ${zfiles.length};`,
     `static constexpr int kZppSchemaCount = ${totalSchemas};`,
     `static constexpr int kZppEnumCount   = ${totalEnums};`,
+    `struct ZppVec3 {`,
+    `    float x{0.0f}, y{0.0f}, z{0.0f};`,
+    `    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }`,
+    `    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }`,
+    `};`,
   ];
 
   for (const e of sampleEnums) {
@@ -659,6 +681,12 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   }
   if (folder === 'renderer' && sampleSchemas.some(s => s.sname === 'CConsole')) {
     out.push(`static_assert(CConsole_ZppContract{}.m_aTimer.size() == 8u, "CConsole MAX_LINES must be 8");`);
+  }
+  if (folder === 'renderer' && deltaOps.some(d => d.opName === 'CWeather_StoreWeatherState')) {
+    out.push(`static_assert(op_CWeather_StoreWeatherState(CWeather_ZppContract{}, apply_CWeather_StoreWeatherState(CWeather_ZppContract{})), "CWeather_StoreWeatherState float-copy delta contract must hold");`);
+  }
+  if (folder === 'collision' && deltaOps.some(d => d.opName === 'CColSphere_Set')) {
+    out.push(`static_assert(op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(CColSphere_ZppContract{}, 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5), 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5) && !op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(CColSphere_ZppContract{}, 2.5f, ZppVec3{4.0f, 5.0f, 6.0f}, 4, 5), 2.5f, ZppVec3{1.0f, 2.0f, 3.0f}, 4, 5), "CColSphere_Set must verify 3D CVector center");`);
   }
   if (folder === 'core' && deltaOps.some(d => d.opName === 'CClock_Initialise')) {
     out.push(`static_assert(op_CClock_Initialise(CClock_ZppContract{}, apply_CClock_Initialise(CClock_ZppContract{}, 1000, 4200), 1000, 4200), "CClock_Initialise must accept arbitrary scale and timestamp");`);

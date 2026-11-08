@@ -13,6 +13,11 @@ namespace zpp_text_spec {
 static constexpr int kZppModuleCount = 3;
 static constexpr int kZppSchemaCount = 121;
 static constexpr int kZppEnumCount   = 2;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // State Schema Contract from zpp/text/Messages.zpp
 struct tMessage_ZppContract {
     int32_t m_pText{0}; // Z++: seq CHAR

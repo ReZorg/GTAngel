@@ -13,6 +13,11 @@ namespace zpp_save_spec {
 static constexpr int kZppModuleCount = 5;
 static constexpr int kZppSchemaCount = 143;
 static constexpr int kZppEnumCount   = 10;
+struct ZppVec3 {
+    float x{0.0f}, y{0.0f}, z{0.0f};
+    constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
+    constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
+};
 // Free Type from zpp/save/GenericGameStorage.zpp
 enum class GenericGameStorage_Enum_1 : int32_t { SAVE_TYPE_NONE_v = 0, SAVE_TYPE_32_BIT_v = 1, SAVE_TYPE_64_BIT_v = 2, SAVE_TYPE_MSVC_v = 4, SAVE_TYPE_GCC_v = 8, SAVE_TYPE_STEAM_v = 16 };
 // Free Type from zpp/save/GenericGameStorage.zpp
