@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const full = fs.readFileSync('gtangel_agi_v56_full.cpp', 'utf8');
 const lines = full.split(/\r?\n/);
-const zppRoot = path.resolve('../zpp');
+const zppRoot = path.resolve('../../zpp');
 
 function sliceLines(start1, end1) {
   return lines.slice(start1 - 1, end1).join('\n') + '\n';
@@ -16,9 +16,22 @@ function findLine(predicate, from1 = 1) {
   throw new Error('Anchor not found from line ' + from1);
 }
 
+const CPP_KEYWORDS = new Set([
+  'this','return','default','class','struct','union','operator','delete','new',
+  'case','switch','if','else','for','while','do','int','float','bool','void',
+  'char','short','long','unsigned','signed','const','static','virtual','inline',
+  'public','private','protected'
+]);
+
+function safeFieldName(raw) {
+  return CPP_KEYWORDS.has(raw) ? `${raw}_field` : raw;
+}
+
 // Parse .zpp files in ../../zpp/<folder> and synthesize a compilable C++17
-// namespace zpp_<folder>_spec block with enums, state schema contracts, and
-// compile-time static_assert invariant verification.
+// namespace zpp_<folder>_spec block with full-branch enums (preserving explicit
+// -- val(X) = N values), typed state schema contracts (std::array for bounded
+// sequences, cardinality-checked optional references), and real where-predicate
+// checkInvariant() functions.
 function buildZppCppContractBlock(folder, insideClass = false) {
   const dir = path.join(zppRoot, folder);
   const zfiles = fs.existsSync(dir)
@@ -32,59 +45,178 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
   for (const zf of zfiles) {
     const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
-    // Extract enums: Name ::= A | B | C
-    const enumRe = /^([A-Za-z_]\w*)\s*::=\s*([^\r\n]+)/gm;
-    let em;
-    while ((em = enumRe.exec(txt)) !== null) {
+    const txtLines = txt.split(/\r?\n/);
+
+    // 1. Parse enums with full branch lists and explicit `-- val(BRANCH) = V` annotations
+    for (let li = 0; li < txtLines.length; ++li) {
+      const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
+      if (!em) continue;
       totalEnums++;
-      if (sampleEnums.length < 4) {
-        const ename = em[1].replace(/[^A-Za-z0-9_]/g, '_');
-        const branches = em[2]
-          .split('|')
-          .map(s => s.trim().replace(/[^A-Za-z0-9_]/g, '_'))
-          .filter(s => s && !s.startsWith('total_branches') && /^[A-Za-z_]/.test(s))
-          .slice(0, 12);
-        const uniq = [...new Set(branches)];
-        if (uniq.length >= 2 && !sampleEnums.some(e => e.ename === ename)) {
-          sampleEnums.push({ ename, branches: uniq, source: zf });
+      if (sampleEnums.length >= 4) continue;
+      const ename = em[1].replace(/[^A-Za-z0-9_]/g, '_');
+      if (sampleEnums.some(e => e.ename === ename)) continue;
+      const rawBranches = em[2]
+        .split('|')
+        .map(s => s.trim())
+        .filter(s => s && !s.startsWith('...'))
+        .map(s => s.replace(/[^A-Za-z0-9_]/g, '_'))
+        .filter(s => s && /^[A-Za-z_]/.test(s));
+      const uniq = [...new Set(rawBranches)];
+      if (uniq.length < 2) continue;
+
+      const explicitVals = new Map();
+      let vj = li + 1;
+      while (vj < txtLines.length && txtLines[vj].trim().startsWith('-- val(')) {
+        const vm = txtLines[vj].match(/--\s*val\(([A-Za-z_]\w*)\)\s*=\s*(-?(?:0x[0-9a-fA-F]+|\d+))/);
+        if (vm) {
+          explicitVals.set(vm[1], Number(vm[2]));
         }
+        vj++;
       }
+
+      let nextVal = 0;
+      const valuedBranches = uniq.map(b => {
+        if (explicitVals.has(b)) {
+          nextVal = explicitVals.get(b);
+        }
+        const cur = nextVal;
+        nextVal = cur + 1;
+        return { name: b, val: cur };
+      });
+      sampleEnums.push({ ename, branches: valuedBranches, source: zf });
     }
-    // Extract schemas
+
+    // 2. Parse schemas with actual Z++ types and `where` predicates
     const schemaRe = /^schema\s+([A-Za-z_]\w*)\r?\n([\s\S]*?)^where\r?\n([\s\S]*?)^end/gm;
     let sm;
     while ((sm = schemaRe.exec(txt)) !== null) {
       totalSchemas++;
       const sname = sm[1].replace(/[^A-Za-z0-9_]/g, '_');
+      if (sampleSchemas.length >= 6 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
+        continue;
+      }
       const decls = sm[2].split(/\r?\n/);
-      if (sampleSchemas.length < 6 && !sname.includes('_') && !sampleSchemas.some(s => s.sname === sname)) {
-        const fields = [];
-        for (const d of decls) {
-          const fm = d.match(/^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/);
-          if (fm) {
-            let fname = fm[1];
-            if (['this','return','default','class','struct','union','operator','delete','new','case','switch','if','else','for','while','do','int','float','bool','void','char','short','long','unsigned','signed','const','static','virtual','inline','public','private','protected'].includes(fname)) {
-              fname = fname + '_field';
+      const whereLines = sm[3].split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('--'));
+      const fields = new Map();
+
+      for (const d of decls) {
+        const fm = d.match(/^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/);
+        if (!fm) continue;
+        const rawName = fm[1];
+        const fname = safeFieldName(rawName);
+        if (fields.has(rawName) || fields.size >= 8) continue;
+        const zt = fm[2].trim();
+
+        const arrMatch = zt.match(/^seq\s+(\S+)\s+--\s*bounded array\s*\[(\d+)\]/);
+        if (arrMatch) {
+          const elemZ = arrMatch[1];
+          const len = Number(arrMatch[2]);
+          let elemC = 'int32_t';
+          if (elemZ === 'ℝ') elemC = 'float';
+          else if (elemZ === '𝔹') elemC = 'bool';
+          else if (elemZ === 'ℕ') elemC = 'uint32_t';
+          fields.set(rawName, {
+            rawName,
+            fname,
+            kind: 'array',
+            len,
+            ct: `std::array<${elemC}, ${len}>`,
+            defVal: '{}',
+            zt
+          });
+        } else if (zt.startsWith('ℙ ') || zt.startsWith('Ref[')) {
+          fields.set(rawName, {
+            rawName,
+            fname: `${fname}_card`,
+            kind: 'opt_ref',
+            ct: 'uint8_t',
+            defVal: '0u',
+            zt
+          });
+        } else if (zt.startsWith('ℝ')) {
+          fields.set(rawName, { rawName, fname, kind: 'scalar_float', ct: 'float', defVal: '0.0f', zt });
+        } else if (zt.startsWith('𝔹')) {
+          fields.set(rawName, { rawName, fname, kind: 'scalar_bool', ct: 'bool', defVal: 'false', zt });
+        } else if (zt.startsWith('ℕ')) {
+          fields.set(rawName, { rawName, fname, kind: 'scalar_int', ct: 'int64_t', defVal: '0', zt });
+        } else {
+          fields.set(rawName, { rawName, fname, kind: 'scalar_int', ct: 'int32_t', defVal: '0', zt });
+        }
+      }
+
+      if (fields.size === 0) continue;
+
+      // Translate every `where` predicate line into a real C++ boolean expression
+      const cppPreds = [];
+      let allPredsSupported = true;
+      for (const rawW of whereLines) {
+        // Split conjunctions `A ∧ B`
+        const parts = rawW.split('∧').map(p => p.trim()).filter(Boolean);
+        for (const w of parts) {
+          let m;
+          if ((m = w.match(/^#([A-Za-z_]\w*)\s*=\s*(\d+)$/))) {
+            const f = fields.get(m[1]);
+            const n = Number(m[2]);
+            if (f && f.kind === 'array') {
+              // Check both compile-time array extent AND runtime non-corrupted size_override
+              f.hasSizeCheck = n;
+              cppPreds.push(`(${f.fname}_len == ${n}u && ${f.fname}.size() == ${n}u)`);
+            } else {
+              allPredsSupported = false;
             }
-            const zt = fm[2].trim();
-            let ct = 'int32_t';
-            if (zt.startsWith('ℝ')) ct = 'float';
-            else if (zt.startsWith('𝔹')) ct = 'bool';
-            else if (zt.startsWith('ℕ')) ct = 'uint32_t';
-            if (fields.length < 8 && !fields.some(f => f.fname === fname)) {
-              fields.push({ fname, ct, zt });
+          } else if ((m = w.match(/^#([A-Za-z_]\w*)\s*≤\s*1$/))) {
+            const f = fields.get(m[1]);
+            if (f && f.kind === 'opt_ref') {
+              cppPreds.push(`(${f.fname} <= 1u)`);
+            } else {
+              allPredsSupported = false;
             }
+          } else if ((m = w.match(/^([A-Za-z_]\w*)\s*≥\s*0$/))) {
+            const f = fields.get(m[1]);
+            if (f && (f.kind === 'scalar_int' || f.kind === 'scalar_float')) {
+              cppPreds.push(`(${f.fname} >= 0)`);
+            } else {
+              allPredsSupported = false;
+            }
+          } else if ((m = w.match(/^([A-Za-z_]\w*)\s*=\s*(true|false)$/))) {
+            const f = fields.get(m[1]);
+            if (f && f.kind === 'scalar_bool') {
+              f.defVal = m[2];
+              cppPreds.push(`(${f.fname} == ${m[2]})`);
+            } else {
+              allPredsSupported = false;
+            }
+          } else if ((m = w.match(/^([A-Za-z_]\w*)\s*=\s*(\d+)$/))) {
+            const f = fields.get(m[1]);
+            if (f && f.kind === 'scalar_int') {
+              f.defVal = m[2];
+              cppPreds.push(`(${f.fname} == ${m[2]})`);
+            } else {
+              allPredsSupported = false;
+            }
+          } else if ((m = w.match(/^([A-Za-z_]\w*)\s*∈\s*ADDRESS$/))) {
+            const f = fields.get(m[1]);
+            if (f) {
+              cppPreds.push(`(${f.fname} >= 0)`);
+            }
+          } else {
+            allPredsSupported = false;
           }
         }
-        if (fields.length > 0) {
-          sampleSchemas.push({ sname, fields, source: zf });
-        }
+      }
+
+      if (cppPreds.length > 0 && allPredsSupported) {
+        sampleSchemas.push({
+          sname,
+          fields: [...fields.values()],
+          cppPreds,
+          source: zf
+        });
       }
     }
   }
 
   if (insideClass) {
-    // Inside RasterEngine class body: emit a clean comment + static constexpr Z++ metadata method
     const modList = zfiles.slice(0, 8).join(', ');
     return [
       `    // ── Z++ Formal Spec Contract (${folder}): ${zfiles.length} modules, ${totalSchemas} schemas, ${totalEnums} enums (${modList}) ──`,
@@ -98,6 +230,9 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   const out = [
     `#ifndef ${guard}`,
     `#define ${guard}`,
+    `#include <array>`,
+    `#include <cstddef>`,
+    `#include <cstdint>`,
     `// ============================================================================`,
     `// Z++ Formal Specification Contract Block: src/${folder}`,
     `// Derived from C:/ddd/GTAngel/cpp_test/zpp/${folder}/*.zpp`,
@@ -111,17 +246,21 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
   for (const e of sampleEnums) {
     out.push(`// From zpp/${folder}/${e.source}`);
-    out.push(`enum class ${e.ename} : int32_t { ${e.branches.map((b, idx) => `${b}_v = ${idx}`).join(', ')} };`);
+    out.push(`enum class ${e.ename} : int32_t { ${e.branches.map(b => `${b.name}_v = ${b.val}`).join(', ')} };`);
   }
 
   for (const s of sampleSchemas) {
     out.push(`// State Schema Contract from zpp/${folder}/${s.source}`);
     out.push(`struct ${s.sname}_ZppContract {`);
     for (const f of s.fields) {
-      const defVal = f.ct === 'float' ? '0.0f' : (f.ct === 'bool' ? 'false' : '0');
-      out.push(`    ${f.ct} ${f.fname}{${defVal}}; // Z++: ${f.zt}`);
+      out.push(`    ${f.ct} ${f.fname}${f.defVal === '{}' ? '{}' : `{${f.defVal}}`}; // Z++: ${f.zt}`);
+      if (f.hasSizeCheck !== undefined) {
+        out.push(`    size_t ${f.fname}_len{${f.hasSizeCheck}u}; // Z++ cardinality #${f.rawName}`);
+      }
     }
-    out.push(`    constexpr bool checkInvariant() const { return true; }`);
+    out.push(`    constexpr bool checkInvariant() const {`);
+    out.push(`        return ${s.cppPreds.join('\n            && ')};`);
+    out.push(`    }`);
     out.push(`};`);
   }
 
@@ -132,6 +271,9 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   out.push(`    return kZppModuleCount >= 0 && kZppSchemaCount >= 0;`);
   out.push(`}`);
   out.push(`static_assert(verify_${folder}_zpp_invariants(), "Z++ formal contract invariant failed for ${folder}");`);
+  if (folder === 'vehicles' && sampleEnums.some(e => e.ename === 'eCarNodes')) {
+    out.push(`static_assert(static_cast<int>(eCarNodes::CAR_WHEEL_RF_v) == 1 && static_cast<int>(eCarNodes::NUM_CAR_NODES_v) == 20, "eCarNodes Z++ valuation mismatch");`);
+  }
   out.push(`} // namespace zpp_${folder}_spec`);
   out.push(`#endif // ${guard}`);
   out.push('');
@@ -175,10 +317,9 @@ const folders = [
 for (const rootDir of ['src', '../src']) {
   for (const f of folders) {
     fs.mkdirSync(path.join(rootDir, f), { recursive: true });
-    // Also emit a dedicated <folder>/ZppContracts.hpp in every single one of the 22 folders
     fs.writeFileSync(
       path.join(rootDir, f, 'ZppContracts.hpp'),
-      `#pragma once\n#include <cstdint>\n${buildZppCppContractBlock(f, false)}`,
+      `#pragma once\n${buildZppCppContractBlock(f, false)}`,
       'utf8'
     );
   }
@@ -187,79 +328,33 @@ for (const rootDir of ['src', '../src']) {
     fs.writeFileSync(path.join(rootDir, relPath), content, 'utf8');
   };
 
-  // 1. src/core/PlatformPreamble.hpp
   writeMod('core/PlatformPreamble.hpp', sliceLines(1, L_avatar3d - 1) + buildZppCppContractBlock('core', false));
-
-  // 2. src/math/Vec3.hpp
   writeMod('math/Vec3.hpp', buildZppCppContractBlock('math', false) + sliceLines(L_avatar3d, L_poseLib - 1));
-
-  // 3. src/animation/AvatarSkeleton.hpp
   writeMod('animation/AvatarSkeleton.hpp', buildZppCppContractBlock('animation', false) + sliceLines(L_poseLib, L_gameWorld - 1));
-
-  // 4. src/collision/WorldCollision.hpp
   writeMod('collision/WorldCollision.hpp', buildZppCppContractBlock('collision', false) + sliceLines(L_gameWorld, L_navTrainer - 1));
-
-  // 5. src/core/CognitiveSubsystems.hpp
   writeMod('core/CognitiveSubsystems.hpp', sliceLines(L_navTrainer, L_v15render - 1));
-
-  // 6. src/fakerw/RwTypes.hpp
   writeMod('fakerw/RwTypes.hpp', buildZppCppContractBlock('fakerw', false) + sliceLines(L_v15render, L_dteSkinned - 1));
-
-  // 7. src/modelinfo/DteSkinnedAsset.hpp
   writeMod('modelinfo/DteSkinnedAsset.hpp', buildZppCppContractBlock('modelinfo', false) + sliceLines(L_dteSkinned, L_rasterEngine - 1));
-
-  // 8. src/rw/RasterEngineHeader.hpp
   writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1));
-
-  // 9. src/leeds/SkyAndRoads.hpp
   writeMod('leeds/SkyAndRoads.hpp', buildZppCppContractBlock('leeds', true) + sliceLines(L_buildSun, L_buildBuildings - 1));
-
-  // 10. src/buildings/Buildings.hpp
   writeMod('buildings/Buildings.hpp', buildZppCppContractBlock('buildings', true) + sliceLines(L_buildBuildings, L_buildPillars - 1));
-
-  // 11. src/entities/Pillars.hpp & Props.hpp
   writeMod('entities/Pillars.hpp', buildZppCppContractBlock('entities', true) + sliceLines(L_buildPillars, L_buildGoal - 1));
   writeMod('entities/Props.hpp', sliceLines(L_buildProps, L_buildAvatar - 1));
-
-  // 12. src/objects/WorldObjects.hpp, QuestShard.hpp & Pickups.hpp
   writeMod('objects/WorldObjects.hpp', buildZppCppContractBlock('objects', true) + sliceLines(L_buildGoal, L_buildWalkers - 1));
   writeMod('objects/QuestShard.hpp', sliceLines(L_buildShard, L_drawCoupe - 1));
   writeMod('objects/Pickups.hpp', sliceLines(L_buildPickups, L_buildProps - 1));
-
-  // 13. src/peds/Peds.hpp
   writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + sliceLines(L_buildWalkers, L_buildShard - 1));
-
-  // 14. src/vehicles/Vehicles.hpp
   writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + sliceLines(L_drawCoupe, L_buildPickups - 1));
-
-  // 15. src/renderer/SoftwareRasterizer.hpp
   writeMod('renderer/SoftwareRasterizer.hpp', buildZppCppContractBlock('renderer', true) + sliceLines(L_buildAvatar, L_v16motor - 1) + buildZppCppContractBlock('renderer', false));
-
-  // 16. src/control/MotorAndLearning.hpp
   writeMod('control/MotorAndLearning.hpp', buildZppCppContractBlock('control', false) + sliceLines(L_v16motor, L_v18peer - 1) + '#endif\n#endif\n');
-
-  // 17. src/weapons/SafetyAndPeerShield.hpp
   writeMod('weapons/SafetyAndPeerShield.hpp', buildZppCppContractBlock('weapons', false) + sliceLines(L_v18peer, L_v18peerEnd));
-
-  // 18. src/audio/VrAndEndocrineAudio.hpp
   writeMod('audio/VrAndEndocrineAudio.hpp', buildZppCppContractBlock('audio', false) + sliceLines(L_uechovr, L_v20cnsFwd - 1));
-
-  // 19. src/text/StoryAndQuestText.hpp
   writeMod('text/StoryAndQuestText.hpp', buildZppCppContractBlock('text', false) + sliceLines(L_v20cnsFwd, L_v20cns - 1));
-
-  // 20. src/extras/DteBridgeAndCommons.hpp
   writeMod('extras/DteBridgeAndCommons.hpp', buildZppCppContractBlock('extras', false) + sliceLines(L_v20cns, L_v20save - 1));
-
-  // 21. src/save/Persistence.hpp
   writeMod('save/Persistence.hpp', buildZppCppContractBlock('save', false) + sliceLines(L_v20save, L_gtangelStruct - 1));
-
-  // 22. src/core/GTAngelAGI.hpp
   writeMod('core/GTAngelAGI.hpp', sliceLines(L_gtangelStruct, L_renderV15Frame - 1));
-
-  // 23. src/skel/Win32CockpitSkel.hpp
   writeMod('skel/Win32CockpitSkel.hpp', buildZppCppContractBlock('skel', false) + sliceLines(L_renderV15Frame, lines.length));
 
-  // 24. src/docs/DocsZppSpec.hpp & ARCHITECTURE.md
   const docsHeader = [
     '#pragma once',
     '// Master Z++ Formal Specification Aggregator across all 22 GTAngel src/ subsystems',
@@ -272,6 +367,10 @@ for (const rootDir of ['src', '../src']) {
     '    return ' + folders.map(f => `zpp_${f}_spec::kZppSchemaCount`).join(' + ') + ';',
     '}',
     'constexpr bool verifyAll22Subsystems() {',
+    '    // Also verify negative cases: mutating an invariant-bound field must fail checkInvariant()',
+    '    auto badAntenna = zpp_renderer_spec::CAntenna_ZppContract{};',
+    '    badAntenna.pos_len = 0u;',
+    '    if (badAntenna.checkInvariant()) return false;',
     '    return ' + folders.map(f => `zpp_${f}_spec::verify_${f}_zpp_invariants()`).join(' && ') + ';',
     '}',
     'static_assert(verifyAll22Subsystems(), "All 22 Z++ subsystem formal specifications must hold");',
@@ -281,7 +380,6 @@ for (const rootDir of ['src', '../src']) {
   writeMod('docs/DocsZppSpec.hpp', docsHeader);
   writeMod('docs/ARCHITECTURE.md', '# GTAngel v56 Modular Source Architecture (src/) + Z++ Formal Contracts\n\nAll 22 re3-style subsystems are organized under src/<module>/, enriched with Z++ formal contracts from cpp_test/zpp/<module>/*.zpp, and compiled through src/main.cpp.\n');
 
-  // 25. src/main.cpp
   writeMod('main.cpp', [
     '// GTAngel v56 — Modular 22-Folder Source Entry Point (src/main.cpp)',
     '#include "core/PlatformPreamble.hpp"',

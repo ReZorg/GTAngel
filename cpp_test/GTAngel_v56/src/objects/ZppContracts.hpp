@@ -1,7 +1,9 @@
 #pragma once
-#include <cstdint>
 #ifndef GTANGEL_ZPP_OBJECTS_SPEC_GUARD
 #define GTANGEL_ZPP_OBJECTS_SPEC_GUARD
+#include <array>
+#include <cstddef>
+#include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/objects
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/objects/*.zpp
@@ -16,74 +18,62 @@ enum class Object_Enum_1 : int32_t { UNKNOWN_OBJECT_v = 0, GAME_OBJECT_v = 1, MI
 // From zpp/objects/Object.zpp
 enum class CollisionSpecialResponseCase : int32_t { COLLRESPONSE_NONE_v = 0, COLLRESPONSE_LAMPOST_v = 1, COLLRESPONSE_SMALLBOX_v = 2, COLLRESPONSE_BIGBOX_v = 3, COLLRESPONSE_FENCEPART_v = 4, COLLRESPONSE_UNKNOWN5_v = 5 };
 // From zpp/objects/Object.zpp
-enum class CollisionDamageEffect : int32_t { DAMAGE_EFFECT_NONE_v = 0, DAMAGE_EFFECT_CHANGE_MODEL_v = 1, DAMAGE_EFFECT_SPLIT_MODEL_v = 2, DAMAGE_EFFECT_SMASH_AND_DAMAGE_TRAFFICLIGHTS_v = 3, DAMAGE_EFFECT_SMASH_COMPLETELY_v = 4, DAMAGE_EFFECT_CHANGE_THEN_SMASH_v = 5, DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY_v = 6, DAMAGE_EFFECT_SMASH_YELLOW_TARGET_COMPLETELY_v = 7, DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY_v = 8, DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY_v = 9, DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY_v = 10, DAMAGE_EFFECT_SMASH_NEWSTANDNEW1_v = 11 };
+enum class CollisionDamageEffect : int32_t { DAMAGE_EFFECT_NONE_v = 0, DAMAGE_EFFECT_CHANGE_MODEL_v = 1, DAMAGE_EFFECT_SPLIT_MODEL_v = 2, DAMAGE_EFFECT_SMASH_AND_DAMAGE_TRAFFICLIGHTS_v = 3, DAMAGE_EFFECT_SMASH_COMPLETELY_v = 20, DAMAGE_EFFECT_CHANGE_THEN_SMASH_v = 21, DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY_v = 50, DAMAGE_EFFECT_SMASH_YELLOW_TARGET_COMPLETELY_v = 51, DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY_v = 60, DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY_v = 70, DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY_v = 80, DAMAGE_EFFECT_SMASH_NEWSTANDNEW1_v = 91, DAMAGE_EFFECT_SMASH_NEWSTANDNEW2_v = 92, DAMAGE_EFFECT_SMASH_NEWSTANDNEW3_v = 93, DAMAGE_EFFECT_SMASH_NEWSTANDNEW4_v = 94, DAMAGE_EFFECT_SMASH_NEWSTANDNEW5_v = 95, DAMAGE_EFFECT_SMASH_BLACKBAG_v = 100, DAMAGE_EFFECT_SMASH_VEGPALM_v = 110, DAMAGE_EFFECT_BURST_BEACHBALL_v = 120, DAMAGE_EFFECT_SMASH_BEACHLOUNGE_WOOD_v = 131, DAMAGE_EFFECT_SMASH_BEACHLOUNGE_TOWEL_v = 132 };
 // From zpp/objects/Object.zpp
 enum class Object_Enum_4 : int32_t { UNKNOWN_OBJECT_v = 0, GAME_OBJECT_v = 1, MISSION_OBJECT_v = 2, TEMP_OBJECT_v = 3, CUTSCENE_OBJECT_v = 4 };
 // State Schema Contract from zpp/objects/CutsceneHead.zpp
 struct CCutsceneHead_ZppContract {
-    int32_t m_pHeadNode{0}; // Z++: Ref[RwFrame]
-    int32_t m_parentObject{0}; // Z++: Ref[CCutsceneObject]
+    uint8_t m_pHeadNode_card{0u}; // Z++: Ref[RwFrame]
+    uint8_t m_parentObject_card{0u}; // Z++: Ref[CCutsceneObject]
     int32_t unk2{0}; // Z++: ℤ
     int32_t bIsSkinned{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const { return true; }
+    constexpr bool checkInvariant() const {
+        return (m_pHeadNode_card <= 1u)
+            && (m_parentObject_card <= 1u);
+    }
 };
 // State Schema Contract from zpp/objects/CutsceneObject.zpp
 struct CCutsceneObject_ZppContract {
     bool bRenderRightHand{false}; // Z++: 𝔹
     bool bRenderLeftHand{false}; // Z++: 𝔹
-    int32_t m_pShadow{0}; // Z++: Ref[CCutsceneShadow]
+    uint8_t m_pShadow_card{0u}; // Z++: Ref[CCutsceneShadow]
     int32_t m_pAttachTo{0}; // Z++: ADDRESS
-    int32_t m_pAttachmentObject{0}; // Z++: Ref[CObject]
-    constexpr bool checkInvariant() const { return true; }
-};
-// State Schema Contract from zpp/objects/Object.zpp
-struct CObject_ZppContract {
-    int32_t m_objectMatrix{0}; // Z++: CMatrix
-    float m_fUprootLimit{0.0f}; // Z++: ℝ
-    int32_t ObjectCreatedBy{0}; // Z++: ℤ
-    bool bIsPickup{false}; // Z++: 𝔹
-    bool bAmmoCollected{false}; // Z++: 𝔹
-    bool bPickupObjWithMessage{false}; // Z++: 𝔹
-    bool bOutOfStock{false}; // Z++: 𝔹
-    bool bGlassCracked{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const { return true; }
-};
-// State Schema Contract from zpp/objects/ObjectData.zpp
-struct CObjectInfo_ZppContract {
-    float m_fMass{0.0f}; // Z++: ℝ
-    float m_fTurnMass{0.0f}; // Z++: ℝ
-    float m_fAirResistance{0.0f}; // Z++: ℝ
-    float m_fElasticity{0.0f}; // Z++: ℝ
-    float m_fBuoyancy{0.0f}; // Z++: ℝ
-    float m_fUprootLimit{0.0f}; // Z++: ℝ
-    float m_fCollisionDamageMultiplier{0.0f}; // Z++: ℝ
-    uint32_t m_nCollisionDamageEffect{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const { return true; }
-};
-// State Schema Contract from zpp/objects/ObjectData.zpp
-struct CObjectData_ZppContract {
-    int32_t ms_aObjectInfo{0}; // Z++: seq CObjectInfo  -- bounded array [NUMOBJECTINFO]
-    constexpr bool checkInvariant() const { return true; }
+    uint8_t m_pAttachmentObject_card{0u}; // Z++: Ref[CObject]
+    constexpr bool checkInvariant() const {
+        return (m_pShadow_card <= 1u)
+            && (m_pAttachmentObject_card <= 1u);
+    }
 };
 // State Schema Contract from zpp/objects/ParticleObject.zpp
-struct CParticleObject_ZppContract {
-    int32_t m_pNext{0}; // Z++: Ref[CParticleObject]
-    int32_t m_pPrev{0}; // Z++: Ref[CParticleObject]
-    int32_t m_pParticle{0}; // Z++: Ref[CParticle]
-    uint32_t m_nRemoveTimer{0}; // Z++: ℕ
-    int32_t m_Type{0}; // Z++: eParticleObjectType
-    int32_t m_ParticleType{0}; // Z++: tParticleType
-    uint32_t m_nNumEffectCycles{0}; // Z++: ℕ
-    uint32_t m_nSkipFrames{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const { return true; }
+struct CAudioHydrant_ZppContract {
+    int32_t AudioEntity{0}; // Z++: ℤ
+    uint8_t pParticleObject_card{0u}; // Z++: Ref[CParticleObject]
+    constexpr bool checkInvariant() const {
+        return (pParticleObject_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/objects/Stinger.zpp
+struct CStinger_ZppContract {
+    bool bIsDeployed{false}; // Z++: 𝔹
+    int64_t m_nTimeOfDeploy{0}; // Z++: ℕ
+    int32_t m_vPos{0}; // Z++: CVector
+    float m_fMax_Z{0.0f}; // Z++: ℝ
+    float m_fMin_Z{0.0f}; // Z++: ℝ
+    std::array<int32_t, 60> m_vPositions{}; // Z++: seq CVector2D  -- bounded array [60]
+    size_t m_vPositions_len{60u}; // Z++ cardinality #m_vPositions
+    int32_t pSpikes{0}; // Z++: seq Ref[CStingerSegment]  -- bounded array [NUM_STINGER_SEGMENTS]
+    int64_t m_nSpikeState{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (m_nTimeOfDeploy >= 0)
+            && (m_vPositions_len == 60u && m_vPositions.size() == 60u)
+            && (m_nSpikeState >= 0);
+    }
 };
 constexpr bool verify_objects_zpp_invariants() {
     if (!CCutsceneHead_ZppContract{}.checkInvariant()) return false;
     if (!CCutsceneObject_ZppContract{}.checkInvariant()) return false;
-    if (!CObject_ZppContract{}.checkInvariant()) return false;
-    if (!CObjectInfo_ZppContract{}.checkInvariant()) return false;
-    if (!CObjectData_ZppContract{}.checkInvariant()) return false;
-    if (!CParticleObject_ZppContract{}.checkInvariant()) return false;
+    if (!CAudioHydrant_ZppContract{}.checkInvariant()) return false;
+    if (!CStinger_ZppContract{}.checkInvariant()) return false;
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_objects_zpp_invariants(), "Z++ formal contract invariant failed for objects");

@@ -79,6 +79,16 @@
     }
 
     void buildRoads(const avatar3d::GameWorld& world) {
+        // LW52 (Skidmarks.zpp CSkidmarks): stationary world-space braking tire marks on intersection approaches
+        for (float laneZ : {-1.4f, 1.4f}) {
+            for (float trackOff : {-0.62f, 0.62f}) {
+                const float tz = laneZ + trackOff;
+                addQuad({-7.5f, 0.017f, tz - 0.06f}, {-4.2f, 0.017f, tz - 0.06f},
+                        {-4.2f, 0.017f, tz + 0.06f}, {-7.5f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+                addQuad({ 4.2f, 0.017f, tz - 0.06f}, { 7.5f, 0.017f, tz - 0.06f},
+                        { 7.5f, 0.017f, tz + 0.06f}, { 4.2f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+            }
+        }
         // LW34: roads, sidewalks, curbs, and lane markings tiled in 2m chunks
         // within the local 42m camera window so near-plane culling never drops
         // long quads when vertices lie behind the camera.

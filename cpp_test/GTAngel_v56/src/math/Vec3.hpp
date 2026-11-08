@@ -1,5 +1,8 @@
 #ifndef GTANGEL_ZPP_MATH_SPEC_GUARD
 #define GTANGEL_ZPP_MATH_SPEC_GUARD
+#include <array>
+#include <cstddef>
+#include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/math
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/math/*.zpp
@@ -11,57 +14,65 @@ static constexpr int kZppSchemaCount = 264;
 static constexpr int kZppEnumCount   = 0;
 // State Schema Contract from zpp/math/Matrix.zpp
 struct CMatrix_ZppContract {
-    int32_t m_attachment{0}; // Z++: Ref[RwMatrix]
+    uint8_t m_attachment_card{0u}; // Z++: Ref[RwMatrix]
     float fz{0.0f}; // Z++: ℝ
     bool m_hasRwMatrix{false}; // Z++: 𝔹
     float uw{0.0f}; // Z++: ℝ
     float pw{0.0f}; // Z++: ℝ
     float fw{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const { return true; }
-};
-// State Schema Contract from zpp/math/Matrix.zpp
-struct CCompressedMatrixNotAligned_ZppContract {
-    int32_t m_vecPos{0}; // Z++: CVector
-    int32_t m_rightX{0}; // Z++: ℤ
-    int32_t m_rightY{0}; // Z++: ℤ
-    int32_t m_rightZ{0}; // Z++: ℤ
-    int32_t m_upX{0}; // Z++: ℤ
-    int32_t m_upY{0}; // Z++: ℤ
-    int32_t m_upZ{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const { return true; }
-};
-// State Schema Contract from zpp/math/Matrix.zpp
-struct CCompressedMatrix_ZppContract {
-    int32_t _alignment{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const { return true; }
+    constexpr bool checkInvariant() const {
+        return (m_attachment_card <= 1u);
+    }
 };
 // State Schema Contract from zpp/math/Quaternion.zpp
 struct CQuaternion_ZppContract {
     float w{0.0f}; // Z++: ℝ
-    int32_t this_field{0}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const { return true; }
-};
-// State Schema Contract from zpp/math/Rect.zpp
-struct CRect_ZppContract {
-    float left{0.0f}; // Z++: ℝ
-    float bottom{0.0f}; // Z++: ℝ
-    float right{0.0f}; // Z++: ℝ
-    float top{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const { return true; }
+    uint8_t this_field_card{0u}; // Z++: Ref[return]
+    constexpr bool checkInvariant() const {
+        return (this_field_card <= 1u);
+    }
 };
 // State Schema Contract from zpp/math/Vector.zpp
 struct CVector_ZppContract {
     float w{0.0f}; // Z++: ℝ
-    int32_t this_field{0}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const { return true; }
+    uint8_t this_field_card{0u}; // Z++: Ref[return]
+    constexpr bool checkInvariant() const {
+        return (this_field_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/math/Vector2D.zpp
+struct CVector2D_ZppContract {
+    float y{0.0f}; // Z++: ℝ
+    uint8_t this_field_card{0u}; // Z++: Ref[return]
+    constexpr bool checkInvariant() const {
+        return (this_field_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/math/VuVector.zpp
+struct VuVectorModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{40}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 40);
+    }
+};
+// State Schema Contract from zpp/math/math.zpp
+struct mathModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{118}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 118);
+    }
 };
 constexpr bool verify_math_zpp_invariants() {
     if (!CMatrix_ZppContract{}.checkInvariant()) return false;
-    if (!CCompressedMatrixNotAligned_ZppContract{}.checkInvariant()) return false;
-    if (!CCompressedMatrix_ZppContract{}.checkInvariant()) return false;
     if (!CQuaternion_ZppContract{}.checkInvariant()) return false;
-    if (!CRect_ZppContract{}.checkInvariant()) return false;
     if (!CVector_ZppContract{}.checkInvariant()) return false;
+    if (!CVector2D_ZppContract{}.checkInvariant()) return false;
+    if (!VuVectorModuleState_ZppContract{}.checkInvariant()) return false;
+    if (!mathModuleState_ZppContract{}.checkInvariant()) return false;
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_math_zpp_invariants(), "Z++ formal contract invariant failed for math");

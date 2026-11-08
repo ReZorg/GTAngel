@@ -7885,17 +7885,31 @@ once(`        for (float sx : {-0.65f, 0.65f})
 `        for (float sx : {-0.65f, 0.65f})
             addQuad(local(sx, 0.70f, -1.15f), local(sx, 0.70f, -0.92f),
                     local(sx, 0.84f, -0.94f), local(sx, 0.84f, -1.15f), cab, id);
-        // LW52 (Antennas.zpp & Skidmarks.zpp from Automobile.zpp): rear quarter whip antenna + twin tire tracks
+        // LW52 (Antennas.zpp from Automobile.zpp): rear quarter whip antenna + 3D rear diffuser mudflaps
         {
             const float sway = 0.06f * sinf(wheelPhase * 0.5f);
             addTaperedBone(local(-0.56f, 0.62f, -0.88f), local(-0.56f + sway, 1.32f, -1.02f), 0.012f, 0.006f, Colour{195, 205, 220, 255}, id);
             addJoint(local(-0.56f + sway, 1.32f, -1.02f), 0.020f, Colour{65, 75, 250, 255}, id);
-            for (float tx : {-0.68f, 0.68f}) {
-                addQuad(local(tx - 0.07f, 0.018f, -2.15f), local(tx + 0.07f, 0.018f, -2.15f),
-                        local(tx + 0.07f, 0.018f, -0.85f), local(tx - 0.07f, 0.018f, -0.85f),
-                        Colour{34, 34, 40, 255}, ObjectGround);
+            for (float tx : {-0.64f, 0.64f}) {
+                addQuad(local(tx - 0.06f, 0.15f, -1.16f), local(tx + 0.06f, 0.15f, -1.16f),
+                        local(tx + 0.06f, 0.28f, -1.12f), local(tx - 0.06f, 0.28f, -1.12f),
+                        darkTrim, id);
             }
-        }`, 'LW52 Automobile.zpp whip antenna & tire tracks');
+        }`, 'LW52 Automobile.zpp whip antenna & diffuser mudflaps');
+
+// 2b. Skidmarks.zpp: stationary world-space tire braking skidmarks on the road approaches in buildRoads
+once(`    void buildRoads(const avatar3d::GameWorld& world) {`,
+`    void buildRoads(const avatar3d::GameWorld& world) {
+        // LW52 (Skidmarks.zpp CSkidmarks): stationary world-space braking tire marks on intersection approaches
+        for (float laneZ : {-1.4f, 1.4f}) {
+            for (float trackOff : {-0.62f, 0.62f}) {
+                const float tz = laneZ + trackOff;
+                addQuad({-7.5f, 0.017f, tz - 0.06f}, {-4.2f, 0.017f, tz - 0.06f},
+                        {-4.2f, 0.017f, tz + 0.06f}, {-7.5f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+                addQuad({ 4.2f, 0.017f, tz - 0.06f}, { 7.5f, 0.017f, tz - 0.06f},
+                        { 7.5f, 0.017f, tz + 0.06f}, { 4.2f, 0.017f, tz + 0.06f}, Colour{34, 34, 40, 255}, ObjectGround);
+            }
+        }`, 'LW52 stationary world-space road skidmarks');
 
 // 3. Ped.zpp & Bones.zpp: add commuter backpack / shoulder pack (BONE_spine = 2) + cap visor (BONE_head = 5).
 once(`                addJoint(sk.joints[el], 0.048f, suit, ObjectNpc);

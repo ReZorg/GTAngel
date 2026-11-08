@@ -1,7 +1,9 @@
 #pragma once
-#include <cstdint>
 #ifndef GTANGEL_ZPP_BUILDINGS_SPEC_GUARD
 #define GTANGEL_ZPP_BUILDINGS_SPEC_GUARD
+#include <array>
+#include <cstddef>
+#include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/buildings
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/buildings/*.zpp

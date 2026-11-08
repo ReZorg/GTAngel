@@ -1,7 +1,9 @@
 #pragma once
-#include <cstdint>
 #ifndef GTANGEL_ZPP_DOCS_SPEC_GUARD
 #define GTANGEL_ZPP_DOCS_SPEC_GUARD
+#include <array>
+#include <cstddef>
+#include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/docs
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/docs/*.zpp
