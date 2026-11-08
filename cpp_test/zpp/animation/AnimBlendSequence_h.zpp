@@ -1,0 +1,304 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendSequence (animation)
+-- Source File(s): animation/AnimBlendSequence.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Quaternion.zpp  (from "Quaternion.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AnimBlendSequence_Enum_1 ::= KF_ROT | KF_TRANS
+  -- val(KF_ROT) = 1
+  -- val(KF_TRANS) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema KeyFrame
+  rotation : CQuaternion
+  deltaTime : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema KeyFrameTrans
+  KeyFrame  -- inherits base schema
+  translation : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema KeyFrameCompressed
+  rot : seq ℤ  -- bounded array [4]
+  deltaTime : ℤ
+where
+  #rot = 4
+end
+
+schema KeyFrameCompressed_GetRotation
+  ΔKeyFrameCompressed
+  quat? : Ref[CQuaternion]
+where
+  -- Declared member operation KeyFrameCompressed::GetRotation(CQuaternion *quat)
+  true
+end
+
+schema KeyFrameCompressed_SetRotation_2
+  ΔKeyFrameCompressed
+  quat? : CQuaternion
+  result! : void
+where
+  -- Declared member operation KeyFrameCompressed::SetRotation(const CQuaternion &quat)
+  true
+end
+
+schema KeyFrameCompressed_GetDeltaTime_3
+  ΔKeyFrameCompressed
+  result! : ℝ
+where
+  -- Declared member operation KeyFrameCompressed::GetDeltaTime(void)
+  true
+end
+
+schema KeyFrameCompressed_SetTime_4
+  ΔKeyFrameCompressed
+  t? : ℝ
+  result! : void
+where
+  -- Declared member operation KeyFrameCompressed::SetTime(float t)
+  true
+end
+
+schema KeyFrameTransCompressed
+  KeyFrameCompressed  -- inherits base schema
+  trans : seq ℤ  -- bounded array [3]
+where
+  #trans = 3
+end
+
+schema KeyFrameTransCompressed_GetTranslation
+  ΔKeyFrameTransCompressed
+  vec? : Ref[CVector]
+where
+  -- Declared member operation KeyFrameTransCompressed::GetTranslation(CVector *vec)
+  true
+end
+
+schema KeyFrameTransCompressed_SetTranslation_2
+  ΔKeyFrameTransCompressed
+  vec? : CVector
+  result! : void
+where
+  -- Declared member operation KeyFrameTransCompressed::SetTranslation(const CVector &vec)
+  true
+end
+
+schema CAnimBlendSequence
+  type : ℤ
+  name : seq CHAR
+  numFrames : ℤ
+  boneTag : ℤ
+  keyFrames : ADDRESS
+  keyFramesCompressed : ADDRESS
+where
+  #name = 24
+end
+
+schema CAnimBlendSequence_CAnimBlendSequence
+  ΔCAnimBlendSequence
+where
+  -- Declared member operation CAnimBlendSequence::CAnimBlendSequence(void)
+  true
+end
+
+schema CAnimBlendSequence_CAnimBlendSequence_2
+  ΔCAnimBlendSequence
+  result! : ANY
+where
+  -- Declared member operation CAnimBlendSequence::CAnimBlendSequence(void)
+  true
+end
+
+schema CAnimBlendSequence_SetName_3
+  ΔCAnimBlendSequence
+  name? : seq CHAR
+where
+  -- Declared member operation CAnimBlendSequence::SetName(char *name)
+  true
+end
+
+schema CAnimBlendSequence_SetNumFrames_4
+  ΔCAnimBlendSequence
+  numFrames? : ℤ
+  translation? : 𝔹
+  compressed? : 𝔹
+where
+  -- Declared member operation CAnimBlendSequence::SetNumFrames(int numFrames, bool translation, bool compressed)
+  true
+end
+
+schema CAnimBlendSequence_RemoveQuaternionFlips_5
+  ΔCAnimBlendSequence
+where
+  -- Declared member operation CAnimBlendSequence::RemoveQuaternionFlips(void)
+  true
+end
+
+schema CAnimBlendSequence_GetKeyFrame_6
+  ΔCAnimBlendSequence
+  n? : ℤ
+  result! : Ref[KeyFrame]
+where
+  -- Declared member operation CAnimBlendSequence::GetKeyFrame(int n)
+  true
+end
+
+schema CAnimBlendSequence_GetKeyFrameCompressed_7
+  ΔCAnimBlendSequence
+  n? : ℤ
+  result! : Ref[KeyFrameCompressed]
+where
+  -- Declared member operation CAnimBlendSequence::GetKeyFrameCompressed(int n)
+  true
+end
+
+schema CAnimBlendSequence_HasTranslation_8
+  ΔCAnimBlendSequence
+  result! : bool
+where
+  -- Declared member operation CAnimBlendSequence::HasTranslation(void)
+  true
+end
+
+schema CAnimBlendSequence_Uncompress_9
+  ΔCAnimBlendSequence
+  result! : void
+where
+  -- Declared member operation CAnimBlendSequence::Uncompress(void)
+  true
+end
+
+schema CAnimBlendSequence_CompressKeyframes_10
+  ΔCAnimBlendSequence
+where
+  -- Declared member operation CAnimBlendSequence::CompressKeyframes(void)
+  true
+end
+
+schema CAnimBlendSequence_RemoveUncompressedData_11
+  ΔCAnimBlendSequence
+where
+  -- Declared member operation CAnimBlendSequence::RemoveUncompressedData(void)
+  true
+end
+
+schema CAnimBlendSequence_MoveMemory_12
+  ΔCAnimBlendSequence
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendSequence::MoveMemory(void)
+  true
+end
+
+schema CAnimBlendSequence_SetBoneTag_13
+  ΔCAnimBlendSequence
+  tag? : ℤ
+where
+  -- Declared member operation CAnimBlendSequence::SetBoneTag(int tag)
+  true
+end
+
+schema CAnimBlendSequence_SetNumFrames_14
+  ΔCAnimBlendSequence
+  numFrames? : ℤ
+  translation? : 𝔹
+  result! : ifdef_PED_SKIN__endif_void
+where
+  -- Declared member operation CAnimBlendSequence::SetNumFrames(int numFrames, bool translation)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema AnimBlendSequence_GetRotation
+  ΔAnimBlendSequenceModuleState
+  quat? : Ref[CQuaternion]
+where
+  -- State update: scale' = 1.0f/4096.0f
+  -- State update: quat.x' = rot[0]*scale
+  -- State update: quat.y' = rot[1]*scale
+  -- State update: quat.z' = rot[2]*scale
+  -- State update: quat.w' = rot[3]*scale
+  true
+end
+
+schema AnimBlendSequence_SetRotation
+  ΔAnimBlendSequenceModuleState
+  quat? : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema AnimBlendSequence_GetDeltaTime
+  ΔAnimBlendSequenceModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = deltaTime/60.0f
+  true
+end
+
+schema AnimBlendSequence_SetTime
+  ΔAnimBlendSequenceModuleState
+  t? : ℝ
+where
+  -- State update: deltaTime' = t*60.0f + 0.5f
+  true
+end
+
+schema AnimBlendSequence_GetTranslation
+  ΔAnimBlendSequenceModuleState
+  vec? : Ref[CVector]
+where
+  -- State update: scale' = 1.0f/1024.0f
+  -- State update: vec.x' = trans[0]*scale
+  -- State update: vec.y' = trans[1]*scale
+  -- State update: vec.z' = trans[2]*scale
+  true
+end
+
+schema AnimBlendSequence_SetTranslation
+  ΔAnimBlendSequenceModuleState
+  vec? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema AnimBlendSequence_HasTranslation
+  ΔAnimBlendSequenceModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(type & KF_TRANS)
+  true
+end
+
+schema AnimBlendSequence_SetBoneTag
+  ΔAnimBlendSequenceModuleState
+  tag? : ℤ
+where
+  -- State update: boneTag' = tag
+  true
+end

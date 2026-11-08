@@ -1,0 +1,912 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: DMAudio (audio)
+-- Source File(s): audio/DMAudio.cpp, audio/DMAudio.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include audio_enums.zpp  (from "audio_enums.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include Crime.zpp  (from "Crime.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NO_AUDIO_PROVIDER : seq CHAR  -- #define NO_AUDIO_PROVIDER -3
+AUDIO_PROVIDER_NOT_DETERMINED : seq CHAR  -- #define AUDIO_PROVIDER_NOT_DETERMINED -99
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cDMAudio
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cDMAudio_cDMAudio
+  ΔcDMAudio
+  result! : ANY
+where
+  -- Declared member operation cDMAudio::cDMAudio()
+  true
+end
+
+schema cDMAudio_Terminate_2
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::Terminate(void)
+  true
+end
+
+schema cDMAudio_Service_3
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::Service(void)
+  true
+end
+
+schema cDMAudio_CreateEntity_4
+  ΔcDMAudio
+  type? : eAudioType
+  UID? : ADDRESS
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::CreateEntity(eAudioType type, void *UID)
+  true
+end
+
+schema cDMAudio_DestroyEntity_5
+  ΔcDMAudio
+  audioEntity? : ℤ
+where
+  -- Declared member operation cDMAudio::DestroyEntity(int32 audioEntity)
+  true
+end
+
+schema cDMAudio_GetEntityStatus_6
+  ΔcDMAudio
+  audioEntity? : ℤ
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::GetEntityStatus(int32 audioEntity)
+  true
+end
+
+schema cDMAudio_SetEntityStatus_7
+  ΔcDMAudio
+  audioEntity? : ℤ
+  status? : bool8
+where
+  -- Declared member operation cDMAudio::SetEntityStatus(int32 audioEntity, bool8 status)
+  true
+end
+
+schema cDMAudio_PlayOneShot_8
+  ΔcDMAudio
+  audioEntity? : ℤ
+  oneShot? : ℕ
+  volume? : ℝ
+where
+  -- Declared member operation cDMAudio::PlayOneShot(int32 audioEntity, uint16 oneShot, float volume)
+  true
+end
+
+schema cDMAudio_DestroyAllGameCreatedEntities_9
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::DestroyAllGameCreatedEntities(void)
+  true
+end
+
+schema cDMAudio_SetOutputMode_10
+  ΔcDMAudio
+  surround? : bool8
+where
+  -- Declared member operation cDMAudio::SetOutputMode(bool8 surround)
+  true
+end
+
+schema cDMAudio_SetMP3BoostVolume_11
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetMP3BoostVolume(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetEffectsMasterVolume_12
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetEffectsMasterVolume(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetMusicMasterVolume_13
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetMusicMasterVolume(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetEffectsFadeVol_14
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetEffectsFadeVol(uint8 volume)
+  true
+end
+
+schema cDMAudio_SetMusicFadeVol_15
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- Declared member operation cDMAudio::SetMusicFadeVol(uint8 volume)
+  true
+end
+
+schema cDMAudio_GetNum3DProvidersAvailable_16
+  ΔcDMAudio
+  result! : ℕ
+where
+  -- Declared member operation cDMAudio::GetNum3DProvidersAvailable(void)
+  true
+end
+
+schema cDMAudio_Get3DProviderName_17
+  ΔcDMAudio
+  id? : ℕ
+  result! : seq CHAR
+where
+  -- Declared member operation cDMAudio::Get3DProviderName(uint8 id)
+  true
+end
+
+schema cDMAudio_AutoDetect3DProviders_18
+  ΔcDMAudio
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::AutoDetect3DProviders(void)
+  true
+end
+
+schema cDMAudio_GetCurrent3DProviderIndex_19
+  ΔcDMAudio
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::GetCurrent3DProviderIndex(void)
+  true
+end
+
+schema cDMAudio_SetCurrent3DProvider_20
+  ΔcDMAudio
+  which? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation cDMAudio::SetCurrent3DProvider(uint8 which)
+  true
+end
+
+schema cDMAudio_SetSpeakerConfig_21
+  ΔcDMAudio
+  config? : ℤ
+where
+  -- Declared member operation cDMAudio::SetSpeakerConfig(int32 config)
+  true
+end
+
+schema cDMAudio_IsMP3RadioChannelAvailable_22
+  ΔcDMAudio
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::IsMP3RadioChannelAvailable(void)
+  true
+end
+
+schema cDMAudio_ReleaseDigitalHandle_23
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::ReleaseDigitalHandle(void)
+  true
+end
+
+schema cDMAudio_ReacquireDigitalHandle_24
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::ReacquireDigitalHandle(void)
+  true
+end
+
+schema cDMAudio_SetDynamicAcousticModelingStatus_25
+  ΔcDMAudio
+  status? : bool8
+where
+  -- Declared member operation cDMAudio::SetDynamicAcousticModelingStatus(bool8 status)
+  true
+end
+
+schema cDMAudio_CheckForAnAudioFileOnCD_26
+  ΔcDMAudio
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::CheckForAnAudioFileOnCD(void)
+  true
+end
+
+schema cDMAudio_GetCDAudioDriveLetter_27
+  ΔcDMAudio
+  result! : seq CHAR
+where
+  -- Declared member operation cDMAudio::GetCDAudioDriveLetter(void)
+  true
+end
+
+schema cDMAudio_IsAudioInitialised_28
+  ΔcDMAudio
+  result! : bool8
+where
+  -- Declared member operation cDMAudio::IsAudioInitialised(void)
+  true
+end
+
+schema cDMAudio_ResetPoliceRadio_29
+  ΔcDMAudio
+where
+  -- Declared member operation cDMAudio::ResetPoliceRadio()
+  true
+end
+
+schema cDMAudio_ReportCrime_30
+  ΔcDMAudio
+  crime? : eCrimeType
+  pos? : CVector
+where
+  -- Declared member operation cDMAudio::ReportCrime(eCrimeType crime, CVector const &pos)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cDMAudio_Initialise
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.Initialise
+  true
+end
+
+schema cDMAudio_Terminate
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.Terminate
+  true
+end
+
+schema cDMAudio_Service
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.Service
+  true
+end
+
+schema cDMAudio_CreateEntity
+  ΔcDMAudio
+  type? : eAudioType
+  UID? : ADDRESS
+where
+  -- Return postcondition: result! = AudioManager.CreateEntity(type, (CPhysical *)UID)
+  -- Invokes: AudioManager.CreateEntity
+  true
+end
+
+schema cDMAudio_DestroyEntity
+  ΔcDMAudio
+  audioEntity? : ℤ
+where
+  -- Invokes: AudioManager.DestroyEntity
+  true
+end
+
+schema cDMAudio_GetEntityStatus
+  ΔcDMAudio
+  audioEntity? : ℤ
+where
+  -- Return postcondition: result! = AudioManager.GetEntityStatus(audioEntity)
+  -- Invokes: AudioManager.GetEntityStatus
+  true
+end
+
+schema cDMAudio_SetEntityStatus
+  ΔcDMAudio
+  audioEntity? : ℤ
+  status? : bool8
+where
+  -- Invokes: AudioManager.SetEntityStatus
+  true
+end
+
+schema cDMAudio_PlayOneShot
+  ΔcDMAudio
+  audioEntity? : ℤ
+  oneShot? : ℕ
+  volume? : ℝ
+where
+  -- Invokes: AudioManager.PlayOneShot
+  true
+end
+
+schema cDMAudio_DestroyAllGameCreatedEntities
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.DestroyAllGameCreatedEntities
+  true
+end
+
+schema cDMAudio_SetOutputMode
+  ΔcDMAudio
+  surround? : bool8
+where
+  -- Invokes: AudioManager.SetOutputMode
+  true
+end
+
+schema cDMAudio_SetMP3BoostVolume
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- State update: vol' = volume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: AudioManager.SetMP3BoostVolume
+  true
+end
+
+schema cDMAudio_SetEffectsMasterVolume
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- State update: vol' = volume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: AudioManager.SetEffectsMasterVolume
+  true
+end
+
+schema cDMAudio_SetMusicMasterVolume
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- State update: vol' = volume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: AudioManager.SetMusicMasterVolume
+  true
+end
+
+schema cDMAudio_SetEffectsFadeVol
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- State update: vol' = volume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: AudioManager.SetEffectsFadeVol
+  true
+end
+
+schema cDMAudio_SetMusicFadeVol
+  ΔcDMAudio
+  volume? : ℕ
+where
+  -- State update: vol' = volume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: AudioManager.SetMusicFadeVol
+  true
+end
+
+schema cDMAudio_GetNum3DProvidersAvailable
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.GetNum3DProvidersAvailable()
+  -- Invokes: AudioManager.GetNum3DProvidersAvailable
+  true
+end
+
+schema cDMAudio_Get3DProviderName
+  ΔcDMAudio
+  id? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.Get3DProviderName(id)
+  -- Invokes: AudioManager.Get3DProviderName
+  true
+end
+
+schema cDMAudio_AutoDetect3DProviders
+  ΔcDMAudio
+  result! : ℤ
+where
+  -- Return postcondition: result! = AudioManager.AutoDetect3DProviders()
+  -- Invokes: AudioManager.AutoDetect3DProviders
+  true
+end
+
+schema cDMAudio_GetCurrent3DProviderIndex
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.GetCurrent3DProviderIndex()
+  -- Invokes: AudioManager.GetCurrent3DProviderIndex
+  true
+end
+
+schema cDMAudio_SetCurrent3DProvider
+  ΔcDMAudio
+  which? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.SetCurrent3DProvider(which)
+  -- Invokes: AudioManager.SetCurrent3DProvider
+  true
+end
+
+schema cDMAudio_SetSpeakerConfig
+  ΔcDMAudio
+  config? : ℤ
+where
+  -- Invokes: AudioManager.SetSpeakerConfig
+  true
+end
+
+schema cDMAudio_IsMP3RadioChannelAvailable
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.IsMP3RadioChannelAvailable()
+  -- Invokes: AudioManager.IsMP3RadioChannelAvailable
+  true
+end
+
+schema cDMAudio_ReleaseDigitalHandle
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.ReleaseDigitalHandle
+  true
+end
+
+schema cDMAudio_ReacquireDigitalHandle
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.ReacquireDigitalHandle
+  true
+end
+
+schema cDMAudio_SetDynamicAcousticModelingStatus
+  ΔcDMAudio
+  status? : bool8
+where
+  -- Invokes: AudioManager.SetDynamicAcousticModelingStatus
+  true
+end
+
+schema cDMAudio_CheckForAnAudioFileOnCD
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.CheckForAnAudioFileOnCD()
+  -- Invokes: AudioManager.CheckForAnAudioFileOnCD
+  true
+end
+
+schema cDMAudio_GetCDAudioDriveLetter
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.GetCDAudioDriveLetter()
+  -- Invokes: AudioManager.GetCDAudioDriveLetter
+  true
+end
+
+schema cDMAudio_IsAudioInitialised
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.IsAudioInitialised()
+  -- Invokes: AudioManager.IsAudioInitialised
+  true
+end
+
+schema cDMAudio_ResetPoliceRadio
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.ResetPoliceRadio
+  true
+end
+
+schema cDMAudio_ReportCrime
+  ΔcDMAudio
+  crime? : eCrimeType
+  pos? : CVector
+where
+  -- Invokes: AudioManager.ReportCrime
+  true
+end
+
+schema cDMAudio_CreateLoopingScriptObject
+  ΔcDMAudio
+  scriptObject? : Ref[cAudioScriptObject]
+where
+  -- Return postcondition: result! = audioEntity
+  -- Invokes: AudioManager.CreateEntity, AudioManager.SetEntityStatus
+  true
+end
+
+schema cDMAudio_DestroyLoopingScriptObject
+  ΔcDMAudio
+  audioEntity? : ℤ
+where
+  -- Invokes: AudioManager.DestroyEntity
+  true
+end
+
+schema cDMAudio_CreateOneShotScriptObject
+  ΔcDMAudio
+  scriptObject? : Ref[cAudioScriptObject]
+where
+  -- Invokes: AudioManager.CreateEntity, AudioManager.SetEntityStatus, AudioManager.PlayOneShot
+  true
+end
+
+schema cDMAudio_PlaySuspectLastSeen
+  ΔcDMAudio
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Invokes: AudioManager.PlaySuspectLastSeen
+  true
+end
+
+schema cDMAudio_ReportCollision
+  ΔcDMAudio
+  entityA? : Ref[CEntity]
+  entityB? : Ref[CEntity]
+  surfaceTypeA? : ℕ
+  surfaceTypeB? : ℕ
+  collisionPower? : ℝ
+  velocity? : ℝ
+where
+  -- Invokes: AudioManager.ReportCollision
+  true
+end
+
+schema cDMAudio_PlayFrontEndSound
+  ΔcDMAudio
+  frontend? : ℕ
+  volume? : ℕ
+where
+  -- Invokes: AudioManager.PlayOneShot
+  true
+end
+
+schema cDMAudio_PlayRadioAnnouncement
+  ΔcDMAudio
+  announcement? : ℕ
+where
+  -- Invokes: MusicManager.PlayAnnouncement
+  true
+end
+
+schema cDMAudio_PlayFrontEndTrack
+  ΔcDMAudio
+  track? : ℕ
+  frontendFlag? : bool8
+where
+  -- Invokes: MusicManager.PlayFrontEndTrack
+  true
+end
+
+schema cDMAudio_StopFrontEndTrack
+  ΔcDMAudio
+where
+  -- Invokes: MusicManager.StopFrontEndTrack
+  true
+end
+
+schema cDMAudio_ResetTimers
+  ΔcDMAudio
+  time? : ℕ
+where
+  -- Invokes: AudioManager.ResetTimers
+  true
+end
+
+schema cDMAudio_ChangeMusicMode
+  ΔcDMAudio
+  mode? : ℕ
+where
+  -- Invokes: MusicManager.ChangeMusicMode
+  true
+end
+
+schema cDMAudio_PreloadCutSceneMusic
+  ΔcDMAudio
+  track? : ℕ
+where
+  -- Invokes: MusicManager.PreloadCutSceneMusic
+  true
+end
+
+schema cDMAudio_PlayPreloadedCutSceneMusic
+  ΔcDMAudio
+where
+  -- Invokes: MusicManager.PlayPreloadedCutSceneMusic
+  true
+end
+
+schema cDMAudio_StopCutSceneMusic
+  ΔcDMAudio
+where
+  -- Invokes: MusicManager.StopCutSceneMusic
+  true
+end
+
+schema cDMAudio_PreloadMissionAudio
+  ΔcDMAudio
+  slot? : ℕ
+  missionAudio? : seq CHAR
+where
+  -- Invokes: AudioManager.PreloadMissionAudio
+  true
+end
+
+schema cDMAudio_GetMissionAudioLoadingStatus
+  ΔcDMAudio
+  slot? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.GetMissionAudioLoadingStatus(slot)
+  -- Invokes: AudioManager.GetMissionAudioLoadingStatus
+  true
+end
+
+schema cDMAudio_SetMissionAudioLocation
+  ΔcDMAudio
+  slot? : ℕ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Invokes: AudioManager.SetMissionAudioLocation
+  true
+end
+
+schema cDMAudio_PlayLoadedMissionAudio
+  ΔcDMAudio
+  slot? : ℕ
+where
+  -- Invokes: AudioManager.PlayLoadedMissionAudio
+  true
+end
+
+schema cDMAudio_IsMissionAudioSamplePlaying
+  ΔcDMAudio
+  slot? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.IsMissionAudioSamplePlaying(slot)
+  -- Invokes: AudioManager.IsMissionAudioSamplePlaying
+  true
+end
+
+schema cDMAudio_IsMissionAudioSampleFinished
+  ΔcDMAudio
+  slot? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.IsMissionAudioSampleFinished(slot)
+  -- Invokes: AudioManager.IsMissionAudioSampleFinished
+  true
+end
+
+schema cDMAudio_ClearMissionAudio
+  ΔcDMAudio
+  slot? : ℕ
+where
+  -- Invokes: AudioManager.ClearMissionAudio
+  true
+end
+
+schema cDMAudio_GetMissionAudioLoadedLabel
+  ΔcDMAudio
+  slot? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.GetMissionAudioLoadedLabel(slot)
+  -- Invokes: AudioManager.GetMissionAudioLoadedLabel
+  true
+end
+
+schema cDMAudio_GetRadioInCar
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = MusicManager.GetRadioInCar()
+  -- Invokes: MusicManager.GetRadioInCar
+  true
+end
+
+schema cDMAudio_SetRadioInCar
+  ΔcDMAudio
+  radio? : ℕ
+where
+  -- Invokes: MusicManager.SetRadioInCar
+  true
+end
+
+schema cDMAudio_SetRadioChannel
+  ΔcDMAudio
+  radio? : ℕ
+  pos? : ℤ
+where
+  -- Invokes: MusicManager.SetRadioChannelByScript
+  true
+end
+
+schema cDMAudio_SetStartingTrackPositions
+  ΔcDMAudio
+  isStartGame? : bool8
+where
+  -- Invokes: MusicManager.SetStartingTrackPositions
+  true
+end
+
+schema cDMAudio_GetListenTimeArray
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = MusicManager.GetListenTimeArray()
+  -- Invokes: MusicManager.GetListenTimeArray
+  true
+end
+
+schema cDMAudio_GetFavouriteRadioStation
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = MusicManager.GetFavouriteRadioStation()
+  -- Invokes: MusicManager.GetFavouriteRadioStation
+  true
+end
+
+schema cDMAudio_GetRadioPosition
+  ΔcDMAudio
+  station? : ℕ
+where
+  -- Return postcondition: result! = MusicManager.GetRadioPosition(station)
+  -- Invokes: MusicManager.GetRadioPosition
+  true
+end
+
+schema cDMAudio_SetPedTalkingStatus
+  ΔcDMAudio
+  ped? : Ref[CPed]
+  status? : bool8
+where
+  -- Return postcondition: result! = AudioManager.SetPedTalkingStatus(ped, status)
+  -- Invokes: AudioManager.SetPedTalkingStatus
+  true
+end
+
+schema cDMAudio_SetPlayersMood
+  ΔcDMAudio
+  mood? : ℕ
+  time? : ℕ
+where
+  -- Return postcondition: result! = AudioManager.SetPlayersMood(mood, time)
+  -- Invokes: AudioManager.SetPlayersMood
+  true
+end
+
+schema cDMAudio_ShutUpPlayerTalking
+  ΔcDMAudio
+  state? : bool8
+where
+  -- State update: AudioManager.m_bIsPlayerShutUp' = state
+  true
+end
+
+schema cDMAudio_SetMonoMode
+  ΔcDMAudio
+  mono? : bool8
+where
+  -- Invokes: AudioManager.SetMonoMode
+  true
+end
+
+schema cDMAudio_PlayRadioAnnouncement_2
+  ΔcDMAudio
+  announcement? : ℕ
+where
+  -- Invokes: MusicManager.PlayAnnouncement
+  true
+end
+
+schema cDMAudio_PlayFrontEndTrack_2
+  ΔcDMAudio
+  track? : ℕ
+  frontendFlag? : bool8
+where
+  -- Invokes: MusicManager.PlayFrontEndTrack
+  true
+end
+
+schema cDMAudio_PreloadCutSceneMusic_2
+  ΔcDMAudio
+  track? : ℕ
+where
+  -- Invokes: MusicManager.PreloadCutSceneMusic
+  true
+end
+
+schema cDMAudio_PreloadMissionAudio_2
+  ΔcDMAudio
+  missionAudio? : seq CHAR
+where
+  -- Invokes: AudioManager.PreloadMissionAudio
+  true
+end
+
+schema cDMAudio_GetMissionAudioLoadingStatus_2
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.GetMissionAudioLoadingStatus()
+  -- Invokes: AudioManager.GetMissionAudioLoadingStatus
+  true
+end
+
+schema cDMAudio_SetMissionAudioLocation_2
+  ΔcDMAudio
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Invokes: AudioManager.SetMissionAudioLocation
+  true
+end
+
+schema cDMAudio_PlayLoadedMissionAudio_2
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.PlayLoadedMissionAudio
+  true
+end
+
+schema cDMAudio_IsMissionAudioSampleFinished_2
+  ΔcDMAudio
+where
+  -- Return postcondition: result! = AudioManager.IsMissionAudioSampleFinished()
+  -- Invokes: AudioManager.IsMissionAudioSampleFinished
+  true
+end
+
+schema cDMAudio_ClearMissionAudio_2
+  ΔcDMAudio
+where
+  -- Invokes: AudioManager.ClearMissionAudio
+  true
+end
+
+schema cDMAudio_SetRadioChannel_2
+  ΔcDMAudio
+  radio? : ℕ
+  pos? : ℤ
+where
+  -- Invokes: MusicManager.SetRadioChannelByScript
+  true
+end
+
+schema DMAudio_cDMAudio
+  ΔDMAudioModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

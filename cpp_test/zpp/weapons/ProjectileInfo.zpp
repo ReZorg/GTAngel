@@ -1,0 +1,278 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ProjectileInfo (weapons)
+-- Source File(s): weapons/ProjectileInfo.cpp, weapons/ProjectileInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include General.zpp  (from "General.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Projectile.zpp  (from "Projectile.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include World.zpp  (from "World.h")
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PROJECTILE_BOUNDARY_MIN_X : ℝ  -- #define PROJECTILE_BOUNDARY_MIN_X -2390.0f
+PROJECTILE_BOUNDARY_MAX_X : ℝ  -- #define PROJECTILE_BOUNDARY_MAX_X 1590.0f
+PROJECTILE_BOUNDARY_MIN_Y : ℝ  -- #define PROJECTILE_BOUNDARY_MIN_Y -1990.0f
+PROJECTILE_BOUNDARY_MAX_Y : ℝ  -- #define PROJECTILE_BOUNDARY_MAX_Y 1990.0f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CProjectileInfo
+  m_eWeaponType : eWeaponType
+  m_pSource : Ref[CEntity]
+  m_nExplosionTime : ℕ
+  m_bInUse : 𝔹
+  m_vecPos : CVector
+  ms_apProjectile : seq Ref[CProjectile]  -- bounded array [NUM_PROJECTILES]
+where
+  #m_pSource ≤ 1
+  m_nExplosionTime ≥ 0
+end
+
+schema CProjectileInfo_GetProjectileInfo
+  ΔCProjectileInfo
+  id? : ℤ
+  result! : Ref[CProjectileInfo]
+where
+  -- Declared member operation CProjectileInfo::GetProjectileInfo(int32 id)
+  true
+end
+
+schema CProjectileInfo_Initialise_2
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::Initialise()
+  true
+end
+
+schema CProjectileInfo_Shutdown_3
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::Shutdown()
+  true
+end
+
+schema CProjectileInfo_AddProjectile_4
+  ΔCProjectileInfo
+  ped? : Ref[CEntity]
+  weapon? : eWeaponType
+  pos? : CVector
+  speed? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CProjectileInfo::AddProjectile(CEntity *ped, eWeaponType weapon, CVector pos, float speed)
+  true
+end
+
+schema CProjectileInfo_RemoveProjectile_5
+  ΔCProjectileInfo
+  info? : Ref[CProjectileInfo]
+  projectile? : Ref[CProjectile]
+where
+  -- Declared member operation CProjectileInfo::RemoveProjectile(CProjectileInfo *info, CProjectile *projectile)
+  true
+end
+
+schema CProjectileInfo_RemoveNotAdd_6
+  ΔCProjectileInfo
+  entity? : Ref[CEntity]
+  weaponType? : eWeaponType
+  pos? : CVector
+where
+  -- Declared member operation CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector pos)
+  true
+end
+
+schema CProjectileInfo_RemoveIfThisIsAProjectile_7
+  ΔCProjectileInfo
+  pObject? : Ref[CObject]
+  result! : 𝔹
+where
+  -- Declared member operation CProjectileInfo::RemoveIfThisIsAProjectile(CObject *pObject)
+  true
+end
+
+schema CProjectileInfo_RemoveAllProjectiles_8
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::RemoveAllProjectiles()
+  true
+end
+
+schema CProjectileInfo_RemoveDetonatorProjectiles_9
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::RemoveDetonatorProjectiles()
+  true
+end
+
+schema CProjectileInfo_Update_10
+  ΔCProjectileInfo
+where
+  -- Declared member operation CProjectileInfo::Update()
+  true
+end
+
+schema CProjectileInfo_IsProjectileInRange_11
+  ΔCProjectileInfo
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  remove? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, float z1, float z2, bool remove)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CProjectileInfo_Initialise
+  ΔCProjectileInfo
+where
+  -- State update: m_eWeaponType' = WEAPONTYPE_GRENADE
+  -- State update: m_pSource' = ∅
+  -- State update: m_nExplosionTime' = 0
+  -- State update: m_bInUse' = false
+  -- State update: projectileInUse' = 0
+  true
+end
+
+schema CProjectileInfo_Shutdown
+  ΔCProjectileInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CProjectileInfo_GetProjectileInfo
+  ΔCProjectileInfo
+  id? : ℤ
+where
+  -- Return postcondition: result! = &gaProjectileInfo[id]
+  true
+end
+
+schema CProjectileInfo_AddProjectile
+  ΔCProjectileInfo
+  entity? : Ref[CEntity]
+  weapon? : eWeaponType
+  pos? : CVector
+  speed? : ℝ
+where
+  -- State update: SpecialCollisionResponseCase' = COLLRESPONSE_NONE
+  -- State update: gravity' = true
+  -- State update: elasticity' = 0.75f
+  -- State update: ped' = (CPed*)entity
+  -- State update: vy' = 0.35f
+  -- State update: time' = CTimer::GetTimeInMilliseconds() + 2000
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CTimer::GetTimeInMilliseconds, entity->GetModelIndex, ped->GetMatrix, matrix.GetPosition, entity->GetForward
+  true
+end
+
+schema CProjectileInfo_RemoveProjectile
+  ΔCProjectileInfo
+  info? : Ref[CProjectileInfo]
+  projectile? : Ref[CProjectile]
+where
+  -- State update: info.m_bInUse' = false
+  -- Invokes: CExplosion::AddExplosion, projectile->GetPosition, m_pSource->IsVehicle, CWorld::Remove
+  true
+end
+
+schema CProjectileInfo_RemoveNotAdd
+  ΔCProjectileInfo
+  entity? : Ref[CEntity]
+  weaponType? : eWeaponType
+  pos? : CVector
+where
+  -- Invokes: CExplosion::AddExplosion
+  true
+end
+
+schema CProjectileInfo_Update
+  ΔCProjectileInfo
+where
+  -- State update: tearGasOffset' = -0.0f
+  -- State update: ped' = (CPed*)gaProjectileInfo[i].m_pSource
+  -- State update: m_pSource' = ∅
+  -- State update: m_bInUse' = false
+  -- State update: m_fElasticity' = 0.03f
+  -- State update: projectilePos' = ms_apProjectile[i].GetPosition()
+  -- Invokes: ped->IsPed, ped->IsPointerValid, CTimer::GetTimeStep, CWorld::Remove, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CProjectileInfo_IsProjectileInRange
+  ΔCProjectileInfo
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  remove? : 𝔹
+where
+  -- State update: pos' = ms_apProjectile[i].GetPosition()
+  -- State update: m_bInUse' = false
+  -- Return postcondition: result! = result
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CProjectileInfo_RemoveDetonatorProjectiles
+  ΔCProjectileInfo
+where
+  -- State update: m_bInUse' = false
+  -- Invokes: CExplosion::AddExplosion, CWorld::Remove
+  true
+end
+
+schema CProjectileInfo_RemoveAllProjectiles
+  ΔCProjectileInfo
+where
+  -- State update: m_bInUse' = false
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CProjectileInfo_RemoveIfThisIsAProjectile
+  ΔCProjectileInfo
+  object? : Ref[CObject]
+where
+  -- State update: m_bInUse' = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CWorld::Remove
+  true
+end

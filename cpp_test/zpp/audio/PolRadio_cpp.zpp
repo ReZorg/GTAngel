@@ -1,0 +1,119 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PolRadio (audio)
+-- Source File(s): audio/PolRadio.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include AudioSamples.zpp  (from "AudioSamples.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include PolRadio.zpp  (from "PolRadio.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include Wanted.zpp  (from "Wanted.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tPoliceRadioZone
+  m_aName : seq CHAR
+  m_nSampleIndex : ℕ
+  field_12 : ℤ
+where
+  #m_aName = 8
+  m_nSampleIndex ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cAudioManager_InitialisePoliceRadioZones
+  ΔcAudioManager
+where
+  -- State update: m_nSampleIndex' = sample
+  true
+end
+
+schema cAudioManager_InitialisePoliceRadio
+  ΔcAudioManager
+where
+  -- State update: type' = CRIME_NONE
+  -- State update: gSpecialSuspectLastSeenReport' = FALSE
+  -- Invokes: m_sPoliceRadioQueue.Reset, SampleManager.SetChannelReverbFlag
+  true
+end
+
+schema cAudioManager_ResetPoliceRadio
+  ΔcAudioManager
+where
+  -- Invokes: SampleManager.GetChannelUsedFlag, SampleManager.StopChannel
+  true
+end
+
+schema cAudioManager_SetMissionScriptPoliceAudio
+  ΔcAudioManager
+  sfx? : ℕ
+where
+  -- State update: g_nMissionAudioPlayingStatus' = PLAY_STATUS_STOPPED
+  -- State update: g_nMissionAudioSfx' = sfx
+  true
+end
+
+schema cAudioManager_GetMissionScriptPoliceAudioPlayingStatus
+  ΔcAudioManager
+where
+  -- Return postcondition: result! = g_nMissionAudioPlayingStatus
+  true
+end
+
+schema cAudioManager_DoPoliceRadioCrackle
+  ΔcAudioManager
+where
+  -- State update: m_sQueueSample.m_nEntityIndex' = m_nPoliceChannelEntity
+  -- State update: m_sQueueSample.m_nCounter' = 0
+  -- State update: m_sQueueSample.m_nSampleIndex' = SFX_POLICE_RADIO_CRACKLE
+  -- State update: m_sQueueSample.m_nBankIndex' = SFX_BANK_0
+  -- State update: m_sQueueSample.m_bIs2D' = TRUE
+  -- State update: m_sQueueSample.m_nPriority' = 10
+  -- Invokes: SampleManager.GetSampleBaseFrequency
+  true
+end
+
+schema cAudioManager_ServicePoliceRadio
+  ΔcAudioManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cAudioManager_ServicePoliceRadioChannel
+  ΔcAudioManager
+  wantedLevel? : ℕ
+where
+  -- State update: processed' = FALSE
+  -- State update: cWait' = 0
+  -- State update: bChannelOpen' = FALSE
+  -- State update: bMissionAudioPhysicalPlayingStatus' = PLAY_STATUS_STOPPED
+  -- State update: PoliceChannelFreq' = 5500
+  -- State update: bChannelOpen' = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: SampleManager.GetChannelUsedFlag, SampleManager.SetChannelFrequency, SampleManager.StopChannel, SampleManager.IsStreamPlaying, SampleManager.PauseStream
+  true
+end

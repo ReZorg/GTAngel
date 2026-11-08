@@ -1,0 +1,171 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneHead (objects)
+-- Source File(s): objects/CutsceneHead.cpp, objects/CutsceneHead.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpskin.zpp  (from "rpskin.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include Directory.zpp  (from "Directory.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include CutsceneHead.zpp  (from "CutsceneHead.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include CutsceneObject.zpp  (from "CutsceneObject.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCutsceneHead
+  CCutsceneObject  -- inherits base schema
+  m_pHeadNode : Ref[RwFrame]
+  m_parentObject : Ref[CCutsceneObject]
+  unk2 : ℤ
+  bIsSkinned : ℤ
+where
+  #m_pHeadNode ≤ 1
+  #m_parentObject ≤ 1
+end
+
+schema CCutsceneHead_CreateRwObject
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::CreateRwObject(void)
+  true
+end
+
+schema CCutsceneHead_DeleteRwObject_2
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::DeleteRwObject(void)
+  true
+end
+
+schema CCutsceneHead_ProcessControl_3
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::ProcessControl(void)
+  true
+end
+
+schema CCutsceneHead_Render_4
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::Render(void)
+  true
+end
+
+schema CCutsceneHead_RenderLimb_5
+  ΔCCutsceneHead
+  bone? : ℤ
+where
+  -- Declared member operation CCutsceneHead::RenderLimb(int32 bone)
+  true
+end
+
+schema CCutsceneHead_PlayAnimation_6
+  ΔCCutsceneHead
+  animName? : seq CHAR
+where
+  -- Declared member operation CCutsceneHead::PlayAnimation(const char *animName)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCutsceneHead_CCutsceneHead
+  ΔCCutsceneHead
+  obj? : Ref[CObject]
+where
+  -- State update: unk1' = 0
+  -- State update: bIsSkinned' = false
+  -- State update: m_parentObject' = (CCutsceneObject*)obj
+  -- State update: bIsSkinned' = true
+  -- State update: atm' = (RpAtomic*)GetFirstObject(m_pHeadNode)
+  -- Invokes: obj->GetClump, m_parentObject->SetRenderHead
+  true
+end
+
+schema CCutsceneHead_CreateRwObject
+  ΔCCutsceneHead
+where
+  -- State update: atm' = GetFirstAtomic((RpClump*)m_rwObject)
+  -- Invokes: CEntity::CreateRwObject
+  true
+end
+
+schema CCutsceneHead_DeleteRwObject
+  ΔCCutsceneHead
+where
+  -- Invokes: CEntity::DeleteRwObject
+  true
+end
+
+schema CCutsceneHead_ProcessControl
+  ΔCCutsceneHead
+where
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(m_parentObject.GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, BONE_head)
+  -- State update: mat' = &RpHAnimHierarchyGetMatrixArray(hier)[idx]
+  -- State update: m_matrix' = CMatrix(mat) * m_matrix
+  -- State update: m_matrix' = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix
+  -- State update: atm' = GetFirstAtomic((RpClump*)m_rwObject)
+  -- Invokes: CPhysical::ProcessControl, m_parentObject->GetClump, m_matrix.SetRotateY, CCutsceneMgr::IsRunning, CTimer::GetTimeStepNonClippedInSeconds
+  true
+end
+
+schema CCutsceneHead_Render
+  ΔCCutsceneHead
+where
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(m_parentObject.GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, BONE_head)
+  -- State update: mat' = &RpHAnimHierarchyGetMatrixArray(hier)[idx]
+  -- State update: m_matrix' = CMatrix(mat) * m_matrix
+  -- State update: m_matrix' = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix
+  -- State update: atm' = GetFirstAtomic((RpClump*)m_rwObject)
+  -- Invokes: m_parentObject->GetClump, m_matrix.SetRotateY, CObject::Render
+  true
+end
+
+schema CCutsceneHead_RenderLimb
+  ΔCCutsceneHead
+  bone? : ℤ
+where
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(m_parentObject.GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, bone)
+  -- State update: mats' = RpHAnimHierarchyGetMatrixArray(hier)
+  -- State update: mi' = (CPedModelInfo*)CModelInfo::GetModelInfo(GetModelIndex())
+  -- State update: atomic' = mi.getLeftHand()
+  -- State update: atomic' = mi.getRightHand()
+  -- Invokes: m_parentObject->GetClump, CModelInfo::GetModelInfo, mi->GetModelType, mi->getLeftHand, mi->getRightHand
+  true
+end
+
+schema CCutsceneHead_PlayAnimation
+  ΔCCutsceneHead
+  animName? : seq CHAR
+where
+  -- State update: lastLoadedSKA' = false
+  -- State update: atm' = GetFirstAtomic((RpClump*)m_rwObject)
+  -- State update: hier' = RpSkinAtomicGetHAnimHierarchy(atm)
+  -- State update: anim' = RpHAnimAnimationStreamRead(stream)
+  -- State update: anim' = rw::Animation::streamReadLegacy(stream)
+  -- State update: lastLoadedSKA' = true
+  -- Invokes: ms_pCutsceneDir->FindItem, CStreaming::MakeSpaceFor, CStreaming::ImGonnaUseStreamingMemory, CStreaming::IHaveUsedStreamingMemory, Animation::streamReadLegacy
+  true
+end

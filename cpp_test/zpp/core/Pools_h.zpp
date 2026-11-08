@@ -1,0 +1,270 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pools (core)
+-- Source File(s): core/Pools.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include templates.zpp  (from "templates.h")
+-- include Lists.zpp  (from "Lists.h")
+-- include Treadable.zpp  (from "Treadable.h")
+-- include Object.zpp  (from "Object.h")
+-- include CutsceneObject.zpp  (from "CutsceneObject.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include DummyPed.zpp  (from "DummyPed.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include CutsceneHead.zpp  (from "CutsceneHead.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPools
+  ms_pPtrNodePool : Ref[CCPtrNodePool]
+  ms_pEntryInfoNodePool : Ref[CEntryInfoNodePool]
+  ms_pPedPool : Ref[CPedPool]
+  ms_pVehiclePool : Ref[CVehiclePool]
+  ms_pBuildingPool : Ref[CBuildingPool]
+  ms_pTreadablePool : Ref[CTreadablePool]
+  ms_pObjectPool : Ref[CObjectPool]
+  ms_pDummyPool : Ref[CDummyPool]
+  ms_pAudioScriptObjectPool : Ref[CAudioScriptObjectPool]
+  ms_pColModelPool : Ref[CColModelPool]
+where
+  #ms_pPtrNodePool ≤ 1
+  #ms_pEntryInfoNodePool ≤ 1
+  #ms_pPedPool ≤ 1
+  #ms_pVehiclePool ≤ 1
+  #ms_pBuildingPool ≤ 1
+  #ms_pTreadablePool ≤ 1
+  #ms_pObjectPool ≤ 1
+  #ms_pDummyPool ≤ 1
+  #ms_pAudioScriptObjectPool ≤ 1
+  #ms_pColModelPool ≤ 1
+end
+
+schema CPools_GetPtrNodePool
+  ΔCPools
+  result! : Ref[CCPtrNodePool]
+where
+  -- Declared member operation CPools::GetPtrNodePool(void)
+  true
+end
+
+schema CPools_GetEntryInfoNodePool_2
+  ΔCPools
+  result! : Ref[CEntryInfoNodePool]
+where
+  -- Declared member operation CPools::GetEntryInfoNodePool(void)
+  true
+end
+
+schema CPools_GetPedPool_3
+  ΔCPools
+  result! : Ref[CPedPool]
+where
+  -- Declared member operation CPools::GetPedPool(void)
+  true
+end
+
+schema CPools_GetVehiclePool_4
+  ΔCPools
+  result! : Ref[CVehiclePool]
+where
+  -- Declared member operation CPools::GetVehiclePool(void)
+  true
+end
+
+schema CPools_GetBuildingPool_5
+  ΔCPools
+  result! : Ref[CBuildingPool]
+where
+  -- Declared member operation CPools::GetBuildingPool(void)
+  true
+end
+
+schema CPools_GetTreadablePool_6
+  ΔCPools
+  result! : Ref[CTreadablePool]
+where
+  -- Declared member operation CPools::GetTreadablePool(void)
+  true
+end
+
+schema CPools_GetObjectPool_7
+  ΔCPools
+  result! : Ref[CObjectPool]
+where
+  -- Declared member operation CPools::GetObjectPool(void)
+  true
+end
+
+schema CPools_GetDummyPool_8
+  ΔCPools
+  result! : Ref[CDummyPool]
+where
+  -- Declared member operation CPools::GetDummyPool(void)
+  true
+end
+
+schema CPools_GetAudioScriptObjectPool_9
+  ΔCPools
+  result! : Ref[CAudioScriptObjectPool]
+where
+  -- Declared member operation CPools::GetAudioScriptObjectPool(void)
+  true
+end
+
+schema CPools_GetColModelPool_10
+  ΔCPools
+  result! : Ref[CColModelPool]
+where
+  -- Declared member operation CPools::GetColModelPool(void)
+  true
+end
+
+schema CPools_Initialise_11
+  ΔCPools
+  result! : void
+where
+  -- Declared member operation CPools::Initialise(void)
+  true
+end
+
+schema CPools_ShutDown_12
+  ΔCPools
+where
+  -- Declared member operation CPools::ShutDown(void)
+  true
+end
+
+schema CPools_GetPedRef_13
+  ΔCPools
+  ped? : Ref[CPed]
+  result! : ℤ
+where
+  -- Declared member operation CPools::GetPedRef(CPed *ped)
+  true
+end
+
+schema CPools_GetPed_14
+  ΔCPools
+  handle? : ℤ
+  result! : Ref[CPed]
+where
+  -- Declared member operation CPools::GetPed(int32 handle)
+  true
+end
+
+schema CPools_GetVehicleRef_15
+  ΔCPools
+  vehicle? : Ref[CVehicle]
+  result! : ℤ
+where
+  -- Declared member operation CPools::GetVehicleRef(CVehicle *vehicle)
+  true
+end
+
+schema CPools_GetVehicle_16
+  ΔCPools
+  handle? : ℤ
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CPools::GetVehicle(int32 handle)
+  true
+end
+
+schema CPools_GetObjectRef_17
+  ΔCPools
+  object? : Ref[CObject]
+  result! : ℤ
+where
+  -- Declared member operation CPools::GetObjectRef(CObject *object)
+  true
+end
+
+schema CPools_GetObject_18
+  ΔCPools
+  handle? : ℤ
+  result! : Ref[CObject]
+where
+  -- Declared member operation CPools::GetObject(int32 handle)
+  true
+end
+
+schema CPools_CheckPoolsEmpty_19
+  ΔCPools
+where
+  -- Declared member operation CPools::CheckPoolsEmpty()
+  true
+end
+
+schema CPools_MakeSureSlotInObjectPoolIsEmpty_20
+  ΔCPools
+  slot? : ℤ
+where
+  -- Declared member operation CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
+  true
+end
+
+schema CPools_LoadObjectPool_21
+  ΔCPools
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPools::LoadObjectPool(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPools_LoadPedPool_22
+  ΔCPools
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPools::LoadPedPool(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPools_LoadVehiclePool_23
+  ΔCPools
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPools::LoadVehiclePool(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPools_SaveObjectPool_24
+  ΔCPools
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPools::SaveObjectPool(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CPools_SavePedPool_25
+  ΔCPools
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPools::SavePedPool(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CPools_SaveVehiclePool_26
+  ΔCPools
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPools::SaveVehiclePool(uint8 *buf, uint32 *size)
+  true
+end

@@ -1,0 +1,158 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Credits (renderer)
+-- Source File(s): renderer/Credits.cpp, renderer/Credits.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Text.zpp  (from "Text.h")
+-- include Credits.zpp  (from "Credits.h")
+-- include Pad.zpp  (from "Pad.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCredits
+  bCreditsGoing : 𝔹
+  CreditsStartTime : ℕ
+where
+  CreditsStartTime ≥ 0
+end
+
+schema CCredits_Init
+  ΔCCredits
+where
+  -- Declared member operation CCredits::Init(void)
+  true
+end
+
+schema CCredits_Start_2
+  ΔCCredits
+where
+  -- Declared member operation CCredits::Start(void)
+  true
+end
+
+schema CCredits_Stop_3
+  ΔCCredits
+where
+  -- Declared member operation CCredits::Stop(void)
+  true
+end
+
+schema CCredits_AreCreditsDone_4
+  ΔCCredits
+  result! : 𝔹
+where
+  -- Declared member operation CCredits::AreCreditsDone(void)
+  true
+end
+
+schema CCredits_Render_5
+  ΔCCredits
+where
+  -- Declared member operation CCredits::Render(void)
+  true
+end
+
+schema CCredits_PrintCreditSpace_6
+  ΔCCredits
+  space? : ℝ
+  line? : ℕ
+where
+  -- Declared member operation CCredits::PrintCreditSpace(float space, uint32 &line)
+  true
+end
+
+schema CCredits_PrintCreditText_7
+  ΔCCredits
+  scaleX? : ℝ
+  scaleY? : ℝ
+  text? : seq CHAR
+  lineoffset? : ℕ
+  scrolloffset? : ℝ
+where
+  -- Declared member operation CCredits::PrintCreditText(float scaleX, float scaleY, wchar *text, uint32 &lineoffset, float scrolloffset)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCredits_Init
+  ΔCCredits
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCredits_Start
+  ΔCCredits
+where
+  -- State update: bCreditsGoing' = true
+  -- State update: CreditsStartTime' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCredits_Stop
+  ΔCCredits
+where
+  -- State update: bCreditsGoing' = false
+  true
+end
+
+schema CCredits_PrintCreditSpace
+  ΔCCredits
+  space? : ℝ
+  line? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCredits_PrintCreditText
+  ΔCCredits
+  scaleX? : ℝ
+  scaleY? : ℝ
+  text? : seq CHAR
+  lineoffset? : ℕ
+  scrolloffset? : ℝ
+where
+  -- State update: bCreditsGoing' = false
+  -- State update: start' = DEFAULT_SCREEN_HEIGHT + 20.0f
+  -- State update: y' = lineoffset + start - scrolloffset
+  -- Invokes: CPad::UpdatePads, CPad::GetPad, CFont::SetScale, CFont::SetColor, CFont::PrintString
+  true
+end
+
+schema CCredits_Render
+  ΔCCredits
+where
+  -- State update: lineoffset' = 0
+  -- State update: bCreditsGoing' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, CFont::SetJustifyOff, CFont::SetBackgroundOff, CFont::SetCentreSize, CFont::SetCentreOn
+  true
+end
+
+schema CCredits_AreCreditsDone
+  ΔCCredits
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !bCreditsGoing
+  true
+end

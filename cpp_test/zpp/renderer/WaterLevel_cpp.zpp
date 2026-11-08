@@ -1,0 +1,699 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WaterLevel (renderer)
+-- Source File(s): renderer/WaterLevel.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include World.zpp  (from "World.h")
+-- include General.zpp  (from "General.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleMgr.zpp  (from "ParticleMgr.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include rpworld.zpp  (from "rpworld.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include WaterCreatures.zpp  (from "WaterCreatures.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWaterLevel_Initialise
+  ΔCWaterLevel
+  pWaterDat? : seq CHAR
+where
+  -- State update: ms_nNoOfWaterLevels' = 0
+  -- State update: hFile' = -1
+  -- State update: hFile' = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb")
+  -- State update: hFile' = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb")
+  -- State update: hFile' = CFileMgr::OpenFile(pWaterDat, "r")
+  -- State update: x' = 0
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile, CColStore::LoadAllCollision, CFileMgr::SetDir
+  true
+end
+
+schema CWaterLevel_Shutdown
+  ΔCWaterLevel
+where
+  -- State update: t' = ∅
+  true
+end
+
+schema CWaterLevel_CreateWavyAtomic
+  ΔCWaterLevel
+where
+  -- State update: wavyMaterial' = RpMaterialCreate()
+  -- State update: watercolor' = { 255, 255, 255, 255  }
+  -- State update: maskMaterial' = RpMaterialCreate()
+  -- State update: watercolor' = { 255, 255, 255, 192 }
+  -- State update: wavytlist' = RpGeometryGetTriangles(wavyGeometry)
+  -- State update: base' = (RwUInt16)((16 + 1)*i+j)
+  true
+end
+
+schema CWaterLevel_DestroyWavyAtomic
+  ΔCWaterLevel
+where
+  -- State update: frame' = RpAtomicGetFrame(a)
+  true
+end
+
+schema CWaterLevel_AddWaterLevel
+  ΔCWaterLevel
+  fXLeft? : ℝ
+  fYBottom? : ℝ
+  fXRight? : ℝ
+  fYTop? : ℝ
+  fLevel? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWaterLevel_WaterLevelAccordingToRectangles
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  pfOutLevel? : ℙ ℝ
+where
+  -- State update: pfOutLevel' = ms_aWaterZs[i]
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CWaterLevel_TestVisibilityForFineWaterBlocks
+  ΔCWaterLevel
+  worldPos? : CVector
+where
+  -- State update: lineStart' = worldPos
+  -- State update: lineStart' = worldPos
+  -- State update: lineEnd' = worldPos
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CWorld::ProcessVerticalLine, CWorld::ProcessLineOfSight
+  true
+end
+
+schema CWaterLevel_RemoveIsolatedWater
+  ΔCWaterLevel
+where
+  -- State update: x' = 0
+  -- State update: y' = 0
+  -- State update: keepGoing' = false
+  -- State update: x' = 0
+  -- State update: y' = 0
+  -- State update: keepGoing' = true
+  true
+end
+
+schema CWaterLevel_GetWaterLevel
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  pfOutLevel? : ℙ ℝ
+  bDontCheckZ? : 𝔹
+where
+  -- State update: x' = WATER_TO_SMALL_SECTOR_X(fX + WATER_X_OFFSET)
+  -- State update: y' = WATER_TO_SMALL_SECTOR_Y(fY)
+  -- State update: nBlock' = aWaterFineBlockList[x][y]
+  -- State update: pfOutLevel' = ms_aWaterZs[nBlock]
+  -- State update: fWindFactor' = CWeather::WindClipped * 0.4f + 0.2f
+  -- State update: pfOutLevel' = 0.0f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWaterLevel_GetWaterLevelNoWaves
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  pfOutLevel? : ℙ ℝ
+where
+  -- State update: x' = WATER_TO_SMALL_SECTOR_X(fX + WATER_X_OFFSET)
+  -- State update: y' = WATER_TO_SMALL_SECTOR_Y(fY)
+  -- State update: nBlock' = aWaterFineBlockList[x][y]
+  -- State update: pfOutLevel' = ms_aWaterZs[nBlock]
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CWaterLevel_GetWaterWavesOnly
+  ΔCWaterLevel
+  x? : ℤ
+  y? : ℤ
+where
+  -- State update: fWindFactor' = CWeather::WindClipped * 0.7f + 0.3f
+  -- Return postcondition: result! = fWave * fWindFactor
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWaterLevel_GetWaterNormal
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+where
+  -- State update: x' = WATER_TO_SMALL_SECTOR_X(fX)
+  -- State update: y' = WATER_TO_SMALL_SECTOR_Y(fY)
+  -- State update: fWindFactor' = CWeather::WindClipped * 0.4f + 0.2f
+  -- State update: norm' = CrossProduct(vA, vB)
+  -- Return postcondition: result! = norm
+  -- Invokes: CTimer::GetTimeInMilliseconds, norm.Normalise
+  true
+end
+
+schema WaterLevel_GetWaterDrawDist
+  ΔWaterLevelModuleState
+where
+  -- Return postcondition: result! = 1200.0f
+  -- Return postcondition: result! = 2000.0f
+  -- Return postcondition: result! = (TheCamera.GetPosition().z + -15.0f) * 800.0f / 45.0f + 1200.0f
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema WaterLevel_GetWavyDrawDist
+  ΔWaterLevelModuleState
+where
+  -- Return postcondition: result! = 120.0f
+  -- Return postcondition: result! = 70.0f
+  true
+end
+
+schema WaterLevel_GetCamBounds
+  ΔWaterLevelModuleState
+  bUseCamStartY? : ℙ 𝔹
+  bUseCamEndY? : ℙ 𝔹
+  bUseCamStartX? : ℙ 𝔹
+  bUseCamEndX? : ℙ 𝔹
+where
+  -- State update: bUseCamStartX' = true
+  -- State update: bUseCamEndX' = true
+  -- State update: bUseCamStartY' = true
+  -- State update: bUseCamEndY' = true
+  -- Invokes: TheCamera.GetForward
+  true
+end
+
+schema WaterLevel_IsColideWithBlock
+  ΔWaterLevelModuleState
+  x? : ℤ
+  y? : ℤ
+  block? : ℤ
+where
+  -- State update: block' = CWaterLevel::aWaterFineBlockList[x + 0][y + 0]
+  -- State update: block' = CWaterLevel::aWaterFineBlockList[x + 0][y + 1]
+  -- State update: block' = CWaterLevel::aWaterFineBlockList[x + 0][y + 2]
+  -- State update: block' = CWaterLevel::aWaterFineBlockList[x + 1][y + 0]
+  -- State update: block' = CWaterLevel::aWaterFineBlockList[x + 1][y + 1]
+  -- State update: block' = CWaterLevel::aWaterFineBlockList[x + 1][y + 2]
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema WaterLevel_SectorRadius
+  ΔWaterLevelModuleState
+  fSize? : ℝ
+where
+  -- Return postcondition: result! = Sqrt(Pow(fSize, 2) + Pow(fSize, 2))
+  true
+end
+
+schema CWaterLevel_RenderWater
+  ΔCWaterLevel
+where
+  -- State update: bUseCamEndX' = false
+  -- State update: bUseCamStartY' = false
+  -- State update: bUseCamStartX' = false
+  -- State update: bUseCamEndY' = false
+  -- State update: fWavySectorMaxRenderDist' = _GetWavyDrawDist()
+  -- State update: fWavySectorMaxRenderDistSqr' = SQR(fWavySectorMaxRenderDist)
+  -- Invokes: CTimer::GetIsPaused, CGeneral::GetRandomNumberInRange, CTimer::GetTimeStepFix, CTimeCycle::GetDirectionalRed, CTimeCycle::GetAmbientRed
+  true
+end
+
+schema CWaterLevel_RenderTransparentWater
+  ΔCWaterLevel
+where
+  -- State update: bUseCamEndX' = false
+  -- State update: bUseCamStartY' = false
+  -- State update: bUseCamStartX' = false
+  -- State update: bUseCamEndY' = false
+  -- State update: _bSeaLife' = false
+  -- State update: fWaterDrawDist' = _GetWavyDrawDist()
+  -- Invokes: CGame::CanSeeWaterFromCurrArea, CTimeCycle::GetWaterRed, CTimeCycle::GetWaterGreen, CTimeCycle::GetWaterBlue, TheCamera.GetPosition
+  true
+end
+
+schema CWaterLevel_RenderOneFlatSmallWaterPoly
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- State update: vidx' = TempBufferVerticesStored
+  -- State update: iidx' = TempBufferIndicesStored
+  true
+end
+
+schema CWaterLevel_RenderOneFlatLargeWaterPoly
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- State update: vidx' = TempBufferVerticesStored
+  -- State update: iidx' = TempBufferIndicesStored
+  true
+end
+
+schema CWaterLevel_RenderOneFlatHugeWaterPoly
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- State update: vidx' = TempBufferVerticesStored
+  -- State update: iidx' = TempBufferIndicesStored
+  true
+end
+
+schema CWaterLevel_RenderOneFlatExtraHugeWaterPoly
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- State update: vidx' = TempBufferVerticesStored
+  -- State update: iidx' = TempBufferIndicesStored
+  true
+end
+
+schema CWaterLevel_RenderOneWavySector
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+  bDontRender? : 𝔹
+where
+  -- State update: RequireWavySector' = true
+  -- State update: WavesCalculatedThisFrame' = true
+  -- State update: wavyGeometry' = RpAtomicGetGeometry(ms_pWavyAtomic)
+  -- State update: wavyMorph' = RpGeometryGetMorphTarget(wavyGeometry, 0)
+  -- State update: wavyPreLight' = RpGeometryGetPreLightColors(wavyGeometry)
+  -- State update: wavyMorphVerts' = RpMorphTargetGetVertices(wavyMorph)
+  -- Invokes: COcclusion::IsAABoxOccluded, CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange, norm.Normalise
+  true
+end
+
+schema WaterLevel_RoundValue
+  ΔWaterLevelModuleState
+  v? : ℤ
+where
+  -- Return postcondition: result! = result
+  true
+end
+
+schema CWaterLevel_PreCalcWaterGeometry
+  ΔCWaterLevel
+where
+  -- State update: WavesCalculatedThisFrame' = false
+  -- State update: MaskCalculatedThisFrame' = false
+  -- State update: RequireWavySector' = false
+  -- State update: WavesCalculatedThisFrame' = true
+  -- State update: color.red' = CTimeCycle::GetWaterRed()
+  -- State update: color.green' = CTimeCycle::GetWaterGreen()
+  -- Invokes: CTimeCycle::GetWaterRed, CTimeCycle::GetWaterGreen, CTimeCycle::GetWaterBlue, CTimeCycle::GetWaterAlpha, CCullZones::WaterFudge
+  true
+end
+
+schema CWaterLevel_PreCalcWavySector
+  ΔCWaterLevel
+  color? : RwRGBA
+where
+  -- State update: wavyGeometry' = RpAtomicGetGeometry(ms_pWavyAtomic)
+  -- State update: wavyMorph' = RpGeometryGetMorphTarget(wavyGeometry, 0)
+  -- State update: wavyPreLight' = RpGeometryGetPreLightColors(wavyGeometry)
+  -- State update: wavyMorphVerts' = RpMorphTargetGetVertices(wavyMorph)
+  -- State update: wavyMorphNormals' = RpMorphTargetGetVertexNormals(wavyMorph)
+  -- State update: camPosUp' = TheCamera.GetForward()
+  -- Return postcondition: result! = true
+  -- Invokes: CTimer::GetTimeInMilliseconds, TheCamera.GetForward, CGeneral::GetRandomNumberInRange, norm.Normalise
+  true
+end
+
+schema CWaterLevel_PreCalcWavyMask
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  fSectorX? : ℝ
+  fSectorY? : ℝ
+  fCamPosX? : ℝ
+  fCamPosY? : ℝ
+  fCamDirX? : ℝ
+  fCamDirY? : ℝ
+  color? : RwRGBA
+where
+  -- State update: wavyGeometry' = RpAtomicGetGeometry(ms_pWavyAtomic)
+  -- State update: wavyMorph' = RpGeometryGetMorphTarget(wavyGeometry, 0)
+  -- State update: wavyMorphVerts' = RpMorphTargetGetVertices(wavyMorph)
+  -- State update: wavyMorphNormals' = RpMorphTargetGetVertexNormals(wavyMorph)
+  -- State update: maskGeometry' = RpAtomicGetGeometry(ms_pMaskAtomic)
+  -- State update: maskPreLight' = RpGeometryGetPreLightColors(maskGeometry)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: COcclusion::IsAABoxOccluded, CGeneral::GetRandomNumber, TheCamera.GetForward, CParticle::AddParticle, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CWaterLevel_RenderBoatWakes
+  ΔCWaterLevel
+where
+  -- State update: fWakeZ' = 0.0f
+  -- State update: fWakeLifeTimeMult' = 0.01f / CBoat::WAKE_LIFETIME
+  -- State update: idx' = 0
+  -- State update: pBoat' = CBoat::apFrameWakeGeneratingBoats[idx]
+  -- State update: fAplhaA' = 255.0f
+  -- State update: fSizeA' = fSize
+  -- Invokes: CBoat::FillBoatList, pBoat->GetForward, pBoat->GetColModel, pBoat->GetModelIndex, vecDistB.MagnitudeSqr
+  true
+end
+
+schema WaterLevel_GetWindedWave
+  ΔWaterLevelModuleState
+  fX? : ℝ
+  fY? : ℝ
+where
+  -- State update: x' = WATER_HUGE_X(fX + WATER_X_OFFSET)
+  -- State update: y' = WATER_HUGE_Y(fY)
+  -- State update: fWave' = Sin(( (x - Floor(x)) + (y - Floor(y)) ) * TWOPI + fAngle)
+  -- Return postcondition: result! = fWindFactor * fWave
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CWaterLevel_RenderWakeSegment
+  ΔCWaterLevel
+  vecA? : CVector2D
+  vecB? : CVector2D
+  vecC? : CVector2D
+  vecD? : CVector2D
+  fSizeA? : ℝ
+  fSizeB? : ℝ
+  fAlphaA? : ℝ
+  fAlphaB? : ℝ
+  fWakeZ? : ℝ
+where
+  -- State update: fCurStep' = (float)i       / 4
+  -- State update: fNxtStep' = (float)(i + 1) / 4
+  -- State update: fLeftCurStep' = 1.0f - fCurStep
+  -- State update: fLeftNxtStep' = 1.0f - fNxtStep
+  -- State update: AlphaA' = (uint32)(fAlphaA * aAlphaFade[i]    )
+  -- State update: AlphaB' = (uint32)(fAlphaA * aAlphaFade[i + 1])
+  true
+end
+
+schema CWaterLevel_RenderOneSlopedUnderWaterPoly
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+where
+  -- State update: v' = 0.1f + fSeaBedZ
+  -- State update: v' = 0.1f
+  -- State update: v' = 0.1f + ((fSeaBedZ * (240.0f - d)) / 240.0f)
+  -- State update: v' = 0.1f
+  -- State update: vidx' = TempBufferVerticesStored
+  -- State update: iidx' = TempBufferIndicesStored
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CWaterLevel_RenderOneFlatSmallWaterPolyBlended
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  fCamX? : ℝ
+  fCamY? : ℝ
+  color? : RwRGBA
+  colorTrans? : RwRGBA
+  fDrawDist? : ℝ
+where
+  -- State update: vidx' = TempBufferVerticesStored
+  -- State update: fBlendDrawDist' = fDrawDist + fStartBlendDistanceAdd
+  -- State update: fDistStartX' = SQR(fX                       - fCamX)
+  -- State update: fDistStartY' = SQR(fY                       - fCamY)
+  -- State update: fDistEndX' = SQR((fX + SMALL_SECTOR_SIZE) - fCamX)
+  -- State update: fDistEndY' = SQR((fY + SMALL_SECTOR_SIZE) - fCamY)
+  true
+end
+
+schema CWaterLevel_CalcDistanceToWater
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+where
+  -- State update: fSectorMaxRenderDist' = 250.0f
+  -- State update: nStartY' = WATER_TO_SMALL_SECTOR_Y(fY - fSectorMaxRenderDist) - 1
+  -- State update: nEndY' = WATER_TO_SMALL_SECTOR_Y(fY + fSectorMaxRenderDist) + 1
+  -- State update: nStartX' = Clamp(nStartX, 0, MAX_SMALL_SECTORS - 1)
+  -- State update: nEndX' = Clamp(nEndX,   0, MAX_SMALL_SECTORS - 1)
+  -- State update: nStartY' = Clamp(nStartY, 0, MAX_SMALL_SECTORS - 1)
+  -- Return postcondition: result! = Clamp(Sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist)
+  -- Invokes: vecDist.MagnitudeSqr
+  true
+end
+
+schema CWaterLevel_RenderAndEmptyRenderBuffer
+  ΔCWaterLevel
+where
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: TempBufferVerticesStored' = 0
+  true
+end
+
+schema CWaterLevel_GetGroundLevel
+  ΔCWaterLevel
+  vecPosn? : CVector
+  pfOutLevel? : ℙ ℝ
+  pData? : Ref[ColData]
+  fDistance? : ℝ
+where
+  -- State update: pfOutLevel' = point.point.z
+  -- State update: pData.SurfaceType' = point.surfaceB
+  -- State update: pData.PieceType' = point.pieceB
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CWorld::ProcessVerticalLine
+  true
+end
+
+schema CWaterLevel_IsLocationOutOfWorldBounds_WS
+  ΔCWaterLevel
+  vecPosn? : CVector
+  nOffset? : ℤ
+where
+  -- State update: x' = int32((vecPosn.x / 50.0f) + 48.0f)
+  -- State update: y' = int32((vecPosn.y / 50.0f) + 40.0f)
+  -- Return postcondition: result! = x < nOffset || x >= 80 - nOffset || y < nOffset || y >= 80 - nOffset
+  true
+end
+
+schema CWaterLevel_GetGroundLevel_WS
+  ΔCWaterLevel
+  vecPosn? : CVector
+  pfOutLevel? : ℙ ℝ
+  pData? : Ref[ColData]
+  fDistance? : ℝ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = GetGroundLevel(vecPosn, pfOutLevel, pData, fDistance)
+  true
+end
+
+schema CWaterLevel_GetWaterDepth
+  ΔCWaterLevel
+  vecPosn? : CVector
+  pfDepth? : ℙ ℝ
+  pfLevelNoWaves? : ℙ ℝ
+  pfGroundLevel? : ℙ ℝ
+where
+  -- State update: fGroundLevel' = -100.0
+  -- State update: pfDepth' = fLevelNoWaves - fGroundLevel
+  -- State update: pfLevelNoWaves' = fLevelNoWaves
+  -- State update: pfGroundLevel' = fGroundLevel
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CWaterLevel_RenderSeaBirds
+  ΔCWaterLevel
+where
+  -- State update: cur_pos' = TheCamera.GetPosition()
+  -- State update: prev_pos' = cur_pos
+  -- State update: timecounter' = CTimer::GetTimeInMilliseconds()
+  -- State update: birdgenTime' = 0
+  -- State update: birdgenTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: vecPos' = cur_pos
+  -- Invokes: TheCamera.GetPosition, CCullZones::CamNoRain, CCullZones::PlayerNoRain, CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CWaterLevel_RenderShipsOnHorizon
+  ΔCWaterLevel
+where
+  -- State update: cur_pos' = FindPlayerCoors()
+  -- State update: cur_pos' = FindPlayerPed().GetPosition()
+  -- State update: prev_pos' = cur_pos
+  -- State update: timecounter' = CTimer::GetTimeInMilliseconds()
+  -- State update: shipgenTime' = 0
+  -- State update: shipgenTime' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange, CGeneral::GetRandomNumber, CParticle::Cos, CParticle::Sin
+  true
+end
+
+schema CWaterLevel_HandleBeachToysStuff
+  ΔCWaterLevel
+where
+  -- State update: cur_pos' = FindPlayerCoors()
+  -- State update: cur_pos' = FindPlayerPed().GetPosition()
+  -- State update: bBeachBallInit' = true
+  -- State update: FirstBeachBallPos' = cur_pos
+  -- State update: bLoungeInit' = true
+  -- State update: FirstLoungePos' = cur_pos
+  -- Invokes: CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange, CGeneral::GetRandomNumber, CParticle::Cos, CParticle::Sin
+  true
+end
+
+schema CWaterLevel_CreateBeachToy
+  ΔCWaterLevel
+  vec? : CVector
+  beachtoy? : eBeachToy
+where
+  -- State update: finalToy' = beachtoy
+  -- State update: isStatic' = false
+  -- State update: model' = MI_BEACHBALL
+  -- State update: finalToy' = BEACHTOY_LOUNGE_WOOD_UP
+  -- State update: finalToy' = BEACHTOY_LOUNGE_TOWEL_UP
+  -- State update: finalToy' = BEACHTOY_LOUNGE_WOOD_ON
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = toy
+  -- Invokes: CGeneral::GetRandomNumber, toy->SetPosition, toy->GetMatrix, CTimer::GetTimeInMilliseconds, CWorld::Add
+  true
+end
+
+schema CWaterLevel_HandleBeachToysStuff_2
+  ΔCWaterLevel
+where
+  -- State update: cur_pos' = FindPlayerCoors()
+  -- State update: cur_pos' = FindPlayerPed().GetPosition()
+  -- State update: bBeachBallInit' = true
+  -- State update: FirstBeachBallPos' = cur_pos
+  -- State update: bLoungeInit' = true
+  -- State update: FirstLoungePos' = cur_pos
+  -- Invokes: CTimer::GetTimeInMilliseconds, CGeneral::GetRandomNumberInRange, CGeneral::GetRandomNumber, CParticle::Cos, CParticle::Sin
+  true
+end
+
+schema CWaterLevel_RenderOneWavySector_2
+  ΔCWaterLevel
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+  color? : RwRGBA
+  bUnk? : 𝔹
+where
+  -- State update: nGeomUsed' = 0
+  -- State update: WavesCalculatedThisFrame' = true
+  -- State update: geometry' = RpAtomicGetGeometry(ms_pWavyAtomic)
+  -- State update: wavyPreLights' = RpGeometryGetPreLightColors(geometry)
+  -- State update: u' = float(i) / 8 + TEXTURE_ADDV
+  -- State update: v' = float(j) / 8 + TEXTURE_ADDU
+  -- Invokes: CTimer::GetTimeInMilliseconds, CBoat::FillBoatList, CBoat::IsSectorAffectedByWake, CBoat::IsVertexAffectedByWake
+  true
+end
+
+schema CWaterLevel_AllocateBoatWakeArray
+  ΔCWaterLevel
+where
+  -- State update: wavyGeometry' = RpAtomicGetGeometry(ms_pWavyAtomic)
+  -- State update: wavyMorphTarget' = RpGeometryGetMorphTarget(wavyGeometry, 0)
+  -- State update: wavyMaterial' = RpGeometryGetMaterial(wavyGeometry, 0)
+  -- State update: geom' = 0
+  -- State update: geomTriangles' = RpGeometryGetTriangles(apGeomArray[geom])
+  -- State update: geomMorphTarget' = RpGeometryGetMorphTarget(apGeomArray[geom], 0)
+  -- Invokes: CStreaming::MakeSpaceFor
+  true
+end
+
+schema CWaterLevel_FreeBoatWakeArray
+  ΔCWaterLevel
+where
+  -- State update: nGeomUsed' = 0
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema WaterLevelModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 4358
+end

@@ -1,0 +1,55 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CustomSoundTrack (leeds)
+-- Source File(s): leeds/CustomSoundTrack.cpp, leeds/CustomSoundTrack.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include CustomSoundTrack.zpp  (from "CustomSoundTrack.h")
+-- include singletonManager.zpp  (from "singletonManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cCustomSoundTrack
+  base__cSingleton_cCustomSoundTrack_  -- inherits base schema
+  m_bIsPlaying : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cCustomSoundTrack_cCustomSoundTrack
+  ΔcCustomSoundTrack
+where
+  -- Declared member operation cCustomSoundTrack::cCustomSoundTrack()
+  true
+end
+
+schema cCustomSoundTrack_IsPlaying_2
+  ΔcCustomSoundTrack
+  result! : 𝔹
+where
+  -- Declared member operation cCustomSoundTrack::IsPlaying()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CustomSoundTrack_IsPlaying
+  ΔCustomSoundTrackModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bIsPlaying
+  -- Return postcondition: result! = false
+  true
+end

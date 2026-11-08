@@ -1,0 +1,95 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ObjectData (objects)
+-- Source File(s): objects/ObjectData.cpp, objects/ObjectData.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Object.zpp  (from "Object.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include ObjectData.zpp  (from "ObjectData.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CObjectInfo
+  m_fMass : ℝ
+  m_fTurnMass : ℝ
+  m_fAirResistance : ℝ
+  m_fElasticity : ℝ
+  m_fBuoyancy : ℝ
+  m_fUprootLimit : ℝ
+  m_fCollisionDamageMultiplier : ℝ
+  m_nCollisionDamageEffect : ℕ
+  m_nSpecialCollisionResponseCases : ℕ
+  m_bCameraToAvoidThisObject : 𝔹
+where
+  m_nCollisionDamageEffect ≥ 0
+  m_nSpecialCollisionResponseCases ≥ 0
+end
+
+schema CObjectData
+  ms_aObjectInfo : seq CObjectInfo  -- bounded array [NUMOBJECTINFO]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CObjectData_Initialise
+  ΔCObjectData
+  filename? : seq CHAR
+where
+  -- Declared member operation CObjectData::Initialise(const char *filename)
+  true
+end
+
+schema CObjectData_SetObjectData_2
+  ΔCObjectData
+  modelId? : ℤ
+  object? : CObject
+where
+  -- Declared member operation CObjectData::SetObjectData(int32 modelId, CObject &object)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CObjectData_Initialise
+  ΔCObjectData
+  filename? : seq CHAR
+where
+  -- State update: m_fMass' = 99999.0f
+  -- State update: m_fTurnMass' = 99999.0f
+  -- State update: m_fAirResistance' = 0.99f
+  -- State update: m_fElasticity' = 0.1f
+  -- State update: m_fBuoyancy' = GRAVITY * ms_aObjectInfo[0].m_fMass * 2.0f
+  -- State update: m_fUprootLimit' = 0.0f
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile, CModelInfo::GetModelInfo, mi->SetObjectID
+  true
+end
+
+schema CObjectData_SetObjectData
+  ΔCObjectData
+  modelId? : ℤ
+  object? : CObject
+where
+  -- State update: object.m_fMass' = objinfo.m_fMass
+  -- State update: object.m_fTurnMass' = objinfo.m_fTurnMass
+  -- State update: object.m_fAirResistance' = objinfo.m_fAirResistance
+  -- State update: object.m_fElasticity' = objinfo.m_fElasticity
+  -- State update: object.m_fBuoyancy' = objinfo.m_fBuoyancy
+  -- State update: object.m_fUprootLimit' = objinfo.m_fUprootLimit
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end

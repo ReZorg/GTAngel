@@ -1,0 +1,69 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script9 (control)
+-- Source File(s): control/Script9.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include Bridge.zpp  (from "Bridge.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Ferry.zpp  (from "Ferry.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Object.zpp  (from "Object.h")
+-- include OnscreenTimer.zpp  (from "OnscreenTimer.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_ProcessCommands1500To1599
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: id' = -1
+  -- State update: id' = pFerry.m_nFerryId
+  -- State update: pFerry' = CFerry::GetFerry(GET_INTEGER_PARAM(0))
+  -- State update: pFerry' = CFerry::GetFerry(GET_INTEGER_PARAM(0))
+  -- State update: pFerry' = CFerry::GetFerry(GET_INTEGER_PARAM(0))
+  -- State update: pFerry' = CFerry::GetFerry(GET_INTEGER_PARAM(0))
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CFerry::DissableFerryPath, CFerry::EnableFerryPath, CFerry::GetClosestFerry, pFerry->IsDocked, CFerry::GetFerry
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script9ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 781
+end

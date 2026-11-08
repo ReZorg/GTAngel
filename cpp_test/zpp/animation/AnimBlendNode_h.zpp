@@ -1,0 +1,144 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendNode (animation)
+-- Source File(s): animation/AnimBlendNode.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include AnimBlendSequence.zpp  (from "AnimBlendSequence.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlendNode
+  theta : ℝ
+  invSin : ℝ
+  frameA : ℤ
+  frameB : ℤ
+  remainingTime : ℝ
+  sequence : Ref[CAnimBlendSequence]
+  association : Ref[CAnimBlendAssociation]
+where
+  #sequence ≤ 1
+  #association ≤ 1
+end
+
+schema CAnimBlendNode_Init
+  ΔCAnimBlendNode
+where
+  -- Declared member operation CAnimBlendNode::Init(void)
+  true
+end
+
+schema CAnimBlendNode_Update_2
+  ΔCAnimBlendNode
+  trans? : CVector
+  rot? : CQuaternion
+  weight? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::Update(CVector &trans, CQuaternion &rot, float weight)
+  true
+end
+
+schema CAnimBlendNode_UpdateCompressed_3
+  ΔCAnimBlendNode
+  trans? : CVector
+  rot? : CQuaternion
+  weight? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::UpdateCompressed(CVector &trans, CQuaternion &rot, float weight)
+  true
+end
+
+schema CAnimBlendNode_NextKeyFrame_4
+  ΔCAnimBlendNode
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::NextKeyFrame(void)
+  true
+end
+
+schema CAnimBlendNode_NextKeyFrameCompressed_5
+  ΔCAnimBlendNode
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::NextKeyFrameCompressed(void)
+  true
+end
+
+schema CAnimBlendNode_FindKeyFrame_6
+  ΔCAnimBlendNode
+  t? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::FindKeyFrame(float t)
+  true
+end
+
+schema CAnimBlendNode_SetupKeyFrameCompressed_7
+  ΔCAnimBlendNode
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendNode::SetupKeyFrameCompressed(void)
+  true
+end
+
+schema CAnimBlendNode_CalcDeltas_8
+  ΔCAnimBlendNode
+where
+  -- Declared member operation CAnimBlendNode::CalcDeltas(void)
+  true
+end
+
+schema CAnimBlendNode_CalcDeltasCompressed_9
+  ΔCAnimBlendNode
+where
+  -- Declared member operation CAnimBlendNode::CalcDeltasCompressed(void)
+  true
+end
+
+schema CAnimBlendNode_GetCurrentTranslation_10
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetCurrentTranslation(CVector &trans, float weight)
+  true
+end
+
+schema CAnimBlendNode_GetCurrentTranslationCompressed_11
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetCurrentTranslationCompressed(CVector &trans, float weight)
+  true
+end
+
+schema CAnimBlendNode_GetEndTranslation_12
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetEndTranslation(CVector &trans, float weight)
+  true
+end
+
+schema CAnimBlendNode_GetEndTranslationCompressed_13
+  ΔCAnimBlendNode
+  trans? : CVector
+  weight? : ℝ
+where
+  -- Declared member operation CAnimBlendNode::GetEndTranslationCompressed(CVector &trans, float weight)
+  true
+end

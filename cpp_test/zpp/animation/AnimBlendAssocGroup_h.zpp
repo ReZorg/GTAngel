@@ -1,0 +1,113 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendAssocGroup (animation)
+-- Source File(s): animation/AnimBlendAssocGroup.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlendAssocGroup
+  animBlock : Ref[CAnimBlock]
+  assocList : Ref[CAnimBlendAssociation]
+  numAssociations : ℤ
+  firstAnimId : ℤ
+  groupId : ℤ
+where
+  #animBlock ≤ 1
+  #assocList ≤ 1
+end
+
+schema CAnimBlendAssocGroup_CAnimBlendAssocGroup
+  ΔCAnimBlendAssocGroup
+where
+  -- Declared member operation CAnimBlendAssocGroup::CAnimBlendAssocGroup(void)
+  true
+end
+
+schema CAnimBlendAssocGroup_CAnimBlendAssocGroup_2
+  ΔCAnimBlendAssocGroup
+  result! : ANY
+where
+  -- Declared member operation CAnimBlendAssocGroup::CAnimBlendAssocGroup(void)
+  true
+end
+
+schema CAnimBlendAssocGroup_DestroyAssociations_3
+  ΔCAnimBlendAssocGroup
+where
+  -- Declared member operation CAnimBlendAssocGroup::DestroyAssociations(void)
+  true
+end
+
+schema CAnimBlendAssocGroup_GetAnimation_4
+  ΔCAnimBlendAssocGroup
+  id? : ℕ
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimBlendAssocGroup::GetAnimation(uint32 id)
+  true
+end
+
+schema CAnimBlendAssocGroup_GetAnimation_5
+  ΔCAnimBlendAssocGroup
+  name? : seq CHAR
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimBlendAssocGroup::GetAnimation(const char *name)
+  true
+end
+
+schema CAnimBlendAssocGroup_CopyAnimation_6
+  ΔCAnimBlendAssocGroup
+  id? : ℕ
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimBlendAssocGroup::CopyAnimation(uint32 id)
+  true
+end
+
+schema CAnimBlendAssocGroup_CopyAnimation_7
+  ΔCAnimBlendAssocGroup
+  name? : seq CHAR
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimBlendAssocGroup::CopyAnimation(const char *name)
+  true
+end
+
+schema CAnimBlendAssocGroup_CreateAssociations_8
+  ΔCAnimBlendAssocGroup
+  name? : seq CHAR
+where
+  -- Declared member operation CAnimBlendAssocGroup::CreateAssociations(const char *name)
+  true
+end
+
+schema CAnimBlendAssocGroup_CreateAssociations_9
+  ΔCAnimBlendAssocGroup
+  blockName? : seq CHAR
+  clump? : Ref[RpClump]
+  animNames? : seq CHAR
+  numAssocs? : ℤ
+where
+  -- Declared member operation CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, const char **animNames, int numAssocs)
+  true
+end
+
+schema CAnimBlendAssocGroup_CreateAssociations_10
+  ΔCAnimBlendAssocGroup
+  blockName? : seq CHAR
+  animNames? : seq CHAR
+  objectNames? : seq CHAR
+  numChars? : ℤ
+where
+  -- Declared member operation CAnimBlendAssocGroup::CreateAssociations(const char *blockName, const char *animNames, const char *objectNames, int numChars)
+  true
+end

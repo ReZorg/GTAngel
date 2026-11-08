@@ -1,0 +1,74 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Antennas (renderer)
+-- Source File(s): renderer/Antennas.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAntenna
+  active : 𝔹
+  updatedLastFrame : 𝔹
+  id : ℕ
+  segmentLength : ℝ
+  pos : seq CVector  -- bounded array [6]
+  speed : seq CVector  -- bounded array [6]
+where
+  id ≥ 0
+  #pos = 6
+  #speed = 6
+end
+
+schema CAntenna_Update
+  ΔCAntenna
+  dir? : CVector
+  pos? : CVector
+where
+  -- Declared member operation CAntenna::Update(CVector dir, CVector pos)
+  true
+end
+
+schema CAntennas
+  aAntennas : seq CAntenna  -- bounded array [NUMANTENNAS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CAntennas_Init
+  ΔCAntennas
+where
+  -- Declared member operation CAntennas::Init(void)
+  true
+end
+
+schema CAntennas_Update_2
+  ΔCAntennas
+where
+  -- Declared member operation CAntennas::Update(void)
+  true
+end
+
+schema CAntennas_RegisterOne_3
+  ΔCAntennas
+  id? : ℕ
+  dir? : CVector
+  position? : CVector
+  length? : ℝ
+where
+  -- Declared member operation CAntennas::RegisterOne(uint32 id, CVector dir, CVector position, float length)
+  true
+end
+
+schema CAntennas_Render_4
+  ΔCAntennas
+where
+  -- Declared member operation CAntennas::Render(void)
+  true
+end

@@ -1,0 +1,663 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Population (peds)
+-- Source File(s): peds/Population.cpp, peds/Population.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Game.zpp  (from "Game.h")
+-- include General.zpp  (from "General.h")
+-- include World.zpp  (from "World.h")
+-- include Population.zpp  (from "Population.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include EmergencyPed.zpp  (from "EmergencyPed.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include IniFile.zpp  (from "IniFile.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include DummyObject.zpp  (from "DummyObject.h")
+-- include Script.zpp  (from "Script.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include PedType.zpp  (from "PedType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MIN_CREATION_DIST : ℝ  -- #define MIN_CREATION_DIST 40.0f
+CREATION_RANGE : ℝ  -- #define CREATION_RANGE 10.0f
+OFFSCREEN_CREATION_MULT : ℝ  -- #define OFFSCREEN_CREATION_MULT 0.5f
+PED_REMOVE_DIST : ℝ  -- #define PED_REMOVE_DIST (MIN_CREATION_DIST + CREATION_RANGE + 1.0f)
+PED_REMOVE_DIST_SPECIAL : ℝ  -- #define PED_REMOVE_DIST_SPECIAL (MIN_CREATION_DIST + CREATION_RANGE + 15.0f)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema PedGroup
+  models : seq ℤ  -- bounded array [NUMMODELSPERPEDGROUP]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPopulation
+  ms_pPedGroups : seq PedGroup  -- bounded array [NUMPEDGROUPS]
+  ms_bGivePedsWeapons : 𝔹
+  m_AllRandomPedsThisType : ℤ
+  PedDensityMultiplier : ℝ
+  ms_nTotalMissionPeds : ℕ
+  MaxNumberOfPedsInUse : ℤ
+  MaxNumberOfPedsInUseInterior : ℤ
+  ms_nNumCivMale : ℕ
+  ms_nNumCivFemale : ℕ
+  ms_nNumCop : ℕ
+  bZoneChangeHasHappened : 𝔹
+  ms_nNumEmergency : ℕ
+  m_CountDownToPedsAtStart : ℤ
+  ms_nNumGang1 : ℕ
+  ms_nNumGang2 : ℕ
+  ms_nTotalPeds : ℕ
+  ms_nNumGang3 : ℕ
+  ms_nTotalGangPeds : ℕ
+  ms_nNumGang4 : ℕ
+  ms_nTotalCivPeds : ℕ
+  ms_nNumGang5 : ℕ
+  ms_nNumDummy : ℕ
+  ms_nNumGang6 : ℕ
+  ms_nNumGang9 : ℕ
+  ms_nNumGang7 : ℕ
+  ms_nNumGang8 : ℕ
+  ms_nTotalCarPassengerPeds : ℕ
+  NumMiamiViceCops : ℕ
+  RegenerationPoint_a : CVector
+  RegenerationPoint_b : CVector
+  RegenerationFront : CVector
+where
+  ms_nTotalMissionPeds ≥ 0
+  ms_nNumCivMale ≥ 0
+  ms_nNumCivFemale ≥ 0
+  ms_nNumCop ≥ 0
+  ms_nNumEmergency ≥ 0
+  ms_nNumGang1 ≥ 0
+  ms_nNumGang2 ≥ 0
+  ms_nTotalPeds ≥ 0
+  ms_nNumGang3 ≥ 0
+  ms_nTotalGangPeds ≥ 0
+  ms_nNumGang4 ≥ 0
+  ms_nTotalCivPeds ≥ 0
+  ms_nNumGang5 ≥ 0
+  ms_nNumDummy ≥ 0
+  ms_nNumGang6 ≥ 0
+  ms_nNumGang9 ≥ 0
+end
+
+schema CPopulation_Initialise
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::Initialise()
+  true
+end
+
+schema CPopulation_Update_2
+  ΔCPopulation
+  arg_1? : 𝔹
+where
+  -- Declared member operation CPopulation::Update(bool)
+  true
+end
+
+schema CPopulation_LoadPedGroups_3
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::LoadPedGroups()
+  true
+end
+
+schema CPopulation_UpdatePedCount_4
+  ΔCPopulation
+  arg_1? : ePedType
+  arg_2? : 𝔹
+where
+  -- Declared member operation CPopulation::UpdatePedCount(ePedType, bool)
+  true
+end
+
+schema CPopulation_DealWithZoneChange_5
+  ΔCPopulation
+  oldLevel? : eLevelName
+  newLevel? : eLevelName
+  arg_3? : 𝔹
+where
+  -- Declared member operation CPopulation::DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool)
+  true
+end
+
+schema CPopulation_AddPedInCar_6
+  ΔCPopulation
+  car? : Ref[CVehicle]
+  isDriver? : 𝔹
+  result! : Ref[CPed]
+where
+  -- Declared member operation CPopulation::AddPedInCar(CVehicle *car, bool isDriver)
+  true
+end
+
+schema CPopulation_RemovePed_7
+  ΔCPopulation
+  ent? : Ref[CPed]
+where
+  -- Declared member operation CPopulation::RemovePed(CPed *ent)
+  true
+end
+
+schema CPopulation_ChooseCivilianOccupation_8
+  ΔCPopulation
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPopulation::ChooseCivilianOccupation(int32)
+  true
+end
+
+schema CPopulation_ChooseNextCivilianOccupation_9
+  ΔCPopulation
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPopulation::ChooseNextCivilianOccupation(int32)
+  true
+end
+
+schema CPopulation_ChooseCivilianCoupleOccupations_10
+  ΔCPopulation
+  arg_1? : ℤ
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Declared member operation CPopulation::ChooseCivilianCoupleOccupations(int32, int32&, int32&)
+  true
+end
+
+schema CPopulation_ChoosePolicePedOccupation_11
+  ΔCPopulation
+  result! : ℤ
+where
+  -- Declared member operation CPopulation::ChoosePolicePedOccupation()
+  true
+end
+
+schema CPopulation_ChooseGangOccupation_12
+  ΔCPopulation
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CPopulation::ChooseGangOccupation(int)
+  true
+end
+
+schema CPopulation_GeneratePedsAtStartOfGame_13
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::GeneratePedsAtStartOfGame()
+  true
+end
+
+schema CPopulation_PedCreationDistMultiplier_14
+  ΔCPopulation
+  result! : ℝ
+where
+  -- Declared member operation CPopulation::PedCreationDistMultiplier()
+  true
+end
+
+schema CPopulation_AddPed_15
+  ΔCPopulation
+  pedType? : ePedType
+  mi? : ℕ
+  coors? : CVector
+  modifier? : ℤ
+  result! : Ref[CPed]
+where
+  -- Declared member operation CPopulation::AddPed(ePedType pedType, uint32 mi, CVector const &coors, int32 modifier = 0)
+  true
+end
+
+schema CPopulation_AddToPopulation_16
+  ΔCPopulation
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CPopulation::AddToPopulation(float, float, float, float)
+  true
+end
+
+schema CPopulation_ManagePopulation_17
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::ManagePopulation(void)
+  true
+end
+
+schema CPopulation_MoveCarsAndPedsOutOfAbandonedZones_18
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::MoveCarsAndPedsOutOfAbandonedZones(void)
+  true
+end
+
+schema CPopulation_ConvertToRealObject_19
+  ΔCPopulation
+  arg_1? : Ref[CDummyObject]
+where
+  -- Declared member operation CPopulation::ConvertToRealObject(CDummyObject*)
+  true
+end
+
+schema CPopulation_ConvertToDummyObject_20
+  ΔCPopulation
+  arg_1? : Ref[CObject]
+where
+  -- Declared member operation CPopulation::ConvertToDummyObject(CObject*)
+  true
+end
+
+schema CPopulation_ConvertAllObjectsToDummyObjects_21
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::ConvertAllObjectsToDummyObjects(void)
+  true
+end
+
+schema CPopulation_TestRoomForDummyObject_22
+  ΔCPopulation
+  arg_1? : Ref[CObject]
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::TestRoomForDummyObject(CObject*)
+  true
+end
+
+schema CPopulation_TestSafeForRealObject_23
+  ΔCPopulation
+  arg_1? : Ref[CDummyObject]
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::TestSafeForRealObject(CDummyObject*)
+  true
+end
+
+schema CPopulation_IsSkateable_24
+  ΔCPopulation
+  arg_1? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::IsSkateable(CVector const&)
+  true
+end
+
+schema CPopulation_CanJeerAtStripper_25
+  ΔCPopulation
+  model? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::CanJeerAtStripper(int32 model)
+  true
+end
+
+schema CPopulation_RemovePedsIfThePoolGetsFull_26
+  ΔCPopulation
+where
+  -- Declared member operation CPopulation::RemovePedsIfThePoolGetsFull(void)
+  true
+end
+
+schema CPopulation_IsMale_27
+  ΔCPopulation
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::IsMale(int32)
+  true
+end
+
+schema CPopulation_IsFemale_28
+  ΔCPopulation
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::IsFemale(int32)
+  true
+end
+
+schema CPopulation_IsSunbather_29
+  ΔCPopulation
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPopulation::IsSunbather(int32)
+  true
+end
+
+schema CPopulation_ComputeRandomisedGangSize_30
+  ΔCPopulation
+  result! : ℤ
+where
+  -- Declared member operation CPopulation::ComputeRandomisedGangSize(void)
+  true
+end
+
+schema RegenerationPoint
+  srcLevel : eLevelName
+  destLevel : eLevelName
+  x1 : ℝ
+  x2 : ℝ
+  y1 : ℝ
+  y2 : ℝ
+  z1 : ℝ
+  z2 : ℝ
+  destPosA : RwV3d
+  destPosB : RwV3d
+  srcPosA : RwV3d
+  srcPosB : RwV3d
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPopulation_Initialise
+  ΔCPopulation
+where
+  -- State update: ms_nNumCivMale' = 0
+  -- State update: ms_nNumCivFemale' = 0
+  -- State update: ms_nNumCop' = 0
+  -- State update: ms_nNumEmergency' = 0
+  -- State update: ms_nNumGang1' = 0
+  -- State update: ms_nNumGang2' = 0
+  true
+end
+
+schema CPopulation_RemovePed
+  ΔCPopulation
+  ent? : Ref[CPed]
+where
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CPopulation_ChooseCivilianOccupation
+  ΔCPopulation
+  group? : ℤ
+where
+  -- State update: gLastSelectedCivilianIndex' = CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP)
+  -- State update: lastModel' = ms_pPedGroups[group].models[gLastSelectedCivilianIndex]
+  -- State update: gLastSelectedCivilianIndex' = CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP)
+  -- Return postcondition: result! = lastModel
+  -- Return postcondition: result! = ms_pPedGroups[group].models[gLastSelectedCivilianIndex]
+  -- Invokes: CGeneral::GetRandomNumberInRange, CPopulation::IsSunbather
+  true
+end
+
+schema CPopulation_ChooseNextCivilianOccupation
+  ΔCPopulation
+  group? : ℤ
+where
+  -- State update: gLastSelectedCivilianIndex' = 0
+  -- State update: lastModel' = ms_pPedGroups[group].models[gLastSelectedCivilianIndex]
+  -- State update: gLastSelectedCivilianIndex' = 0
+  -- Return postcondition: result! = lastModel
+  -- Return postcondition: result! = ms_pPedGroups[group].models[gLastSelectedCivilianIndex]
+  -- Invokes: CPopulation::IsSunbather
+  true
+end
+
+schema CPopulation_ChoosePolicePedOccupation
+  ΔCPopulation
+where
+  -- Return postcondition: result! = COP_STREET
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+schema CPopulation_LoadPedGroups
+  ΔCPopulation
+where
+  -- State update: nextPedGroup' = 0
+  -- State update: fd' = CFileMgr::OpenFile("PEDGRP.DAT", "r")
+  -- State update: end' = 0
+  -- State update: cursor' = 0
+  -- State update: nextWhitespace' = cursor
+  -- State update: cursor' = nextWhitespace
+  -- Invokes: CFileMgr::ChangeDir, CFileMgr::OpenFile, CFileMgr::ReadLine, CModelInfo::GetModelInfo, CFileMgr::CloseFile
+  true
+end
+
+schema CPopulation_UpdatePedCount
+  ΔCPopulation
+  pedType? : ePedType
+  decrease? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPopulation_ChooseGangOccupation
+  ΔCPopulation
+  gangId? : ℤ
+where
+  -- State update: modelOverride' = CGangs::GetGangPedModelOverride(gangId)
+  -- State update: firstGangModel' = 2 * gangId + MI_GANG01
+  -- Return postcondition: result! = CGeneral::GetRandomNumberInRange(firstGangModel, firstGangModel + 2)
+  -- Return postcondition: result! = firstGangModel + 1
+  -- Return postcondition: result! = firstGangModel
+  -- Invokes: CGangs::GetGangPedModelOverride, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPopulation_DealWithZoneChange
+  ΔCPopulation
+  oldLevel? : eLevelName
+  newLevel? : eLevelName
+  forceIndustrialZone? : 𝔹
+where
+  -- State update: bZoneChangeHasHappened' = true
+  -- State update: findSafeZoneAround.x' = 690.0f
+  -- State update: findSafeZoneAround.y' = -920.0f
+  -- State update: findSafeZoneAround.z' = 42.0f
+  -- State update: findSafeZoneAround' = FindPlayerCoors()
+  -- State update: safeZone' = 0
+  -- Invokes: RegenerationFront.Normalise
+  true
+end
+
+schema CPopulation_Update
+  ΔCPopulation
+  addPeds? : 𝔹
+where
+  -- State update: ms_nTotalCivPeds' = ms_nNumCivFemale + ms_nNumCivMale
+  -- State update: pcdm' = PedCreationDistMultiplier()
+  -- Invokes: CReplay::IsPlayingBack, CCutsceneMgr::IsRunning
+  true
+end
+
+schema CPopulation_GeneratePedsAtStartOfGame
+  ΔCPopulation
+where
+  -- State update: ms_nTotalCivPeds' = ms_nNumCivFemale + ms_nNumCivMale
+  true
+end
+
+schema CPopulation_PedCreationDistMultiplier
+  ΔCPopulation
+where
+  -- State update: veh' = FindPlayerVehicle()
+  -- State update: vehSpeed' = veh.m_vecMoveSpeed.Magnitude2D()
+  -- Return postcondition: result! = 1.0f
+  -- Return postcondition: result! = Clamp(vehSpeed - 0.1f + 1.0f, 1.0f, 1.5f)
+  -- Invokes: m_vecMoveSpeed.Magnitude2D
+  true
+end
+
+schema CPopulation_AddPed
+  ΔCPopulation
+  pedType? : ePedType
+  miOrCopType? : ℕ
+  coors? : CVector
+  modifier? : ℤ
+where
+  -- State update: ped' = new CCivilianPed(pedType, miOrCopType)
+  -- State update: weapon' = WEAPONTYPE_COLT45
+  -- State update: weapon' = WEAPONTYPE_NIGHTSTICK
+  -- State update: weapon' = WEAPONTYPE_GOLFCLUB
+  -- State update: weapon' = WEAPONTYPE_TEC9
+  -- State update: ped' = new CCopPed((eCopType)miOrCopType, modifier)
+  -- Return postcondition: result! = ped
+  -- Return postcondition: result! = ped
+  -- Return postcondition: result! = ped
+  -- Invokes: ped->SetPosition, ped->SetOrientation, CWorld::Add, CGeneral::GetRandomNumber, ped->GiveDelayedWeapon
+  true
+end
+
+schema CPopulation_AddToPopulation
+  ΔCPopulation
+  minDist? : ℝ
+  maxDist? : ℝ
+  minDistOffScreen? : ℝ
+  maxDistOffScreen? : ℝ
+where
+  -- State update: woman' = -1
+  -- State update: gangLeader' = ∅
+  -- State update: addCop' = false
+  -- State update: isSecurityGuard' = false
+  -- State update: forceAddingCop' = false
+  -- State update: playerInfo' = &CWorld::Players[CWorld::PlayerInFocus]
+  -- Invokes: CTheZones::GetZoneInfoForTimeOfDay, wantedInfo->GetWantedLevel, CGame::IsInInterior, CGeneral::GetRandomNumber, CTheScripts::IsPlayerOnAMission
+  true
+end
+
+schema CPopulation_AddPedInCar
+  ΔCPopulation
+  car? : Ref[CVehicle]
+  isDriver? : 𝔹
+where
+  -- State update: defaultModel' = MI_MALE01
+  -- State update: miamiViceIndex' = 0
+  -- State update: imSureThatModelIsLoaded' = true
+  -- State update: coors' = FindPlayerCoors()
+  -- State update: preferredModel' = 0
+  -- State update: pedType' = PEDTYPE_FIREMAN
+  -- Return postcondition: result! = newPed
+  -- Invokes: CTheZones::GetZoneInfoForTimeOfDay, car->GetModelIndex, car->IsTaxi, CGangs::GetGangInfo, CModelInfo::GetModelInfo
+  true
+end
+
+schema CPopulation_MoveCarsAndPedsOutOfAbandonedZones
+  ΔCPopulation
+where
+  -- State update: frame' = CTimer::GetFrameCounter() & 7
+  -- State update: movedVehicleCount' = 0
+  -- State update: poolSize' = CPools::GetVehiclePool().GetSize()
+  -- State update: poolIndex' = poolSize - 1
+  -- State update: veh' = CPools::GetVehiclePool().GetSlot(poolIndex)
+  -- State update: poolSize' = CPools::GetPedPool().GetSize()
+  -- Invokes: CTimer::GetFrameCounter, CPools::GetVehiclePool, veh->IsCar, veh->GetStatus, veh->GetPosition
+  true
+end
+
+schema CPopulation_ConvertAllObjectsToDummyObjects
+  ΔCPopulation
+where
+  -- State update: obj' = CPools::GetObjectPool().GetSlot(i)
+  -- Invokes: CPools::GetObjectPool, obj->CanBeDeleted
+  true
+end
+
+schema CPopulation_ConvertToRealObject
+  ΔCPopulation
+  dummy? : Ref[CDummyObject]
+where
+  -- State update: obj' = new CObject(dummy)
+  -- State update: obj.bIsVisible' = false
+  -- State update: obj.m_vecMoveSpeed' = CVector(0.0f, 0.0f, -0.001f)
+  -- State update: obj.bTouchingWater' = true
+  -- Invokes: CWorld::Remove, CWorld::Add, CModelInfo::GetModelInfo, obj->GetModelIndex, obj->SetIsStatic
+  true
+end
+
+schema CPopulation_ConvertToDummyObject
+  ΔCPopulation
+  obj? : Ref[CObject]
+where
+  -- State update: dummy' = new CDummyObject(obj)
+  -- State update: dummy.bIsVisible' = false
+  -- Invokes: dummy->GetMatrix, dummy->UpdateRwFrame, CModelInfo::GetModelInfo, obj->GetModelIndex, CWorld::Remove
+  true
+end
+
+schema CPopulation_TestRoomForDummyObject
+  ΔCPopulation
+  obj? : Ref[CObject]
+where
+  -- Return postcondition: result! = collidingObjs == 0
+  -- Invokes: CWorld::FindObjectsKindaColliding, m_objectMatrix.GetPosition, CModelInfo::GetColModel, obj->GetModelIndex
+  true
+end
+
+schema CPopulation_TestSafeForRealObject
+  ΔCPopulation
+  dummy? : Ref[CDummyObject]
+where
+  -- State update: dummyCol' = dummy.GetColModel()
+  -- State update: radius' = dummyCol.boundingSphere.radius
+  -- State update: minX' = CWorld::GetSectorIndexX(dummy.GetPosition().x - radius)
+  -- State update: minX' = 0
+  -- State update: minY' = CWorld::GetSectorIndexY(dummy.GetPosition().y - radius)
+  -- State update: minY' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: dummy->GetColModel, CWorld::GetSectorIndexX, dummy->GetPosition, CWorld::GetSectorIndexY, dummy->GetBoundRadius
+  true
+end
+
+schema CPopulation_ManagePopulation
+  ΔCPopulation
+where
+  -- State update: frameMod32' = CTimer::GetFrameCounter() & 31
+  -- State update: playerPos' = FindPlayerCentreOfWorld(CWorld::PlayerInFocus)
+  -- State update: objectPoolSize' = CPools::GetObjectPool().GetSize()
+  -- State update: obj' = CPools::GetObjectPool().GetSlot(i)
+  -- State update: objPlayerDist' = (obj.GetPosition() - playerPos).Magnitude()
+  -- State update: dummyPoolSize' = CPools::GetDummyPool().GetSize()
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: CTimer::GetFrameCounter, CPools::GetObjectPool, obj->CanBeDeleted, obj->GetPosition, obj->GetModelIndex
+  true
+end

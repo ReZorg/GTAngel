@@ -1,0 +1,90 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ShotInfo (weapons)
+-- Source File(s): weapons/ShotInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ShotInfo.zpp  (from "ShotInfo.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include World.zpp  (from "World.h")
+-- include WeaponInfo.zpp  (from "WeaponInfo.h")
+-- include General.zpp  (from "General.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Fire.zpp  (from "Fire.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CShotInfo_Initialise
+  ΔCShotInfo
+where
+  -- State update: m_inUse' = false
+  -- State update: m_weapon' = WEAPONTYPE_COLT45
+  -- State update: m_startPos' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_areaAffected' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_radius' = 1.0f
+  -- State update: m_sourceEntity' = ∅
+  true
+end
+
+schema CShotInfo_AddShot
+  ΔCShotInfo
+  sourceEntity? : Ref[CEntity]
+  weapon? : eWeaponType
+  startPos? : CVector
+  endPos? : CVector
+where
+  -- State update: weaponInfo' = CWeaponInfo::GetWeaponInfo(weapon)
+  -- State update: slot' = 0
+  -- State update: m_inUse' = true
+  -- State update: m_weapon' = weapon
+  -- State update: m_startPos' = startPos
+  -- State update: m_areaAffected' = endPos - startPos
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CWeaponInfo::GetWeaponInfo, CGeneral::GetRandomNumber, m_areaAffected.Normalise, weaponInfo->IsFlagSet, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CShotInfo_Shutdown
+  ΔCShotInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CShotInfo_Update
+  ΔCShotInfo
+where
+  -- State update: slot' = 0
+  -- State update: shot' = gaShotInfo[slot]
+  -- State update: shot.m_sourceEntity' = ∅
+  -- State update: weaponInfo' = CWeaponInfo::GetWeaponInfo(shot.m_weapon)
+  -- State update: shot.m_inUse' = false
+  -- State update: ped' = (CPed*) shot.m_sourceEntity
+  -- Invokes: m_sourceEntity->IsPed, CWeaponInfo::GetWeaponInfo, CTimer::GetTimeInMilliseconds, weaponInfo->IsFlagSet, CTimer::GetTimeStep
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ShotInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 169
+end

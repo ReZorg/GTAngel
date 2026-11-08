@@ -1,0 +1,80 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: lighting (extras)
+-- Source File(s): extras/shaders/lighting.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema Light
+  color : ℝ
+  position : ℝ
+  direction : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema lighting_DoDirLight
+  ΔlightingModuleState
+  L? : Light
+  N? : ℝ
+  result! : ℝ
+where
+  -- State update: l' = max(0.0, dot(N, -L.direction.xyz))
+  -- Return postcondition: result! = l*L.color.xyz
+  true
+end
+
+schema lighting_DoDirLightSpec
+  ΔlightingModuleState
+  L? : Light
+  N? : ℝ
+  V? : ℝ
+  power? : ℝ
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema lighting_DoPointLight
+  ΔlightingModuleState
+  L? : Light
+  V? : ℝ
+  N? : ℝ
+  result! : ℝ
+where
+  -- State update: dir' = V - L.position.xyz
+  -- State update: dist' = length(dir)
+  -- State update: atten' = max(0.0, (1.0 - dist/L.color.w))
+  -- State update: l' = max(0.0, dot(N, -normalize(dir)))
+  -- Return postcondition: result! = l*L.color.xyz*atten
+  true
+end
+
+schema lighting_DoSpotLight
+  ΔlightingModuleState
+  L? : Light
+  V? : ℝ
+  N? : ℝ
+  result! : ℝ
+where
+  -- State update: dir' = V - L.position.xyz
+  -- State update: dist' = length(dir)
+  -- State update: atten' = max(0.0, (1.0 - dist/L.color.w))
+  -- State update: l' = max(0.0, dot(N, -dir))
+  -- State update: pcos' = dot(dir, L.direction.xyz)
+  -- State update: ccos' = -L.position.w
+  -- Return postcondition: result! = l*L.color.xyz*atten
+  true
+end

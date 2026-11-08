@@ -1,0 +1,65 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedChat (peds)
+-- Source File(s): peds/PedChat.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include General.zpp  (from "General.h")
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPed_ServiceTalkingWhenDead
+  ΔCPed
+where
+  -- Return postcondition: result! = m_queuedSound == SOUND_PED_DEATH
+  true
+end
+
+schema CPed_ServiceTalking
+  ΔCPed
+where
+  -- State update: m_queuedSound' = SOUND_PED_BOMBER
+  -- State update: m_queuedSound' = SOUND_PED_BURNING
+  -- State update: m_soundStart' = CTimer::GetTimeInMilliseconds() - 1
+  -- State update: m_lastSoundStart' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_lastQueuedSound' = m_queuedSound
+  -- State update: m_queuedSound' = SOUND_NO_SOUND
+  -- Invokes: CGeneral::faststricmp, CModelInfo::GetModelInfo, CTimer::GetTimeInMilliseconds, DMAudio.PlayOneShot, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPed_Say
+  ΔCPed
+  audio? : ℕ
+where
+  -- State update: audio' = SOUND_PED_DAMAGE
+  -- State update: audio' = SOUND_PED_HIT
+  -- State update: m_queuedSound' = audio
+  -- Invokes: TheCamera.GetPosition, CGeneral::GetRandomNumberInRange, CTimer::GetTimeInMilliseconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PedChatModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 221
+end

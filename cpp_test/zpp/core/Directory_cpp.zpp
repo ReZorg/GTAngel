@@ -1,0 +1,90 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Directory (core)
+-- Source File(s): core/Directory.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Directory.zpp  (from "Directory.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDirectory_CDirectory
+  ΔCDirectory
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDirectory_ReadDirFile
+  ΔCDirectory
+  filename? : seq CHAR
+where
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema CDirectory_WriteDirFile
+  ΔCDirectory
+  filename? : seq CHAR
+where
+  -- State update: fd' = CFileMgr::OpenFileForWriting(filename)
+  -- Return postcondition: result! = n == numEntries*sizeof(DirectoryInfo)
+  -- Invokes: CFileMgr::OpenFileForWriting, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema CDirectory_AddItem
+  ΔCDirectory
+  dirinfo? : DirectoryInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDirectory_AddItem_2
+  ΔCDirectory
+  dirinfo? : DirectoryInfo
+  imgId? : ℤ
+where
+  -- State update: di' = dirinfo
+  true
+end
+
+schema CDirectory_FindItem
+  ΔCDirectory
+  name? : seq CHAR
+  offset? : ℕ
+  size? : ℕ
+where
+  -- State update: offset' = entries[i].offset
+  -- State update: size' = entries[i].size
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DirectoryModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 74
+end

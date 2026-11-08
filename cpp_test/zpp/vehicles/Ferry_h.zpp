@@ -1,0 +1,374 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Ferry (vehicles)
+-- Source File(s): vehicles/Ferry.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Door.zpp  (from "Door.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eFerryNodes ::= FERRY_DOOR_FRONT | FERRY_RAMP_FRONT | FERRY_DOOR_BACK | FERRY_RAMP_BACK | NUM_FERRY_NODES
+  -- val(FERRY_DOOR_FRONT) = 1
+
+Ferry_Enum_2 ::= NUM_FERRY_STATIONS | NUM_FERRIES | NUM_WAKE_POINTS
+  -- val(NUM_FERRY_STATIONS) = 2
+  -- val(NUM_FERRIES) = NUM_FERRY_PATHS * 2
+  -- val(NUM_WAKE_POINTS) = 64
+
+Ferry_Enum_3 ::= FERRY_STOPPED | FERRY_CRUISING | FERRY_SLOWING | FERRY_ACCELERATING
+  -- val(FERRY_STOPPED) = 0
+
+Ferry_Enum_4 ::= FERRY_DOOR_CLOSED | FERRY_DOOR_OPENING | FERRY_DOOR_OPEN | FERRY_DOOR_CLOSING
+  -- val(FERRY_DOOR_CLOSED) = 0
+
+eSpaceUse ::= FERRY_SPACE_PED | FERRY_SPACE_CAR
+  -- val(FERRY_SPACE_PED) = 0
+
+eSpaceStyle ::= FERRY_SPACE_STYLE_0 | FERRY_SPACE_STYLE_1
+  -- val(FERRY_SPACE_STYLE_0) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFerryNode
+  x : ℝ
+  y : ℝ
+  z : ℝ
+  t : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CFerryInterpolationLine
+  type : ℕ
+  time : ℝ
+  position : ℝ
+  speed : ℝ
+  acceleration : ℝ
+where
+  type ≥ 0
+end
+
+schema CFerryPath
+  TotalLengthOfTrack : ℝ
+  TotalDurationOfTrack : ℝ
+  NumTrackNodes : ℤ
+  aTrackNodes : Ref[CFerryNode]
+  aLineBits : ℙ ℤ
+where
+  #aTrackNodes ≤ 1
+  #aLineBits ≤ 1
+end
+
+schema CFerryInst
+  pPathData : seq Ref[CFerryPath]  -- bounded array [NUM_FERRY_PATHS]
+  m_afPositions : seq ℝ  -- bounded array [NUM_FERRIES]
+  m_afSpeeds : seq ℝ  -- bounded array [NUM_FERRIES]
+  m_apFerries : seq Ref[CFerry]  -- bounded array [NUM_FERRIES]
+  m_bFerriesDisabled : 𝔹
+  m_anNumWakePoints : seq ℕ  -- bounded array [NUM_FERRIES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CFerry
+  CVehicle  -- inherits base schema
+  m_nFerryId : ℤ
+  m_isFarAway : ℕ
+  m_nCurTrackNode : ℕ
+  m_fSpeed : ℝ
+  m_bFerryDocked : 𝔹
+  m_nDoorTimer : ℕ
+  m_nTimeLeftStation : ℕ
+  m_nDoorState : ℤ
+  m_bApproachingDock : 𝔹
+  m_nSkipFerryStatus : ℕ
+  m_nTimeAlongPath : ℕ
+  m_bUseFrontDoor : 𝔹
+  m_vecForwardSpeed : CVector
+  m_pDefaultColModel : Ref[CColModel]
+  m_nCollision : ℕ
+  m_doors : seq CDoor  -- bounded array [4]
+  m_aFerryNodes : seq Ref[RwFrame]  -- bounded array [NUM_FERRY_NODES]
+  m_bAlreadyRendered : 𝔹
+  m_bPlayerArrivedHorn : 𝔹
+  mspInst : Ref[CFerryInst]
+where
+  m_isFarAway ≥ 0
+  m_nCurTrackNode ≥ 0
+  m_nDoorTimer ≥ 0
+  m_nTimeLeftStation ≥ 0
+  m_nSkipFerryStatus ≥ 0
+  m_nTimeAlongPath ≥ 0
+  #m_pDefaultColModel ≤ 1
+  m_nCollision ≥ 0
+  #m_doors = 4
+  #mspInst ≤ 1
+end
+
+schema CFerry_Render
+  ΔCFerry
+where
+  -- Declared member operation CFerry::Render(void)
+  true
+end
+
+schema CFerry_EnableFerryPath_2
+  ΔCFerry
+  arg_1? : ℤ
+where
+  -- Declared member operation CFerry::EnableFerryPath(int)
+  true
+end
+
+schema CFerry_CFerry_3
+  ΔCFerry
+  arg_1? : ℤ
+  arg_2? : ℕ
+where
+  -- Declared member operation CFerry::CFerry(int32, uint8)
+  true
+end
+
+schema CFerry_SetModelIndex_4
+  ΔCFerry
+  arg_1? : ℕ
+where
+  -- Declared member operation CFerry::SetModelIndex(uint32)
+  true
+end
+
+schema CFerry_InitFerrys_5
+  ΔCFerry
+where
+  -- Declared member operation CFerry::InitFerrys(void)
+  true
+end
+
+schema CFerry_Init_6
+  ΔCFerry
+  arg_1? : ADDRESS
+where
+  -- Declared member operation CFerry::Init(void*)
+  true
+end
+
+schema CFerry_ProcessControl_7
+  ΔCFerry
+where
+  -- Declared member operation CFerry::ProcessControl(void)
+  true
+end
+
+schema CFerry_PlayArrivedHorn_8
+  ΔCFerry
+where
+  -- Declared member operation CFerry::PlayArrivedHorn(void)
+  true
+end
+
+schema CFerry_AddWakePoint_9
+  ΔCFerry
+  arg_1? : CVector
+where
+  -- Declared member operation CFerry::AddWakePoint(CVector)
+  true
+end
+
+schema CFerry_PruneWakeTrail_10
+  ΔCFerry
+where
+  -- Declared member operation CFerry::PruneWakeTrail(void)
+  true
+end
+
+schema CFerry_SkipFerryToNextDock_11
+  ΔCFerry
+where
+  -- Declared member operation CFerry::SkipFerryToNextDock(void)
+  true
+end
+
+schema CFerry_DissableFerryPath_12
+  ΔCFerry
+  arg_1? : ℤ
+where
+  -- Declared member operation CFerry::DissableFerryPath(int)
+  true
+end
+
+schema CFerry_CompleteDorrMovement_13
+  ΔCFerry
+where
+  -- Declared member operation CFerry::CompleteDorrMovement(void)
+  true
+end
+
+schema CFerry_IsDoorOpen_14
+  ΔCFerry
+  result! : 𝔹
+where
+  -- Declared member operation CFerry::IsDoorOpen(void)
+  true
+end
+
+schema CFerry_CloseDoor_15
+  ΔCFerry
+where
+  -- Declared member operation CFerry::CloseDoor(void)
+  true
+end
+
+schema CFerry_IsDocked_16
+  ΔCFerry
+  result! : 𝔹
+where
+  -- Declared member operation CFerry::IsDocked(void)
+  true
+end
+
+schema CFerry_GetClosestFerry_17
+  ΔCFerry
+  arg_1? : ℝ
+  arg_2? : ℝ
+  result! : Ref[CFerry]
+where
+  -- Declared member operation CFerry::GetClosestFerry(float, float)
+  true
+end
+
+schema CFerry_GetBoardingSpace_18
+  ΔCFerry
+  eSpaceUse? : CFerry
+  eSpaceStyle? : CFerry
+  arg_3? : ℕ
+  result! : CVector
+where
+  -- Declared member operation CFerry::GetBoardingSpace(CFerry::eSpaceUse, CFerry::eSpaceStyle, uint8)
+  true
+end
+
+schema CFerry_GetNearestDoor_19
+  ΔCFerry
+  arg_1? : CVector
+  result! : CVector
+where
+  -- Declared member operation CFerry::GetNearestDoor(CVector)
+  true
+end
+
+schema CFerry_OpenFerryDoor_20
+  ΔCFerry
+  arg_1? : ℝ
+where
+  -- Declared member operation CFerry::OpenFerryDoor(float)
+  true
+end
+
+schema CFerry_FerryHitStuff_21
+  ΔCFerry
+  arg_1? : CPtrList
+where
+  -- Declared member operation CFerry::FerryHitStuff(CPtrList&)
+  true
+end
+
+schema CFerry_RenderAllRemaning_22
+  ΔCFerry
+where
+  -- Declared member operation CFerry::RenderAllRemaning(void)
+  true
+end
+
+schema CFerry_UpdateFerrys_23
+  ΔCFerry
+where
+  -- Declared member operation CFerry::UpdateFerrys(void)
+  true
+end
+
+schema CFerry_SwitchFerryCollision_24
+  ΔCFerry
+  arg_1? : ℤ
+where
+  -- Declared member operation CFerry::SwitchFerryCollision(int)
+  true
+end
+
+schema CFerry_SetupForMultiplayer_25
+  ΔCFerry
+where
+  -- Declared member operation CFerry::SetupForMultiplayer(void)
+  true
+end
+
+schema CFerry_Write_26
+  ΔCFerry
+  arg_1? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CFerry::Write(base::cRelocatableChunkWriter&)
+  true
+end
+
+schema CFerry_OpenDoor_27
+  ΔCFerry
+where
+  -- Declared member operation CFerry::OpenDoor(void)
+  true
+end
+
+schema CFerry_PreRender_28
+  ΔCFerry
+where
+  -- Declared member operation CFerry::PreRender(void)
+  true
+end
+
+schema CFerry_IsDoorClosed_29
+  ΔCFerry
+  result! : 𝔹
+where
+  -- Declared member operation CFerry::IsDoorClosed(void)
+  true
+end
+
+schema CFerry_GetFerry_30
+  ΔCFerry
+  i? : ℤ
+  result! : Ref[CFerry]
+where
+  -- Declared member operation CFerry::GetFerry(int i)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Ferry_GetFerry
+  ΔFerryModuleState
+  i? : ℤ
+  result! : Ref[CFerry]
+where
+  -- Return postcondition: result! = mspInst ? mspInst->m_apFerries[i] : nil
+  true
+end
+
+schema Ferry_SetFerriesDisabled
+  ΔFerryModuleState
+  disabled? : 𝔹
+where
+  -- State update: mspInst.m_bFerriesDisabled' = disabled
+  true
+end

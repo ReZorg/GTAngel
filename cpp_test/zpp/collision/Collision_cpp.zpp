@@ -1,0 +1,761 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Collision (collision)
+-- Source File(s): collision/Collision.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include VuVector.zpp  (from "VuVector.h")
+-- include main.zpp  (from "main.h")
+-- include Lists.zpp  (from "Lists.h")
+-- include Game.zpp  (from "Game.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include General.zpp  (from "General.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include World.zpp  (from "World.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Train.zpp  (from "Train.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Population.zpp  (from "Population.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Lines.zpp  (from "Lines.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include VuCollision.zpp  (from "VuCollision.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include ColStore.zpp  (from "ColStore.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Collision_Enum_1 ::= MAXNUMSPHERES | MAXNUMBOXES | MAXNUMLINES | MAXNUMTRIS
+  -- val(MAXNUMSPHERES) = 128
+  -- val(MAXNUMBOXES) = 32
+  -- val(MAXNUMLINES) = 16
+  -- val(MAXNUMTRIS) = 600
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Collision_GetVUresult
+  ΔCollisionModuleState
+where
+  -- Return postcondition: result! = ret
+  -- Return postcondition: result! = vi01
+  true
+end
+
+schema Collision_GetVUresult_2
+  ΔCollisionModuleState
+  point? : CVuVector
+  normal? : CVuVector
+  dist? : ℝ
+where
+  -- State update: point' = vf01
+  -- State update: normal' = vf02
+  -- State update: dist' = vf03.x
+  -- Return postcondition: result! = ret
+  -- Return postcondition: result! = vi01
+  true
+end
+
+schema CCollision_Init
+  ΔCCollision
+where
+  -- State update: ms_collisionInMemory' = LEVEL_GENERIC
+  -- Invokes: ms_colModelCache.Init, CColStore::Initialise
+  true
+end
+
+schema CCollision_Shutdown
+  ΔCCollision
+where
+  -- Invokes: ms_colModelCache.Shutdown, CColStore::Shutdown
+  true
+end
+
+schema CCollision_Update
+  ΔCCollision
+where
+  -- State update: playerCoors' = FindPlayerCoors()
+  -- State update: level' = CTheZones::m_CurrLevel
+  -- State update: forceLevelChange' = false
+  -- State update: level' = LEVEL_COMMERCIAL
+  -- State update: forceLevelChange' = true
+  -- State update: level' = LEVEL_COMMERCIAL
+  -- Invokes: CTimer::GetTimeInMilliseconds, CCutsceneMgr::IsCutsceneProcessing, CStreaming::HaveAllBigBuildingsLoaded
+  true
+end
+
+schema Collision_GetCollisionInSectorList
+  ΔCollisionModuleState
+  list? : CPtrList
+where
+  -- State update: node' = list.first
+  -- State update: e' = (CEntity*)node.item
+  -- State update: level' = CModelInfo::GetColModel(e.GetModelIndex()).level
+  -- Return postcondition: result! = (eLevelName)level
+  -- Return postcondition: result! = LEVEL_GENERIC
+  -- Invokes: CModelInfo::GetColModel, e->GetModelIndex
+  true
+end
+
+schema Collision_GetCollisionInSector
+  ΔCollisionModuleState
+  sect? : CSector
+where
+  -- State update: level' = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS])
+  -- State update: level' = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES])
+  -- Return postcondition: result! = (eLevelName)level
+  true
+end
+
+schema CCollision_LoadCollisionWhenINeedIt
+  ΔCCollision
+  forceChange? : 𝔹
+where
+  -- State update: level' = LEVEL_GENERIC
+  -- State update: playerCoors' = FindPlayerCoors()
+  -- State update: sx' = CWorld::GetSectorIndexX(playerCoors.x)
+  -- State update: sy' = CWorld::GetSectorIndexY(playerCoors.y)
+  -- State update: multipleLevels' = false
+  -- State update: veh' = FindPlayerVehicle()
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, veh->IsTrain, CCullZones::DoINeedToLoadCollision, veh->IsBoat
+  true
+end
+
+schema CCollision_SortOutCollisionAfterLoad
+  ΔCCollision
+where
+  -- State update: ms_collisionInMemory' = CGame::currLevel
+  -- State update: bAlreadyLoaded' = true
+  -- State update: ms_collisionInMemory' = CGame::currLevel
+  -- Invokes: CModelInfo::RemoveColModelsFromOtherLevels, CFileLoader::LoadCollisionFromDatFile, CGame::TidyUpMemory
+  true
+end
+
+schema CCollision_LoadCollisionScreen
+  ΔCCollision
+  level? : eLevelName
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCollision_TestSphereSphere
+  ΔCCollision
+  s1? : CColSphere
+  s2? : CColSphere
+where
+  -- State update: d' = s1.radius + s2.radius
+  -- Return postcondition: result! = (s1.center - s2.center).MagnitudeSqr() < d*d
+  true
+end
+
+schema CCollision_TestSphereBox
+  ΔCCollision
+  sph? : CColSphere
+  box? : CColBox
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCollision_TestLineBox
+  ΔCCollision
+  line? : CColLine
+  box? : CColBox
+where
+  -- State update: t' = (box.min.x - line.p0.x) / (line.p1.x - line.p0.x)
+  -- State update: y' = line.p0.y + (line.p1.y - line.p0.y)*t
+  -- State update: z' = line.p0.z + (line.p1.z - line.p0.z)*t
+  -- State update: t' = (line.p0.x - box.max.x) / (line.p0.x - line.p1.x)
+  -- State update: y' = line.p0.y + (line.p1.y - line.p0.y)*t
+  -- State update: z' = line.p0.z + (line.p1.z - line.p0.z)*t
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCollision_TestVerticalLineBox
+  ΔCCollision
+  line? : CColLine
+  box? : CColBox
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCollision_TestLineTriangle
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+where
+  -- State update: p0dist' = DotProduct(line.p1 - line.p0, normal)
+  -- State update: t' = -plane.CalcPoint(line.p0) / p0dist
+  -- State update: p' = line.p0 + (line.p1-line.p0)*t
+  -- State update: va' = verts[tri.a].Get()
+  -- State update: vb' = verts[tri.b].Get()
+  -- State update: vc' = verts[tri.c].Get()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.Unpack, plane.GetNormal, plane.CalcPoint
+  true
+end
+
+schema CCollision_TestLineSphere
+  ΔCCollision
+  line? : CColLine
+  sph? : CColSphere
+where
+  -- State update: v01' = line.p1 - line.p0
+  -- State update: v0c' = sph.center - line.p0
+  -- State update: linesq' = v01.MagnitudeSqr()
+  -- State update: projline' = -2.0f * DotProduct(v01, v0c)
+  -- State update: diffsq' = projline*projline - tansq
+  -- State update: f' = (-projline - Sqrt(diffsq)) / (2.0f*linesq)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = f >= 0.0f && f <= 1.0f
+  -- Invokes: v01.MagnitudeSqr, p0.MagnitudeSqr
+  true
+end
+
+schema CCollision_TestSphereTriangle
+  ΔCCollision
+  sphere? : CColSphere
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+where
+  -- State update: planedist' = plane.CalcPoint(sphere.center)
+  -- State update: va' = verts[tri.a].Get()
+  -- State update: vb' = verts[tri.b].Get()
+  -- State update: vc' = verts[tri.c].Get()
+  -- State update: vec2' = vb - va
+  -- State update: len' = vec2.Magnitude()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.Unpack, plane.CalcPoint, vec2.Magnitude, plane.GetNormal
+  true
+end
+
+schema CCollision_TestLineOfSight
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  ignoreSeeThrough? : 𝔹
+where
+  -- State update: lastTest' = -1
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lastTest' = i
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lastTest' = i
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCollision_ProcessSphereSphere
+  ΔCCollision
+  s1? : CColSphere
+  s2? : CColSphere
+  point? : ℤ
+  mindistsq? : ℝ
+where
+  -- State update: dist' = s1.center - s2.center
+  -- State update: d' = dist.Magnitude() - s2.radius
+  -- State update: depth' = s1.radius - d
+  -- State update: d' = 0.0f
+  -- State update: point.point' = s1.center - dist*d
+  -- State update: point.normal' = dist
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: dist.Magnitude, dist.Normalise
+  true
+end
+
+schema CCollision_ProcessSphereBox
+  ΔCCollision
+  sph? : CColSphere
+  box? : CColBox
+  point? : ℤ
+  mindistsq? : ℝ
+where
+  -- State update: p' = (box.min + box.max)*0.5f
+  -- State update: dist' = sph.center - p
+  -- State update: lensq' = dist.MagnitudeSqr()
+  -- State update: point.normal' = dist * (1.0f/Sqrt(lensq))
+  -- State update: point.point' = sph.center - point.normal
+  -- State update: point.surfaceA' = sph.surface
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: dist.MagnitudeSqr
+  true
+end
+
+schema CCollision_ProcessLineBox
+  ΔCCollision
+  line? : CColLine
+  box? : CColBox
+  point? : ℤ
+  mindist? : ℝ
+where
+  -- State update: mint' = 1.0f
+  -- State update: t' = (box.min.x - line.p0.x) / (line.p1.x - line.p0.x)
+  -- State update: y' = line.p0.y + (line.p1.y - line.p0.y)*t
+  -- State update: z' = line.p0.z + (line.p1.z - line.p0.z)*t
+  -- State update: mint' = t
+  -- State update: p' = CVector(box.min.x, y, z)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCollision_ProcessLineSphere
+  ΔCCollision
+  line? : CColLine
+  sphere? : CColSphere
+  point? : ℤ
+  mindist? : ℝ
+where
+  -- State update: v01' = line.p1 - line.p0
+  -- State update: v0c' = sphere.center - line.p0
+  -- State update: linesq' = v01.MagnitudeSqr()
+  -- State update: projline' = DotProduct(v01, v0c)
+  -- State update: tansq' = (v0c.MagnitudeSqr() - sphere.radius*sphere.radius) * linesq
+  -- State update: diffsq' = projline*projline - tansq
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: v01.MagnitudeSqr, v0c.MagnitudeSqr, normal.Normalise
+  true
+end
+
+schema CCollision_ProcessVerticalLineTriangle
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindist? : ℝ
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: poly.valid' = true
+  -- State update: p0' = line.p0
+  -- State update: va' = verts[tri.a].Get()
+  -- State update: vb' = verts[tri.b].Get()
+  -- State update: vc' = verts[tri.c].Get()
+  -- State update: h' = (line.p1 - p0).z
+  -- Return postcondition: result! = res
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.GetNormal, plane.CalcPoint
+  true
+end
+
+schema CCollision_IsStoredPolyStillValidVerticalLine
+  ΔCCollision
+  pos? : CVector
+  z? : ℝ
+  point? : ℤ
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: p0' = pos
+  -- State update: p1' = pos
+  -- State update: p1.z' = z
+  -- State update: v01' = poly.verts[1] - poly.verts[0]
+  -- State update: v02' = poly.verts[2] - poly.verts[0]
+  -- State update: plane' = CrossProduct(v02, v01)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = poly->valid = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.Normalise, plane.Set, plane.CalcPoint, plane.GetNormal
+  true
+end
+
+schema CCollision_ProcessLineTriangle
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindist? : ℝ
+where
+  -- State update: point.point' = pnt
+  -- State update: point.normal' = normal
+  -- State update: mindist' = dist
+  -- State update: p0dist' = DotProduct(line.p1 - line.p0, normal)
+  -- State update: t' = -plane.CalcPoint(line.p0) / p0dist
+  -- State update: p' = line.p0 + (line.p1-line.p0)*t
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.Unpack, plane.GetNormal, plane.CalcPoint
+  true
+end
+
+schema CCollision_ProcessSphereTriangle
+  ΔCCollision
+  sphere? : CColSphere
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindistsq? : ℝ
+where
+  -- State update: depth' = sphere.radius - dist
+  -- State update: point.point' = pnt
+  -- State update: point.normal' = normal
+  -- State update: point.depth' = depth
+  -- State update: mindistsq' = dist*dist
+  -- State update: planedist' = plane.CalcPoint(sphere.center)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.Unpack, plane.CalcPoint, plane.GetNormal, vec2.Magnitude, normal.Normalise
+  true
+end
+
+schema CCollision_ProcessLineOfSight
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  point? : ℤ
+  mindist? : ℝ
+  ignoreSeeThrough? : 𝔹
+where
+  -- State update: coldist' = 1.0f
+  -- State update: lasttri' = ∅
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lasttri' = tri
+  -- State update: tri' = &model.triangles[i]
+  -- State update: point.point' = pnt
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: point.Set
+  true
+end
+
+schema CCollision_ProcessVerticalLine
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  point? : ℤ
+  mindist? : ℝ
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: coldist' = 1.0f
+  -- State update: TempStoredPoly.valid' = false
+  -- State update: lasttri' = ∅
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lasttri' = tri
+  -- State update: tri' = &model.triangles[i]
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: point.Set
+  true
+end
+
+schema CCollision_ProcessColModels
+  ΔCCollision
+  matrixA? : CMatrix
+  modelA? : CColModel
+  matrixB? : CMatrix
+  modelB? : CColModel
+  spherepoints? : ℙ ℤ
+  linepoints? : ℙ ℤ
+  linedists? : ℙ ℝ
+where
+  -- State update: aSpheresA' = (CVuVector*)SPR(0x0000)
+  -- State update: aSpheresB' = (CVuVector*)SPR(0x0800)
+  -- State update: aLinesA' = (CVuVector*)SPR(0x1000)
+  -- State update: aSphereIndicesA' = (int32*)SPR(0x1200)
+  -- State update: aSphereIndicesB' = (int32*)SPR(0x1400)
+  -- State update: aBoxIndicesB' = (int32*)SPR(0x1600)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema CCollision_DistToLine
+  ΔCCollision
+  l0? : Ref[CVector]
+  l1? : Ref[CVector]
+  point? : Ref[CVector]
+where
+  -- State update: lensq' = (*l1 - *l0).MagnitudeSqr()
+  -- State update: dot' = DotProduct(*point - *l0, *l1 - *l0)
+  -- State update: distSqr' = (*point - *l0).MagnitudeSqr() - dot * dot / lensq
+  -- Return postcondition: result! = (*point - *l0).Magnitude()
+  -- Return postcondition: result! = (*point - *l1).Magnitude()
+  -- Return postcondition: result! = 0.f
+  true
+end
+
+schema CCollision_DistToLine_2
+  ΔCCollision
+  l0? : Ref[CVector]
+  l1? : Ref[CVector]
+  point? : Ref[CVector]
+  closest? : CVector
+where
+  -- State update: lensq' = (*l1 - *l0).MagnitudeSqr()
+  -- State update: dot' = DotProduct(*point - *l0, *l1 - *l0)
+  -- State update: closest' = *l0
+  -- State update: closest' = *l1
+  -- State update: closest' = *l0 + (*l1 - *l0)*(dot/lensq)
+  -- Return postcondition: result! = (*point - closest).Magnitude()
+  true
+end
+
+schema CCollision_CalculateTrianglePlanes
+  ΔCCollision
+  model? : Ref[CColModel]
+where
+  -- State update: lptr' = model.GetLinkPtr()
+  -- State update: lptr' = ms_colModelCache.Insert(model)
+  -- State update: lptr' = ms_colModelCache.tail.prev
+  -- State update: lptr' = ms_colModelCache.Insert(model)
+  -- Invokes: model->GetLinkPtr, lptr->Remove, head.Insert, ms_colModelCache.Insert, item->RemoveTrianglePlanes
+  true
+end
+
+schema CCollision_DrawColModel
+  ΔCCollision
+  mat? : CMatrix
+  colModel? : CColModel
+where
+  -- State update: min' = colModel.boundingBox.min
+  -- State update: max' = colModel.boundingBox.max
+  -- State update: c' = mat * colModel.spheres[i].center
+  -- State update: r' = colModel.spheres[i].radius
+  -- State update: min' = colModel.boxes[i].min
+  -- State update: max' = colModel.boxes[i].max
+  -- Invokes: CLines::RenderLineWithClipping, colModel.GetTrianglePoint
+  true
+end
+
+schema CCollision_DrawColModel_Coloured
+  ΔCCollision
+  mat? : CMatrix
+  colModel? : CColModel
+  id? : ℤ
+where
+  -- State update: r' = 255
+  -- State update: g' = 128
+  -- State update: b' = 0
+  -- State update: s' = colModel.triangles[i].surface
+  -- State update: f' = (s & 0xF)/32.0f + 0.5f
+  -- State update: r' = f * 255.0f
+  -- Invokes: RenderBuffer::ClearRenderBuffer, colModel.GetTrianglePoint, CSurfaceTable::GetAdhesionGroup, CTimer::GetFrameCounter, CGeneral::GetRandomNumber
+  true
+end
+
+schema CCollision_TestSphereSphere_2
+  ΔCCollision
+  s1? : CSphere
+  s2? : CSphere
+where
+  -- State update: d' = s1.radius + s2.radius
+  -- Return postcondition: result! = (s1.center - s2.center).MagnitudeSqr() < d*d
+  true
+end
+
+schema CCollision_TestSphereBox_2
+  ΔCCollision
+  sph? : CSphere
+  box? : CBox
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCollision_TestLineBox_2
+  ΔCCollision
+  line? : CColLine
+  box? : CBox
+where
+  -- State update: t' = (box.min.x - line.p0.x) / (line.p1.x - line.p0.x)
+  -- State update: y' = line.p0.y + (line.p1.y - line.p0.y)*t
+  -- State update: z' = line.p0.z + (line.p1.z - line.p0.z)*t
+  -- State update: t' = (line.p0.x - box.max.x) / (line.p0.x - line.p1.x)
+  -- State update: y' = line.p0.y + (line.p1.y - line.p0.y)*t
+  -- State update: z' = line.p0.z + (line.p1.z - line.p0.z)*t
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCollision_TestVerticalLineBox_2
+  ΔCCollision
+  line? : CColLine
+  box? : CBox
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCollision_TestLineOfSight_2
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  ignoreSeeThrough? : 𝔹
+  ignoreShootThrough? : 𝔹
+where
+  -- State update: lastTest' = -1
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lastTest' = i
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lastTest' = i
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCollision_ProcessLineTriangle_2
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindist? : ℝ
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: point.point' = pnt
+  -- State update: point.normal' = normal
+  -- State update: mindist' = dist
+  -- State update: p0dist' = DotProduct(line.p1 - line.p0, normal)
+  -- State update: t' = -plane.CalcPoint(line.p0) / p0dist
+  -- State update: p' = line.p0 + (line.p1-line.p0)*t
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: plane.Unpack, plane.GetNormal, plane.CalcPoint
+  true
+end
+
+schema CCollision_ProcessLineOfSight_2
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  point? : ℤ
+  mindist? : ℝ
+  ignoreSeeThrough? : 𝔹
+  ignoreShootThrough? : 𝔹
+where
+  -- State update: coldist' = 1.0f
+  -- State update: lasttri' = ∅
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lasttri' = tri
+  -- State update: tri' = &model.triangles[i]
+  -- State update: point.point' = pnt
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: point.Set
+  true
+end
+
+schema CCollision_ProcessVerticalLine_2
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  point? : ℤ
+  mindist? : ℝ
+  ignoreSeeThrough? : 𝔹
+  ignoreShootThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: coldist' = 1.0f
+  -- State update: TempStoredPoly.valid' = false
+  -- State update: lasttri' = ∅
+  -- State update: tri' = &model.triangles[i]
+  -- State update: lasttri' = tri
+  -- State update: tri' = &model.triangles[i]
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: point.Set
+  true
+end
+
+schema CCollision_RemoveTrianglePlanes
+  ΔCCollision
+  model? : Ref[CColModel]
+where
+  -- Invokes: ms_colModelCache.Remove, model->GetLinkPtr, model->RemoveTrianglePlanes
+  true
+end
+
+schema Collision_GetSurfaceColor
+  ΔCollisionModuleState
+  surf? : ℕ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+where
+  -- State update: r' = 255
+  -- State update: g' = 128
+  -- State update: b' = 0
+  -- State update: r' = 255
+  -- State update: g' = 0
+  -- State update: b' = 0
+  -- Invokes: CSurfaceTable::GetAdhesionGroup, CTimer::GetFrameCounter
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CollisionModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3576
+end

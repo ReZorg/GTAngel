@@ -1,0 +1,183 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WeaponInfo (weapons)
+-- Source File(s): weapons/WeaponInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include AnimationId.zpp  (from "AnimationId.h")
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+WeaponInfo_Enum_1 ::= WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_DISSIPATES | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES | WEAPONFLAG_CANAIM | WEAPONFLAG_CANAIM_WITHARM | WEAPONFLAG_1ST_PERSON | WEAPONFLAG_HEAVY | WEAPONFLAG_THROW | WEAPONFLAG_RELOAD_LOOP2START | WEAPONFLAG_USE_2ND | WEAPONFLAG_GROUND_2ND | WEAPONFLAG_FINISH_3RD | WEAPONFLAG_RELOAD | WEAPONFLAG_FIGHTMODE | WEAPONFLAG_CROUCHFIRE | WEAPONFLAG_COP3_RD | WEAPONFLAG_GROUND_3RD | WEAPONFLAG_PARTIALATTACK | WEAPONFLAG_ANIMDETONATE
+  -- val(WEAPONFLAG_USE_GRAVITY) = 1
+  -- val(WEAPONFLAG_SLOWS_DOWN) = 1 << 1
+  -- val(WEAPONFLAG_DISSIPATES) = 1 << 2
+  -- val(WEAPONFLAG_RAND_SPEED) = 1 << 3
+  -- val(WEAPONFLAG_EXPANDS) = 1 << 4
+  -- val(WEAPONFLAG_EXPLODES) = 1 << 5
+  -- val(WEAPONFLAG_CANAIM) = 1 << 6
+  -- val(WEAPONFLAG_CANAIM_WITHARM) = 1 << 7
+  -- val(WEAPONFLAG_1ST_PERSON) = 1 << 8
+  -- val(WEAPONFLAG_HEAVY) = 1 << 9
+  -- val(WEAPONFLAG_THROW) = 1 << 10
+  -- val(WEAPONFLAG_RELOAD_LOOP2START) = 1 << 11
+  -- val(WEAPONFLAG_USE_2ND) = 1 << 12
+  -- val(WEAPONFLAG_GROUND_2ND) = 1 << 13
+  -- val(WEAPONFLAG_FINISH_3RD) = 1 << 14
+  -- val(WEAPONFLAG_RELOAD) = 1 << 15
+  -- val(WEAPONFLAG_FIGHTMODE) = 1 << 16
+  -- val(WEAPONFLAG_CROUCHFIRE) = 1 << 17
+  -- val(WEAPONFLAG_COP3_RD) = 1 << 18
+  -- val(WEAPONFLAG_GROUND_3RD) = 1 << 19
+  -- val(WEAPONFLAG_PARTIALATTACK) = 1 << 20
+  -- val(WEAPONFLAG_ANIMDETONATE) = 1 << 21
+
+WeaponInfo_Enum_2 ::= WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_DISSIPATES | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES | WEAPONFLAG_CANAIM | WEAPONFLAG_CANAIM_WITHARM | WEAPONFLAG_1ST_PERSON | WEAPONFLAG_HEAVY | WEAPONFLAG_THROW
+  -- val(WEAPONFLAG_USE_GRAVITY) = 1
+  -- val(WEAPONFLAG_SLOWS_DOWN) = 1 << 1
+  -- val(WEAPONFLAG_DISSIPATES) = 1 << 2
+  -- val(WEAPONFLAG_RAND_SPEED) = 1 << 3
+  -- val(WEAPONFLAG_EXPANDS) = 1 << 4
+  -- val(WEAPONFLAG_EXPLODES) = 1 << 5
+  -- val(WEAPONFLAG_CANAIM) = 1 << 6
+  -- val(WEAPONFLAG_CANAIM_WITHARM) = 1 << 7
+  -- val(WEAPONFLAG_1ST_PERSON) = 1 << 8
+  -- val(WEAPONFLAG_HEAVY) = 1 << 9
+  -- val(WEAPONFLAG_THROW) = 1 << 10
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeaponInfo
+  ms_aReloadSampleTime : seq ℕ  -- bounded array [WEAPONTYPE_TOTALWEAPONS]
+  ms_aMaxAmmoForWeapon : seq ℤ  -- bounded array [WEAPONTYPE_TOTALWEAPONS]
+  m_eWeaponFire : eWeaponFire
+  m_fRange : ℝ
+  m_nFiringRate : ℕ
+  m_nReload : ℕ
+  m_nAmountofAmmunition : ℤ
+  m_nDamage : ℕ
+  m_fSpeed : ℝ
+  m_fRadius : ℝ
+  m_fLifespan : ℝ
+  m_fSpread : ℝ
+  m_vecFireOffset : CVector
+  m_AnimToPlay : AssocGroupId
+  m_fAnimLoopStart : ℝ
+  m_fAnimLoopEnd : ℝ
+  m_fAnimFrameFire : ℝ
+  m_fAnim2LoopStart : ℝ
+  m_fAnim2LoopEnd : ℝ
+  m_fAnim2FrameFire : ℝ
+  m_fAnimBreakout : ℝ
+  m_nModelId : ℤ
+  m_nModel2Id : ℤ
+  m_Flags : ℕ
+  m_nWeaponSlot : ℕ
+  m_Anim2ToPlay : AnimationId
+where
+  m_nFiringRate ≥ 0
+  m_nReload ≥ 0
+  m_nDamage ≥ 0
+  m_Flags ≥ 0
+  m_nWeaponSlot ≥ 0
+end
+
+schema CWeaponInfo_Initialise
+  ΔCWeaponInfo
+where
+  -- Declared member operation CWeaponInfo::Initialise(void)
+  true
+end
+
+schema CWeaponInfo_LoadWeaponData_2
+  ΔCWeaponInfo
+where
+  -- Declared member operation CWeaponInfo::LoadWeaponData(void)
+  true
+end
+
+schema CWeaponInfo_GetWeaponInfo_3
+  ΔCWeaponInfo
+  weaponType? : eWeaponType
+  result! : Ref[CWeaponInfo]
+where
+  -- Declared member operation CWeaponInfo::GetWeaponInfo(eWeaponType weaponType)
+  true
+end
+
+schema CWeaponInfo_FindWeaponFireType_4
+  ΔCWeaponInfo
+  name? : seq CHAR
+  result! : eWeaponFire
+where
+  -- Declared member operation CWeaponInfo::FindWeaponFireType(char *name)
+  true
+end
+
+schema CWeaponInfo_FindWeaponType_5
+  ΔCWeaponInfo
+  name? : seq CHAR
+  result! : eWeaponType
+where
+  -- Declared member operation CWeaponInfo::FindWeaponType(char *name)
+  true
+end
+
+schema CWeaponInfo_Shutdown_6
+  ΔCWeaponInfo
+where
+  -- Declared member operation CWeaponInfo::Shutdown(void)
+  true
+end
+
+schema CWeaponInfo_IsWeaponSlotAmmoMergeable_7
+  ΔCWeaponInfo
+  slot? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CWeaponInfo::IsWeaponSlotAmmoMergeable(uint32 slot)
+  true
+end
+
+schema CWeaponInfo_IsFlagSet_8
+  ΞCWeaponInfo
+  flag? : ℕ
+  result! : bool
+where
+  -- Declared member operation CWeaponInfo::IsFlagSet(uint32 flag)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema WeaponInfo_IsWeaponSlotAmmoMergeable
+  ΔWeaponInfoModuleState
+  slot? : ℕ
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema WeaponInfo_IsFlagSet
+  ΞWeaponInfoModuleState
+  flag? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (m_Flags & flag) != 0
+  true
+end

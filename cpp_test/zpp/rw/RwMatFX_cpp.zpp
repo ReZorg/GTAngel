@@ -1,0 +1,147 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RwMatFX (rw)
+-- Source File(s): rw/RwMatFX.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema MatFXNothing
+  pad : seq ℤ  -- bounded array [5]
+  effect : ℤ
+where
+  #pad = 5
+end
+
+schema MatFXBump
+  bumpFrame : Ref[RwFrame]
+  bumpedTex : Ref[RwTexture]
+  bumpTex : Ref[RwTexture]
+  negBumpCoefficient : ℝ
+  pad : ℤ
+  effect : ℤ
+where
+  #bumpFrame ≤ 1
+  #bumpedTex ≤ 1
+  #bumpTex ≤ 1
+end
+
+schema MatFXEnv
+  envFrame : Ref[RwFrame]
+  envTex : Ref[RwTexture]
+  envCoeff : ℝ
+  envFBalpha : ℤ
+  pad : ℤ
+  effect : ℤ
+where
+  #envFrame ≤ 1
+  #envTex ≤ 1
+end
+
+schema MatFXDual
+  dualTex : Ref[RwTexture]
+  srcBlend : ℤ
+  dstBlend : ℤ
+where
+  #dualTex ≤ 1
+end
+
+schema MatFX
+  b : MatFXBump
+  e : MatFXEnv
+  d : MatFXDual
+  effects : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema RwMatFX_rpMatFXD3D8AtomicMatFXDefaultRender
+  ΔRwMatFXModuleState
+  inst? : Ref[RxD3D8InstanceData]
+  flags? : ℤ
+  texture? : Ref[RwTexture]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RwMatFX_ApplyEnvMapTextureMatrix
+  ΔRwMatFXModuleState
+  tex? : Ref[RwTexture]
+  n? : ℤ
+  frame? : Ref[RwFrame]
+where
+  -- State update: envframemat' = RwMatrixCreate()
+  -- State update: tmpmat' = RwMatrixCreate()
+  -- State update: envmat' = RwMatrixCreate()
+  -- State update: tmpmat.flags' = 0
+  -- State update: tmpmat.pos.x' = 0.0f
+  -- State update: tmpmat.pos.y' = 0.0f
+  true
+end
+
+schema RwMatFX_rpMatFXD3D8AtomicMatFXEnvRender_ps2
+  ΔRwMatFXModuleState
+  inst? : Ref[RxD3D8InstanceData]
+  flags? : ℤ
+  sel? : ℤ
+  texture? : Ref[RwTexture]
+  envMap? : Ref[RwTexture]
+where
+  -- State update: env' = &matfx.fx[sel].e
+  -- State update: intens' = (uint8)(env.envCoeff*255.0f)
+  -- State update: texfactor' = D3DCOLOR_RGBA(intens, intens, intens, intens)
+  true
+end
+
+schema RwMatFX_rwD3D8EnableClippingIfNeeded
+  ΔRwMatFXModuleState
+  object? : ADDRESS
+  type? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RwMatFX_rwD3D8AtomicMatFXRenderCallback
+  ΔRwMatFXModuleState
+  repEntry? : Ref[RwResEntry]
+  object? : ADDRESS
+  type? : ℕ
+  flags? : ℕ
+where
+  -- State update: forceBlack' = FALSE
+  -- State update: forceBlack' = TRUE
+  -- State update: header' = (RxD3D8ResEntryHeader *)(repEntry + 1)
+  -- State update: inst' = (RxD3D8InstanceData *)(header + 1)
+  -- State update: effect' = matfx ? matfx.effects : rpMATFXEFFECT∅
+  true
+end
+
+schema RwMatFX_ReplaceMatFxCallback
+  ΔRwMatFXModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

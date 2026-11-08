@@ -1,0 +1,37 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: neoVehicle (extras)
+-- Source File(s): extras/shaders/neoVehicle.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema neoVehicle_main
+  ΔneoVehicleModuleState
+where
+  -- State update: pass1' = v_color*texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: envmap' = texture(tex1, vec2(v_tex1.x, 1.0-v_tex1.y)).rgb
+  -- State update: pass1.rgb' = mix(pass1.rgb, envmap, v_reflcolor.a)
+  -- State update: pass1.rgb' = mix(u_fogColor.rgb, pass1.rgb, v_fog)
+  -- State update: pass2' = v_reflcolor.rgb * v_fog
+  -- State update: color.rgb' = pass1.rgb*pass1.a + pass2
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema neoVehicleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 29
+end

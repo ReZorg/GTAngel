@@ -1,0 +1,35 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Lines (renderer)
+-- Source File(s): renderer/Lines.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CLines
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CLines_RenderLineWithClipping
+  ΔCLines
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- Declared member operation CLines::RenderLineWithClipping(float x1, float y1, float z1, float x2, float y2, float z2, uint32 c1, uint32 c2)
+  true
+end

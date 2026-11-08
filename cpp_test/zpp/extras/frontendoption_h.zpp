@@ -1,0 +1,38 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: frontendoption (extras)
+-- Source File(s): extras/frontendoption.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FEOPTION_ACTION_LEFT : ℕ  -- #define FEOPTION_ACTION_LEFT 0
+FEOPTION_ACTION_RIGHT : ℕ  -- #define FEOPTION_ACTION_RIGHT 1
+FEOPTION_ACTION_SELECT : ℕ  -- #define FEOPTION_ACTION_SELECT 2
+FEOPTION_ACTION_FOCUSLOSS : ℕ  -- #define FEOPTION_ACTION_FOCUSLOSS 3
+FESCREEN_CENTER : ℕ  -- #define FESCREEN_CENTER 0
+FESCREEN_LEFT_ALIGN : ℕ  -- #define FESCREEN_LEFT_ALIGN 1
+FESCREEN_RIGHT_ALIGN : ℕ  -- #define FESCREEN_RIGHT_ALIGN 2
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema frontendoptionModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 136
+end

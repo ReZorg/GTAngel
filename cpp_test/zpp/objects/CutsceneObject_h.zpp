@@ -1,0 +1,226 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneObject (objects)
+-- Source File(s): objects/CutsceneObject.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Object.zpp  (from "Object.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCutsceneObject
+  CObject  -- inherits base schema
+  bRenderRightHand : 𝔹
+  bRenderLeftHand : 𝔹
+  m_pShadow : Ref[CCutsceneShadow]
+  m_pAttachTo : ADDRESS
+  m_pAttachmentObject : Ref[CObject]
+where
+  #m_pShadow ≤ 1
+  #m_pAttachmentObject ≤ 1
+end
+
+schema CCutsceneObject_GetRenderHead
+  ΔCCutsceneObject
+  result! : 𝔹
+where
+  -- Declared member operation CCutsceneObject::GetRenderHead(void)
+  true
+end
+
+schema CCutsceneObject_GetRenderRightHand_2
+  ΔCCutsceneObject
+  result! : bool
+where
+  -- Declared member operation CCutsceneObject::GetRenderRightHand(void)
+  true
+end
+
+schema CCutsceneObject_GetRenderLeftHand_3
+  ΔCCutsceneObject
+  result! : bool
+where
+  -- Declared member operation CCutsceneObject::GetRenderLeftHand(void)
+  true
+end
+
+schema CCutsceneObject_SetRenderHead_4
+  ΔCCutsceneObject
+  render? : 𝔹
+  result! : void
+where
+  -- Declared member operation CCutsceneObject::SetRenderHead(bool render)
+  true
+end
+
+schema CCutsceneObject_SetRenderRightHand_5
+  ΔCCutsceneObject
+  render? : 𝔹
+  result! : void
+where
+  -- Declared member operation CCutsceneObject::SetRenderRightHand(bool render)
+  true
+end
+
+schema CCutsceneObject_SetRenderLeftHand_6
+  ΔCCutsceneObject
+  render? : 𝔹
+  result! : void
+where
+  -- Declared member operation CCutsceneObject::SetRenderLeftHand(bool render)
+  true
+end
+
+schema CCutsceneObject_CCutsceneObject_7
+  ΔCCutsceneObject
+  result! : endif
+where
+  -- Declared member operation CCutsceneObject::CCutsceneObject(void)
+  true
+end
+
+schema CCutsceneObject_SetModelIndex_8
+  ΔCCutsceneObject
+  id? : ℕ
+where
+  -- Declared member operation CCutsceneObject::SetModelIndex(uint32 id)
+  true
+end
+
+schema CCutsceneObject_ProcessControl_9
+  ΔCCutsceneObject
+where
+  -- Declared member operation CCutsceneObject::ProcessControl(void)
+  true
+end
+
+schema CCutsceneObject_PreRender_10
+  ΔCCutsceneObject
+where
+  -- Declared member operation CCutsceneObject::PreRender(void)
+  true
+end
+
+schema CCutsceneObject_Render_11
+  ΔCCutsceneObject
+where
+  -- Declared member operation CCutsceneObject::Render(void)
+  true
+end
+
+schema CCutsceneObject_RenderLimb_12
+  ΔCCutsceneObject
+  bone? : ℤ
+where
+  -- Declared member operation CCutsceneObject::RenderLimb(int32 bone)
+  true
+end
+
+schema CCutsceneObject_SetupLighting_13
+  ΔCCutsceneObject
+  result! : 𝔹
+where
+  -- Declared member operation CCutsceneObject::SetupLighting(void)
+  true
+end
+
+schema CCutsceneObject_RemoveLighting_14
+  ΔCCutsceneObject
+  reset? : 𝔹
+where
+  -- Declared member operation CCutsceneObject::RemoveLighting(bool reset)
+  true
+end
+
+schema CCutsceneObject_CCutsceneObject_15
+  ΔCCutsceneObject
+  result! : ANY
+where
+  -- Declared member operation CCutsceneObject::CCutsceneObject(void)
+  true
+end
+
+schema CCutsceneObject_UpdatesInCutscene_16
+  ΔCCutsceneObject
+  result! : 𝔹
+where
+  -- Declared member operation CCutsceneObject::UpdatesInCutscene(void)
+  true
+end
+
+schema CCutsceneObject_CreateShadow_17
+  ΔCCutsceneObject
+  result! : void
+where
+  -- Declared member operation CCutsceneObject::CreateShadow(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CutsceneObject_GetRenderHead
+  ΔCutsceneObjectModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bRenderHead
+  true
+end
+
+schema CutsceneObject_GetRenderRightHand
+  ΔCutsceneObjectModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bRenderRightHand
+  true
+end
+
+schema CutsceneObject_GetRenderLeftHand
+  ΔCutsceneObjectModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bRenderLeftHand
+  true
+end
+
+schema CutsceneObject_SetRenderHead
+  ΔCutsceneObjectModuleState
+  render? : 𝔹
+where
+  -- State update: bRenderHead' = render
+  true
+end
+
+schema CutsceneObject_SetRenderRightHand
+  ΔCutsceneObjectModuleState
+  render? : 𝔹
+where
+  -- State update: bRenderRightHand' = render
+  true
+end
+
+schema CutsceneObject_SetRenderLeftHand
+  ΔCutsceneObjectModuleState
+  render? : 𝔹
+where
+  -- State update: bRenderLeftHand' = render
+  true
+end
+
+schema CutsceneObject_UpdatesInCutscene
+  ΔCutsceneObjectModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end

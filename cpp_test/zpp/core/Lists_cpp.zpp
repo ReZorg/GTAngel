@@ -1,0 +1,74 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Lists (core)
+-- Source File(s): core/Lists.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Lists.zpp  (from "Lists.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Lists_new
+  ΔListsModuleState
+  arg_1? : ℕ
+  result! : CPtrNode__operator
+where
+  -- State update: node' = CPools::GetPtrNodePool().New()
+  -- Return postcondition: result! = node
+  -- Invokes: CPools::GetPtrNodePool
+  true
+end
+
+schema Lists_delete
+  ΔListsModuleState
+  p? : ADDRESS
+  arg_2? : ℕ
+  result! : CPtrNode__operator
+where
+  -- Invokes: CPools::GetPtrNodePool
+  true
+end
+
+schema Lists_new_2
+  ΔListsModuleState
+  arg_1? : ℕ
+  result! : CEntryInfoNode__operator
+where
+  -- State update: node' = CPools::GetEntryInfoNodePool().New()
+  -- Return postcondition: result! = node
+  -- Invokes: CPools::GetEntryInfoNodePool
+  true
+end
+
+schema Lists_delete_2
+  ΔListsModuleState
+  p? : ADDRESS
+  arg_2? : ℕ
+  result! : CEntryInfoNode__operator
+where
+  -- Invokes: CPools::GetEntryInfoNodePool
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ListsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 26
+end

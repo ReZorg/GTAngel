@@ -1,0 +1,938 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Entity (entities)
+-- Source File(s): entities/Entity.cpp, entities/Entity.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Object.zpp  (from "Object.h")
+-- include World.zpp  (from "World.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Dummy.zpp  (from "Dummy.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include VuVector.zpp  (from "VuVector.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eEntityType ::= ENTITY_TYPE_NOTHING | ENTITY_TYPE_BUILDING | ENTITY_TYPE_VEHICLE | ENTITY_TYPE_PED | ENTITY_TYPE_OBJECT | ENTITY_TYPE_DUMMY | ENTITY_TYPE_MULTIPLAYER
+  -- val(ENTITY_TYPE_NOTHING) = 0
+
+eEntityStatus ::= STATUS_PLAYER | STATUS_PLAYER_PLAYBACKFROMBUFFER | STATUS_SIMPLE | STATUS_PHYSICS | STATUS_ABANDONED | STATUS_WRECKED | STATUS_TRAIN_MOVING | STATUS_TRAIN_NOT_MOVING | STATUS_FERRY_MOVING | STATUS_FERRY_NOT_MOVING | STATUS_HELI | STATUS_PLANE | STATUS_PLAYER_REMOTE | STATUS_PLAYER_DISABLED | STATUS_GHOST
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CEntity
+  CPlaceable  -- inherits base schema
+  m_rwObject : Ref[RwObject]
+  m_type : 𝔹
+  m_status : 𝔹
+  bUsesCollision : 𝔹
+  bCollisionProcessed : 𝔹
+  bIsStatic : 𝔹
+  bHasContacted : 𝔹
+  bPedPhysics : 𝔹
+  bIsStuck : 𝔹
+  bIsInSafePosition : 𝔹
+  bUseCollisionRecords : 𝔹
+  bWasPostponed : 𝔹
+  bExplosionProof : 𝔹
+  bIsVisible : 𝔹
+  bHasCollided : 𝔹
+  bRenderScorched : 𝔹
+  bHasBlip : 𝔹
+  bIsBIGBuilding : 𝔹
+  bStreamBIGBuilding : 𝔹
+  bRenderDamaged : 𝔹
+  bBulletProof : 𝔹
+  bFireProof : 𝔹
+  bCollisionProof : 𝔹
+  bMeleeProof : 𝔹
+  bOnlyDamagedByPlayer : 𝔹
+  bStreamingDontDelete : 𝔹
+  bRemoveFromWorld : 𝔹
+  bHasHitWall : 𝔹
+  bImBeingRendered : 𝔹
+  bTouchingWater : 𝔹
+  bIsSubway : 𝔹
+  bDrawLast : 𝔹
+  bNoBrightHeadLights : 𝔹
+  bDoNotRender : 𝔹
+  bDistanceFade : 𝔹
+  m_flagE1 : 𝔹
+  bDontCastShadowsOn : 𝔹
+  bOffscreen : 𝔹
+  bIsStaticWaitingForCollision : 𝔹
+  bDontStream : 𝔹
+  bUnderwater : 𝔹
+  bHasPreRenderEffects : 𝔹
+  bIsTreeModel : 𝔹
+  bIsVehicle : 𝔹
+  bIsPed : 𝔹
+  bMakeVisible : 𝔹
+  m_scanCode : ℕ
+  m_randomSeed : ℕ
+  m_modelIndex : ℤ
+  m_level : ℤ
+  m_area : ℤ
+  m_pFirstReference : Ref[CReference]
+  bZoneCulled : 𝔹
+  bZoneCulled2 : 𝔹
+  m_flagE2 : 𝔹
+where
+  #m_rwObject ≤ 1
+  #m_type = 3
+  #m_status = 5
+  #bUsesCollision = 1
+  #bCollisionProcessed = 1
+  #bIsStatic = 1
+  #bHasContacted = 1
+  #bPedPhysics = 1
+  #bIsStuck = 1
+  #bIsInSafePosition = 1
+  #bUseCollisionRecords = 1
+  #bWasPostponed = 1
+  #bExplosionProof = 1
+  #bIsVisible = 1
+  #bHasCollided = 1
+  #bRenderScorched = 1
+end
+
+schema CEntity_GetType
+  ΞCEntity
+  result! : ℕ
+where
+  -- Declared member operation CEntity::GetType()
+  true
+end
+
+schema CEntity_SetType_2
+  ΔCEntity
+  type? : ℕ
+  result! : void
+where
+  -- Declared member operation CEntity::SetType(uint8 type)
+  true
+end
+
+schema CEntity_GetStatus_3
+  ΞCEntity
+  result! : ℕ
+where
+  -- Declared member operation CEntity::GetStatus()
+  true
+end
+
+schema CEntity_SetStatus_4
+  ΔCEntity
+  status? : ℕ
+  result! : void
+where
+  -- Declared member operation CEntity::SetStatus(uint8 status)
+  true
+end
+
+schema CEntity_GetColModel_5
+  ΔCEntity
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CEntity::GetColModel(void)
+  true
+end
+
+schema CEntity_GetIsStatic_6
+  ΞCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::GetIsStatic(void)
+  true
+end
+
+schema CEntity_SetIsStatic_7
+  ΔCEntity
+  state? : 𝔹
+  result! : void
+where
+  -- Declared member operation CEntity::SetIsStatic(bool state)
+  true
+end
+
+schema CEntity_SaveEntityFlags_8
+  ΔCEntity
+  buf? : ℙ ℕ
+  result! : ifdef_COMPATIBLE_SAVES_void
+where
+  -- Declared member operation CEntity::SaveEntityFlags(uint8*& buf)
+  true
+end
+
+schema CEntity_LoadEntityFlags_9
+  ΔCEntity
+  buf? : ℙ ℕ
+where
+  -- Declared member operation CEntity::LoadEntityFlags(uint8*& buf)
+  true
+end
+
+schema CEntity_CEntity_10
+  ΔCEntity
+  result! : endif
+where
+  -- Declared member operation CEntity::CEntity(void)
+  true
+end
+
+schema CEntity_CEntity_11
+  ΔCEntity
+  result! : ANY
+where
+  -- Declared member operation CEntity::CEntity(void)
+  true
+end
+
+schema CEntity_Add_12
+  ΔCEntity
+where
+  -- Declared member operation CEntity::Add(void)
+  true
+end
+
+schema CEntity_Remove_13
+  ΔCEntity
+where
+  -- Declared member operation CEntity::Remove(void)
+  true
+end
+
+schema CEntity_UpdatesInCutscene_14
+  ΔCEntity
+  result! : 𝔹
+where
+  -- Declared member operation CEntity::UpdatesInCutscene(void)
+  true
+end
+
+schema CEntity_SetModelIndex_15
+  ΔCEntity
+  id? : ℕ
+  result! : void
+where
+  -- Declared member operation CEntity::SetModelIndex(uint32 id)
+  true
+end
+
+schema CEntity_SetModelIndexNoCreate_16
+  ΔCEntity
+  id? : ℕ
+where
+  -- Declared member operation CEntity::SetModelIndexNoCreate(uint32 id)
+  true
+end
+
+schema CEntity_CreateRwObject_17
+  ΔCEntity
+where
+  -- Declared member operation CEntity::CreateRwObject(void)
+  true
+end
+
+schema CEntity_DeleteRwObject_18
+  ΔCEntity
+where
+  -- Declared member operation CEntity::DeleteRwObject(void)
+  true
+end
+
+schema CEntity_GetBoundRect_19
+  ΔCEntity
+  result! : CRect
+where
+  -- Declared member operation CEntity::GetBoundRect(void)
+  true
+end
+
+schema CEntity_ProcessControl_20
+  ΔCEntity
+where
+  -- Declared member operation CEntity::ProcessControl(void)
+  true
+end
+
+schema CEntity_Render_21
+  ΔCEntity
+where
+  -- Declared member operation CEntity::Render(void)
+  true
+end
+
+schema CEntity_UpdateAnim_22
+  ΔCEntity
+where
+  -- Declared member operation CEntity::UpdateAnim(void)
+  true
+end
+
+schema CEntity_SetupLighting_23
+  ΔCEntity
+  result! : 𝔹
+where
+  -- Declared member operation CEntity::SetupLighting(void)
+  true
+end
+
+schema CEntity_RemoveLighting_24
+  ΔCEntity
+  arg_1? : 𝔹
+where
+  -- Declared member operation CEntity::RemoveLighting(bool)
+  true
+end
+
+schema CEntity_FlagToDestroyWhenNextProcessed_25
+  ΔCEntity
+where
+  -- Declared member operation CEntity::FlagToDestroyWhenNextProcessed(void)
+  true
+end
+
+schema CEntity_IsVehicle_26
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsVehicle(void)
+  true
+end
+
+schema CEntity_IsPed_27
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsPed(void)
+  true
+end
+
+schema CEntity_IsObject_28
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsObject(void)
+  true
+end
+
+schema CEntity_IsDummy_29
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsDummy(void)
+  true
+end
+
+schema CEntity_IsMultiplayer_30
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsMultiplayer(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CEntity_CEntity
+  ΔCEntity
+where
+  -- State update: m_type' = ENTITY_TYPE_NOTHING
+  -- State update: m_status' = STATUS_ABANDONED
+  -- State update: bUsesCollision' = false
+  -- State update: bCollisionProcessed' = false
+  -- State update: bIsStatic' = false
+  -- State update: bHasContacted' = false
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+schema CEntity_CEntity_2
+  ΔCEntity
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CEntity_SetModelIndex
+  ΔCEntity
+  id? : ℕ
+where
+  -- State update: m_modelIndex' = id
+  -- State update: bIsTreeModel' = IsTreeModel(m_modelIndex)
+  -- State update: bHasPreRenderEffects' = HasPreRenderEffects()
+  true
+end
+
+schema CEntity_SetModelIndexNoCreate
+  ΔCEntity
+  id? : ℕ
+where
+  -- State update: m_modelIndex' = id
+  -- State update: bIsTreeModel' = IsTreeModel(m_modelIndex)
+  -- State update: bHasPreRenderEffects' = HasPreRenderEffects()
+  true
+end
+
+schema CEntity_CreateRwObject
+  ΔCEntity
+where
+  -- State update: mi' = CModelInfo::GetModelInfo(m_modelIndex)
+  -- State update: m_rwObject' = mi.CreateInstance()
+  -- Invokes: CModelInfo::GetModelInfo, mi->CreateInstance, mi->AddRef
+  true
+end
+
+schema CEntity_AttachToRwObject
+  ΔCEntity
+  obj? : Ref[RwObject]
+where
+  -- State update: m_rwObject' = obj
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema CEntity_DetachFromRwObject
+  ΔCEntity
+where
+  -- State update: m_rwObject' = ∅
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema Entity_AtomicRemoveAnimFromSkinCB
+  ΔEntityModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: hier' = RpSkinAtomicGetHAnimHierarchy(atomic)
+  -- State update: hier.interpolator.currentAnim' = ∅
+  -- State update: hier.currentAnim' = ∅
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CEntity_DeleteRwObject
+  ΔCEntity
+where
+  -- State update: f' = RpAtomicGetFrame((RpAtomic*)m_rwObject)
+  -- State update: m_rwObject' = ∅
+  -- Invokes: CStreaming::UnregisterInstance, CModelInfo::GetModelInfo
+  true
+end
+
+schema CEntity_GetBoundRect
+  ΔCEntity
+where
+  -- State update: col' = CModelInfo::GetColModel(m_modelIndex)
+  -- State update: v' = col.boundingBox.min
+  -- State update: v.x' = col.boundingBox.max.x
+  -- State update: v' = col.boundingBox.max
+  -- State update: v.x' = col.boundingBox.min.x
+  -- Return postcondition: result! = rect
+  -- Invokes: CModelInfo::GetColModel, rect.ContainPoint
+  true
+end
+
+schema CEntity_GetBoundCentre
+  ΔCEntity
+where
+  -- Invokes: CModelInfo::GetColModel
+  true
+end
+
+schema CEntity_GetBoundCentre_2
+  ΔCEntity
+  out? : CVuVector
+where
+  -- Invokes: CModelInfo::GetColModel
+  true
+end
+
+schema CEntity_GetBoundCentre_3
+  ΔCEntity
+  out? : CVector
+where
+  -- Invokes: CModelInfo::GetColModel
+  true
+end
+
+schema CEntity_GetBoundRadius
+  ΔCEntity
+where
+  -- Return postcondition: result! = CModelInfo::GetColModel(m_modelIndex)->boundingSphere.radius
+  -- Invokes: CModelInfo::GetColModel
+  true
+end
+
+schema CEntity_UpdateRwFrame
+  ΔCEntity
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_PauseEntityAnims
+  ΔEntityModuleState
+where
+  -- Return postcondition: result! = CSpecialFX::bSnapShotActive
+  true
+end
+
+schema CEntity_UpdateRpHAnim
+  ΔCEntity
+where
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(GetClump())
+  -- State update: m' = &RpHAnimHierarchyGetMatrixArray(hier)[i]
+  -- Invokes: CDebug::PrintAt
+  true
+end
+
+schema CEntity_HasPreRenderEffects
+  ΔCEntity
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CEntity_PreRender
+  ΔCEntity
+where
+  -- State update: dist' = (TheCamera.GetPosition() - GetPosition()).Magnitude2D()
+  -- State update: fDistToNearestTree' = Min(CObject::fDistToNearestTree, dist)
+  -- State update: pos' = GetPosition()
+  -- State update: flicker' = (CGeneral::GetRandomNumber() & 0xF)/(float)0x10
+  -- State update: pos' = GetPosition()
+  -- Invokes: CModelInfo::GetModelInfo, TheCamera.GetPosition, CPickups::DoCollectableEffects, CPickups::DoMoneyEffects, CPickups::DoMineEffects
+  true
+end
+
+schema CEntity_Render
+  ΔCEntity
+where
+  -- State update: bImBeingRendered' = true
+  -- State update: bImBeingRendered' = false
+  -- Invokes: CVisibilityPlugins::GetObjectDistanceAlpha
+  true
+end
+
+schema CEntity_UpdateDistanceFade
+  ΔCEntity
+where
+  -- State update: alpha' = CVisibilityPlugins::GetObjectDistanceAlpha(m_rwObject)
+  -- State update: alpha' = 255
+  -- State update: alpha' = Max(alpha-16, 0)
+  -- State update: alpha' = Min(alpha+32, 255)
+  -- Invokes: CVisibilityPlugins::GetObjectDistanceAlpha, CCutsceneMgr::IsRunning, CVisibilityPlugins::SetObjectDistanceAlpha
+  true
+end
+
+schema CEntity_UpdateAnim
+  ΔCEntity
+where
+  -- State update: bOffscreen' = !GetIsOnScreen()
+  -- Invokes: CTimer::GetTimeStepNonClippedInSeconds, CTimer::GetTimeStepInSeconds
+  true
+end
+
+schema CEntity_GetIsTouching
+  ΔCEntity
+  center? : CVUVECTOR
+  radius? : ℝ
+where
+  -- Return postcondition: result! = sq(GetBoundRadius()+radius) > (boundCenter-center).MagnitudeSqr()
+  true
+end
+
+schema CEntity_GetIsTouching_2
+  ΔCEntity
+  other? : Ref[CEntity]
+where
+  -- Invokes: other->GetBoundRadius, other->GetBoundCentre
+  true
+end
+
+schema CEntity_IsVisible
+  ΔCEntity
+where
+  -- Return postcondition: result! = m_rwObject && bIsVisible && GetIsOnScreen()
+  true
+end
+
+schema CEntity_IsVisibleComplex
+  ΔCEntity
+where
+  -- Return postcondition: result! = m_rwObject && bIsVisible && GetIsOnScreenComplex()
+  true
+end
+
+schema CEntity_GetIsOnScreen
+  ΔCEntity
+where
+  -- Return postcondition: result! = TheCamera.IsSphereVisible(GetBoundCentre(), GetBoundRadius())
+  -- Invokes: TheCamera.IsSphereVisible
+  true
+end
+
+schema CEntity_GetIsOnScreenComplex
+  ΔCEntity
+where
+  -- State update: rect' = GetBoundRect()
+  -- State update: colmodel' = CModelInfo::GetColModel(m_modelIndex)
+  -- State update: z' = GetPosition().z
+  -- State update: minz' = z + colmodel.boundingBox.min.z
+  -- State update: maxz' = z + colmodel.boundingBox.max.z
+  -- State update: x' = rect.left
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = TheCamera.IsBoxVisible(boundBox, &TheCamera.GetCameraMatrix())
+  -- Invokes: TheCamera.IsPointVisible, TheCamera.GetCameraMatrix, CModelInfo::GetColModel, TheCamera.IsBoxVisible
+  true
+end
+
+schema CEntity_Add
+  ΔCEntity
+where
+  -- State update: bounds' = GetBoundRect()
+  -- State update: xstart' = CWorld::GetSectorIndexX(bounds.left)
+  -- State update: xend' = CWorld::GetSectorIndexX(bounds.right)
+  -- State update: xmid' = CWorld::GetSectorIndexX((bounds.left + bounds.right)/2.0f)
+  -- State update: ystart' = CWorld::GetSectorIndexY(bounds.top)
+  -- State update: yend' = CWorld::GetSectorIndexY(bounds.bottom)
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector, list->InsertItem
+  true
+end
+
+schema CEntity_Remove
+  ΔCEntity
+where
+  -- State update: bounds' = GetBoundRect()
+  -- State update: xstart' = CWorld::GetSectorIndexX(bounds.left)
+  -- State update: xend' = CWorld::GetSectorIndexX(bounds.right)
+  -- State update: xmid' = CWorld::GetSectorIndexX((bounds.left + bounds.right)/2.0f)
+  -- State update: ystart' = CWorld::GetSectorIndexY(bounds.top)
+  -- State update: yend' = CWorld::GetSectorIndexY(bounds.bottom)
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector, list->RemoveItem
+  true
+end
+
+schema CEntity_GetDistanceFromCentreOfMassToBaseOfModel
+  ΔCEntity
+where
+  -- Return postcondition: result! = -CModelInfo::GetColModel(m_modelIndex)->boundingBox.min.z
+  -- Invokes: CModelInfo::GetColModel
+  true
+end
+
+schema CEntity_SetupBigBuilding
+  ΔCEntity
+where
+  -- State update: mi' = (CSimpleModelInfo*)CModelInfo::GetModelInfo(m_modelIndex)
+  -- State update: bIsBIGBuilding' = true
+  -- State update: bStreamingDontDelete' = true
+  -- State update: bUsesCollision' = false
+  -- State update: m_level' = CTheZones::GetLevelFromPosition(&GetPosition())
+  -- State update: bStreamBIGBuilding' = true
+  -- Invokes: CModelInfo::GetModelInfo, CTheZones::GetLevelFromPosition
+  true
+end
+
+schema CEntity_ModifyMatrixForTreeInWind
+  ΔCEntity
+where
+  -- State update: t' = m_randomSeed + 8*CTimer::GetTimeInMilliseconds()
+  -- State update: f' = (t & 0xFFF)/(float)0x1000
+  -- State update: strength' = -0.015f*CWeather::Wind
+  -- State update: t' = (uintptr)this + CTimer::GetTimeInMilliseconds()
+  -- State update: f' = (t & 0xFFF)/(float)0x1000
+  -- State update: flutter' = Sin(f * 6.28f)
+  -- Invokes: CTimer::GetIsPaused, CTimer::GetTimeInMilliseconds, mat.GetUp, CWindModifiers::FindWindModifier, mat.UpdateRW
+  true
+end
+
+schema CEntity_ModifyMatrixForBannerInWind
+  ΔCEntity
+where
+  -- State update: strength' = 0.2f
+  -- State update: strength' = 0.43f
+  -- State update: strength' = 0.66f
+  -- State update: f' = (t & 0x7FF)/(float)0x800
+  -- State update: right' = CrossProduct(GetForward(), GetUp())
+  -- State update: right.z' = 0.0f
+  -- Invokes: CTimer::GetIsPaused, CTimer::GetTimeInMilliseconds, right.Normalise
+  true
+end
+
+schema CEntity_PreRenderForGlassWindow
+  ΔCEntity
+where
+  -- State update: bIsVisible' = false
+  -- Invokes: CModelInfo::GetModelInfo, CGlass::AskForObjectToBeRenderedInGlass
+  true
+end
+
+schema Entity_SetAtomicAlphaCB
+  ΔEntityModuleState
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: alpha' = (uint8)(uintptr)data
+  -- Return postcondition: result! = material
+  true
+end
+
+schema Entity_SetClumpAlphaCB
+  ΔEntityModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: geometry' = RpAtomicGetGeometry(atomic)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CEntity_SetRwObjectAlpha
+  ΔCEntity
+  alpha? : ℤ
+where
+  -- State update: geometry' = RpAtomicGetGeometry((RpAtomic*)m_rwObject)
+  true
+end
+
+schema Entity_IsEntityPointerValid
+  ΔEntityModuleState
+  pEntity? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = IsBuildingPointerValid((CBuilding*)pEntity)
+  -- Invokes: pEntity->GetType
+  true
+end
+
+schema CEntity_SaveEntityFlags
+  ΔCEntity
+  buf? : ℙ ℕ
+where
+  -- State update: tmp' = 0
+  -- State update: tmp' = 0
+  true
+end
+
+schema CEntity_LoadEntityFlags
+  ΔCEntity
+  buf? : ℙ ℕ
+where
+  -- State update: m_type' = (tmp & ((BIT(3) - 1)))
+  -- State update: m_status' = ((tmp >> 3) & (BIT(5) - 1))
+  -- State update: bUsesCollision' = !!(tmp & BIT(8))
+  -- State update: bCollisionProcessed' = !!(tmp & BIT(9))
+  -- State update: bIsStatic' = !!(tmp & BIT(10))
+  -- State update: bHasContacted' = !!(tmp & BIT(11))
+  true
+end
+
+schema Entity_GetType
+  ΞEntityModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_type
+  true
+end
+
+schema Entity_SetType
+  ΔEntityModuleState
+  type? : ℕ
+where
+  -- State update: m_type' = type
+  true
+end
+
+schema Entity_GetStatus
+  ΞEntityModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_status
+  true
+end
+
+schema Entity_SetStatus
+  ΔEntityModuleState
+  status? : ℕ
+where
+  -- State update: m_status' = status
+  true
+end
+
+schema Entity_GetIsStatic
+  ΞEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bIsStatic || bIsStaticWaitingForCollision
+  true
+end
+
+schema Entity_SetIsStatic
+  ΔEntityModuleState
+  state? : 𝔹
+where
+  -- State update: bIsStatic' = state
+  true
+end
+
+schema Entity_GetAddressOfEntityProperties
+  ΔEntityModuleState
+  result! : ℙ ℕ
+where
+  -- Return postcondition: result! = (uint32*)((char*)&m_rwObject + sizeof(m_rwObject))
+  true
+end
+
+schema Entity_UpdatesInCutscene
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Entity_ProcessControl
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_ProcessCollision
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_ProcessShift
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_Teleport
+  ΔEntityModuleState
+  v? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_FlagToDestroyWhenNextProcessed
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_IsBuilding
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_BUILDING
+  true
+end
+
+schema Entity_IsVehicle
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_VEHICLE
+  true
+end
+
+schema Entity_IsPed
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_PED
+  true
+end
+
+schema Entity_IsObject
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_OBJECT
+  true
+end
+
+schema Entity_IsDummy
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_DUMMY
+  true
+end
+
+schema Entity_IsMultiplayer
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_MULTIPLAYER
+  true
+end
+
+schema Entity_GetModelIndex
+  ΞEntityModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_modelIndex
+  true
+end
+
+schema Entity_GetIsStatic_2
+  ΞEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bIsStatic
+  true
+end

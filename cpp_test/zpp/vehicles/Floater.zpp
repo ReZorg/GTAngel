@@ -1,0 +1,267 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Floater (vehicles)
+-- Source File(s): vehicles/Floater.cpp, vehicles/Floater.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Physical.zpp  (from "Physical.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Floater.zpp  (from "Floater.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+tWaterLevel ::= FLOATER_ABOVE_WATER | FLOATER_IN_WATER | FLOATER_UNDER_WATER
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cBuoyancy
+  m_position : CVector
+  m_matrix : CMatrix
+  m_field_54 : ℤ
+  m_positionZ : CVector
+  m_waterlevel : ℝ
+  m_waterLevelInc : ℝ
+  m_buoyancy : ℝ
+  m_dimMax : CVector
+  m_dimMin : CVector
+  m_numPartialVolumes : ℝ
+  m_field_8C : ℤ
+  m_field_90 : ℤ
+  m_field_94 : ℤ
+  m_haveVolume : 𝔹
+  m_step : CVector
+  m_stepRatio : CVector
+  m_numSteps : ℝ
+  m_flipAverage : 𝔹
+  m_field_B9 : seq CHAR
+  m_isBoat : 𝔹
+  m_volumeUnderWater : ℝ
+  m_impulsePoint : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cBuoyancy_ProcessBuoyancy
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  buoyancy? : ℝ
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation cBuoyancy::ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *point, CVector *impulse)
+  true
+end
+
+schema cBuoyancy_ProcessBuoyancyBoat_2
+  ΔcBuoyancy
+  phys? : Ref[CVehicle]
+  buoyancy? : ℝ
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+  bNoTurnForce? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation cBuoyancy::ProcessBuoyancyBoat(CVehicle *phys, float buoyancy, CVector *point, CVector *impulse, bool bNoTurnForce)
+  true
+end
+
+schema cBuoyancy_PreCalcSetup_3
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  buoyancy? : ℝ
+where
+  -- Declared member operation cBuoyancy::PreCalcSetup(CPhysical *phys, float buoyancy)
+  true
+end
+
+schema cBuoyancy_SimpleCalcBuoyancy_4
+  ΔcBuoyancy
+where
+  -- Declared member operation cBuoyancy::SimpleCalcBuoyancy(void)
+  true
+end
+
+schema cBuoyancy_SimpleSumBuoyancyData_5
+  ΔcBuoyancy
+  waterLevel? : CVector
+  waterPosition? : tWaterLevel
+  result! : ℝ
+where
+  -- Declared member operation cBuoyancy::SimpleSumBuoyancyData(CVector &waterLevel, tWaterLevel waterPosition)
+  true
+end
+
+schema cBuoyancy_FindWaterLevel_6
+  ΔcBuoyancy
+  zpos? : CVector
+  waterLevel? : Ref[CVector]
+  waterPosition? : Ref[tWaterLevel]
+where
+  -- Declared member operation cBuoyancy::FindWaterLevel(const CVector &zpos, CVector *waterLevel, tWaterLevel *waterPosition)
+  true
+end
+
+schema cBuoyancy_FindWaterLevelNorm_7
+  ΔcBuoyancy
+  zpos? : CVector
+  waterLevel? : Ref[CVector]
+  waterPosition? : Ref[tWaterLevel]
+  normal? : Ref[CVector]
+where
+  -- Declared member operation cBuoyancy::FindWaterLevelNorm(const CVector &zpos, CVector *waterLevel, tWaterLevel *waterPosition, CVector *normal)
+  true
+end
+
+schema cBuoyancy_CalcBuoyancyForce_8
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  impulse? : Ref[CVector]
+  point? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation cBuoyancy::CalcBuoyancyForce(CPhysical *phys, CVector *impulse, CVector *point)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema cBuoyancy_ProcessBuoyancy
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  buoyancy? : ℝ
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+where
+  -- State update: m_numSteps' = 2.0f
+  -- State update: m_matrix' = phys.GetMatrix()
+  -- State update: f' = CalcBuoyancyForce(phys, point, impulse)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = f != 0.0f
+  -- Invokes: CWaterLevel::GetWaterLevel, phys->GetPosition, phys->GetMatrix
+  true
+end
+
+schema cBuoyancy_ProcessBuoyancyBoat
+  ΔcBuoyancy
+  veh? : Ref[CVehicle]
+  buoyancy? : ℝ
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+  bNoTurnForce? : 𝔹
+where
+  -- State update: m_numSteps' = 2.0f
+  -- State update: m_matrix' = veh.GetMatrix()
+  -- State update: volDiv' = 1.0f/((m_dimMax.z - m_dimMin.z)*sq(m_numSteps+1.0f))
+  -- State update: ix' = 0
+  -- State update: x' = m_dimMin.x
+  -- State update: y' = m_dimMin.y
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = m_isBoat || m_haveVolume
+  -- Invokes: CWaterLevel::GetWaterLevel, veh->GetPosition, veh->GetMatrix, veh->GetModelIndex, CTimer::GetTimeStep
+  true
+end
+
+schema cBuoyancy_PreCalcSetup
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  buoyancy? : ℝ
+where
+  -- State update: m_isBoat' = phys.IsVehicle() && ((CVehicle*)phys).IsBoat()
+  -- State update: colModel' = phys.GetColModel()
+  -- State update: m_dimMin' = colModel.boundingBox.min
+  -- State update: m_dimMax' = colModel.boundingBox.max
+  -- State update: m_dimMin.y' = -m_dimMax.y
+  -- State update: m_step' = (m_dimMax - m_dimMin)/m_numSteps
+  -- Invokes: phys->IsVehicle, phys->GetColModel, phys->GetModelIndex, phys->GetPosition
+  true
+end
+
+schema cBuoyancy_SimpleCalcBuoyancy
+  ΔcBuoyancy
+where
+  -- State update: ix' = 0
+  -- State update: x' = m_dimMin.x
+  -- State update: y' = m_dimMin.y
+  -- State update: fVolMultiplier' = m_isBoat ? fBoatVolumeDistribution[i] : 1.0f
+  true
+end
+
+schema cBuoyancy_SimpleSumBuoyancyData
+  ΔcBuoyancy
+  waterLevel? : CVector
+  waterPosition? : tWaterLevel
+where
+  -- State update: submerged' = Abs(waterLevel.z - m_dimMin.z)
+  -- State update: fThisVolume' = submerged - (1.0f - fVolMultiplier)
+  -- State update: fThisVolume' = 2.0f*sq(fThisVolume)
+  -- State update: fThisVolume' = sq(fThisVolume)
+  -- State update: fThisVolume' = sq(fThisVolume)
+  -- State update: AverageOfWaterLevel.x' = waterLevel.x * m_stepRatio.x
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = fThisVolume
+  true
+end
+
+schema cBuoyancy_FindWaterLevel
+  ΔcBuoyancy
+  zpos? : CVector
+  waterLevel? : Ref[CVector]
+  waterPosition? : Ref[tWaterLevel]
+where
+  -- State update: waterPosition' = FLOATER_IN_WATER
+  -- State update: xWaterLevel' = Multiply3x3(m_matrix, *waterLevel)
+  -- State update: waterLevel.z' = m_dimMax.z
+  -- State update: waterPosition' = FLOATER_UNDER_WATER
+  -- State update: waterLevel.z' = m_dimMin.z
+  -- State update: waterPosition' = FLOATER_ABOVE_WATER
+  -- Invokes: CWaterLevel::GetWaterLevel
+  true
+end
+
+schema cBuoyancy_FindWaterLevelNorm
+  ΔcBuoyancy
+  zpos? : CVector
+  waterLevel? : Ref[CVector]
+  waterPosition? : Ref[tWaterLevel]
+  normal? : Ref[CVector]
+where
+  -- State update: waterPosition' = FLOATER_IN_WATER
+  -- State update: xWaterLevel' = Multiply3x3(m_matrix, *waterLevel)
+  -- State update: waterLevel.z' = m_dimMax.z
+  -- State update: waterPosition' = FLOATER_UNDER_WATER
+  -- State update: waterLevel.z' = m_dimMin.z
+  -- State update: waterPosition' = FLOATER_ABOVE_WATER
+  -- Invokes: CWaterLevel::GetWaterLevel, CWaterLevel::GetWaterNormal
+  true
+end
+
+schema cBuoyancy_CalcBuoyancyForce
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+where
+  -- State update: point' = Multiply3x3(m_matrix, m_impulsePoint)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CTimer::GetTimeStep
+  true
+end

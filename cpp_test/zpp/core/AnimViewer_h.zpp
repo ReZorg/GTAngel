@@ -1,0 +1,49 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimViewer (core)
+-- Source File(s): core/AnimViewer.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimViewer
+  animTxdSlot : ℤ
+  pTarget : Ref[CEntity]
+where
+  #pTarget ≤ 1
+end
+
+schema CAnimViewer_Initialise
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Initialise()
+  true
+end
+
+schema CAnimViewer_Render_2
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Render()
+  true
+end
+
+schema CAnimViewer_Shutdown_3
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Shutdown()
+  true
+end
+
+schema CAnimViewer_Update_4
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Update()
+  true
+end

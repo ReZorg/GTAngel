@@ -1,0 +1,88 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Placeable (core)
+-- Source File(s): core/Placeable.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPlaceable_CPlaceable
+  ΔCPlaceable
+where
+  -- Invokes: m_matrix.SetScale
+  true
+end
+
+schema CPlaceable_CPlaceable_2
+  ΔCPlaceable
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlaceable_SetHeading
+  ΔCPlaceable
+  angle? : ℝ
+where
+  -- State update: pos' = GetMatrix().GetPosition()
+  -- Invokes: m_matrix.SetRotateZ
+  true
+end
+
+schema CPlaceable_IsWithinArea
+  ΔCPlaceable
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+where
+  -- State update: tmp' = x1
+  -- State update: x1' = x2
+  -- State update: x2' = tmp
+  -- State update: tmp' = y1
+  -- State update: y1' = y2
+  -- State update: y2' = tmp
+  true
+end
+
+schema CPlaceable_IsWithinArea_2
+  ΔCPlaceable
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+where
+  -- State update: tmp' = x1
+  -- State update: x1' = x2
+  -- State update: x2' = tmp
+  -- State update: tmp' = y1
+  -- State update: y1' = y2
+  -- State update: y2' = tmp
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PlaceableModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 72
+end

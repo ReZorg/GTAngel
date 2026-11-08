@@ -1,0 +1,870 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: sampman_oal (audio)
+-- Source File(s): audio/sampman_oal.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include time.zpp  (from "time.h")
+-- include eax.zpp  (from "eax.h")
+-- include eax-util.zpp  (from "eax-util.h")
+-- include io.zpp  (from "io.h")
+-- include al.zpp  (from "AL/al.h")
+-- include alc.zpp  (from "AL/alc.h")
+-- include alext.zpp  (from "AL/alext.h")
+-- include efx.zpp  (from "AL/efx.h")
+-- include efx-presets.zpp  (from "AL/efx-presets.h")
+-- include direct.zpp  (from "direct.h")
+-- include shlobj.zpp  (from "shlobj.h")
+-- include shlguid.zpp  (from "shlguid.h")
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include oal_utils.zpp  (from "oal/oal_utils.h")
+-- include aldlist.zpp  (from "oal/aldlist.h")
+-- include channel.zpp  (from "oal/channel.h")
+-- include utility.zpp  (from "utility")
+-- include mutex.zpp  (from "mutex")
+-- include queue.zpp  (from "queue")
+-- include condition_variable.zpp  (from "condition_variable")
+-- include stream.zpp  (from "oal/stream.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include opusfile.zpp  (from "opusfile.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+_getcwd : seq CHAR  -- #define _getcwd getcwd
+MIN_DIST : ℝ  -- #define MIN_DIST 0.5f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tMP3Entry
+  aFilename : seq CHAR
+  nTrackLength : ℕ
+  nTrackStreamPos : ℕ
+  pNext : Ref[tMP3Entry]
+  pLinkPath : seq CHAR
+where
+  nTrackLength ≥ 0
+  nTrackStreamPos ≥ 0
+  #pNext ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema sampman_oal_IsFXSupported
+  Δsampman_oalModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = _effectsSupported
+  true
+end
+
+schema sampman_oal_EAX_SetAll
+  Δsampman_oalModuleState
+  allparameters? : Ref[EAXLISTENERPROPERTIES]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema sampman_oal_add_providers
+  Δsampman_oalModuleState
+where
+  -- State update: pDeviceList' = &DeviceList
+  -- State update: devNumber' = Min(pDeviceList.GetNumDevices(), MAXPROVIDERS)
+  -- State update: id' = pDeviceList.GetDeviceName(i)
+  -- State update: sources' = pDeviceList.GetMaxNumSources(i)
+  -- State update: bSupportsFx' = true
+  -- State update: id' = pDeviceList.GetDeviceName(i)
+  -- Invokes: SampleManager.SetNum3DProvidersAvailable, pDeviceList->GetNumDevices, pDeviceList->GetDefaultDevice, pDeviceList->GetDeviceName, pDeviceList->GetMaxNumSources
+  true
+end
+
+schema sampman_oal_release_existing
+  Δsampman_oalModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema sampman_oal_set_new_provider
+  Δsampman_oalModuleState
+  index? : ℤ
+where
+  -- State update: curprovider' = index
+  -- State update: usingEAX' = 0
+  -- State update: usingEAX3' = 0
+  -- State update: _usingEFX' = false
+  -- State update: usingEAX' = 1
+  -- State update: usingEAX3' = 1
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema sampman_oal_IsThisTrackAt16KHz
+  Δsampman_oalModuleState
+  track? : ℕ
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema cSampleManager_cSampleManager
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_cSampleManager_2
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema sampman_oal_SetUpDebugBanksInfo
+  Δsampman_oalModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetSpeakerConfig
+  ΔcSampleManager
+  nConfig? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetMaximumSupportedChannels
+  ΔcSampleManager
+  result! : ℕ
+where
+  -- Return postcondition: result! = MAXCHANNELS
+  -- Return postcondition: result! = _maxSamples
+  true
+end
+
+schema cSampleManager_GetNum3DProvidersAvailable
+  ΔcSampleManager
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nNumberOfProviders
+  true
+end
+
+schema cSampleManager_SetNum3DProvidersAvailable
+  ΔcSampleManager
+  num? : ℕ
+where
+  -- State update: m_nNumberOfProviders' = num
+  true
+end
+
+schema cSampleManager_Set3DProviderName
+  ΔcSampleManager
+  id? : ℕ
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetCurrent3DProviderIndex
+  ΔcSampleManager
+  result! : ℤ
+where
+  -- Return postcondition: result! = curprovider
+  true
+end
+
+schema cSampleManager_SetCurrent3DProvider
+  ΔcSampleManager
+  nProvider? : ℕ
+  result! : ℤ
+where
+  -- State update: savedprovider' = curprovider
+  -- State update: nProvider' = Clamp(nProvider, 0, m_nNumberOfProviders - 1)
+  -- Return postcondition: result! = curprovider
+  -- Return postcondition: result! = curprovider
+  -- Return postcondition: result! = curprovider
+  true
+end
+
+schema cSampleManager_AutoDetect3DProviders
+  ΔcSampleManager
+where
+  -- State update: providername' = Get3DProviderName(i)
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = defaultProvider
+  -- Return postcondition: result! = i
+  -- Invokes: AudioManager.IsAudioInitialised
+  true
+end
+
+schema sampman_oal_ResolveLink
+  Δsampman_oalModuleState
+  path? : seq CHAR
+  out? : seq CHAR
+where
+  -- State update: len' = strlen(path)
+  -- State update: linkname' = (char*)alloca(sb.st_size + 1)
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: psl->QueryInterface, ppf->Load, psl->Resolve, psl->GetPath, ppf->Release
+  true
+end
+
+schema sampman_oal_FindMP3s
+  Δsampman_oalModuleState
+where
+  -- State update: actualPath' = casepath(path)
+  -- State update: hFind' = FindFirstFile(path, &fd)
+  -- State update: bShortcut' = FALSE
+  -- State update: bInitFirstEntry' = TRUE
+  -- State update: filepathlen' = strlen(filepath)
+  -- State update: bShortcut' = TRUE
+  true
+end
+
+schema sampman_oal_DeleteMP3Entries
+  Δsampman_oalModuleState
+where
+  -- State update: e' = _pMP3List
+  -- State update: next' = e.pNext
+  -- State update: next' = ∅
+  -- State update: e.pLinkPath' = ∅
+  -- State update: e' = next
+  -- State update: e' = ∅
+  true
+end
+
+schema sampman_oal_GetMP3EntryByIndex
+  Δsampman_oalModuleState
+  idx? : ℕ
+where
+  -- State update: e' = _pMP3List
+  -- State update: e' = e.pNext
+  -- Return postcondition: result! = e
+  -- Return postcondition: result! = NULL
+  true
+end
+
+schema sampman_oal_GetMP3PosFromStreamPos
+  Δsampman_oalModuleState
+  pPosition? : ℙ ℕ
+  pEntry? : Ref[tMP3Entry]
+where
+  -- State update: _CurMP3Index' = 0
+  -- State update: pEntry' = _pMP3List
+  -- State update: _CurMP3Pos' = *pPosition
+  -- State update: pPosition' = 0
+  -- State update: pEntry' = _pMP3List
+  -- State update: _CurMP3Pos' = 0
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_IsMP3RadioChannelAvailable
+  ΔcSampleManager
+where
+  -- Return postcondition: result! = nNumMP3s != 0
+  true
+end
+
+schema cSampleManager_ReleaseDigitalHandle
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_ReacquireDigitalHandle
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_Initialise
+  ΔcSampleManager
+where
+  -- State update: nOffset' = 0
+  -- State update: nSize' = 0
+  -- State update: nFrequency' = 22050
+  -- State update: nLoopStart' = 0
+  -- State update: nLoopEnd' = -1
+  -- State update: m_nEffectsVolume' = MAX_VOLUME
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CStream::Initialise, CChannel::InitChannels
+  true
+end
+
+schema cSampleManager_Terminate
+  ΔcSampleManager
+where
+  -- State update: ALEffect' = AL_EFFECT_∅
+  -- State update: ALEffectSlot' = AL_EFFECTSLOT_∅
+  -- State update: ALDevice' = ∅
+  -- State update: ALContext' = ∅
+  -- State update: _fPrevEaxRatioDestination' = 0.0f
+  -- State update: _usingEFX' = false
+  -- Invokes: CChannel::DestroyChannels, CStream::Terminate
+  true
+end
+
+schema cSampleManager_CheckForAnAudioFileOnCD
+  ΔcSampleManager
+  result! : bool8
+where
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema cSampleManager_GetCDAudioDriveLetter
+  ΔcSampleManager
+  result! : seq CHAR
+where
+  -- Return postcondition: result! = '\0'
+  true
+end
+
+schema cSampleManager_UpdateEffectsVolume
+  ΔcSampleManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetEffectsMasterVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- State update: m_nEffectsVolume' = nVolume
+  true
+end
+
+schema cSampleManager_SetMusicMasterVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- State update: m_nMusicVolume' = nVolume
+  true
+end
+
+schema cSampleManager_SetMP3BoostVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- State update: m_nMP3BoostVolume' = nVolume
+  true
+end
+
+schema cSampleManager_SetEffectsFadeVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- State update: m_nEffectsFadeVolume' = nVolume
+  true
+end
+
+schema cSampleManager_SetMusicFadeVolume
+  ΔcSampleManager
+  nVolume? : ℕ
+where
+  -- State update: m_nMusicFadeVolume' = nVolume
+  true
+end
+
+schema cSampleManager_SetMonoMode
+  ΔcSampleManager
+  nMode? : bool8
+where
+  -- State update: m_nMonoMode' = nMode
+  true
+end
+
+schema cSampleManager_LoadSampleBank
+  ΔcSampleManager
+  nBank? : ℕ
+where
+  -- State update: samplesRead' = 0
+  -- State update: samplesSize' = nSampleBankSize[nBank] / 2
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CTimer::GetIsCodePaused, MusicManager.IsInitialised, MusicManager.GetMusicMode
+  true
+end
+
+schema cSampleManager_UnloadSampleBank
+  ΔcSampleManager
+  nBank? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_IsSampleBankLoaded
+  ΔcSampleManager
+  nBank? : ℕ
+where
+  -- Return postcondition: result! = gBankLoaded[nBank]
+  true
+end
+
+schema cSampleManager_IsMissionAudioLoaded
+  ΔcSampleManager
+  nSlot? : ℕ
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_LoadMissionAudio
+  ΔcSampleManager
+  nSlot? : ℕ
+  nSample? : ℕ
+where
+  -- State update: gPlayerTalkSfx' = nSample
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_IsPedCommentLoaded
+  ΔcSampleManager
+  nComment? : ℕ
+where
+  -- State update: slot' = (int8)nCurrentPedSlot - i - 1
+  -- State update: slot' = nCurrentPedSlot - i - 1
+  -- Return postcondition: result! = LOADING_STATUS_LOADED
+  -- Return postcondition: result! = LOADING_STATUS_NOT_LOADED
+  true
+end
+
+schema cSampleManager_GetPedCommentSlot
+  ΔcSampleManager
+  nComment? : ℕ
+where
+  -- State update: slot' = (int8)nCurrentPedSlot - i - 1
+  -- State update: slot' = nCurrentPedSlot - i - 1
+  -- Return postcondition: result! = slot
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema cSampleManager_LoadPedComment
+  ΔcSampleManager
+  nComment? : ℕ
+where
+  -- State update: samplesRead' = 0
+  -- State update: samplesSize' = m_aSamples[nComment].nSize / 2
+  -- State update: nCurrentPedSlot' = 0
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CTimer::GetIsCodePaused, MusicManager.IsInitialised, MusicManager.GetMusicMode, MusicManager.GetNextTrack
+  true
+end
+
+schema cSampleManager_GetBankContainingSound
+  ΔcSampleManager
+  offset? : ℕ
+where
+  -- Return postcondition: result! = SFX_BANK_PED_COMMENTS
+  -- Return postcondition: result! = SFX_BANK_0
+  -- Return postcondition: result! = INVALID_SFX_BANK
+  true
+end
+
+schema cSampleManager_GetSampleBaseFrequency
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = m_aSamples[nSample].nFrequency
+  true
+end
+
+schema cSampleManager_GetSampleLoopStartOffset
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = m_aSamples[nSample].nLoopStart
+  true
+end
+
+schema cSampleManager_GetSampleLoopEndOffset
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = m_aSamples[nSample].nLoopEnd
+  true
+end
+
+schema cSampleManager_GetSampleLength
+  ΔcSampleManager
+  nSample? : ℕ
+where
+  -- Return postcondition: result! = m_aSamples[nSample].nSize / sizeof(uint16)
+  true
+end
+
+schema cSampleManager_UpdateReverb
+  ΔcSampleManager
+  result! : bool8
+where
+  -- State update: fRatio' = 0.0f
+  -- State update: fRatio' = Clamp(fRatio, 0.0f, 0.6f)
+  -- State update: fRatio' = Min(fRatio * 1.67f, 1.0f)
+  -- State update: _fEffectsLevel' = fRatio * 0.75f
+  -- State update: _fEffectsLevel' = fRatio * 0.8f
+  -- State update: _fEffectsLevel' = fRatio * 0.22f
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_SetChannelReverbFlag
+  ΔcSampleManager
+  nChannel? : ℕ
+  nReverbFlag? : bool8
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_InitialiseChannel
+  ΔcSampleManager
+  nChannel? : ℕ
+  nSfx? : ℕ
+  nBank? : ℕ
+where
+  -- State update: addr' = (uintptr)gPlayerTalkData
+  -- State update: addr' = nMissionSlotSfxStartAddress + i * MISSION_AUDIO_BLOCKSIZE
+  -- State update: slot' = nCurrentPedSlot - i - 1
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema cSampleManager_SetChannelEmittingVolume
+  ΔcSampleManager
+  nChannel? : ℕ
+  nVolume? : ℕ
+where
+  -- State update: vol' = nVolume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: MusicManager.GetMusicMode, MusicManager.GetNextTrack
+  true
+end
+
+schema cSampleManager_SetChannel3DPosition
+  ΔcSampleManager
+  nChannel? : ℕ
+  fX? : ℝ
+  fY? : ℝ
+  fZ? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannel3DDistances
+  ΔcSampleManager
+  nChannel? : ℕ
+  fMax? : ℝ
+  fMin? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelVolume
+  ΔcSampleManager
+  nChannel? : ℕ
+  nVolume? : ℕ
+where
+  -- State update: vol' = nVolume
+  -- State update: vol' = MAX_VOLUME
+  -- Invokes: MusicManager.GetMusicMode, MusicManager.GetNextTrack
+  true
+end
+
+schema cSampleManager_SetChannelPan
+  ΔcSampleManager
+  nChannel? : ℕ
+  nPan? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelFrequency
+  ΔcSampleManager
+  nChannel? : ℕ
+  nFreq? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelLoopPoints
+  ΔcSampleManager
+  nChannel? : ℕ
+  nLoopStart? : ℕ
+  nLoopEnd? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetChannelLoopCount
+  ΔcSampleManager
+  nChannel? : ℕ
+  nLoopCount? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_GetChannelUsedFlag
+  ΔcSampleManager
+  nChannel? : ℕ
+where
+  -- Return postcondition: result! = aChannel[nChannel].IsUsed()
+  true
+end
+
+schema cSampleManager_StartChannel
+  ΔcSampleManager
+  nChannel? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_StopChannel
+  ΔcSampleManager
+  nChannel? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_PreloadStreamedFile
+  ΔcSampleManager
+  nFile? : ℕ
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- Invokes: stream->Close, stream->Open, stream->Setup
+  true
+end
+
+schema cSampleManager_PauseStream
+  ΔcSampleManager
+  nPauseFlag? : bool8
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- Invokes: stream->IsOpened, stream->SetPause
+  true
+end
+
+schema cSampleManager_StartPreloadedStreamedFile
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- Invokes: stream->IsOpened, stream->Start
+  true
+end
+
+schema cSampleManager_StartStreamedFile
+  ΔcSampleManager
+  nFile? : ℕ
+  nPos? : ℕ
+  nStream? : ℕ
+where
+  -- State update: position' = nPos
+  -- State update: position' = 0
+  -- State update: e' = _pMP3List
+  -- State update: nFile' = 0
+  -- State update: stream' = aStream[nStream]
+  -- State update: _bIsMp3Active' = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: stream->Open, stream->Setup, stream->SetLoopCount, stream->SetPosMS, stream->Start
+  true
+end
+
+schema cSampleManager_StopStreamedFile
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- State update: _bIsMp3Active' = FALSE
+  -- Invokes: stream->Close
+  true
+end
+
+schema cSampleManager_GetStreamedFilePosition
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- State update: mp3' = _GetMP3EntryByIndex(_CurMP3Index)
+  -- Return postcondition: result! = stream->GetPosMS() + mp3->nTrackStreamPos
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = stream->GetPosMS()
+  -- Invokes: stream->IsOpened, stream->GetPosMS
+  true
+end
+
+schema cSampleManager_SetStreamedVolumeAndPan
+  ΔcSampleManager
+  nVolume? : ℕ
+  nPan? : ℕ
+  nEffectFlag? : bool8
+  nStream? : ℕ
+where
+  -- State update: boostMult' = 0.0f
+  -- State update: nVolume' = MAX_VOLUME
+  -- State update: nPan' = MAX_VOLUME
+  -- State update: boostMult' = m_nMP3BoostVolume / 64.f
+  -- State update: stream' = aStream[nStream]
+  -- Invokes: MusicManager.GetRadioInCar, MusicManager.CheckForMusicInterruptions, stream->IsOpened, stream->SetVolume, stream->SetPan
+  true
+end
+
+schema cSampleManager_GetStreamedFileLength
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- Return postcondition: result! = nStreamLength[nStream]
+  true
+end
+
+schema cSampleManager_IsStreamPlaying
+  ΔcSampleManager
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: stream->IsOpened, stream->IsPlaying
+  true
+end
+
+schema cSampleManager_Service
+  ΔcSampleManager
+where
+  -- State update: stream' = aStream[i]
+  -- State update: refCount' = CChannel::channelsThatNeedService
+  -- Invokes: stream->IsOpened, stream->Update
+  true
+end
+
+schema cSampleManager_InitialiseSampleBanks
+  ΔcSampleManager
+where
+  -- State update: nBank' = SFX_BANK_0
+  -- State update: fpSampleDescHandle' = fcaseopen(SampleBankDescFilename, "rb")
+  -- State update: fpSampleDataHandle' = fcaseopen(SampleBankDataFilename, "rb")
+  -- State update: fpSampleDescHandle' = ∅
+  -- State update: _nSampleDataEndOffset' = ftell(fpSampleDataHandle)
+  -- State update: fpSampleDataHandle' = op_open_file(SampleBankDataFilename, &e)
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema cSampleManager_SetStreamedFileLoopFlag
+  ΔcSampleManager
+  nLoopFlag? : bool8
+  nChannel? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema cSampleManager_SetMonoMode_2
+  ΔcSampleManager
+  nMode? : ℕ
+where
+  -- State update: m_nMonoMode' = nMode
+  true
+end
+
+schema cSampleManager_PreloadStreamedFile_2
+  ΔcSampleManager
+  nFile? : ℕ
+  nStream? : ℕ
+where
+  -- State update: stream' = aStream[nStream]
+  -- Invokes: stream->Close, stream->Open, stream->Setup
+  true
+end
+
+schema cSampleManager_StartStreamedFile_2
+  ΔcSampleManager
+  nFile? : ℕ
+  nPos? : ℕ
+  nStream? : ℕ
+where
+  -- State update: position' = nPos
+  -- State update: position' = 0
+  -- State update: e' = _pMP3List
+  -- State update: nFile' = 0
+  -- State update: stream' = aStream[nStream]
+  -- State update: _bIsMp3Active' = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = FALSE
+  -- Invokes: stream->Open, stream->Setup, stream->SetPosMS, stream->Start, stream->Close
+  true
+end
+
+schema cSampleManager_SetStreamedVolumeAndPan_2
+  ΔcSampleManager
+  nVolume? : ℕ
+  nPan? : ℕ
+  nEffectFlag? : ℕ
+  nStream? : ℕ
+where
+  -- State update: nVolume' = MAX_VOLUME
+  -- State update: nPan' = MAX_VOLUME
+  -- State update: stream' = aStream[nStream]
+  -- Invokes: stream->IsOpened, stream->SetVolume, stream->SetPan
+  true
+end

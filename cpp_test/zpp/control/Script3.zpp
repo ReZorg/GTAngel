@@ -1,0 +1,119 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script3 (control)
+-- Source File(s): control/Script3.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include General.zpp  (from "General.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Population.zpp  (from "Population.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include User.zpp  (from "User.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Wanted.zpp  (from "Wanted.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_ProcessCommands500To599
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed' = CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed
+  -- State update: pPed' = CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed
+  -- State update: pPed.m_pWanted.m_bIgnoredByCops' = true
+  -- State update: pPed.m_pWanted.m_bIgnoredByCops' = false
+  -- State update: text' = CTheScripts::GetTextByKeyFromScript(&m_nIp)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetUp, CPools::GetPedPool, CRestart::CancelOverrideRestart, CWorld::StopAllLawEnforcersInTheirTracks
+  true
+end
+
+schema CRunningScript_ProcessCommands600To699
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pos' = GET_VECTOR_PARAM(1)
+  -- State update: pos.z' = CWorld::FindGroundZForCoord(pos.x, pos.y)
+  -- State update: infX' = GET_FLOAT_PARAM(1)
+  -- State update: supX' = GET_FLOAT_PARAM(3)
+  -- State update: infX' = GET_FLOAT_PARAM(3)
+  -- State update: supX' = GET_FLOAT_PARAM(1)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTheScripts::SetObjectiveForAllPedsInCollective, CWorld::FindGroundZForCoord, CPools::GetPedPool, CPools::GetVehiclePool, CTheScripts::AddPedsInAreaToCollective
+  true
+end
+
+schema CRunningScript_ProcessCommands700To799
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pos' = GET_VECTOR_PARAM(0)
+  -- State update: pos.z' = CWorld::FindGroundZForCoord(pos.x, pos.y)
+  -- State update: pos' = GET_VECTOR_PARAM(0)
+  -- State update: pos.z' = CWorld::FindGroundZForCoord(pos.x, pos.y)
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CPools::GetVehiclePool, CWorld::FindGroundZForCoord, ThePaths.FindNodeClosestToCoors, pNode->GetPosition, ThePaths.FindNodeCoorsForScript
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script3ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2502
+end

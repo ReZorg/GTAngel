@@ -1,0 +1,216 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TexRead (rw)
+-- Source File(s): rw/TexRead.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpanisot.zpp  (from "rpanisot.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include platform.zpp  (from "platform.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include main.zpp  (from "main.h")
+-- include Directory.zpp  (from "Directory.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Font.zpp  (from "Font.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Text.zpp  (from "Text.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Frontend.zpp  (from "Frontend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FORCE_PC_SCALING : seq CHAR  -- #define FORCE_PC_SCALING #ifndef LIBRW
+WITHD3D : seq CHAR  -- #define WITHD3D #endif
+CAPSVERSION : ℕ  -- #define CAPSVERSION 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema GPUcaps
+  version : ℕ
+  platform : ℕ
+  subplatform : ℕ
+  dxtSupport : ℕ
+where
+  version ≥ 0
+  platform ≥ 0
+  subplatform ≥ 0
+  dxtSupport ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema TexRead_RwTextureGtaStreamRead
+  ΔTexReadModuleState
+  stream? : Ref[RwStream]
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = tex
+  -- Invokes: CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerMillisecond
+  true
+end
+
+schema TexRead_destroyTexture
+  ΔTexReadModuleState
+  texture? : Ref[RwTexture]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = texture
+  true
+end
+
+schema TexRead_RwTexDictionaryGtaStreamRead
+  ΔTexReadModuleState
+  stream? : Ref[RwStream]
+where
+  -- State update: texDict' = RwTexDictionaryCreate()
+  -- State update: tex' = RwTextureGtaStreamRead(stream)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema TexRead_RwTexDictionaryGtaStreamRead1
+  ΔTexReadModuleState
+  stream? : Ref[RwStream]
+where
+  -- State update: numberTextures' = 0
+  -- State update: texDict' = RwTexDictionaryCreate()
+  -- State update: numberTextures' = numTextures/2
+  -- State update: tex' = RwTextureGtaStreamRead(stream)
+  -- State update: numberTextures' = numTextures
+  -- State update: streamPosition' = STREAMPOS(stream)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema TexRead_RwTexDictionaryGtaStreamRead2
+  ΔTexReadModuleState
+  stream? : Ref[RwStream]
+  texDict? : Ref[RwTexDictionary]
+where
+  -- State update: tex' = RwTextureGtaStreamRead(stream)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = texDict
+  true
+end
+
+schema TexRead_GetGPUcaps
+  ΔTexReadModuleState
+  caps? : Ref[GPUcaps]
+where
+  -- State update: caps.version' = CAPSVERSION
+  -- State update: caps.platform' = rw::platform
+  -- State update: caps.subplatform' = 0
+  -- State update: caps.dxtSupport' = 0
+  -- State update: caps.subplatform' = rw::gl3::gl3Caps.gles
+  -- State update: caps.dxtSupport' = rw::gl3::gl3Caps.dxtSupported
+  true
+end
+
+schema TexRead_ReadVideoCardCapsFile
+  ΔTexReadModuleState
+  caps? : Ref[GPUcaps]
+where
+  -- State update: file' = CFileMgr::OpenFile("DATA\\CAPS.DAT", "rb")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema TexRead_CheckVideoCardCaps
+  ΔTexReadModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema TexRead_WriteVideoCardCapsFile
+  ΔTexReadModuleState
+where
+  -- State update: file' = CFileMgr::OpenFile("DATA\\CAPS.DAT", "wb")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema TexRead_ReadVideoCardCapsFile_2
+  ΔTexReadModuleState
+  cap32? : ℕ
+  cap24? : ℕ
+  cap16? : ℕ
+  cap8? : ℕ
+where
+  -- State update: cap32' = UINT32_MAX
+  -- State update: cap24' = UINT32_MAX
+  -- State update: cap16' = UINT32_MAX
+  -- State update: cap8' = UINT32_MAX
+  -- State update: file' = CFileMgr::OpenFile("DATA\\CAPS.DAT", "rb")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema TexRead_CanVideoCardDoDXT
+  ΔTexReadModuleState
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema TexRead_ConvertingTexturesScreen
+  ΔTexReadModuleState
+  num? : ℕ
+  count? : ℕ
+  text? : seq CHAR
+where
+  -- State update: splash' = LoadSplash(∅)
+  -- Invokes: CSprite2d::SetRecipNearClip, CSprite2d::InitPerFrame, CFont::InitPerFrame, splash->Draw, CSprite2d::DrawRect
+  true
+end
+
+schema TexRead_DealWithTxdWriteError
+  ΔTexReadModuleState
+  num? : ℕ
+  count? : ℕ
+  text? : seq CHAR
+where
+  -- State update: RsGlobal.quit' = false
+  -- State update: RsGlobal.quit' = true
+  -- Invokes: CPad::UpdatePads, CPad::GetPad
+  true
+end
+
+schema TexRead_CreateTxdImageForVideoCard
+  ΔTexReadModuleState
+where
+  -- State update: buf' = new uint8[CDSTREAM_SECTOR_SIZE]
+  -- State update: pDir' = new CDirectory(TXDSTORESIZE)
+  -- State update: filesys' = RwOsGetFileInterface()
+  -- State update: needToReadBackTextures' = true
+  -- State update: vsyncState' = FrontEndMenuManager.m_PrefsVsync
+  -- State update: frameLimiterState' = FrontEndMenuManager.m_PrefsFrameLimiter
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CStreaming::FlushRequestList, CTxdStore::GetSlot, CStreaming::IsObjectInCdImage, CTxdStore::GetTxdName, CStreaming::RequestTxd
+  true
+end

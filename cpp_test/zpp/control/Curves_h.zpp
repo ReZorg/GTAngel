@@ -1,0 +1,49 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Curves (control)
+-- Source File(s): control/Curves.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCurves
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCurves_CalcSpeedScaleFactor
+  ΔCCurves
+  arg_1? : Ref[CVector]
+  arg_2? : Ref[CVector]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CCurves::CalcSpeedScaleFactor(CVector*, CVector*, float, float, float, float)
+  true
+end
+
+schema CCurves_CalcCurvePoint_2
+  ΔCCurves
+  arg_1? : Ref[CVector]
+  arg_2? : Ref[CVector]
+  arg_3? : Ref[CVector]
+  arg_4? : Ref[CVector]
+  arg_5? : ℝ
+  arg_6? : ℤ
+  arg_7? : Ref[CVector]
+  arg_8? : Ref[CVector]
+where
+  -- Declared member operation CCurves::CalcCurvePoint(CVector*, CVector*, CVector*, CVector*, float, int32, CVector*, CVector*)
+  true
+end

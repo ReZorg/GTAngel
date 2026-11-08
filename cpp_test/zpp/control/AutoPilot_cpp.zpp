@@ -1,0 +1,73 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AutoPilot (control)
+-- Source File(s): control/AutoPilot.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AutoPilot.zpp  (from "AutoPilot.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Curves.zpp  (from "Curves.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAutoPilot_ModifySpeed
+  ΔCAutoPilot
+  speed? : ℝ
+where
+  -- State update: m_fMaxTrafficSpeed' = Max(0.01f, speed)
+  -- State update: pCurrentLink' = &ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo]
+  -- State update: pNextLink' = &ThePaths.m_carPathLinks[m_nNextPathNodeInfo]
+  -- Invokes: CTimer::GetTimeInMilliseconds, pCurrentLink->GetX, pCurrentLink->GetY, pNextLink->GetX, pNextLink->GetY
+  true
+end
+
+schema CAutoPilot_RemoveOnePathNode
+  ΔCAutoPilot
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAutoPilot_Save
+  ΔCAutoPilot
+  buf? : ℙ ℕ
+where
+  -- State update: flags' = 0
+  true
+end
+
+schema CAutoPilot_Load
+  ΔCAutoPilot
+  buf? : ℙ ℕ
+where
+  -- State update: m_bSlowedDownBecauseOfCars' = !!(flags & BIT(0))
+  -- State update: m_bSlowedDownBecauseOfPeds' = !!(flags & BIT(1))
+  -- State update: m_bStayInCurrentLevel' = !!(flags & BIT(2))
+  -- State update: m_bStayInFastLane' = !!(flags & BIT(3))
+  -- State update: m_bIgnorePathfinding' = !!(flags & BIT(4))
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AutoPilotModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 149
+end

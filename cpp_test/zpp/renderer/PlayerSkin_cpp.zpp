@@ -1,0 +1,126 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PlayerSkin (renderer)
+-- Source File(s): renderer/PlayerSkin.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include rtbmp.zpp  (from "rtbmp.h")
+-- include ClumpModelInfo.zpp  (from "ClumpModelInfo.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Directory.zpp  (from "Directory.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PlayerSkin_FindPlayerDff
+  ΔPlayerSkinModuleState
+  offset? : ℕ
+  size? : ℕ
+where
+  -- State update: file' = CFileMgr::OpenFile("models\\gta3.dir", "rb")
+  -- State update: offset' = info.offset
+  -- State update: size' = info.size
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read
+  true
+end
+
+schema PlayerSkin_LoadPlayerDff
+  ΔPlayerSkinModuleState
+where
+  -- State update: streamWasAdded' = false
+  -- State update: streamWasAdded' = true
+  -- State update: buffer' = (uint8*)RwMallocAlign(size << 11, 2048)
+  -- State update: mem.start' = buffer
+  -- State update: mem.length' = size << 11
+  -- State update: stream' = RwStreamOpen(rwSTREAMMEMORY, rwSTREAMREAD, &mem)
+  true
+end
+
+schema CPlayerSkin_Initialise
+  ΔCPlayerSkin
+where
+  -- State update: m_txdSlot' = CTxdStore::AddTxdSlot("skin")
+  -- Invokes: CTxdStore::AddTxdSlot, CTxdStore::Create, CTxdStore::AddRef
+  true
+end
+
+schema CPlayerSkin_Shutdown
+  ΔCPlayerSkin
+where
+  -- Invokes: CTxdStore::RemoveTxdSlot
+  true
+end
+
+schema CPlayerSkin_GetSkinTexture
+  ΔCPlayerSkin
+  texName? : seq CHAR
+where
+  -- State update: tex' = RwTextureRead(texName, ∅)
+  -- State update: raster' = RwRasterCreate(width, height, depth, format)
+  -- State update: tex' = RwTextureCreate(raster)
+  -- Return postcondition: result! = tex
+  -- Return postcondition: result! = tex
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd, CTxdStore::GetSlot
+  true
+end
+
+schema CPlayerSkin_BeginFrontendSkinEdit
+  ΔCPlayerSkin
+where
+  -- State update: gOldFov' = CDraw::GetFOV()
+  -- Invokes: CDraw::GetFOV, CDraw::SetFOV
+  true
+end
+
+schema CPlayerSkin_EndFrontendSkinEdit
+  ΔCPlayerSkin
+where
+  -- State update: gpPlayerClump' = ∅
+  -- Invokes: CDraw::SetFOV
+  true
+end
+
+schema CPlayerSkin_RenderFrontendSkinEdit
+  ΔCPlayerSkin
+where
+  -- State update: rotation' = 0.0f
+  -- State update: AmbientColor' = { 0.65f, 0.65f, 0.65f, 1.0f }
+  -- State update: pos' = { 1.35f, 0.35f, 7.725f }
+  -- State update: axis1' = { 1.0f, 0.0f, 0.0f }
+  -- State update: axis2' = { 0.0f, 0.0f, 1.0f }
+  -- State update: LastFlash' = 0
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PlayerSkinModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 194
+end

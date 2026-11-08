@@ -1,0 +1,584 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Timer (core)
+-- Source File(s): core/Timer.cpp, core/Timer.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Record.zpp  (from "Record.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+RsTimerType : seq CHAR  -- #define RsTimerType uint32
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTimer
+  m_snTimeInMilliseconds : ℕ
+  m_snTimeInMillisecondsPauseMode : ℕ
+  m_snTimeInMillisecondsNonClipped : ℕ
+  m_snPreviousTimeInMilliseconds : ℕ
+  m_FrameCounter : ℕ
+  ms_fTimeScale : ℝ
+  ms_fTimeStep : ℝ
+  ms_fTimeStepNonClipped : ℝ
+  m_LogicalFramesPassed : ℕ
+  m_CodePause : 𝔹
+where
+  m_snTimeInMilliseconds ≥ 0
+  m_snTimeInMillisecondsPauseMode ≥ 0
+  m_snTimeInMillisecondsNonClipped ≥ 0
+  m_snPreviousTimeInMilliseconds ≥ 0
+  m_FrameCounter ≥ 0
+  m_LogicalFramesPassed ≥ 0
+end
+
+schema CTimer_GetTimeStep
+  ΔCTimer
+  result! : ℝ
+where
+  -- Declared member operation CTimer::GetTimeStep(void)
+  true
+end
+
+schema CTimer_SetTimeStep_2
+  ΔCTimer
+  ts? : ℝ
+  result! : void
+where
+  -- Declared member operation CTimer::SetTimeStep(float ts)
+  true
+end
+
+schema CTimer_GetTimeStepInSeconds_3
+  ΔCTimer
+  result! : ℝ
+where
+  -- Declared member operation CTimer::GetTimeStepInSeconds()
+  true
+end
+
+schema CTimer_GetTimeStepInMilliseconds_4
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetTimeStepInMilliseconds()
+  true
+end
+
+schema CTimer_GetTimeStepNonClipped_5
+  ΔCTimer
+  result! : ℝ
+where
+  -- Declared member operation CTimer::GetTimeStepNonClipped(void)
+  true
+end
+
+schema CTimer_GetTimeStepNonClippedInSeconds_6
+  ΔCTimer
+  result! : ℝ
+where
+  -- Declared member operation CTimer::GetTimeStepNonClippedInSeconds(void)
+  true
+end
+
+schema CTimer_GetTimeStepNonClippedInMilliseconds_7
+  ΔCTimer
+  result! : ℝ
+where
+  -- Declared member operation CTimer::GetTimeStepNonClippedInMilliseconds(void)
+  true
+end
+
+schema CTimer_SetTimeStepNonClipped_8
+  ΔCTimer
+  ts? : ℝ
+  result! : void
+where
+  -- Declared member operation CTimer::SetTimeStepNonClipped(float ts)
+  true
+end
+
+schema CTimer_GetFrameCounter_9
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetFrameCounter(void)
+  true
+end
+
+schema CTimer_SetFrameCounter_10
+  ΔCTimer
+  fc? : ℕ
+  result! : void
+where
+  -- Declared member operation CTimer::SetFrameCounter(uint32 fc)
+  true
+end
+
+schema CTimer_GetTimeInMilliseconds_11
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetTimeInMilliseconds(void)
+  true
+end
+
+schema CTimer_SetTimeInMilliseconds_12
+  ΔCTimer
+  t? : ℕ
+  result! : void
+where
+  -- Declared member operation CTimer::SetTimeInMilliseconds(uint32 t)
+  true
+end
+
+schema CTimer_GetTimeInMillisecondsNonClipped_13
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetTimeInMillisecondsNonClipped(void)
+  true
+end
+
+schema CTimer_SetTimeInMillisecondsNonClipped_14
+  ΔCTimer
+  t? : ℕ
+  result! : void
+where
+  -- Declared member operation CTimer::SetTimeInMillisecondsNonClipped(uint32 t)
+  true
+end
+
+schema CTimer_GetTimeInMillisecondsPauseMode_15
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetTimeInMillisecondsPauseMode(void)
+  true
+end
+
+schema CTimer_SetTimeInMillisecondsPauseMode_16
+  ΔCTimer
+  t? : ℕ
+  result! : void
+where
+  -- Declared member operation CTimer::SetTimeInMillisecondsPauseMode(uint32 t)
+  true
+end
+
+schema CTimer_GetPreviousTimeInMilliseconds_17
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetPreviousTimeInMilliseconds(void)
+  true
+end
+
+schema CTimer_SetPreviousTimeInMilliseconds_18
+  ΔCTimer
+  t? : ℕ
+  result! : void
+where
+  -- Declared member operation CTimer::SetPreviousTimeInMilliseconds(uint32 t)
+  true
+end
+
+schema CTimer_GetTimeScale_19
+  ΔCTimer
+  result! : ℝ
+where
+  -- Declared member operation CTimer::GetTimeScale(void)
+  true
+end
+
+schema CTimer_SetTimeScale_20
+  ΔCTimer
+  ts? : ℝ
+  result! : void
+where
+  -- Declared member operation CTimer::SetTimeScale(float ts)
+  true
+end
+
+schema CTimer_GetCyclesPerFrame_21
+  ΔCTimer
+  result! : ℕ
+where
+  -- Declared member operation CTimer::GetCyclesPerFrame()
+  true
+end
+
+schema CTimer_GetIsPaused_22
+  ΔCTimer
+  result! : 𝔹
+where
+  -- Declared member operation CTimer::GetIsPaused()
+  true
+end
+
+schema CTimer_GetIsUserPaused_23
+  ΔCTimer
+  result! : bool
+where
+  -- Declared member operation CTimer::GetIsUserPaused()
+  true
+end
+
+schema CTimer_GetIsCodePaused_24
+  ΔCTimer
+  result! : bool
+where
+  -- Declared member operation CTimer::GetIsCodePaused()
+  true
+end
+
+schema CTimer_SetCodePause_25
+  ΔCTimer
+  pause? : 𝔹
+  result! : void
+where
+  -- Declared member operation CTimer::SetCodePause(bool pause)
+  true
+end
+
+schema CTimer_Initialise_26
+  ΔCTimer
+  result! : void
+where
+  -- Declared member operation CTimer::Initialise(void)
+  true
+end
+
+schema CTimer_Shutdown_27
+  ΔCTimer
+where
+  -- Declared member operation CTimer::Shutdown(void)
+  true
+end
+
+schema CTimer_Update_28
+  ΔCTimer
+where
+  -- Declared member operation CTimer::Update(void)
+  true
+end
+
+schema CTimer_Suspend_29
+  ΔCTimer
+where
+  -- Declared member operation CTimer::Suspend(void)
+  true
+end
+
+schema CTimer_Resume_30
+  ΔCTimer
+where
+  -- Declared member operation CTimer::Resume(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTimer_Initialise
+  ΔCTimer
+where
+  -- State update: ms_fTimeScale' = 1.0f
+  -- State update: ms_fTimeStep' = 1.0f
+  -- State update: suspendDepth' = 0
+  -- State update: m_UserPause' = false
+  -- State update: m_CodePause' = false
+  -- State update: m_snTimeInMillisecondsNonClipped' = 0
+  -- Invokes: DMAudio.ResetTimers
+  true
+end
+
+schema CTimer_Shutdown
+  ΔCTimer
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimer_Update
+  ΔCTimer
+where
+  -- State update: frameTimeLogical' = 0.0
+  -- State update: frameTimeFraction' = 0.0
+  -- State update: frameTimeFractionScaled' = 0.0
+  -- State update: m_snPreviousTimeInMilliseconds' = m_snTimeInMilliseconds
+  -- State update: updInCycles' = (pc.LowPart - _oldPerfCounter.LowPart)
+  -- State update: _oldPerfCounter' = pc
+  -- Invokes: CRecordDataForGame::IsPlayingBack, CRecordDataForChase::IsRecording
+  true
+end
+
+schema CTimer_Suspend
+  ΔCTimer
+where
+  -- State update: suspendPcTimer' = RsTimer()
+  true
+end
+
+schema CTimer_Resume
+  ΔCTimer
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimer_GetCyclesPerMillisecond
+  ΔCTimer
+  result! : ℕ
+where
+  -- Return postcondition: result! = _nCyclesPerMS
+  -- Return postcondition: result! = 1
+  true
+end
+
+schema CTimer_GetCurrentTimeInCycles
+  ΔCTimer
+  result! : ℕ
+where
+  -- Return postcondition: result! = (pc.LowPart - _oldPerfCounter.LowPart)
+  -- Return postcondition: result! = RsTimer() - oldPcTimer
+  true
+end
+
+schema CTimer_GetIsSlowMotionActive
+  ΔCTimer
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_fTimeScale < 1.0f
+  true
+end
+
+schema CTimer_Stop
+  ΔCTimer
+where
+  -- State update: m_snPreviousTimeInMilliseconds' = m_snTimeInMilliseconds
+  true
+end
+
+schema CTimer_StartUserPause
+  ΔCTimer
+where
+  -- State update: m_UserPause' = true
+  true
+end
+
+schema CTimer_EndUserPause
+  ΔCTimer
+where
+  -- State update: m_UserPause' = false
+  true
+end
+
+schema CTimer_GetCyclesPerFrame
+  ΔCTimer
+  result! : ℕ
+where
+  -- Return postcondition: result! = 20
+  true
+end
+
+schema Timer_SetTimeStep
+  ΔTimerModuleState
+  ts? : ℝ
+where
+  -- State update: ms_fTimeStep' = ts
+  true
+end
+
+schema Timer_GetTimeStepInSeconds
+  ΔTimerModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fTimeStep / 50.0f
+  true
+end
+
+schema Timer_GetTimeStepInMilliseconds
+  ΔTimerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_fTimeStep / 50.0f * 1000.0f
+  true
+end
+
+schema Timer_GetTimeStepNonClippedInSeconds
+  ΔTimerModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fTimeStepNonClipped / 50.0f
+  true
+end
+
+schema Timer_GetTimeStepNonClippedInMilliseconds
+  ΔTimerModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = ms_fTimeStepNonClipped / 50.0f * 1000.0f
+  true
+end
+
+schema Timer_SetTimeStepNonClipped
+  ΔTimerModuleState
+  ts? : ℝ
+where
+  -- State update: ms_fTimeStepNonClipped' = ts
+  true
+end
+
+schema Timer_SetFrameCounter
+  ΔTimerModuleState
+  fc? : ℕ
+where
+  -- State update: m_FrameCounter' = fc
+  true
+end
+
+schema Timer_SetTimeInMilliseconds
+  ΔTimerModuleState
+  t? : ℕ
+where
+  -- State update: m_snTimeInMilliseconds' = t
+  true
+end
+
+schema Timer_GetTimeInMillisecondsNonClipped
+  ΔTimerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_snTimeInMillisecondsNonClipped
+  true
+end
+
+schema Timer_SetTimeInMillisecondsNonClipped
+  ΔTimerModuleState
+  t? : ℕ
+where
+  -- State update: m_snTimeInMillisecondsNonClipped' = t
+  true
+end
+
+schema Timer_GetTimeInMillisecondsPauseMode
+  ΔTimerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_snTimeInMillisecondsPauseMode
+  true
+end
+
+schema Timer_SetTimeInMillisecondsPauseMode
+  ΔTimerModuleState
+  t? : ℕ
+where
+  -- State update: m_snTimeInMillisecondsPauseMode' = t
+  true
+end
+
+schema Timer_GetPreviousTimeInMilliseconds
+  ΔTimerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_snPreviousTimeInMilliseconds
+  true
+end
+
+schema Timer_SetPreviousTimeInMilliseconds
+  ΔTimerModuleState
+  t? : ℕ
+where
+  -- State update: m_snPreviousTimeInMilliseconds' = t
+  true
+end
+
+schema Timer_SetTimeScale
+  ΔTimerModuleState
+  ts? : ℝ
+where
+  -- State update: ms_fTimeScale' = ts
+  true
+end
+
+schema Timer_GetIsPaused
+  ΔTimerModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_UserPause || m_CodePause
+  true
+end
+
+schema Timer_GetIsUserPaused
+  ΔTimerModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_UserPause
+  true
+end
+
+schema Timer_GetIsCodePaused
+  ΔTimerModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_CodePause
+  true
+end
+
+schema Timer_SetCodePause
+  ΔTimerModuleState
+  pause? : 𝔹
+where
+  -- State update: m_CodePause' = pause
+  true
+end
+
+schema Timer_GetDefaultTimeStep
+  ΔTimerModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = 50.0f / 30.0f
+  true
+end
+
+schema Timer_GetTimeStepFix
+  ΔTimerModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = GetTimeStep() / GetDefaultTimeStep()
+  true
+end
+
+schema Timer_GetLogicalFrameCounter
+  ΔTimerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_LogicalFrameCounter
+  true
+end
+
+schema Timer_GetLogicalFramesPassed
+  ΔTimerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_LogicalFramesPassed
+  true
+end

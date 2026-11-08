@@ -1,0 +1,547 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: TxdStore (rw)
+-- Source File(s): rw/TxdStore.cpp, rw/TxdStore.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+-- include templates.zpp  (from "templates.h")
+-- include General.zpp  (from "General.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema TxdDef
+  texDict : Ref[RwTexDictionary]
+  refCount : ℤ
+  refCountGu : ℤ
+  name : seq CHAR
+where
+  #texDict ≤ 1
+  #name = 20
+end
+
+schema CTxdStore
+  ms_pTxdPool : Ref[CPool_TxdDef_TxdDef]
+  ms_pStoredTxd : Ref[RwTexDictionary]
+where
+  #ms_pTxdPool ≤ 1
+  #ms_pStoredTxd ≤ 1
+end
+
+schema CTxdStore_Initialise
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::Initialise(void)
+  true
+end
+
+schema CTxdStore_Shutdown_2
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::Shutdown(void)
+  true
+end
+
+schema CTxdStore_GameShutdown_3
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::GameShutdown(void)
+  true
+end
+
+schema CTxdStore_AddTxdSlot_4
+  ΔCTxdStore
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CTxdStore::AddTxdSlot(const char *name)
+  true
+end
+
+schema CTxdStore_RemoveTxdSlot_5
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveTxdSlot(int slot)
+  true
+end
+
+schema CTxdStore_FindTxdSlot_6
+  ΔCTxdStore
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CTxdStore::FindTxdSlot(const char *name)
+  true
+end
+
+schema CTxdStore_GetTxdName_7
+  ΔCTxdStore
+  slot? : ℤ
+  result! : seq CHAR
+where
+  -- Declared member operation CTxdStore::GetTxdName(int slot)
+  true
+end
+
+schema CTxdStore_PushCurrentTxd_8
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::PushCurrentTxd(void)
+  true
+end
+
+schema CTxdStore_PopCurrentTxd_9
+  ΔCTxdStore
+where
+  -- Declared member operation CTxdStore::PopCurrentTxd(void)
+  true
+end
+
+schema CTxdStore_SetCurrentTxd_10
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::SetCurrentTxd(int slot)
+  true
+end
+
+schema CTxdStore_Create_11
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::Create(int slot)
+  true
+end
+
+schema CTxdStore_GetNumRefs_12
+  ΔCTxdStore
+  slot? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CTxdStore::GetNumRefs(int slot)
+  true
+end
+
+schema CTxdStore_AddRef_13
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::AddRef(int slot)
+  true
+end
+
+schema CTxdStore_AddRefEvenIfNotInMemory_14
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::AddRefEvenIfNotInMemory(int slot)
+  true
+end
+
+schema CTxdStore_AddRefGu_15
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::AddRefGu(int slot)
+  true
+end
+
+schema CTxdStore_RemoveRef_16
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveRef(int slot)
+  true
+end
+
+schema CTxdStore_RemoveRefGu_17
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveRefGu(int slot)
+  true
+end
+
+schema CTxdStore_RemoveRefWithoutDelete_18
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Declared member operation CTxdStore::RemoveRefWithoutDelete(int slot)
+  true
+end
+
+schema CTxdStore_LoadTxd_19
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::LoadTxd(int slot, RwStream *stream)
+  true
+end
+
+schema CTxdStore_LoadTxd_20
+  ΔCTxdStore
+  slot? : ℤ
+  data? : ADDRESS
+  chunk? : ADDRESS
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::LoadTxd(int slot, void *data, void *chunk)
+  true
+end
+
+schema CTxdStore_LoadTxd_21
+  ΔCTxdStore
+  slot? : ℤ
+  filename? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::LoadTxd(int slot, const char *filename)
+  true
+end
+
+schema CTxdStore_StartLoadTxd_22
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::StartLoadTxd(int slot, RwStream *stream)
+  true
+end
+
+schema CTxdStore_FinishLoadTxd_23
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+  result! : 𝔹
+where
+  -- Declared member operation CTxdStore::FinishLoadTxd(int slot, RwStream *stream)
+  true
+end
+
+schema CTxdStore_RemoveTxd_24
+  ΔCTxdStore
+  slot? : ℤ
+  notChunk? : 𝔹
+where
+  -- Declared member operation CTxdStore::RemoveTxd(int slot, bool notChunk = false)
+  true
+end
+
+schema CTxdStore_Load_25
+  ΔCTxdStore
+  stored? : Ref[RwTexDictionary]
+  pool? : Ref[CPool_TxdDef]
+where
+  -- Declared member operation CTxdStore::Load(RwTexDictionary *stored, CPool<TxdDef> *pool)
+  true
+end
+
+schema CTxdStore_GetSlot_26
+  ΔCTxdStore
+  slot? : ℤ
+  result! : Ref[TxdDef]
+where
+  -- Declared member operation CTxdStore::GetSlot(int slot)
+  true
+end
+
+schema CTxdStore_assert_27
+  ΔCTxdStore
+  arg_1? : ms_pTxdPool
+where
+  -- Declared member operation CTxdStore::assert(ms_pTxdPool)
+  true
+end
+
+schema CTxdStore_assert_28
+  ΔCTxdStore
+  arg_1? : slot___ms_pTxdPool__GetSize
+where
+  -- Declared member operation CTxdStore::assert(slot < ms_pTxdPool->GetSize()
+  true
+end
+
+schema CTxdStore_GetSlot_29
+  ΔCTxdStore
+  arg_1? : slot
+  result! : return_ms_pTxdPool
+where
+  -- Declared member operation CTxdStore::GetSlot(slot)
+  true
+end
+
+schema CTxdStore_isTxdLoaded_30
+  ΔCTxdStore
+  slot? : ℤ
+  result! : bool
+where
+  -- Declared member operation CTxdStore::isTxdLoaded(int slot)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTxdStore_Initialise
+  ΔCTxdStore
+where
+  -- State update: ms_pTxdPool' = new CPool<TxdDef,TxdDef>(TXDSTORESIZE, "TexDictionary")
+  true
+end
+
+schema CTxdStore_Shutdown
+  ΔCTxdStore
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTxdStore_GameShutdown
+  ΔCTxdStore
+where
+  -- State update: def' = GetSlot(i)
+  true
+end
+
+schema CTxdStore_AddTxdSlot
+  ΔCTxdStore
+  name? : seq CHAR
+where
+  -- State update: def' = ms_pTxdPool.New()
+  -- State update: def.texDict' = ∅
+  -- State update: def.refCount' = 0
+  -- State update: def.refCountGu' = 0
+  -- Return postcondition: result! = ms_pTxdPool->GetJustIndex(def)
+  -- Invokes: ms_pTxdPool->New, ms_pTxdPool->GetJustIndex
+  true
+end
+
+schema CTxdStore_RemoveTxdSlot
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  -- Invokes: ms_pTxdPool->Delete
+  true
+end
+
+schema CTxdStore_FindTxdSlot
+  ΔCTxdStore
+  name? : seq CHAR
+where
+  -- State update: size' = ms_pTxdPool.GetSize()
+  -- State update: def' = GetSlot(i)
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  -- Invokes: ms_pTxdPool->GetSize, CGeneral::faststricmp
+  true
+end
+
+schema CTxdStore_GetTxdName
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Return postcondition: result! = GetSlot(slot)->name
+  true
+end
+
+schema CTxdStore_PushCurrentTxd
+  ΔCTxdStore
+where
+  -- State update: ms_pStoredTxd' = RwTexDictionaryGetCurrent()
+  true
+end
+
+schema CTxdStore_PopCurrentTxd
+  ΔCTxdStore
+where
+  -- State update: ms_pStoredTxd' = ∅
+  true
+end
+
+schema CTxdStore_SetCurrentTxd
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTxdStore_Create
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = RwTexDictionaryCreate()
+  -- State update: def.refCount' = 0
+  -- State update: def.refCountGu' = 0
+  true
+end
+
+schema CTxdStore_GetNumRefs
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Return postcondition: result! = GetSlot(slot)->refCount
+  true
+end
+
+schema CTxdStore_AddRef
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTxdStore_AddRefEvenIfNotInMemory
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTxdStore_AddRefGu
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  true
+end
+
+schema CTxdStore_RemoveRef
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Invokes: CStreaming::RemoveTxd
+  true
+end
+
+schema CTxdStore_RemoveRefGu
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  true
+end
+
+schema CTxdStore_RemoveRefWithoutDelete
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTxdStore_LoadTxd
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = RwTexDictionaryGtaStreamRead(stream)
+  -- Return postcondition: result! = def->texDict != nil
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CTxdStore_LoadTxd_2
+  ΔCTxdStore
+  slot? : ℤ
+  data? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = (RwTexDictionary*)data
+  -- State update: def.refCount' = 0
+  -- State update: def.refCountGu' = 0
+  -- Return postcondition: result! = def->texDict != nil
+  -- Invokes: CStreaming::RegisterPointer
+  true
+end
+
+schema CTxdStore_LoadTxd_3
+  ΔCTxdStore
+  slot? : ℤ
+  filename? : seq CHAR
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename)
+  -- Return postcondition: result! = ret
+  true
+end
+
+schema CTxdStore_StartLoadTxd
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = RwTexDictionaryGtaStreamRead1(stream)
+  -- Return postcondition: result! = def->texDict != nil
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CTxdStore_FinishLoadTxd
+  ΔCTxdStore
+  slot? : ℤ
+  stream? : Ref[RwStream]
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = RwTexDictionaryGtaStreamRead2(stream, def.texDict)
+  -- Return postcondition: result! = def->texDict != nil
+  true
+end
+
+schema CTxdStore_RemoveTxd
+  ΔCTxdStore
+  slot? : ℤ
+  notChunk? : 𝔹
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = ∅
+  -- State update: def.refCount' = 0
+  -- State update: def.refCountGu' = 0
+  -- Invokes: CStreaming::UnregisterPointer, msInstance.Free
+  true
+end
+
+schema CTxdStore_Load
+  ΔCTxdStore
+  stored? : Ref[RwTexDictionary]
+  pool? : Ref[CPool_TxdDef]
+where
+  -- State update: ms_pTxdPool' = pool
+  -- State update: ms_pStoredTxd' = stored
+  -- State update: def' = GetSlot(i)
+  true
+end
+
+schema CTxdStore_RemoveTxd_2
+  ΔCTxdStore
+  slot? : ℤ
+where
+  -- State update: def' = GetSlot(slot)
+  -- State update: def.texDict' = ∅
+  true
+end

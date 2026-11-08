@@ -1,0 +1,234 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script4 (control)
+-- Source File(s): control/Script4.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include BulletInfo.zpp  (from "BulletInfo.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include PedRoutes.zpp  (from "PedRoutes.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Population.zpp  (from "Population.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Record.zpp  (from "Record.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include User.zpp  (from "User.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Wanted.zpp  (from "Wanted.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Script4_IsSlideObjectUsedWrongByScript
+  ΔScript4ModuleState
+  posTarget? : CVector
+  slideBy? : CVector
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CRunningScript_ProcessCommands800To899
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pLeader' = CWorld::Players[GET_INTEGER_PARAM(1)].m_pPed
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed' = CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed
+  -- State update: zone_id' = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_INFO)
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CPools::GetPedPool, pPed->InflictDamage, CPools::GetVehiclePool, CTheScripts::ReadTextLabelFromScript, CTheZones::FindZoneByLabelAndReturnIndex
+  true
+end
+
+schema CRunningScript_ProcessCommands900To999
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: source' = CTheScripts::GetTextByKeyFromScript(&m_nIp)
+  -- State update: pstr' = CTheScripts::GetTextByKeyFromScript(&m_nIp)
+  -- State update: infX' = *(float*)&ScriptParams[0] - *(float*)&ScriptParams[3]
+  -- State update: supX' = *(float*)&ScriptParams[0] + *(float*)&ScriptParams[3]
+  -- State update: infY' = *(float*)&ScriptParams[1] - *(float*)&ScriptParams[4]
+  -- State update: supY' = *(float*)&ScriptParams[1] + *(float*)&ScriptParams[4]
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTheScripts::GetTextByKeyFromScript, CMessages::AddMessageJumpQWithString, CWorld::FindMissionEntitiesIntersectingCube, CTimer::Suspend, CTimer::Stop
+  true
+end
+
+schema CTheScripts_GetNewUniqueScriptSphereIndex
+  ΔCTheScripts
+  index? : ℤ
+  result! : ℤ
+where
+  -- State update: m_Index' = 1
+  -- Return postcondition: result! = (uint16)index | ScriptSphereArray[index].m_Index << 16
+  true
+end
+
+schema CTheScripts_GetActualScriptSphereIndex
+  ΔCTheScripts
+  index? : ℤ
+  result! : ℤ
+where
+  -- State update: check' = (uint32)index >> 16
+  -- State update: array_idx' = index & (0xFFFF)
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = array_idx
+  true
+end
+
+schema CTheScripts_DrawScriptSpheres
+  ΔCTheScripts
+where
+  -- Invokes: C3dMarkers::PlaceMarkerSet
+  true
+end
+
+schema CTheScripts_AddScriptSphere
+  ΔCTheScripts
+  id? : ℤ
+  pos? : CVector
+  radius? : ℝ
+  result! : ℤ
+where
+  -- State update: m_bInUse' = true
+  -- State update: m_Id' = id
+  -- State update: m_vecCenter' = pos
+  -- State update: m_fRadius' = radius
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = GetNewUniqueScriptSphereIndex(i)
+  true
+end
+
+schema CTheScripts_RemoveScriptSphere
+  ΔCTheScripts
+  index? : ℤ
+where
+  -- State update: index' = GetActualScriptSphereIndex(index)
+  -- State update: m_bInUse' = false
+  -- State update: m_Id' = 0
+  true
+end
+
+schema CTheScripts_SwapNearestBuildingModel
+  ΔCTheScripts
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  radius? : ℝ
+  mi1? : ℤ
+  mi2? : ℤ
+where
+  -- State update: pos.z' = CWorld::FindGroundZForCoord(pos.x, pos.y)
+  -- State update: mi1' = CTheScripts::UsedObjectArray[-mi1].index
+  -- State update: mi2' = CTheScripts::UsedObjectArray[-mi2].index
+  -- State update: pClosestEntity' = ∅
+  -- State update: min_dist' = 2.0f * radius
+  -- State update: dist' = (apEntities[i].GetPosition() - pos).Magnitude()
+  -- Invokes: CWorld::FindGroundZForCoord, CWorld::FindObjectsOfTypeInRange, CWorld::FindObjectsOfTypeInRangeSectorList, CWorld::GetBigBuildingList, CTheZones::GetLevelFromPosition
+  true
+end
+
+schema CTheScripts_AddToBuildingSwapArray
+  ΔCTheScripts
+  pBuilding? : Ref[CBuilding]
+  old_model? : ℤ
+  new_model? : ℤ
+where
+  -- State update: found' = false
+  -- State update: found' = true
+  -- State update: m_pBuilding' = ∅
+  -- State update: m_nNewModel' = -1
+  -- State update: m_nNewModel' = new_model
+  -- State update: found' = true
+  true
+end
+
+schema CTheScripts_AddToInvisibilitySwapArray
+  ΔCTheScripts
+  pEntity? : Ref[CEntity]
+  remove? : 𝔹
+where
+  -- State update: found' = false
+  -- State update: found' = true
+  -- State update: found' = true
+  true
+end
+
+schema CTheScripts_UndoBuildingSwaps
+  ΔCTheScripts
+where
+  -- State update: m_pBuilding' = ∅
+  -- State update: m_nNewModel' = -1
+  -- Invokes: m_pBuilding->ReplaceWithNewModel
+  true
+end
+
+schema CTheScripts_UndoEntityInvisibilitySettings
+  ΔCTheScripts
+where
+  -- State update: bIsVisible' = true
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script4ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2454
+end

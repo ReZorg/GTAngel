@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Stinger (objects)
+-- Source File(s): objects/Stinger.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Object.zpp  (from "Object.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUM_STINGER_SEGMENTS : seq CHAR  -- #define NUM_STINGER_SEGMENTS (12)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Stinger_Enum_1 ::= STINGERSTATE_NONE | STINGERSTATE_DEPLOYING | STINGERSTATE_DEPLOYED | STINGERSTATE_UNDEPLOYING | STINGERSTATE_REMOVE
+  -- val(STINGERSTATE_NONE) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStingerSegment
+  CObject  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CStingerSegment_CStingerSegment
+  ΔCStingerSegment
+where
+  -- Declared member operation CStingerSegment::CStingerSegment()
+  true
+end
+
+schema CStingerSegment_CStingerSegment_2
+  ΔCStingerSegment
+  result! : ANY
+where
+  -- Declared member operation CStingerSegment::CStingerSegment()
+  true
+end
+
+schema CStinger
+  bIsDeployed : 𝔹
+  m_nTimeOfDeploy : ℕ
+  m_vPos : CVector
+  m_fMax_Z : ℝ
+  m_fMin_Z : ℝ
+  m_vPositions : seq CVector2D  -- bounded array [60]
+  pSpikes : seq Ref[CStingerSegment]  -- bounded array [NUM_STINGER_SEGMENTS]
+  m_nSpikeState : ℕ
+where
+  m_nTimeOfDeploy ≥ 0
+  #m_vPositions = 60
+  m_nSpikeState ≥ 0
+end
+
+schema CStinger_CStinger
+  ΔCStinger
+where
+  -- Declared member operation CStinger::CStinger()
+  true
+end
+
+schema CStinger_Init_2
+  ΔCStinger
+  pPed? : Ref[CPed]
+where
+  -- Declared member operation CStinger::Init(CPed *pPed)
+  true
+end
+
+schema CStinger_Remove_3
+  ΔCStinger
+where
+  -- Declared member operation CStinger::Remove()
+  true
+end
+
+schema CStinger_Deploy_4
+  ΔCStinger
+  pPed? : Ref[CPed]
+where
+  -- Declared member operation CStinger::Deploy(CPed *pPed)
+  true
+end
+
+schema CStinger_CheckForBurstTyres_5
+  ΔCStinger
+where
+  -- Declared member operation CStinger::CheckForBurstTyres()
+  true
+end
+
+schema CStinger_Process_6
+  ΔCStinger
+where
+  -- Declared member operation CStinger::Process()
+  true
+end

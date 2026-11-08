@@ -1,0 +1,152 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Gangs (peds)
+-- Source File(s): peds/Gangs.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include General.zpp  (from "General.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CGangs_Initialise
+  ΔCGangs
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CGangs_HaveGangModelsLoaded
+  ΔCGangs
+  gang? : ℤ
+  result! : 𝔹
+where
+  -- State update: pGangInfo' = GetGangInfo(gang)
+  -- Invokes: CStreaming::HasModelLoaded
+  true
+end
+
+schema CGangs_SetGangPedModels
+  ΔCGangs
+  gang? : ℤ
+  mi1? : ℤ
+  mi2? : ℤ
+where
+  -- State update: m_nPedModel1MI' = mi1
+  -- State update: m_nPedModel2MI' = mi2
+  true
+end
+
+schema CGangs_SetWillAttackPlayerWithCops
+  ΔCGangs
+  type? : ePedType
+  will? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CGangs_GetWillAttackPlayerWithCops
+  ΔCGangs
+  type? : ePedType
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GangAttackWithCops[type - PEDTYPE_GANG1]
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CGangs_ChooseGangPedModel
+  ΔCGangs
+  gang? : ℤ
+  result! : ℤ
+where
+  -- State update: pGangInfo' = GetGangInfo(gang)
+  -- Return postcondition: result! = pGangInfo->m_nPedModel1MI
+  -- Return postcondition: result! = pGangInfo->m_nPedModel2MI
+  -- Invokes: CGeneral::GetRandomTrueFalse
+  true
+end
+
+schema CGangs_SetGangVehicleModel
+  ΔCGangs
+  gang? : ℤ
+  model? : ℤ
+where
+  -- State update: m_nVehicleMI' = model
+  true
+end
+
+schema CGangs_SetGangWeapons
+  ΔCGangs
+  gang? : ℤ
+  weapon1? : ℤ
+  weapon2? : ℤ
+where
+  -- State update: gi' = GetGangInfo(gang)
+  -- State update: gi.m_Weapon1' = weapon1
+  -- State update: gi.m_Weapon2' = weapon2
+  true
+end
+
+schema CGangs_SetGangPedModelOverride
+  ΔCGangs
+  gang? : ℤ
+  ovrd? : ℤ
+where
+  -- State update: m_nPedModelOverride' = ovrd
+  true
+end
+
+schema CGangs_GetGangPedModelOverride
+  ΔCGangs
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = GetGangInfo(gang)->m_nPedModelOverride
+  true
+end
+
+schema CGangs_SaveAllGangData
+  ΔCGangs
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = SAVE_HEADER_SIZE + sizeof(Gang)
+  true
+end
+
+schema CGangs_LoadAllGangData
+  ΔCGangs
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema GangsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 146
+end

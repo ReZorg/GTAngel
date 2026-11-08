@@ -1,0 +1,115 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: EventList (core)
+-- Source File(s): core/EventList.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eEventType ::= EVENT_NULL | EVENT_ASSAULT | EVENT_RUN_REDLIGHT | EVENT_ASSAULT_POLICE | EVENT_GUNSHOT | EVENT_INJURED_PED | EVENT_DEAD_PED | EVENT_FIRE | EVENT_STEAL_CAR | EVENT_HIT_AND_RUN | EVENT_HIT_AND_RUN_COP | EVENT_SHOOT_PED | EVENT_SHOOT_COP | EVENT_EXPLOSION | EVENT_PED_SET_ON_FIRE | EVENT_COP_SET_ON_FIRE | EVENT_CAR_SET_ON_FIRE | EVENT_ASSAULT_NASTYWEAPON | EVENT_ASSAULT_NASTYWEAPON_POLICE | EVENT_UNK | EVENT_ICECREAM | EVENT_ATM | EVENT_SHOPSTALL | EVENT_SHOPWINDOW | EVENT_LAST_EVENT
+
+eEventEntity ::= EVENT_ENTITY_NONE | EVENT_ENTITY_PED | EVENT_ENTITY_VEHICLE | EVENT_ENTITY_OBJECT
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CEvent
+  type : eEventType
+  entityType : eEventEntity
+  entityRef : ℤ
+  criminal : Ref[CPed]
+  posn : CVector
+  timeout : ℕ
+  state : ℤ
+where
+  #criminal ≤ 1
+  timeout ≥ 0
+end
+
+schema CEventList
+  ms_nFirstFreeSlotIndex : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CEventList_Initialise
+  ΔCEventList
+where
+  -- Declared member operation CEventList::Initialise(void)
+  true
+end
+
+schema CEventList_Update_2
+  ΔCEventList
+where
+  -- Declared member operation CEventList::Update(void)
+  true
+end
+
+schema CEventList_RegisterEvent_3
+  ΔCEventList
+  type? : eEventType
+  entityType? : eEventEntity
+  ent? : Ref[CEntity]
+  criminal? : Ref[CPed]
+  timeout? : ℤ
+where
+  -- Declared member operation CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent, CPed *criminal, int32 timeout)
+  true
+end
+
+schema CEventList_RegisterEvent_4
+  ΔCEventList
+  type? : eEventType
+  posn? : CVector
+  timeout? : ℤ
+where
+  -- Declared member operation CEventList::RegisterEvent(eEventType type, CVector posn, int32 timeout)
+  true
+end
+
+schema CEventList_GetEvent_5
+  ΔCEventList
+  type? : eEventType
+  event? : ℙ ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CEventList::GetEvent(eEventType type, int32 *event)
+  true
+end
+
+schema CEventList_ClearEvent_6
+  ΔCEventList
+  event? : ℤ
+where
+  -- Declared member operation CEventList::ClearEvent(int32 event)
+  true
+end
+
+schema CEventList_FindClosestEvent_7
+  ΔCEventList
+  type? : eEventType
+  posn? : CVector
+  event? : ℙ ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
+  true
+end
+
+schema CEventList_ReportCrimeForEvent_8
+  ΔCEventList
+  type? : eEventType
+  arg_2? : ℤ
+  arg_3? : 𝔹
+where
+  -- Declared member operation CEventList::ReportCrimeForEvent(eEventType type, intptr, bool)
+  true
+end

@@ -1,0 +1,48 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColLine (collision)
+-- Source File(s): collision/ColLine.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CColLine
+  p0 : CVector
+  p1 : CVector
+  pad0 : ℤ
+  pad1 : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CColLine_CColLine
+  ΔCColLine
+where
+  -- Declared member operation CColLine::CColLine(void)
+  true
+end
+
+schema CColLine_CColLine_2
+  ΔCColLine
+  p0? : CVector
+  p1? : CVector
+where
+  -- Declared member operation CColLine::CColLine(const CVector &p0, const CVector &p1)
+  true
+end
+
+schema CColLine_Set_3
+  ΔCColLine
+  p0? : CVector
+  p1? : CVector
+where
+  -- Declared member operation CColLine::Set(const CVector &p0, const CVector &p1)
+  true
+end

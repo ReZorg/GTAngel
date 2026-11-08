@@ -1,0 +1,192 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: BaseModelInfo (modelinfo)
+-- Source File(s): modelinfo/BaseModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include templates.zpp  (from "templates.h")
+-- include main.zpp  (from "main.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include 2dEffect.zpp  (from "2dEffect.h")
+-- include BaseModelInfo.zpp  (from "BaseModelInfo.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include ColModel.zpp  (from "ColModel.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CBaseModelInfo_CBaseModelInfo
+  ΔCBaseModelInfo
+  type? : ModelInfoType
+where
+  -- State update: m_colModel' = ∅
+  -- State update: m_2dEffectsID' = -1
+  -- State update: m_objectId' = -1
+  -- State update: m_refCount' = 0
+  -- State update: m_txdSlot' = -1
+  -- State update: m_type' = type
+  true
+end
+
+schema CBaseModelInfo_Shutdown
+  ΔCBaseModelInfo
+where
+  -- State update: m_2dEffectsID' = -1
+  -- State update: m_num2dEffects' = 0
+  -- State update: m_txdSlot' = -1
+  -- State update: m_objectId' = -1
+  true
+end
+
+schema CBaseModelInfo_DeleteCollisionModel
+  ΔCBaseModelInfo
+where
+  -- State update: m_colModel' = ∅
+  true
+end
+
+schema CBaseModelInfo_AddRef
+  ΔCBaseModelInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CBaseModelInfo_RemoveRef
+  ΔCBaseModelInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CBaseModelInfo_SetTexDictionary
+  ΔCBaseModelInfo
+  name? : seq CHAR
+where
+  -- State update: slot' = CTxdStore::FindTxdSlot(name)
+  -- State update: slot' = CTxdStore::AddTxdSlot(name)
+  -- State update: m_txdSlot' = slot
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::AddTxdSlot
+  true
+end
+
+schema CBaseModelInfo_AddTexDictionaryRef
+  ΔCBaseModelInfo
+where
+  -- Invokes: CTxdStore::AddRef
+  true
+end
+
+schema CBaseModelInfo_AddTexDictionaryRefGu
+  ΔCBaseModelInfo
+where
+  -- Invokes: CTxdStore::AddRefGu
+  true
+end
+
+schema CBaseModelInfo_RemoveTexDictionaryRef
+  ΔCBaseModelInfo
+where
+  -- Invokes: CTxdStore::RemoveRef
+  true
+end
+
+schema CBaseModelInfo_RemoveTexDictionaryRefGu
+  ΔCBaseModelInfo
+where
+  -- Invokes: CTxdStore::RemoveRefGu
+  true
+end
+
+schema CBaseModelInfo_Init2dEffects
+  ΔCBaseModelInfo
+where
+  -- State update: m_twodEffects' = ∅
+  -- State update: m_num2dEffects' = 0
+  true
+end
+
+schema CBaseModelInfo_Add2dEffect
+  ΔCBaseModelInfo
+  fx? : Ref[C2dEffect]
+where
+  -- State update: m_2dEffectsID' = CModelInfo::Get2dEffectStore().GetIndex(fx)
+  -- State update: m_num2dEffects' = 1
+  -- Invokes: CModelInfo::Get2dEffectStore
+  true
+end
+
+schema CBaseModelInfo_Get2dEffect
+  ΔCBaseModelInfo
+  n? : ℤ
+where
+  -- Return postcondition: result! = CModelInfo::Get2dEffectStore().GetItem(m_2dEffectsID+n)
+  -- Return postcondition: result! = nil
+  -- Invokes: CModelInfo::Get2dEffectStore
+  true
+end
+
+schema CBaseModelInfo_SetModelName
+  ΔCBaseModelInfo
+  name? : seq CHAR
+where
+  -- State update: m_nameKey' = CKeyGen::GetUppercaseKey(name)
+  -- Invokes: CKeyGen::GetUppercaseKey
+  true
+end
+
+schema CBaseModelInfo_DeleteChunk
+  ΔCBaseModelInfo
+where
+  -- State update: m_chunk' = ∅
+  -- Invokes: CStreaming::UnregisterPointer, msInstance.Free
+  true
+end
+
+schema BaseModelInfo_GetColmodelID
+  ΔBaseModelInfoModuleState
+  model? : Ref[CColModel]
+where
+  -- State update: colModelid' = 0
+  -- State update: colModelid' = 1
+  -- State update: colModelid' = 2
+  -- State update: colModelid' = 3
+  -- State update: colModelid' = 4
+  -- State update: colModelid' = 5
+  -- Return postcondition: result! = colModelid
+  true
+end
+
+schema CBaseModelInfo_Write
+  ΔCBaseModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: m_chunk' = ∅
+  -- Invokes: m_colModel->Write, writer.AddPatch
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema BaseModelInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 213
+end

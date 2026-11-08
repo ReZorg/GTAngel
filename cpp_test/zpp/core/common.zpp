@@ -1,0 +1,240 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: common (core)
+-- Source File(s): core/common.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include switch.zpp  (from "switch.h")
+-- include stdint.zpp  (from "stdint.h")
+-- include string.zpp  (from "string.h")
+-- include math.zpp  (from "math.h")
+-- include windows.zpp  (from "windows.h")
+-- include d3d8.zpp  (from "d3d8.h")
+-- include d3d9.zpp  (from "d3d9.h")
+-- include dinput.zpp  (from "dinput.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include rpworld.zpp  (from "rpworld.h")
+-- include config.zpp  (from "config.h")
+-- include memoryManager.zpp  (from "memoryManager.h")
+-- include relocatableChunk.zpp  (from "relocatableChunk.h")
+-- include rphanim.zpp  (from "rphanim.h")
+-- include rpskin.zpp  (from "rpskin.h")
+-- include skeleton.zpp  (from "skeleton.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include maths.zpp  (from "maths.h")
+-- include Vector.zpp  (from "Vector.h")
+-- include VuVector.zpp  (from "VuVector.h")
+-- include Vector2D.zpp  (from "Vector2D.h")
+-- include Matrix.zpp  (from "Matrix.h")
+-- include Rect.zpp  (from "Rect.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+_CRT_SECURE_NO_WARNINGS : seq CHAR  -- #define _CRT_SECURE_NO_WARNINGS #define _USE_MATH_DEFINES
+__STDC_LIMIT_MACROS : seq CHAR  -- #define __STDC_LIMIT_MACROS #endif
+AUDIO_MSS : seq CHAR  -- #define AUDIO_MSS #define RWLIBS
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #if defined _WIN32 && defined WITHWINDOWS && !defined _INC_WINDOWS
+WITH_D3D : seq CHAR  -- #define WITH_D3D #else
+DIRECTINPUT_VERSION : seq CHAR  -- #define DIRECTINPUT_VERSION 0x0800
+RWHALFPIXEL : seq CHAR  -- #define RWHALFPIXEL #define STREAMPOS(str) ((str)->Type.memory.position)
+RpHAnimStdInterpFrame : seq CHAR  -- #define RpHAnimStdInterpFrame RpHAnimStdKeyFrame
+HALFPX : ℝ  -- #define HALFPX (0.5f)
+rwVENDORID_ROCKSTAR : seq CHAR  -- #define rwVENDORID_ROCKSTAR 0x0253F2
+Const : seq CHAR  -- #define Const const
+nil : seq CHAR  -- #define nil NULL
+DEFAULT_SCREEN_WIDTH : seq CHAR  -- #define DEFAULT_SCREEN_WIDTH (640)
+DEFAULT_SCREEN_HEIGHT : seq CHAR  -- #define DEFAULT_SCREEN_HEIGHT (448)
+DEFAULT_ASPECT_RATIO : ℝ  -- #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
+DEFAULT_VIEWWINDOW : ℝ  -- #define DEFAULT_VIEWWINDOW (0.7f)
+SCREEN_WIDTH : seq CHAR  -- #define SCREEN_WIDTH ((float)640)
+SCREEN_HEIGHT : seq CHAR  -- #define SCREEN_HEIGHT ((float)512)
+SCREEN_HEIGHT_PAL : seq CHAR  -- #define SCREEN_HEIGHT_PAL ((float)512)
+SCREEN_HEIGHT_NTSC : seq CHAR  -- #define SCREEN_HEIGHT_NTSC ((float)448)
+SCREEN_ASPECT_RATIO : seq CHAR  -- #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
+SCREEN_VIEWWINDOW : ℝ  -- #define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
+PSP_DEFAULT_SCREEN_WIDTH : seq CHAR  -- #define PSP_DEFAULT_SCREEN_WIDTH (480)
+PSP_DEFAULT_SCREEN_HEIGHT : seq CHAR  -- #define PSP_DEFAULT_SCREEN_HEIGHT (272)
+CVUVECTOR : seq CHAR  -- #define CVUVECTOR CVuVector
+M_E : ℝ  -- #define M_E 2.71828182845904523536
+M_LOG2E : ℝ  -- #define M_LOG2E 1.44269504088896340736
+M_LOG10E : ℝ  -- #define M_LOG10E 0.434294481903251827651
+M_LN2 : ℝ  -- #define M_LN2 0.693147180559945309417
+M_LN10 : ℝ  -- #define M_LN10 2.30258509299404568402
+M_PI : ℝ  -- #define M_PI 3.14159265358979323846
+M_PI_2 : ℝ  -- #define M_PI_2 1.57079632679489661923
+M_PI_4 : ℝ  -- #define M_PI_4 0.785398163397448309616
+M_1_PI : ℝ  -- #define M_1_PI 0.318309886183790671538
+M_2_PI : ℝ  -- #define M_2_PI 0.636619772367581343076
+M_2_SQRTPI : ℝ  -- #define M_2_SQRTPI 1.12837916709551257390
+M_SQRT2 : ℝ  -- #define M_SQRT2 1.41421356237309504880
+M_SQRT1_2 : ℝ  -- #define M_SQRT1_2 0.707106781186547524401
+PI : seq CHAR  -- #define PI (float)M_PI
+TWOPI : seq CHAR  -- #define TWOPI (PI*2)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRGBA
+  this : Ref[return]
+where
+  #this ≤ 1
+end
+
+schema CRGBA_CRGBA
+  ΔCRGBA
+where
+  -- Declared member operation CRGBA::CRGBA(void)
+  true
+end
+
+schema CRGBA_operator_2
+  ΔCRGBA
+  right? : CRGBA
+  result! : bool
+where
+  -- Declared member operation CRGBA::operator !=(const CRGBA &right)
+  true
+end
+
+schema CRGBA_operator_3
+  ΔCRGBA
+  right? : CRGBA
+  result! : CRGBA
+where
+  -- Declared member operation CRGBA::operator =(const CRGBA &right)
+  true
+end
+
+schema CRGBA_operator_RwRGBA_4
+  ΞCRGBA
+  result! : ANY
+where
+  -- Declared member operation CRGBA::operator RwRGBA(void)
+  true
+end
+
+schema CRGBA_operator_5
+  ΔCRGBA
+  right? : RwRGBA
+  result! : CRGBA
+where
+  -- Declared member operation CRGBA::operator =(const RwRGBA &right)
+  true
+end
+
+schema check_size
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema check_size_static_assert
+  Δcheck_size
+  arg_1? : s
+  arg_2? : Invalid_structure_size
+where
+  -- Declared member operation check_size::static_assert(s == t, "Invalid structure size")
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema common_dpb
+  ΔcommonModuleState
+  b? : ℕ
+  p? : ℕ
+  s? : ℕ
+  w? : ℕ
+  result! : ℕ
+where
+  -- State update: m' = MASK(p,s)
+  -- Return postcondition: result! = (w & ~m) | ((b<<p) & m)
+  true
+end
+
+schema common_ldb
+  ΔcommonModuleState
+  p? : ℕ
+  s? : ℕ
+  w? : ℕ
+  result! : ℕ
+where
+  -- Return postcondition: result! = w>>p & (1<<s)-1
+  true
+end
+
+schema common_CRGBA
+  ΔcommonModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema common_operator
+  ΔcommonModuleState
+  right? : CRGBA
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema common_operator_2
+  ΔcommonModuleState
+  right? : CRGBA
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !(*this == right)
+  true
+end
+
+schema common_operator_RwRGBA
+  ΔcommonModuleState
+where
+  -- Return postcondition: result! = rwRGBA
+  true
+end
+
+schema common_operator_RwRGBA_2
+  ΔcommonModuleState
+where
+  -- Return postcondition: result! = &rwRGBA
+  true
+end
+
+schema common_RwRGBA
+  ΞcommonModuleState
+  result! : operator
+where
+  -- Return postcondition: result! = rwRGBA
+  true
+end
+
+schema common_sq
+  ΔcommonModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = x*x
+  true
+end
+
+schema common_TRACE
+  ΔcommonModuleState
+  f? : seq CHAR
+  result! : inline___void
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

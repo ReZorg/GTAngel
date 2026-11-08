@@ -1,0 +1,412 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Sprite2d (renderer)
+-- Source File(s): renderer/Sprite2d.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Font.zpp  (from "Font.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSprite2d_SetRecipNearClip
+  ΔCSprite2d
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_InitPerFrame
+  ΔCSprite2d
+where
+  -- State update: nextBufferVertex' = 0
+  -- State update: nextBufferIndex' = 0
+  -- State update: RecipNearClip' = 1.0f / RwCameraGetNearClipPlane(Scene.camera)
+  -- State update: NearScreenZ' = RwIm2DGetNearScreenZ()
+  -- State update: NearCamZ' = RwCameraGetNearClipPlane(Scene.camera)
+  true
+end
+
+schema CSprite2d_GetBank
+  ΔCSprite2d
+  n? : ℤ
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = mCurrentBank++
+  true
+end
+
+schema CSprite2d_AddSpriteToBank
+  ΔCSprite2d
+  bank? : ℤ
+  rect? : CRect
+  col? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_DrawBank
+  ΔCSprite2d
+  bank? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Delete
+  ΔCSprite2d
+where
+  -- State update: m_pTexture' = ∅
+  true
+end
+
+schema CSprite2d_SetTexture
+  ΔCSprite2d
+  name? : seq CHAR
+where
+  -- State update: m_pTexture' = RwTextureRead(name, ∅)
+  true
+end
+
+schema CSprite2d_SetTexture_2
+  ΔCSprite2d
+  name? : seq CHAR
+  mask? : seq CHAR
+where
+  -- State update: m_pTexture' = RwTextureRead(name, mask)
+  true
+end
+
+schema CSprite2d_SetAddressing
+  ΔCSprite2d
+  addr? : RwTextureAddressMode
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_SetRenderState
+  ΔCSprite2d
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Draw
+  ΔCSprite2d
+  x? : ℝ
+  y? : ℝ
+  w? : ℝ
+  h? : ℝ
+  col? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Draw_2
+  ΔCSprite2d
+  rect? : CRect
+  col? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Draw_3
+  ΔCSprite2d
+  rect? : CRect
+  col? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Draw_4
+  ΔCSprite2d
+  rect? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Draw_5
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  col? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_SetVertices
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+  far? : ℕ
+where
+  -- State update: screenz' = RwIm2DGetFarScreenZ()
+  -- State update: z' = RwCameraGetFarClipPlane(Scene.camera)
+  -- State update: screenz' = RwIm2DGetNearScreenZ()
+  -- State update: z' = 1.0f/RecipNearClip
+  -- State update: recipz' = 1.0f/z
+  -- State update: offset' = 1.0f/1024.0f
+  true
+end
+
+schema CSprite2d_SetVertices_2
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_SetVertices_3
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  -- State update: screenz' = RwIm2DGetNearScreenZ()
+  -- State update: recipz' = RecipNearClip
+  true
+end
+
+schema CSprite2d_SetVertices_4
+  ΔCSprite2d
+  n? : ℤ
+  positions? : ℙ ℝ
+  uvs? : ℙ ℝ
+  col? : CRGBA
+where
+  -- State update: screenz' = RwIm2DGetNearScreenZ()
+  -- State update: recipz' = RecipNearClip
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  true
+end
+
+schema CSprite2d_SetMaskVertices
+  ΔCSprite2d
+  n? : ℤ
+  positions? : ℙ ℝ
+where
+  -- State update: screenz' = RwIm2DGetNearScreenZ()
+  -- State update: recipz' = RecipNearClip
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  true
+end
+
+schema CSprite2d_SetVertices_5
+  ΔCSprite2d
+  verts? : Ref[RwIm2DVertex]
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- State update: screenz' = RwIm2DGetNearScreenZ()
+  -- State update: recipz' = RecipNearClip
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  true
+end
+
+schema CSprite2d_DrawRect
+  ΔCSprite2d
+  r? : CRect
+  col? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_DrawRect_2
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_DrawRectXLU
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_Draw2DPolygon
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  color? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_SetVertices_6
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- State update: offset' = 1.0f/1024.0f
+  true
+end
+
+schema CSprite2d_DrawAnyRect
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_AddToBuffer
+  ΔCSprite2d
+  r? : CRect
+  c? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- State update: pIndexList' = &TempBufferRenderIndexList[nextBufferIndex]
+  true
+end
+
+schema CSprite2d_IsVertexBufferFull
+  ΔCSprite2d
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSprite2d_RenderVertexBuffer
+  ΔCSprite2d
+where
+  -- State update: nextBufferVertex' = 0
+  -- State update: nextBufferIndex' = 0
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Sprite2dModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 634
+end

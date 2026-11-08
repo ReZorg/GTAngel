@@ -1,0 +1,156 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WaterCreatures (renderer)
+-- Source File(s): renderer/WaterCreatures.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eFishSlotState ::= WATER_CREATURE_INIT | WATER_CREATURE_ACTIVE | WATER_CREATURE_FADE_OUT | WATER_CREATURE_REMOVE | WATER_CREATURE_DISABLED
+  -- val(WATER_CREATURE_INIT) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWaterCreature
+  m_pObj : Ref[CObject]
+  m_fFwdSpeed : ℝ
+  m_fZTurnSpeed : ℝ
+  m_alpha : ℤ
+  m_fWaterDepth : ℝ
+  m_state : ℤ
+where
+  #m_pObj ≤ 1
+end
+
+schema CWaterCreature_CWaterCreature
+  ΔCWaterCreature
+where
+  -- Declared member operation CWaterCreature::CWaterCreature()
+  true
+end
+
+schema CWaterCreature_Allocate_2
+  ΔCWaterCreature
+  pObj? : Ref[CObject]
+  fFwdSpeed? : ℝ
+  fZTurnSpeed? : ℝ
+  fWaterDepth? : ℝ
+  alpha? : ℕ
+  state? : eFishSlotState
+where
+  -- Declared member operation CWaterCreature::Allocate(CObject *pObj, float fFwdSpeed, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state)
+  true
+end
+
+schema CWaterCreature_Free_3
+  ΔCWaterCreature
+where
+  -- Declared member operation CWaterCreature::Free()
+  true
+end
+
+schema CWaterCreature_Initialise_4
+  ΔCWaterCreature
+  pObj? : Ref[CObject]
+  fFwdSpeed? : ℝ
+  fZTurnSpeed? : ℝ
+  fWaterDepth? : ℝ
+  alpha? : ℕ
+  state? : eFishSlotState
+where
+  -- Declared member operation CWaterCreature::Initialise(CObject *pObj, float fFwdSpeed, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state)
+  true
+end
+
+schema CWaterCreatures
+  aWaterCreatures : seq CWaterCreature  -- bounded array [NUM_WATER_CREATURES]
+  nNumActiveSeaLifeForms : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWaterCreatures_CreateSeaLifeForm
+  ΔCWaterCreatures
+  pos? : CVector
+  modelID? : ℤ
+  zRotAngle? : ℤ
+  result! : Ref[CObject]
+where
+  -- Declared member operation CWaterCreatures::CreateSeaLifeForm(CVector const& pos, int16 modelID, int32 zRotAngle)
+  true
+end
+
+schema CWaterCreatures_CreateOne_2
+  ΔCWaterCreatures
+  pos? : CVector
+  modelID? : ℤ
+where
+  -- Declared member operation CWaterCreatures::CreateOne(CVector const& pos, int32 modelID)
+  true
+end
+
+schema CWaterCreatures_UpdateAll_3
+  ΔCWaterCreatures
+where
+  -- Declared member operation CWaterCreatures::UpdateAll()
+  true
+end
+
+schema CWaterCreatures_FreeFishStructSlot_4
+  ΔCWaterCreatures
+  wc? : Ref[CWaterCreature]
+where
+  -- Declared member operation CWaterCreatures::FreeFishStructSlot(CWaterCreature *wc)
+  true
+end
+
+schema CWaterCreatures_IsSpaceForMoreWaterCreatures_5
+  ΔCWaterCreatures
+  result! : 𝔹
+where
+  -- Declared member operation CWaterCreatures::IsSpaceForMoreWaterCreatures()
+  true
+end
+
+schema CWaterCreatures_CalculateFishHeading_6
+  ΔCWaterCreatures
+  pos1? : CVector
+  pos2? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CWaterCreatures::CalculateFishHeading(CVector const& pos1, CVector const& pos2)
+  true
+end
+
+schema CWaterCreatures_RemoveAll_7
+  ΔCWaterCreatures
+where
+  -- Declared member operation CWaterCreatures::RemoveAll()
+  true
+end
+
+schema CWaterCreatures_GetFishStructSlot_8
+  ΔCWaterCreatures
+  result! : Ref[CWaterCreature]
+where
+  -- Declared member operation CWaterCreatures::GetFishStructSlot()
+  true
+end
+
+schema WaterCreatureProperties
+  modelID : ℙ ℤ
+  fFwdSpeed : ℝ
+  fLevel : ℝ
+  fUnknown : ℝ
+  fWaterDepth : ℝ
+where
+  #modelID ≤ 1
+end

@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Bridge (control)
+-- Source File(s): control/Bridge.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+bridgeStates ::= STATE_BRIDGE_LOCKED | STATE_LIFT_PART_IS_UP | STATE_LIFT_PART_MOVING_DOWN | STATE_LIFT_PART_IS_DOWN | STATE_LIFT_PART_ABOUT_TO_MOVE_UP | STATE_LIFT_PART_MOVING_UP | STATE_BRIDGE_ALWAYS_UNLOCKED
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBridge
+  pWeight : Ref[CEntity_pLiftRoad__pLiftPart]
+  OldState : ℤ
+  DefaultZLiftWeight : ℝ
+  OldLift : ℝ
+  TimeOfBridgeBecomingOperational : ℕ
+where
+  #pWeight ≤ 1
+  TimeOfBridgeBecomingOperational ≥ 0
+end
+
+schema CBridge_Init
+  ΔCBridge
+where
+  -- Declared member operation CBridge::Init()
+  true
+end
+
+schema CBridge_Update_2
+  ΔCBridge
+where
+  -- Declared member operation CBridge::Update()
+  true
+end
+
+schema CBridge_ShouldLightsBeFlashing_3
+  ΔCBridge
+  result! : 𝔹
+where
+  -- Declared member operation CBridge::ShouldLightsBeFlashing()
+  true
+end
+
+schema CBridge_FindBridgeEntities_4
+  ΔCBridge
+where
+  -- Declared member operation CBridge::FindBridgeEntities()
+  true
+end
+
+schema CBridge_ThisIsABridgeObjectMovingUp_5
+  ΔCBridge
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CBridge::ThisIsABridgeObjectMovingUp(int)
+  true
+end
+
+schema CBridge_ForceBridgeState_6
+  ΔCBridge
+  state? : ℕ
+where
+  -- Declared member operation CBridge::ForceBridgeState(uint8 state)
+  true
+end

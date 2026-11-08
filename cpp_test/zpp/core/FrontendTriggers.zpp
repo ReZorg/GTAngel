@@ -1,0 +1,454 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FrontendTriggers (core)
+-- Source File(s): core/FrontendTriggers.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema FrontendTriggers_DisplayWarningControllerMsg
+  ΔFrontendTriggersModuleState
+where
+  -- State update: text.m_text' = TheText.Get("NOCONTE")
+  -- State update: text.m_text' = TheText.Get("WRCONTE")
+  -- Invokes: CSprite2d::DrawRect, CFont::SetFontStyle, CFont::SetBackgroundOff, CFont::SetScale, CFont::SetPropOn
+  true
+end
+
+schema FrontendTriggers_TriggerMCSUM_Yes
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: bMemoryCardStartUpMenus_ExitNow' = true
+  true
+end
+
+schema FrontendTriggers_DisplayMemoryCardAccessMsg
+  ΔFrontendTriggersModuleState
+  msg? : seq CHAR
+  color? : CRGBA
+where
+  -- State update: text.m_text' = msg
+  -- Invokes: CSprite2d::DrawRect, CFont::SetFontStyle, CFont::SetBackgroundOff, CFont::SetScale, CFont::SetPropOn
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_FormatFailedOK
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_SaveGame
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_BackToMainMenu
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_SaveGame
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_QuitMenu
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: FrontEndMenuManager.m_bMenuActive' = false
+  -- State update: FrontEndMenuManager.m_bInSaveZone' = false
+  -- Invokes: CTimer::EndUserPause
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_FormatCard
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_Message
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_Message
+  -- Invokes: TheMemoryCard.GetError, MenuSaveZoneMSG_1.AddText, TheText.Get, MenuSaveZoneMSG_2.AddOption, MenuPageSaveZone_Message.ActivatePage
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_FormatCardSelect
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_Message
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_Message
+  -- Invokes: TheMemoryCard.GetError, MenuSaveZoneMSG_1.AddText, TheText.Get, MenuSaveZoneMSG_2.AddOption, MenuPageSaveZone_Message.ActivatePage
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_DeleteSaveGame
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: error' = TheText.Get("FES_DEE")
+  -- State update: error' = TheText.Get("FES_GME")
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- Invokes: MemCardAccessTriggerCaller.CanCall, MemCardAccessTriggerCaller.SetTrigger, TheText.Get, TheMemoryCard.DeleteSlot, TheMemoryCard.GetError
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_SaveGame
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_Message
+  -- State update: error' = TheText.Get("FESZ_SR")
+  -- Invokes: MemCardAccessTriggerCaller.CanCall, MemCardAccessTriggerCaller.SetTrigger, TheText.Get, TheMemoryCard.SaveSlot, TheMemoryCard.GetError
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_SaveSlots
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTwoLinesTriggered]
+where
+  -- State update: MemoryCardSlotSelected' = widget.GetMenuSelection() - 1
+  -- State update: MenuSaveZoneQYN_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneQYN_2.m_numOptions' = 0
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_QuestionYesNo
+  -- State update: MenuSaveZoneQYN_1.m_numTexts' = 0
+  -- Invokes: widget->GetMenuSelection, TheMemoryCard.GetInfoOnSpecificSlot, MenuSaveZoneQYN_1.AddText, TheText.Get, MenuSaveZoneQYN_2.AddOption
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_SaveGameSelect
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: gErrorSampleTriggered' = false
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_FormatCard
+  -- State update: bMemoryCardSpecialZone' = true
+  -- State update: bIgnoreTriangleButton' = true
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_SaveSlots
+  -- Invokes: TheMemoryCard.GetError, pActiveMenuPage->ActivatePage
+  true
+end
+
+schema FrontendTriggers_TriggerControls_Vibrations
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuOnOffTriggered]
+where
+  -- State update: m_PrefsUseVibration' = widget.GetMenuSelection()
+  -- State update: TimeToStopPadShaking' = CTimer::GetTimeInMillisecondsPauseMode() + 500
+  -- Invokes: widget->GetMenuSelection, CPad::GetPad, CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema FrontendTriggers_TriggerControls_ContrDisplay
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggeredAlways]
+where
+  -- State update: conf' = MenuControls_1.GetMenuSelection()
+  -- Invokes: MenuControls_1.GetMenuSelection, MenuControls_2.GetMenuSelection
+  true
+end
+
+schema FrontendTriggers_TriggerControls_DrawHNContrConfig
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggeredAlways]
+where
+  -- State update: conf' = widget.GetMenuSelection()
+  -- Invokes: widget->GetMenuSelection, MenuControls_2.GetMenuSelection
+  true
+end
+
+schema FrontendTriggers_TriggerControls_DrawContrConfig
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggeredAlways]
+where
+  -- State update: conf' = widget.GetMenuSelection()
+  -- State update: conf' = widget.m_cursor
+  -- Invokes: widget->GetMenuSelection, MenuControls_2.GetMenuSelection
+  true
+end
+
+schema FrontendTriggers_TriggerControls_ContrConfig
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: conf' = widget.GetMenuSelection()
+  -- Invokes: widget->GetMenuSelection, MenuControls_2.GetMenuSelection
+  true
+end
+
+schema FrontendTriggers_TriggerLanguage_Language
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: m_PrefsLanguage' = widget.GetMenuSelection()
+  -- State update: FrontEndMenuManager.m_bInitialised' = false
+  -- State update: bFrontEnd_ReloadObrTxtGxt' = true
+  -- Invokes: widget->GetMenuSelection
+  true
+end
+
+schema FrontendTriggers_TriggerAudio_RadioStation
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoicePicturedTriggered]
+where
+  -- State update: m_PrefsRadioStation' = widget.GetMenuSelection()
+  -- Invokes: widget->GetMenuSelection, DMAudio.PlayFrontEndTrack, DMAudio.SetRadioInCar
+  true
+end
+
+schema FrontendTriggers_TriggerAudio_StereoMono
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- Invokes: widget->GetMenuSelection, DMAudio.SetMonoMode, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema FrontendTriggers_TriggerAudio_MusicVolumeAlways
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuSliderTriggered]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontendTriggers_TriggerAudio_SfxVolumeAlways
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuSliderTriggered]
+where
+  -- State update: bTriggerTest' = false
+  -- State update: m_PrefsSfxVolume' = float(widget.GetMenuSelection()) / 100.0f * 127.0f + 0.5f
+  -- State update: bTriggerTest' = false
+  -- State update: bTriggerTest' = true
+  -- Invokes: widget->GetMenuSelection, CPad::GetPad, DMAudio.PlayFrontEndSound, FrontEndMenuManager.SetSoundLevelsForMusicMenu
+  true
+end
+
+schema FrontendTriggers_TriggerAudio_MusicVolume
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuSliderTriggered]
+where
+  -- State update: m_PrefsMusicVolume' = float(widget.GetMenuSelection()) / 100.0f * 127.0f + 0.5f
+  -- Invokes: widget->GetMenuSelection, FrontEndMenuManager.SetSoundLevelsForMusicMenu
+  true
+end
+
+schema FrontendTriggers_TriggerAudio_SfxVolume
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuSliderTriggered]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema FrontendTriggers_TriggerSave_NewGameNewGame
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: FrontEndMenuManager.m_bWantToRestart' = true
+  -- State update: FrontEndMenuManager.m_bMenuActive' = false
+  -- State update: FrontEndMenuManager.m_bInSaveZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- Invokes: CTimer::EndUserPause, FrontEndMenuManager.AnaliseMenuContents, DMAudio.SetEffectsFadeVol, DMAudio.SetMusicFadeVol, DMAudio.ResetTimers
+  true
+end
+
+schema FrontendTriggers_TriggerSave_NewGameSelectYes
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: MenuSaveZoneQYN_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneQYN_2.m_numOptions' = 0
+  -- State update: pMenuSave' = &MenuPageSaveZone_QuestionYesNo
+  -- State update: bIgnoreTriangleButton' = true
+  -- Invokes: MenuSaveZoneQYN_1.AddText, TheText.Get, MenuSaveZoneQYN_2.AddOption, MenuPageSaveZone_QuestionYesNo.ActivatePage
+  true
+end
+
+schema FrontendTriggers_TriggerSave_DeleteGameDeleteGame
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pMenuSave' = &MenuPageSaveZone_Message
+  -- State update: bMemoryCardSpecialZone' = false
+  -- Invokes: MemCardAccessTriggerCaller.CanCall, MemCardAccessTriggerCaller.SetTrigger, TheText.Get, TheMemoryCard.DeleteSlot, TheMemoryCard.GetError
+  true
+end
+
+schema FrontendTriggers_TriggerSave_DeleteGameDeleteGameSelect
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTwoLinesTriggered]
+where
+  -- State update: MemoryCardSlotSelected' = widget.GetMenuSelection() - 1
+  -- State update: MenuSaveZoneQYN_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneQYN_2.m_numOptions' = 0
+  -- State update: pMenuSave' = &MenuPageSaveZone_QuestionYesNo
+  -- State update: bMemoryCardSpecialZone' = false
+  -- Invokes: widget->GetMenuSelection, TheMemoryCard.GetInfoOnSpecificSlot, MenuSaveZoneQYN_1.AddText, TheText.Get, MenuSaveZoneQYN_2.AddOption
+  true
+end
+
+schema FrontendTriggers_TriggerSave_DeleteGameSelect
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: pMenuSave' = &MenuPage_SaveDeleteGame
+  -- State update: gErrorSampleTriggered' = false
+  -- State update: bMemoryCardSpecialZone' = true
+  -- State update: bIgnoreTriangleButton' = true
+  -- Invokes: pMenuSave->ActivatePage
+  true
+end
+
+schema FrontendTriggers_TriggerSave_LoadGameLoadGame
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: FrontEndMenuManager.m_bWantToRestart' = true
+  -- State update: FrontEndMenuManager.m_bMenuActive' = false
+  -- State update: FrontEndMenuManager.m_bInSaveZone' = false
+  -- State update: TheMemoryCard.m_bWantToLoad' = true
+  -- Invokes: MemCardAccessTriggerCaller.CanCall, MemCardAccessTriggerCaller.SetTrigger, TheText.Get, TheMemoryCard.LoadSlotToBuffer, TheMemoryCard.GetError
+  true
+end
+
+schema FrontendTriggers_TriggerSave_LoadGameLoadGameSelect
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTwoLinesTriggered]
+where
+  -- State update: MemoryCardSlotSelected' = widget.GetMenuSelection() - 1
+  -- State update: MenuSaveZoneMSG_1.m_numTexts' = 0
+  -- State update: MenuSaveZoneMSG_2.m_numOptions' = 0
+  -- State update: pMenuSave' = &MenuPageSaveZone_Message
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: MenuSaveZoneQYN_1.m_numTexts' = 0
+  -- Invokes: widget->GetMenuSelection, TheMemoryCard.GetInfoOnSpecificSlot, MenuSaveZoneMSG_1.AddText, TheText.Get, MenuSaveZoneMSG_2.AddOption
+  true
+end
+
+schema FrontendTriggers_TriggerSave_LoadGameSelect
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: pMenuSave' = &MenuPage_SaveLoadGame
+  -- State update: gErrorSampleTriggered' = false
+  -- State update: bMemoryCardSpecialZone' = true
+  -- State update: bIgnoreTriangleButton' = true
+  -- Invokes: pMenuSave->ActivatePage
+  true
+end
+
+schema FrontendTriggers_TriggerSave_BackToMainMenu
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTriggered]
+where
+  -- State update: pMenuSave' = &MenuPage_SaveBasic
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- Invokes: pMenuSave->ActivatePage
+  true
+end
+
+schema FrontendTriggers_InitialiseTextsInMenuControllerInCar
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuPictureAndText]
+  cont? : CMenuManager__CONTRCONFIG
+where
+  -- State update: widget.m_numTexts' = 0
+  -- Invokes: widget->AddText, TheText.Get
+  true
+end
+
+schema FrontendTriggers_InitialiseTextsInMenuControllerOnFoot
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuPictureAndText]
+  cont? : CMenuManager__CONTRCONFIG
+where
+  -- State update: widget.m_numTexts' = 0
+  -- Invokes: widget->AddText, TheText.Get
+  true
+end
+
+schema FrontendTriggers_TriggerSaveZone_BackToMainMenuTwoLines
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTwoLinesTriggered]
+where
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_SaveGame
+  true
+end
+
+schema FrontendTriggers_TriggerSave_BackToMainMenuTwoLines
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuMultiChoiceTwoLinesTriggered]
+where
+  -- State update: pMenuSave' = &MenuPage_SaveBasic
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- Invokes: pMenuSave->ActivatePage
+  true
+end
+
+schema FrontendTriggers_SetRandomActiveTextlineColor
+  ΔFrontendTriggersModuleState
+  bText? : ℕ
+where
+  -- State update: rgbaATC' = SELECTED_TEXT_COLOR
+  -- State update: bSelected' = false
+  -- State update: bHighlignted' = false
+  -- State update: bHighlignted' = true
+  -- State update: bSelected' = true
+  -- State update: bSelected' = true
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode
+  true
+end
+
+schema FrontendTriggers_TriggerDisplay_Trails
+  ΔFrontendTriggersModuleState
+  widget? : Ref[CMenuOnOffTriggered]
+where
+  -- State update: m_PrefsShowTrails' = widget.GetMenuSelection()
+  -- State update: BlurOn' = CMenuManager::m_PrefsShowTrails
+  -- Invokes: widget->GetMenuSelection, CMBlur::MotionBlurOpen, CMBlur::MotionBlurClose
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FrontendTriggersModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1393
+end

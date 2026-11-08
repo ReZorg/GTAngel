@@ -1,0 +1,1243 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VisibilityPlugins (rw)
+-- Source File(s): rw/VisibilityPlugins.cpp, rw/VisibilityPlugins.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include templates.zpp  (from "templates.h")
+-- include main.zpp  (from "main.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include World.zpp  (from "World.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+RENDERCALLBACK : seq CHAR  -- #define RENDERCALLBACK AtomicDefaultRenderCallBack
+VEHICLE_LODDIST_MULTIPLIER : seq CHAR  -- #define VEHICLE_LODDIST_MULTIPLIER (TheCamera.GenerationDistMultiplier)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+VisibilityPlugins_Enum_1 ::= ID_VISIBILITYATOMIC | ID_VISIBILITYCLUMP | ID_VISIBILITYFRAME
+  -- val(ID_VISIBILITYATOMIC) = MAKECHUNKID(rwVENDORID_ROCKSTAR
+  -- val(ID_VISIBILITYCLUMP) = MAKECHUNKID(rwVENDORID_ROCKSTAR
+  -- val(ID_VISIBILITYFRAME) = MAKECHUNKID(rwVENDORID_ROCKSTAR
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CVisibilityPlugins
+  atomic : Ref[RpAtomic]
+  sort : ℝ
+  m_alphaList : CLinkList_AlphaObjectInfo
+  m_alphaEntityList : CLinkList_AlphaObjectInfo
+  ms_pCameraPosn : Ref[RwV3d]
+  ms_cullCompsDist : ℝ
+  ms_vehicleLod0Dist : ℝ
+  ms_vehicleLod1Dist : ℝ
+  ms_vehicleFadeDist : ℝ
+  ms_bigVehicleLod0Dist : ℝ
+  ms_bigVehicleLod1Dist : ℝ
+  ms_pedLodDist : ℝ
+  ms_pedFadeDist : ℝ
+  flags : ℕ
+  ms_atomicPluginOffset : ℤ
+  ms_framePluginOffset : ℤ
+  alpha : ℤ
+  ms_clumpPluginOffset : ℤ
+  m_alphaBoatAtomicList : CLinkList_AlphaObjectInfo
+  m_alphaUnderwaterEntityList : CLinkList_AlphaObjectInfo
+  ms_pedLod1Dist : ℝ
+  modelInfo : Ref[union_AtomicExt_CSimpleModelInfo]
+  ms_pedLod0Dist : ℝ
+where
+  #atomic ≤ 1
+  #ms_pCameraPosn ≤ 1
+  flags ≥ 0
+  #modelInfo ≤ 1
+end
+
+schema CVisibilityPlugins_Initialise
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::Initialise(void)
+  true
+end
+
+schema CVisibilityPlugins_Shutdown_2
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::Shutdown(void)
+  true
+end
+
+schema CVisibilityPlugins_InitAlphaEntityList_3
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::InitAlphaEntityList(void)
+  true
+end
+
+schema CVisibilityPlugins_InsertEntityIntoSortedList_4
+  ΔCVisibilityPlugins
+  e? : Ref[CEntity]
+  dist? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CVisibilityPlugins::InsertEntityIntoSortedList(CEntity *e, float dist)
+  true
+end
+
+schema CVisibilityPlugins_InitAlphaAtomicList_5
+  ΔCVisibilityPlugins
+where
+  -- Declared member operation CVisibilityPlugins::InitAlphaAtomicList(void)
+  true
+end
+
+schema CVisibilityPlugins_InsertAtomicIntoSortedList_6
+  ΔCVisibilityPlugins
+  a? : Ref[RpAtomic]
+  dist? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CVisibilityPlugins::InsertAtomicIntoSortedList(RpAtomic *a, float dist)
+  true
+end
+
+schema CVisibilityPlugins_SetRenderWareCamera_7
+  ΔCVisibilityPlugins
+  camera? : Ref[RwCamera]
+where
+  -- Declared member operation CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
+  true
+end
+
+schema CVisibilityPlugins_SetupVehicleVariables_8
+  ΔCVisibilityPlugins
+  vehicle? : Ref[RpClump]
+where
+  -- Declared member operation CVisibilityPlugins::SetupVehicleVariables(RpClump *vehicle)
+  true
+end
+
+schema CVisibilityPlugins_RenderWheelAtomicCB_9
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderWheelAtomicCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderObjNormalAtomic_10
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderAlphaAtomic_11
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  alpha? : ℤ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, int alpha)
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingAtomic_12
+  ΔCVisibilityPlugins
+  atm? : Ref[RpAtomic]
+  dist? : ℝ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atm, float dist)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_13
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailAlphaCB_14
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_BigVehicle_15
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailAlphaCB_BigVehicle_16
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_Boat_17
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB_Boat(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_Boat_Far_18
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleHiDetailCB_Boat_Far(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat_19
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLoDetailCB_Boat(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat_Far_20
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLoDetailCB_Boat_Far(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLowDetailCB_BigVehicle_21
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLowDetailCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLowDetailAlphaCB_BigVehicle_22
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleLowDetailAlphaCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleReallyLowDetailCB_23
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleReallyLowDetailCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleReallyLowDetailCB_BigVehicle_24
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderTrainHiDetailCB_25
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderTrainHiDetailAlphaCB_26
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleRotorAlphaCB_27
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleRotorAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleTailRotorAlphaCB_28
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderVehicleTailRotorAlphaCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderPedCB_29
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
+  true
+end
+
+schema CVisibilityPlugins_RenderAtomicList_30
+  ΔCVisibilityPlugins
+  list? : CLinkList_AlphaObjectInfo
+where
+  -- Declared member operation CVisibilityPlugins::RenderAtomicList(CLinkList<AlphaObjectInfo> &list)
+  true
+end
+
+schema AlphaObjectInfo
+  atomic : Ref[RpAtomic]
+  sort : ℝ
+where
+  #atomic ≤ 1
+end
+
+schema AtomicExt
+  modelId : ℤ
+  flags : ℕ
+where
+  flags ≥ 0
+end
+
+schema FrameExt
+  id : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema ClumpExt
+  visibilityCB : ClumpVisibilityCB
+  alpha : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CVisibilityPlugins_Initialise
+  ΔCVisibilityPlugins
+where
+  -- State update: m_alphaList.head.item.sort' = 0.0f
+  -- State update: m_alphaList.tail.item.sort' = 100000000.0f
+  -- State update: m_alphaEntityList.head.item.sort' = 0.0f
+  -- State update: m_alphaEntityList.tail.item.sort' = 100000000.0f
+  -- State update: m_alphaBuildingList.head.item.sort' = 0.0f
+  -- State update: m_alphaBuildingList.tail.item.sort' = 100000000.0f
+  -- Invokes: m_alphaList.Init, m_alphaEntityList.Init, m_alphaBuildingList.Init, base::RegisterRelocatableChunkFunc
+  true
+end
+
+schema CVisibilityPlugins_Shutdown
+  ΔCVisibilityPlugins
+where
+  -- Invokes: m_alphaList.Shutdown, m_alphaEntityList.Shutdown, m_alphaBuildingList.Shutdown
+  true
+end
+
+schema CVisibilityPlugins_InitAlphaEntityList
+  ΔCVisibilityPlugins
+where
+  -- Invokes: m_alphaEntityList.Clear, m_alphaBuildingList.Clear
+  true
+end
+
+schema CVisibilityPlugins_InsertEntityIntoSortedList
+  ΔCVisibilityPlugins
+  e? : Ref[CEntity]
+  dist? : ℝ
+where
+  -- State update: item.entity' = e
+  -- State update: item.sort' = dist
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = !!m_alphaBuildingList.InsertSorted(item)
+  -- Return postcondition: result! = !!m_alphaEntityList.InsertSorted(item)
+  -- Invokes: e->IsBuilding, m_alphaBuildingList.InsertSorted, m_alphaEntityList.InsertSorted
+  true
+end
+
+schema CVisibilityPlugins_InitAlphaAtomicList
+  ΔCVisibilityPlugins
+where
+  -- Invokes: m_alphaList.Clear
+  true
+end
+
+schema CVisibilityPlugins_InsertAtomicIntoSortedList
+  ΔCVisibilityPlugins
+  a? : Ref[RpAtomic]
+  dist? : ℝ
+where
+  -- State update: item.atomic' = a
+  -- State update: item.sort' = dist
+  -- Return postcondition: result! = ret
+  -- Invokes: m_alphaList.InsertSorted
+  true
+end
+
+schema CVisibilityPlugins_SetRenderWareCamera
+  ΔCVisibilityPlugins
+  camera? : Ref[RwCamera]
+where
+  -- State update: ms_pCamera' = camera
+  -- State update: ms_pCameraPosn' = RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(camera)))
+  -- State update: ms_cullCompsDist' = 1000000.0f
+  -- State update: ms_cullCompsDist' = sq(TheCamera.LODDistMultiplier * 20.0f)
+  -- State update: ms_vehicleLod0Dist' = sq(70.0f * VEHICLE_LODDIST_MULTIPLIER)
+  -- State update: ms_vehicleLod1Dist' = sq(90.0f * VEHICLE_LODDIST_MULTIPLIER)
+  true
+end
+
+schema CVisibilityPlugins_SetupVehicleVariables
+  ΔCVisibilityPlugins
+  vehicle? : Ref[RpClump]
+where
+  -- State update: DistToCameraSq' = GetDistanceSquaredFromCamera(RpClumpGetFrame(vehicle))
+  -- State update: dist2d' = Sqrt(SQR(distToCam.x) + SQR(distToCam.y))
+  -- State update: PitchToCamera' = 0.0f
+  -- State update: PitchToCamera' = Atan2(distToCam.z, dist2d)
+  true
+end
+
+schema VisibilityPlugins_SetAlphaCB
+  ΔVisibilityPluginsModuleState
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: alpha' = (uint8)(uintptr)data
+  -- Return postcondition: result! = material
+  true
+end
+
+schema VisibilityPlugins_SetTextureCB
+  ΔVisibilityPluginsModuleState
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = material
+  true
+end
+
+schema CVisibilityPlugins_RenderAtomicList
+  ΔCVisibilityPlugins
+  list? : CLinkList_AlphaObjectInfo
+where
+  -- State update: node' = list.tail.prev
+  true
+end
+
+schema CVisibilityPlugins_RenderAlphaAtomics
+  ΔCVisibilityPlugins
+where
+  -- State update: node' = m_alphaList.tail.prev
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingEntities
+  ΔCVisibilityPlugins
+  list? : CLinkList_AlphaObjectInfo
+where
+  -- State update: node' = list.tail.prev
+  -- State update: e' = node.item.entity
+  -- State update: e.bImBeingRendered' = true
+  -- State update: e.bImBeingRendered' = false
+  -- Invokes: e->IsPed, e->IsVehicle, CModelInfo::GetModelInfo, e->GetModelIndex, mi->GetModelType
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingEntities_2
+  ΔCVisibilityPlugins
+where
+  -- State update: node' = m_alphaEntityList.tail.prev
+  -- State update: e' = node.item.entity
+  -- State update: e.bImBeingRendered' = true
+  -- State update: e.bImBeingRendered' = false
+  -- Invokes: e->IsPed, e->IsVehicle, CModelInfo::GetModelInfo, e->GetModelIndex, mi->GetModelType
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingUnderwaterEntities
+  ΔCVisibilityPlugins
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVisibilityPlugins_RenderWheelAtomicCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: mi' = GetAtomicModelInfo(atomic)
+  -- State update: m' = RwFrameGetLTM(RpAtomicGetFrame(atomic))
+  -- State update: len' = RwV3dLength(&view)
+  -- State update: lodatm' = mi.GetAtomicFromDistance(len)
+  -- Return postcondition: result! = atomic
+  -- Invokes: mi->GetAtomicFromDistance
+  true
+end
+
+schema CVisibilityPlugins_RenderObjNormalAtomic
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: m' = RwFrameGetLTM(RpAtomicGetFrame(atomic))
+  -- State update: len' = RwV3dLength(&view)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderAlphaAtomic
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  alpha? : ℤ
+where
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- State update: flags' = RpGeometryGetFlags(geo)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingAtomic
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  camdist? : ℝ
+where
+  -- State update: mi' = GetAtomicModelInfo(atomic)
+  -- State update: lodatm' = mi.GetAtomicFromDistance(camdist - FADE_DISTANCE)
+  -- State update: fadefactor' = 1.0f
+  -- State update: alpha' = mi.m_alpha * fadefactor
+  -- State update: geo' = RpAtomicGetGeometry(lodatm)
+  -- State update: flags' = RpGeometryGetFlags(geo)
+  -- Return postcondition: result! = atomic
+  -- Invokes: mi->GetAtomicFromDistance, mi->GetLargestLodDistance
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailAlphaCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_BigVehicle
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: distsq' = GetDistanceSquaredFromCamera(clumpframe)
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailAlphaCB_BigVehicle
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_Boat
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: distsq' = GetDistanceSquaredFromCamera(clumpframe)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleHiDetailCB_Boat_Far
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat_Far
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLowDetailCB_BigVehicle
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: distsq' = GetDistanceSquaredFromCamera(clumpframe)
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLowDetailAlphaCB_BigVehicle
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: distsq' = GetDistanceSquaredFromCamera(clumpframe)
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleReallyLowDetailCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: dist' = GetDistanceSquaredFromCamera(RpClumpGetFrame(clump))
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleReallyLowDetailCB_BigVehicle
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: distsq' = GetDistanceSquaredFromCamera(clumpframe)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderTrainHiDetailCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: distsq' = GetDistanceSquaredFromCamera(clumpframe)
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderTrainHiDetailAlphaCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: flags' = GetAtomicId(atomic)
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleRotorAlphaCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clumpframe' = RpClumpGetFrame(RpAtomicGetClump(atomic))
+  -- State update: dot' = RwV3dDotProduct(&cam2atm, &RwFrameGetLTM(clumpframe).at)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleTailRotorAlphaCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: atmMat' = RwFrameGetLTM(RpAtomicGetFrame(atomic))
+  -- State update: clumpMat' = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)))
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderPedCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: dist' = GetDistanceSquaredFromCamera(RpClumpGetFrame(clump))
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_GetDistanceSquaredFromCamera
+  ΔCVisibilityPlugins
+  pos? : Ref[RwV3d]
+where
+  -- Return postcondition: result! = RwV3dDotProduct(&dist, &dist)
+  true
+end
+
+schema CVisibilityPlugins_GetDistanceSquaredFromCamera_2
+  ΔCVisibilityPlugins
+  frame? : Ref[RwFrame]
+where
+  -- State update: m' = RwFrameGetLTM(frame)
+  -- Return postcondition: result! = RwV3dDotProduct(&dist, &dist)
+  true
+end
+
+schema CVisibilityPlugins_GetDotProductWithCameraVector
+  ΔCVisibilityPlugins
+  atomicMat? : Ref[RwMatrix]
+  clumpMat? : Ref[RwMatrix]
+  flags? : ℕ
+where
+  -- State update: dot' = RwV3dDotProduct(&dist, RwMatrixGetUp(clumpMat))
+  -- State update: dot' = RwV3dDotProduct(&dist, RwMatrixGetRight(clumpMat))
+  -- State update: dot' = 0.0f
+  -- State update: dot' = -dot
+  -- State update: dotdoor' = -RwV3dDotProduct(&dist, RwMatrixGetUp(clumpMat))
+  -- State update: dotdoor' = RwV3dDotProduct(&dist, RwMatrixGetUp(clumpMat))
+  -- Return postcondition: result! = dot
+  true
+end
+
+schema CVisibilityPlugins_DefaultVisibilityCB
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CVisibilityPlugins_FrustumSphereCB
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- State update: frame' = RpClumpGetFrame(clump)
+  -- State update: modelInfo' = (CClumpModelInfo*)GetFrameHierarchyId(frame)
+  -- State update: sphere.radius' = modelInfo.GetColModel().boundingSphere.radius
+  -- State update: sphere.center.x' = modelInfo.GetColModel().boundingSphere.center.x
+  -- State update: sphere.center.y' = modelInfo.GetColModel().boundingSphere.center.y
+  -- State update: sphere.center.z' = modelInfo.GetColModel().boundingSphere.center.z
+  -- Return postcondition: result! = RwCameraFrustumTestSphere(ms_pCamera, &sphere) != rwSPHEREOUTSIDE
+  -- Invokes: modelInfo->GetColModel
+  true
+end
+
+schema CVisibilityPlugins_MloVisibilityCB
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- State update: frame' = RpClumpGetFrame(clump)
+  -- State update: modelInfo' = (CMloModelInfo*)GetFrameHierarchyId(frame)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = CVisibilityPlugins::FrustumSphereCB(clump)
+  -- Invokes: CVisibilityPlugins::FrustumSphereCB
+  true
+end
+
+schema CVisibilityPlugins_VehicleVisibilityCB
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- State update: frame' = RpClumpGetFrame(clump)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = FrustumSphereCB(clump)
+  true
+end
+
+schema CVisibilityPlugins_VehicleVisibilityCB_BigVehicle
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- Return postcondition: result! = FrustumSphereCB(clump)
+  true
+end
+
+schema CVisibilityPlugins_PluginAttach
+  ΔCVisibilityPlugins
+where
+  -- Return postcondition: result! = ms_atomicPluginOffset != -1 && ms_clumpPluginOffset != -1
+  true
+end
+
+schema CVisibilityPlugins_AtomicConstructor
+  ΔCVisibilityPlugins
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- State update: modelId' = -1
+  -- State update: flags' = 0
+  -- State update: distanceAlpha' = 255
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVisibilityPlugins_AtomicDestructor
+  ΔCVisibilityPlugins
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVisibilityPlugins_AtomicCopyConstructor
+  ΔCVisibilityPlugins
+  dst? : ADDRESS
+  src? : ADDRESS
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema CVisibilityPlugins_SetAtomicModelInfo
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  modelInfo? : Ref[CSimpleModelInfo]
+where
+  -- State update: ext' = ATOMICEXT(atomic)
+  -- State update: ext.modelInfo' = modelInfo
+  -- Invokes: modelInfo->GetModelType
+  true
+end
+
+schema CVisibilityPlugins_SetAtomicModelIndex
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  modelId? : ℤ
+where
+  -- State update: modelId' = modelId
+  true
+end
+
+schema CVisibilityPlugins_GetAtomicModelInfo
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: id' = ATOMICEXT(atomic).modelId
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id)
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema CVisibilityPlugins_SetAtomicFlag
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  f? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVisibilityPlugins_ClearAtomicFlag
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  f? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVisibilityPlugins_SetAtomicId
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  id? : ℤ
+where
+  -- State update: flags' = id
+  true
+end
+
+schema CVisibilityPlugins_GetAtomicId
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- Return postcondition: result! = ATOMICEXT(atomic)->flags
+  true
+end
+
+schema CVisibilityPlugins_SetAtomicRenderCallback
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  cb? : RpAtomicCallBackRender
+where
+  -- State update: cb' = RENDERCALLBACK
+  true
+end
+
+schema CVisibilityPlugins_FrameConstructor
+  ΔCVisibilityPlugins
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- State update: id' = 0
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVisibilityPlugins_FrameDestructor
+  ΔCVisibilityPlugins
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVisibilityPlugins_FrameCopyConstructor
+  ΔCVisibilityPlugins
+  dst? : ADDRESS
+  src? : ADDRESS
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema CVisibilityPlugins_SetFrameHierarchyId
+  ΔCVisibilityPlugins
+  frame? : Ref[RwFrame]
+  id? : ℤ
+where
+  -- State update: id' = id
+  true
+end
+
+schema CVisibilityPlugins_GetFrameHierarchyId
+  ΔCVisibilityPlugins
+  frame? : Ref[RwFrame]
+where
+  -- Return postcondition: result! = FRAMEEXT(frame)->id
+  true
+end
+
+schema CVisibilityPlugins_ClumpConstructor
+  ΔCVisibilityPlugins
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- State update: ext' = CLUMPEXT(object)
+  -- State update: ext.visibilityCB' = DefaultVisibilityCB
+  -- State update: ext.alpha' = 0xFF
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVisibilityPlugins_ClumpDestructor
+  ΔCVisibilityPlugins
+  object? : ADDRESS
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVisibilityPlugins_ClumpCopyConstructor
+  ΔCVisibilityPlugins
+  dst? : ADDRESS
+  src? : ADDRESS
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- State update: visibilityCB' = CLUMPEXT(src).visibilityCB
+  -- Return postcondition: result! = dst
+  true
+end
+
+schema CVisibilityPlugins_SetClumpModelInfo
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+  modelInfo? : Ref[CClumpModelInfo]
+where
+  -- State update: visibilityCB' = MloVisibilityCB
+  -- State update: vmi' = (CVehicleModelInfo*)modelInfo
+  -- State update: visibilityCB' = VehicleVisibilityCB_BigVehicle
+  -- State update: visibilityCB' = VehicleVisibilityCB
+  -- Invokes: modelInfo->GetModelType
+  true
+end
+
+schema CVisibilityPlugins_GetClumpModelInfo
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- Return postcondition: result! = (CClumpModelInfo*)GetFrameHierarchyId(RpClumpGetFrame(clump))
+  true
+end
+
+schema CVisibilityPlugins_SetClumpAlpha
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+  alpha? : ℤ
+where
+  -- State update: alpha' = alpha
+  true
+end
+
+schema CVisibilityPlugins_GetClumpAlpha
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- Return postcondition: result! = CLUMPEXT(clump)->alpha
+  true
+end
+
+schema CVisibilityPlugins_IsClumpVisible
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- Return postcondition: result! = CLUMPEXT(clump)->visibilityCB(clump)
+  true
+end
+
+schema VisibilityPlugins_SetAtomicDistanceAlphaCB
+  ΔVisibilityPluginsModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: distanceAlpha' = *(int*)data
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_SetClumpDistanceAlpha
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+  alpha? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema VisibilityPlugins_GetAtomicDistanceAlphaCB
+  ΔVisibilityPluginsModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: data' = ATOMICEXT(atomic).distanceAlpha
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_GetClumpDistanceAlpha
+  ΔCVisibilityPlugins
+  clump? : Ref[RpClump]
+where
+  -- State update: alpha' = 255
+  -- Return postcondition: result! = alpha
+  true
+end
+
+schema CVisibilityPlugins_SetObjectDistanceAlpha
+  ΔCVisibilityPlugins
+  object? : Ref[RwObject]
+  alpha? : ℤ
+where
+  -- State update: distanceAlpha' = alpha
+  true
+end
+
+schema CVisibilityPlugins_GetObjectDistanceAlpha
+  ΔCVisibilityPlugins
+  object? : Ref[RwObject]
+where
+  -- Return postcondition: result! = 255
+  -- Return postcondition: result! = ATOMICEXT(object)->distanceAlpha
+  -- Return postcondition: result! = GetClumpDistanceAlpha((RpClump*)object)
+  true
+end
+
+schema VisibilityPlugins_rpDefaultGeometryInstance
+  ΔVisibilityPluginsModuleState
+  geo? : Ref[RpGeometry]
+  atomic? : ADDRESS
+  del? : ℤ
+where
+  -- State update: geo.instanceFlags' = rpGEOMETRYINSTANCE
+  -- State update: newheader.numMeshes' = geo.mesh.numMeshes
+  -- State update: newheader.serialNum' = 1
+  -- State update: newheader.totalIndicesInMesh' = 0
+  -- State update: newheader.firstMeshOffset' = 0
+  -- State update: oldmesh' = (RpMesh*)(geo.mesh+1)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema VisibilityPlugins_PreInstanceRenderCB
+  ΔVisibilityPluginsModuleState
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema VisibilityPlugins_DefaultRenderCB_pushid
+  ΔVisibilityPluginsModuleState
+  atomic? : Ref[RpAtomic]
+where
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingAtomic_2
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+  camdist? : ℝ
+where
+  -- State update: mi' = GetAtomicModelInfo(atomic)
+  -- State update: lodatm' = mi.GetAtomicFromDistance(camdist - FADE_DISTANCE)
+  -- State update: fadefactor' = 1.0f
+  -- State update: alpha' = mi.m_alpha * fadefactor
+  -- State update: geo' = RpAtomicGetGeometry(lodatm)
+  -- State update: flags' = RpGeometryGetFlags(geo)
+  -- Return postcondition: result! = atomic
+  -- Invokes: mi->GetAtomicFromDistance, mi->GetLargestLodDistance
+  true
+end
+
+schema CVisibilityPlugins_RenderPedLowDetailCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: dist' = GetDistanceSquaredFromCamera(RpClumpGetFrame(clump))
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderPedHiDetailCB
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: dist' = GetDistanceSquaredFromCamera(RpClumpGetFrame(clump))
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderPedCB_2
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: alpha' = GetClumpAlpha(RpAtomicGetClump(atomic))
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVisibilityPlugins_RenderFadingEntities_3
+  ΔCVisibilityPlugins
+  list? : CLinkList_AlphaObjectInfo
+where
+  -- State update: node' = list.tail.prev
+  -- State update: e' = node.item.entity
+  -- State update: e.bImBeingRendered' = true
+  -- State update: e.bImBeingRendered' = false
+  -- Invokes: e->IsPed, e->IsVehicle, CModelInfo::GetModelInfo, e->GetModelIndex, mi->GetModelType
+  true
+end
+
+schema CVisibilityPlugins_RenderVehicleLoDetailCB_Boat_2
+  ΔCVisibilityPlugins
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: clump' = RpAtomicGetClump(atomic)
+  -- State update: alpha' = GetClumpAlpha(clump)
+  -- Return postcondition: result! = atomic
+  true
+end

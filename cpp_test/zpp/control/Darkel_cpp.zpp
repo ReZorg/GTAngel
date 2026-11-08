@@ -1,0 +1,199 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Darkel (control)
+-- Source File(s): control/Darkel.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Population.zpp  (from "Population.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include World.zpp  (from "World.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Font.zpp  (from "Font.h")
+-- include Text.zpp  (from "Text.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FRENZY_ANY_PED : seq CHAR  -- #define FRENZY_ANY_PED -1
+FRENZY_ANY_CAR : seq CHAR  -- #define FRENZY_ANY_CAR -2
+DARKEL_COUNTER_HEIGHT : ℝ  -- #define DARKEL_COUNTER_HEIGHT 143.0f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDarkel_CalcFade
+  ΔCDarkel
+  time? : ℕ
+  start? : ℕ
+  end? : ℕ
+where
+  -- Return postcondition: result! = 255
+  -- Return postcondition: result! = 255 * (end - time) / 500
+  -- Return postcondition: result! = 255 * (time - start) / 500
+  true
+end
+
+schema CDarkel_DrawMessages
+  ΔCDarkel
+where
+  -- State update: y' = (SCREEN_HEIGHT / 2 + 25) - (timePassedSinceStart * 0.01f)
+  -- Invokes: CReplay::IsPlayingBack, CFont::SetJustifyOff, CFont::SetBackgroundOff, CFont::SetCentreSize, CFont::SetCentreOn
+  true
+end
+
+schema CDarkel_Init
+  ΔCDarkel
+where
+  -- State update: Status' = KILLFRENZY_NONE
+  true
+end
+
+schema CDarkel_QueryModelsKilledByPlayer
+  ΔCDarkel
+  modelId? : ℤ
+where
+  -- Return postcondition: result! = RegisteredKills[modelId]
+  true
+end
+
+schema CDarkel_FrenzyOnGoing
+  ΔCDarkel
+where
+  -- Return postcondition: result! = Status == KILLFRENZY_ONGOING
+  true
+end
+
+schema CDarkel_ReadStatus
+  ΔCDarkel
+where
+  -- Return postcondition: result! = Status
+  true
+end
+
+schema CDarkel_RegisterCarBlownUpByPlayer
+  ΔCDarkel
+  vehicle? : Ref[CVehicle]
+where
+  -- State update: model' = vehicle.GetModelIndex()
+  -- Invokes: CReplay::IsPlayingBack, vehicle->GetModelIndex, DMAudio.PlayFrontEndSound, vehicle->GetVehicleAppearance
+  true
+end
+
+schema CDarkel_RegisterKillByPlayer
+  ΔCDarkel
+  victim? : Ref[CPed]
+  weapon? : eWeaponType
+  headshot? : 𝔹
+where
+  -- State update: model' = victim.GetModelIndex()
+  -- Invokes: CReplay::IsPlayingBack, victim->GetModelIndex, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema CDarkel_RegisterKillNotByPlayer
+  ΔCDarkel
+  victim? : Ref[CPed]
+  weapontype? : eWeaponType
+where
+  -- Invokes: CReplay::IsPlayingBack
+  true
+end
+
+schema CDarkel_ResetModelsKilledByPlayer
+  ΔCDarkel
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDarkel_ResetOnPlayerDeath
+  ΔCDarkel
+where
+  -- State update: m_AllRandomPedsThisType' = -1
+  -- State update: Status' = KILLFRENZY_FAILED
+  -- State update: TimeOfFrenzyStart' = CTimer::GetTimeInMilliseconds()
+  -- State update: fixedWeapon' = WEAPONTYPE_UZI
+  -- State update: fixedWeapon' = (eWeaponType)WeaponType
+  -- State update: player' = FindPlayerPed()
+  -- Invokes: CTimer::GetTimeInMilliseconds, player->GetWeapon, player->GetWeaponSlot, player->RemoveWeaponModel, CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CDarkel_StartFrenzy
+  ΔCDarkel
+  weaponType? : eWeaponType
+  time? : ℤ
+  kill? : ℕ
+  modelId0? : ℤ
+  text? : seq CHAR
+  modelId2? : ℤ
+  modelId3? : ℤ
+  modelId4? : ℤ
+  standardSound? : 𝔹
+  needHeadShot? : 𝔹
+where
+  -- State update: fixedWeapon' = WEAPONTYPE_UZI
+  -- State update: fixedWeapon' = weaponType
+  -- State update: WeaponType' = weaponType
+  -- State update: Status' = KILLFRENZY_ONGOING
+  -- State update: KillsNeeded' = kill
+  -- State update: ModelToKill' = modelId0
+  -- Invokes: CGameLogic::ClearShortCut, CGameLogic::RemoveShortCutDropOffPointForMission, TheText.Get, CTimer::GetTimeInMilliseconds, player->GetWeapon
+  true
+end
+
+schema CDarkel_Update
+  ΔCDarkel
+where
+  -- State update: PrevTime' = FrameTime / 1000
+  -- State update: PreviousTime' = PrevTime
+  -- State update: m_AllRandomPedsThisType' = -1
+  -- State update: Status' = KILLFRENZY_FAILED
+  -- State update: TimeOfFrenzyStart' = CTimer::GetTimeInMilliseconds()
+  -- State update: fixedWeapon' = WEAPONTYPE_UZI
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetTimeInMilliseconds, DMAudio.PlayFrontEndSound, player->GetWeapon, player->GetWeaponSlot
+  true
+end
+
+schema CDarkel_DealWithWeaponChangeAtEndOfFrenzy
+  ΔCDarkel
+where
+  -- State update: fixedWeapon' = WEAPONTYPE_UZI
+  -- State update: fixedWeapon' = (eWeaponType)WeaponType
+  -- State update: slot' = CWeaponInfo::GetWeaponInfo(fixedWeapon).m_nWeaponSlot
+  -- State update: m_eWeaponType' = WEAPONTYPE_UNARMED
+  -- State update: m_nAmmoTotal' = 0
+  -- State update: m_nAmmoInClip' = 0
+  -- Invokes: CModelInfo::GetModelInfo, CWeaponInfo::GetWeaponInfo, player->GiveWeapon, player->RemoveWeaponModel, player->GetWeapon
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DarkelModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 576
+end

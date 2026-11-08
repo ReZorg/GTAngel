@@ -1,0 +1,139 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Garages (control)
+-- Source File(s): control/Garages.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include main.zpp  (from "main.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include General.zpp  (from "General.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Script.zpp  (from "Script.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Text.zpp  (from "Text.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include World.zpp  (from "World.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+ROTATED_DOOR_OPEN_SPEED : ℝ  -- #define ROTATED_DOOR_OPEN_SPEED (0.015f)
+ROTATED_DOOR_CLOSE_SPEED : ℝ  -- #define ROTATED_DOOR_CLOSE_SPEED (0.02f)
+DEFAULT_DOOR_OPEN_SPEED : ℝ  -- #define DEFAULT_DOOR_OPEN_SPEED (0.035f)
+DEFAULT_DOOR_CLOSE_SPEED : ℝ  -- #define DEFAULT_DOOR_CLOSE_SPEED (0.04f)
+CRUSHER_CRANE_SPEED : ℝ  -- #define CRUSHER_CRANE_SPEED (0.005f)
+BOMB_PRICE : seq CHAR  -- #define BOMB_PRICE (500)
+RESPRAY_PRICE : seq CHAR  -- #define RESPRAY_PRICE (100)
+DISTANCE_TO_CALL_OFF_CHASE : ℝ  -- #define DISTANCE_TO_CALL_OFF_CHASE (50.0f)
+DISTANCE_FOR_MRWHOOP_HACK : ℝ  -- #define DISTANCE_FOR_MRWHOOP_HACK (0.5f)
+DISTANCE_TO_ACTIVATE_GARAGE : ℝ  -- #define DISTANCE_TO_ACTIVATE_GARAGE (8.0f)
+DISTANCE_TO_ACTIVATE_KEEPCAR_GARAGE : ℝ  -- #define DISTANCE_TO_ACTIVATE_KEEPCAR_GARAGE (17.0f)
+DISTANCE_TO_CLOSE_MISSION_GARAGE : ℝ  -- #define DISTANCE_TO_CLOSE_MISSION_GARAGE (30.0f)
+DISTANCE_TO_CLOSE_COLLECTSPECIFICCARS_GARAGE : ℝ  -- #define DISTANCE_TO_CLOSE_COLLECTSPECIFICCARS_GARAGE (25.0f)
+DISTANCE_TO_CLOSE_COLLECTCARS_GARAGE : ℝ  -- #define DISTANCE_TO_CLOSE_COLLECTCARS_GARAGE (40.0f)
+DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT : ℝ  -- #define DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT (3.2f)
+DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_IN_CAR : ℝ  -- #define DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_IN_CAR (15.0f)
+DISTANCE_TO_FORCE_CLOSE_HIDEOUT_GARAGE : ℝ  -- #define DISTANCE_TO_FORCE_CLOSE_HIDEOUT_GARAGE (70.0f)
+DISTANCE_TO_OPEN_HIDEOUT_GARAGE_ON_FOOT : ℝ  -- #define DISTANCE_TO_OPEN_HIDEOUT_GARAGE_ON_FOOT (2.8f)
+DISTANCE_TO_OPEN_HIDEOUT_GARAGE_IN_CAR : ℝ  -- #define DISTANCE_TO_OPEN_HIDEOUT_GARAGE_IN_CAR (10.0f)
+DISTANCE_TO_SHOW_HIDEOUT_MESSAGE : ℝ  -- #define DISTANCE_TO_SHOW_HIDEOUT_MESSAGE (5.0f)
+DISTANCE_TO_CONSIDER_DOOR_FOR_GARAGE : ℝ  -- #define DISTANCE_TO_CONSIDER_DOOR_FOR_GARAGE (20.0f)
+TIME_TO_RESPRAY : seq CHAR  -- #define TIME_TO_RESPRAY (2000)
+TIME_TO_SETUP_BOMB : seq CHAR  -- #define TIME_TO_SETUP_BOMB (2000)
+TIME_TO_CRUSH_CAR : seq CHAR  -- #define TIME_TO_CRUSH_CAR (3000)
+TIME_TO_PROCESS_KEEPCAR_GARAGE : seq CHAR  -- #define TIME_TO_PROCESS_KEEPCAR_GARAGE (2000)
+FREE_RESPRAY_HEALTH_THRESHOLD : ℝ  -- #define FREE_RESPRAY_HEALTH_THRESHOLD (970.0f)
+NUM_PARTICLES_IN_RESPRAY : seq CHAR  -- #define NUM_PARTICLES_IN_RESPRAY (200)
+RESPRAY_CENTERING_COEFFICIENT : ℝ  -- #define RESPRAY_CENTERING_COEFFICIENT (0.4f)
+KGS_OF_EXPLOSIVES_IN_BOMB : seq CHAR  -- #define KGS_OF_EXPLOSIVES_IN_BOMB (10)
+REWARD_FOR_FIRST_POLICE_CAR : seq CHAR  -- #define REWARD_FOR_FIRST_POLICE_CAR (5000)
+REWARD_FOR_FIRST_BANK_VAN : seq CHAR  -- #define REWARD_FOR_FIRST_BANK_VAN (5000)
+MAX_POLICE_CARS_TO_COLLECT : seq CHAR  -- #define MAX_POLICE_CARS_TO_COLLECT (10)
+MAX_BANK_VANS_TO_COLLECT : seq CHAR  -- #define MAX_BANK_VANS_TO_COLLECT (10)
+MAX_SPEED_TO_SHOW_COLLECTED_MESSAGE : ℝ  -- #define MAX_SPEED_TO_SHOW_COLLECTED_MESSAGE (0.03f)
+IMPORT_REWARD : seq CHAR  -- #define IMPORT_REWARD (500)
+IMPORT_ALLCARS_REWARD : seq CHAR  -- #define IMPORT_ALLCARS_REWARD (20500)
+CRUSHER_VEHICLE_TEST_SPAN : seq CHAR  -- #define CRUSHER_VEHICLE_TEST_SPAN (8)
+CRUSHER_MIN_REWARD : seq CHAR  -- #define CRUSHER_MIN_REWARD (25)
+CRUSHER_MAX_REWARD : seq CHAR  -- #define CRUSHER_MAX_REWARD (125)
+CRUSHER_REWARD_COEFFICIENT : ℝ  -- #define CRUSHER_REWARD_COEFFICIENT (1.0f/500000)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CGarages_Init
+  ΔCGarages
+where
+  -- State update: CrushedCarId' = -1
+  -- State update: NumGarages' = 0
+  -- State update: MessageEndTime' = 0
+  -- State update: MessageStartTime' = 0
+  -- State update: PlayerInGarage' = false
+  -- State update: BombsAreFree' = false
+  -- Invokes: DMAudio.CreateEntity, DMAudio.SetEntityStatus
+  true
+end
+
+schema CGarages_Shutdown
+  ΔCGarages
+where
+  -- State update: NumGarages' = 0
+  -- State update: hGarages' = AEHANDLE_NONE
+  -- Invokes: DMAudio.DestroyEntity
+  true
+end
+
+schema CGarages_Update
+  ΔCGarages
+where
+  -- State update: GarageToBeTidied' = 0
+  -- State update: bCamShouldBeOutisde' = false
+  -- State update: TheCamera.pToGarageWeAreIn' = ∅
+  -- State update: GarageToBeTidied' = 0
+  -- State update: pGarage' = &aGarages[NumGarages]
+  -- State update: pGarage.m_fInfX' = Min(Min(Min(X1, X2), X3), X2 + X3 - X1)
+  -- Return postcondition: result! = NumGarages++
+  -- Return postcondition: result! = NumGarages++
+  -- Return postcondition: result! = pGarage->m_fDoorHeight > 0.0f
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetFrameCounter, CGarages::AddOne, m_vDir1.Magnitude, m_vDir2.Magnitude
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema GaragesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 5541
+end

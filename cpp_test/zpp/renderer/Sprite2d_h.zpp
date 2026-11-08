@@ -1,0 +1,380 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Sprite2d (renderer)
+-- Source File(s): renderer/Sprite2d.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSprite2d
+  RecipNearClip : ℝ
+  NearScreenZ : ℝ
+  NearCamZ : ℝ
+  nextBufferVertex : ℤ
+  nextBufferIndex : ℤ
+  maVertices : seq RwIm2DVertex  -- bounded array [8]
+  m_pTexture : Ref[RwTexture]
+  mCurrentBank : ℤ
+  mpBankTextures : seq Ref[RwTexture]  -- bounded array [10]
+  mCurrentSprite : seq ℤ  -- bounded array [10]
+  mBankStart : seq ℤ  -- bounded array [10]
+  maBankVertices : seq RwIm2DVertex  -- bounded array [500]
+where
+  #maVertices = 8
+  #m_pTexture ≤ 1
+  #mpBankTextures = 10
+  #mCurrentSprite = 10
+  #mBankStart = 10
+  #maBankVertices = 500
+end
+
+schema CSprite2d_SetRecipNearClip
+  ΔCSprite2d
+where
+  -- Declared member operation CSprite2d::SetRecipNearClip(void)
+  true
+end
+
+schema CSprite2d_InitPerFrame_2
+  ΔCSprite2d
+where
+  -- Declared member operation CSprite2d::InitPerFrame(void)
+  true
+end
+
+schema CSprite2d_CSprite2d_3
+  ΔCSprite2d
+where
+  -- Declared member operation CSprite2d::CSprite2d(void)
+  true
+end
+
+schema CSprite2d_CSprite2d_4
+  ΔCSprite2d
+  result! : ANY
+where
+  -- Declared member operation CSprite2d::CSprite2d(void)
+  true
+end
+
+schema CSprite2d_Delete_5
+  ΔCSprite2d
+where
+  -- Declared member operation CSprite2d::Delete(void)
+  true
+end
+
+schema CSprite2d_SetRenderState_6
+  ΔCSprite2d
+where
+  -- Declared member operation CSprite2d::SetRenderState(void)
+  true
+end
+
+schema CSprite2d_SetTexture_7
+  ΔCSprite2d
+  name? : seq CHAR
+where
+  -- Declared member operation CSprite2d::SetTexture(const char *name)
+  true
+end
+
+schema CSprite2d_SetTexture_8
+  ΔCSprite2d
+  name? : seq CHAR
+  mask? : seq CHAR
+where
+  -- Declared member operation CSprite2d::SetTexture(const char *name, const char *mask)
+  true
+end
+
+schema CSprite2d_SetAddressing_9
+  ΔCSprite2d
+  addr? : RwTextureAddressMode
+where
+  -- Declared member operation CSprite2d::SetAddressing(RwTextureAddressMode addr)
+  true
+end
+
+schema CSprite2d_Draw_10
+  ΔCSprite2d
+  x? : ℝ
+  y? : ℝ
+  w? : ℝ
+  h? : ℝ
+  col? : CRGBA
+where
+  -- Declared member operation CSprite2d::Draw(float x, float y, float w, float h, const CRGBA &col)
+  true
+end
+
+schema CSprite2d_Draw_11
+  ΔCSprite2d
+  rect? : CRect
+  col? : CRGBA
+where
+  -- Declared member operation CSprite2d::Draw(const CRect &rect, const CRGBA &col)
+  true
+end
+
+schema CSprite2d_Draw_12
+  ΔCSprite2d
+  rect? : CRect
+  col? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- Declared member operation CSprite2d::Draw(const CRect &rect, const CRGBA &col, float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2)
+  true
+end
+
+schema CSprite2d_Draw_13
+  ΔCSprite2d
+  rect? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite2d::Draw(const CRect &rect, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite2d_Draw_14
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  col? : CRGBA
+where
+  -- Declared member operation CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &col)
+  true
+end
+
+schema CSprite2d_SetVertices_15
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite2d_SetVertices_16
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- Declared member operation CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3, float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2)
+  true
+end
+
+schema CSprite2d_SetVertices_17
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite2d::SetVertices(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite2d_SetVertices_18
+  ΔCSprite2d
+  n? : ℤ
+  positions? : ℙ ℝ
+  uvs? : ℙ ℝ
+  col? : CRGBA
+where
+  -- Declared member operation CSprite2d::SetVertices(int n, float *positions, float *uvs, const CRGBA &col)
+  true
+end
+
+schema CSprite2d_SetMaskVertices_19
+  ΔCSprite2d
+  n? : ℤ
+  positions? : ℙ ℝ
+where
+  -- Declared member operation CSprite2d::SetMaskVertices(int n, float *positions)
+  true
+end
+
+schema CSprite2d_SetVertices_20
+  ΔCSprite2d
+  verts? : Ref[RwIm2DVertex]
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+where
+  -- Declared member operation CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3, float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2)
+  true
+end
+
+schema CSprite2d_DrawRect_21
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite2d::DrawRect(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite2d_DrawRect_22
+  ΔCSprite2d
+  r? : CRect
+  col? : CRGBA
+where
+  -- Declared member operation CSprite2d::DrawRect(const CRect &r, const CRGBA &col)
+  true
+end
+
+schema CSprite2d_DrawRectXLU_23
+  ΔCSprite2d
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite2d::DrawRectXLU(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite2d_DrawAnyRect_24
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- Declared member operation CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+  true
+end
+
+schema CSprite2d_Draw2DPolygon_25
+  ΔCSprite2d
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  color? : CRGBA
+where
+  -- Declared member operation CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &color)
+  true
+end
+
+schema CSprite2d_GetVertices_26
+  ΔCSprite2d
+  result! : Ref[RwIm2DVertex]
+where
+  -- Declared member operation CSprite2d::GetVertices()
+  true
+end
+
+schema CSprite2d_IsVertexBufferFull_27
+  ΔCSprite2d
+  result! : 𝔹
+where
+  -- Declared member operation CSprite2d::IsVertexBufferFull()
+  true
+end
+
+schema CSprite2d_AddToBuffer_28
+  ΔCSprite2d
+  a1? : CRect
+  a2? : CRGBA
+  a3? : ℝ
+  a4? : ℝ
+  a5? : ℝ
+  a6? : ℝ
+  a7? : ℝ
+  a8? : ℝ
+  a9? : ℝ
+  a10? : ℝ
+where
+  -- Declared member operation CSprite2d::AddToBuffer(const CRect &a1, const CRGBA &a2, float a3, float a4, float a5, float a6, float a7, float a8, float a9, float a10)
+  true
+end
+
+schema CSprite2d_RenderVertexBuffer_29
+  ΔCSprite2d
+where
+  -- Declared member operation CSprite2d::RenderVertexBuffer()
+  true
+end
+
+schema CSprite2d_GetBank_30
+  ΔCSprite2d
+  n? : ℤ
+  tex? : Ref[RwTexture]
+  result! : ℤ
+where
+  -- Declared member operation CSprite2d::GetBank(int32 n, RwTexture *tex)
+  true
+end

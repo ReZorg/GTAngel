@@ -1,0 +1,586 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SimpleModelInfo (modelinfo)
+-- Source File(s): modelinfo/SimpleModelInfo.cpp, modelinfo/SimpleModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+-- include Leeds.zpp  (from "Leeds.h")
+-- include BaseModelInfo.zpp  (from "BaseModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NEAR_DRAW_DIST : ℝ  -- #define NEAR_DRAW_DIST 100.0f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema TempIdeData
+  name : seq CHAR
+  id : ℤ
+where
+  #name = 24
+end
+
+schema CSimpleModelInfo
+  CBaseModelInfo  -- inherits base schema
+  m_atomics : Ref[RpAtomic]
+  m_lodDistances : seq ℝ  -- bounded array [3]
+  m_numAtomics : ℕ
+  m_alpha : ℕ
+  m_firstDamaged : 𝔹
+  m_wetRoadReflection : 𝔹
+  m_isDamaged : 𝔹
+  m_isBigBuilding : 𝔹
+  m_noFade : 𝔹
+  m_drawLast : 𝔹
+  m_additive : 𝔹
+  m_isSubway : 𝔹
+  m_ignoreLight : 𝔹
+  m_noZwrite : 𝔹
+  m_noShadows : 𝔹
+  m_ignoreDrawDist : 𝔹
+  m_isCodeGlass : 𝔹
+  m_isArtistGlass : 𝔹
+  m_relatedModel : Ref[CSimpleModelInfo]
+  msClassInfo : base__cRelocatableChunkClassInfo
+  msClassInstance : CSimpleModelInfo
+  m_normalCull : 𝔹
+where
+  #m_atomics ≤ 1
+  #m_lodDistances = 3
+  m_numAtomics ≥ 0
+  m_alpha ≥ 0
+  #m_firstDamaged = 2
+  #m_wetRoadReflection = 1
+  #m_isDamaged = 1
+  #m_isBigBuilding = 1
+  #m_noFade = 1
+  #m_drawLast = 1
+  #m_additive = 1
+  #m_isSubway = 1
+  #m_ignoreLight = 1
+  #m_noZwrite = 1
+  #m_noShadows = 1
+  #m_ignoreDrawDist = 1
+end
+
+schema CSimpleModelInfo_CSimpleModelInfo
+  ΔCSimpleModelInfo
+where
+  -- Declared member operation CSimpleModelInfo::CSimpleModelInfo(void)
+  true
+end
+
+schema CSimpleModelInfo_CreateInstance_2
+  ΔCSimpleModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CSimpleModelInfo::CreateInstance(void)
+  true
+end
+
+schema CSimpleModelInfo_CreateInstance_3
+  ΔCSimpleModelInfo
+  arg_1? : Ref[RwMatrix]
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CSimpleModelInfo::CreateInstance(RwMatrix *)
+  true
+end
+
+schema CSimpleModelInfo_GetRwObject_4
+  ΔCSimpleModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CSimpleModelInfo::GetRwObject(void)
+  true
+end
+
+schema CSimpleModelInfo_LoadModel_5
+  ΔCSimpleModelInfo
+  atomics? : ADDRESS
+  chunk? : ADDRESS
+  result! : void
+where
+  -- Declared member operation CSimpleModelInfo::LoadModel(void *atomics, const void *chunk)
+  true
+end
+
+schema CSimpleModelInfo_Write_6
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CSimpleModelInfo::Write(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CSimpleModelInfo_WriteModel_7
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : ADDRESS
+where
+  -- Declared member operation CSimpleModelInfo::WriteModel(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CSimpleModelInfo_RcWriteThis_8
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CSimpleModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CSimpleModelInfo_RcWriteEmpty_9
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CSimpleModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CSimpleModelInfo_SetAtomic_10
+  ΔCSimpleModelInfo
+  n? : ℤ
+  atomic? : Ref[RpAtomic]
+where
+  -- Declared member operation CSimpleModelInfo::SetAtomic(int n, RpAtomic *atomic)
+  true
+end
+
+schema CSimpleModelInfo_Init_11
+  ΔCSimpleModelInfo
+where
+  -- Declared member operation CSimpleModelInfo::Init(void)
+  true
+end
+
+schema CSimpleModelInfo_IncreaseAlpha_12
+  ΔCSimpleModelInfo
+where
+  -- Declared member operation CSimpleModelInfo::IncreaseAlpha(void)
+  true
+end
+
+schema CSimpleModelInfo_SetLodDistances_13
+  ΔCSimpleModelInfo
+  dist? : ℙ ℝ
+where
+  -- Declared member operation CSimpleModelInfo::SetLodDistances(float *dist)
+  true
+end
+
+schema CSimpleModelInfo_GetLodDistance_14
+  ΔCSimpleModelInfo
+  i? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CSimpleModelInfo::GetLodDistance(int i)
+  true
+end
+
+schema CSimpleModelInfo_GetNearDistance_15
+  ΔCSimpleModelInfo
+  result! : ℝ
+where
+  -- Declared member operation CSimpleModelInfo::GetNearDistance(void)
+  true
+end
+
+schema CSimpleModelInfo_GetLargestLodDistance_16
+  ΔCSimpleModelInfo
+  result! : ℝ
+where
+  -- Declared member operation CSimpleModelInfo::GetLargestLodDistance(void)
+  true
+end
+
+schema CSimpleModelInfo_GetLodAtomic_17
+  ΔCSimpleModelInfo
+  n? : ℤ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CSimpleModelInfo::GetLodAtomic(int n)
+  true
+end
+
+schema CSimpleModelInfo_GetLastAtomic_18
+  ΔCSimpleModelInfo
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CSimpleModelInfo::GetLastAtomic(void)
+  true
+end
+
+schema CSimpleModelInfo_GetLastAtomic_19
+  ΔCSimpleModelInfo
+  dist? : ℝ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CSimpleModelInfo::GetLastAtomic(float dist)
+  true
+end
+
+schema CSimpleModelInfo_GetAtomicFromDistance_20
+  ΔCSimpleModelInfo
+  dist? : ℝ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CSimpleModelInfo::GetAtomicFromDistance(float dist)
+  true
+end
+
+schema CSimpleModelInfo_GetFirstAtomicFromDistance_21
+  ΔCSimpleModelInfo
+  dist? : ℝ
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
+  true
+end
+
+schema CSimpleModelInfo_FindRelatedModel_22
+  ΔCSimpleModelInfo
+where
+  -- Declared member operation CSimpleModelInfo::FindRelatedModel(void)
+  true
+end
+
+schema CSimpleModelInfo_SetupBigBuilding_23
+  ΔCSimpleModelInfo
+where
+  -- Declared member operation CSimpleModelInfo::SetupBigBuilding(void)
+  true
+end
+
+schema CSimpleModelInfo_SetNumAtomics_24
+  ΔCSimpleModelInfo
+  n? : ℤ
+where
+  -- Declared member operation CSimpleModelInfo::SetNumAtomics(int n)
+  true
+end
+
+schema CSimpleModelInfo_GetRelatedModel_25
+  ΔCSimpleModelInfo
+  result! : Ref[CSimpleModelInfo]
+where
+  -- Declared member operation CSimpleModelInfo::GetRelatedModel(void)
+  true
+end
+
+schema CSimpleModelInfo_SetRelatedModel_26
+  ΔCSimpleModelInfo
+  m? : Ref[CSimpleModelInfo]
+  result! : void
+where
+  -- Declared member operation CSimpleModelInfo::SetRelatedModel(CSimpleModelInfo *m)
+  true
+end
+
+schema CSimpleModelInfo_GetRwObject_27
+  ΔCSimpleModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CSimpleModelInfo::GetRwObject(void)
+  true
+end
+
+schema CSimpleModelInfo_SetAtomic_28
+  ΔCSimpleModelInfo
+  n? : ℤ
+  atomic? : Ref[RpAtomic]
+  result! : void
+where
+  -- Declared member operation CSimpleModelInfo::SetAtomic(int n, RpAtomic *atomic)
+  true
+end
+
+schema CSimpleModelInfo_return_29
+  ΔCSimpleModelInfo
+  arg_1? : Ref[CSimpleModelInfo]
+where
+  -- Declared member operation CSimpleModelInfo::return(CSimpleModelInfo*)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSimpleModelInfo_DeleteRwObject
+  ΔCSimpleModelInfo
+where
+  -- State update: f' = RpAtomicGetFrame(m_atomics[i])
+  -- State update: m_atomics' = ∅
+  -- Invokes: CAnimManager::RemoveAnimBlockRef, CStreaming::UnregisterPointer, CStreaming::UnregisterAtomic
+  true
+end
+
+schema CSimpleModelInfo_CreateInstance
+  ΔCSimpleModelInfo
+where
+  -- State update: atomic' = RpAtomicClone(m_atomics[0])
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = (RwObject*)atomic
+  -- Invokes: CStreaming::RegisterInstance
+  true
+end
+
+schema CSimpleModelInfo_CreateInstance_2
+  ΔCSimpleModelInfo
+  matrix? : Ref[RwMatrix]
+where
+  -- State update: atomic' = RpAtomicClone(m_atomics[0])
+  -- State update: frame' = RwFrameCreate()
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = (RwObject*)atomic
+  -- Invokes: CStreaming::RegisterInstance
+  true
+end
+
+schema CSimpleModelInfo_Init
+  ΔCSimpleModelInfo
+where
+  -- State update: m_numAtomics' = 0
+  -- State update: m_firstDamaged' = 0
+  -- State update: m_wetRoadReflection' = 0
+  -- State update: m_isDamaged' = 0
+  -- State update: m_isBigBuilding' = 0
+  -- State update: m_noFade' = 0
+  true
+end
+
+schema CSimpleModelInfo_SetAtomic
+  ΔCSimpleModelInfo
+  n? : ℤ
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: m_atomics' = new RpAtomic*[3]
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- Invokes: CAnimManager::AddAnimBlockRef, CustomPipes::AttachGlossPipe, CustomPipes::AttachWorldPipe
+  true
+end
+
+schema CSimpleModelInfo_SetLodDistances
+  ΔCSimpleModelInfo
+  dist? : ℙ ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSimpleModelInfo_IncreaseAlpha
+  ΔCSimpleModelInfo
+where
+  -- State update: m_alpha' = 0xFF
+  true
+end
+
+schema CSimpleModelInfo_GetLodDistance
+  ΔCSimpleModelInfo
+  i? : ℤ
+where
+  -- Return postcondition: result! = m_lodDistances[i] * TheCamera.LODDistMultiplier
+  true
+end
+
+schema CSimpleModelInfo_GetNearDistance
+  ΔCSimpleModelInfo
+where
+  -- Return postcondition: result! = m_lodDistances[2] * TheCamera.LODDistMultiplier
+  true
+end
+
+schema CSimpleModelInfo_GetLargestLodDistance
+  ΔCSimpleModelInfo
+where
+  -- State update: d' = m_lodDistances[m_numAtomics-1]
+  -- State update: d' = m_lodDistances[m_firstDamaged-1]
+  -- Return postcondition: result! = d * TheCamera.LODDistMultiplier
+  true
+end
+
+schema CSimpleModelInfo_GetLodAtomic
+  ΔCSimpleModelInfo
+  n? : ℤ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[n]
+  true
+end
+
+schema CSimpleModelInfo_GetLastAtomic
+  ΔCSimpleModelInfo
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[m_numAtomics-1]
+  -- Return postcondition: result! = m_atomics[m_firstDamaged-1]
+  true
+end
+
+schema CSimpleModelInfo_GetLastAtomic_2
+  ΔCSimpleModelInfo
+  dist? : ℝ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[n]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CSimpleModelInfo_GetAtomicFromDistance
+  ΔCSimpleModelInfo
+  dist? : ℝ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CSimpleModelInfo_GetFirstAtomicFromDistance
+  ΔCSimpleModelInfo
+  dist? : ℝ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[0]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CSimpleModelInfo_FindRelatedModel
+  ΔCSimpleModelInfo
+where
+  -- State update: thisIndex' = 0
+  -- State update: thisIndex' = -1
+  -- State update: otherIndex' = 0
+  -- State update: mi' = CModelInfo::GetModelInfo(m_sTempIdeData[otherIndex].id)
+  -- Invokes: CModelInfo::GetModelInfo, CGeneral::faststrcmp, mi->IsSimple, this->SetRelatedModel
+  true
+end
+
+schema CSimpleModelInfo_SetupBigBuilding
+  ΔCSimpleModelInfo
+where
+  -- State update: m_isBigBuilding' = 1
+  -- State update: related' = GetRelatedModel()
+  -- State update: m_drawLast' = false
+  -- Invokes: related->GetLargestLodDistance
+  true
+end
+
+schema CSimpleModelInfo_LoadModel
+  ΔCSimpleModelInfo
+  atomics? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: m_chunk' = (void*)chunk
+  -- State update: m_atomics' = (RpAtomic**)atomics
+  -- Invokes: CStreaming::RegisterPointer, CStreaming::RegisterAtomic
+  true
+end
+
+schema CSimpleModelInfo_Write
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: m_atomics' = ∅
+  -- Invokes: CBaseModelInfo::Write, writer.AddPatch
+  true
+end
+
+schema CSimpleModelInfo_WriteModel
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: numAtomics' = 0
+  -- State update: firstDam' = m_firstDamaged - m_numAtomics + numAtomics
+  -- State update: m_firstDamaged' = firstDam
+  -- State update: m_firstDamaged' = 0
+  -- State update: m_numAtomics' = numAtomics
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics
+  -- Invokes: writer.AllocateRaw, writer.AddPatch
+  true
+end
+
+schema CSimpleModelInfo_RcWriteThis
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CSimpleModelInfo_RcWriteEmpty
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CSimpleModelInfo_FindRelatedModel_2
+  ΔCSimpleModelInfo
+  minID? : ℤ
+  maxID? : ℤ
+where
+  -- State update: mi' = CModelInfo::GetModelInfo(i)
+  -- Invokes: CModelInfo::GetModelInfo, CGeneral::faststrcmp, mi->GetModelName, mi->IsSimple, this->SetRelatedModel
+  true
+end
+
+schema CSimpleModelInfo_SetupBigBuilding_2
+  ΔCSimpleModelInfo
+  minID? : ℤ
+  maxID? : ℤ
+where
+  -- State update: m_isBigBuilding' = 1
+  -- State update: related' = GetRelatedModel()
+  -- State update: m_drawLast' = false
+  -- Invokes: related->GetLargestLodDistance
+  true
+end
+
+schema SimpleModelInfo_CSimpleModelInfo
+  ΔSimpleModelInfoModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema SimpleModelInfo_SetNumAtomics
+  ΔSimpleModelInfoModuleState
+  n? : ℤ
+where
+  -- State update: m_numAtomics' = n
+  true
+end
+
+schema SimpleModelInfo_SetRelatedModel
+  ΔSimpleModelInfoModuleState
+  m? : Ref[CSimpleModelInfo]
+where
+  -- State update: m_relatedModel' = m
+  true
+end

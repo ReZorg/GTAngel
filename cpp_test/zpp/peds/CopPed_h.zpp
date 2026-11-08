@@ -1,0 +1,151 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CopPed (peds)
+-- Source File(s): peds/CopPed.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eCopType ::= COP_STREET | COP_FBI | COP_SWAT | COP_HELI_SWAT | COP_ARMY | COP_MIAMIVICE
+  -- val(COP_STREET) = 0
+  -- val(COP_FBI) = 1
+  -- val(COP_SWAT) = 2
+  -- val(COP_HELI_SWAT) = 3
+  -- val(COP_ARMY) = 4
+  -- val(COP_MIAMIVICE) = 5
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCopPed
+  CPed  -- inherits base schema
+  m_nRoadblockVeh : Ref[CVehicle]
+  m_fDistanceToTarget : ℝ
+  m_bIsInPursuit : 𝔹
+  m_bIsDisabledCop : 𝔹
+  field_5FE : ℤ
+  m_bBeatingSuspect : 𝔹
+  m_bStopAndShootDisabledZone : 𝔹
+  m_bDragsPlayerFromCar : 𝔹
+  m_bZoneDisabled : 𝔹
+  m_fAbseilPos : ℝ
+  m_nCopType : eCopType
+  m_bThrowsSpikeTrap : 𝔹
+  m_pRopeEntity : Ref[CEntity]
+  m_nRopeID : ℕ
+  m_nHassleTimer : ℕ
+  field_61C : ℕ
+  field_624 : ℤ
+  field_628 : ℤ
+  m_nRoadblockNode : ℤ
+  field_1350 : ℤ
+  field_1364 : ℤ
+where
+  #m_nRoadblockVeh ≤ 1
+  #m_pRopeEntity ≤ 1
+  m_nRopeID ≥ 0
+  m_nHassleTimer ≥ 0
+  field_61C ≥ 0
+end
+
+schema CCopPed_CCopPed
+  ΔCCopPed
+  arg_1? : eCopType
+  modifier? : ℤ
+where
+  -- Declared member operation CCopPed::CCopPed(eCopType, int32 modifier = 0)
+  true
+end
+
+schema CCopPed_CCopPed_2
+  ΔCCopPed
+  result! : ANY
+where
+  -- Declared member operation CCopPed::CCopPed()
+  true
+end
+
+schema CCopPed_ClearPursuit_3
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ClearPursuit(void)
+  true
+end
+
+schema CCopPed_ProcessControl_4
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ProcessControl(void)
+  true
+end
+
+schema CCopPed_SetArrestPlayer_5
+  ΔCCopPed
+  arg_1? : Ref[CPed]
+where
+  -- Declared member operation CCopPed::SetArrestPlayer(CPed*)
+  true
+end
+
+schema CCopPed_SetPursuit_6
+  ΔCCopPed
+  arg_1? : 𝔹
+where
+  -- Declared member operation CCopPed::SetPursuit(bool)
+  true
+end
+
+schema CCopPed_ArrestPlayer_7
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ArrestPlayer(void)
+  true
+end
+
+schema CCopPed_ScanForCrimes_8
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ScanForCrimes(void)
+  true
+end
+
+schema CCopPed_CopAI_9
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::CopAI(void)
+  true
+end
+
+schema CCopPed_ProcessHeliSwat_10
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ProcessHeliSwat(void)
+  true
+end
+
+schema CCopPed_ProcessStingerCop_11
+  ΔCCopPed
+where
+  -- Declared member operation CCopPed::ProcessStingerCop(void)
+  true
+end
+
+schema CCopPed_CCopPed_12
+  ΔCCopPed
+  arg_1? : eCopType
+where
+  -- Declared member operation CCopPed::CCopPed(eCopType)
+  true
+end

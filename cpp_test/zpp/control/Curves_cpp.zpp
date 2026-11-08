@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Curves (control)
+-- Source File(s): control/Curves.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Curves.zpp  (from "Curves.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCurves_CalcSpeedScaleFactor
+  ΔCCurves
+  pPoint1? : Ref[CVector]
+  pPoint2? : Ref[CVector]
+  dir1X? : ℝ
+  dir1Y? : ℝ
+  dir2X? : ℝ
+  dir2Y? : ℝ
+  result! : ℝ
+where
+  -- State update: distance' = (*pPoint1 - *pPoint2).Magnitude2D()
+  -- State update: dp' = DotProduct2D(dir1, dir2)
+  -- Return postcondition: result! = ((1.0f - dp) * 0.25f + 1.0f) * distance
+  true
+end
+
+schema CCurves_CalcCurvePoint
+  ΔCCurves
+  pPos1? : Ref[CVector]
+  pPos2? : Ref[CVector]
+  pDir1? : Ref[CVector]
+  pDir2? : Ref[CVector]
+  between? : ℝ
+  timeOnCurve? : ℤ
+  pOutPos? : Ref[CVector]
+  pOutDir? : Ref[CVector]
+where
+  -- State update: dir1' = *pDir1 * actualFactor
+  -- State update: dir2' = *pDir2 * actualFactor
+  -- State update: t1' = Abs(DotProduct2D(*pPos2 - *pPos1, *pDir1))
+  -- State update: t2' = Abs(DotProduct2D(*pPos1 - *pPos2, *pDir2))
+  -- State update: coef' = (t1 - t2) / (t1 + t2)
+  -- State update: curveCoef' = 0.0f
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CurvesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 60
+end

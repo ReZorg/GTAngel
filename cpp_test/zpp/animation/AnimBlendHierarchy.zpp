@@ -1,0 +1,203 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendHierarchy (animation)
+-- Source File(s): animation/AnimBlendHierarchy.cpp, animation/AnimBlendHierarchy.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendSequence.zpp  (from "AnimBlendSequence.h")
+-- include AnimBlendHierarchy.zpp  (from "AnimBlendHierarchy.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include templates.zpp  (from "templates.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlendHierarchy
+  name : seq CHAR
+  sequences : Ref[CAnimBlendSequence]
+  numSequences : ℤ
+  compressed : 𝔹
+  keepCompressed : 𝔹
+  totalLength : ℝ
+  linkPtr : Ref[CLink_CAnimBlendHierarchy]
+where
+  #name = 24
+  #sequences ≤ 1
+  #linkPtr ≤ 1
+end
+
+schema CAnimBlendHierarchy_CAnimBlendHierarchy
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::CAnimBlendHierarchy(void)
+  true
+end
+
+schema CAnimBlendHierarchy_Shutdown_2
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::Shutdown(void)
+  true
+end
+
+schema CAnimBlendHierarchy_SetName_3
+  ΔCAnimBlendHierarchy
+  name? : seq CHAR
+where
+  -- Declared member operation CAnimBlendHierarchy::SetName(char *name)
+  true
+end
+
+schema CAnimBlendHierarchy_CalcTotalTime_4
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::CalcTotalTime(void)
+  true
+end
+
+schema CAnimBlendHierarchy_CalcTotalTimeCompressed_5
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::CalcTotalTimeCompressed(void)
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveQuaternionFlips_6
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::RemoveQuaternionFlips(void)
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveAnimSequences_7
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::RemoveAnimSequences(void)
+  true
+end
+
+schema CAnimBlendHierarchy_Uncompress_8
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::Uncompress(void)
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveUncompressedData_9
+  ΔCAnimBlendHierarchy
+where
+  -- Declared member operation CAnimBlendHierarchy::RemoveUncompressedData(void)
+  true
+end
+
+schema CAnimBlendHierarchy_MoveMemory_10
+  ΔCAnimBlendHierarchy
+  onlyone? : 𝔹
+where
+  -- Declared member operation CAnimBlendHierarchy::MoveMemory(bool onlyone = false)
+  true
+end
+
+schema CAnimBlendHierarchy_IsCompressed_11
+  ΔCAnimBlendHierarchy
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendHierarchy::IsCompressed()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimBlendHierarchy_CAnimBlendHierarchy
+  ΔCAnimBlendHierarchy
+where
+  -- State update: sequences' = ∅
+  -- State update: numSequences' = 0
+  -- State update: compressed' = 0
+  -- State update: totalLength' = 0.0f
+  -- State update: linkPtr' = ∅
+  true
+end
+
+schema CAnimBlendHierarchy_Shutdown
+  ΔCAnimBlendHierarchy
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: compressed' = 0
+  -- Invokes: CAnimManager::RemoveFromUncompressedCache
+  true
+end
+
+schema CAnimBlendHierarchy_SetName
+  ΔCAnimBlendHierarchy
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendHierarchy_CalcTotalTime
+  ΔCAnimBlendHierarchy
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: kf1' = sequences[i].GetKeyFrame(j)
+  -- State update: kf2' = sequences[i].GetKeyFrame(j-1)
+  true
+end
+
+schema CAnimBlendHierarchy_CalcTotalTimeCompressed
+  ΔCAnimBlendHierarchy
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: kf1' = sequences[i].GetKeyFrameCompressed(j)
+  -- State update: kf2' = sequences[i].GetKeyFrameCompressed(j-1)
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveQuaternionFlips
+  ΔCAnimBlendHierarchy
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveAnimSequences
+  ΔCAnimBlendHierarchy
+where
+  -- State update: sequences' = ∅
+  -- State update: numSequences' = 0
+  true
+end
+
+schema CAnimBlendHierarchy_Uncompress
+  ΔCAnimBlendHierarchy
+where
+  -- State update: compressed' = 0
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveUncompressedData
+  ΔCAnimBlendHierarchy
+where
+  -- State update: compressed' = 1
+  true
+end
+
+schema CAnimBlendHierarchy_MoveMemory
+  ΔCAnimBlendHierarchy
+  onlyone? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

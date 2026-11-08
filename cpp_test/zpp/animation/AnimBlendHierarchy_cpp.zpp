@@ -1,0 +1,116 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendHierarchy (animation)
+-- Source File(s): animation/AnimBlendHierarchy.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendSequence.zpp  (from "AnimBlendSequence.h")
+-- include AnimBlendHierarchy.zpp  (from "AnimBlendHierarchy.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimBlendHierarchy_CAnimBlendHierarchy
+  ΔCAnimBlendHierarchy
+where
+  -- State update: sequences' = ∅
+  -- State update: numSequences' = 0
+  -- State update: compressed' = 0
+  -- State update: totalLength' = 0.0f
+  -- State update: linkPtr' = ∅
+  true
+end
+
+schema CAnimBlendHierarchy_Shutdown
+  ΔCAnimBlendHierarchy
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: compressed' = 0
+  -- Invokes: CAnimManager::RemoveFromUncompressedCache
+  true
+end
+
+schema CAnimBlendHierarchy_SetName
+  ΔCAnimBlendHierarchy
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendHierarchy_CalcTotalTime
+  ΔCAnimBlendHierarchy
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: kf1' = sequences[i].GetKeyFrame(j)
+  -- State update: kf2' = sequences[i].GetKeyFrame(j-1)
+  true
+end
+
+schema CAnimBlendHierarchy_CalcTotalTimeCompressed
+  ΔCAnimBlendHierarchy
+where
+  -- State update: totalLength' = 0.0f
+  -- State update: kf1' = sequences[i].GetKeyFrameCompressed(j)
+  -- State update: kf2' = sequences[i].GetKeyFrameCompressed(j-1)
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveQuaternionFlips
+  ΔCAnimBlendHierarchy
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveAnimSequences
+  ΔCAnimBlendHierarchy
+where
+  -- State update: sequences' = ∅
+  -- State update: numSequences' = 0
+  true
+end
+
+schema CAnimBlendHierarchy_Uncompress
+  ΔCAnimBlendHierarchy
+where
+  -- State update: compressed' = 0
+  true
+end
+
+schema CAnimBlendHierarchy_RemoveUncompressedData
+  ΔCAnimBlendHierarchy
+where
+  -- State update: compressed' = 1
+  true
+end
+
+schema CAnimBlendHierarchy_MoveMemory
+  ΔCAnimBlendHierarchy
+  onlyone? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AnimBlendHierarchyModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 144
+end

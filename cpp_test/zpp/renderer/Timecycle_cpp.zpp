@@ -1,0 +1,122 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Timecycle (renderer)
+-- Source File(s): renderer/Timecycle.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTimeCycle_Initialise
+  ΔCTimeCycle
+where
+  -- State update: bi' = 0
+  -- State update: w' = 0
+  -- State update: h' = 0
+  -- State update: li' = 0
+  -- State update: m_FogReduction' = 0
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema CTimeCycle_UpdateArrays
+  ΔCTimeCycle
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimeCycle_Interpolate
+  ΔCTimeCycle
+  a? : ℙ ℤ
+  b? : ℙ ℤ
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimeCycle_Interpolate_2
+  ΔCTimeCycle
+  a? : ℙ ℕ
+  b? : ℙ ℕ
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimeCycle_Interpolate_3
+  ΔCTimeCycle
+  a? : ℙ ℤ
+  b? : ℙ ℤ
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTimeCycle_StartExtraColour
+  ΔCTimeCycle
+  c? : ℤ
+  fade? : 𝔹
+where
+  -- State update: m_bExtraColourOn' = true
+  -- State update: m_ExtraColour' = c
+  -- State update: m_ExtraColourInter' = 0.0f
+  -- State update: m_ExtraColourInter' = 1.0f
+  true
+end
+
+schema CTimeCycle_StopExtraColour
+  ΔCTimeCycle
+  fade? : 𝔹
+where
+  -- State update: m_bExtraColourOn' = false
+  -- State update: m_ExtraColourInter' = 0.0f
+  true
+end
+
+schema CTimeCycle_Update
+  ΔCTimeCycle
+where
+  -- State update: h1' = CClock::GetHours()
+  -- State update: h2' = (h1+1)%24
+  -- State update: w1' = CWeather::OldWeatherType
+  -- State update: w2' = CWeather::NewWeatherType
+  -- State update: timeInterp' = (CClock::GetMinutes() + CClock::GetSeconds()/60.0f)/60.0f
+  -- State update: interp_c0' = (1.0f-timeInterp) * (1.0f-CWeather::InterpolationValue)
+  -- Invokes: CClock::GetHours, CClock::GetMinutes, CClock::GetSeconds, sunPos.Normalise, CTimer::GetTimeStep
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TimecycleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 971
+end

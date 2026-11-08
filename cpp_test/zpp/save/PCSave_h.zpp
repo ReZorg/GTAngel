@@ -1,0 +1,82 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PCSave (save)
+-- Source File(s): save/PCSave.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eSaveStatus ::= SAVESTATUS_SUCCESSFUL | SAVESTATUS_ERR_SAVE_CREATE | SAVESTATUS_ERR_SAVE_WRITE | SAVESTATUS_ERR_SAVE_CLOSE | SAVESTATUS_ERR_LOAD_OPEN | SAVESTATUS_ERR_LOAD_READ | SAVESTATUS_ERR_LOAD_CLOSE | SAVESTATUS_ERR_DATA_INVALID | SAVESTATUS_DELETEFAILED8 | SAVESTATUS_DELETEFAILED9 | SAVESTATUS_DELETEFAILED10
+  -- val(SAVESTATUS_SUCCESSFUL) = 0
+
+PCSave_Enum_2 ::= SLOT_OK | SLOT_EMPTY | SLOT_CORRUPTED
+  -- val(SLOT_OK) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema C_PcSave
+  nErrorCode : eSaveStatus
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema C_PcSave_C_PcSave
+  ΔC_PcSave
+where
+  -- Declared member operation C_PcSave::C_PcSave()
+  true
+end
+
+schema C_PcSave_DeleteSlot_2
+  ΔC_PcSave
+  slot? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation C_PcSave::DeleteSlot(int32 slot)
+  true
+end
+
+schema C_PcSave_SaveSlot_3
+  ΔC_PcSave
+  slot? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation C_PcSave::SaveSlot(int32 slot)
+  true
+end
+
+schema C_PcSave_PcClassSaveRoutine_4
+  ΔC_PcSave
+  file? : ℤ
+  data? : ℙ ℕ
+  size? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation C_PcSave::PcClassSaveRoutine(int32 file, uint8 *data, uint32 size)
+  true
+end
+
+schema C_PcSave_SetSaveDirectory_5
+  ΔC_PcSave
+  path? : seq CHAR
+where
+  -- Declared member operation C_PcSave::SetSaveDirectory(const char *path)
+  true
+end
+
+schema C_PcSave_SaveSlot_6
+  ΔC_PcSave
+  slot? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation C_PcSave::SaveSlot(int32 slot)
+  true
+end

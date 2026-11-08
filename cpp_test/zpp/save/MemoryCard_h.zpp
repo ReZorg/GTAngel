@@ -1,0 +1,421 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MemoryCard (save)
+-- Source File(s): save/MemoryCard.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Date.zpp  (from "Date.h")
+-- include libcdvd.zpp  (from "libcdvd.h")
+-- include sifdev.zpp  (from "sifdev.h")
+-- include libvu0.zpp  (from "libvu0.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+GUFF_FILE_SIZE : ℕ  -- #define GUFF_FILE_SIZE 147096
+SAVE_FILE_SIZE : ℕ  -- #define SAVE_FILE_SIZE 201729
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+MemoryCard_Enum_1 ::= CARD_ONE | CARD_TWO | MAX_CARDS
+  -- val(CARD_ONE) = 0
+
+MemoryCard_Enum_2 ::= MAX_SLOTS
+  -- val(MAX_SLOTS) = 8
+
+MCSTATE ::= MCSTATE_OK | MCSTATE_NEED_500KB | MCSTATE_NEED_200KB | MCSTATE_NOCARD
+  -- val(MCSTATE_OK) = 0
+
+SLOTINFO ::= SLOT_PRESENT | SLOT_NOTPRESENT | SLOT_CORRUPTED
+  -- val(SLOT_PRESENT) = 0
+
+MemoryCard_Enum_5 ::= ERR_NONE | ERR_NOFORMAT | ERR_DIRNOENTRY | ERR_OPENNOENTRY | ERR_DELETENOENTRY | ERR_DELETEDENIED | ERR_DELETEFAILED | ERR_WRITEFULLDEVICE | ERR_WRITENOENTRY | ERR_WRITEDENIED | ERR_FLUSHNOENTRY | ERR_WRITEFAILED | ERR_FORMATFAILED | ERR_FILETABLENOENTRY | ERR_DIRFULLDEVICE | ERR_DIRBADENTRY | ERR_FILEFULLDEVICE | ERR_FILENOPATHENTRY | ERR_FILEDENIED | ERR_FILEUPLIMIT | ERR_READNOENTRY | ERR_READDENIED | ERR_LOADFAILED | ERR_SAVEFAILED | ERR_DATACORRUPTED | ERR_NOROOTDIR | NO_ERR_SUCCESS
+  -- val(ERR_NONE) = 0
+  -- val(ERR_NOFORMAT) = 1
+  -- val(ERR_DIRNOENTRY) = 2
+  -- val(ERR_OPENNOENTRY) = 3
+  -- val(ERR_DELETENOENTRY) = 4
+  -- val(ERR_DELETEDENIED) = 5
+  -- val(ERR_DELETEFAILED) = 6
+  -- val(ERR_WRITEFULLDEVICE) = 7
+  -- val(ERR_WRITENOENTRY) = 8
+  -- val(ERR_WRITEDENIED) = 9
+  -- val(ERR_FORMATFAILED) = 12
+  -- val(ERR_FILETABLENOENTRY) = 13
+  -- val(ERR_DIRFULLDEVICE) = 14
+  -- val(ERR_DIRBADENTRY) = 15
+  -- val(ERR_FILEFULLDEVICE) = 16
+  -- val(ERR_FILENOPATHENTRY) = 17
+  -- val(ERR_FILEDENIED) = 18
+  -- val(ERR_FILEUPLIMIT) = 19
+  -- val(ERR_READNOENTRY) = 20
+  -- val(ERR_READDENIED) = 21
+  -- val(ERR_LOADFAILED) = 22
+  -- val(ERR_SAVEFAILED) = 23
+
+MemoryCard_Enum_6 ::= RES_SUCCESS | RES_FAILED
+  -- val(RES_SUCCESS) = 1
+  -- val(RES_FAILED) = -1
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CMemoryCardInfo
+  port : ℤ
+  slot : ℤ
+  type : ℤ
+  free : ℤ
+  format : ℤ
+  dir : seq CHAR
+  Year : ℤ
+  _Create : time
+  _Modify : time
+  FileSizeByte : ℤ
+  AttrFile : ℤ
+  EntryName : seq unsigned_char  -- bounded array [32]
+where
+  #dir = 40
+  #EntryName = 32
+end
+
+schema CMemoryCard
+  _unk0 : ℤ
+  _unk1 : ℤ
+  m_bWantToLoad : 𝔹
+  JustLoadedDontFadeInYet : 𝔹
+  StillToFadeOut : 𝔹
+  b_FoundRecentSavedGameWantToLoad : 𝔹
+  TimeStartedCountingForFade : ℕ
+  TimeToStayFadedBeforeFadeOut : ℕ
+  LastBlockSize : ℕ
+  _bunk2 : 𝔹
+  SaveFileNameJustSaved : seq CHAR
+  _pad0 : seq CHAR
+  pErrorMsg : seq CHAR
+  _unk4 : seq CHAR
+  _bunk5 : 𝔹
+  _bunk6 : 𝔹
+  _bunk7 : 𝔹
+  _bunk8 : 𝔹
+  nError : ℤ
+  _unk9 : seq CHAR
+  LoadFileName : seq CHAR
+  _pad1 : seq CHAR
+  CompileDateAndTime : CDate
+  m_LanguageToLoad : ℤ
+  m_LevelToLoad : ℤ
+  CurrentCard : ℤ
+  _unk10 : seq CHAR
+where
+  TimeStartedCountingForFade ≥ 0
+  TimeToStayFadedBeforeFadeOut ≥ 0
+  LastBlockSize ≥ 0
+  #SaveFileNameJustSaved = 30
+  #_pad0 = 3
+  #_unk4 = 32
+  #_unk9 = 30
+  #LoadFileName = 30
+  #_pad1 = 2
+  #_unk10 = 32
+end
+
+schema CMemoryCard_GetError
+  ΔCMemoryCard
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::GetError()
+  true
+end
+
+schema CMemoryCard_GetErrorMessage_2
+  ΔCMemoryCard
+  result! : seq CHAR
+where
+  -- Declared member operation CMemoryCard::GetErrorMessage()
+  true
+end
+
+schema CMemoryCard_Init_3
+  ΔCMemoryCard
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::Init(void)
+  true
+end
+
+schema CMemoryCard_CMemoryCard_4
+  ΔCMemoryCard
+where
+  -- Declared member operation CMemoryCard::CMemoryCard(void)
+  true
+end
+
+schema CMemoryCard_RestoreForStartLoad_5
+  ΔCMemoryCard
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::RestoreForStartLoad(void)
+  true
+end
+
+schema CMemoryCard_LoadSavedGame_6
+  ΔCMemoryCard
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::LoadSavedGame(void)
+  true
+end
+
+schema CMemoryCard_CheckCardInserted_7
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::CheckCardInserted(int32 cardID)
+  true
+end
+
+schema CMemoryCard_PopulateCardFlags_8
+  ΔCMemoryCard
+  cardID? : ℤ
+  bSlotFlag? : 𝔹
+  bTypeFlag? : 𝔹
+  bFreeFlag? : 𝔹
+  bFormatFlag? : 𝔹
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::PopulateCardFlags(int32 cardID, bool bSlotFlag, bool bTypeFlag, bool bFreeFlag, bool bFormatFlag)
+  true
+end
+
+schema CMemoryCard_FormatCard_9
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::FormatCard(int32 cardID)
+  true
+end
+
+schema CMemoryCard_PopulateFileTable_10
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::PopulateFileTable(int32 cardID)
+  true
+end
+
+schema CMemoryCard_CreateRootDirectory_11
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::CreateRootDirectory(int32 cardID)
+  true
+end
+
+schema CMemoryCard_ChangeDirectory_12
+  ΔCMemoryCard
+  cardID? : ℤ
+  dir? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::ChangeDirectory(int32 cardID, char *dir)
+  true
+end
+
+schema CMemoryCard_CreateIconFiles_13
+  ΔCMemoryCard
+  cardID? : ℤ
+  icon_one? : seq CHAR
+  icon_two? : seq CHAR
+  icon_three? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::CreateIconFiles(int32 cardID, char *icon_one, char *icon_two, char *icon_three)
+  true
+end
+
+schema CMemoryCard_LoadIconFiles_14
+  ΔCMemoryCard
+  cardID? : ℤ
+  icon_one? : seq CHAR
+  icon_two? : seq CHAR
+  icon_three? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::LoadIconFiles(int32 cardID, char *icon_one, char *icon_two, char *icon_three)
+  true
+end
+
+schema CMemoryCard_CloseMemCardFile_15
+  ΔCMemoryCard
+  file? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::CloseMemCardFile(int32 file)
+  true
+end
+
+schema CMemoryCard_CreateMemCardFileReadWrite_16
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::CreateMemCardFileReadWrite(int32 cardID, char *filename)
+  true
+end
+
+schema CMemoryCard_OpenMemCardFileForReading_17
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::OpenMemCardFileForReading(int32 cardID, char *filename)
+  true
+end
+
+schema CMemoryCard_ReadFromMemCard_18
+  ΔCMemoryCard
+  file? : ℤ
+  buff? : ADDRESS
+  size? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::ReadFromMemCard(int32 file, void *buff, int32 size)
+  true
+end
+
+schema CMemoryCard_DeleteMemoryCardFile_19
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::DeleteMemoryCardFile(int32 cardID, char *filename)
+  true
+end
+
+schema CMemoryCard_PopulateErrorMessage_20
+  ΔCMemoryCard
+where
+  -- Declared member operation CMemoryCard::PopulateErrorMessage()
+  true
+end
+
+schema CMemoryCard_WritetoMemCard_21
+  ΔCMemoryCard
+  file? : ℤ
+  buff? : ADDRESS
+  size? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::WritetoMemCard(int32 file, void *buff, int32 size)
+  true
+end
+
+schema CMemoryCard_SaveGame_22
+  ΔCMemoryCard
+  result! : 𝔹
+where
+  -- Declared member operation CMemoryCard::SaveGame(void)
+  true
+end
+
+schema CMemoryCard_DoHackRoundSTUPIDSonyDateTimeStuff_23
+  ΔCMemoryCard
+  port? : ℤ
+  filename? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CMemoryCard::DoHackRoundSTUPIDSonyDateTimeStuff(int32 port, char *filename)
+  true
+end
+
+schema CMemoryCard_LookForRootDirectory_24
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::LookForRootDirectory(int32 cardID)
+  true
+end
+
+schema CMemoryCard_FillFirstFileWithGuff_25
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::FillFirstFileWithGuff(int32 cardID)
+  true
+end
+
+schema CMemoryCard_FindMostRecentFileName_26
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CMemoryCard::FindMostRecentFileName(int32 cardID, char *filename)
+  true
+end
+
+schema CMemoryCard_ClearFileTableBuffer_27
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- Declared member operation CMemoryCard::ClearFileTableBuffer(int32 cardID)
+  true
+end
+
+schema CMemoryCard_GetClusterAmountForFileCreation_28
+  ΔCMemoryCard
+  port? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::GetClusterAmountForFileCreation(int32 port)
+  true
+end
+
+schema CMemoryCard_DeleteEverythingInGameRoot_29
+  ΔCMemoryCard
+  cardID? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CMemoryCard::DeleteEverythingInGameRoot(int32 cardID)
+  true
+end
+
+schema CMemoryCard_CheckDataNotCorrupt_30
+  ΔCMemoryCard
+  filename? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMemoryCard::CheckDataNotCorrupt(char *filename)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema MemoryCard_GetError
+  ΔMemoryCardModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = nError
+  true
+end

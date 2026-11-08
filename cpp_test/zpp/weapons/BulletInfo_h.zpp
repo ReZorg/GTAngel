@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: BulletInfo (weapons)
+-- Source File(s): weapons/BulletInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+BulletInfo_Enum_1 ::= NUM_BULLETS
+  -- val(NUM_BULLETS) = 100
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBulletInfo
+  m_eWeaponType : eWeaponType
+  m_pSource : Ref[CEntity]
+  m_fTimer : ℝ
+  m_bInUse : 𝔹
+  m_vecPosition : CVector
+  m_vecSpeed : CVector
+  m_nDamage : ℤ
+where
+  #m_pSource ≤ 1
+end
+
+schema CBulletInfo_Initialise
+  ΔCBulletInfo
+where
+  -- Declared member operation CBulletInfo::Initialise(void)
+  true
+end
+
+schema CBulletInfo_Shutdown_2
+  ΔCBulletInfo
+where
+  -- Declared member operation CBulletInfo::Shutdown(void)
+  true
+end
+
+schema CBulletInfo_AddBullet_3
+  ΔCBulletInfo
+  pSource? : Ref[CEntity]
+  type? : eWeaponType
+  vecPosition? : CVector
+  vecSpeed? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CBulletInfo::AddBullet(CEntity* pSource, eWeaponType type, CVector vecPosition, CVector vecSpeed)
+  true
+end
+
+schema CBulletInfo_Update_4
+  ΔCBulletInfo
+where
+  -- Declared member operation CBulletInfo::Update(void)
+  true
+end
+
+schema CBulletInfo_TestForSniperBullet_5
+  ΔCBulletInfo
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CBulletInfo::TestForSniperBullet(float x1, float x2, float y1, float y2, float z1, float z2)
+  true
+end

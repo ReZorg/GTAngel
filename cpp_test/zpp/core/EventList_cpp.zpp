@@ -1,0 +1,152 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: EventList (core)
+-- Source File(s): core/EventList.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include World.zpp  (from "World.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include EventList.zpp  (from "EventList.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Text.zpp  (from "Text.h")
+-- include main.zpp  (from "main.h")
+-- include Accident.zpp  (from "Accident.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+EventList_Enum_1 ::= EVENT_STATE_0 | EVENT_STATE_CANDELETE | EVENT_STATE_CLEAR
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CEventList_Initialise
+  ΔCEventList
+where
+  -- State update: type' = EVENT_∅
+  -- State update: entityType' = EVENT_ENTITY_NONE
+  -- State update: entityRef' = 0
+  -- State update: posn.x' = 0.0f
+  -- State update: posn.y' = 0.0f
+  -- State update: posn.z' = 0.0f
+  true
+end
+
+schema CEventList_Update
+  ΔCEventList
+where
+  -- State update: ms_nFirstFreeSlotIndex' = 0
+  -- State update: type' = EVENT_∅
+  -- State update: state' = EVENT_STATE_0
+  -- State update: state' = EVENT_STATE_CANDELETE
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CEventList_RegisterEvent
+  ΔCEventList
+  type? : eEventType
+  entityType? : eEventEntity
+  ent? : Ref[CEntity]
+  criminal? : Ref[CPed]
+  timeout? : ℤ
+where
+  -- State update: copsDontCare' = false
+  -- State update: ref' = CPools::GetPedRef((CPed*)ent)
+  -- State update: copsDontCare' = true
+  -- State update: ref' = CPools::GetVehicleRef((CVehicle*)ent)
+  -- State update: ref' = CPools::GetObjectRef((CObject*)ent)
+  -- State update: ref' = 0
+  -- Invokes: gAccidentManager.ReportAccident, CPools::GetPedRef, ent->GetModelIndex, CPools::GetVehicleRef, CPools::GetObjectRef
+  true
+end
+
+schema CEventList_RegisterEvent_2
+  ΔCEventList
+  type? : eEventType
+  posn? : CVector
+  timeout? : ℤ
+where
+  -- State update: timeout' = CTimer::GetTimeInMilliseconds() + timeout
+  -- State update: ms_nFirstFreeSlotIndex' = i
+  -- State update: type' = type
+  -- State update: entityType' = EVENT_ENTITY_NONE
+  -- State update: timeout' = CTimer::GetTimeInMilliseconds() + timeout
+  -- State update: posn' = posn
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CEventList_GetEvent
+  ΔCEventList
+  type? : eEventType
+  event? : ℙ ℤ
+where
+  -- State update: event' = i
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CEventList_ClearEvent
+  ΔCEventList
+  event? : ℤ
+where
+  -- State update: state' = EVENT_STATE_CLEAR
+  true
+end
+
+schema CEventList_FindClosestEvent
+  ΔCEventList
+  type? : eEventType
+  posn? : CVector
+  event? : ℙ ℤ
+where
+  -- State update: found' = false
+  -- State update: mindist' = 60.0f
+  -- State update: dist' = (posn - gaEvent[i].posn).Magnitude()
+  -- State update: mindist' = dist
+  -- State update: found' = true
+  -- State update: event' = i
+  -- Return postcondition: result! = found
+  true
+end
+
+schema CEventList_ReportCrimeForEvent
+  ΔCEventList
+  type? : eEventType
+  crimeId? : ℤ
+  copsDontCare? : 𝔹
+where
+  -- State update: crime' = CRIME_HIT_PED
+  -- State update: crime' = CRIME_RUN_REDLIGHT
+  -- State update: crime' = CRIME_HIT_COP
+  -- State update: crime' = CRIME_POSSESSION_GUN
+  -- State update: crime' = CRIME_STEAL_CAR
+  -- State update: crime' = CRIME_RUNOVER_PED
+  -- Invokes: m_pWanted->GetWantedLevel, CMessages::AddBigMessage, TheText.Get, CWanted::WorkOutPolicePresence, m_pWanted->RegisterCrime_Immediately
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema EventListModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 273
+end

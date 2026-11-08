@@ -1,0 +1,149 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: NameGrid (control)
+-- Source File(s): control/NameGrid.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlayerName
+  x : ℝ
+  y : ℝ
+  unk_8 : seq CHAR
+  unk_4c : ℤ
+where
+  #unk_8 = 34
+end
+
+schema CPlayerName_CPlayerName
+  ΔCPlayerName
+where
+  -- Declared member operation CPlayerName::CPlayerName()
+  true
+end
+
+schema CPlayerName_DisplayName_2
+  ΔCPlayerName
+  arg_1? : ℤ
+where
+  -- Declared member operation CPlayerName::DisplayName(int)
+  true
+end
+
+schema CRow
+  unk_0 : ℤ
+  unk_4 : ℤ
+  unk_8 : seq CHAR
+  unk_30 : ℤ
+where
+  #unk_8 = 20
+end
+
+schema CRow_CRow
+  ΔCRow
+where
+  -- Declared member operation CRow::CRow()
+  true
+end
+
+schema CRow_SetLetter_2
+  ΔCRow
+  arg_1? : ℤ
+  arg_2? : seq CHAR
+where
+  -- Declared member operation CRow::SetLetter(int, wchar *)
+  true
+end
+
+schema CGrid
+  rows : seq CRow  -- bounded array [5]
+  unk_int1 : ℤ
+  unk_int2 : ℤ
+  unk_int3 : ℤ
+  unk_float1 : ℝ
+  unk_float2 : ℝ
+  playerName : CPlayerName
+  unk2 : seq CHAR
+  unk3 : seq CHAR
+where
+  #rows = 5
+  #unk2 = 4
+  #unk3 = 4
+end
+
+schema CGrid_CGrid
+  ΔCGrid
+where
+  -- Declared member operation CGrid::CGrid()
+  true
+end
+
+schema CGrid_ProcessAnyLeftJustDown_2
+  ΔCGrid
+where
+  -- Declared member operation CGrid::ProcessAnyLeftJustDown()
+  true
+end
+
+schema CGrid_ProcessAnyRightJustDown_3
+  ΔCGrid
+where
+  -- Declared member operation CGrid::ProcessAnyRightJustDown()
+  true
+end
+
+schema CGrid_ProcessAnyUpJustDown_4
+  ΔCGrid
+where
+  -- Declared member operation CGrid::ProcessAnyUpJustDown()
+  true
+end
+
+schema CGrid_ProcessAnyDownJustDown_5
+  ΔCGrid
+where
+  -- Declared member operation CGrid::ProcessAnyDownJustDown()
+  true
+end
+
+schema CGrid_AllDoneMakePlayerName_6
+  ΔCGrid
+where
+  -- Declared member operation CGrid::AllDoneMakePlayerName()
+  true
+end
+
+schema CGrid_ProcessDPadCrossJustDown_7
+  ΔCGrid
+where
+  -- Declared member operation CGrid::ProcessDPadCrossJustDown()
+  true
+end
+
+schema CGrid_DisplayGrid_8
+  ΔCGrid
+where
+  -- Declared member operation CGrid::DisplayGrid()
+  true
+end
+
+schema CGrid_ProcessControllerInput_9
+  ΔCGrid
+where
+  -- Declared member operation CGrid::ProcessControllerInput()
+  true
+end
+
+schema CGrid_Process_10
+  ΔCGrid
+where
+  -- Declared member operation CGrid::Process()
+  true
+end

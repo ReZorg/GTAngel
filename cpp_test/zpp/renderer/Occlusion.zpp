@@ -1,0 +1,424 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Occlusion (renderer)
+-- Source File(s): renderer/Occlusion.cpp, renderer/Occlusion.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+-- include Game.zpp  (from "Game.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Vector.zpp  (from "Vector.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include Lines.zpp  (from "Lines.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ActiveOccluderLine
+  origin : CVector2D
+  direction : CVector2D
+  length : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CActiveOccluder
+  lines : seq ActiveOccluderLine  -- bounded array [6]
+  linesCount : ℤ
+  radius : ℝ
+where
+  #lines = 6
+end
+
+schema CActiveOccluder_IsPointWithinOcclusionArea
+  ΔCActiveOccluder
+  x? : ℝ
+  y? : ℝ
+  area? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CActiveOccluder::IsPointWithinOcclusionArea(float x, float y, float area)
+  true
+end
+
+schema COccluder
+  height : ℤ
+  z : ℤ
+  angle : ℕ
+  listIndex : ℤ
+where
+  angle ≥ 0
+end
+
+schema COccluder_NearCamera
+  ΔCOccluder
+  result! : 𝔹
+where
+  -- Declared member operation COccluder::NearCamera()
+  true
+end
+
+schema COccluder_ProcessOneOccluder_2
+  ΔCOccluder
+  occl? : Ref[CActiveOccluder]
+  result! : 𝔹
+where
+  -- Declared member operation COccluder::ProcessOneOccluder(CActiveOccluder *occl)
+  true
+end
+
+schema COccluder_ProcessLineSegment_3
+  ΔCOccluder
+  corner1? : ℤ
+  corner2? : ℤ
+  occl? : Ref[CActiveOccluder]
+  result! : 𝔹
+where
+  -- Declared member operation COccluder::ProcessLineSegment(int corner1, int corner2, CActiveOccluder* occl)
+  true
+end
+
+schema COccluder_GetAngle_4
+  ΔCOccluder
+  result! : ℝ
+where
+  -- Declared member operation COccluder::GetAngle(void)
+  true
+end
+
+schema COcclusion
+  NumOccludersOnMap : ℤ
+  FarAwayList : ℤ
+  NearbyList : ℤ
+  ListWalkThroughFA : ℤ
+  PreviousListWalkThroughFA : ℤ
+  NumActiveOccluders : ℤ
+  aOccluders : seq COccluder  -- bounded array [NUMOCCLUSIONVOLUMES]
+  aActiveOccluders : seq CActiveOccluder  -- bounded array [NUMACTIVEOCCLUDERS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema COcclusion_Init
+  ΔCOcclusion
+where
+  -- Declared member operation COcclusion::Init(void)
+  true
+end
+
+schema COcclusion_AddOne_2
+  ΔCOcclusion
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  length? : ℝ
+  height? : ℝ
+  angle? : ℝ
+where
+  -- Declared member operation COcclusion::AddOne(float x, float y, float z, float width, float length, float height, float angle)
+  true
+end
+
+schema COcclusion_ProcessBeforeRendering_3
+  ΔCOcclusion
+where
+  -- Declared member operation COcclusion::ProcessBeforeRendering(void)
+  true
+end
+
+schema COcclusion_OccluderHidesBehind_4
+  ΔCOcclusion
+  occl1? : Ref[CActiveOccluder]
+  occl2? : Ref[CActiveOccluder]
+  result! : 𝔹
+where
+  -- Declared member operation COcclusion::OccluderHidesBehind(CActiveOccluder *occl1, CActiveOccluder *occl2)
+  true
+end
+
+schema COcclusion_IsAABoxOccluded_5
+  ΔCOcclusion
+  pos? : CVector
+  width? : ℝ
+  length? : ℝ
+  height? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation COcclusion::IsAABoxOccluded(CVector pos, float width, float length, float height)
+  true
+end
+
+schema COcclusion_IsPositionOccluded_6
+  ΔCOcclusion
+  pos? : CVector
+  side? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation COcclusion::IsPositionOccluded(CVector pos, float side)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema COcclusion_Init
+  ΔCOcclusion
+where
+  -- State update: NumOccludersOnMap' = 0
+  -- State update: FarAwayList' = -1
+  -- State update: NearbyList' = -1
+  -- State update: ListWalkThroughFA' = -1
+  -- State update: PreviousListWalkThroughFA' = -1
+  -- Invokes: VarConsole.Add
+  true
+end
+
+schema COcclusion_AddOne
+  ΔCOcclusion
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  length? : ℝ
+  height? : ℝ
+  angle? : ℝ
+where
+  -- State update: x' = x
+  -- State update: y' = y
+  -- State update: z' = z
+  -- State update: width' = width
+  -- State update: length' = length
+  -- State update: height' = height
+  true
+end
+
+schema COccluder_NearCamera
+  ΔCOccluder
+where
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema Occlusion_DoesInfiniteLineCrossFiniteLine
+  ΔOcclusionModuleState
+  p1X? : ℝ
+  p1Y? : ℝ
+  p2X? : ℝ
+  p2Y? : ℝ
+  lineX? : ℝ
+  lineY? : ℝ
+  lineDX? : ℝ
+  lineDY? : ℝ
+where
+  -- State update: side1' = (p1X - lineX) * lineDY - (p1Y - lineY) * lineDX
+  -- State update: side2' = (p2X - lineX) * lineDY - (p2Y - lineY) * lineDX
+  -- Return postcondition: result! = side1 * side2 < 0.0f
+  true
+end
+
+schema Occlusion_DoesInfiniteLineTouchScreen
+  ΔOcclusionModuleState
+  lineX? : ℝ
+  lineY? : ℝ
+  lineDX? : ℝ
+  lineDY? : ℝ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema Occlusion_IsPointInsideLine
+  ΔOcclusionModuleState
+  lineX? : ℝ
+  lineY? : ℝ
+  lineDX? : ℝ
+  lineDY? : ℝ
+  pX? : ℝ
+  pY? : ℝ
+  area? : ℝ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (pX - lineX) * lineDY - (pY - lineY) * lineDX >= area
+  true
+end
+
+schema Occlusion_CalcScreenCoors
+  ΔOcclusionModuleState
+  in? : CVector
+  out? : Ref[CVector]
+  outw? : ℙ ℝ
+  outh? : ℙ ℝ
+  result! : 𝔹
+where
+  -- State update: out' = TheCamera.m_viewMatrix * in
+  -- State update: recip' = 1.0f / out.z
+  -- State update: fovScale' = DefaultFOV / CDraw::GetFOV()
+  -- State update: outw' = fovScale * recip * SCREEN_WIDTH
+  -- State update: outh' = fovScale * recip * SCREEN_HEIGHT
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CDraw::GetFOV
+  true
+end
+
+schema Occlusion_CalcScreenCoors_2
+  ΔOcclusionModuleState
+  in? : CVector
+  out? : Ref[CVector]
+  result! : 𝔹
+where
+  -- State update: out' = TheCamera.m_viewMatrix * in
+  -- State update: recip' = 1.0f / out.z
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema COccluder_ProcessLineSegment
+  ΔCOccluder
+  corner1? : ℤ
+  corner2? : ℤ
+  occl? : Ref[CActiveOccluder]
+where
+  -- State update: ratio' = clipDist2 / (clipDist1 + clipDist2)
+  -- State update: p1' = gOccluderCoorsOnScreen[corner1]
+  -- State update: ratio' = clipDist1 / (clipDist1 + clipDist2)
+  -- State update: p2' = gOccluderCoorsOnScreen[corner2]
+  -- State update: gMinXInOccluder' = Min(Min(gMinXInOccluder, p1.x), p2.x)
+  -- State update: gMaxXInOccluder' = Max(Max(gMaxXInOccluder, p1.x), p2.x)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: direction.Magnitude
+  true
+end
+
+schema COccluder_ProcessOneOccluder
+  ΔCOccluder
+  occl? : Ref[CActiveOccluder]
+where
+  -- State update: occl.linesCount' = 0
+  -- State update: occl.radius' = Max(width, length) * 0.35f + gCenterOnScreen.z
+  -- State update: x' = length / 2.0f * Sin(GetAngle())
+  -- State update: y' = -length / 2.0f * Cos(GetAngle())
+  -- State update: z' = 0.0f
+  -- State update: x' = width / 2.0f * Cos(GetAngle())
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema COcclusion_OccluderHidesBehind
+  ΔCOcclusion
+  occl1? : Ref[CActiveOccluder]
+  occl2? : Ref[CActiveOccluder]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema COcclusion_ProcessBeforeRendering
+  ΔCOcclusion
+where
+  -- State update: NumActiveOccluders' = 0
+  -- State update: PreviousListWalkThroughFA' = -1
+  -- State update: ListWalkThroughFA' = FarAwayList
+  -- State update: prevListWalkThroughFA' = ListWalkThroughFA
+  -- State update: FarAwayList' = aOccluders[ListWalkThroughFA].listIndex
+  -- State update: listIndex' = aOccluders[ListWalkThroughFA].listIndex
+  true
+end
+
+schema CActiveOccluder_IsPointWithinOcclusionArea
+  ΔCActiveOccluder
+  pX? : ℝ
+  pY? : ℝ
+  area? : ℝ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema COcclusion_IsAABoxOccluded
+  ΔCOcclusion
+  pos? : CVector
+  width? : ℝ
+  length? : ℝ
+  height? : ℝ
+  result! : 𝔹
+where
+  -- State update: side' = CVector(width, length, height).Magnitude() / 4.0f
+  -- State update: area' = Max(outW, outH) * side
+  -- State update: minCorner.x' = pos.x - width / 2.0f
+  -- State update: minCorner.y' = pos.y - length / 2.0f
+  -- State update: minCorner.z' = pos.z - height / 2.0f
+  -- State update: maxCorner.x' = pos.x + width / 2.0f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema COcclusion_IsPositionOccluded
+  ΔCOcclusion
+  pos? : CVector
+  side? : ℝ
+  result! : 𝔹
+where
+  -- State update: area' = Max(width, height) * side
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema COcclusion_Render
+  ΔCOcclusion
+where
+  -- State update: recipz' = 1.0f/RwCameraGetNearClipPlane(Scene.camera)
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CEntity_IsEntityOccluded
+  ΔCEntity
+  result! : 𝔹
+where
+  -- State update: area' = Max(width, height) * GetBoundRadius() * 0.9f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetColModel
+  true
+end
+
+schema Occlusion_GetAngle
+  ΔOcclusionModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = angle*TWOPI/UINT16_MAX
+  true
+end

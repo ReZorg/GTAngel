@@ -1,0 +1,55 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: rphanim (fakerw)
+-- Source File(s): fakerw/rphanim.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include rtquat.zpp  (from "rtquat.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+rpHANIMSTDKEYFRAMETYPEID : seq CHAR  -- #define rpHANIMSTDKEYFRAMETYPEID 0x1
+rpHANIMPOPPARENTMATRIX : seq CHAR  -- #define rpHANIMPOPPARENTMATRIX rw::HAnimHierarchy::POP
+rpHANIMPUSHPARENTMATRIX : seq CHAR  -- #define rpHANIMPUSHPARENTMATRIX rw::HAnimHierarchy::PUSH
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RpHAnimHierarchyFlag ::= rpHANIMHIERARCHYSUBHIERARCHY | rpHANIMHIERARCHYNOMATRICES | rpHANIMHIERARCHYUPDATEMODELLINGMATRICES | rpHANIMHIERARCHYUPDATELTMS | rpHANIMHIERARCHYLOCALSPACEMATRICES
+  -- val(rpHANIMHIERARCHYSUBHIERARCHY) = rw::HAnimHierarchy::SUBHIERARCHY
+  -- val(rpHANIMHIERARCHYNOMATRICES) = rw::HAnimHierarchy::NOMATRICES
+  -- val(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES) = rw::HAnimHierarchy::UPDATEMODELLINGMATRICES
+  -- val(rpHANIMHIERARCHYUPDATELTMS) = rw::HAnimHierarchy::UPDATELTMS
+  -- val(rpHANIMHIERARCHYLOCALSPACEMATRICES) = rw::HAnimHierarchy::LOCALSPACEMATRICES
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema RpHAnimStdKeyFrame
+  prevFrame : Ref[RpHAnimStdKeyFrame]
+  time : ℝ
+  q : RtQuat
+  t : RwV3d
+where
+  #prevFrame ≤ 1
+end
+
+schema RpHAnimStdInterpFrame
+  keyFrame1 : Ref[RpHAnimStdKeyFrame]
+  keyFrame2 : Ref[RpHAnimStdKeyFrame]
+  q : RtQuat
+  t : RwV3d
+where
+  #keyFrame1 ≤ 1
+  #keyFrame2 ≤ 1
+end

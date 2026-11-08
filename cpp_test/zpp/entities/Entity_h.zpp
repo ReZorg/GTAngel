@@ -1,0 +1,508 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Entity (entities)
+-- Source File(s): entities/Entity.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eEntityType ::= ENTITY_TYPE_NOTHING | ENTITY_TYPE_BUILDING | ENTITY_TYPE_VEHICLE | ENTITY_TYPE_PED | ENTITY_TYPE_OBJECT | ENTITY_TYPE_DUMMY | ENTITY_TYPE_MULTIPLAYER
+  -- val(ENTITY_TYPE_NOTHING) = 0
+
+eEntityStatus ::= STATUS_PLAYER | STATUS_PLAYER_PLAYBACKFROMBUFFER | STATUS_SIMPLE | STATUS_PHYSICS | STATUS_ABANDONED | STATUS_WRECKED | STATUS_TRAIN_MOVING | STATUS_TRAIN_NOT_MOVING | STATUS_FERRY_MOVING | STATUS_FERRY_NOT_MOVING | STATUS_HELI | STATUS_PLANE | STATUS_PLAYER_REMOTE | STATUS_PLAYER_DISABLED | STATUS_GHOST
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CEntity
+  CPlaceable  -- inherits base schema
+  m_rwObject : Ref[RwObject]
+  m_type : 𝔹
+  m_status : 𝔹
+  bUsesCollision : 𝔹
+  bCollisionProcessed : 𝔹
+  bIsStatic : 𝔹
+  bHasContacted : 𝔹
+  bPedPhysics : 𝔹
+  bIsStuck : 𝔹
+  bIsInSafePosition : 𝔹
+  bUseCollisionRecords : 𝔹
+  bWasPostponed : 𝔹
+  bExplosionProof : 𝔹
+  bIsVisible : 𝔹
+  bHasCollided : 𝔹
+  bRenderScorched : 𝔹
+  bHasBlip : 𝔹
+  bIsBIGBuilding : 𝔹
+  bStreamBIGBuilding : 𝔹
+  bRenderDamaged : 𝔹
+  bBulletProof : 𝔹
+  bFireProof : 𝔹
+  bCollisionProof : 𝔹
+  bMeleeProof : 𝔹
+  bOnlyDamagedByPlayer : 𝔹
+  bStreamingDontDelete : 𝔹
+  bRemoveFromWorld : 𝔹
+  bHasHitWall : 𝔹
+  bImBeingRendered : 𝔹
+  bTouchingWater : 𝔹
+  bIsSubway : 𝔹
+  bDrawLast : 𝔹
+  bNoBrightHeadLights : 𝔹
+  bDoNotRender : 𝔹
+  bDistanceFade : 𝔹
+  m_flagE1 : 𝔹
+  bDontCastShadowsOn : 𝔹
+  bOffscreen : 𝔹
+  bIsStaticWaitingForCollision : 𝔹
+  bDontStream : 𝔹
+  bUnderwater : 𝔹
+  bHasPreRenderEffects : 𝔹
+  bIsTreeModel : 𝔹
+  bIsVehicle : 𝔹
+  bIsPed : 𝔹
+  bMakeVisible : 𝔹
+  m_scanCode : ℕ
+  m_randomSeed : ℕ
+  m_modelIndex : ℤ
+  m_level : ℤ
+  m_area : ℤ
+  m_pFirstReference : Ref[CReference]
+  bZoneCulled : 𝔹
+  bZoneCulled2 : 𝔹
+  m_flagE2 : 𝔹
+where
+  #m_rwObject ≤ 1
+  #m_type = 3
+  #m_status = 5
+  #bUsesCollision = 1
+  #bCollisionProcessed = 1
+  #bIsStatic = 1
+  #bHasContacted = 1
+  #bPedPhysics = 1
+  #bIsStuck = 1
+  #bIsInSafePosition = 1
+  #bUseCollisionRecords = 1
+  #bWasPostponed = 1
+  #bExplosionProof = 1
+  #bIsVisible = 1
+  #bHasCollided = 1
+  #bRenderScorched = 1
+end
+
+schema CEntity_GetType
+  ΞCEntity
+  result! : ℕ
+where
+  -- Declared member operation CEntity::GetType()
+  true
+end
+
+schema CEntity_SetType_2
+  ΔCEntity
+  type? : ℕ
+  result! : void
+where
+  -- Declared member operation CEntity::SetType(uint8 type)
+  true
+end
+
+schema CEntity_GetStatus_3
+  ΞCEntity
+  result! : ℕ
+where
+  -- Declared member operation CEntity::GetStatus()
+  true
+end
+
+schema CEntity_SetStatus_4
+  ΔCEntity
+  status? : ℕ
+  result! : void
+where
+  -- Declared member operation CEntity::SetStatus(uint8 status)
+  true
+end
+
+schema CEntity_GetColModel_5
+  ΔCEntity
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CEntity::GetColModel(void)
+  true
+end
+
+schema CEntity_GetIsStatic_6
+  ΞCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::GetIsStatic(void)
+  true
+end
+
+schema CEntity_SetIsStatic_7
+  ΔCEntity
+  state? : 𝔹
+  result! : void
+where
+  -- Declared member operation CEntity::SetIsStatic(bool state)
+  true
+end
+
+schema CEntity_SaveEntityFlags_8
+  ΔCEntity
+  buf? : ℙ ℕ
+  result! : ifdef_COMPATIBLE_SAVES_void
+where
+  -- Declared member operation CEntity::SaveEntityFlags(uint8*& buf)
+  true
+end
+
+schema CEntity_LoadEntityFlags_9
+  ΔCEntity
+  buf? : ℙ ℕ
+where
+  -- Declared member operation CEntity::LoadEntityFlags(uint8*& buf)
+  true
+end
+
+schema CEntity_CEntity_10
+  ΔCEntity
+  result! : endif
+where
+  -- Declared member operation CEntity::CEntity(void)
+  true
+end
+
+schema CEntity_CEntity_11
+  ΔCEntity
+  result! : ANY
+where
+  -- Declared member operation CEntity::CEntity(void)
+  true
+end
+
+schema CEntity_Add_12
+  ΔCEntity
+where
+  -- Declared member operation CEntity::Add(void)
+  true
+end
+
+schema CEntity_Remove_13
+  ΔCEntity
+where
+  -- Declared member operation CEntity::Remove(void)
+  true
+end
+
+schema CEntity_UpdatesInCutscene_14
+  ΔCEntity
+  result! : 𝔹
+where
+  -- Declared member operation CEntity::UpdatesInCutscene(void)
+  true
+end
+
+schema CEntity_SetModelIndex_15
+  ΔCEntity
+  id? : ℕ
+  result! : void
+where
+  -- Declared member operation CEntity::SetModelIndex(uint32 id)
+  true
+end
+
+schema CEntity_SetModelIndexNoCreate_16
+  ΔCEntity
+  id? : ℕ
+where
+  -- Declared member operation CEntity::SetModelIndexNoCreate(uint32 id)
+  true
+end
+
+schema CEntity_CreateRwObject_17
+  ΔCEntity
+where
+  -- Declared member operation CEntity::CreateRwObject(void)
+  true
+end
+
+schema CEntity_DeleteRwObject_18
+  ΔCEntity
+where
+  -- Declared member operation CEntity::DeleteRwObject(void)
+  true
+end
+
+schema CEntity_GetBoundRect_19
+  ΔCEntity
+  result! : CRect
+where
+  -- Declared member operation CEntity::GetBoundRect(void)
+  true
+end
+
+schema CEntity_ProcessControl_20
+  ΔCEntity
+where
+  -- Declared member operation CEntity::ProcessControl(void)
+  true
+end
+
+schema CEntity_Render_21
+  ΔCEntity
+where
+  -- Declared member operation CEntity::Render(void)
+  true
+end
+
+schema CEntity_UpdateAnim_22
+  ΔCEntity
+where
+  -- Declared member operation CEntity::UpdateAnim(void)
+  true
+end
+
+schema CEntity_SetupLighting_23
+  ΔCEntity
+  result! : 𝔹
+where
+  -- Declared member operation CEntity::SetupLighting(void)
+  true
+end
+
+schema CEntity_RemoveLighting_24
+  ΔCEntity
+  arg_1? : 𝔹
+where
+  -- Declared member operation CEntity::RemoveLighting(bool)
+  true
+end
+
+schema CEntity_FlagToDestroyWhenNextProcessed_25
+  ΔCEntity
+where
+  -- Declared member operation CEntity::FlagToDestroyWhenNextProcessed(void)
+  true
+end
+
+schema CEntity_IsVehicle_26
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsVehicle(void)
+  true
+end
+
+schema CEntity_IsPed_27
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsPed(void)
+  true
+end
+
+schema CEntity_IsObject_28
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsObject(void)
+  true
+end
+
+schema CEntity_IsDummy_29
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsDummy(void)
+  true
+end
+
+schema CEntity_IsMultiplayer_30
+  ΔCEntity
+  result! : bool
+where
+  -- Declared member operation CEntity::IsMultiplayer(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Entity_GetType
+  ΞEntityModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_type
+  true
+end
+
+schema Entity_SetType
+  ΔEntityModuleState
+  type? : ℕ
+where
+  -- State update: m_type' = type
+  true
+end
+
+schema Entity_GetStatus
+  ΞEntityModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_status
+  true
+end
+
+schema Entity_SetStatus
+  ΔEntityModuleState
+  status? : ℕ
+where
+  -- State update: m_status' = status
+  true
+end
+
+schema Entity_GetIsStatic
+  ΞEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bIsStatic || bIsStaticWaitingForCollision
+  true
+end
+
+schema Entity_SetIsStatic
+  ΔEntityModuleState
+  state? : 𝔹
+where
+  -- State update: bIsStatic' = state
+  true
+end
+
+schema Entity_GetAddressOfEntityProperties
+  ΔEntityModuleState
+  result! : ℙ ℕ
+where
+  -- Return postcondition: result! = (uint32*)((char*)&m_rwObject + sizeof(m_rwObject))
+  true
+end
+
+schema Entity_UpdatesInCutscene
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Entity_ProcessControl
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_ProcessCollision
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_ProcessShift
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_Teleport
+  ΔEntityModuleState
+  v? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_FlagToDestroyWhenNextProcessed
+  ΔEntityModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Entity_IsBuilding
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_BUILDING
+  true
+end
+
+schema Entity_IsVehicle
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_VEHICLE
+  true
+end
+
+schema Entity_IsPed
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_PED
+  true
+end
+
+schema Entity_IsObject
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_OBJECT
+  true
+end
+
+schema Entity_IsDummy
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_DUMMY
+  true
+end
+
+schema Entity_IsMultiplayer
+  ΔEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == ENTITY_TYPE_MULTIPLAYER
+  true
+end
+
+schema Entity_GetModelIndex
+  ΞEntityModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_modelIndex
+  true
+end
+
+schema Entity_GetIsStatic_2
+  ΞEntityModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bIsStatic
+  true
+end

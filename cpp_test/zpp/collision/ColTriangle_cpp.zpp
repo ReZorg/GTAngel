@@ -1,0 +1,62 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColTriangle (collision)
+-- Source File(s): collision/ColTriangle.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ColTriangle.zpp  (from "ColTriangle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CColTriangle_Set
+  ΔCColTriangle
+  arg_1? : Ref[CompressedVector]
+  a? : ℤ
+  b? : ℤ
+  c? : ℤ
+  surf? : ℕ
+  piece? : ℕ
+where
+  -- State update: a' = a
+  -- State update: b' = b
+  -- State update: c' = c
+  -- State update: surface' = surf
+  true
+end
+
+schema CColTrianglePlane_Set
+  ΔCColTrianglePlane
+  va? : CVector
+  vb? : CVector
+  vc? : CVector
+where
+  -- State update: normal' = CrossProduct(vc-va, vb-va)
+  -- State update: dist' = DotProduct(normal, va)
+  -- State update: dir' = normal.x < 0.0f ? DIR_X_NEG : DIR_X_POS
+  -- State update: dir' = normal.y < 0.0f ? DIR_Y_NEG : DIR_Y_POS
+  -- State update: dir' = normal.z < 0.0f ? DIR_Z_NEG : DIR_Z_POS
+  -- Invokes: normal.Normalise
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ColTriangleModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 36
+end

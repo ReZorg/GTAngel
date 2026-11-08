@@ -1,0 +1,34 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: contrast (extras)
+-- Source File(s): extras/shaders/contrast.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema contrast_main
+  ΔcontrastModuleState
+where
+  -- State update: dst' = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  -- State update: color.rgb' = dst.rgb*u_contrastMult + u_contrastAdd
+  -- State update: color.a' = 1.0
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema contrastModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 19
+end

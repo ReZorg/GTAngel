@@ -1,0 +1,890 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: custompipes_d3d9 (extras)
+-- Source File(s): extras/custompipes_d3d9.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include World.zpp  (from "World.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include neoVehicle_VS.zpp  (from "shaders/obj/neoVehicle_VS.inc")
+-- include neoVehicle_PS.zpp  (from "shaders/obj/neoVehicle_PS.inc")
+-- include leedsDefault_ENV_VS.zpp  (from "shaders/obj/leedsDefault_ENV_VS.inc")
+-- include leedsVehicle_mobile_VS.zpp  (from "shaders/obj/leedsVehicle_mobile_VS.inc")
+-- include leedsDefault_BLEND_PS.zpp  (from "shaders/obj/leedsDefault_BLEND_PS.inc")
+-- include leedsDefault_ADD_PS.zpp  (from "shaders/obj/leedsDefault_ADD_PS.inc")
+-- include leedsVehicle_mobile_PS.zpp  (from "shaders/obj/leedsVehicle_mobile_PS.inc")
+-- include leedsBuilding_VS.zpp  (from "shaders/obj/leedsBuilding_VS.inc")
+-- include leedsBuilding_mobile_VS.zpp  (from "shaders/obj/leedsBuilding_mobile_VS.inc")
+-- include scale_PS.zpp  (from "shaders/obj/scale_PS.inc")
+-- include neoGloss_VS.zpp  (from "shaders/obj/neoGloss_VS.inc")
+-- include neoGloss_PS.zpp  (from "shaders/obj/neoGloss_PS.inc")
+-- include neoRim_VS.zpp  (from "shaders/obj/neoRim_VS.inc")
+-- include neoRimSkin_VS.zpp  (from "shaders/obj/neoRimSkin_VS.inc")
+-- include default_UV2_VS.zpp  (from "shaders/obj/default_UV2_VS.inc")
+-- include neoWorldIII_PS.zpp  (from "shaders/obj/neoWorldIII_PS.inc")
+-- include neoWorldVC_PS.zpp  (from "shaders/obj/neoWorldVC_PS.inc")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+custompipes_d3d9_Enum_1 ::= VSLOC_boneMatrices | VSLOC_viewVec | VSLOC_rampStart | VSLOC_rampEnd | VSLOC_rimData | VSLOC_eye | VSLOC_reflProps | VSLOC_specLights | VSLOC_emissive | VSLOC_ambient | VSLOC_viewMat | VSLOC_texMat | PSLOC_colorscale | PSLOC_shininess | PSLOC_skyTop | PSLOC_skyBot
+  -- val(VSLOC_boneMatrices) = rw::d3d::VSLOC_afterLights
+  -- val(VSLOC_viewVec) = VSLOC_boneMatrices + 64*3
+  -- val(VSLOC_eye) = rw::d3d::VSLOC_afterLights
+  -- val(VSLOC_emissive) = rw::d3d::VSLOC_afterLights
+  -- val(VSLOC_texMat) = rw::d3d::VSLOC_afterLights
+  -- val(PSLOC_colorscale) = 1
+
+custompipes_d3d9_Enum_2 ::= VSLOC_boneMatrices | VSLOC_viewVec | VSLOC_rampStart | VSLOC_rampEnd | VSLOC_rimData | VSLOC_eye | VSLOC_reflProps | VSLOC_specLights
+  -- val(VSLOC_boneMatrices) = rw::d3d::VSLOC_afterLights
+  -- val(VSLOC_viewVec) = VSLOC_boneMatrices + 64*3
+  -- val(VSLOC_eye) = rw::d3d::VSLOC_afterLights
+
+custompipes_d3d9_Enum_3 ::= VSLOC_boneMatrices | VSLOC_viewVec | VSLOC_rampStart | VSLOC_rampEnd | VSLOC_rimData | VSLOC_eye | VSLOC_reflProps | VSLOC_specLights
+  -- val(VSLOC_boneMatrices) = rw::d3d::VSLOC_afterLights
+  -- val(VSLOC_viewVec) = VSLOC_boneMatrices + 64*3
+  -- val(VSLOC_eye) = rw::d3d::VSLOC_afterLights
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VsLight
+  color : rw__RGBAf
+  pos : seq ℝ  -- bounded array [4]
+  dir : rw__V3d
+  power : ℝ
+where
+  #pos = 4
+end
+
+schema BuildingInst
+  combinedMat : rw__RawMatrix
+  instHeader : Ref[rw__d3d9__InstanceDataHeader]
+  fadeAlpha : ℕ
+  lighting : 𝔹
+where
+  #instHeader ≤ 1
+  fadeAlpha ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema custompipes_d3d9_uploadEnvMatrix
+  Δcustompipes_d3d9ModuleState
+  frame? : Ref[rw__Frame]
+where
+  -- State update: frame' = engine.currentCamera.getFrame()
+  -- State update: tmp' = *frame.getLTM()
+  -- State update: tmp.at.z' = 0.0f
+  -- State update: tmp.at' = normalize(tmp.at)
+  -- State update: tmp.right.x' = -tmp.at.y
+  -- State update: tmp.right.y' = tmp.at.x
+  -- Invokes: currentCamera->getFrame, frame->getLTM, up.set, pos.set, Matrix::invert
+  true
+end
+
+schema custompipes_d3d9_leedsVehicleRenderCB
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: coef' = 0.0f
+  -- State update: coef' = 1.0f
+  -- State update: cs' = 1.0f
+  -- Invokes: atomic->getFrame, d3d::setTexture, d3ddevice->SetPixelShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_uploadWorldLights
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: amb.red' = CTimeCycle::GetAmbientRed()
+  -- State update: amb.green' = CTimeCycle::GetAmbientGreen()
+  -- State update: amb.blue' = CTimeCycle::GetAmbientBlue()
+  -- State update: amb.alpha' = 1.0f
+  -- State update: emiss' = pAmbient.color
+  -- Invokes: CTimeCycle::GetAmbientRed, CTimeCycle::GetAmbientGreen, CTimeCycle::GetAmbientBlue, d3ddevice->SetVertexShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_leedsVehicleRenderCB_mobile
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: skyTop.red' = CTimeCycle::GetSkyTopRed()/255.0f
+  -- State update: skyTop.green' = CTimeCycle::GetSkyTopGreen()/255.0f
+  -- State update: skyTop.blue' = CTimeCycle::GetSkyTopBlue()/255.0f
+  -- State update: skyBot.red' = CTimeCycle::GetSkyBottomRed()/255.0f
+  -- State update: skyBot.green' = CTimeCycle::GetSkyBottomGreen()/255.0f
+  -- Invokes: atomic->getFrame, CTimeCycle::GetSkyTopRed, CTimeCycle::GetSkyTopGreen, CTimeCycle::GetSkyTopBlue, CTimeCycle::GetSkyBottomRed
+  true
+end
+
+schema custompipes_d3d9_uploadSpecLights
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: power' = 1.0f
+  -- State update: power' = Power.Get()
+  -- State update: speccol' = SpecColor.Get()
+  -- State update: color.red' = speccol.r
+  -- State update: color.green' = speccol.g
+  -- State update: color.blue' = speccol.b
+  -- Invokes: Power.Get, SpecColor.Get, pDirect->getFrame, d3ddevice->SetVertexShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_vehicleRenderCB
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, Fresnel.Get, SpecColor.Get
+  true
+end
+
+schema custompipes_d3d9_CreateVehiclePipe
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoVehicle_VS' = rw::d3d::createVertexShader(neoVehicle_VS_cso)
+  -- State update: neoVehicle_PS' = rw::d3d::createPixelShader(neoVehicle_PS_cso)
+  -- State update: leedsVehicle_VS' = rw::d3d::createVertexShader(leedsDefault_ENV_VS_cso)
+  -- State update: leedsVehicle_mobile_VS' = rw::d3d::createVertexShader(leedsVehicle_mobile_VS_cso)
+  -- State update: leedsVehicle_blend_PS' = rw::d3d::createPixelShader(leedsDefault_BLEND_PS_cso)
+  -- State update: leedsVehicle_add_PS' = rw::d3d::createPixelShader(leedsDefault_ADD_PS_cso)
+  -- Invokes: d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyVehiclePipe
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoVehicle_VS' = ∅
+  -- State update: neoVehicle_PS' = ∅
+  -- State update: leedsVehicle_VS' = ∅
+  -- State update: leedsVehicle_blend_PS' = ∅
+  -- State update: leedsVehicle_add_PS' = ∅
+  -- State update: vehiclePipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_worldRenderCB
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: cs' = 1.0f
+  -- State update: cs' = 255/128.0f
+  -- State update: color' = m.color
+  -- Invokes: atomic->getFrame, d3ddevice->SetPixelShaderConstantF, d3d::setTexture, CVisibilityPlugins::GetObjectDistanceAlpha
+  true
+end
+
+schema custompipes_d3d9_CreateWorldPipe
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: leedsBuilding_VS' = rw::d3d::createVertexShader(leedsBuilding_VS_cso)
+  -- State update: leedsBuilding_mobile_VS' = rw::d3d::createVertexShader(leedsBuilding_mobile_VS_cso)
+  -- State update: scale_PS' = rw::d3d::createPixelShader(scale_PS_cso)
+  -- State update: pipe' = rw::d3d9::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::d3d9::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = rw::d3d9::defaultUninstanceCB
+  -- Invokes: d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyWorldPipe
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: leedsBuilding_VS' = ∅
+  -- State update: leedsBuilding_mobile_VS' = ∅
+  -- State update: scale_PS' = ∅
+  -- State update: worldPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_glossRenderCB
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: tex' = GetGlossTex(m)
+  -- Invokes: currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, d3ddevice->SetPixelShaderConstantF, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateGlossPipe
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoGloss_VS' = rw::d3d::createVertexShader(neoGloss_VS_cso)
+  -- State update: neoGloss_PS' = rw::d3d::createPixelShader(neoGloss_PS_cso)
+  -- State update: pipe' = rw::d3d9::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::d3d9::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = rw::d3d9::defaultUninstanceCB
+  -- State update: pipe.renderCB' = glossRenderCB
+  -- Invokes: d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyGlossPipe
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoGloss_VS' = ∅
+  -- State update: neoGloss_PS' = ∅
+  -- State update: glossPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_uploadRimData
+  Δcustompipes_d3d9ModuleState
+  enable? : 𝔹
+where
+  -- State update: viewVec' = rw::engine.currentCamera.getFrame().getLTM().at
+  -- State update: col' = RampStart.Get()
+  -- State update: col' = RampEnd.Get()
+  -- Invokes: currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, Offset.Get, Scale.Get, Scaling.Get
+  true
+end
+
+schema custompipes_d3d9_rimRenderCB
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_rimSkinRenderCB
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateRimLightPipes
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, RampStart)
+  -- State update: fp' = ReadTweakValueTable(fp, RampEnd)
+  -- State update: fp' = ReadTweakValueTable(fp, Offset)
+  -- State update: fp' = ReadTweakValueTable(fp, Scale)
+  -- State update: fp' = ReadTweakValueTable(fp, Scaling)
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyRimLightPipes
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoRim_VS' = ∅
+  -- State update: neoRimSkin_VS' = ∅
+  -- State update: rimPipe' = ∅
+  -- State update: rimSkinPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader
+  true
+end
+
+schema custompipes_d3d9_SetMatrix
+  Δcustompipes_d3d9ModuleState
+  building? : Ref[BuildingInst]
+  worldMat? : Ref[rw__Matrix]
+where
+  -- State update: cam' = engine.currentCamera
+  -- Invokes: RawMatrix::mult
+  true
+end
+
+schema custompipes_d3d9_IsTextureTransparent
+  Δcustompipes_d3d9ModuleState
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema custompipes_d3d9_AtomicFirstPass
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (d3d9::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = 255
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: setupDone' = false
+  -- State update: defer' = false
+  -- Invokes: atomic->getPipeline, atomic->getFrame, d3ddevice->SetVertexShaderConstantF, CustomPipes::uploadWorldLights, d3ddevice->SetPixelShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_AtomicFullyTransparent
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+  fadeAlpha? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (d3d9::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = fadeAlpha
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- Invokes: atomic->getPipeline, atomic->getFrame
+  true
+end
+
+schema custompipes_d3d9_RenderBlendPass
+  Δcustompipes_d3d9ModuleState
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][i]
+  -- State update: inst' = building.instHeader.inst
+  -- State update: m' = inst.material
+  -- State update: cs' = 1.0f
+  -- State update: cs' = 255/128.0f
+  -- State update: color' = m.color
+  -- Invokes: CustomPipes::uploadWorldLights, d3ddevice->SetVertexShaderConstantF, d3ddevice->SetPixelShaderConstantF, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_uploadSpecLights_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: power' = 1.0f
+  -- State update: power' = Power.Get()
+  -- State update: speccol' = SpecColor.Get()
+  -- State update: color.red' = speccol.r
+  -- State update: color.green' = speccol.g
+  -- State update: color.blue' = speccol.b
+  -- Invokes: Power.Get, SpecColor.Get, pDirect->getFrame, d3ddevice->SetVertexShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_vehicleRenderCB_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, Fresnel.Get, SpecColor.Get
+  true
+end
+
+schema custompipes_d3d9_CreateVehiclePipe_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, Fresnel)
+  -- State update: fp' = ReadTweakValueTable(fp, Power)
+  -- State update: fp' = ReadTweakValueTable(fp, DiffColor)
+  -- State update: fp' = ReadTweakValueTable(fp, SpecColor)
+  -- State update: neoVehicle_VS' = rw::d3d::createVertexShader(neoVehicle_VS_cso)
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyVehiclePipe_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoVehicle_VS' = ∅
+  -- State update: neoVehicle_PS' = ∅
+  -- State update: vehiclePipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_worldRenderCB_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: matfx' = MatFX::get(m)
+  -- State update: dualtex' = matfx.getDualTexture()
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- Invokes: atomic->getFrame, MatFX::getEffects, MatFX::get, matfx->getDualTexture, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateWorldPipe_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoWorld_VS' = rw::d3d::createVertexShader(default_UV2_VS_cso)
+  -- State update: neoWorldIII_PS' = rw::d3d::createPixelShader(neoWorldIII_PS_cso)
+  -- State update: pipe' = rw::d3d9::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::d3d9::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = rw::d3d9::defaultUninstanceCB
+  -- State update: pipe.renderCB' = worldRenderCB
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyWorldPipe_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoWorld_VS' = ∅
+  -- State update: neoWorldIII_PS' = ∅
+  -- State update: worldPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_glossRenderCB_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: tex' = GetGlossTex(m)
+  -- Invokes: currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, d3ddevice->SetPixelShaderConstantF, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateGlossPipe_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoGloss_VS' = rw::d3d::createVertexShader(neoGloss_VS_cso)
+  -- State update: neoGloss_PS' = rw::d3d::createPixelShader(neoGloss_PS_cso)
+  -- State update: pipe' = rw::d3d9::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::d3d9::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = rw::d3d9::defaultUninstanceCB
+  -- State update: pipe.renderCB' = glossRenderCB
+  -- Invokes: d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyGlossPipe_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoGloss_VS' = ∅
+  -- State update: neoGloss_PS' = ∅
+  -- State update: glossPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_uploadRimData_2
+  Δcustompipes_d3d9ModuleState
+  enable? : 𝔹
+where
+  -- State update: viewVec' = rw::engine.currentCamera.getFrame().getLTM().at
+  -- State update: col' = RampStart.Get()
+  -- State update: col' = RampEnd.Get()
+  -- Invokes: currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, Offset.Get, Scale.Get, Scaling.Get
+  true
+end
+
+schema custompipes_d3d9_rimRenderCB_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_rimSkinRenderCB_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateRimLightPipes_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, RampStart)
+  -- State update: fp' = ReadTweakValueTable(fp, RampEnd)
+  -- State update: fp' = ReadTweakValueTable(fp, Offset)
+  -- State update: fp' = ReadTweakValueTable(fp, Scale)
+  -- State update: fp' = ReadTweakValueTable(fp, Scaling)
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyRimLightPipes_2
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoRim_VS' = ∅
+  -- State update: neoRimSkin_VS' = ∅
+  -- State update: rimPipe' = ∅
+  -- State update: rimSkinPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader
+  true
+end
+
+schema custompipes_d3d9_SetMatrix_2
+  Δcustompipes_d3d9ModuleState
+  building? : Ref[BuildingInst]
+  worldMat? : Ref[rw__Matrix]
+where
+  -- State update: cam' = engine.currentCamera
+  -- Invokes: RawMatrix::mult
+  true
+end
+
+schema custompipes_d3d9_IsTextureTransparent_2
+  Δcustompipes_d3d9ModuleState
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema custompipes_d3d9_AtomicFirstPass_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (d3d9::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = 255
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: building.cullMode' = rw::GetRenderState(rw::CULLMODE)
+  -- State update: flags' = atomic.geometry.flags
+  -- Invokes: atomic->getPipeline, rw::GetRenderState, atomic->getFrame, rw::SetRenderState, d3ddevice->SetVertexShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_AtomicFullyTransparent_2
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+  fadeAlpha? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (d3d9::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = fadeAlpha
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: building.cullMode' = rw::GetRenderState(rw::CULLMODE)
+  -- Invokes: atomic->getPipeline, rw::GetRenderState, atomic->getFrame
+  true
+end
+
+schema custompipes_d3d9_RenderBlendPass_2
+  Δcustompipes_d3d9ModuleState
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][i]
+  -- State update: inst' = building.instHeader.inst
+  -- State update: m' = inst.material
+  -- State update: color' = m.color
+  -- State update: color.alpha' = (color.alpha * building.fadeAlpha)/255
+  -- Invokes: rw::SetRenderState, d3ddevice->SetVertexShaderConstantF, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_uploadSpecLights_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: power' = 1.0f
+  -- State update: power' = Power.Get()
+  -- State update: speccol' = SpecColor.Get()
+  -- State update: color.red' = speccol.r
+  -- State update: color.green' = speccol.g
+  -- State update: color.blue' = speccol.b
+  -- Invokes: Power.Get, SpecColor.Get, pDirect->getFrame, d3ddevice->SetVertexShaderConstantF
+  true
+end
+
+schema custompipes_d3d9_vehicleRenderCB_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, Fresnel.Get, SpecColor.Get
+  true
+end
+
+schema custompipes_d3d9_CreateVehiclePipe_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, Fresnel)
+  -- State update: fp' = ReadTweakValueTable(fp, Power)
+  -- State update: fp' = ReadTweakValueTable(fp, DiffColor)
+  -- State update: fp' = ReadTweakValueTable(fp, SpecColor)
+  -- State update: neoVehicle_VS' = rw::d3d::createVertexShader(neoVehicle_VS_cso)
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyVehiclePipe_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoVehicle_VS' = ∅
+  -- State update: neoVehicle_PS' = ∅
+  -- State update: vehiclePipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_worldRenderCB_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: matfx' = MatFX::get(m)
+  -- State update: dualtex' = matfx.getDualTexture()
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- Invokes: atomic->getFrame, MatFX::getEffects, MatFX::get, matfx->getDualTexture, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateWorldPipe_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoWorld_VS' = rw::d3d::createVertexShader(default_UV2_VS_cso)
+  -- State update: neoWorldVC_PS' = rw::d3d::createPixelShader(neoWorldVC_PS_cso)
+  -- State update: pipe' = rw::d3d9::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::d3d9::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = rw::d3d9::defaultUninstanceCB
+  -- State update: pipe.renderCB' = worldRenderCB
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyWorldPipe_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoWorld_VS' = ∅
+  -- State update: neoWorldVC_PS' = ∅
+  -- State update: worldPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_glossRenderCB_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: tex' = GetGlossTex(m)
+  -- Invokes: currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, d3ddevice->SetPixelShaderConstantF, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateGlossPipe_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoGloss_VS' = rw::d3d::createVertexShader(neoGloss_VS_cso)
+  -- State update: neoGloss_PS' = rw::d3d::createPixelShader(neoGloss_PS_cso)
+  -- State update: pipe' = rw::d3d9::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::d3d9::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = rw::d3d9::defaultUninstanceCB
+  -- State update: pipe.renderCB' = glossRenderCB
+  -- Invokes: d3d::createVertexShader, d3d::createPixelShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyGlossPipe_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoGloss_VS' = ∅
+  -- State update: neoGloss_PS' = ∅
+  -- State update: glossPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader, d3d::destroyPixelShader
+  true
+end
+
+schema custompipes_d3d9_uploadRimData_3
+  Δcustompipes_d3d9ModuleState
+  enable? : 𝔹
+where
+  -- State update: viewVec' = rw::engine.currentCamera.getFrame().getLTM().at
+  -- State update: col' = RampStart.Get()
+  -- State update: col' = RampEnd.Get()
+  -- Invokes: currentCamera->getFrame, d3ddevice->SetVertexShaderConstantF, Offset.Get, Scale.Get, Scaling.Get
+  true
+end
+
+schema custompipes_d3d9_rimRenderCB_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_rimSkinRenderCB_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__d3d9__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: vsBits' = lightingCB_Shader(atomic)
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_CreateRimLightPipes_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, RampStart)
+  -- State update: fp' = ReadTweakValueTable(fp, RampEnd)
+  -- State update: fp' = ReadTweakValueTable(fp, Offset)
+  -- State update: fp' = ReadTweakValueTable(fp, Scale)
+  -- State update: fp' = ReadTweakValueTable(fp, Scaling)
+  -- Invokes: CFileMgr::LoadFile, d3d::createVertexShader, ObjPipeline::create
+  true
+end
+
+schema custompipes_d3d9_DestroyRimLightPipes_3
+  Δcustompipes_d3d9ModuleState
+where
+  -- State update: neoRim_VS' = ∅
+  -- State update: neoRimSkin_VS' = ∅
+  -- State update: rimPipe' = ∅
+  -- State update: rimSkinPipe' = ∅
+  -- Invokes: d3d::destroyVertexShader
+  true
+end
+
+schema custompipes_d3d9_SetMatrix_3
+  Δcustompipes_d3d9ModuleState
+  building? : Ref[BuildingInst]
+  worldMat? : Ref[rw__Matrix]
+where
+  -- State update: cam' = engine.currentCamera
+  -- Invokes: RawMatrix::mult
+  true
+end
+
+schema custompipes_d3d9_IsTextureTransparent_3
+  Δcustompipes_d3d9ModuleState
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema custompipes_d3d9_AtomicFirstPass_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (d3d9::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = 255
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: setupDone' = false
+  -- Invokes: atomic->getPipeline, atomic->getFrame, d3ddevice->SetVertexShaderConstantF, d3d::setTexture
+  true
+end
+
+schema custompipes_d3d9_AtomicFullyTransparent_3
+  Δcustompipes_d3d9ModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+  fadeAlpha? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (d3d9::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = fadeAlpha
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- Invokes: atomic->getPipeline, atomic->getFrame
+  true
+end
+
+schema custompipes_d3d9_RenderBlendPass_3
+  Δcustompipes_d3d9ModuleState
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][i]
+  -- State update: inst' = building.instHeader.inst
+  -- State update: m' = inst.material
+  -- State update: color' = m.color
+  -- State update: color.alpha' = (color.alpha * building.fadeAlpha)/255
+  -- Invokes: d3ddevice->SetVertexShaderConstantF, d3d::setTexture
+  true
+end

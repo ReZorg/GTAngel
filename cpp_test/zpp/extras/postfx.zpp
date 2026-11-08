@@ -1,0 +1,370 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: postfx (extras)
+-- Source File(s): extras/postfx.cpp, extras/postfx.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include postfx.zpp  (from "postfx.h")
+-- include colourfilterLCS_PS.zpp  (from "shaders/obj/colourfilterLCS_PS.inc")
+-- include contrastPS.zpp  (from "shaders/obj/contrastPS.inc")
+-- include im2d_vert.zpp  (from "shaders/obj/im2d_vert.inc")
+-- include colourfilterLCS_frag.zpp  (from "shaders/obj/colourfilterLCS_frag.inc")
+-- include contrast_frag.zpp  (from "shaders/obj/contrast_frag.inc")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+postfx_Enum_1 ::= POSTFX_OFF | POSTFX_PSP | POSTFX_PS2 | POSTFX_SIMPLE | POSTFX_MOBILE
+  -- val(POSTFX_SIMPLE) = -1
+  -- val(POSTFX_MOBILE) = -2
+
+postfx_Enum_2 ::= NUMAVERAGE
+  -- val(NUMAVERAGE) = 20
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPostFX
+  pFrontBuffer : Ref[RwRaster]
+  pBackBuffer : Ref[RwRaster]
+  bJustInitialised : 𝔹
+  EffectSwitch : ℤ
+  BlurOn : 𝔹
+  MotionBlurOn : 𝔹
+  Intensity : ℝ
+  Next : ℤ
+  NumValues : ℤ
+where
+  #pFrontBuffer ≤ 1
+  #pBackBuffer ≤ 1
+end
+
+schema CPostFX_InitOnce
+  ΔCPostFX
+where
+  -- Declared member operation CPostFX::InitOnce(void)
+  true
+end
+
+schema CPostFX_Open_2
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+where
+  -- Declared member operation CPostFX::Open(RwCamera *cam)
+  true
+end
+
+schema CPostFX_Close_3
+  ΔCPostFX
+where
+  -- Declared member operation CPostFX::Close(void)
+  true
+end
+
+schema CPostFX_RenderOverlayBlur_4
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Declared member operation CPostFX::RenderOverlayBlur(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+schema CPostFX_RenderOverlaySniper_5
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Declared member operation CPostFX::RenderOverlaySniper(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+schema CPostFX_RenderOverlayShader_6
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Declared member operation CPostFX::RenderOverlayShader(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+schema CPostFX_RenderMotionBlur_7
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  blur? : ℕ
+where
+  -- Declared member operation CPostFX::RenderMotionBlur(RwCamera *cam, uint32 blur)
+  true
+end
+
+schema CPostFX_Render_8
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- Declared member operation CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
+  true
+end
+
+schema CPostFX_SmoothColor_9
+  ΔCPostFX
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+where
+  -- Declared member operation CPostFX::SmoothColor(uint32 red, uint32 green, uint32 blue, uint32 alpha)
+  true
+end
+
+schema CPostFX_NeedBackBuffer_10
+  ΔCPostFX
+  result! : 𝔹
+where
+  -- Declared member operation CPostFX::NeedBackBuffer(void)
+  true
+end
+
+schema CPostFX_NeedFrontBuffer_11
+  ΔCPostFX
+  type? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CPostFX::NeedFrontBuffer(int32 type)
+  true
+end
+
+schema CPostFX_GetBackBuffer_12
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+where
+  -- Declared member operation CPostFX::GetBackBuffer(RwCamera *cam)
+  true
+end
+
+schema CPostFX_UseBlurColours_13
+  ΔCPostFX
+  result! : 𝔹
+where
+  -- Declared member operation CPostFX::UseBlurColours(void)
+  true
+end
+
+schema CPostFX_RenderOverlaySimple_14
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+  result! : POSTFX_SIMPLE__POSTFX_NORMAL__POSTFX_MOBILE__void
+where
+  -- Declared member operation CPostFX::RenderOverlaySimple(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPostFX_InitOnce
+  ΔCPostFX
+where
+  -- State update: u_blurcolor' = rw::gl3::registerUniform("u_blurcolor")
+  -- State update: u_contrastAdd' = rw::gl3::registerUniform("u_contrastAdd")
+  -- State update: u_contrastMult' = rw::gl3::registerUniform("u_contrastMult")
+  -- Invokes: gl3::registerUniform
+  true
+end
+
+schema CPostFX_Open
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+where
+  -- State update: depth' = RwRasterGetDepth(RwCameraGetRaster(cam))
+  -- State update: bJustInitialised' = true
+  -- State update: zero' = HALFPX
+  -- State update: xmax' = width + HALFPX
+  -- State update: ymax' = height + HALFPX
+  -- State update: zero' = -HALFPX
+  -- Invokes: d3d::createPixelShader, Shader::create
+  true
+end
+
+schema CPostFX_Close
+  ΔCPostFX
+where
+  -- State update: pFrontBuffer' = ∅
+  -- State update: pBackBuffer' = ∅
+  -- State update: colourfilterLCS_PS' = ∅
+  -- State update: contrast_PS' = ∅
+  -- State update: colourFilterLCS' = ∅
+  -- State update: contrast' = ∅
+  -- Invokes: d3d::destroyPixelShader, colourFilterLCS->destroy, contrast->destroy
+  true
+end
+
+schema CPostFX_RenderOverlayBlur
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- State update: intensity' = 255*blurIntensity
+  true
+end
+
+schema CPostFX_RenderOverlaySniper
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPostFX_RenderOverlayShader
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- State update: im2dOverridePS' = contrast_PS
+  -- State update: im2dOverrideShader' = contrast
+  -- State update: f' = Intensity
+  -- State update: im2dOverridePS' = colourfilterLCS_PS
+  -- State update: im2dOverrideShader' = colourFilterLCS
+  -- State update: im2dOverridePS' = ∅
+  -- Invokes: d3ddevice->SetPixelShaderConstantF, contrast->use, colourFilterLCS->use
+  true
+end
+
+schema CPostFX_RenderMotionBlur
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  blur? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPostFX_NeedBackBuffer
+  ΔCPostFX
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPostFX_NeedFrontBuffer
+  ΔCPostFX
+  type? : ℤ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPostFX_GetBackBuffer
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPostFX_Render
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  blur? : ℕ
+  type? : ℤ
+  bluralpha? : ℕ
+where
+  -- State update: red' = 0
+  -- State update: green' = 255
+  -- State update: blue' = 0
+  -- State update: blur' = 128
+  -- State update: red' = 100
+  -- State update: green' = 220
+  true
+end
+
+schema CPostFX_SmoothColor
+  ΔCPostFX
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+where
+  -- State update: Next' = (Next+1) % NUMAVERAGE
+  -- State update: NumValues' = Min(NumValues+1, NUMAVERAGE)
+  -- State update: AvgRed' = 0
+  -- State update: AvgGreen' = 0
+  -- State update: AvgBlue' = 0
+  -- State update: AvgAlpha' = 0
+  true
+end
+
+schema CPostFX_RenderOverlaySimple
+  ΔCPostFX
+  cam? : Ref[RwCamera]
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  a? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema postfx_UseBlurColours
+  ΔpostfxModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = EffectSwitch != POSTFX_SIMPLE
+  true
+end

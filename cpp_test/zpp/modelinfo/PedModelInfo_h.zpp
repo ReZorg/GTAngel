@@ -1,0 +1,220 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedModelInfo (modelinfo)
+-- Source File(s): modelinfo/PedModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ClumpModelInfo.zpp  (from "ClumpModelInfo.h")
+-- include ColModel.zpp  (from "ColModel.h")
+-- include PedType.zpp  (from "PedType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PedNode ::= PED_TORSO | PED_MID | PED_HEAD | PED_UPPERARML | PED_UPPERARMR | PED_HANDL | PED_HANDR | PED_UPPERLEGL | PED_UPPERLEGR | PED_FOOTL | PED_FOOTR | PED_LOWERLEGR | PED_FOREARML | PED_FOREARMR | PED_CLAVICLEL | PED_CLAVICLER | PED_NECK
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPedModelInfo
+  CClumpModelInfo  -- inherits base schema
+  m_animGroup : ℕ
+  m_pedType : ePedType
+  m_pedStatType : ePedStats
+  m_carsCanDrive : ℕ
+  m_hitColModel : Ref[CColModel]
+  m_lhand : Ref[RpAtomic]
+  m_rhand : Ref[RpAtomic]
+  msClassInfo : base__cRelocatableChunkClassInfo
+  msClassInstance : CPedModelInfo
+where
+  m_animGroup ≥ 0
+  m_carsCanDrive ≥ 0
+  #m_hitColModel ≤ 1
+  #m_lhand ≤ 1
+  #m_rhand ≤ 1
+end
+
+schema CPedModelInfo_CPedModelInfo
+  ΔCPedModelInfo
+where
+  -- Declared member operation CPedModelInfo::CPedModelInfo(void)
+  true
+end
+
+schema CPedModelInfo_DeleteRwObject_2
+  ΔCPedModelInfo
+  result! : void
+where
+  -- Declared member operation CPedModelInfo::DeleteRwObject(void)
+  true
+end
+
+schema CPedModelInfo_SetClump_3
+  ΔCPedModelInfo
+  arg_1? : Ref[RpClump]
+where
+  -- Declared member operation CPedModelInfo::SetClump(RpClump *)
+  true
+end
+
+schema CPedModelInfo_SetLowDetailClump_4
+  ΔCPedModelInfo
+  arg_1? : Ref[RpClump]
+where
+  -- Declared member operation CPedModelInfo::SetLowDetailClump(RpClump*)
+  true
+end
+
+schema CPedModelInfo_CreateHitColModel_5
+  ΔCPedModelInfo
+where
+  -- Declared member operation CPedModelInfo::CreateHitColModel(void)
+  true
+end
+
+schema CPedModelInfo_CreateHitColModelSkinned_6
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+where
+  -- Declared member operation CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
+  true
+end
+
+schema CPedModelInfo_GetHitColModel_7
+  ΔCPedModelInfo
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CPedModelInfo::GetHitColModel(void)
+  true
+end
+
+schema CPedModelInfo_AnimatePedColModel_8
+  ΔCPedModelInfo
+  colmodel? : Ref[CColModel]
+  frame? : Ref[RwFrame]
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
+  true
+end
+
+schema CPedModelInfo_AnimatePedColModelSkinned_9
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CPedModelInfo::AnimatePedColModelSkinned(RpClump *clump)
+  true
+end
+
+schema CPedModelInfo_getHead_10
+  ΔCPedModelInfo
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CPedModelInfo::getHead(void)
+  true
+end
+
+schema CPedModelInfo_getLeftHand_11
+  ΔCPedModelInfo
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CPedModelInfo::getLeftHand(void)
+  true
+end
+
+schema CPedModelInfo_getRightHand_12
+  ΔCPedModelInfo
+  result! : Ref[RpAtomic]
+where
+  -- Declared member operation CPedModelInfo::getRightHand(void)
+  true
+end
+
+schema CPedModelInfo_CPedModelInfo_13
+  ΔCPedModelInfo
+where
+  -- Declared member operation CPedModelInfo::CPedModelInfo(void)
+  true
+end
+
+schema CPedModelInfo_LoadModel_14
+  ΔCPedModelInfo
+  model? : ADDRESS
+  chunk? : ADDRESS
+  result! : void
+where
+  -- Declared member operation CPedModelInfo::LoadModel(void *model, const void *chunk)
+  true
+end
+
+schema CPedModelInfo_Write_15
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CPedModelInfo::Write(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CPedModelInfo_WriteModel_16
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : ADDRESS
+where
+  -- Declared member operation CPedModelInfo::WriteModel(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CPedModelInfo_RcWriteThis_17
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CPedModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CPedModelInfo_RcWriteEmpty_18
+  ΔCPedModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CPedModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CPedModelInfo_CreateHitColModelSkinned_19
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+  result! : 𝔹
+where
+  -- Declared member operation CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
+  true
+end
+
+schema CPedModelInfo_AnimatePedColModelSkinnedWorld_20
+  ΔCPedModelInfo
+  clump? : Ref[RpClump]
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump *clump)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PedModelInfo_CPedModelInfo
+  ΔPedModelInfoModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

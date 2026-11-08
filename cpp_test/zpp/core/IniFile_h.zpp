@@ -1,0 +1,35 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: IniFile (core)
+-- Source File(s): core/IniFile.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DEFAULT_MAX_NUMBER_OF_PEDS : ℝ  -- #define DEFAULT_MAX_NUMBER_OF_PEDS 25.0f
+DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR : ℝ  -- #define DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR 40.0f
+DEFAULT_MAX_NUMBER_OF_CARS : ℝ  -- #define DEFAULT_MAX_NUMBER_OF_CARS 12.0f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CIniFile
+  PedNumberMultiplier : ℝ
+  CarNumberMultiplier : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CIniFile_LoadIniFile
+  ΔCIniFile
+where
+  -- Declared member operation CIniFile::LoadIniFile()
+  true
+end

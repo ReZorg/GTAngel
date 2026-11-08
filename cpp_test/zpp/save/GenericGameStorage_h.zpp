@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: GenericGameStorage (save)
+-- Source File(s): save/GenericGameStorage.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Game.zpp  (from "Game.h")
+-- include PCSave.zpp  (from "PCSave.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SLOT_COUNT : seq CHAR  -- #define SLOT_COUNT (8)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+GenericGameStorage_Enum_1 ::= SAVE_TYPE_NORMAL | SAVE_TYPE_QUICKSAVE | SAVE_TYPE_2 | SAVE_TYPE_QUICKSAVE_FOR_MISSION_REPLAY | SAVE_TYPE_QUICKSAVE_FOR_SCRIPT | SAVE_TYPE_QUICKSAVE_FOR_SCRIPT_ON_A_MISSION
+
+GenericGameStorage_Enum_2 ::= SAVE_TYPE_NORMAL | SAVE_TYPE_QUICKSAVE | SAVE_TYPE_2 | SAVE_TYPE_QUICKSAVE_FOR_MISSION_REPLAY
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema GenericGameStorageModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 122
+end

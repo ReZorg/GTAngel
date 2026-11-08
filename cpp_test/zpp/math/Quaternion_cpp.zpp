@@ -1,0 +1,147 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Quaternion (math)
+-- Source File(s): math/Quaternion.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Quaternion.zpp  (from "Quaternion.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CQuaternion_Normalise
+  ΔCQuaternion
+where
+  -- State update: sq' = MagnitudeSqr()
+  -- State update: w' = 1.0f
+  -- State update: invsqrt' = RecipSqrt(sq)
+  true
+end
+
+schema CQuaternion_Slerp
+  ΔCQuaternion
+  q1? : CQuaternion
+  q2? : CQuaternion
+  theta? : ℝ
+  invSin? : ℝ
+  t? : ℝ
+where
+  -- State update: this' = q2
+  -- State update: theta' = PI - theta
+  -- State update: w1' = Sin((1.0f - t) * theta) * invSin
+  -- State update: w2' = -Sin(t * theta) * invSin
+  -- State update: w1' = Sin((1.0f - t) * theta) * invSin
+  -- State update: w2' = Sin(t * theta) * invSin
+  true
+end
+
+schema CQuaternion_Multiply
+  ΔCQuaternion
+  q1? : CQuaternion
+  q2? : CQuaternion
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CQuaternion_Get
+  ΔCQuaternion
+  axis? : Ref[RwV3d]
+  angle? : ℙ ℝ
+where
+  -- State update: angle' = Acos(w)
+  -- State update: s' = Sin(*angle)
+  -- State update: axis.x' = x * (1.0f / s)
+  -- State update: axis.y' = y * (1.0f / s)
+  -- State update: axis.z' = z * (1.0f / s)
+  true
+end
+
+schema CQuaternion_Set
+  ΔCQuaternion
+  axis? : Ref[RwV3d]
+  angle? : ℝ
+where
+  -- State update: halfCos' = Cos(angle * 0.5f)
+  -- State update: halfSin' = Sin(angle * 0.5f)
+  -- State update: x' = axis.x * halfSin
+  -- State update: y' = axis.y * halfSin
+  -- State update: z' = axis.z * halfSin
+  -- State update: w' = halfCos
+  true
+end
+
+schema CQuaternion_Get_2
+  ΔCQuaternion
+  matrix? : Ref[RwMatrix]
+where
+  -- State update: x2' = x + x
+  -- State update: y2' = y + y
+  -- State update: z2' = z + z
+  -- State update: x_2x' = x * x2
+  -- State update: x_2y' = x * y2
+  -- State update: x_2z' = x * z2
+  true
+end
+
+schema CQuaternion_Set_2
+  ΔCQuaternion
+  matrix? : RwMatrix
+where
+  -- State update: f' = matrix.up.y + matrix.right.x + matrix.at.z
+  -- State update: s' = Sqrt(f + 1.0f)
+  -- State update: w' = 0.5f * s
+  -- State update: m' = 0.5f / s
+  -- State update: x' = (matrix.up.z - matrix.at.y) * m
+  -- State update: y' = (matrix.at.x - matrix.right.z) * m
+  true
+end
+
+schema CQuaternion_Get_3
+  ΔCQuaternion
+  f1? : ℙ ℝ
+  f2? : ℙ ℝ
+  f3? : ℙ ℝ
+where
+  -- State update: f3' = Atan2(matrix.right.y, matrix.up.y)
+  -- State update: s' = Sin(*f3)
+  -- State update: c' = Cos(*f3)
+  -- State update: f1' = Atan2(-matrix.at.y, s * matrix.right.y + c * matrix.up.y)
+  true
+end
+
+schema CQuaternion_Set_3
+  ΔCQuaternion
+  f1? : ℝ
+  f2? : ℝ
+  f3? : ℝ
+where
+  -- State update: c1' = Cos(f1 * 0.5f)
+  -- State update: c2' = Cos(f2 * 0.5f)
+  -- State update: c3' = Cos(f3 * 0.5f)
+  -- State update: s1' = Sin(f1 * 0.5f)
+  -- State update: s2' = Sin(f2 * 0.5f)
+  -- State update: s3' = Sin(f3 * 0.5f)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema QuaternionModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 177
+end

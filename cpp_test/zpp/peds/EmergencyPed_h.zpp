@@ -1,0 +1,95 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: EmergencyPed (peds)
+-- Source File(s): peds/EmergencyPed.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Ped.zpp  (from "Ped.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+EmergencyPedState ::= EMERGENCY_PED_READY | EMERGENCY_PED_DETERMINE_NEXT_STATE | EMERGENCY_PED_START_CPR | EMERGENCY_PED_FLAG_4 | EMERGENCY_PED_FLAG_8 | EMERGENCY_PED_FACE_TO_PATIENT | EMERGENCY_PED_PERFORM_CPR | EMERGENCY_PED_STOP_CPR | EMERGENCY_PED_STAND_STILL | EMERGENCY_PED_STOP
+  -- val(EMERGENCY_PED_READY) = 0x0
+  -- val(EMERGENCY_PED_DETERMINE_NEXT_STATE) = 0x1
+  -- val(EMERGENCY_PED_START_CPR) = 0x2
+  -- val(EMERGENCY_PED_FLAG_4) = 0x4
+  -- val(EMERGENCY_PED_FLAG_8) = 0x8
+  -- val(EMERGENCY_PED_FACE_TO_PATIENT) = 0x10
+  -- val(EMERGENCY_PED_PERFORM_CPR) = 0x20
+  -- val(EMERGENCY_PED_STOP_CPR) = 0x40
+  -- val(EMERGENCY_PED_STAND_STILL) = 0x80
+  -- val(EMERGENCY_PED_STOP) = 0x100
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CEmergencyPed
+  CPed  -- inherits base schema
+  m_pRevivedPed : Ref[CPed]
+  m_nEmergencyPedState : EmergencyPedState
+  m_pAttendedAccident : Ref[CAccident]
+  m_pAttendedFire : Ref[CFire]
+  m_bStartedToCPR : 𝔹
+  field_1360 : ℤ
+where
+  #m_pRevivedPed ≤ 1
+  #m_pAttendedAccident ≤ 1
+  #m_pAttendedFire ≤ 1
+end
+
+schema CEmergencyPed_CEmergencyPed
+  ΔCEmergencyPed
+  arg_1? : ℕ
+where
+  -- Declared member operation CEmergencyPed::CEmergencyPed(uint32)
+  true
+end
+
+schema CEmergencyPed_CEmergencyPed_2
+  ΔCEmergencyPed
+  result! : ANY
+where
+  -- Declared member operation CEmergencyPed::CEmergencyPed()
+  true
+end
+
+schema CEmergencyPed_ProcessControl_3
+  ΔCEmergencyPed
+where
+  -- Declared member operation CEmergencyPed::ProcessControl(void)
+  true
+end
+
+schema CEmergencyPed_FiremanAI_4
+  ΔCEmergencyPed
+where
+  -- Declared member operation CEmergencyPed::FiremanAI(void)
+  true
+end
+
+schema CEmergencyPed_MedicAI_5
+  ΔCEmergencyPed
+where
+  -- Declared member operation CEmergencyPed::MedicAI(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema EmergencyPed_CEmergencyPed
+  ΔEmergencyPedModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

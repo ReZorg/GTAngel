@@ -1,0 +1,201 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Train (vehicles)
+-- Source File(s): vehicles/Train.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include World.zpp  (from "World.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Train.zpp  (from "Train.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TRAIN_SPEED : ℝ  -- #define TRAIN_SPEED (15.0f)
+TRAIN_SLOWDOWN_DISTANCE : ℝ  -- #define TRAIN_SLOWDOWN_DISTANCE (40.0f)
+TRAIN_TIME_STOPPED_AT_STATION : ℝ  -- #define TRAIN_TIME_STOPPED_AT_STATION (25.0f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CTrain_SetModelIndex
+  ΔCTrain
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex, CClumpModelInfo::FillFrameArray
+  true
+end
+
+schema CTrain_ProcessControl
+  ΔCTrain
+where
+  -- State update: trackNodes' = pTrackNodes_S
+  -- State update: numTrackNodes' = NumTrackNodes_S
+  -- State update: totalLengthOfTrack' = TotalLengthOfTrack_S
+  -- State update: engineTrackPosition' = EngineTrackPosition_S
+  -- State update: engineTrackSpeed' = EngineTrackSpeed_S
+  -- State update: trackNodes' = pTrackNodes
+  -- Invokes: CTimer::GetFrameCounter, fwd.Normalise, right.Normalise, TheCamera.GetPosition, CPad::GetPad
+  true
+end
+
+schema CTrain_PreRender
+  ΔCTrain
+where
+  -- State update: lookVector' = GetPosition() - TheCamera.GetPosition()
+  -- State update: camDist' = lookVector.Magnitude()
+  -- State update: lookVector' = CVector(1.0f, 0.0f, 0.0f)
+  -- State update: behindness' = DotProduct(lookVector, GetForward())
+  -- State update: lightPos' = mi.m_positions[TRAIN_POS_LIGHT_FRONT]
+  -- State update: lightR' = GetMatrix() * lightPos
+  -- Invokes: CModelInfo::GetModelInfo, TheCamera.GetPosition, lookVector.Magnitude, CCoronas::RegisterCorona
+  true
+end
+
+schema CTrain_Render
+  ΔCTrain
+where
+  -- Invokes: CEntity::Render
+  true
+end
+
+schema CTrain_TrainHitStuff
+  ΔCTrain
+  list? : CPtrList
+where
+  -- State update: node' = list.first
+  -- State update: phys' = (CPhysical*)node.item
+  -- State update: phys.bHitByTrain' = true
+  -- Invokes: this->GetPosition, phys->GetPosition
+  true
+end
+
+schema CTrain_AddPassenger
+  ΔCTrain
+  ped? : Ref[CPed]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTrain_OpenTrainDoor
+  ΔCTrain
+  ratio? : ℝ
+where
+  -- State update: posL' = doorL.GetPosition()
+  -- State update: posR' = doorR.GetPosition()
+  -- State update: isClosed' = Doors[0].IsClosed()
+  -- State update: posL.y' = Doors[0].m_fPosn
+  -- State update: posR.y' = Doors[1].m_fPosn
+  -- Invokes: doorL.GetPosition, doorR.GetPosition, doorL.SetTranslate, doorR.SetTranslate, doorL.UpdateRW
+  true
+end
+
+schema CTrain_InitTrains
+  ΔCTrain
+where
+  -- State update: train' = new CTrain(MI_TRAIN, PERMANENT_VEHICLE)
+  -- State update: train.bIsLocked' = true
+  -- State update: train.m_fWagonPosition' = wagonPositions[i]
+  -- State update: train.m_bIsFirstWagon' = firstWagon[i]
+  -- State update: train.m_bIsLastWagon' = lastWagon[i]
+  -- State update: train.m_nWagonGroup' = wagonGroup[i]
+  -- Invokes: CStreaming::LoadAllRequestedModels, CModelInfo::GetModelInfo, CStreaming::RequestModel, train->GetMatrix, train->SetStatus
+  true
+end
+
+schema CTrain_Shutdown
+  ΔCTrain
+where
+  -- State update: pTrackNodes' = ∅
+  -- State update: pTrackNodes_S' = ∅
+  true
+end
+
+schema CTrain_ReadAndInterpretTrackFile
+  ΔCTrain
+  filename? : seq CHAR
+  nodes? : Ref[CTrainNode]
+  numNodes? : ℙ ℤ
+  numStations? : ℤ
+  stationDists? : ℙ ℝ
+  totalLength? : ℙ ℝ
+  totalDuration? : ℙ ℝ
+  interpLines? : ℙ ℤ
+  rightRail? : 𝔹
+where
+  -- State update: readingFile' = false
+  -- State update: readingFile' = true
+  -- State update: gString' = '\0'
+  -- State update: lp' = 0
+  -- State update: numNodes' = tmp
+  -- State update: nodes' = new CTrainNode[*numNodes]
+  -- Invokes: CFileMgr::LoadFile, right.Normalise, CWorld::ProcessVerticalLine
+  true
+end
+
+schema Train_PlayAnnouncement
+  ΔTrainModuleState
+  sound? : ℕ
+  station? : ℕ
+where
+  -- State update: obj' = new cAudioScriptObject
+  -- State update: obj.AudioId' = sound
+  -- State update: obj.Posn' = CTrain::aStationCoors[station]
+  -- State update: obj.AudioEntity' = AEHANDLE_NONE
+  -- Invokes: DMAudio.CreateOneShotScriptObject
+  true
+end
+
+schema Train_ProcessTrainAnnouncements
+  ΔTrainModuleState
+where
+  -- State update: preDist' = StationDist[i] - 100.0f
+  -- State update: postDist' = StationDist[i] + 10.0f
+  true
+end
+
+schema CTrain_UpdateTrains
+  ΔCTrain
+where
+  -- State update: time' = CTimer::GetTimeInMilliseconds()
+  -- State update: t' = TotalDurationOfTrack * (float)(time & 0x1FFFF)/0x20000
+  -- State update: deltaT' = t - aLineBits[j].time
+  -- State update: time' = CTimer::GetTimeInMilliseconds()
+  -- State update: t' = TotalDurationOfTrack_S * (float)(time & 0x3FFFF)/0x40000
+  -- State update: deltaT' = t - aLineBits_S[j].time
+  -- Invokes: TheCamera.GetPosition, CTimer::GetTimeInMilliseconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema TrainModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 820
+end

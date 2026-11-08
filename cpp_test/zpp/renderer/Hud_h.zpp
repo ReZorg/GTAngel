@@ -1,0 +1,300 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Hud (renderer)
+-- Source File(s): renderer/Hud.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+HELP_MSG_LENGTH : ℕ  -- #define HELP_MSG_LENGTH 256
+HUD_TEXT_SCALE_X : ℝ  -- #define HUD_TEXT_SCALE_X 0.7f
+HUD_TEXT_SCALE_Y : ℝ  -- #define HUD_TEXT_SCALE_Y 1.25f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eItems ::= ITEM_NONE | ITEM_ARMOUR | ITEM_HEALTH | ITEM_RADAR
+  -- val(ITEM_NONE) = -1
+  -- val(ITEM_ARMOUR) = 3
+  -- val(ITEM_HEALTH) = 4
+  -- val(ITEM_RADAR) = 8
+
+DRAW_FADE_STATE ::= HUD_WANTED_FADING | HUD_ENERGY_FADING | HUD_SCORE_FADING | HUD_WEAPON_FADING
+  -- val(HUD_WANTED_FADING) = 0
+
+eFadeOperation ::= FADED_OUT | START_FADE_OUT | FADING_IN | FADING_OUT | FADE_DISABLED
+  -- val(FADED_OUT) = 0
+  -- val(FADE_DISABLED) = 5
+
+eSprites ::= HUD_FIST | HUD_SITEROCKET | HUD_RADARDISC | HUD_BAR_INSIDE1DARK | HUD_BAR_INSIDE2DARK | HUD_HUDNUMBERS | HUD_BAR_INSIDE1 | HUD_BAR_INSIDE2 | HUD_BAR_OUTLINE | HUD_SITESNIPER | HUD_SITEM16 | HUD_SITELASER | HUD_LASERDOT | HUD_VIEWFINDER | HUD_BLEEDER | NUM_HUD_SPRITES | HUD_BAT | HUD_PISTOL | HUD_UZI | HUD_SHOTGUN | HUD_AK47 | HUD_M16 | HUD_SNIPER | HUD_ROCKET | HUD_FLAME | HUD_MOLOTOV | HUD_GRENADE | HUD_DETONATOR | HUD_PAGER
+  -- val(HUD_SITEROCKET) = 41
+  -- val(HUD_RADARDISC) = 50
+  -- val(HUD_BAR_INSIDE1DARK) = 57
+  -- val(NUM_HUD_SPRITES) = 70
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CHud
+  Sprites : seq CSprite2d  -- bounded array [NUM_HUD_SPRITES]
+  m_HelpMessage : seq CHAR
+  m_LastHelpMessage : seq CHAR
+  m_HelpMessageState : ℕ
+  m_HelpMessageTimer : ℕ
+  m_HelpMessageFadeTimer : ℤ
+  m_HelpMessageToPrint : seq CHAR
+  m_HelpMessageDisplayTime : ℝ
+  m_HelpMessageDisplayForever : 𝔹
+  m_HelpMessageQuick : 𝔹
+  m_ZoneState : ℕ
+  m_ZoneFadeTimer : ℤ
+  m_ZoneNameTimer : ℕ
+  m_pZoneName : seq CHAR
+  m_pLastZoneName : seq CHAR
+  m_ZoneToPrint : seq CHAR
+  m_VehicleName : seq CHAR
+  m_pLastVehicleName : seq CHAR
+  m_pVehicleNameToPrint : seq CHAR
+  m_VehicleState : ℕ
+  m_VehicleFadeTimer : ℤ
+  m_VehicleNameTimer : ℕ
+  m_Message : seq CHAR
+  m_PagerMessage : seq CHAR
+  m_Wants_To_Draw_Hud : 𝔹
+  m_Wants_To_Draw_3dMarkers : 𝔹
+  m_ItemToFlash : ℤ
+  m_HideRadar : 𝔹
+  m_ClockState : ℤ
+  BigMessageAlpha : seq ℝ  -- bounded array [6]
+  BigMessageX : seq ℝ  -- bounded array [6]
+  OddJob2OffTimer : ℝ
+  CounterOnLastFrame : seq 𝔹  -- bounded array [NUMONSCREENCOUNTERS]
+  OddJob2XOffset : ℝ
+  CounterFlashTimer : seq ℕ  -- bounded array [NUMONSCREENCOUNTERS]
+  OddJob2Timer : ℕ
+  TimerOnLastFrame : 𝔹
+  OddJob2On : ℤ
+  TimerFlashTimer : ℕ
+  PagerSoundPlayed : ℤ
+  SpriteBrightness : ℤ
+  PagerXOffset : ℝ
+  PagerTimer : ℤ
+  PagerOn : ℤ
+  m_WantedFadeTimer : ℕ
+  m_WantedState : ℕ
+  m_WantedTimer : ℕ
+  m_EnergyLostFadeTimer : ℕ
+  m_EnergyLostState : ℕ
+  m_EnergyLostTimer : ℕ
+  m_DisplayScoreFadeTimer : ℕ
+  m_DisplayScoreState : ℕ
+  m_DisplayScoreTimer : ℕ
+  m_WeaponFadeTimer : ℕ
+  m_WeaponState : ℕ
+  m_WeaponTimer : ℕ
+  m_LastDisplayScore : ℕ
+  m_LastWanted : ℕ
+  m_LastWeapon : ℕ
+  m_LastTimeEnergyLost : ℕ
+  gLastPrintForeverString : seq CHAR
+  m_HudAlpha : ℕ
+  BigMessageInUse : seq ℝ  -- bounded array [6]
+  m_pVehicleName : seq CHAR
+where
+  m_HelpMessageState ≥ 0
+  m_HelpMessageTimer ≥ 0
+  m_ZoneState ≥ 0
+  m_ZoneNameTimer ≥ 0
+  m_VehicleState ≥ 0
+  m_VehicleNameTimer ≥ 0
+  #m_Message = 256
+  #m_PagerMessage = 256
+  #BigMessageAlpha = 6
+  #BigMessageX = 6
+  OddJob2Timer ≥ 0
+  TimerFlashTimer ≥ 0
+  m_WantedFadeTimer ≥ 0
+  m_WantedState ≥ 0
+  m_WantedTimer ≥ 0
+  m_EnergyLostFadeTimer ≥ 0
+end
+
+schema CHud_Draw
+  ΔCHud
+where
+  -- Declared member operation CHud::Draw()
+  true
+end
+
+schema CHud_DrawAfterFade_2
+  ΔCHud
+where
+  -- Declared member operation CHud::DrawAfterFade()
+  true
+end
+
+schema CHud_GetRidOfAllHudMessages_3
+  ΔCHud
+where
+  -- Declared member operation CHud::GetRidOfAllHudMessages()
+  true
+end
+
+schema CHud_ReInitialise_4
+  ΔCHud
+where
+  -- Declared member operation CHud::ReInitialise()
+  true
+end
+
+schema CHud_SetBigMessage_5
+  ΔCHud
+  message? : seq CHAR
+  style? : ℕ
+where
+  -- Declared member operation CHud::SetBigMessage(wchar *message, uint16 style)
+  true
+end
+
+schema CHud_SetHelpMessage_6
+  ΔCHud
+  message? : seq CHAR
+  quick? : 𝔹
+  displayForever? : 𝔹
+where
+  -- Declared member operation CHud::SetHelpMessage(wchar *message, bool quick, bool displayForever = false)
+  true
+end
+
+schema CHud_IsHelpMessageBeingDisplayed_7
+  ΔCHud
+  result! : 𝔹
+where
+  -- Declared member operation CHud::IsHelpMessageBeingDisplayed(void)
+  true
+end
+
+schema CHud_SetMessage_8
+  ΔCHud
+  message? : seq CHAR
+where
+  -- Declared member operation CHud::SetMessage(wchar *message)
+  true
+end
+
+schema CHud_SetPagerMessage_9
+  ΔCHud
+  message? : seq CHAR
+where
+  -- Declared member operation CHud::SetPagerMessage(wchar *message)
+  true
+end
+
+schema CHud_SetVehicleName_10
+  ΔCHud
+  name? : seq CHAR
+where
+  -- Declared member operation CHud::SetVehicleName(wchar *name)
+  true
+end
+
+schema CHud_SetZoneName_11
+  ΔCHud
+  name? : seq CHAR
+where
+  -- Declared member operation CHud::SetZoneName(wchar *name)
+  true
+end
+
+schema CHud_Shutdown_12
+  ΔCHud
+where
+  -- Declared member operation CHud::Shutdown()
+  true
+end
+
+schema CHud_DrawFadeState_13
+  ΔCHud
+  arg_1? : DRAW_FADE_STATE
+  arg_2? : ℤ
+  result! : ℝ
+where
+  -- Declared member operation CHud::DrawFadeState(DRAW_FADE_STATE, int)
+  true
+end
+
+schema CHud_ResetWastedText_14
+  ΔCHud
+where
+  -- Declared member operation CHud::ResetWastedText(void)
+  true
+end
+
+schema CHud_DrawHealthBar_15
+  ΔCHud
+  value? : ℤ
+where
+  -- Declared member operation CHud::DrawHealthBar(int16 value)
+  true
+end
+
+schema CHud_DrawArmourBar_16
+  ΔCHud
+  value? : ℤ
+where
+  -- Declared member operation CHud::DrawArmourBar(int16 value)
+  true
+end
+
+schema CHud_DrawTimeAndCashNumbers_17
+  ΔCHud
+  str? : seq CHAR
+  x? : ℝ
+  y? : ℝ
+  secondSet? : 𝔹
+where
+  -- Declared member operation CHud::DrawTimeAndCashNumbers(char *str, float x, float y, bool secondSet)
+  true
+end
+
+schema CHud_DrawCash_18
+  ΔCHud
+where
+  -- Declared member operation CHud::DrawCash()
+  true
+end
+
+schema CHud_DrawTime_19
+  ΔCHud
+where
+  -- Declared member operation CHud::DrawTime()
+  true
+end
+
+schema CHud_UseTimerCounterFontSettings_20
+  ΔCHud
+where
+  -- Declared member operation CHud::UseTimerCounterFontSettings()
+  true
+end
+
+schema CHud_SetHelpMessage_21
+  ΔCHud
+  message? : seq CHAR
+  quick? : 𝔹
+where
+  -- Declared member operation CHud::SetHelpMessage(wchar *message, bool quick)
+  true
+end

@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PowerPoints (control)
+-- Source File(s): control/PowerPoints.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include PowerPoints.zpp  (from "PowerPoints.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPowerPoint_Update
+  ΔCPowerPoint
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Init
+  ΔCPowerPoints
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Update
+  ΔCPowerPoints
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_GenerateNewOne
+  ΔCPowerPoints
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Save
+  ΔCPowerPoints
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPowerPoints_Load
+  ΔCPowerPoints
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PowerPointsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 22
+end

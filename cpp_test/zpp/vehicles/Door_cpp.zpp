@@ -1,0 +1,208 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Door (vehicles)
+-- Source File(s): vehicles/Door.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Door.zpp  (from "Door.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDoor_CDoor
+  ΔCDoor
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDoor_Open
+  ΔCDoor
+  ratio? : ℝ
+where
+  -- State update: m_fPrevAngle' = m_fAngle
+  -- State update: open' = RetAngleWhenOpen()
+  -- State update: m_fAngle' = open*ratio
+  -- State update: m_fAngVel' = 0.0f
+  -- State update: m_nDoorState' = DOORST_OPEN
+  -- State update: m_fAngle' = open
+  true
+end
+
+schema CDoor_Process
+  ΔCDoor
+  vehicle? : Ref[CVehicle]
+where
+  -- State update: speed' = vehicle.GetSpeed(vecOffset)
+  -- State update: vecSpeedDiff' = speed - m_vecSpeed
+  -- State update: vecSpeedDiff' = Multiply3x3(vecSpeedDiff, vehicle.GetMatrix())
+  -- State update: fSpeedDiff' = 0.0f
+  -- State update: fSpeedDiff' = vecSpeedDiff.y + vecSpeedDiff.z
+  -- State update: fSpeedDiff' = -(vecSpeedDiff.y + vecSpeedDiff.z)
+  -- Invokes: vehicle->GetSpeed, vehicle->GetMatrix
+  true
+end
+
+schema CDoor_RetAngleWhenClosed
+  ΔCDoor
+where
+  -- Return postcondition: result! = m_fMaxAngle
+  -- Return postcondition: result! = m_fMinAngle
+  true
+end
+
+schema CDoor_RetAngleWhenOpen
+  ΔCDoor
+where
+  -- Return postcondition: result! = m_fMinAngle
+  -- Return postcondition: result! = m_fMaxAngle
+  true
+end
+
+schema CDoor_GetAngleOpenRatio
+  ΔCDoor
+where
+  -- State update: open' = RetAngleWhenOpen()
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = m_fAngle/open
+  true
+end
+
+schema CDoor_IsFullyOpen
+  ΔCDoor
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDoor_IsClosed
+  ΔCDoor
+where
+  -- Return postcondition: result! = m_fAngle == RetAngleWhenClosed()
+  true
+end
+
+schema CTrainDoor_CTrainDoor
+  ΔCTrainDoor
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTrainDoor_Open
+  ΔCTrainDoor
+  ratio? : ℝ
+where
+  -- State update: m_fPrevPosn' = m_fPosn
+  -- State update: open' = RetTranslationWhenOpen()
+  -- State update: m_fPosn' = open*ratio
+  -- State update: m_nDoorState' = DOORST_OPEN
+  -- State update: m_fPosn' = open
+  true
+end
+
+schema CTrainDoor_RetTranslationWhenClosed
+  ΔCTrainDoor
+where
+  -- Return postcondition: result! = m_fClosedPosn
+  -- Return postcondition: result! = m_fOpenPosn
+  true
+end
+
+schema CTrainDoor_RetTranslationWhenOpen
+  ΔCTrainDoor
+where
+  -- Return postcondition: result! = m_fOpenPosn
+  -- Return postcondition: result! = m_fClosedPosn
+  true
+end
+
+schema CTrainDoor_IsFullyOpen
+  ΔCTrainDoor
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CTrainDoor_IsClosed
+  ΔCTrainDoor
+where
+  -- Return postcondition: result! = m_fPosn == RetTranslationWhenClosed()
+  true
+end
+
+schema CFerryDoor_IsInUse
+  ΔCFerryDoor
+where
+  -- State update: translationDifference' = m_fPrevPosn - m_fPosn
+  -- State update: m_fPrevPosn' = m_fPosn
+  -- Return postcondition: result! = Abs(translationDifference) > 0.002f
+  true
+end
+
+schema CFerryDoor_RetTranslationWhenClosed
+  ΔCFerryDoor
+where
+  -- Return postcondition: result! = m_fClosedPosn
+  -- Return postcondition: result! = m_fOpenPosn
+  true
+end
+
+schema CFerryDoor_IsClosed
+  ΔCFerryDoor
+where
+  -- Return postcondition: result! = m_fPosn == RetTranslationWhenClosed()
+  true
+end
+
+schema CFerryDoor_RetTranslationWhenOpen
+  ΔCFerryDoor
+where
+  -- Return postcondition: result! = m_fOpenPosn
+  -- Return postcondition: result! = m_fClosedPosn
+  true
+end
+
+schema CFerryDoor_IsFullyOpen
+  ΔCFerryDoor
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CFerryDoor_Open
+  ΔCFerryDoor
+  ratio? : ℝ
+where
+  -- State update: m_fPrevPosn' = m_fPosn
+  -- State update: open' = RetTranslationWhenOpen()
+  -- State update: m_fPosn' = open*ratio
+  -- State update: m_nDoorState' = DOORST_OPEN
+  -- State update: m_fPosn' = open
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DoorModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 247
+end

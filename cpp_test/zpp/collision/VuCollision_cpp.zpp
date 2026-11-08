@@ -1,0 +1,126 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VuCollision (collision)
+-- Source File(s): collision/VuCollision.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include VuVector.zpp  (from "VuVector.h")
+-- include VuCollision.zpp  (from "VuCollision.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema VuCollision_DistanceBetweenSphereAndLine
+  ΔVuCollisionModuleState
+  center? : CVuVector
+  p0? : CVuVector
+  line? : CVuVector
+where
+  -- State update: p1' = p0+line
+  -- State update: dist0' = center - p0
+  -- State update: dist1' = center - p1
+  -- State update: lenSq' = line.MagnitudeSqr()
+  -- State update: distSq0' = dist0.MagnitudeSqr()
+  -- State update: distSq1' = dist1.MagnitudeSqr()
+  -- Return postcondition: result! = ret
+  -- Return postcondition: result! = ret
+  -- Return postcondition: result! = ret
+  -- Invokes: line.MagnitudeSqr, dist0.MagnitudeSqr, dist1.MagnitudeSqr
+  true
+end
+
+schema VuCollision_SignFlags
+  ΔVuCollisionModuleState
+  v? : CVector
+  result! : ℤ
+where
+  -- State update: f' = 0
+  -- Return postcondition: result! = f
+  true
+end
+
+schema VuCollision_LineToTriangleCollision
+  ΔVuCollisionModuleState
+  p0? : CVuVector
+  p1? : CVuVector
+  v0? : CVuVector
+  v1? : CVuVector
+  v2? : CVuVector
+  plane? : CVuVector
+where
+  -- State update: dot0' = DotProduct(plane, p0)
+  -- State update: dot1' = DotProduct(plane, p1)
+  -- State update: dist0' = plane.w - dot0
+  -- State update: dist1' = plane.w - dot1
+  -- State update: vi01' = 0
+  -- State update: diff' = p1 - p0
+  true
+end
+
+schema VuCollision_LineToTriangleCollisionCompressed
+  ΔVuCollisionModuleState
+  p0? : CVuVector
+  p1? : CVuVector
+  tri? : VuTriangle
+where
+  -- State update: v0.x' = tri.v0[0]/128.0f
+  -- State update: v0.y' = tri.v0[1]/128.0f
+  -- State update: v0.z' = tri.v0[2]/128.0f
+  -- State update: v0.w' = tri.v0[3]/128.0f
+  -- State update: v1.x' = tri.v1[0]/128.0f
+  -- State update: v1.y' = tri.v1[1]/128.0f
+  true
+end
+
+schema VuCollision_SphereToTriangleCollision
+  ΔVuCollisionModuleState
+  sph? : CVuVector
+  v0? : CVuVector
+  v1? : CVuVector
+  v2? : CVuVector
+  plane? : CVuVector
+where
+  -- State update: planedist' = DotProduct(plane, sph) - plane.w
+  -- State update: vi01' = 0
+  -- State update: p' = sph - planedist*plane
+  -- State update: p.w' = 0.0f
+  -- State update: vf01' = p
+  -- State update: planedist' = Abs(planedist)
+  -- Invokes: vf02.MagnitudeSqr
+  true
+end
+
+schema VuCollision_SphereToTriangleCollisionCompressed
+  ΔVuCollisionModuleState
+  sph? : CVuVector
+  tri? : VuTriangle
+where
+  -- State update: v0.x' = tri.v0[0]/128.0f
+  -- State update: v0.y' = tri.v0[1]/128.0f
+  -- State update: v0.z' = tri.v0[2]/128.0f
+  -- State update: v0.w' = tri.v0[3]/128.0f
+  -- State update: v1.x' = tri.v1[0]/128.0f
+  -- State update: v1.y' = tri.v1[1]/128.0f
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema VuCollisionModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 282
+end

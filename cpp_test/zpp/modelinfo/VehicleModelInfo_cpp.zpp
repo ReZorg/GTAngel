@@ -1,0 +1,721 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: VehicleModelInfo (modelinfo)
+-- Source File(s): modelinfo/VehicleModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include General.zpp  (from "General.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include Train.zpp  (from "Train.h")
+-- include Ferry.zpp  (from "Ferry.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Leeds.zpp  (from "Leeds.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+VehicleModelInfo_Enum_1 ::= VEHICLE_FLAG_COLLAPSE | VEHICLE_FLAG_ADD_WHEEL | VEHICLE_FLAG_POS | VEHICLE_FLAG_DOOR | VEHICLE_FLAG_LEFT | VEHICLE_FLAG_RIGHT | VEHICLE_FLAG_FRONT | VEHICLE_FLAG_REAR | VEHICLE_FLAG_COMP | VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_ANGLECULL | VEHICLE_FLAG_REARDOOR | VEHICLE_FLAG_FRONTDOOR
+  -- val(VEHICLE_FLAG_COLLAPSE) = 0x2
+  -- val(VEHICLE_FLAG_ADD_WHEEL) = 0x4
+  -- val(VEHICLE_FLAG_POS) = 0x8
+  -- val(VEHICLE_FLAG_DOOR) = 0x10
+  -- val(VEHICLE_FLAG_LEFT) = 0x20
+  -- val(VEHICLE_FLAG_RIGHT) = 0x40
+  -- val(VEHICLE_FLAG_FRONT) = 0x80
+  -- val(VEHICLE_FLAG_REAR) = 0x100
+  -- val(VEHICLE_FLAG_COMP) = 0x200
+  -- val(VEHICLE_FLAG_DRAWLAST) = 0x400
+  -- val(VEHICLE_FLAG_WINDSCREEN) = 0x800
+  -- val(VEHICLE_FLAG_ANGLECULL) = 0x1000
+  -- val(VEHICLE_FLAG_REARDOOR) = 0x2000
+  -- val(VEHICLE_FLAG_FRONTDOOR) = 0x4000
+
+VehicleModelInfo_Enum_2 ::= NONE | COLOURS | CARS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema editableMatCBData
+  vehicle : Ref[CVehicleModelInfo]
+  numMats1 : ℤ
+  numMats2 : ℤ
+where
+  #vehicle ≤ 1
+end
+
+schema VehicleChunk
+  clump : Ref[RpClump]
+  numComps : ℤ
+  comp : Ref[RpAtomic]
+  materials1 : seq Ref[RpMaterial]  -- bounded array [NUM_FIRST_MATERIALS]
+  materials2 : seq Ref[RpMaterial]  -- bounded array [NUM_SECOND_MATERIALS]
+where
+  #clump ≤ 1
+  #comp ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CVehicleModelInfo_Load
+  ΔCVehicleModelInfo
+  inst? : ADDRESS
+where
+  -- State update: mspInfo' = (CVehicleModelInfo::Statics*)inst
+  -- State update: mspInfo' = new CVehicleModelInfo::Statics
+  true
+end
+
+schema CVehicleModelInfo_WriteStaticInfo
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Return postcondition: result! = mspInfo
+  -- Invokes: writer.AllocateRaw, writer.AddPatch
+  true
+end
+
+schema CVehicleModelInfo_DeleteRwObject
+  ΔCVehicleModelInfo
+where
+  -- State update: f' = RpAtomicGetFrame(m_comps[i])
+  -- State update: m_comps' = ∅
+  -- State update: m_numComps' = 0
+  -- State update: m_comps' = ∅
+  -- Invokes: CStreaming::UnregisterPointer, CStreaming::UnregisterAtomic, CClumpModelInfo::DeleteRwObject
+  true
+end
+
+schema VehicleModelInfo_RemoveWheelCB
+  ΔVehicleModelInfoModuleState
+  object? : Ref[RwObject]
+  arg? : ADDRESS
+where
+  -- State update: atomic' = (RpAtomic*)object
+  -- Return postcondition: result! = object
+  -- Invokes: CStreaming::UnregisterPointer
+  true
+end
+
+schema CVehicleModelInfo_RemoveWheels
+  ΔCVehicleModelInfo
+where
+  -- State update: desc' = ms_vehicleDescs[m_vehicleType]
+  -- State update: assoc.frame' = ∅
+  -- State update: assoc.id' = desc[i].hierId
+  true
+end
+
+schema CVehicleModelInfo_CreateInstance
+  ΔCVehicleModelInfo
+where
+  -- State update: clump' = (RpClump*)CClumpModelInfo::CreateInstance()
+  -- State update: clumpframe' = RpClumpGetFrame(clump)
+  -- State update: comp1' = ChooseComponent()
+  -- State update: atomic' = RpAtomicClone(m_comps[comp1])
+  -- State update: f' = RwFrameCreate()
+  -- State update: comp2' = ChooseSecondComponent()
+  -- Return postcondition: result! = (RwObject*)clump
+  -- Invokes: CClumpModelInfo::CreateInstance, CStreaming::RegisterInstance
+  true
+end
+
+schema VehicleModelInfo_SplayNormals
+  ΔVehicleModelInfoModuleState
+  atomic? : Ref[RpAtomic]
+  arg? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVehicleModelInfo_SetClump
+  ΔCVehicleModelInfo
+  clump? : Ref[RpClump]
+where
+  -- Invokes: CClumpModelInfo::SetClump
+  true
+end
+
+schema CVehicleModelInfo_SetAnimFile
+  ΔCVehicleModelInfo
+  file? : seq CHAR
+where
+  -- State update: m_animFileName' = new char[strlen(file)+1]
+  true
+end
+
+schema CVehicleModelInfo_ConvertAnimFileIndex
+  ΔCVehicleModelInfo
+where
+  -- State update: index' = CAnimManager::GetAnimationBlockIndex(m_animFileName)
+  -- State update: m_animFileIndex' = index
+  -- Invokes: CAnimManager::GetAnimationBlockIndex
+  true
+end
+
+schema CVehicleModelInfo_CollapseFramesCB
+  ΔCVehicleModelInfo
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = frame
+  true
+end
+
+schema CVehicleModelInfo_MoveObjectsCB
+  ΔCVehicleModelInfo
+  object? : Ref[RwObject]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema CVehicleModelInfo_HideDamagedAtomicCB
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::SetAtomicFlag
+  true
+end
+
+schema CVehicleModelInfo_HideAllComponentsAtomicCB
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::GetAtomicId
+  true
+end
+
+schema CVehicleModelInfo_HasAlphaMaterialCB
+  ΔCVehicleModelInfo
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: data' = true
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = material
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: clump' = (RpClump*)data
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: alpha' = false
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  -- Invokes: CGeneral::faststrncmp, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_BigVehicle
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: alpha' = false
+  -- Return postcondition: result! = atomic
+  -- Invokes: CGeneral::faststrncmp, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Train
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: alpha' = false
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Ferry
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: alpha' = false
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Boat
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: clump' = (RpClump*)data
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: alpha' = false
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  -- Invokes: CGeneral::faststrncmp, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Boat_Far
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: clump' = (RpClump*)data
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  -- Invokes: CGeneral::faststrncmp, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_Heli
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRendererCB_RealHeli
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: clump' = (RpClump*)data
+  -- State update: name' = GetFrameNodeName(RpAtomicGetFrame(atomic))
+  -- State update: alpha' = false
+  -- Return postcondition: result! = atomic
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::SetAtomicRenderCallback, CGeneral::faststrncmp
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicRenderCallbacks
+  ΔCVehicleModelInfo
+where
+  -- Invokes: mod_HandlingManager.GetHandlingData
+  true
+end
+
+schema CVehicleModelInfo_SetAtomicFlagCB
+  ΔCVehicleModelInfo
+  object? : Ref[RwObject]
+  data? : ADDRESS
+where
+  -- State update: atomic' = (RpAtomic*)object
+  -- Return postcondition: result! = object
+  -- Invokes: CVisibilityPlugins::SetAtomicFlag
+  true
+end
+
+schema CVehicleModelInfo_ClearAtomicFlagCB
+  ΔCVehicleModelInfo
+  object? : Ref[RwObject]
+  data? : ADDRESS
+where
+  -- State update: atomic' = (RpAtomic*)object
+  -- Return postcondition: result! = object
+  -- Invokes: CVisibilityPlugins::ClearAtomicFlag
+  true
+end
+
+schema VehicleModelInfo_GetOkAndDamagedAtomicCB
+  ΔVehicleModelInfoModuleState
+  object? : Ref[RwObject]
+  data? : ADDRESS
+where
+  -- State update: atomic' = (RpAtomic*)object
+  -- Return postcondition: result! = object
+  -- Invokes: CVisibilityPlugins::GetAtomicId
+  true
+end
+
+schema CVehicleModelInfo_PreprocessHierarchy
+  ΔCVehicleModelInfo
+where
+  -- State update: desc' = ms_vehicleDescs[m_vehicleType]
+  -- State update: m_numDoors' = 0
+  -- State update: m_numComps' = 0
+  -- State update: m_comps' = new RpAtomic*[7]
+  -- State update: assoc.frame' = ∅
+  -- State update: assoc.name' = desc[i].name
+  -- Invokes: CModelInfo::GetModelInfo, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_SetVehicleComponentFlags
+  ΔCVehicleModelInfo
+  frame? : Ref[RwFrame]
+  flags? : ℕ
+where
+  -- Invokes: mod_HandlingManager.GetHandlingData, CModelInfo::GetModelInfo
+  true
+end
+
+schema VehicleModelInfo_IsValidCompRule
+  ΔVehicleModelInfoModuleState
+  rule? : ℤ
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema VehicleModelInfo_CountCompsInRule
+  ΔVehicleModelInfoModuleState
+  comps? : ℤ
+where
+  -- Return postcondition: result! = n
+  true
+end
+
+schema VehicleModelInfo_ChooseComponent
+  ΔVehicleModelInfoModuleState
+  rule? : ℤ
+  comps? : ℤ
+where
+  -- Return postcondition: result! = COMPRULE_COMPN(comps, n)
+  -- Return postcondition: result! = COMPRULE_COMPN(comps, n)
+  -- Return postcondition: result! = COMPRULE_COMPN(comps, n-1)
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema VehicleModelInfo_GetListOfComponentsNotUsedByRules
+  ΔVehicleModelInfoModuleState
+  comprules? : ℕ
+  numComps? : ℤ
+  comps? : ℙ ℤ
+where
+  -- Return postcondition: result! = n
+  true
+end
+
+schema CVehicleModelInfo_GetWheelPosn
+  ΔCVehicleModelInfo
+  n? : ℤ
+  pos? : CVector
+where
+  -- State update: m' = RwFrameGetMatrix(GetFrameFromId(m_clump, wheelIds[n]))
+  -- State update: pos.x' = RwMatrixGetPos(m).x
+  -- State update: pos.y' = RwMatrixGetPos(m).y
+  -- State update: pos.z' = RwMatrixGetPos(m).z
+  true
+end
+
+schema CVehicleModelInfo_ChooseComponent
+  ΔCVehicleModelInfo
+where
+  -- State update: comp' = -1
+  -- State update: comp' = comps[(int)CGeneral::GetRandomNumberInRange(0, n)]
+  -- State update: comp' = mspInfo.ms_compsToUse[0]
+  -- Return postcondition: result! = comp
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CVehicleModelInfo_ChooseSecondComponent
+  ΔCVehicleModelInfo
+where
+  -- State update: comp' = -1
+  -- State update: comp' = comps[(int)CGeneral::GetRandomNumberInRange(0, n)]
+  -- State update: comp' = mspInfo.ms_compsToUse[1]
+  -- Return postcondition: result! = comp
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CVehicleModelInfo_GetEditableMaterialListCB
+  ΔCVehicleModelInfo
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: white' = { 255, 255, 255, 255 }
+  -- State update: cbdata' = (editableMatCBData*)data
+  -- State update: col' = RpMaterialGetColor(material)
+  -- Return postcondition: result! = material
+  true
+end
+
+schema CVehicleModelInfo_GetEditableMaterialListCB_2
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVehicleModelInfo_FindEditableMaterialList
+  ΔCVehicleModelInfo
+where
+  -- State update: cbdata.vehicle' = this
+  -- State update: cbdata.numMats1' = 0
+  -- State update: cbdata.numMats2' = 0
+  -- State update: maxFirstMaterials' = Max(maxFirstMaterials, cbdata.numMats1)
+  -- State update: maxSecondMaterials' = Max(maxSecondMaterials, cbdata.numMats2)
+  -- State update: m_currentColour1' = -1
+  true
+end
+
+schema CVehicleModelInfo_SetVehicleColour
+  ΔCVehicleModelInfo
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- State update: col' = ms_vehicleColourTable[c1]
+  -- State update: coltex' = ms_colourTextureTable[c1]
+  -- State update: matp' = m_materials1
+  -- State update: colp' = (RwRGBA*)RpMaterialGetColor(*matp)
+  -- State update: colp.red' = col.red
+  -- State update: colp.green' = col.green
+  true
+end
+
+schema CVehicleModelInfo_ChooseVehicleColour
+  ΔCVehicleModelInfo
+  col1? : ℕ
+  col2? : ℕ
+where
+  -- State update: col1' = 0
+  -- State update: col2' = 0
+  -- State update: col1' = 68
+  -- State update: col2' = 68
+  -- State update: m_lastColorVariation' = (m_lastColorVariation+1) % m_numColours
+  -- State update: col1' = m_colours1[m_lastColorVariation]
+  -- Invokes: CModelInfo::GetModelInfo, veh->GetModelIndex
+  true
+end
+
+schema CVehicleModelInfo_AvoidSameVehicleColour
+  ΔCVehicleModelInfo
+  col1? : ℙ ℕ
+  col2? : ℙ ℕ
+where
+  -- State update: col1' = 0
+  -- State update: col2' = 0
+  -- State update: col1' = 68
+  -- State update: col2' = 68
+  -- State update: col1' = m_colours1[n]
+  -- State update: col2' = m_colours2[n]
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema VehicleModelInfo_CreateCarColourTexture
+  ΔVehicleModelInfoModuleState
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+where
+  -- State update: img' = RwImageCreate(2, 2, 32)
+  -- State update: pixels' = (RwUInt8*)RwMalloc(2*2*4)
+  -- State update: ras' = RwRasterCreate(width, height, depth, format)
+  -- State update: tex' = RwTextureCreate(ras)
+  -- Return postcondition: result! = tex
+  true
+end
+
+schema CVehicleModelInfo_LoadVehicleColours
+  ΔCVehicleModelInfo
+where
+  -- State update: fd' = CFileMgr::OpenFile("CARCOLS.DAT", "r")
+  -- State update: section' = 0
+  -- State update: numCols' = 0
+  -- State update: start' = 0
+  -- State update: end' = start
+  -- State update: section' = COLOURS
+  -- Invokes: CFileMgr::ChangeDir, CFileMgr::OpenFile, CFileMgr::ReadLine, CModelInfo::GetModelInfo, CFileMgr::CloseFile
+  true
+end
+
+schema CVehicleModelInfo_DeleteVehicleColourTextures
+  ΔCVehicleModelInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CVehicleModelInfo_GetMatFXEffectMaterialCB
+  ΔCVehicleModelInfo
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: data' = RpMatFXMaterialGetEffects(material)
+  -- Return postcondition: result! = material
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CVehicleModelInfo_SetEnvironmentMap
+  ΔCVehicleModelInfo
+where
+  -- Invokes: CustomPipes::AttachVehiclePipe
+  true
+end
+
+schema CVehicleModelInfo_LoadEnvironmentMaps
+  ΔCVehicleModelInfo
+where
+  -- State update: txdslot' = CTxdStore::FindTxdSlot("particle")
+  -- State update: gpWhiteTexture' = RwTextureRead("white", ∅)
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CVehicleModelInfo_ShutdownEnvironmentMaps
+  ΔCVehicleModelInfo
+where
+  -- State update: gpWhiteTexture' = ∅
+  -- State update: pMatFxIdentityFrame' = ∅
+  true
+end
+
+schema CVehicleModelInfo_GetMaximumNumberOfPassengersFromNumberOfDoors
+  ΔCVehicleModelInfo
+  id? : ℤ
+where
+  -- Return postcondition: result! = id == MI_RCBANDIT ? 0 : 1
+  -- Return postcondition: result! = 8
+  -- Return postcondition: result! = n - 1
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema CVehicleModelInfo_LoadModel
+  ΔCVehicleModelInfo
+  data? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: chk' = (VehicleChunk*)data
+  -- State update: m_numComps' = chk.numComps
+  -- State update: m_comps' = chk.comp
+  -- State update: m_comps' = ∅
+  -- State update: m_currentColour1' = -1
+  -- State update: m_currentColour2' = -1
+  -- Invokes: CClumpModelInfo::LoadModel, CStreaming::RegisterPointer, CStreaming::RegisterAtomic, CModelInfo::GetModelInfo, CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CVehicleModelInfo_Write
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: CClumpModelInfo::Write
+  true
+end
+
+schema CVehicleModelInfo_WriteModel
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: chk' = new VehicleChunk
+  -- State update: chk.clump' = (RpClump*)CClumpModelInfo::WriteModel(writer)
+  -- State update: chk.numComps' = m_numComps
+  -- State update: chk.comp' = ∅
+  -- State update: chk.comp' = m_comps
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = chk
+  -- Invokes: writer.AllocateRaw, CClumpModelInfo::WriteModel, writer.AddPatch
+  true
+end
+
+schema CVehicleModelInfo_RcWriteThis
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CVehicleModelInfo_RcWriteEmpty
+  ΔCVehicleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CVehicleModelInfo_SetEnvironmentMapCB
+  ΔCVehicleModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- State update: hasSpec' = 0
+  -- State update: initialised' = true
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CVehicleModelInfo_SetEnvironmentMap_2
+  ΔCVehicleModelInfo
+where
+  -- State update: pMatFxIdentityFrame' = RwFrameCreate()
+  -- State update: m_envMap' = ms_pEnvironmentMaps[0]
+  -- State update: wheelmi' = (CSimpleModelInfo*)CModelInfo::GetModelInfo(m_wheelId)
+  -- Invokes: CModelInfo::GetModelInfo, CustomPipes::AttachVehiclePipe
+  true
+end
+
+schema CVehicleModelInfo_HasSpecularMaterialCB
+  ΔCVehicleModelInfo
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: data' = true
+  -- Return postcondition: result! = material
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CVehicleModelInfo_SetEnvironmentMapCB_2
+  ΔCVehicleModelInfo
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: spec' = RpMaterialGetSurfaceProperties(material).specular
+  -- Return postcondition: result! = material
+  true
+end

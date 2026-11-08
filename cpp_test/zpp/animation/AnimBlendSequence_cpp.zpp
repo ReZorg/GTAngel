@@ -1,0 +1,140 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendSequence (animation)
+-- Source File(s): animation/AnimBlendSequence.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendSequence.zpp  (from "AnimBlendSequence.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimBlendSequence_CAnimBlendSequence
+  ΔCAnimBlendSequence
+where
+  -- State update: type' = 0
+  -- State update: numFrames' = 0
+  -- State update: keyFrames' = ∅
+  -- State update: keyFramesCompressed' = ∅
+  -- State update: boneTag' = -1
+  true
+end
+
+schema CAnimBlendSequence_CAnimBlendSequence_2
+  ΔCAnimBlendSequence
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendSequence_SetName
+  ΔCAnimBlendSequence
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendSequence_SetNumFrames
+  ΔCAnimBlendSequence
+  numFrames? : ℤ
+  translation? : 𝔹
+  compressed? : 𝔹
+where
+  -- State update: keyFramesCompressed' = RwMalloc(sizeof(KeyFrameTrans) * numFrames)
+  -- State update: keyFrames' = RwMalloc(sizeof(KeyFrameTrans) * numFrames)
+  -- State update: keyFramesCompressed' = RwMalloc(sizeof(KeyFrame) * numFrames)
+  -- State update: keyFrames' = RwMalloc(sizeof(KeyFrame) * numFrames)
+  -- State update: numFrames' = numFrames
+  true
+end
+
+schema CAnimBlendSequence_RemoveQuaternionFlips
+  ΔCAnimBlendSequence
+where
+  -- State update: frame' = GetKeyFrame(0)
+  -- State update: last' = frame.rotation
+  -- State update: frame' = GetKeyFrame(i)
+  -- State update: frame.rotation' = -frame.rotation
+  -- State update: last' = frame.rotation
+  true
+end
+
+schema CAnimBlendSequence_Uncompress
+  ΔCAnimBlendSequence
+where
+  -- State update: rotScale' = 1.0f/4096.0f
+  -- State update: timeScale' = 1.0f/60.0f
+  -- State update: transScale' = 1.0f/1024.0f
+  -- State update: newKfs' = RwMalloc(numFrames * sizeof(KeyFrameTrans))
+  -- State update: ckf' = (KeyFrameTransCompressed*)keyFramesCompressed
+  -- State update: kf' = (KeyFrameTrans*)newKfs
+  true
+end
+
+schema CAnimBlendSequence_CompressKeyframes
+  ΔCAnimBlendSequence
+where
+  -- State update: rotScale' = 4096.0f
+  -- State update: timeScale' = 60.0f
+  -- State update: transScale' = 1024.0f
+  -- State update: newKfs' = RwMalloc(numFrames * sizeof(KeyFrameTransCompressed))
+  -- State update: ckf' = (KeyFrameTransCompressed*)newKfs
+  -- State update: kf' = (KeyFrameTrans*)keyFrames
+  true
+end
+
+schema CAnimBlendSequence_RemoveUncompressedData
+  ΔCAnimBlendSequence
+where
+  -- State update: keyFrames' = ∅
+  true
+end
+
+schema CAnimBlendSequence_MoveMemory
+  ΔCAnimBlendSequence
+where
+  -- State update: newaddr' = gMainHeap.MoveMemory(keyFrames)
+  -- State update: keyFrames' = newaddr
+  -- State update: newaddr' = gMainHeap.MoveMemory(keyFramesCompressed)
+  -- State update: keyFramesCompressed' = newaddr
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: gMainHeap.MoveMemory
+  true
+end
+
+schema CAnimBlendSequence_SetNumFrames_2
+  ΔCAnimBlendSequence
+  numFrames? : ℤ
+  translation? : 𝔹
+where
+  -- State update: sz' = sizeof(KeyFrameTrans)
+  -- State update: sz' = sizeof(KeyFrame)
+  -- State update: keyFrames' = RwMalloc(sz * numFrames)
+  -- State update: numFrames' = numFrames
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AnimBlendSequenceModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 232
+end

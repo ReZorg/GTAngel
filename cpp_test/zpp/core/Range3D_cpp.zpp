@@ -1,0 +1,63 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Range3D (core)
+-- Source File(s): core/Range3D.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Range3D.zpp  (from "Range3D.h")
+-- include General.zpp  (from "General.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRange3D_IsInRange
+  ΔCRange3D
+  vec? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRange3D_DebugShowRange
+  ΔCRange3D
+  arg_1? : ℝ
+  arg_2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRange3D_GetRandomPointInRange
+  ΔCRange3D
+where
+  -- State update: distX' = Abs(max.x - min.x)
+  -- State update: distY' = Abs(max.y - min.y)
+  -- State update: distZ' = Abs(max.z - min.z)
+  -- State update: outX' = CGeneral::GetRandomNumber() % distX + min.x
+  -- State update: outY' = CGeneral::GetRandomNumber() % distY + min.y
+  -- State update: outZ' = CGeneral::GetRandomNumber() % distZ + min.z
+  -- Return postcondition: result! = CVector(outX, outY, outZ)
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Range3DModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 30
+end

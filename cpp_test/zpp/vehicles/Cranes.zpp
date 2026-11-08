@@ -1,0 +1,668 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Cranes (vehicles)
+-- Source File(s): vehicles/Cranes.cpp, vehicles/Cranes.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Object.zpp  (from "Object.h")
+-- include World.zpp  (from "World.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_DISTANCE_TO_FIND_CRANE : ℝ  -- #define MAX_DISTANCE_TO_FIND_CRANE (10.0f)
+CRANE_UPDATE_RADIUS : ℝ  -- #define CRANE_UPDATE_RADIUS (300.0f)
+CRANE_MOVEMENT_PROCESSING_RADIUS : ℝ  -- #define CRANE_MOVEMENT_PROCESSING_RADIUS (150.0f)
+CRUSHER_Z : ℝ  -- #define CRUSHER_Z (-0.951f)
+MILITARY_Z : ℝ  -- #define MILITARY_Z (10.7862f)
+DISTANCE_FROM_PLAYER_TO_REMOVE_VEHICLE : ℝ  -- #define DISTANCE_FROM_PLAYER_TO_REMOVE_VEHICLE (5.0f)
+DISTANCE_FROM_HOOK_TO_VEHICLE_TO_COLLECT : ℝ  -- #define DISTANCE_FROM_HOOK_TO_VEHICLE_TO_COLLECT (0.5f)
+CAR_REWARD_MILITARY_CRANE : seq CHAR  -- #define CAR_REWARD_MILITARY_CRANE (1500)
+CAR_MOVING_SPEED_THRESHOLD : ℝ  -- #define CAR_MOVING_SPEED_THRESHOLD (0.01f)
+CRANE_SLOWDOWN_MULTIPLIER : ℝ  -- #define CRANE_SLOWDOWN_MULTIPLIER (0.3f)
+OSCILLATION_SPEED : ℝ  -- #define OSCILLATION_SPEED (0.002f)
+CAR_ROTATION_SPEED : ℝ  -- #define CAR_ROTATION_SPEED (0.0035f)
+CRANE_MOVEMENT_SPEED : ℝ  -- #define CRANE_MOVEMENT_SPEED (0.001f)
+HOOK_ANGLE_MOVEMENT_SPEED : ℝ  -- #define HOOK_ANGLE_MOVEMENT_SPEED (0.004f)
+HOOK_OFFSET_MOVEMENT_SPEED : ℝ  -- #define HOOK_OFFSET_MOVEMENT_SPEED (0.1f)
+HOOK_HEIGHT_MOVEMENT_SPEED : ℝ  -- #define HOOK_HEIGHT_MOVEMENT_SPEED (0.06f)
+MESSAGE_SHOW_DURATION : seq CHAR  -- #define MESSAGE_SHOW_DURATION (4000)
+MAX_DISTANCE : ℝ  -- #define MAX_DISTANCE (99999.9f)
+MIN_VALID_POSITION : ℝ  -- #define MIN_VALID_POSITION (-10000.0f)
+DEFAULT_OFFSET : ℝ  -- #define DEFAULT_OFFSET (20.0f)
+CRANES_SAVE_SIZE : seq CHAR  -- #define CRANES_SAVE_SIZE 0x400
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CraneState ::= IDLE | GOING_TOWARDS_TARGET | LIFTING_TARGET | GOING_TOWARDS_TARGET_ONLY_HEIGHT | ROTATING_TARGET | DROPPING_TARGET
+  -- val(IDLE) = 0
+  -- val(GOING_TOWARDS_TARGET) = 1
+  -- val(LIFTING_TARGET) = 2
+  -- val(GOING_TOWARDS_TARGET_ONLY_HEIGHT) = 3
+  -- val(ROTATING_TARGET) = 4
+  -- val(DROPPING_TARGET) = 5
+
+CraneStatus ::= NONE | ACTIVATED | DEACTIVATED
+  -- val(NONE) = 0
+  -- val(ACTIVATED) = 1
+  -- val(DEACTIVATED) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCrane
+  m_pCraneEntity : Ref[CBuilding]
+  m_pHook : Ref[CObject]
+  m_nAudioEntity : ℤ
+  m_fPickupX1 : ℝ
+  m_fPickupX2 : ℝ
+  m_fPickupY1 : ℝ
+  m_fPickupY2 : ℝ
+  m_vecDropoffTarget : CVector
+  m_fDropoffHeading : ℝ
+  m_fPickupAngle : ℝ
+  m_fDropoffAngle : ℝ
+  m_fPickupDistance : ℝ
+  m_fDropoffDistance : ℝ
+  m_fPickupHeight : ℝ
+  m_fDropoffHeight : ℝ
+  m_fHookAngle : ℝ
+  m_fHookOffset : ℝ
+  m_fHookHeight : ℝ
+  m_vecHookInitPos : CVector
+  m_vecHookCurPos : CVector
+  m_vecHookVelocity : CVector2D
+  m_pVehiclePickedUp : Ref[CVehicle]
+  m_nTimeForNextCheck : ℕ
+  m_nCraneStatus : ℕ
+  m_nCraneState : ℕ
+  m_nVehiclesCollected : ℕ
+  m_bIsCrusher : 𝔹
+  m_bIsMilitaryCrane : 𝔹
+  m_bWasMilitaryCrane : 𝔹
+  m_bIsTop : 𝔹
+where
+  #m_pCraneEntity ≤ 1
+  #m_pHook ≤ 1
+  #m_pVehiclePickedUp ≤ 1
+  m_nTimeForNextCheck ≥ 0
+  m_nCraneStatus ≥ 0
+  m_nCraneState ≥ 0
+  m_nVehiclesCollected ≥ 0
+end
+
+schema CCrane_Init
+  ΔCCrane
+where
+  -- Declared member operation CCrane::Init(void)
+  true
+end
+
+schema CCrane_Update_2
+  ΔCCrane
+  result! : void
+where
+  -- Declared member operation CCrane::Update(void)
+  true
+end
+
+schema CCrane_RotateCarriedCarProperly_3
+  ΔCCrane
+  result! : 𝔹
+where
+  -- Declared member operation CCrane::RotateCarriedCarProperly(void)
+  true
+end
+
+schema CCrane_FindCarInSectorList_4
+  ΔCCrane
+  pList? : Ref[CPtrList]
+where
+  -- Declared member operation CCrane::FindCarInSectorList(CPtrList* pList)
+  true
+end
+
+schema CCrane_DoesCranePickUpThisCarType_5
+  ΔCCrane
+  mi? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CCrane::DoesCranePickUpThisCarType(uint32 mi)
+  true
+end
+
+schema CCrane_GoTowardsTarget_6
+  ΔCCrane
+  fAngleToTarget? : ℝ
+  fDistanceToTarget? : ℝ
+  fTargetHeight? : ℝ
+  fSpeedMultiplier? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCrane::GoTowardsTarget(float fAngleToTarget, float fDistanceToTarget, float fTargetHeight, float fSpeedMultiplier = 1.0f)
+  true
+end
+
+schema CCrane_GoTowardsHeightTarget_7
+  ΔCCrane
+  fTargetHeight? : ℝ
+  fSpeedMultiplier? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCrane::GoTowardsHeightTarget(float fTargetHeight, float fSpeedMultiplier = 1.0f)
+  true
+end
+
+schema CCrane_FindParametersForTarget_8
+  ΔCCrane
+  X? : ℝ
+  Y? : ℝ
+  Z? : ℝ
+  pAngle? : ℙ ℝ
+  pDistance? : ℙ ℝ
+  pHeight? : ℙ ℝ
+where
+  -- Declared member operation CCrane::FindParametersForTarget(float X, float Y, float Z, float* pAngle, float* pDistance, float* pHeight)
+  true
+end
+
+schema CCrane_CalcHookCoordinates_9
+  ΔCCrane
+  pX? : ℙ ℝ
+  pY? : ℙ ℝ
+  pZ? : ℙ ℝ
+where
+  -- Declared member operation CCrane::CalcHookCoordinates(float* pX, float* pY, float* pZ)
+  true
+end
+
+schema CCrane_SetHookMatrix_10
+  ΔCCrane
+where
+  -- Declared member operation CCrane::SetHookMatrix(void)
+  true
+end
+
+schema CCrane_GetHeightToPickup_11
+  ΔCCrane
+  result! : ℝ
+where
+  -- Declared member operation CCrane::GetHeightToPickup()
+  true
+end
+
+schema CCrane_GetHeightToDropoff_12
+  ΔCCrane
+  result! : ℝ
+where
+  -- Declared member operation CCrane::GetHeightToDropoff()
+  true
+end
+
+schema CCrane_GetHeightToPickupHeight_13
+  ΔCCrane
+  result! : ℝ
+where
+  -- Declared member operation CCrane::GetHeightToPickupHeight()
+  true
+end
+
+schema CCrane_GetHeightToDropoffHeight_14
+  ΔCCrane
+  result! : ℝ
+where
+  -- Declared member operation CCrane::GetHeightToDropoffHeight()
+  true
+end
+
+schema CCranes
+  CarsCollectedMilitaryCrane : ℕ
+  NumCranes : ℤ
+  aCranes : seq CCrane  -- bounded array [NUM_CRANES]
+where
+  CarsCollectedMilitaryCrane ≥ 0
+end
+
+schema CCranes_InitCranes
+  ΔCCranes
+where
+  -- Declared member operation CCranes::InitCranes(void)
+  true
+end
+
+schema CCranes_AddThisOneCrane_2
+  ΔCCranes
+  pCraneEntity? : Ref[CEntity]
+where
+  -- Declared member operation CCranes::AddThisOneCrane(CEntity* pCraneEntity)
+  true
+end
+
+schema CCranes_ActivateCrane_3
+  ΔCCranes
+  fInfX? : ℝ
+  fSupX? : ℝ
+  fInfY? : ℝ
+  fSupY? : ℝ
+  fDropOffX? : ℝ
+  fDropOffY? : ℝ
+  fDropOffZ? : ℝ
+  fHeading? : ℝ
+  bIsCrusher? : 𝔹
+  bIsMilitary? : 𝔹
+  fPosX? : ℝ
+  fPosY? : ℝ
+where
+  -- Declared member operation CCranes::ActivateCrane(float fInfX, float fSupX, float fInfY, float fSupY, float fDropOffX, float fDropOffY, float fDropOffZ, float fHeading, bool bIsCrusher, bool bIsMilitary, float fPosX, float fPosY)
+  true
+end
+
+schema CCranes_DeActivateCrane_4
+  ΔCCranes
+  fX? : ℝ
+  fY? : ℝ
+where
+  -- Declared member operation CCranes::DeActivateCrane(float fX, float fY)
+  true
+end
+
+schema CCranes_IsThisCarPickedUp_5
+  ΔCCranes
+  fX? : ℝ
+  fY? : ℝ
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCranes::IsThisCarPickedUp(float fX, float fY, CVehicle* pVehicle)
+  true
+end
+
+schema CCranes_UpdateCranes_6
+  ΔCCranes
+where
+  -- Declared member operation CCranes::UpdateCranes(void)
+  true
+end
+
+schema CCranes_DoesMilitaryCraneHaveThisOneAlready_7
+  ΔCCranes
+  mi? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CCranes::DoesMilitaryCraneHaveThisOneAlready(uint32 mi)
+  true
+end
+
+schema CCranes_RegisterCarForMilitaryCrane_8
+  ΔCCranes
+  mi? : ℕ
+where
+  -- Declared member operation CCranes::RegisterCarForMilitaryCrane(uint32 mi)
+  true
+end
+
+schema CCranes_HaveAllCarsBeenCollectedByMilitaryCrane_9
+  ΔCCranes
+  result! : 𝔹
+where
+  -- Declared member operation CCranes::HaveAllCarsBeenCollectedByMilitaryCrane(void)
+  true
+end
+
+schema CCranes_IsThisCarBeingCarriedByAnyCrane_10
+  ΔCCranes
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCranes::IsThisCarBeingCarriedByAnyCrane(CVehicle* pVehicle)
+  true
+end
+
+schema CCranes_IsThisCarBeingTargettedByAnyCrane_11
+  ΔCCranes
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCranes::IsThisCarBeingTargettedByAnyCrane(CVehicle* pVehicle)
+  true
+end
+
+schema CCranes_Save_12
+  ΔCCranes
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CCranes::Save(uint8* buf, uint32* size)
+  true
+end
+
+schema CCranes_Load_13
+  ΔCCranes
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CCranes::Load(uint8* buf, uint32 size)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCranes_InitCranes
+  ΔCCranes
+where
+  -- State update: CarsCollectedMilitaryCrane' = 0
+  -- State update: NumCranes' = 0
+  -- State update: pEntity' = (CEntity*)pNode.item
+  -- State update: pNode' = CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL).first
+  -- State update: pEntity' = (CEntity*)pNode.item
+  -- Invokes: CWorld::GetSector, pEntity->GetModelIndex, CWorld::GetBigBuildingList
+  true
+end
+
+schema CCranes_AddThisOneCrane
+  ΔCCranes
+  pEntity? : Ref[CEntity]
+where
+  -- State update: pCrane' = &aCranes[NumCranes]
+  -- State update: pCrane.m_pCraneEntity' = (CBuilding*)pEntity
+  -- State update: pCrane.m_nCraneStatus' = CCrane::NONE
+  -- State update: pCrane.m_fHookAngle' = NumCranes
+  -- State update: pCrane.m_fHookOffset' = DEFAULT_OFFSET
+  -- State update: pCrane.m_fHookHeight' = DEFAULT_OFFSET
+  -- Invokes: pEntity->GetMatrix, pCrane->Init, DMAudio.CreateEntity, DMAudio.SetEntityStatus, pEntity->GetModelIndex
+  true
+end
+
+schema CCranes_ActivateCrane
+  ΔCCranes
+  fInfX? : ℝ
+  fSupX? : ℝ
+  fInfY? : ℝ
+  fSupY? : ℝ
+  fDropOffX? : ℝ
+  fDropOffY? : ℝ
+  fDropOffZ? : ℝ
+  fHeading? : ℝ
+  bIsCrusher? : 𝔹
+  bIsMilitary? : 𝔹
+  fPosX? : ℝ
+  fPosY? : ℝ
+where
+  -- State update: fMinDistance' = MAX_DISTANCE
+  -- State update: Y' = fPosY
+  -- State update: X' = fDropOffX
+  -- State update: Y' = fDropOffY
+  -- State update: index' = 0
+  -- State update: fMinDistance' = distance
+  -- Invokes: m_pCraneEntity->GetPosition, CWorld::FindGroundZForCoord, pCrane->FindParametersForTarget
+  true
+end
+
+schema CCranes_DeActivateCrane
+  ΔCCranes
+  X? : ℝ
+  Y? : ℝ
+where
+  -- State update: fMinDistance' = MAX_DISTANCE
+  -- State update: index' = 0
+  -- State update: fMinDistance' = distance
+  -- State update: index' = i
+  -- State update: m_nCraneStatus' = CCrane::DEACTIVATED
+  -- State update: m_nCraneState' = CCrane::IDLE
+  -- Invokes: m_pCraneEntity->GetPosition
+  true
+end
+
+schema CCranes_IsThisCarPickedUp
+  ΔCCranes
+  X? : ℝ
+  Y? : ℝ
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- State update: index' = 0
+  -- Return postcondition: result! = result
+  -- Invokes: m_pCraneEntity->GetPosition
+  true
+end
+
+schema CCranes_UpdateCranes
+  ΔCCranes
+where
+  -- Invokes: TheCamera.GetPosition, m_pCraneEntity->GetPosition
+  true
+end
+
+schema CCrane_Update
+  ΔCCrane
+where
+  -- State update: xstart' = Max(0, CWorld::GetSectorIndexX(m_fPickupX1))
+  -- State update: xend' = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(m_fPickupX2))
+  -- State update: ystart' = Max(0, CWorld::GetSectorIndexY(m_fPickupY1))
+  -- State update: yend' = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(m_fPickupY2))
+  -- State update: xstart' = CWorld::GetSectorIndexX(m_fPickupX1)
+  -- State update: xend' = CWorld::GetSectorIndexX(m_fPickupX2)
+  -- Invokes: CReplay::IsPlayingBack, TheCamera.GetGameCamPosition, m_pCraneEntity->GetPosition, CTimer::GetTimeInMilliseconds, CWorld::AdvanceCurrentScanCode
+  true
+end
+
+schema CCrane_RotateCarriedCarProperly
+  ΔCCrane
+  result! : 𝔹
+where
+  -- State update: fDeltaThisFrame' = CAR_ROTATION_SPEED * CTimer::GetTimeStep()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CGeneral::GetATanOfXY, m_pVehiclePickedUp->GetForward, CTimer::GetTimeStep, m_pVehiclePickedUp->GetMatrix
+  true
+end
+
+schema CCrane_FindCarInSectorList
+  ΔCCrane
+  pList? : Ref[CPtrList]
+where
+  -- State update: node' = pList.first
+  -- State update: pVehicle' = (CVehicle*)node.item
+  -- State update: pVehicle.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: pVehicle.bCraneMessageDone' = true
+  -- State update: m_pVehiclePickedUp' = pVehicle
+  -- State update: m_nCraneState' = GOING_TOWARDS_TARGET
+  -- Invokes: CWorld::GetCurrentScanCode, pVehicle->GetPosition, pVehicle->GetMoveSpeed, pVehicle->IsCar, pVehicle->GetStatus
+  true
+end
+
+schema CCrane_DoesCranePickUpThisCarType
+  ΔCCrane
+  mi? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCranes_DoesMilitaryCraneHaveThisOneAlready
+  ΔCCranes
+  mi? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CarsCollectedMilitaryCrane & 1)
+  -- Return postcondition: result! = (CarsCollectedMilitaryCrane & 2)
+  -- Return postcondition: result! = (CarsCollectedMilitaryCrane & 4)
+  true
+end
+
+schema CCranes_RegisterCarForMilitaryCrane
+  ΔCCranes
+  mi? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCranes_HaveAllCarsBeenCollectedByMilitaryCrane
+  ΔCCranes
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (CarsCollectedMilitaryCrane & 0x7F) == 0x7F
+  true
+end
+
+schema CCrane_GoTowardsTarget
+  ΔCCrane
+  fAngleToTarget? : ℝ
+  fDistanceToTarget? : ℝ
+  fTargetHeight? : ℝ
+  fSpeedMultiplier? : ℝ
+  result! : 𝔹
+where
+  -- State update: fHookAngleDelta' = fAngleToTarget - m_fHookAngle
+  -- State update: m_fHookAngle' = fAngleToTarget
+  -- State update: bAngleMovementFinished' = true
+  -- State update: bAngleMovementFinished' = false
+  -- State update: fHookOffsetDelta' = fDistanceToTarget - m_fHookOffset
+  -- State update: m_fHookOffset' = fDistanceToTarget
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CCrane_GoTowardsHeightTarget
+  ΔCCrane
+  fTargetHeight? : ℝ
+  fSpeedMultiplier? : ℝ
+  result! : 𝔹
+where
+  -- State update: fHookHeightDelta' = fTargetHeight - m_fHookHeight
+  -- State update: m_fHookHeight' = fTargetHeight
+  -- State update: bHeightMovementFinished' = true
+  -- State update: bHeightMovementFinished' = false
+  -- Return postcondition: result! = bHeightMovementFinished
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CCrane_FindParametersForTarget
+  ΔCCrane
+  X? : ℝ
+  Y? : ℝ
+  Z? : ℝ
+  pAngle? : ℙ ℝ
+  pDistance? : ℙ ℝ
+  pHeight? : ℙ ℝ
+where
+  -- State update: pHeight' = Z
+  -- Invokes: CGeneral::GetATanOfXY, m_pCraneEntity->GetPosition
+  true
+end
+
+schema CCrane_CalcHookCoordinates
+  ΔCCrane
+  pX? : ℙ ℝ
+  pY? : ℙ ℝ
+  pZ? : ℙ ℝ
+where
+  -- State update: pZ' = m_fHookHeight
+  -- Invokes: m_pCraneEntity->GetPosition
+  true
+end
+
+schema CCrane_SetHookMatrix
+  ΔCCrane
+where
+  -- Invokes: m_pHook->SetPosition, up.Normalise, m_pHook->GetRight, m_pHook->GetForward, m_pHook->GetUp
+  true
+end
+
+schema CCranes_IsThisCarBeingCarriedByAnyCrane
+  ΔCCranes
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCranes_IsThisCarBeingTargettedByAnyCrane
+  ΔCCranes
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCranes_Save
+  ΔCCranes
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = 2 * sizeof(uint32) + CRANES_SAVE_SIZE
+  -- State update: pCrane' = WriteSaveBuf(buf, aCranes[i])
+  -- Invokes: CPools::GetBuildingPool, CPools::GetObjectPool, CPools::GetVehiclePool
+  true
+end
+
+schema CCranes_Load
+  ΔCCranes
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: pCrane' = &aCranes[i]
+  -- State update: m_nAudioEntity' = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[i])
+  -- Invokes: CPools::GetBuildingPool, CPools::GetObjectPool, CPools::GetVehiclePool, DMAudio.CreateEntity, DMAudio.SetEntityStatus
+  true
+end
+
+schema Cranes_Init
+  ΔCranesModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Cranes_GetHeightToDropoff
+  ΔCranesModuleState
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Cranes_GetHeightToPickupHeight
+  ΔCranesModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fPickupHeight + (m_bIsCrusher ? 7.0f : 4.0f)
+  true
+end
+
+schema Cranes_GetHeightToDropoffHeight
+  ΔCranesModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_fDropoffHeight + (m_bIsCrusher ? 7.0f : 2.0f)
+  true
+end

@@ -1,0 +1,584 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Messages (text)
+-- Source File(s): text/Messages.cpp, text/Messages.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include User.zpp  (from "User.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Text.zpp  (from "Text.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMBRIEFMESSAGES : ℕ  -- #define NUMBRIEFMESSAGES 8
+NUMBIGMESSAGES : ℕ  -- #define NUMBIGMESSAGES 8
+NUMPREVIOUSBRIEFS : ℕ  -- #define NUMPREVIOUSBRIEFS 5
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tMessage
+  m_pText : seq CHAR
+  m_nFlag : ℕ
+  m_nTime : ℕ
+  m_nStartTime : ℕ
+  m_nNumber : seq ℤ  -- bounded array [6]
+  m_pString : seq CHAR
+where
+  m_nFlag ≥ 0
+  m_nTime ≥ 0
+  m_nStartTime ≥ 0
+  #m_nNumber = 6
+end
+
+schema tBigMessage
+  m_Stack : seq tMessage  -- bounded array [4]
+where
+  #m_Stack = 4
+end
+
+schema tPreviousBrief
+  m_pText : seq CHAR
+  m_nNumber : seq ℤ  -- bounded array [6]
+  m_pString : seq CHAR
+where
+  #m_nNumber = 6
+end
+
+schema CMessages
+  BriefMessages : seq tMessage  -- bounded array [NUMBRIEFMESSAGES]
+  BIGMessages : seq tBigMessage  -- bounded array [NUMBIGMESSAGES]
+  PreviousBriefs : seq tPreviousBrief  -- bounded array [NUMPREVIOUSBRIEFS]
+  PreviousMissionTitle : seq CHAR
+where
+  #PreviousMissionTitle = 16
+end
+
+schema CMessages_Init
+  ΔCMessages
+where
+  -- Declared member operation CMessages::Init(void)
+  true
+end
+
+schema CMessages_GetWideStringLength_2
+  ΔCMessages
+  src? : seq CHAR
+  result! : ℕ
+where
+  -- Declared member operation CMessages::GetWideStringLength(wchar *src)
+  true
+end
+
+schema CMessages_WideStringCopy_3
+  ΔCMessages
+  dst? : seq CHAR
+  src? : seq CHAR
+  size? : ℕ
+where
+  -- Declared member operation CMessages::WideStringCopy(wchar *dst, wchar *src, uint16 size)
+  true
+end
+
+schema CMessages_WideStringCompare_4
+  ΔCMessages
+  str1? : seq CHAR
+  str2? : seq CHAR
+  size? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CMessages::WideStringCompare(wchar *str1, wchar *str2, uint16 size)
+  true
+end
+
+schema CMessages_Process_5
+  ΔCMessages
+where
+  -- Declared member operation CMessages::Process(void)
+  true
+end
+
+schema CMessages_Display_6
+  ΔCMessages
+where
+  -- Declared member operation CMessages::Display(void)
+  true
+end
+
+schema CMessages_AddMessage_7
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+where
+  -- Declared member operation CMessages::AddMessage(wchar *key, uint32 time, uint16 pos)
+  true
+end
+
+schema CMessages_AddMessageJumpQ_8
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+where
+  -- Declared member operation CMessages::AddMessageJumpQ(wchar *key, uint32 time, uint16 pos)
+  true
+end
+
+schema CMessages_AddMessageSoon_9
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+where
+  -- Declared member operation CMessages::AddMessageSoon(wchar *key, uint32 time, uint16 pos)
+  true
+end
+
+schema CMessages_ClearMessages_10
+  ΔCMessages
+where
+  -- Declared member operation CMessages::ClearMessages(void)
+  true
+end
+
+schema CMessages_ClearSmallMessagesOnly_11
+  ΔCMessages
+where
+  -- Declared member operation CMessages::ClearSmallMessagesOnly(void)
+  true
+end
+
+schema CMessages_AddBigMessage_12
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+where
+  -- Declared member operation CMessages::AddBigMessage(wchar *key, uint32 time, uint16 pos)
+  true
+end
+
+schema CMessages_AddBigMessageQ_13
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+where
+  -- Declared member operation CMessages::AddBigMessageQ(wchar *key, uint32 time, uint16 pos)
+  true
+end
+
+schema CMessages_AddToPreviousBriefArray_14
+  ΔCMessages
+  text? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  string? : seq CHAR
+where
+  -- Declared member operation CMessages::AddToPreviousBriefArray(wchar *text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, wchar *string)
+  true
+end
+
+schema CMessages_InsertNumberInString_15
+  ΔCMessages
+  src? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  dst? : seq CHAR
+where
+  -- Declared member operation CMessages::InsertNumberInString(wchar *src, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, wchar *dst)
+  true
+end
+
+schema CMessages_InsertStringInString_16
+  ΔCMessages
+  str1? : seq CHAR
+  str2? : seq CHAR
+where
+  -- Declared member operation CMessages::InsertStringInString(wchar *str1, wchar *str2)
+  true
+end
+
+schema CMessages_InsertPlayerControlKeysInString_17
+  ΔCMessages
+  src? : seq CHAR
+where
+  -- Declared member operation CMessages::InsertPlayerControlKeysInString(wchar *src)
+  true
+end
+
+schema CMessages_AddMessageWithNumber_18
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+where
+  -- Declared member operation CMessages::AddMessageWithNumber(wchar *key, uint32 time, uint16 pos, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6)
+  true
+end
+
+schema CMessages_AddMessageJumpQWithNumber_19
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+where
+  -- Declared member operation CMessages::AddMessageJumpQWithNumber(wchar *key, uint32 time, uint16 pos, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6)
+  true
+end
+
+schema CMessages_AddMessageSoonWithNumber_20
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+where
+  -- Declared member operation CMessages::AddMessageSoonWithNumber(wchar *key, uint32 time, uint16 pos, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6)
+  true
+end
+
+schema CMessages_AddBigMessageWithNumber_21
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+where
+  -- Declared member operation CMessages::AddBigMessageWithNumber(wchar *key, uint32 time, uint16 pos, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6)
+  true
+end
+
+schema CMessages_AddBigMessageWithNumberQ_22
+  ΔCMessages
+  key? : seq CHAR
+  time? : ℕ
+  pos? : ℕ
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+where
+  -- Declared member operation CMessages::AddBigMessageWithNumberQ(wchar *key, uint32 time, uint16 pos, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6)
+  true
+end
+
+schema CMessages_AddMessageWithString_23
+  ΔCMessages
+  text? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+  str? : seq CHAR
+where
+  -- Declared member operation CMessages::AddMessageWithString(wchar *text, uint32 time, uint16 flag, wchar *str)
+  true
+end
+
+schema CMessages_AddMessageJumpQWithString_24
+  ΔCMessages
+  text? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+  str? : seq CHAR
+where
+  -- Declared member operation CMessages::AddMessageJumpQWithString(wchar *text, uint32 time, uint16 flag, wchar *str)
+  true
+end
+
+schema CMessages_ClearThisPrint_25
+  ΔCMessages
+  str? : seq CHAR
+where
+  -- Declared member operation CMessages::ClearThisPrint(wchar *str)
+  true
+end
+
+schema CMessages_ClearThisBigPrint_26
+  ΔCMessages
+  str? : seq CHAR
+where
+  -- Declared member operation CMessages::ClearThisBigPrint(wchar *str)
+  true
+end
+
+schema CMessages_ClearAllMessagesDisplayedByGame_27
+  ΔCMessages
+where
+  -- Declared member operation CMessages::ClearAllMessagesDisplayedByGame(void)
+  true
+end
+
+schema CMessages_ClearThisBigPrintNow_28
+  ΔCMessages
+  id? : ℕ
+where
+  -- Declared member operation CMessages::ClearThisBigPrintNow(uint32 id)
+  true
+end
+
+schema CMessages_GetTokenPadKeyString_29
+  ΔCMessages
+  in? : seq CHAR
+  out? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMessages::GetTokenPadKeyString(const wchar *in, wchar *out)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMessages_Init
+  ΔCMessages
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pString' = ∅
+  true
+end
+
+schema CMessages_GetWideStringLength
+  ΔCMessages
+  src? : seq CHAR
+where
+  -- State update: length' = 0
+  -- Return postcondition: result! = length
+  true
+end
+
+schema CMessages_WideStringCopy
+  ΔCMessages
+  dst? : seq CHAR
+  src? : seq CHAR
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Messages_FixupChar
+  ΔMessagesModuleState
+  c? : seq CHAR
+  result! : seq CHAR
+where
+  -- Return postcondition: result! = c & 0x7fff
+  -- Return postcondition: result! = c
+  -- Invokes: CFont::IsJapanese
+  true
+end
+
+schema CMessages_WideStringCompare
+  ΔCMessages
+  str1? : seq CHAR
+  str2? : seq CHAR
+  size? : ℕ
+where
+  -- State update: len1' = GetWideStringLength(str1)
+  -- State update: len2' = GetWideStringLength(str2)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMessages_Process
+  ΔCMessages
+where
+  -- State update: style' = 0
+  -- State update: m_pText' = ∅
+  -- State update: m_pText' = ∅
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pText' = ∅
+  -- State update: m_pText' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_Display
+  ΔCMessages
+where
+  -- Invokes: CHud::SetBigMessage, CHud::SetMessage
+  true
+end
+
+schema CMessages_AddMessage
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = flag
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddMessageJumpQ
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = flag
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddMessageSoon
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  flag? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = flag
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- State update: m_pText' = msg
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_ClearMessages
+  ΔCMessages
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pString' = ∅
+  true
+end
+
+schema CMessages_ClearSmallMessagesOnly
+  ΔCMessages
+where
+  -- State update: m_pText' = ∅
+  -- State update: m_pString' = ∅
+  true
+end
+
+schema CMessages_AddBigMessage
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  style? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = 0
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddBigMessageQ
+  ΔCMessages
+  msg? : seq CHAR
+  time? : ℕ
+  style? : ℕ
+where
+  -- State update: m_pText' = msg
+  -- State update: m_nFlag' = 0
+  -- State update: m_nTime' = time
+  -- State update: m_nStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_pString' = ∅
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CMessages_AddToPreviousBriefArray
+  ΔCMessages
+  text? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  string? : seq CHAR
+where
+  -- State update: m_pText' = text
+  -- State update: m_pString' = string
+  true
+end
+
+schema CMessages_InsertNumberInString
+  ΔCMessages
+  str? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  outstr? : seq CHAR
+where
+  -- State update: outstr' = '\0'
+  -- State update: outLen' = strlen(numStr)
+  -- State update: outstr' = '\0'
+  -- State update: size' = GetWideStringLength(str)
+  -- State update: c' = 0
+  -- State update: outLen' = strlen(numStr)
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = true
+  -- Invokes: CFont::IsJapanese, CMessages::InsertStringInString, CMessages::GetTokenPadKeyString, CPad::GetPad, TheText.Get
+  true
+end

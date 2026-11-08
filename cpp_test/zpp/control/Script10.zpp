@@ -1,0 +1,69 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script10 (control)
+-- Source File(s): control/Script10.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Object.zpp  (from "Object.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include User.zpp  (from "User.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_ProcessCommands1600To1699
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: ip' = m_nIp
+  -- State update: id' = (uint32)(uintptr)GetPointerToScriptVariable(&ip, 0)
+  -- State update: pos' = GET_VECTOR_PARAM(0)
+  -- State update: dir' = GET_VECTOR_PARAM(3)
+  -- State update: key' = CTheScripts::GetTextByKeyFromScript(&m_nIp)
+  -- State update: gDeveloperFlag' = GET_INTEGER_PARAM(0)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTheScripts::GetTextByKeyFromScript, CMessages::AddMessageJumpQ, CPickups::GetValue, CPickups::SetValue, CPools::GetObjectPool
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script10ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 426
+end

@@ -1,0 +1,125 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedPlacement (peds)
+-- Source File(s): peds/PedPlacement.cpp, peds/PedPlacement.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include World.zpp  (from "World.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPedPlacement
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPedPlacement_FindZCoorForPed
+  ΔCPedPlacement
+  pos? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CPedPlacement::FindZCoorForPed(CVector* pos)
+  true
+end
+
+schema CPedPlacement_IsPositionClearOfCars_2
+  ΔCPedPlacement
+  arg_1? : Ref[Const_CVector]
+  result! : Ref[CEntity]
+where
+  -- Declared member operation CPedPlacement::IsPositionClearOfCars(Const CVector*)
+  true
+end
+
+schema CPedPlacement_IsPositionClearForPed_3
+  ΔCPedPlacement
+  pos? : CVector
+  radius? : ℝ
+  total? : ℤ
+  entities? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CPedPlacement::IsPositionClearForPed(const CVector& pos, float radius = -1.0f, int total = -1, CEntity** entities = nil)
+  true
+end
+
+schema CPedPlacement_FindZCoorForPed_4
+  ΔCPedPlacement
+  pos? : Ref[CVector]
+where
+  -- Declared member operation CPedPlacement::FindZCoorForPed(CVector* pos)
+  true
+end
+
+schema CPedPlacement_IsPositionClearForPed_5
+  ΔCPedPlacement
+  arg_1? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CPedPlacement::IsPositionClearForPed(CVector*)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPedPlacement_FindZCoorForPed
+  ΔCPedPlacement
+  pos? : Ref[CVector]
+where
+  -- State update: startZ' = pos.z - 100.0f
+  -- State update: foundColZ' = -100.0f
+  -- State update: foundColZ2' = -100.0f
+  -- State update: foundColZ' = foundCol.point.z
+  -- State update: foundColZ2' = foundCol.point.z
+  -- State update: zForPed' = Max(foundColZ, foundColZ2)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CWorld::ProcessVerticalLine
+  true
+end
+
+schema CPedPlacement_IsPositionClearOfCars
+  ΔCPedPlacement
+  pos? : Ref[Const_CVector]
+where
+  -- Invokes: CWorld::TestSphereAgainstWorld
+  true
+end
+
+schema CPedPlacement_IsPositionClearForPed
+  ΔCPedPlacement
+  pos? : CVector
+  radius? : ℝ
+  total? : ℤ
+  entities? : Ref[CEntity]
+where
+  -- State update: radius' = 0.75f
+  -- State update: total' = 2
+  -- Return postcondition: result! = count == 0
+  -- Invokes: CWorld::FindObjectsKindaColliding
+  true
+end
+
+schema CPedPlacement_IsPositionClearForPed_2
+  ΔCPedPlacement
+  pos? : Ref[CVector]
+where
+  -- Return postcondition: result! = count == 0
+  -- Invokes: CWorld::FindObjectsKindaColliding
+  true
+end

@@ -1,0 +1,460 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Game (core)
+-- Source File(s): core/Game.cpp, core/Game.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include platform.zpp  (from "platform.h")
+-- include Game.zpp  (from "Game.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Accident.zpp  (from "Accident.h")
+-- include Antennas.zpp  (from "Antennas.h")
+-- include Bridge.zpp  (from "Bridge.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CarGen.zpp  (from "CarGen.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Clouds.zpp  (from "Clouds.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include Console.zpp  (from "Console.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Credits.zpp  (from "Credits.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include EventList.zpp  (from "EventList.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include frontendoption.zpp  (from "frontendoption.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include IniFile.zpp  (from "IniFile.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include PedRoutes.zpp  (from "PedRoutes.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+-- include Population.zpp  (from "Population.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Record.zpp  (from "Record.h")
+-- include References.zpp  (from "References.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include RoadBlocks.zpp  (from "RoadBlocks.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include SceneEdit.zpp  (from "SceneEdit.h")
+-- include Script.zpp  (from "Script.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include Train.zpp  (from "Train.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include User.zpp  (from "User.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include WaterCannon.zpp  (from "WaterCannon.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include WeaponEffects.zpp  (from "WeaponEffects.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+-- include postfx.zpp  (from "postfx.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include screendroplets.zpp  (from "screendroplets.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include TexturePools.zpp  (from "TexturePools.h")
+-- include Ferry.zpp  (from "Ferry.h")
+-- include SetPieces.zpp  (from "SetPieces.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+-- include Ropes.zpp  (from "Ropes.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include WaterCreatures.zpp  (from "WaterCreatures.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eLevelName ::= LEVEL_IGNORE | LEVEL_GENERIC | LEVEL_BEACH | LEVEL_MAINLAND | LEVEL_COMMERCIAL | LEVEL_SUBURBAN | LEVEL_UNDERGROUND
+  -- val(LEVEL_IGNORE) = -1
+  -- val(LEVEL_GENERIC) = 0
+
+eAreaName ::= AREA_MAIN_MAP | AREA_HOTEL | AREA_MANSION | AREA_BANK | AREA_MALL | AREA_STRIP_CLUB | AREA_LAWYERS | AREA_COFFEE_SHOP | AREA_CONCERT_HALL | AREA_STUDIO | AREA_RIFLE_RANGE | AREA_BIKER_BAR | AREA_POLICE_STATION | AREA_EVERYWHERE | AREA_DIRT | AREA_BLOOD | AREA_OVALRING | AREA_MALIBU_CLUB | AREA_PRINT_WORKS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema SkyDataPrefix
+  pktSize1 : ℕ
+  data : ℕ
+  pktSize2 : ℕ
+  unused : ℕ
+where
+  pktSize1 ≥ 0
+  data ≥ 0
+  pktSize2 ≥ 0
+  unused ≥ 0
+end
+
+schema DMAGIFUpload
+  tag1_addr : ℕ
+  vif_direct1 : ℕ
+  giftag : seq ℕ  -- bounded array [4]
+  gs_bitbltbuf : seq ℕ  -- bounded array [4]
+  tag2_addr : ℕ
+  vif_direct2 : ℕ
+where
+  tag1_addr ≥ 0
+  vif_direct1 ≥ 0
+  #giftag = 4
+  #gs_bitbltbuf = 4
+  tag2_addr ≥ 0
+  vif_direct2 ≥ 0
+end
+
+schema CGame
+  currLevel : eLevelName
+  currArea : ℤ
+  bDemoMode : 𝔹
+  nastyGame : 𝔹
+  frenchGame : 𝔹
+  germanGame : 𝔹
+  japaneseGame : 𝔹
+  playingIntro : 𝔹
+  aDatFile : seq CHAR
+  VarUpdatePlayerCoords : bool8
+where
+  #aDatFile = 32
+end
+
+schema CGame_InitialiseRenderWare
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::InitialiseRenderWare(void)
+  true
+end
+
+schema CGame_ShutdownRenderWare_2
+  ΔCGame
+where
+  -- Declared member operation CGame::ShutdownRenderWare(void)
+  true
+end
+
+schema CGame_InitialiseOnceAfterRW_3
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::InitialiseOnceAfterRW(void)
+  true
+end
+
+schema CGame_FinalShutdown_4
+  ΔCGame
+where
+  -- Declared member operation CGame::FinalShutdown(void)
+  true
+end
+
+schema CGame_Initialise_5
+  ΔCGame
+  datFile? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CGame::Initialise(const char *datFile)
+  true
+end
+
+schema CGame_ShutDown_6
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::ShutDown(void)
+  true
+end
+
+schema CGame_ReInitGameObjectVariables_7
+  ΔCGame
+where
+  -- Declared member operation CGame::ReInitGameObjectVariables(void)
+  true
+end
+
+schema CGame_ReloadIPLs_8
+  ΔCGame
+where
+  -- Declared member operation CGame::ReloadIPLs(void)
+  true
+end
+
+schema CGame_ShutDownForRestart_9
+  ΔCGame
+where
+  -- Declared member operation CGame::ShutDownForRestart(void)
+  true
+end
+
+schema CGame_InitialiseWhenRestarting_10
+  ΔCGame
+where
+  -- Declared member operation CGame::InitialiseWhenRestarting(void)
+  true
+end
+
+schema CGame_Process_11
+  ΔCGame
+where
+  -- Declared member operation CGame::Process(void)
+  true
+end
+
+schema CGame_InitAfterFocusLoss_12
+  ΔCGame
+where
+  -- Declared member operation CGame::InitAfterFocusLoss(void)
+  true
+end
+
+schema CGame_IsInInterior_13
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::IsInInterior(void)
+  true
+end
+
+schema CGame_CanSeeWaterFromCurrArea_14
+  ΔCGame
+  result! : bool
+where
+  -- Declared member operation CGame::CanSeeWaterFromCurrArea(void)
+  true
+end
+
+schema CGame_CanSeeOutSideFromCurrArea_15
+  ΔCGame
+  result! : 𝔹
+where
+  -- Declared member operation CGame::CanSeeOutSideFromCurrArea(void)
+  true
+end
+
+schema CGame_TidyUpMemory_16
+  ΔCGame
+  arg_1? : 𝔹
+  arg_2? : 𝔹
+where
+  -- Declared member operation CGame::TidyUpMemory(bool, bool)
+  true
+end
+
+schema CGame_DrasticTidyUpMemory_17
+  ΔCGame
+  arg_1? : 𝔹
+where
+  -- Declared member operation CGame::DrasticTidyUpMemory(bool)
+  true
+end
+
+schema CGame_ProcessTidyUpMemory_18
+  ΔCGame
+where
+  -- Declared member operation CGame::ProcessTidyUpMemory(void)
+  true
+end
+
+schema CGame_ReInitGameObjectVariables_19
+  ΔCGame
+  arg_1? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CGame::ReInitGameObjectVariables(bool)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Game_MessageScreen
+  ΔGameModuleState
+  msg? : seq CHAR
+where
+  -- State update: splash' = LoadSplash(∅)
+  -- Invokes: CSprite2d::InitPerFrame, CFont::InitPerFrame, splash->Draw, splash->DrawRect, CFont::SetFontStyle
+  true
+end
+
+schema CGame_InitialiseOnceBeforeRW
+  ΔCGame
+where
+  -- Return postcondition: result! = true
+  -- Invokes: CFileMgr::Initialise, CPostFX::InitOnce
+  true
+end
+
+schema CGame_InitialiseRenderWare
+  ΔCGame
+where
+  -- State update: Scene.camera' = CameraCreate(SCREEN_WIDTH, SCREEN_HEIGHT, TRUE)
+  -- State update: bbox.sup.z' = 10000.0f
+  -- State update: bbox.inf.z' = -10000.0f
+  -- State update: Scene.world' = RpWorldCreate(&bbox)
+  -- State update: Scene.camera' = ∅
+  -- State update: envMapApplyLight' = true
+  -- Return postcondition: result! = (false)
+  -- Return postcondition: result! = (false)
+  -- Return postcondition: result! = (true)
+  -- Invokes: CTxdStore::Initialise, CVisibilityPlugins::Initialise, CFont::Initialise, CHud::Initialise, CPlayerSkin::Initialise
+  true
+end
+
+schema CGame_ShutdownRenderWare
+  ΔCGame
+where
+  -- State update: Scene.world' = ∅
+  -- State update: Scene.camera' = ∅
+  -- Invokes: ScreenDroplets::Shutdown, CustomPipes::CustomPipeShutdown, CMBlur::MotionBlurClose, CHud::Shutdown, CFont::Shutdown
+  true
+end
+
+schema CGame_InitialiseOnceAfterRW
+  ΔCGame
+  result! : 𝔹
+where
+  -- State update: m_PrefsSpeakers' = 0
+  -- State update: name' = DMAudio.Get3DProviderName(i)
+  -- State update: providername' = UnicodeToAscii(buff)
+  -- Return postcondition: result! = true
+  -- Invokes: TheText.Load, DMAudio.Initialise, CTimer::Initialise, CTempColModels::Initialise, mod_HandlingManager.Initialise
+  true
+end
+
+schema CGame_FinalShutdown
+  ΔCGame
+where
+  -- Invokes: CTxdStore::Shutdown, CPedStats::Shutdown
+  true
+end
+
+schema CGame_ShutDown
+  ΔCGame
+  result! : 𝔹
+where
+  -- State update: m_pPed' = ∅
+  -- Return postcondition: result! = true
+  -- Invokes: CReplay::FinishPlayback, CReplay::EmptyReplayBuffer, CPlane::Shutdown, CTrain::Shutdown, CScriptPaths::Shutdown
+  true
+end
+
+schema CGame_ReInitGameObjectVariables
+  ΔCGame
+where
+  -- State update: bDoingCarCollisions' = false
+  -- State update: gStartX' = -180.0f
+  -- State update: gStartY' = 180.0f
+  -- State update: gStartZ' = 14.0f
+  -- State update: ms_fLODDistance' = 500.0f
+  -- State update: PlayerInFocus' = 0
+  -- Invokes: CGameLogic::InitAtStartOfGame, TheCamera.Init, TheCamera.SetRwCamera, CDebug::DebugInitTextBuffer, CWeather::Init
+  true
+end
+
+schema CGame_ReloadIPLs
+  ΔCGame
+where
+  -- Invokes: CTimer::Stop, CWorld::RemoveStaticObjects, ThePaths.Init, CCullZones::Init, CFileLoader::ReloadPaths
+  true
+end
+
+schema CGame_ShutDownForRestart
+  ΔCGame
+where
+  -- State update: ms_disableStreaming' = false
+  -- Invokes: CReplay::FinishPlayback, CReplay::EmptyReplayBuffer, DMAudio.DestroyAllGameCreatedEntities, CGarages::SetAllDoorsBackToOriginalHeight, CTheScripts::UndoBuildingSwaps
+  true
+end
+
+schema CGame_InitialiseWhenRestarting
+  ΔCGame
+where
+  -- State update: b_FoundRecentSavedGameWantToLoad' = false
+  -- State update: splash' = LoadSplash(∅)
+  -- State update: TheMemoryCard.m_bWantToLoad' = false
+  -- State update: currLevel' = LEVEL_INDUSTRIAL
+  -- State update: FrontEndMenuManager.m_bWantToLoad' = false
+  -- State update: currLevel' = LEVEL_INDUSTRIAL
+  -- Invokes: CTimer::Initialise, CSprite2d::SetRecipNearClip, TheCamera.Init, TheMemoryCard.RestoreForStartLoad, CStreaming::LoadScene
+  true
+end
+
+schema CGame_Process
+  ΔCGame
+where
+  -- State update: gameProcessPirateCheck' = 2
+  -- State update: Number' = 0
+  -- State update: VarUpdatePlayerCoords' = false
+  -- State update: newPtr' = gMainHeap.MoveMemory(*ptr)
+  -- State update: ptr' = newPtr
+  -- State update: pRet' = (bool*)pData
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = texture
+  -- Invokes: CPad::UpdatePads, CCutsceneMgr::Update, CCutsceneMgr::IsCutsceneProcessing, CTimer::GetIsCodePaused, FrontEndMenuManager.Process
+  true
+end
+
+schema Game_IsInInterior
+  ΔGameModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = currArea != AREA_MAIN_MAP
+  true
+end
+
+schema Game_IsAreaVisible
+  ΔGameModuleState
+  area? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = area == CGame::currArea || area == AREA_EVERYWHERE
+  true
+end

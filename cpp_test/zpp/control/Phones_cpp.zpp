@@ -1,0 +1,224 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Phones (control)
+-- Source File(s): control/Phones.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include General.zpp  (from "General.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Replay.zpp  (from "Replay.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PHONEINFO_SAVE_SIZE : seq CHAR  -- #define PHONEINFO_SAVE_SIZE 0xA30
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Phones_isPhoneAvailable
+  ΔPhonesModuleState
+  m_phoneId? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPhoneInfo_Update
+  ΔCPhoneInfo
+where
+  -- State update: player' = FindPlayerPed()
+  -- State update: playerInfo' = &CWorld::Players[CWorld::PlayerInFocus]
+  -- State update: pPhoneDisplayingMessages' = ∅
+  -- State update: bDisplayingPhoneMessage' = false
+  -- State update: notInCar' = false
+  -- State update: playerPos' = FindPlayerVehicle().GetPosition()
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetTimeInMilliseconds, playerInfo->MakePlayerSafe, TheCamera.SetWideScreenOff, player->GetClump
+  true
+end
+
+schema CPhoneInfo_FindNearestFreePhone
+  ΔCPhoneInfo
+  pos? : Ref[CVector]
+where
+  -- State update: nearestPhoneId' = -1
+  -- State update: nearestPhoneDist' = 60.0f
+  -- State update: phoneId' = 0
+  -- State update: phoneDist' = (m_aPhones[phoneId].m_vecPos - *pos).Magnitude2D()
+  -- State update: nearestPhoneDist' = phoneDist
+  -- State update: nearestPhoneId' = phoneId
+  -- Return postcondition: result! = nearestPhoneId
+  true
+end
+
+schema CPhoneInfo_PhoneAtThisPosition
+  ΔCPhoneInfo
+  pos? : CVector
+where
+  -- State update: phoneId' = 0
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPhoneInfo_HasMessageBeenDisplayed
+  ΔCPhoneInfo
+  phoneId? : ℤ
+where
+  -- State update: state' = m_aPhones[phoneId].m_nState
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPhoneInfo_IsMessageBeingDisplayed
+  ΔCPhoneInfo
+  phoneId? : ℤ
+where
+  -- Return postcondition: result! = pPhoneDisplayingMessages == &m_aPhones[phoneId]
+  true
+end
+
+schema Phones_LoadPhone
+  ΔPhonesModuleState
+  phone? : CPhone
+  buf? : ℙ ℕ
+where
+  -- State update: phone.m_pEntity' = (CEntity*)(uintptr)tmp
+  true
+end
+
+schema CPhoneInfo_Load
+  ΔCPhoneInfo
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: m_nMax' = Min(NUMPHONES, max)
+  -- State update: m_nScriptPhonesMax' = 0
+  -- State update: ignoreOtherPhones' = false
+  -- State update: ignoreOtherPhones' = true
+  -- State update: ignoreOtherPhones' = true
+  -- State update: m_nMax' = max
+  -- Invokes: CPools::GetBuildingPool
+  true
+end
+
+schema CPhoneInfo_SetPhoneMessage_JustOnce
+  ΔCPhoneInfo
+  phoneId? : ℤ
+  msg1? : seq CHAR
+  msg2? : seq CHAR
+  msg3? : seq CHAR
+  msg4? : seq CHAR
+  msg5? : seq CHAR
+  msg6? : seq CHAR
+where
+  -- State update: m_nState' = PHONE_STATE_ONETIME_MESSAGE_SET
+  -- State update: m_nState' = PHONE_STATE_MESSAGE_REMOVED
+  true
+end
+
+schema CPhoneInfo_SetPhoneMessage_Repeatedly
+  ΔCPhoneInfo
+  phoneId? : ℤ
+  msg1? : seq CHAR
+  msg2? : seq CHAR
+  msg3? : seq CHAR
+  msg4? : seq CHAR
+  msg5? : seq CHAR
+  msg6? : seq CHAR
+where
+  -- State update: m_nState' = PHONE_STATE_REPEATED_MESSAGE_SET
+  -- State update: m_nState' = PHONE_STATE_MESSAGE_REMOVED
+  true
+end
+
+schema CPhoneInfo_SwapPhone
+  ΔCPhoneInfo
+  xPos? : ℝ
+  yPos? : ℝ
+  into? : ℤ
+where
+  -- State update: nearestPhoneId' = -1
+  -- State update: nearestPhoneDist' = 1.0f
+  -- State update: phoneId' = m_nScriptPhonesMax
+  -- State update: phoneDistance' = (m_aPhones[phoneId].m_vecPos - pos).Magnitude2D()
+  -- State update: nearestPhoneDist' = phoneDistance
+  -- State update: nearestPhoneId' = phoneId
+  true
+end
+
+schema CPhoneInfo_GrabPhone
+  ΔCPhoneInfo
+  xPos? : ℝ
+  yPos? : ℝ
+where
+  -- State update: nearestPhoneId' = -1
+  -- State update: nearestPhoneDist' = 100.0f
+  -- State update: phoneId' = m_nScriptPhonesMax
+  -- State update: phoneDistance' = (m_aPhones[phoneId].m_vecPos - pos).Magnitude2D()
+  -- State update: nearestPhoneDist' = phoneDistance
+  -- State update: nearestPhoneId' = phoneId
+  -- Return postcondition: result! = m_nScriptPhonesMax - 1
+  true
+end
+
+schema CPhoneInfo_Initialise
+  ΔCPhoneInfo
+where
+  -- State update: pool' = CPools::GetBuildingPool()
+  -- State update: pCallBackPed' = ∅
+  -- State update: bDisplayingPhoneMessage' = false
+  -- State update: bPickingUpPhone' = false
+  -- State update: pPhoneDisplayingMessages' = ∅
+  -- State update: m_nMax' = 0
+  -- Invokes: CPools::GetBuildingPool, pool->GetSize, pool->GetSlot, building->GetModelIndex, building->GetPosition
+  true
+end
+
+schema CPhoneInfo_Save
+  ΔCPhoneInfo
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = PHONEINFO_SAVE_SIZE
+  -- State update: phoneId' = 0
+  -- State update: phoneId' = 0
+  -- State update: phone' = WriteSaveBuf(buf, m_aPhones[phoneId])
+  -- State update: m_nMax' = 0
+  -- State update: m_nScriptPhonesMax' = 0
+  -- Invokes: CPools::GetBuildingPool, CPhoneInfo::Shutdown, CPad::GetPad, ped->SetPedState, CMessages::AddMessage
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PhonesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 605
+end

@@ -1,0 +1,76 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: XtraCompsModelInfo (modelinfo)
+-- Source File(s): modelinfo/XtraCompsModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ClumpModelInfo.zpp  (from "ClumpModelInfo.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CXtraCompsModelInfo
+  CClumpModelInfo  -- inherits base schema
+  field_34 : ℤ
+  msClassInfo : base__cRelocatableChunkClassInfo
+  msClassInstance : CXtraCompsModelInfo
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CXtraCompsModelInfo_CXtraCompsModelInfo
+  ΔCXtraCompsModelInfo
+where
+  -- Declared member operation CXtraCompsModelInfo::CXtraCompsModelInfo(void)
+  true
+end
+
+schema CXtraCompsModelInfo_Shutdown_2
+  ΔCXtraCompsModelInfo
+  result! : void
+where
+  -- Declared member operation CXtraCompsModelInfo::Shutdown(void)
+  true
+end
+
+schema CXtraCompsModelInfo_CreateInstance_3
+  ΔCXtraCompsModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CXtraCompsModelInfo::CreateInstance(void)
+  true
+end
+
+schema CXtraCompsModelInfo_SetClump_4
+  ΔCXtraCompsModelInfo
+  arg_1? : Ref[RpClump]
+  result! : void
+where
+  -- Declared member operation CXtraCompsModelInfo::SetClump(RpClump*)
+  true
+end
+
+schema CXtraCompsModelInfo_RcWriteThis_5
+  ΔCXtraCompsModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CXtraCompsModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CXtraCompsModelInfo_RcWriteEmpty_6
+  ΔCXtraCompsModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CXtraCompsModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end

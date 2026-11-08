@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: screenDroplet (extras)
+-- Source File(s): extras/shaders/screenDroplet.frag
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema screenDroplet_main
+  ΔscreenDropletModuleState
+where
+  -- State update: color' = v_color*texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema screenDropletModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 18
+end

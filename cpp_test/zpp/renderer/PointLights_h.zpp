@@ -1,0 +1,109 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PointLights (renderer)
+-- Source File(s): renderer/PointLights.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+PointLights_Enum_1 ::= LIGHT_POINT | LIGHT_DIRECTIONAL | LIGHT_DARKEN | LIGHT_FOGONLY_ALWAYS | LIGHT_FOGONLY
+
+PointLights_Enum_2 ::= FOG_NONE | FOG_NORMAL | FOG_ALWAYS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRegisteredPointLight
+  coors : CVector
+  dir : CVector
+  radius : ℝ
+  red : ℝ
+  green : ℝ
+  blue : ℝ
+  type : ℤ
+  fogType : ℤ
+  castExtraShadows : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPointLights
+  NumLights : ℤ
+  aLights : seq ℤ  -- bounded array [NUMPOINTLIGHTS]
+  aCachedMapReads : seq CVector  -- bounded array [32]
+  aCachedMapReadResults : seq ℝ  -- bounded array [32]
+  NextCachedValue : ℤ
+where
+  #aCachedMapReads = 32
+  #aCachedMapReadResults = 32
+end
+
+schema CPointLights_Init
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::Init(void)
+  true
+end
+
+schema CPointLights_InitPerFrame_2
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::InitPerFrame(void)
+  true
+end
+
+schema CPointLights_AddLight_3
+  ΔCPointLights
+  type? : ℕ
+  coors? : CVector
+  dir? : CVector
+  radius? : ℝ
+  red? : ℝ
+  green? : ℝ
+  blue? : ℝ
+  fogType? : ℕ
+  castExtraShadows? : 𝔹
+where
+  -- Declared member operation CPointLights::AddLight(uint8 type, CVector coors, CVector dir, float radius, float red, float green, float blue, uint8 fogType, bool castExtraShadows)
+  true
+end
+
+schema CPointLights_GenerateLightsAffectingObject_4
+  ΔCPointLights
+  objCoors? : Ref[Const_CVector]
+  result! : ℝ
+where
+  -- Declared member operation CPointLights::GenerateLightsAffectingObject(Const CVector *objCoors)
+  true
+end
+
+schema CPointLights_RemoveLightsAffectingObject_5
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::RemoveLightsAffectingObject(void)
+  true
+end
+
+schema CPointLights_RenderFogEffect_6
+  ΔCPointLights
+where
+  -- Declared member operation CPointLights::RenderFogEffect(void)
+  true
+end
+
+schema CPointLights_ProcessVerticalLineUsingCache_7
+  ΔCPointLights
+  coors? : CVector
+  groundZ? : ℙ ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CPointLights::ProcessVerticalLineUsingCache(CVector coors, float *groundZ)
+  true
+end

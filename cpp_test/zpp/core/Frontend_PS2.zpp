@@ -1,0 +1,618 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Frontend_PS2 (core)
+-- Source File(s): core/Frontend_PS2.cpp, core/Frontend_PS2.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include platform.zpp  (from "platform.h")
+-- include main.zpp  (from "main.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Text.zpp  (from "Text.h")
+-- include Font.zpp  (from "Font.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Credits.zpp  (from "Credits.h")
+-- include General.zpp  (from "General.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Frontend_PS2.zpp  (from "Frontend_PS2.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Game.zpp  (from "Game.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include FrontEndControls.zpp  (from "FrontEndControls.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+-- include FrontendTriggers.zpp  (from "FrontendTriggers.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SCRW : seq CHAR  -- #define SCRW SCREEN_WIDTH
+SCRH : seq CHAR  -- #define SCRH SCREEN_HEIGHT
+X : seq CHAR  -- #define X SCREEN_SCALE_X
+Y : seq CHAR  -- #define Y SCREEN_SCALE_Y
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Frontend_PS2_Enum_1 ::= PAGE_STATS | PAGE_LOAD | PAGE_BRIEFS | PAGE_CONTROLS | PAGE_AUDIO | PAGE_DISPLAY | PAGE_LANGUAGE | NUM_PAGES | PAGE_FIRST | PAGE_LAST
+  -- val(PAGE_FIRST) = PAGE_STATS
+  -- val(PAGE_LAST) = PAGE_LANGUAGE
+
+Frontend_PS2_Enum_2 ::= PAGESTATE_NORMAL | PAGESTATE_HIGHLIGHTED | PAGESTATE_SELECTED
+  -- val(PAGESTATE_NORMAL) = 0
+
+eFrontendSprites ::= FE2_MAINPANEL_UL | FE2_MAINPANEL_UR | FE2_MAINPANEL_DL | FE2_MAINPANEL_DR | FE2_MAINPANEL_DR2 | FE2_TABACTIVE | FE_ICONBRIEF | FE_ICONSTATS | FE_ICONCONTROLS | FE_ICONSAVE | FE_ICONAUDIO | FE_ICONDISPLAY | FE_ICONLANGUAGE | FE_CONTROLLER | FE_CONTROLLERSH | FE_ARROWS1 | FE_ARROWS2 | FE_ARROWS3 | FE_ARROWS4 | FE_RADIO1 | FE_RADIO2 | FE_RADIO3 | FE_RADIO4 | FE_RADIO5 | FE_RADIO6 | FE_RADIO7 | FE_RADIO8 | FE_RADIO9 | NUM_FE_SPRITES
+
+eControlMethod ::= CONTROL_STANDARD | CONTROL_CLASSIC
+  -- val(CONTROL_STANDARD) = 0
+
+LANGUAGE ::= LANGUAGE_AMERICAN | LANGUAGE_FRENCH | LANGUAGE_GERMAN | LANGUAGE_ITALIAN | LANGUAGE_SPANISH | LANGUAGE_RUSSIAN | LANGUAGE_JAPANESE
+
+CONTRCONFIG ::= CONFIG_1 | CONFIG_2 | CONFIG_3 | CONFIG_4
+  -- val(CONFIG_1) = 0
+
+Frontend_PS2_Enum_7 ::= NUM_SPRIRES
+  -- val(NUM_SPRIRES) = 28
+
+Frontend_PS2_Enum_8 ::= PAGESTATE_NORMAL | PAGESTATE_HIGHLIGHTED | PAGESTATE_SELELECTED
+  -- val(PAGESTATE_NORMAL) = 0
+  -- val(PAGESTATE_HIGHLIGHTED) = 1
+  -- val(PAGESTATE_SELELECTED) = 2
+
+Frontend_PS2_Enum_9 ::= SLIDE_TO_BOTTOM | SLIDE_TO_RIGHT | SLIDE_TO_TOP | SLIDE_TO_LEFT | SLIDE_MAX
+  -- val(SLIDE_TO_BOTTOM) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CMenuManager
+  m_currentPage : ℤ
+  m_newPage : ℤ
+  m_pageState : ℤ
+  m_nPageLeftTimer : ℕ
+  m_nPageRightTimer : ℕ
+  m_nChangePageTimer : ℕ
+  field_18 : ℤ
+  m_fade : ℕ
+  m_someAlpha : ℕ
+  m_nStartPauseTimer : ℕ
+  m_nEndPauseTimer : ℕ
+  m_position : CVector2D
+  m_nSlidingDir : ℕ
+  m_bInitialised : 𝔹
+  m_bWantToUpdateContent : 𝔹
+  m_bMenuActive : 𝔹
+  m_bWantToRestart : 𝔹
+  m_bRenderGameInMenu : 𝔹
+  m_bSaveMenuActive : 𝔹
+  m_bInSaveZone : 𝔹
+  field_3C : seq CHAR
+  m_bTexturesLoaded : 𝔹
+  m_sprites : seq CSprite2d  -- bounded array [NUM_SPRIRES]
+  m_PrefsSfxVolume : ℤ
+  m_PrefsMusicVolume : ℤ
+  m_PrefsBrightness : ℤ
+  m_PrefsShowTrails : 𝔹
+  m_PrefsShowSubtitles : 𝔹
+  m_PrefsAllowNastyGame : 𝔹
+  m_PrefsRadioStation : ℤ
+  m_PrefsStereoMono : ℤ
+  m_PrefsUseWideScreen : ℤ
+  m_PrefsLanguage : ℤ
+  m_PrefsControllerConfig : CONTRCONFIG
+  m_PrefsUseVibration : 𝔹
+  m_nMouseTempPosX : ℤ
+  m_nMouseTempPosY : ℤ
+  m_nPrefsVideoMode : ℤ
+  m_nDisplayVideoMode : ℤ
+  m_nPrefsAudio3DProviderIndex : ℤ
+  OS_Language : ℤ
+  m_PrefsVsync : ℤ
+  m_PrefsVsyncDisp : ℤ
+  m_PrefsFrameLimiter : ℤ
+  m_PrefsSpeakers : ℤ
+  m_ControlMethod : ℤ
+  m_PrefsDMA : ℤ
+  m_PrefsLOD : ℝ
+  m_PrefsSkinFile : seq CHAR
+  m_PrefsDisableTutorials : 𝔹
+  fMapSize : ℝ
+  fMapCenterY : ℝ
+  fMapCenterX : ℝ
+  m_nPrefsSubsystem : ℤ
+  m_nSelectedScreenMode : ℤ
+where
+  m_nPageLeftTimer ≥ 0
+  m_nPageRightTimer ≥ 0
+  m_nChangePageTimer ≥ 0
+  m_fade ≥ 0
+  m_someAlpha ≥ 0
+  m_nStartPauseTimer ≥ 0
+  m_nEndPauseTimer ≥ 0
+  m_nSlidingDir ≥ 0
+  #m_PrefsSkinFile = 256
+end
+
+schema CMenuManager_CMenuManager
+  ΔCMenuManager
+  result! : ANY
+where
+  -- Declared member operation CMenuManager::CMenuManager(void)
+  true
+end
+
+schema CMenuManager_LoadAllTextures_2
+  ΔCMenuManager
+  result! : endif_void
+where
+  -- Declared member operation CMenuManager::LoadAllTextures(void)
+  true
+end
+
+schema CMenuManager_UnloadTextures_3
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::UnloadTextures(void)
+  true
+end
+
+schema CMenuManager_InitialiseMenusOnce_4
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::InitialiseMenusOnce(void)
+  true
+end
+
+schema CMenuManager_InitialiseChangedLanguageSettings_5
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::InitialiseChangedLanguageSettings(void)
+  true
+end
+
+schema CMenuManager_InitialiseMenuContents_6
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::InitialiseMenuContents(void)
+  true
+end
+
+schema CMenuManager_AnaliseMenuContents_7
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::AnaliseMenuContents(void)
+  true
+end
+
+schema CMenuManager_InitialiseMenuContentsAfterLoadingGame_8
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::InitialiseMenuContentsAfterLoadingGame(void)
+  true
+end
+
+schema CMenuManager_DrawFrontEnd_9
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawFrontEnd(void)
+  true
+end
+
+schema CMenuManager_DrawFrontEndNormal_10
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawFrontEndNormal(void)
+  true
+end
+
+schema CMenuManager_DrawFrontEndSaveZone_11
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawFrontEndSaveZone(void)
+  true
+end
+
+schema CMenuManager_DrawMemoryCardStartUpMenus_12
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawMemoryCardStartUpMenus(void)
+  true
+end
+
+schema CMenuManager_Process_13
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::Process(void)
+  true
+end
+
+schema CMenuManager_WorkOutMenuState_14
+  ΔCMenuManager
+  bExit? : ℕ
+where
+  -- Declared member operation CMenuManager::WorkOutMenuState(uint8 bExit)
+  true
+end
+
+schema CMenuManager_ProcessControllerInput_15
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessControllerInput(void)
+  true
+end
+
+schema CMenuManager_ProcessDPadLeftJustDown_16
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDPadLeftJustDown(void)
+  true
+end
+
+schema CMenuManager_ProcessDPadRightJustDown_17
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDPadRightJustDown(void)
+  true
+end
+
+schema CMenuManager_ProcessDPadUpJustDown_18
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDPadUpJustDown(void)
+  true
+end
+
+schema CMenuManager_ProcessDPadDownJustDown_19
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDPadDownJustDown(void)
+  true
+end
+
+schema CMenuManager_ProcessDPadTriangleJustDown_20
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDPadTriangleJustDown(void)
+  true
+end
+
+schema CMenuManager_ProcessDPadCrossJustDown_21
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDPadCrossJustDown(void)
+  true
+end
+
+schema CMenuManager_DoHackingMenusAtPageBrowse_22
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DoHackingMenusAtPageBrowse(void)
+  true
+end
+
+schema CMenuManager_SetSoundLevelsForMusicMenu_23
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::SetSoundLevelsForMusicMenu(void)
+  true
+end
+
+schema CMenuManager_FilterOutColorMarkersFromString_24
+  ΔCMenuManager
+  string? : seq CHAR
+  color? : CRGBA
+where
+  -- Declared member operation CMenuManager::FilterOutColorMarkersFromString(wchar *string, CRGBA &color)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMenuManager_CMenuManager
+  ΔCMenuManager
+where
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- State update: m_currentPage' = PAGE_FIRST
+  -- State update: m_newPage' = PAGE_FIRST
+  -- State update: m_bMenuActive' = false
+  -- State update: m_bSaveMenuActive' = false
+  -- State update: m_bRenderGameInMenu' = false
+  true
+end
+
+schema CMenuManager_LoadAllTextures
+  ΔCMenuManager
+where
+  -- State update: splash' = LoadSplash(∅)
+  -- State update: slot' = CTxdStore::FindTxdSlot("frontend")
+  -- State update: slot' = CTxdStore::AddTxdSlot("frontend")
+  -- State update: m_bTexturesLoaded' = true
+  -- Invokes: DMAudio.PlayFrontEndSound, DMAudio.Service, splash->Draw, CFileMgr::SetDir, CTimer::Stop
+  true
+end
+
+schema CMenuManager_UnloadTextures
+  ΔCMenuManager
+where
+  -- State update: slot' = CTxdStore::FindTxdSlot("frontend")
+  -- State update: m_bTexturesLoaded' = false
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::RemoveTxd
+  true
+end
+
+schema CMenuManager_InitialiseMenusOnce
+  ΔCMenuManager
+where
+  -- State update: m_bInitialised' = true
+  -- State update: MenuStats_1.m_width' = X(480.0f)
+  -- State update: MenuStats_1.m_height' = Y(274.0f)
+  -- State update: MenuStats_1.field_10E8' = 0
+  -- State update: MenuStats_1.m_lineSpacing' = Y(20.0f)
+  -- State update: MenuStats_1.m_scrollSpeed' = 1.0f
+  -- Invokes: MenuPage_Stats.Initialise, MenuPage_Briefs.Initialise, MenuPage_SaveBasic.Initialise, MenuPage_SaveNewGame.Initialise, MenuPage_SaveLoadGame.Initialise
+  true
+end
+
+schema CMenuManager_InitialiseChangedLanguageSettings
+  ΔCMenuManager
+where
+  -- State update: bFrontEnd_ReloadObrTxtGxt' = false
+  -- State update: frenchGame' = false
+  -- State update: germanGame' = false
+  -- State update: nastyGame' = true
+  -- State update: MENU_TEXT_SIZE_X' = 0.644f
+  -- State update: MENU_TEXT_SIZE_Y' = 0.84f
+  -- Invokes: CTimer::Stop, TheText.Unload, TheText.Load, CTimer::Update, FrontEndMenuManager.AnaliseMenuContents
+  true
+end
+
+schema CMenuManager_InitialiseMenuContents
+  ΔCMenuManager
+where
+  -- State update: m_bWantToUpdateContent' = true
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- State update: m_PrefsControllerConfig' = CONFIG_4
+  -- State update: m_PrefsControllerConfig' = CONFIG_3
+  -- State update: m_PrefsControllerConfig' = CONFIG_2
+  -- State update: m_PrefsControllerConfig' = CONFIG_1
+  -- Invokes: CPad::GetPad, MenuControls_1.SetMenuSelection, MenuControls_5.SetMenuSelection, MenuAudio_1.SetMenuSelection, MenuAudio_2.SetMenuSelection
+  true
+end
+
+schema CMenuManager_AnaliseMenuContents
+  ΔCMenuManager
+where
+  -- State update: m_bWantToUpdateContent' = false
+  -- State update: m_PrefsControllerConfig' = (CONTRCONFIG)MenuControls_1.GetMenuSelection()
+  -- State update: m_PrefsUseVibration' = MenuControls_5.m_title.m_bSelected
+  -- State update: m_PrefsMusicVolume' = float(MenuAudio_1.GetMenuSelection())/100.0f*127.0f+0.5f
+  -- State update: m_PrefsSfxVolume' = float(MenuAudio_2.GetMenuSelection())/100.0f*127.0f+0.5f
+  -- State update: m_PrefsRadioStation' = MenuAudio_3.GetMenuSelection()
+  -- Invokes: MenuControls_1.GetMenuSelection, CPad::GetPad, MenuAudio_1.GetMenuSelection, MenuAudio_2.GetMenuSelection, MenuAudio_3.GetMenuSelection
+  true
+end
+
+schema CMenuManager_InitialiseMenuContentsAfterLoadingGame
+  ΔCMenuManager
+where
+  -- State update: m_bInitialised' = false
+  -- State update: bFrontEnd_ReloadObrTxtGxt' = true
+  -- Invokes: MenuLanguage_1.GetMenuSelection
+  true
+end
+
+schema CMenuManager_DrawFrontEnd
+  ΔCMenuManager
+where
+  -- Invokes: CFont::SetAlphaFade, MemCardAccessTriggerCaller.CanCall, MemCardAccessTriggerCaller.CallTrigger
+  true
+end
+
+schema CMenuManager_DrawFrontEndNormal
+  ΔCMenuManager
+where
+  -- State update: counter' = 0
+  -- State update: m_fade' = 255
+  -- State update: m_someAlpha' = 255
+  -- State update: m_position.x' = 0.0f
+  -- State update: m_position.y' = 0.0f
+  -- State update: alpha' = 1.0f
+  -- Invokes: CSprite2d::InitPerFrame, CFont::InitPerFrame, CTimer::GetTimeInMillisecondsPauseMode, splash->Draw, CSprite2d::DrawRect
+  true
+end
+
+schema CMenuManager_DrawFrontEndSaveZone
+  ΔCMenuManager
+where
+  -- State update: counter' = 0
+  -- State update: pActiveMenuPage' = &MenuPageSaveZone_FormatCard
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: m_fade' = 255
+  -- State update: text' = TheText.Get("FEDS_SB")
+  -- State update: text' = TheText.Get("FEDS_SE")
+  -- Invokes: TheMemoryCard.GetError, pActiveMenuPage->ActivatePage, CSprite2d::InitPerFrame, CFont::InitPerFrame, CSprite2d::DrawRect
+  true
+end
+
+schema CMenuManager_DrawMemoryCardStartUpMenus
+  ΔCMenuManager
+where
+  -- State update: bMemoryCardStartUpMenus_ExitNow' = false
+  -- State update: MemCardStatusWaiter' = 0
+  -- State update: MemCardStatusWaiter' = 0
+  -- State update: bMemoryCardStartUpMenus_ExitNow' = true
+  -- State update: splash' = LoadSplash("splash1")
+  -- State update: text.m_text' = TheText.Get("FEDS_SE")
+  -- Invokes: CFont::SetAlphaFade, MCMenu.SetPosition, TheMemoryCard.CheckCardStateAtGameStartUp, MCMenu.AddTitle, TheText.Get
+  true
+end
+
+schema CMenuManager_Process
+  ΔCMenuManager
+where
+  -- State update: m_bWantToRestart' = false
+  -- State update: pMenuSave' = &MenuPage_SaveBasic
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- State update: bMemoryCardSpecialZone' = false
+  -- State update: bIgnoreTriangleButton' = false
+  -- State update: m_bInSaveZone' = false
+  -- Invokes: TheCamera.GetScreenFadeStatus
+  true
+end
+
+schema CMenuManager_WorkOutMenuState
+  ΔCMenuManager
+  bExit? : ℕ
+where
+  -- State update: bIsStartPressed' = CPad::GetPad(0).GetStartJustDown()
+  -- State update: bIsCreditsOrDraw' = CCredits::AreCreditsDone() || m_bMenuActive
+  -- State update: bIsDemoOrDraw' = m_bMenuActive || CGame::bDemoMode
+  -- State update: m_bMenuActive' = !m_bMenuActive
+  -- State update: gMusicPlaying' = false
+  -- State update: bMemoryCardSpecialZone' = false
+  -- Invokes: CPad::GetPad, CCredits::AreCreditsDone, CPad::IsNoOrObsolete, DMAudio.PlayFrontEndSound, DMAudio.ChangeMusicMode
+  true
+end
+
+schema CMenuManager_ProcessControllerInput
+  ΔCMenuManager
+where
+  -- State update: TimeToStopPadShaking' = 0
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, CPad::StopPadsShaking, CPad::GetPad, pActiveMenuPage->GoLeftStill, pActiveMenuPage->GoRightStill
+  true
+end
+
+schema CMenuManager_ProcessDPadLeftJustDown
+  ΔCMenuManager
+where
+  -- State update: m_newPage' = PAGE_LAST
+  -- State update: m_nPageLeftTimer' = CTimer::GetTimeInMillisecondsPauseMode() + 300
+  -- State update: m_nPageRightTimer' = 0
+  -- State update: m_nChangePageTimer' = CTimer::GetTimeInMillisecondsPauseMode() + 250
+  -- State update: field_18' = m_newPage
+  -- Invokes: pActiveMenuPage->GoLeft, DMAudio.PlayFrontEndSound, CTimer::GetTimeInMillisecondsPauseMode, pActiveMenuPage->GoLeftMenuOnPage
+  true
+end
+
+schema CMenuManager_ProcessDPadRightJustDown
+  ΔCMenuManager
+where
+  -- State update: m_newPage' = PAGE_FIRST
+  -- State update: m_nPageLeftTimer' = 0
+  -- State update: m_nPageRightTimer' = CTimer::GetTimeInMillisecondsPauseMode() + 300
+  -- State update: m_nChangePageTimer' = CTimer::GetTimeInMillisecondsPauseMode() + 250
+  -- State update: field_18' = m_newPage
+  -- Invokes: pActiveMenuPage->GoRight, DMAudio.PlayFrontEndSound, CTimer::GetTimeInMillisecondsPauseMode, pActiveMenuPage->GoRightMenuOnPage
+  true
+end
+
+schema CMenuManager_ProcessDPadUpJustDown
+  ΔCMenuManager
+where
+  -- Invokes: pActiveMenuPage->GoUp, DMAudio.PlayFrontEndSound, pActiveMenuPage->GoUpMenuOnPage
+  true
+end
+
+schema CMenuManager_ProcessDPadDownJustDown
+  ΔCMenuManager
+where
+  -- Invokes: pActiveMenuPage->GoDown, DMAudio.PlayFrontEndSound, pActiveMenuPage->GoDownMenuOnPage
+  true
+end
+
+schema CMenuManager_ProcessDPadTriangleJustDown
+  ΔCMenuManager
+where
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- State update: m_pageState' = PAGESTATE_HIGHLIGHTED
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- State update: m_pageState' = PAGESTATE_HIGHLIGHTED
+  -- State update: m_pageState' = PAGESTATE_NORMAL
+  -- Invokes: pActiveMenuPage->SelectDefaultCancelAction, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema CMenuManager_ProcessDPadCrossJustDown
+  ΔCMenuManager
+where
+  -- State update: m_pageState' = PAGESTATE_HIGHLIGHTED
+  -- State update: m_pageState' = PAGESTATE_SELECTED
+  -- State update: gMusicPlaying' = true
+  -- State update: gMusicPlaying' = false
+  -- State update: m_pageState' = PAGESTATE_SELECTED
+  -- State update: m_pageState' = PAGESTATE_HIGHLIGHTED
+  -- Invokes: pActiveMenuPage->SelectCurrentOptionUnderCursor, DMAudio.PlayFrontEndSound, DMAudio.PlayFrontEndTrack, DMAudio.StopFrontEndTrack, pActiveMenuPage->IsActiveMenuTwoState
+  true
+end
+
+schema CMenuManager_DoHackingMenusAtPageBrowse
+  ΔCMenuManager
+where
+  -- State update: sel' = MenuControls_1.GetMenuSelection()
+  -- State update: sel' = MenuAudio_3.GetMenuSelection()
+  -- Invokes: MenuControls_1.GetMenuSelection, MenuControls_1.GoFirst, MenuControls_1.GoNext, MenuAudio_3.GetMenuSelection, MenuAudio_3.GoFirst
+  true
+end
+
+schema CMenuManager_SetSoundLevelsForMusicMenu
+  ΔCMenuManager
+where
+  -- Invokes: DMAudio.SetMusicMasterVolume, DMAudio.SetEffectsMasterVolume
+  true
+end
+
+schema CMenuManager_FilterOutColorMarkersFromString
+  ΔCMenuManager
+  string? : seq CHAR
+  color? : CRGBA
+where
+  -- State update: src' = buf
+  -- State update: dst' = string
+  -- State update: color' = CRGBA(0, 0, 0, 255)
+  -- State update: color' = CRGBA(255, 0, 255, 255)
+  -- State update: color' = CRGBA(255, 255, 0, 255)
+  -- State update: color' = CRGBA(255, 255, 255, 255)
+  true
+end
+
+schema Frontend_PS2_WaitForUserCD
+  ΔFrontend_PS2ModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Frontend_PS2_GetIsMenuActive
+  ΔFrontend_PS2ModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!m_bMenuActive
+  true
+end
+
+schema Frontend_PS2_CMenuManager
+  ΔFrontend_PS2ModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

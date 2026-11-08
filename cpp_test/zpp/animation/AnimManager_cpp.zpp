@@ -1,0 +1,301 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimManager (animation)
+-- Source File(s): animation/AnimManager.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include AnimBlendAssocGroup.zpp  (from "AnimBlendAssocGroup.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include Streaming.zpp  (from "Streaming.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema IfpHeader
+  ident : seq CHAR
+  size : ℕ
+where
+  #ident = 4
+  size ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimManager_Initialise
+  ΔCAnimManager
+where
+  -- State update: ms_numAnimations' = 0
+  -- State update: ms_numAnimBlocks' = 0
+  -- Invokes: ms_animCache.Init
+  true
+end
+
+schema CAnimManager_Shutdown
+  ΔCAnimManager
+where
+  -- Invokes: CStreaming::RemoveAnim, ms_animCache.Shutdown
+  true
+end
+
+schema CAnimManager_UncompressAnimation
+  ΔCAnimManager
+  hier? : Ref[CAnimBlendHierarchy]
+where
+  -- State update: link' = ms_animCache.Insert(hier)
+  -- State update: lastHier' = ms_animCache.tail.prev.item
+  -- State update: lastHier.linkPtr' = ∅
+  -- State update: link' = ms_animCache.Insert(hier)
+  -- State update: hier.linkPtr' = link
+  -- Invokes: hier->CalcTotalTimeCompressed, linkPtr->Remove, head.Insert, ms_animCache.Insert, lastHier->RemoveUncompressedData
+  true
+end
+
+schema CAnimManager_RemoveFromUncompressedCache
+  ΔCAnimManager
+  hier? : Ref[CAnimBlendHierarchy]
+where
+  -- State update: hier.linkPtr' = ∅
+  -- Invokes: ms_animCache.Remove
+  true
+end
+
+schema CAnimManager_GetAnimationBlock
+  ΔCAnimManager
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = &ms_aAnimBlocks[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CAnimManager_GetAnimationBlockIndex
+  ΔCAnimManager
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CAnimManager_RegisterAnimBlock
+  ΔCAnimManager
+  name? : seq CHAR
+where
+  -- State update: animBlock' = GetAnimationBlock(name)
+  -- State update: animBlock' = &ms_aAnimBlocks[ms_numAnimBlocks++]
+  -- State update: animBlock.numAnims' = 0
+  -- Return postcondition: result! = animBlock - ms_aAnimBlocks
+  true
+end
+
+schema CAnimManager_GetNumRefsToAnimBlock
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Return postcondition: result! = ms_aAnimBlocks[block].refCount
+  true
+end
+
+schema CAnimManager_AddAnimBlockRef
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimManager_RemoveAnimBlockRefWithoutDelete
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimManager_RemoveAnimBlockRef
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- Invokes: CStreaming::RemoveAnim
+  true
+end
+
+schema CAnimManager_RemoveAnimBlock
+  ΔCAnimManager
+  block? : ℤ
+where
+  -- State update: animblock' = &ms_aAnimBlocks[block]
+  -- State update: animblock.isLoaded' = false
+  -- State update: animblock.refCount' = 0
+  true
+end
+
+schema CAnimManager_GetAnimation
+  ΔCAnimManager
+  name? : seq CHAR
+  animBlock? : Ref[CAnimBlock]
+where
+  -- State update: hier' = &ms_aAnimations[animBlock.firstIndex]
+  -- Return postcondition: result! = hier
+  -- Return postcondition: result! = nil
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CAnimManager_GetAnimGroupName
+  ΔCAnimManager
+  groupId? : AssocGroupId
+where
+  -- Return postcondition: result! = ms_aAnimAssocDefinitions[groupId].name
+  true
+end
+
+schema CAnimManager_CreateAnimAssociation
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  animId? : AnimationId
+where
+  -- Return postcondition: result! = ms_aAnimAssocGroups[groupId].CopyAnimation(animId)
+  true
+end
+
+schema CAnimManager_GetAnimAssociation
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  animId? : AnimationId
+where
+  -- Return postcondition: result! = ms_aAnimAssocGroups[groupId].GetAnimation(animId)
+  true
+end
+
+schema CAnimManager_GetAnimAssociation_2
+  ΔCAnimManager
+  groupId? : AssocGroupId
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = ms_aAnimAssocGroups[groupId].GetAnimation(name)
+  true
+end
+
+schema CAnimManager_AddAnimation
+  ΔCAnimManager
+  clump? : Ref[RpClump]
+  groupId? : AssocGroupId
+  animId? : AnimationId
+where
+  -- State update: anim' = CreateAnimAssociation(groupId, animId)
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: syncanim' = ∅
+  -- State update: link' = clumpData.link.next
+  -- State update: syncanim' = CAnimBlendAssociation::FromLink(link)
+  -- Return postcondition: result! = anim
+  -- Invokes: anim->IsMovement, CAnimBlendAssociation::FromLink, syncanim->IsMovement, anim->SyncAnimation, anim->Start
+  true
+end
+
+schema CAnimManager_AddAnimationAndSync
+  ΔCAnimManager
+  clump? : Ref[RpClump]
+  syncanim? : Ref[CAnimBlendAssociation]
+  groupId? : AssocGroupId
+  animId? : AnimationId
+where
+  -- State update: anim' = CreateAnimAssociation(groupId, animId)
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- Return postcondition: result! = anim
+  -- Invokes: anim->IsMovement, anim->SyncAnimation, anim->Start, link.Prepend
+  true
+end
+
+schema CAnimManager_BlendAnimation
+  ΔCAnimManager
+  clump? : Ref[RpClump]
+  groupId? : AssocGroupId
+  animId? : AnimationId
+  delta? : ℝ
+where
+  -- State update: removePrevAnim' = 0
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: anim' = GetAnimAssociation(groupId, animId)
+  -- State update: isMovement' = anim.IsMovement()
+  -- State update: isPartial' = anim.IsPartial()
+  -- State update: movementAnim' = ∅
+  -- Return postcondition: result! = found
+  -- Return postcondition: result! = found
+  -- Invokes: anim->IsMovement, anim->IsPartial, CAnimBlendAssociation::FromLink, found->IsRunning, found->Start
+  true
+end
+
+schema CAnimManager_LoadAnimFiles
+  ΔCAnimManager
+where
+  -- State update: ms_aAnimAssocGroups' = new CAnimBlendAssocGroup[NUM_ANIM_ASSOC_GROUPS]
+  -- State update: clump' = (RpClump*)mi.CreateInstance()
+  -- State update: group' = &ms_aAnimAssocGroups[i]
+  -- State update: def' = &ms_aAnimAssocDefinitions[i]
+  -- Invokes: CModelInfo::GetModelInfo, mi->CreateInstance, group->CreateAssociations, group->GetAnimation
+  true
+end
+
+schema CAnimManager_CreateAnimAssocGroups
+  ΔCAnimManager
+where
+  -- State update: block' = GetAnimationBlock(ms_aAnimAssocDefinitions[i].blockName)
+  -- State update: clump' = (RpClump*)mi.CreateInstance()
+  -- State update: group' = &ms_aAnimAssocGroups[i]
+  -- State update: def' = &ms_aAnimAssocDefinitions[i]
+  -- State update: group.groupId' = i
+  -- State update: group.firstAnimId' = def.animDescs[0].animId
+  -- Invokes: CModelInfo::GetModelInfo, mi->CreateInstance, group->CreateAssociations, group->GetAnimation
+  true
+end
+
+schema CAnimManager_LoadAnimFile
+  ΔCAnimManager
+  filename? : seq CHAR
+where
+  -- State update: stream' = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename)
+  true
+end
+
+schema CAnimManager_RemoveLastAnimFile
+  ΔCAnimManager
+where
+  -- State update: ms_numAnimations' = ms_aAnimBlocks[ms_numAnimBlocks].firstIndex
+  -- State update: isLoaded' = false
+  true
+end
+
+schema CAnimManager_LoadAnimFile_2
+  ΔCAnimManager
+  fd? : ℤ
+  compress? : 𝔹
+where
+  -- State update: fbuf' = (float*)buf
+  -- State update: numANPK' = *(int*)buf
+  -- State update: numANPK' = 1
+  -- State update: animBlock' = &ms_aAnimBlocks[ms_numAnimBlocks++]
+  -- State update: animBlock.numAnims' = *(int*)buf
+  -- State update: animBlock.firstIndex' = ms_numAnimations
+  -- Invokes: CFileMgr::Read, CGeneral::faststrncmp, CFileMgr::Seek, hier->SetName, seq->SetName
+  true
+end

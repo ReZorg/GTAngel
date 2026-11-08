@@ -1,0 +1,74 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneHead (objects)
+-- Source File(s): objects/CutsceneHead.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include CutsceneObject.zpp  (from "CutsceneObject.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCutsceneHead
+  CCutsceneObject  -- inherits base schema
+  m_pHeadNode : Ref[RwFrame]
+  m_parentObject : Ref[CCutsceneObject]
+  unk2 : ℤ
+  bIsSkinned : ℤ
+where
+  #m_pHeadNode ≤ 1
+  #m_parentObject ≤ 1
+end
+
+schema CCutsceneHead_CreateRwObject
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::CreateRwObject(void)
+  true
+end
+
+schema CCutsceneHead_DeleteRwObject_2
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::DeleteRwObject(void)
+  true
+end
+
+schema CCutsceneHead_ProcessControl_3
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::ProcessControl(void)
+  true
+end
+
+schema CCutsceneHead_Render_4
+  ΔCCutsceneHead
+where
+  -- Declared member operation CCutsceneHead::Render(void)
+  true
+end
+
+schema CCutsceneHead_RenderLimb_5
+  ΔCCutsceneHead
+  bone? : ℤ
+where
+  -- Declared member operation CCutsceneHead::RenderLimb(int32 bone)
+  true
+end
+
+schema CCutsceneHead_PlayAnimation_6
+  ΔCCutsceneHead
+  animName? : seq CHAR
+where
+  -- Declared member operation CCutsceneHead::PlayAnimation(const char *animName)
+  true
+end

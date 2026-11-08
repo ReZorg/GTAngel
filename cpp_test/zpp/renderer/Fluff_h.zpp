@@ -1,0 +1,836 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Fluff (renderer)
+-- Source File(s): renderer/Fluff.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Vector.zpp  (from "Vector.h")
+-- include Object.zpp  (from "Object.h")
+-- include Plane.zpp  (from "Plane.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMMOVINGTHINGS : ℕ  -- #define NUMMOVINGTHINGS 48
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Fluff_Enum_1 ::= SCRIPT_PATH_DISABLED | SCRIPT_PATH_INITIALIZED | SCRIPT_PATH_ACTIVE
+  -- val(SCRIPT_PATH_DISABLED) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CScriptPath
+  m_numNodes : ℤ
+  m_pNode : Ref[CPlaneNode]
+  m_fTotalLength : ℝ
+  m_fSpeed : ℝ
+  m_fPosition : ℝ
+  m_fObjectLength : ℝ
+  m_state : ℤ
+  m_pObjects : seq Ref[CObject]  -- bounded array [6]
+where
+  #m_pNode ≤ 1
+  #m_pObjects = 6
+end
+
+schema CScriptPath_Clear
+  ΔCScriptPath
+where
+  -- Declared member operation CScriptPath::Clear(void)
+  true
+end
+
+schema CScriptPath_Update_2
+  ΔCScriptPath
+where
+  -- Declared member operation CScriptPath::Update(void)
+  true
+end
+
+schema CScriptPath_InitialiseOne_3
+  ΔCScriptPath
+  numNodes? : ℤ
+  length? : ℝ
+where
+  -- Declared member operation CScriptPath::InitialiseOne(int32 numNodes, float length)
+  true
+end
+
+schema CScriptPath_FindCoorsFromDistanceOnPath_4
+  ΔCScriptPath
+  t? : ℝ
+  pX? : ℙ ℝ
+  pY? : ℙ ℝ
+  pZ? : ℙ ℝ
+where
+  -- Declared member operation CScriptPath::FindCoorsFromDistanceOnPath(float t, float *pX, float *pY, float *pZ)
+  true
+end
+
+schema CScriptPath_SetObjectToControl_5
+  ΔCScriptPath
+  pObj? : Ref[CObject]
+where
+  -- Declared member operation CScriptPath::SetObjectToControl(CObject *pObj)
+  true
+end
+
+schema CScriptPaths
+  aArray : seq CScriptPath  -- bounded array [3]
+where
+  #aArray = 3
+end
+
+schema CScriptPaths_Init
+  ΔCScriptPaths
+where
+  -- Declared member operation CScriptPaths::Init(void)
+  true
+end
+
+schema CScriptPaths_Shutdown_2
+  ΔCScriptPaths
+where
+  -- Declared member operation CScriptPaths::Shutdown(void)
+  true
+end
+
+schema CScriptPaths_Update_3
+  ΔCScriptPaths
+where
+  -- Declared member operation CScriptPaths::Update(void)
+  true
+end
+
+schema CScriptPaths_IsOneActive_4
+  ΔCScriptPaths
+  result! : 𝔹
+where
+  -- Declared member operation CScriptPaths::IsOneActive(void)
+  true
+end
+
+schema CScriptPaths_Save_5
+  ΔCScriptPaths
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CScriptPaths::Save(uint8 *buf, uint32 *size)
+  true
+end
+
+schema CScriptPaths_Load_6
+  ΔCScriptPaths
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CScriptPaths::Load(uint8 *buf, uint32 size)
+  true
+end
+
+schema CScriptPaths_Save_ForReplay_7
+  ΔCScriptPaths
+where
+  -- Declared member operation CScriptPaths::Save_ForReplay()
+  true
+end
+
+schema CScriptPaths_Load_ForReplay_8
+  ΔCScriptPaths
+where
+  -- Declared member operation CScriptPaths::Load_ForReplay()
+  true
+end
+
+schema CPlaneTrail
+  m_pos : seq CVector  -- bounded array [16]
+  m_time : seq ℤ  -- bounded array [16]
+where
+  #m_pos = 16
+  #m_time = 16
+end
+
+schema CPlaneTrail_Init
+  ΔCPlaneTrail
+where
+  -- Declared member operation CPlaneTrail::Init(void)
+  true
+end
+
+schema CPlaneTrail_Render_2
+  ΔCPlaneTrail
+  visibility? : ℝ
+where
+  -- Declared member operation CPlaneTrail::Render(float visibility)
+  true
+end
+
+schema CPlaneTrail_RegisterPoint_3
+  ΔCPlaneTrail
+  pos? : CVector
+where
+  -- Declared member operation CPlaneTrail::RegisterPoint(CVector pos)
+  true
+end
+
+schema CPlaneTrails
+  aArray : seq CPlaneTrail  -- bounded array [6]
+where
+  #aArray = 6
+end
+
+schema CPlaneTrails_Init
+  ΔCPlaneTrails
+where
+  -- Declared member operation CPlaneTrails::Init(void)
+  true
+end
+
+schema CPlaneTrails_Update_2
+  ΔCPlaneTrails
+where
+  -- Declared member operation CPlaneTrails::Update(void)
+  true
+end
+
+schema CPlaneTrails_Render_3
+  ΔCPlaneTrails
+where
+  -- Declared member operation CPlaneTrails::Render(void)
+  true
+end
+
+schema CPlaneTrails_RegisterPoint_4
+  ΔCPlaneTrails
+  pos? : CVector
+  id? : ℕ
+where
+  -- Declared member operation CPlaneTrails::RegisterPoint(CVector pos, uint32 id)
+  true
+end
+
+schema CPlaneBanner
+  m_pos : seq CVector  -- bounded array [8]
+where
+  #m_pos = 8
+end
+
+schema CPlaneBanner_Init
+  ΔCPlaneBanner
+where
+  -- Declared member operation CPlaneBanner::Init(void)
+  true
+end
+
+schema CPlaneBanner_Update_2
+  ΔCPlaneBanner
+where
+  -- Declared member operation CPlaneBanner::Update(void)
+  true
+end
+
+schema CPlaneBanner_Render_3
+  ΔCPlaneBanner
+where
+  -- Declared member operation CPlaneBanner::Render(void)
+  true
+end
+
+schema CPlaneBanner_RegisterPoint_4
+  ΔCPlaneBanner
+  pos? : CVector
+where
+  -- Declared member operation CPlaneBanner::RegisterPoint(CVector pos)
+  true
+end
+
+schema CPlaneBanners
+  aArray : seq CPlaneBanner  -- bounded array [5]
+where
+  #aArray = 5
+end
+
+schema CPlaneBanners_Init
+  ΔCPlaneBanners
+where
+  -- Declared member operation CPlaneBanners::Init(void)
+  true
+end
+
+schema CPlaneBanners_Update_2
+  ΔCPlaneBanners
+where
+  -- Declared member operation CPlaneBanners::Update(void)
+  true
+end
+
+schema CPlaneBanners_Render_3
+  ΔCPlaneBanners
+where
+  -- Declared member operation CPlaneBanners::Render(void)
+  true
+end
+
+schema CPlaneBanners_RegisterPoint_4
+  ΔCPlaneBanners
+  pos? : CVector
+  id? : ℕ
+where
+  -- Declared member operation CPlaneBanners::RegisterPoint(CVector pos, uint32 id)
+  true
+end
+
+schema CEscalator
+  m_pos0 : CVector
+  m_pos1 : CVector
+  m_pos2 : CVector
+  m_pos3 : CVector
+  m_matrix : CMatrix
+  m_bIsActive : 𝔹
+  m_bIsMovingDown : 𝔹
+  m_stepsCount : ℤ
+  m_lowerEnd : ℝ
+  m_upperEnd : ℝ
+  m_midPoint : CVector
+  m_radius : ℝ
+  m_pSteps : seq Ref[CObject]  -- bounded array [24]
+where
+  #m_pSteps = 24
+end
+
+schema CEscalator_CEscalator
+  ΔCEscalator
+where
+  -- Declared member operation CEscalator::CEscalator()
+  true
+end
+
+schema CEscalator_Update_2
+  ΔCEscalator
+where
+  -- Declared member operation CEscalator::Update(void)
+  true
+end
+
+schema CEscalator_SwitchOff_3
+  ΔCEscalator
+where
+  -- Declared member operation CEscalator::SwitchOff(void)
+  true
+end
+
+schema CEscalator_AddThisOne_4
+  ΔCEscalator
+  pos0? : CVector
+  pos1? : CVector
+  pos2? : CVector
+  pos3? : CVector
+  b_isMovingDown? : 𝔹
+where
+  -- Declared member operation CEscalator::AddThisOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown)
+  true
+end
+
+schema CEscalator_IsActive_5
+  ΞCEscalator
+  result! : 𝔹
+where
+  -- Declared member operation CEscalator::IsActive()
+  true
+end
+
+schema CEscalator_GetPosition_6
+  ΞCEscalator
+  result! : CVector
+where
+  -- Declared member operation CEscalator::GetPosition()
+  true
+end
+
+schema CEscalators
+  aEscalators : seq CEscalator  -- bounded array [NUM_ESCALATORS]
+  NumEscalators : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CEscalators_Init
+  ΔCEscalators
+where
+  -- Declared member operation CEscalators::Init(void)
+  true
+end
+
+schema CEscalators_Update_2
+  ΔCEscalators
+where
+  -- Declared member operation CEscalators::Update(void)
+  true
+end
+
+schema CEscalators_AddOne_3
+  ΔCEscalators
+  pos0? : CVector
+  pos1? : CVector
+  pos2? : CVector
+  pos3? : CVector
+  b_isMovingDown? : 𝔹
+where
+  -- Declared member operation CEscalators::AddOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown)
+  true
+end
+
+schema CEscalators_Shutdown_4
+  ΔCEscalators
+where
+  -- Declared member operation CEscalators::Shutdown(void)
+  true
+end
+
+schema CEscalators_GetEscalator_5
+  ΔCEscalators
+  ind? : ℤ
+  result! : CEscalator
+where
+  -- Declared member operation CEscalators::GetEscalator(int ind)
+  true
+end
+
+schema CMovingThing
+  m_pNext : Ref[CMovingThing]
+  m_pPrev : Ref[CMovingThing]
+  m_nType : ℤ
+  m_farAway : ℤ
+  m_vecPosn : CVector
+  m_pEntity : Ref[CEntity]
+  m_nHidden : ℤ
+where
+  #m_pNext ≤ 1
+  #m_pPrev ≤ 1
+  #m_pEntity ≤ 1
+end
+
+schema CMovingThing_Update
+  ΔCMovingThing
+where
+  -- Declared member operation CMovingThing::Update()
+  true
+end
+
+schema CMovingThing_AddToList_2
+  ΔCMovingThing
+  pThing? : Ref[CMovingThing]
+where
+  -- Declared member operation CMovingThing::AddToList(CMovingThing *pThing)
+  true
+end
+
+schema CMovingThing_RemoveFromList_3
+  ΔCMovingThing
+where
+  -- Declared member operation CMovingThing::RemoveFromList()
+  true
+end
+
+schema CMovingThing_SizeList_4
+  ΔCMovingThing
+  result! : ℤ
+where
+  -- Declared member operation CMovingThing::SizeList()
+  true
+end
+
+schema CMovingThings
+  StartCloseList : CMovingThing
+  EndCloseList : CMovingThing
+  Num : ℤ
+  aMovingThings : seq CMovingThing  -- bounded array [NUMMOVINGTHINGS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMovingThings_Init
+  ΔCMovingThings
+where
+  -- Declared member operation CMovingThings::Init()
+  true
+end
+
+schema CMovingThings_Shutdown_2
+  ΔCMovingThings
+where
+  -- Declared member operation CMovingThings::Shutdown()
+  true
+end
+
+schema CMovingThings_Update_3
+  ΔCMovingThings
+where
+  -- Declared member operation CMovingThings::Update()
+  true
+end
+
+schema CMovingThings_Render_4
+  ΔCMovingThings
+where
+  -- Declared member operation CMovingThings::Render()
+  true
+end
+
+schema CMovingThings_PossiblyAddThisEntity_5
+  ΔCMovingThings
+  pEnt? : Ref[CEntity]
+where
+  -- Declared member operation CMovingThings::PossiblyAddThisEntity(CEntity *pEnt)
+  true
+end
+
+schema CMovingThings_RegisterOne_6
+  ΔCMovingThings
+  pEnt? : Ref[CEntity]
+  nType? : ℕ
+where
+  -- Declared member operation CMovingThings::RegisterOne(CEntity *pEnt, uint16 nType)
+  true
+end
+
+schema CScrollBar
+  m_Counter : ℕ
+  m_pMessage : seq CHAR
+  m_Position : CVector
+  m_MessageCurrentChar : ℕ
+  m_MessageLength : ℕ
+  m_Size : CVector
+  m_fIntensity : ℝ
+  m_MessageBar : seq ℕ  -- bounded array [40]
+  m_Type : ℕ
+  m_bVisible : 𝔹
+  m_uRed : ℕ
+  m_uGreen : ℕ
+  m_uBlue : ℕ
+  m_fScale : ℝ
+  TonightsEvent : ℤ
+where
+  m_Counter ≥ 0
+  m_MessageCurrentChar ≥ 0
+  m_MessageLength ≥ 0
+  #m_MessageBar = 40
+  m_Type ≥ 0
+  m_uRed ≥ 0
+  m_uGreen ≥ 0
+  m_uBlue ≥ 0
+end
+
+schema CScrollBar_SetVisibility
+  ΔCScrollBar
+  visible? : 𝔹
+where
+  -- Declared member operation CScrollBar::SetVisibility(bool visible)
+  true
+end
+
+schema CScrollBar_IsVisible_2
+  ΔCScrollBar
+  result! : bool
+where
+  -- Declared member operation CScrollBar::IsVisible()
+  true
+end
+
+schema CScrollBar_Init_3
+  ΔCScrollBar
+  pos1? : CVector
+  pos2? : CVector
+  type? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  scale? : ℝ
+  result! : void
+where
+  -- Declared member operation CScrollBar::Init(CVector pos1, CVector pos2, uint8 type, uint8 red, uint8 green, uint8 blue, float scale)
+  true
+end
+
+schema CScrollBar_Update_4
+  ΔCScrollBar
+where
+  -- Declared member operation CScrollBar::Update()
+  true
+end
+
+schema CScrollBar_Render_5
+  ΔCScrollBar
+where
+  -- Declared member operation CScrollBar::Render()
+  true
+end
+
+schema CScrollBar_Init_6
+  ΔCScrollBar
+  arg_1? : CVector
+  arg_2? : ℕ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℕ
+  arg_7? : ℕ
+  arg_8? : ℕ
+  arg_9? : ℝ
+where
+  -- Declared member operation CScrollBar::Init(CVector, uint8, float, float, float, uint8, uint8, uint8, float)
+  true
+end
+
+schema CSmokeTrail
+  m_pos : seq CVector  -- bounded array [16]
+  m_opacity : seq ℝ  -- bounded array [16]
+  m_time : seq ℤ  -- bounded array [16]
+  m_unused : seq CHAR
+  m_seed : ℤ
+where
+  #m_pos = 16
+  #m_opacity = 16
+  #m_time = 16
+  #m_unused = 536
+end
+
+schema CSmokeTrail_Render
+  ΔCSmokeTrail
+where
+  -- Declared member operation CSmokeTrail::Render(void)
+  true
+end
+
+schema CSmokeTrail_RegisterPoint_2
+  ΔCSmokeTrail
+  position? : CVector
+  a? : ℝ
+where
+  -- Declared member operation CSmokeTrail::RegisterPoint(CVector position, float a)
+  true
+end
+
+schema CSmokeTrail_Init_3
+  ΔCSmokeTrail
+  num? : ℤ
+where
+  -- Declared member operation CSmokeTrail::Init(int num)
+  true
+end
+
+schema CSmokeTrails
+  aSmoke : seq CSmokeTrail  -- bounded array [3]
+  CigOn : 𝔹
+where
+  #aSmoke = 3
+end
+
+schema CSmokeTrails_Update
+  ΔCSmokeTrails
+where
+  -- Declared member operation CSmokeTrails::Update(void)
+  true
+end
+
+schema CSmokeTrails_Render_2
+  ΔCSmokeTrails
+where
+  -- Declared member operation CSmokeTrails::Render(void)
+  true
+end
+
+schema CSmokeTrails_Init_3
+  ΔCSmokeTrails
+where
+  -- Declared member operation CSmokeTrails::Init(void)
+  true
+end
+
+schema CTowerClock
+  m_Position : CVector
+  m_Size : CVector
+  m_fDrawDistance : ℝ
+  m_fScale : ℝ
+  m_uRed : ℕ
+  m_uGreen : ℕ
+  m_uBlue : ℕ
+  m_bVisible : 𝔹
+  m_fIntensity : ℝ
+where
+  m_uRed ≥ 0
+  m_uGreen ≥ 0
+  m_uBlue ≥ 0
+end
+
+schema CTowerClock_SetVisibility
+  ΔCTowerClock
+  visible? : 𝔹
+where
+  -- Declared member operation CTowerClock::SetVisibility(bool visible)
+  true
+end
+
+schema CTowerClock_IsVisible_2
+  ΔCTowerClock
+  result! : bool
+where
+  -- Declared member operation CTowerClock::IsVisible()
+  true
+end
+
+schema CTowerClock_Init_3
+  ΔCTowerClock
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℕ
+  arg_5? : ℕ
+  arg_6? : ℕ
+  arg_7? : ℝ
+  arg_8? : ℝ
+  result! : void
+where
+  -- Declared member operation CTowerClock::Init(CVector, float, float, uint8, uint8, uint8, float, float)
+  true
+end
+
+schema CTowerClock_Update_4
+  ΔCTowerClock
+where
+  -- Declared member operation CTowerClock::Update()
+  true
+end
+
+schema CTowerClock_Render_5
+  ΔCTowerClock
+where
+  -- Declared member operation CTowerClock::Render()
+  true
+end
+
+schema CDigitalClock
+  m_Position : CVector
+  m_Size : CVector
+  m_fDrawDistance : ℝ
+  m_fScale : ℝ
+  m_uRed : ℕ
+  m_uGreen : ℕ
+  m_uBlue : ℕ
+  m_bVisible : 𝔹
+  m_fIntensity : ℝ
+where
+  m_uRed ≥ 0
+  m_uGreen ≥ 0
+  m_uBlue ≥ 0
+end
+
+schema CDigitalClock_SetVisibility
+  ΔCDigitalClock
+  visible? : 𝔹
+where
+  -- Declared member operation CDigitalClock::SetVisibility(bool visible)
+  true
+end
+
+schema CDigitalClock_IsVisible_2
+  ΔCDigitalClock
+  result! : bool
+where
+  -- Declared member operation CDigitalClock::IsVisible()
+  true
+end
+
+schema CDigitalClock_Init_3
+  ΔCDigitalClock
+  arg_1? : CVector
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℕ
+  arg_5? : ℕ
+  arg_6? : ℕ
+  arg_7? : ℝ
+  arg_8? : ℝ
+  result! : void
+where
+  -- Declared member operation CDigitalClock::Init(CVector, float, float, uint8, uint8, uint8, float, float)
+  true
+end
+
+schema CDigitalClock_Update_4
+  ΔCDigitalClock
+where
+  -- Declared member operation CDigitalClock::Update()
+  true
+end
+
+schema CDigitalClock_Render_5
+  ΔCDigitalClock
+where
+  -- Declared member operation CDigitalClock::Render()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Fluff_SetVisibility
+  ΔFluffModuleState
+  visible? : 𝔹
+where
+  -- State update: m_bVisible' = visible
+  true
+end
+
+schema Fluff_IsVisible
+  ΔFluffModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bVisible
+  true
+end
+
+schema Fluff_SetVisibility_2
+  ΔFluffModuleState
+  visible? : 𝔹
+where
+  -- State update: m_bVisible' = visible
+  true
+end
+
+schema Fluff_IsVisible_2
+  ΔFluffModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bVisible
+  true
+end
+
+schema Fluff_SetVisibility_3
+  ΔFluffModuleState
+  visible? : 𝔹
+where
+  -- State update: m_bVisible' = visible
+  true
+end
+
+schema Fluff_IsVisible_3
+  ΔFluffModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bVisible
+  true
+end

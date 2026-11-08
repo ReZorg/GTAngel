@@ -1,0 +1,229 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Gangs (peds)
+-- Source File(s): peds/Gangs.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include PedType.zpp  (from "PedType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Gangs_Enum_1 ::= GANG_MAFIA | GANG_TRIAD | GANG_DIABLOS | GANG_YAKUZA | GANG_YARDIE | GANG_COLUMB | GANG_HOODS | GANG_FORELLI | GANG_SINDACCO | NUM_GANGS
+  -- val(GANG_MAFIA) = 0
+
+Gangs_Enum_2 ::= GANG_CUBAN | GANG_HAITIAN | GANG_STREET | GANG_DIAZ | GANG_SECURITY | GANG_BIKER | GANG_PLAYER | GANG_GOLFER | GANG_9 | NUM_GANGS
+  -- val(GANG_CUBAN) = 0
+
+Gangs_Enum_3 ::= GANG_MAFIA | GANG_TRIAD | GANG_DIABLOS | GANG_YAKUZA | GANG_YARDIE | GANG_COLUMB | GANG_HOODS | GANG_7 | GANG_8 | NUM_GANGS
+  -- val(GANG_MAFIA) = 0
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CGangInfo
+  m_nVehicleMI : ℤ
+  m_nPedModel1MI : ℤ
+  m_nPedModel2MI : ℤ
+  m_nPedModelOverride : ℤ
+  m_Weapon1 : ℤ
+  m_Weapon2 : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CGangInfo_CGangInfo
+  ΔCGangInfo
+where
+  -- Declared member operation CGangInfo::CGangInfo()
+  true
+end
+
+schema CGangs
+  GangAttackWithCops : seq 𝔹  -- bounded array [NUM_GANGS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CGangs_Initialise
+  ΔCGangs
+where
+  -- Declared member operation CGangs::Initialise(void)
+  true
+end
+
+schema CGangs_SetGangVehicleModel_2
+  ΔCGangs
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation CGangs::SetGangVehicleModel(int16, int32)
+  true
+end
+
+schema CGangs_SetGangWeapons_3
+  ΔCGangs
+  arg_1? : ℤ
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Declared member operation CGangs::SetGangWeapons(int16, int32, int32)
+  true
+end
+
+schema CGangs_SetGangPedModelOverride_4
+  ΔCGangs
+  arg_1? : ℤ
+  arg_2? : ℤ
+where
+  -- Declared member operation CGangs::SetGangPedModelOverride(int16, int8)
+  true
+end
+
+schema CGangs_GetGangPedModelOverride_5
+  ΔCGangs
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGangs::GetGangPedModelOverride(int16)
+  true
+end
+
+schema CGangs_SaveAllGangData_6
+  ΔCGangs
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CGangs::SaveAllGangData(uint8 *, uint32 *)
+  true
+end
+
+schema CGangs_LoadAllGangData_7
+  ΔCGangs
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+where
+  -- Declared member operation CGangs::LoadAllGangData(uint8 *, uint32)
+  true
+end
+
+schema CGangs_SetGangPedModels_8
+  ΔCGangs
+  arg_1? : ℤ
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Declared member operation CGangs::SetGangPedModels(int16, int32, int32)
+  true
+end
+
+schema CGangs_SetWillAttackPlayerWithCops_9
+  ΔCGangs
+  type? : ePedType
+  will? : 𝔹
+where
+  -- Declared member operation CGangs::SetWillAttackPlayerWithCops(ePedType type, bool will)
+  true
+end
+
+schema CGangs_GetWillAttackPlayerWithCops_10
+  ΔCGangs
+  type? : ePedType
+  result! : 𝔹
+where
+  -- Declared member operation CGangs::GetWillAttackPlayerWithCops(ePedType type)
+  true
+end
+
+schema CGangs_ChooseGangPedModel_11
+  ΔCGangs
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGangs::ChooseGangPedModel(int16)
+  true
+end
+
+schema CGangs_HaveGangModelsLoaded_12
+  ΔCGangs
+  gang? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CGangs::HaveGangModelsLoaded(int16 gang)
+  true
+end
+
+schema CGangs_GetGangPedModel1_13
+  ΔCGangs
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGangs::GetGangPedModel1(int16 gang)
+  true
+end
+
+schema CGangs_GetGangPedModel2_14
+  ΔCGangs
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGangs::GetGangPedModel2(int16 gang)
+  true
+end
+
+schema CGangs_GetGangVehicleModel_15
+  ΔCGangs
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CGangs::GetGangVehicleModel(int16 gang)
+  true
+end
+
+schema CGangs_GetGangInfo_16
+  ΔCGangs
+  gang? : ℤ
+  result! : Ref[CGangInfo]
+where
+  -- Declared member operation CGangs::GetGangInfo(int16 gang)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Gangs_GetGangPedModel1
+  ΔGangsModuleState
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = Gang[gang].m_nPedModel1MI
+  true
+end
+
+schema Gangs_GetGangPedModel2
+  ΔGangsModuleState
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = Gang[gang].m_nPedModel2MI
+  true
+end
+
+schema Gangs_GetGangVehicleModel
+  ΔGangsModuleState
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = Gang[gang].m_nVehicleMI
+  true
+end

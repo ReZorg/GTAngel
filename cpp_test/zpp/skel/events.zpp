@@ -1,0 +1,126 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: events (skel)
+-- Source File(s): skel/events.cpp, skel/events.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include skeleton.zpp  (from "skeleton.h")
+-- include events.zpp  (from "events.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema events_HandleKeyDown
+  ΔeventsModuleState
+  keyStatus? : Ref[RsKeyStatus]
+where
+  -- State update: pad0' = CPad::GetPad(0)
+  -- State update: pad1' = CPad::GetPad(1)
+  -- State update: c' = keyStatus.keyCharCode
+  -- State update: TempKeyState.ESC' = 255
+  -- State update: TempKeyState.INS' = 255
+  -- State update: TempKeyState.DEL' = 255
+  -- Return postcondition: result! = rsEVENTPROCESSED
+  -- Invokes: CPad::GetPad, pad0->AddToPCCheatString
+  true
+end
+
+schema events_HandleKeyUp
+  ΔeventsModuleState
+  keyStatus? : Ref[RsKeyStatus]
+where
+  -- State update: pad0' = CPad::GetPad(0)
+  -- State update: pad1' = CPad::GetPad(1)
+  -- State update: c' = keyStatus.keyCharCode
+  -- State update: TempKeyState.ESC' = 0
+  -- State update: TempKeyState.INS' = 0
+  -- State update: TempKeyState.DEL' = 0
+  -- Return postcondition: result! = rsEVENTPROCESSED
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema events_KeyboardHandler
+  ΔeventsModuleState
+  event? : RsEvent
+  param? : ADDRESS
+where
+  -- Return postcondition: result! = HandleKeyDown((RsKeyStatus *)param)
+  -- Return postcondition: result! = HandleKeyUp((RsKeyStatus *)param)
+  -- Return postcondition: result! = rsEVENTNOTPROCESSED
+  true
+end
+
+schema events_HandlePadButtonDown
+  ΔeventsModuleState
+  padButtonStatus? : Ref[RsPadButtonStatus]
+where
+  -- State update: bPadTwo' = false
+  -- State update: padNumber' = padButtonStatus.padID
+  -- State update: pad' = CPad::GetPad(padNumber)
+  -- State update: padNumber' = 1
+  -- State update: bPadTwo' = true
+  -- State update: btn' = rsPAD∅
+  -- Return postcondition: result! = rsEVENTPROCESSED
+  -- Invokes: CPad::GetPad, ControlsManager.UpdateJoyButtonState, ControlsManager.UpdateJoyInConfigMenus_ButtonDown, ControlsManager.AffectControllerStateOn_ButtonDown
+  true
+end
+
+schema events_HandlePadButtonUp
+  ΔeventsModuleState
+  padButtonStatus? : Ref[RsPadButtonStatus]
+where
+  -- State update: bPadTwo' = false
+  -- State update: padNumber' = padButtonStatus.padID
+  -- State update: pad' = CPad::GetPad(padNumber)
+  -- State update: padNumber' = 1
+  -- State update: bPadTwo' = true
+  -- State update: bCam' = false
+  -- Return postcondition: result! = rsEVENTPROCESSED
+  -- Invokes: CPad::GetPad, ControlsManager.UpdateJoyButtonState, ControlsManager.UpdateJoyInConfigMenus_ButtonUp, ControlsManager.AffectControllerStateOn_ButtonUp
+  true
+end
+
+schema events_PadHandler
+  ΔeventsModuleState
+  event? : RsEvent
+  param? : ADDRESS
+where
+  -- Return postcondition: result! = HandlePadButtonDown((RsPadButtonStatus *)param)
+  -- Return postcondition: result! = HandlePadButtonUp((RsPadButtonStatus *)param)
+  -- Return postcondition: result! = rsEVENTNOTPROCESSED
+  true
+end
+
+schema events_AttachInputDevices
+  ΔeventsModuleState
+where
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema eventsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 838
+end

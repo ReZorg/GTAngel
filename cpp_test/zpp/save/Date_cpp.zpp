@@ -1,0 +1,90 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Date (save)
+-- Source File(s): save/Date.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Date.zpp  (from "Date.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDate_CDate
+  ΔCDate
+where
+  -- State update: m_nYear' = 0
+  -- State update: m_nSecond' = 0
+  -- State update: m_nMinute' = 0
+  -- State update: m_nHour' = 0
+  -- State update: m_nDay' = 0
+  -- State update: m_nMonth' = 0
+  true
+end
+
+schema CDate_operator
+  ΔCDate
+  right? : CDate
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDate_operator_2
+  ΔCDate
+  right? : CDate
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CDate_operator_3
+  ΔCDate
+  right? : CDate
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = m_nSecond == right.m_nSecond
+  true
+end
+
+schema CDate_PopulateDateFields
+  ΔCDate
+  second? : ℤ
+  minute? : ℤ
+  hour? : ℤ
+  day? : ℤ
+  month? : ℤ
+  year? : ℤ
+where
+  -- State update: m_nSecond' = second
+  -- State update: m_nMinute' = minute
+  -- State update: m_nHour' = hour
+  -- State update: m_nDay' = day
+  -- State update: m_nMonth' = month
+  -- State update: m_nYear' = year
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DateModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 91
+end

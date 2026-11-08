@@ -1,0 +1,407 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Matrix (math)
+-- Source File(s): math/Matrix.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CMatrix
+  m_attachment : Ref[RwMatrix]
+  fz : ℝ
+  m_hasRwMatrix : 𝔹
+  uw : ℝ
+  pw : ℝ
+  fw : ℝ
+where
+  #m_attachment ≤ 1
+end
+
+schema CMatrix_CMatrix
+  ΔCMatrix
+  m? : CMatrix
+where
+  -- Declared member operation CMatrix::CMatrix(CMatrix const &m)
+  true
+end
+
+schema CMatrix_CMatrix_2
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+  owner? : 𝔹
+where
+  -- Declared member operation CMatrix::CMatrix(RwMatrix *matrix, bool owner = false)
+  true
+end
+
+schema CMatrix_CMatrix_3
+  ΔCMatrix
+  scale? : ℝ
+where
+  -- Declared member operation CMatrix::CMatrix(float scale)
+  true
+end
+
+schema CMatrix_SetScale_4
+  ΔCMatrix
+  arg_1? : scale
+where
+  -- Declared member operation CMatrix::SetScale(scale)
+  true
+end
+
+schema CMatrix_CMatrix_5
+  ΔCMatrix
+  result! : ANY
+where
+  -- Declared member operation CMatrix::CMatrix(void)
+  true
+end
+
+schema CMatrix_Attach_6
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+  owner? : 𝔹
+where
+  -- Declared member operation CMatrix::Attach(RwMatrix *matrix, bool owner = false)
+  true
+end
+
+schema CMatrix_AttachRW_7
+  ΔCMatrix
+  matrix? : Ref[RwMatrix]
+  owner? : 𝔹
+where
+  -- Declared member operation CMatrix::AttachRW(RwMatrix *matrix, bool owner = false)
+  true
+end
+
+schema CMatrix_Detach_8
+  ΔCMatrix
+where
+  -- Declared member operation CMatrix::Detach(void)
+  true
+end
+
+schema CMatrix_Update_9
+  ΔCMatrix
+where
+  -- Declared member operation CMatrix::Update(void)
+  true
+end
+
+schema CMatrix_UpdateRW_10
+  ΔCMatrix
+where
+  -- Declared member operation CMatrix::UpdateRW(void)
+  true
+end
+
+schema CMatrix_operator_11
+  ΔCMatrix
+  rhs? : CMatrix
+where
+  -- Declared member operation CMatrix::operator=(CMatrix const &rhs)
+  true
+end
+
+schema CMatrix_operator_12
+  ΔCMatrix
+  rhs? : CMatrix
+  result! : CMatrix
+where
+  -- Declared member operation CMatrix::operator+=(CMatrix const &rhs)
+  true
+end
+
+schema CMatrix_operator_13
+  ΔCMatrix
+  rhs? : CMatrix
+  result! : CMatrix
+where
+  -- Declared member operation CMatrix::operator*=(CMatrix const &rhs)
+  true
+end
+
+schema CMatrix_GetPosition_14
+  ΔCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetPosition(void)
+  true
+end
+
+schema CMatrix_GetRight_15
+  ΔCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetRight(void)
+  true
+end
+
+schema CMatrix_GetForward_16
+  ΔCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetForward(void)
+  true
+end
+
+schema CMatrix_GetUp_17
+  ΔCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetUp(void)
+  true
+end
+
+schema CMatrix_GetPosition_18
+  ΞCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetPosition(void)
+  true
+end
+
+schema CMatrix_GetRight_19
+  ΞCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetRight(void)
+  true
+end
+
+schema CMatrix_GetForward_20
+  ΞCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetForward(void)
+  true
+end
+
+schema CMatrix_GetUp_21
+  ΞCMatrix
+  result! : CVector
+where
+  -- Declared member operation CMatrix::GetUp(void)
+  true
+end
+
+schema CMatrix_SetTranslate_22
+  ΔCMatrix
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  result! : void
+where
+  -- Declared member operation CMatrix::SetTranslate(float x, float y, float z)
+  true
+end
+
+schema CMatrix_SetTranslate_23
+  ΔCMatrix
+  trans? : CVector
+where
+  -- Declared member operation CMatrix::SetTranslate(const CVector &trans)
+  true
+end
+
+schema CMatrix_Translate_24
+  ΔCMatrix
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  result! : void
+where
+  -- Declared member operation CMatrix::Translate(float x, float y, float z)
+  true
+end
+
+schema CMatrix_Translate_25
+  ΔCMatrix
+  trans? : CVector
+  result! : void
+where
+  -- Declared member operation CMatrix::Translate(const CVector &trans)
+  true
+end
+
+schema CMatrix_SetScale_26
+  ΔCMatrix
+  s? : ℝ
+  result! : void
+where
+  -- Declared member operation CMatrix::SetScale(float s)
+  true
+end
+
+schema CMatrix_Scale_27
+  ΔCMatrix
+  scale? : ℝ
+where
+  -- Declared member operation CMatrix::Scale(float scale)
+  true
+end
+
+schema CMatrix_Scale_28
+  ΔCMatrix
+  sx? : ℝ
+  sy? : ℝ
+  sz? : ℝ
+  result! : void
+where
+  -- Declared member operation CMatrix::Scale(float sx, float sy, float sz)
+  true
+end
+
+schema CMatrix_SetRotateXOnly_29
+  ΔCMatrix
+  angle? : ℝ
+  result! : void
+where
+  -- Declared member operation CMatrix::SetRotateXOnly(float angle)
+  true
+end
+
+schema CMatrix_SetRotateYOnly_30
+  ΔCMatrix
+  angle? : ℝ
+where
+  -- Declared member operation CMatrix::SetRotateYOnly(float angle)
+  true
+end
+
+schema CCompressedMatrixNotAligned
+  m_vecPos : CVector
+  m_rightX : ℤ
+  m_rightY : ℤ
+  m_rightZ : ℤ
+  m_upX : ℤ
+  m_upY : ℤ
+  m_upZ : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCompressedMatrixNotAligned_CompressFromFullMatrix
+  ΔCCompressedMatrixNotAligned
+  other? : CMatrix
+where
+  -- Declared member operation CCompressedMatrixNotAligned::CompressFromFullMatrix(CMatrix &other)
+  true
+end
+
+schema CCompressedMatrixNotAligned_DecompressIntoFullMatrix_2
+  ΔCCompressedMatrixNotAligned
+  other? : CMatrix
+where
+  -- Declared member operation CCompressedMatrixNotAligned::DecompressIntoFullMatrix(CMatrix &other)
+  true
+end
+
+schema CCompressedMatrix
+  CCompressedMatrixNotAligned  -- inherits base schema
+  _alignment : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Matrix_CMatrix
+  ΔMatrixModuleState
+  scale? : ℝ
+where
+  -- State update: m_attachment' = ∅
+  -- State update: m_hasRwMatrix' = false
+  true
+end
+
+schema Matrix_SetTranslate
+  ΔMatrixModuleState
+  trans? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_Translate
+  ΔMatrixModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_Translate_2
+  ΔMatrixModuleState
+  trans? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_Scale
+  ΔMatrixModuleState
+  scale? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_Scale_2
+  ΔMatrixModuleState
+  sx? : ℝ
+  sy? : ℝ
+  sz? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_SetTranslateOnly
+  ΔMatrixModuleState
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- State update: px' = x
+  -- State update: py' = y
+  -- State update: pz' = z
+  true
+end
+
+schema Matrix_SetTranslateOnly_2
+  ΔMatrixModuleState
+  pos? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_CheckIntegrity
+  ΔMatrixModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Matrix_MultiplyInverse
+  ΔMatrixModuleState
+  mat? : CMatrix
+  vec? : CVector
+  result! : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

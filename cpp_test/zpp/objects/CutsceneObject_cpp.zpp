@@ -1,0 +1,144 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CutsceneObject (objects)
+-- Source File(s): objects/CutsceneObject.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include Bones.zpp  (from "Bones.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include CutsceneShadow.zpp  (from "CutsceneShadow.h")
+-- include CutsceneObject.zpp  (from "CutsceneObject.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCutsceneObject_CCutsceneObject
+  ΔCCutsceneObject
+where
+  -- State update: bUsesCollision' = false
+  -- State update: bStreamingDontDelete' = true
+  -- State update: ObjectCreatedBy' = CUTSCENE_OBJECT
+  -- State update: m_fMass' = 1.0f
+  -- State update: m_fTurnMass' = 1.0f
+  -- State update: bRenderHead' = true
+  true
+end
+
+schema CCutsceneObject_CCutsceneObject_2
+  ΔCCutsceneObject
+where
+  -- State update: m_pShadow' = ∅
+  true
+end
+
+schema CCutsceneObject_SetModelIndex
+  ΔCCutsceneObject
+  id? : ℕ
+where
+  -- State update: velocity3d' = &m_vecMoveSpeed
+  -- Invokes: CEntity::SetModelIndex
+  true
+end
+
+schema CCutsceneObject_CreateShadow
+  ΔCCutsceneObject
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCutsceneObject_ProcessControl
+  ΔCCutsceneObject
+where
+  -- Invokes: CPhysical::ProcessControl, CTimer::GetTimeStep
+  true
+end
+
+schema CutsceneObject_MaterialSetAlpha
+  ΔCutsceneObjectModuleState
+  material? : Ref[RpMaterial]
+  data? : ADDRESS
+where
+  -- State update: alpha' = (uint8)(uintptr)data
+  -- Return postcondition: result! = material
+  true
+end
+
+schema CCutsceneObject_PreRender
+  ΔCCutsceneObject
+where
+  -- State update: atomic' = GetFirstAtomic(GetClump())
+  -- State update: geometry' = RpAtomicGetGeometry(GetFirstAtomic(GetClump()))
+  -- Invokes: m_pAttachmentObject->UpdateRpHAnim, CShadows::StoreShadowForPedObject, m_pShadow->IsInitialized, m_pShadow->UpdateForCutscene, CShadows::StoreShadowForCutscenePedObject
+  true
+end
+
+schema CCutsceneObject_Render
+  ΔCCutsceneObject
+where
+  -- Invokes: CObject::Render
+  true
+end
+
+schema CCutsceneObject_SetupLighting
+  ΔCCutsceneObject
+where
+  -- State update: coors' = GetPosition()
+  -- State update: lighting' = CPointLights::GenerateLightsAffectingObject(&coors)
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPointLights::GenerateLightsAffectingObject
+  true
+end
+
+schema CCutsceneObject_RemoveLighting
+  ΔCCutsceneObject
+  reset? : 𝔹
+where
+  -- Invokes: CRenderer::RemoveVehiclePedLights
+  true
+end
+
+schema CCutsceneObject_RenderLimb
+  ΔCCutsceneObject
+  bone? : ℤ
+where
+  -- State update: mi' = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex())
+  -- State update: atomic' = mi.getHead()
+  -- State update: atomic' = mi.getLeftHand()
+  -- State update: atomic' = mi.getRightHand()
+  -- State update: hier' = GetAnimHierarchyFromSkinClump(GetClump())
+  -- State update: idx' = RpHAnimIDGetIndex(hier, bone)
+  -- Invokes: CModelInfo::GetModelInfo, mi->getHead, mi->getLeftHand, mi->getRightHand
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CutsceneObjectModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 246
+end

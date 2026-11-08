@@ -1,0 +1,121 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: User (core)
+-- Source File(s): core/User.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Pager.zpp  (from "Pager.h")
+-- include OnscreenTimer.zpp  (from "OnscreenTimer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlaceName
+  m_pZone : Ref[CZone]
+  m_pZone2 : Ref[CZone]
+  m_nAdditionalTimer : ℤ
+where
+  #m_pZone ≤ 1
+  #m_pZone2 ≤ 1
+end
+
+schema CPlaceName_CPlaceName
+  ΔCPlaceName
+where
+  -- Declared member operation CPlaceName::CPlaceName()
+  true
+end
+
+schema CPlaceName_Init_2
+  ΔCPlaceName
+where
+  -- Declared member operation CPlaceName::Init()
+  true
+end
+
+schema CPlaceName_Process_3
+  ΔCPlaceName
+where
+  -- Declared member operation CPlaceName::Process()
+  true
+end
+
+schema CPlaceName_Display_4
+  ΔCPlaceName
+where
+  -- Declared member operation CPlaceName::Display()
+  true
+end
+
+schema CPlaceName_ProcessAfterFrontEndShutDown_5
+  ΔCPlaceName
+where
+  -- Declared member operation CPlaceName::ProcessAfterFrontEndShutDown()
+  true
+end
+
+schema CCurrentVehicle
+  m_pCurrentVehicle : Ref[CVehicle]
+where
+  #m_pCurrentVehicle ≤ 1
+end
+
+schema CCurrentVehicle_CCurrentVehicle
+  ΔCCurrentVehicle
+where
+  -- Declared member operation CCurrentVehicle::CCurrentVehicle()
+  true
+end
+
+schema CCurrentVehicle_Init_2
+  ΔCCurrentVehicle
+where
+  -- Declared member operation CCurrentVehicle::Init()
+  true
+end
+
+schema CCurrentVehicle_Process_3
+  ΔCCurrentVehicle
+where
+  -- Declared member operation CCurrentVehicle::Process()
+  true
+end
+
+schema CCurrentVehicle_Display_4
+  ΔCCurrentVehicle
+where
+  -- Declared member operation CCurrentVehicle::Display()
+  true
+end
+
+schema CUserDisplay
+  PlaceName : CPlaceName
+  OnscnTimer : COnscreenTimer
+  Pager : CPager
+  CurrentVehicle : CCurrentVehicle
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CUserDisplay_Init
+  ΔCUserDisplay
+where
+  -- Declared member operation CUserDisplay::Init()
+  true
+end
+
+schema CUserDisplay_Process_2
+  ΔCUserDisplay
+where
+  -- Declared member operation CUserDisplay::Process()
+  true
+end

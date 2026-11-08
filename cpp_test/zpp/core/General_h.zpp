@@ -1,0 +1,476 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: General (core)
+-- Source File(s): core/General.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ctype.zpp  (from "ctype.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CGeneral
+  true : return
+  arc : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CGeneral_GetATanOfXY
+  ΔCGeneral
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::GetATanOfXY(float x, float y)
+  true
+end
+
+schema CGeneral_Abs_2
+  ΔCGeneral
+  arg_1? : x
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::Abs(x)
+  true
+end
+
+schema CGeneral_Abs_3
+  ΔCGeneral
+  arg_1? : y
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::Abs(y)
+  true
+end
+
+schema CGeneral_if_4
+  ΔCGeneral
+  yabs? : xabs
+where
+  -- Declared member operation CGeneral::if(xabs < yabs)
+  true
+end
+
+schema CGeneral_Atan2_5
+  ΔCGeneral
+  y? : x
+  f? : 1_0
+  result! : Ref[else_return_0_5fPI]
+where
+  -- Declared member operation CGeneral::Atan2(-x / y, 1.0f)
+  true
+end
+
+schema CGeneral_if_6
+  ΔCGeneral
+  f? : x___0_0
+  result! : else
+where
+  -- Declared member operation CGeneral::if(x > 0.0f)
+  true
+end
+
+schema CGeneral_Atan2_7
+  ΔCGeneral
+  y? : x
+  f? : 1_0
+  result! : Ref[else_return_1_5fPI]
+where
+  -- Declared member operation CGeneral::Atan2(-x / -y, 1.0f)
+  true
+end
+
+schema CGeneral_if_8
+  ΔCGeneral
+  f? : y___0_0
+  result! : else
+where
+  -- Declared member operation CGeneral::if(y > 0.0f)
+  true
+end
+
+schema CGeneral_Atan2_9
+  ΔCGeneral
+  x? : y
+  f? : 1_0
+  result! : else_return_PI
+where
+  -- Declared member operation CGeneral::Atan2(y / -x, 1.0f)
+  true
+end
+
+schema CGeneral_if_10
+  ΔCGeneral
+  f? : x___0_0
+  result! : else
+where
+  -- Declared member operation CGeneral::if(x > 0.0f)
+  true
+end
+
+schema CGeneral_Atan2_11
+  ΔCGeneral
+  x? : y
+  f? : 1_0
+  result! : else_return_PI
+where
+  -- Declared member operation CGeneral::Atan2(-y / -x, 1.0f)
+  true
+end
+
+schema CGeneral_LimitAngle_12
+  ΔCGeneral
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::LimitAngle(float angle)
+  true
+end
+
+schema CGeneral_while_13
+  ΔCGeneral
+  arg_1? : result
+where
+  -- Declared member operation CGeneral::while(result >= 180.0f)
+  true
+end
+
+schema CGeneral_while_14
+  ΔCGeneral
+  f? : result____180_0
+  result! : ANY
+where
+  -- Declared member operation CGeneral::while(result < -180.0f)
+  true
+end
+
+schema CGeneral_LimitRadianAngle_15
+  ΔCGeneral
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::LimitRadianAngle(float angle)
+  true
+end
+
+schema CGeneral_while_16
+  ΔCGeneral
+  arg_1? : result
+where
+  -- Declared member operation CGeneral::while(result >= PI)
+  true
+end
+
+schema CGeneral_while_17
+  ΔCGeneral
+  PI? : result
+  result! : ANY
+where
+  -- Declared member operation CGeneral::while(result < -PI)
+  true
+end
+
+schema CGeneral_GetRadianAngleBetweenPoints_18
+  ΔCGeneral
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::GetRadianAngleBetweenPoints(float x1, float y1, float x2, float y2)
+  true
+end
+
+schema CGeneral_if_19
+  ΔCGeneral
+  arg_1? : y
+where
+  -- Declared member operation CGeneral::if(y == 0.0f)
+  true
+end
+
+schema CGeneral_if_20
+  ΔCGeneral
+  f? : x___0_0
+where
+  -- Declared member operation CGeneral::if(x > 0.0f)
+  true
+end
+
+schema CGeneral_Atan2_21
+  ΔCGeneral
+  y? : x
+  f? : 1_0
+  result! : else_return
+where
+  -- Declared member operation CGeneral::Atan2(x / y, 1.0f)
+  true
+end
+
+schema CGeneral_if_22
+  ΔCGeneral
+  f? : y___0_0
+  result! : else
+where
+  -- Declared member operation CGeneral::if(y > 0.0f)
+  true
+end
+
+schema CGeneral_Atan2_23
+  ΔCGeneral
+  y? : x
+  f? : 1_0
+  result! : else_return
+where
+  -- Declared member operation CGeneral::Atan2(x / y, 1.0f)
+  true
+end
+
+schema CGeneral_GetAngleBetweenPoints_24
+  ΔCGeneral
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2)
+  true
+end
+
+schema CGeneral_GetNodeHeadingFromVector_25
+  ΔCGeneral
+  x? : ℝ
+  y? : ℝ
+  result! : ℤ
+where
+  -- Declared member operation CGeneral::GetNodeHeadingFromVector(float x, float y)
+  true
+end
+
+schema CGeneral_if_26
+  ΔCGeneral
+  f? : angle___0_0
+where
+  -- Declared member operation CGeneral::if(angle < 0.0f)
+  true
+end
+
+schema CGeneral_DEGTORAD_27
+  ΔCGeneral
+  f? : 22_5
+  result! : angle
+where
+  -- Declared member operation CGeneral::DEGTORAD(22.5f)
+  true
+end
+
+schema CGeneral_if_28
+  ΔCGeneral
+  arg_1? : angle
+where
+  -- Declared member operation CGeneral::if(angle >= TWOPI)
+  true
+end
+
+schema CGeneral_return_29
+  ΔCGeneral
+  arg_1? : ℤ
+where
+  -- Declared member operation CGeneral::return(int)
+  true
+end
+
+schema CGeneral_faststrcmp_30
+  ΔCGeneral
+  str1? : seq CHAR
+  str2? : seq CHAR
+  result! : bool
+where
+  -- Declared member operation CGeneral::faststrcmp(const char *str1, const char *str2)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema General_GetATanOfXY
+  ΔGeneralModuleState
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- State update: xabs' = Abs(x)
+  -- State update: yabs' = Abs(y)
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = 0.5f*PI - Atan2(x / y, 1.0f)
+  -- Return postcondition: result! = 0.5f*PI + Atan2(-x / y, 1.0f)
+  true
+end
+
+schema General_LimitAngle
+  ΔGeneralModuleState
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = result
+  true
+end
+
+schema General_LimitRadianAngle
+  ΔGeneralModuleState
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = result
+  true
+end
+
+schema General_GetRadianAngleBetweenPoints
+  ΔGeneralModuleState
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : ℝ
+where
+  -- State update: x' = x2 - x1
+  -- State update: y' = y2 - y1
+  -- State update: y' = 0.0001f
+  -- Return postcondition: result! = PI - Atan2(x / y, 1.0f)
+  -- Return postcondition: result! = -Atan2(x / y, 1.0f)
+  -- Return postcondition: result! = -(PI + Atan2(x / y, 1.0f))
+  true
+end
+
+schema General_GetAngleBetweenPoints
+  ΔGeneralModuleState
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = RADTODEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2))
+  true
+end
+
+schema General_GetNodeHeadingFromVector
+  ΔGeneralModuleState
+  x? : ℝ
+  y? : ℝ
+  result! : ℤ
+where
+  -- State update: angle' = CGeneral::GetRadianAngleBetweenPoints(x, y, 0.0f, 0.0f)
+  -- State update: angle' = DEGTORAD(22.5f) + TWOPI - angle
+  -- Return postcondition: result! = (int)Floor(angle / DEGTORAD(45.0f))
+  -- Invokes: CGeneral::GetRadianAngleBetweenPoints
+  true
+end
+
+schema General_faststrcmp
+  ΔGeneralModuleState
+  str1? : seq CHAR
+  str2? : seq CHAR
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = *str2 != '\0'
+  true
+end
+
+schema General_faststrncmp
+  ΔGeneralModuleState
+  str1? : seq CHAR
+  str2? : seq CHAR
+  count? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema General_faststricmp
+  ΔGeneralModuleState
+  str1? : seq CHAR
+  str2? : seq CHAR
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = *str2 != '\0'
+  true
+end
+
+schema General_SolveQuadratic
+  ΔGeneralModuleState
+  a? : ℝ
+  b? : ℝ
+  c? : ℝ
+  root1? : ℝ
+  root2? : ℝ
+  result! : 𝔹
+where
+  -- State update: discriminant' = b * b - 4.f * a * c
+  -- State update: discriminantSqrt' = Sqrt(discriminant)
+  -- State update: root2' = (-b + discriminantSqrt) / (2.f * a)
+  -- State update: root1' = (-b - discriminantSqrt) / (2.f * a)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema General_GetRandomNumber
+  ΔGeneralModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = myrand() & MYRAND_MAX
+  true
+end
+
+schema General_GetRandomTrueFalse
+  ΔGeneralModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = GetRandomNumber() < MYRAND_MAX / 2
+  true
+end
+
+schema General_GetRandomNumberInRange
+  ΔGeneralModuleState
+  low? : ℝ
+  high? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1))
+  true
+end
+
+schema General_GetRandomNumberInRange_2
+  ΔGeneralModuleState
+  low? : ℤ
+  high? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1))
+  true
+end
+
+schema General_SetRandomSeed
+  ΔGeneralModuleState
+  seed? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

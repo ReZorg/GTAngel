@@ -1,0 +1,821 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Streaming (core)
+-- Source File(s): core/Streaming.cpp, core/Streaming.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Text.zpp  (from "Text.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Directory.zpp  (from "Directory.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include World.zpp  (from "World.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Record.zpp  (from "Record.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Population.zpp  (from "Population.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include main.zpp  (from "main.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Script.zpp  (from "Script.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include KeyGen.zpp  (from "KeyGen.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Game.zpp  (from "Game.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MB : seq CHAR  -- #define MB (1024*1024)
+BIGBUILDINGFLAGS : seq CHAR  -- #define BIGBUILDINGFLAGS STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY
+STREAM_DIST : ℝ  -- #define STREAM_DIST 80.0f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Streaming_Enum_1 ::= STREAM_OFFSET_TXD | STREAM_OFFSET_COL | STREAM_OFFSET_ANIM | NUMSTREAMINFO
+  -- val(STREAM_OFFSET_TXD) = MODELINFOSIZE
+  -- val(STREAM_OFFSET_COL) = STREAM_OFFSET_TXD+TXDSTORESIZE
+  -- val(STREAM_OFFSET_ANIM) = STREAM_OFFSET_COL+COLSTORESIZE
+  -- val(NUMSTREAMINFO) = STREAM_OFFSET_ANIM+NUMANIMBLOCKS
+
+StreamFlags ::= STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_SCRIPTOWNED | STREAMFLAGS_DEPENDENCY | STREAMFLAGS_PRIORITY | STREAMFLAGS_NOFADE | STREAMFLAGS_20 | STREAMFLAGS_40 | STREAMFLAGS_AMBIENT_SCRIPT_OWNED | STREAMFLAGS_CANT_REMOVE | STREAMFLAGS_KEEP_IN_MEMORY
+  -- val(STREAMFLAGS_DONT_REMOVE) = 0x01
+  -- val(STREAMFLAGS_SCRIPTOWNED) = 0x02
+  -- val(STREAMFLAGS_DEPENDENCY) = 0x04
+  -- val(STREAMFLAGS_PRIORITY) = 0x08
+  -- val(STREAMFLAGS_NOFADE) = 0x10
+  -- val(STREAMFLAGS_20) = 0x20
+  -- val(STREAMFLAGS_40) = 0x40
+  -- val(STREAMFLAGS_AMBIENT_SCRIPT_OWNED) = 0x80
+  -- val(STREAMFLAGS_CANT_REMOVE) = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED|STREAMFLAGS_AMBIENT_SCRIPT_OWNED
+  -- val(STREAMFLAGS_KEEP_IN_MEMORY) = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED|STREAMFLAGS_DEPENDENCY |STREAMFLAGS_AMBIENT_SCRIPT_OWNED
+
+StreamLoadState ::= STREAMSTATE_NOTLOADED | STREAMSTATE_LOADED | STREAMSTATE_INQUEUE | STREAMSTATE_READING | STREAMSTATE_STARTED
+  -- val(STREAMSTATE_NOTLOADED) = 0
+  -- val(STREAMSTATE_LOADED) = 1
+  -- val(STREAMSTATE_INQUEUE) = 2
+  -- val(STREAMSTATE_READING) = 3
+  -- val(STREAMSTATE_STARTED) = 4
+
+ChannelState ::= CHANNELSTATE_IDLE | CHANNELSTATE_READING | CHANNELSTATE_STARTED | CHANNELSTATE_ERROR
+  -- val(CHANNELSTATE_IDLE) = 0
+  -- val(CHANNELSTATE_READING) = 1
+  -- val(CHANNELSTATE_STARTED) = 2
+  -- val(CHANNELSTATE_ERROR) = 3
+
+Streaming_Enum_5 ::= STREAM_OFFSET_TXD | NUMSTREAMINFO
+  -- val(STREAM_OFFSET_TXD) = MODELINFOSIZE
+  -- val(NUMSTREAMINFO) = STREAM_OFFSET_TXD+TXDSTORESIZE
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStreamingInfo
+  m_next : Ref[CStreamingInfo]
+  m_prev : Ref[CStreamingInfo]
+  m_loadState : ℕ
+  m_flags : ℕ
+  m_nextID : ℤ
+  m_position : ℕ
+  m_size : ℕ
+where
+  #m_next ≤ 1
+  #m_prev ≤ 1
+  m_loadState ≥ 0
+  m_flags ≥ 0
+  m_position ≥ 0
+  m_size ≥ 0
+end
+
+schema CStreamingInfo_GetCdPosnAndSize
+  ΔCStreamingInfo
+  posn? : ℕ
+  size? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
+  true
+end
+
+schema CStreamingInfo_SetCdPosnAndSize_2
+  ΔCStreamingInfo
+  posn? : ℕ
+  size? : ℕ
+where
+  -- Declared member operation CStreamingInfo::SetCdPosnAndSize(uint32 posn, uint32 size)
+  true
+end
+
+schema CStreamingInfo_AddToList_3
+  ΔCStreamingInfo
+  link? : Ref[CStreamingInfo]
+where
+  -- Declared member operation CStreamingInfo::AddToList(CStreamingInfo *link)
+  true
+end
+
+schema CStreamingInfo_RemoveFromList_4
+  ΔCStreamingInfo
+where
+  -- Declared member operation CStreamingInfo::RemoveFromList(void)
+  true
+end
+
+schema CStreamingInfo_GetCdSize_5
+  ΔCStreamingInfo
+  result! : ℕ
+where
+  -- Declared member operation CStreamingInfo::GetCdSize(void)
+  true
+end
+
+schema CStreamingInfo_IsPriority_6
+  ΔCStreamingInfo
+  result! : bool
+where
+  -- Declared member operation CStreamingInfo::IsPriority(void)
+  true
+end
+
+schema CStreamingChannel
+  streamIds : seq ℤ  -- bounded array [4]
+  offsets : seq ℤ  -- bounded array [4]
+  state : ℤ
+  field24 : ℤ
+  position : ℤ
+  size : ℤ
+  numTries : ℤ
+  status : ℤ
+where
+  #streamIds = 4
+  #offsets = 4
+end
+
+schema CStreaming
+  ms_disableStreaming : 𝔹
+  ms_bLoadingBigModel : 𝔹
+  ms_numModelsRequested : ℤ
+  ms_aInfoForModel : seq CStreamingInfo  -- bounded array [NUMSTREAMINFO]
+  ms_startLoadedList : CStreamingInfo
+  ms_endLoadedList : CStreamingInfo
+  ms_startRequestedList : CStreamingInfo
+  ms_endRequestedList : CStreamingInfo
+  ms_oldSectorX : ℤ
+  ms_oldSectorY : ℤ
+  ms_streamingBufferSize : ℤ
+  ms_channel : seq CStreamingChannel  -- bounded array [2]
+  ms_channelError : ℤ
+  ms_numVehiclesLoaded : ℤ
+  ms_numPedsLoaded : ℤ
+  ms_vehiclesLoaded : seq ℤ  -- bounded array [MAXVEHICLESLOADED]
+  ms_lastVehicleDeleted : ℤ
+  ms_bIsPedFromPedGroupLoaded : seq 𝔹  -- bounded array [NUMMODELSPERPEDGROUP]
+  ms_pExtraObjectsDir : Ref[CDirectory]
+  ms_numPriorityRequests : ℤ
+  ms_currentPedGrp : ℤ
+  ms_lastCullZone : ℤ
+  ms_loadedGangs : ℕ
+  ms_loadedGangCars : ℕ
+  ms_currentPedLoading : ℤ
+  ms_imageOffsets : seq ℤ  -- bounded array [NUMCDIMAGES]
+  ms_lastImageRead : ℤ
+  ms_imageSize : ℤ
+  ms_memoryAvailable : ℕ
+  ms_hasLoadedLODs : 𝔹
+where
+  #ms_channel = 2
+  #ms_pExtraObjectsDir ≤ 1
+  ms_loadedGangs ≥ 0
+  ms_loadedGangCars ≥ 0
+  ms_memoryAvailable ≥ 0
+end
+
+schema CStreaming_Init
+  ΔCStreaming
+where
+  -- Declared member operation CStreaming::Init(void)
+  true
+end
+
+schema CStreaming_Init2_2
+  ΔCStreaming
+where
+  -- Declared member operation CStreaming::Init2(void)
+  true
+end
+
+schema CStreaming_ReInit_3
+  ΔCStreaming
+where
+  -- Declared member operation CStreaming::ReInit(void)
+  true
+end
+
+schema CStreaming_Shutdown_4
+  ΔCStreaming
+where
+  -- Declared member operation CStreaming::Shutdown(void)
+  true
+end
+
+schema CStreaming_Update_5
+  ΔCStreaming
+where
+  -- Declared member operation CStreaming::Update(void)
+  true
+end
+
+schema CStreaming_LoadCdDirectory_6
+  ΔCStreaming
+where
+  -- Declared member operation CStreaming::LoadCdDirectory(void)
+  true
+end
+
+schema CStreaming_LoadCdDirectory_7
+  ΔCStreaming
+  dirname? : seq CHAR
+  n? : ℤ
+where
+  -- Declared member operation CStreaming::LoadCdDirectory(const char *dirname, int32 n)
+  true
+end
+
+schema CStreaming_ConvertBufferToObject_8
+  ΔCStreaming
+  buf? : ℙ ℤ
+  streamId? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
+  true
+end
+
+schema CStreaming_FinishLoadingLargeFile_9
+  ΔCStreaming
+  buf? : ℙ ℤ
+  streamId? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
+  true
+end
+
+schema CStreaming_HasModelLoaded_10
+  ΔCStreaming
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CStreaming::HasModelLoaded(int32 id)
+  true
+end
+
+schema CStreaming_HasTxdLoaded_11
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::HasTxdLoaded(int32 id)
+  true
+end
+
+schema CStreaming_HasColLoaded_12
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::HasColLoaded(int32 id)
+  true
+end
+
+schema CStreaming_HasAnimLoaded_13
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::HasAnimLoaded(int32 id)
+  true
+end
+
+schema CStreaming_CanRemoveModel_14
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::CanRemoveModel(int32 id)
+  true
+end
+
+schema CStreaming_IsScriptOwnedModel_15
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::IsScriptOwnedModel(int32 id)
+  true
+end
+
+schema CStreaming_CanRemoveTxd_16
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::CanRemoveTxd(int32 id)
+  true
+end
+
+schema CStreaming_CanRemoveCol_17
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::CanRemoveCol(int32 id)
+  true
+end
+
+schema CStreaming_CanRemoveAnim_18
+  ΔCStreaming
+  id? : ℤ
+  result! : bool
+where
+  -- Declared member operation CStreaming::CanRemoveAnim(int32 id)
+  true
+end
+
+schema CStreaming_RequestModel_19
+  ΔCStreaming
+  model? : ℤ
+  flags? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::RequestModel(int32 model, int32 flags)
+  true
+end
+
+schema CStreaming_ReRequestModel_20
+  ΔCStreaming
+  model? : ℤ
+where
+  -- Declared member operation CStreaming::ReRequestModel(int32 model)
+  true
+end
+
+schema CStreaming_RequestTxd_21
+  ΔCStreaming
+  txd? : ℤ
+  flags? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::RequestTxd(int32 txd, int32 flags)
+  true
+end
+
+schema CStreaming_ReRequestTxd_22
+  ΔCStreaming
+  txd? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::ReRequestTxd(int32 txd)
+  true
+end
+
+schema CStreaming_RequestCol_23
+  ΔCStreaming
+  col? : ℤ
+  flags? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::RequestCol(int32 col, int32 flags)
+  true
+end
+
+schema CStreaming_ReRequestCol_24
+  ΔCStreaming
+  col? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::ReRequestCol(int32 col)
+  true
+end
+
+schema CStreaming_RequestAnim_25
+  ΔCStreaming
+  col? : ℤ
+  flags? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::RequestAnim(int32 col, int32 flags)
+  true
+end
+
+schema CStreaming_ReRequestAnim_26
+  ΔCStreaming
+  col? : ℤ
+  result! : void
+where
+  -- Declared member operation CStreaming::ReRequestAnim(int32 col)
+  true
+end
+
+schema CStreaming_RequestBigBuildings_27
+  ΔCStreaming
+  level? : eLevelName
+  result! : void
+where
+  -- Declared member operation CStreaming::RequestBigBuildings(eLevelName level)
+  true
+end
+
+schema CStreaming_RequestBigBuildings_28
+  ΔCStreaming
+  level? : eLevelName
+  pos? : CVector
+where
+  -- Declared member operation CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
+  true
+end
+
+schema CStreaming_InstanceBigBuildings_29
+  ΔCStreaming
+  level? : eLevelName
+  pos? : CVector
+where
+  -- Declared member operation CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
+  true
+end
+
+schema CStreaming_InstanceLoadedModelsInSectorList_30
+  ΔCStreaming
+  list? : CPtrList
+where
+  -- Declared member operation CStreaming::InstanceLoadedModelsInSectorList(CPtrList &list)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CStreamingInfo_GetCdPosnAndSize
+  ΔCStreamingInfo
+  posn? : ℕ
+  size? : ℕ
+where
+  -- State update: posn' = m_position
+  -- State update: size' = m_size
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CStreamingInfo_SetCdPosnAndSize
+  ΔCStreamingInfo
+  posn? : ℕ
+  size? : ℕ
+where
+  -- State update: m_position' = posn
+  -- State update: m_size' = size
+  true
+end
+
+schema CStreamingInfo_AddToList
+  ΔCStreamingInfo
+  link? : Ref[CStreamingInfo]
+where
+  -- State update: m_next' = link.m_next
+  -- State update: m_prev' = link
+  -- State update: link.m_next' = this
+  -- State update: m_next.m_prev' = this
+  true
+end
+
+schema CStreamingInfo_RemoveFromList
+  ΔCStreamingInfo
+where
+  -- State update: m_next.m_prev' = m_prev
+  -- State update: m_prev.m_next' = m_next
+  -- State update: m_next' = ∅
+  -- State update: m_prev' = ∅
+  true
+end
+
+schema CStreaming_Init2
+  ΔCStreaming
+where
+  -- State update: m_loadState' = STREAMSTATE_NOTLOADED
+  -- State update: m_next' = ∅
+  -- State update: m_prev' = ∅
+  -- State update: m_nextID' = -1
+  -- State update: m_size' = 0
+  -- State update: m_position' = 0
+  -- Invokes: CModelInfo::GetModelInfo, mi->GetRwObject, mi->IsSimple, CTxdStore::GetSlot, CPools::GetBuildingPool
+  true
+end
+
+schema CStreaming_Init
+  ΔCStreaming
+where
+  -- State update: txdHandle' = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile, CStreaming::Init2, CStreaming::Shutdown
+  true
+end
+
+schema CStreaming_ReInit
+  ΔCStreaming
+where
+  -- State update: ms_disableStreaming' = false
+  -- Invokes: CStreaming::FlushRequestList, CStreaming::DeleteAllRwObjects, CStreaming::RemoveAllUnusedModels, CModelInfo::GetModelInfo
+  true
+end
+
+schema CStreaming_Shutdown
+  ΔCStreaming
+where
+  -- State update: ms_streamingBufferSize' = 0
+  -- State update: ms_pExtraObjectsDir' = ∅
+  true
+end
+
+schema CStreaming_Update
+  ΔCStreaming
+where
+  -- State update: requestedSubway' = false
+  -- State update: timeProcessingTXD' = 0
+  -- State update: timeProcessingDFF' = 0
+  -- State update: si' = ms_endRequestedList.m_prev
+  -- State update: prev' = si.m_prev
+  -- Invokes: CTimer::GetIsPaused, TheCamera.GetPosition, CCutsceneMgr::IsCutsceneProcessing, CReplay::IsPlayingBack, CColStore::AddCollisionNeededAtPosn
+  true
+end
+
+schema CStreaming_LoadCdDirectory
+  ΔCStreaming
+where
+  -- State update: ms_imageSize' = GetGTA3ImgSize()
+  -- State update: ms_lastImageRead' = 0
+  true
+end
+
+schema CStreaming_LoadCdDirectory_2
+  ΔCStreaming
+  dirname? : seq CHAR
+  n? : ℤ
+where
+  -- State update: lastID' = -1
+  -- State update: fd' = CFileMgr::OpenFile(dirname, "rb")
+  -- State update: imgSelector' = n<<24
+  -- State update: bAddToStreaming' = false
+  -- State update: ms_streamingBufferSize' = direntry.size
+  -- State update: dot' = strchr(direntry.name, '.')
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CModelInfo::GetModelInfo, ms_pExtraObjectsDir->AddItem, CTxdStore::FindTxdSlot
+  true
+end
+
+schema Streaming_GetObjectName
+  ΔStreamingModuleState
+  streamId? : ℤ
+where
+  -- Return postcondition: result! = objname
+  -- Invokes: CModelInfo::GetModelInfo, CTxdStore::GetTxdName, CColStore::GetColName, CAnimManager::GetAnimationBlock
+  true
+end
+
+schema Streaming_RegisterAtomicMemPtrsCB
+  ΔStreamingModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema CStreaming_ConvertBufferToObject
+  ΔCStreaming
+  buf? : ℙ ℤ
+  streamId? : ℤ
+where
+  -- State update: cdsize' = ms_aInfoForModel[streamId].GetCdSize()
+  -- State update: mem.start' = (uint8*)buf
+  -- State update: mem.length' = cdsize * CDSTREAM_SECTOR_SIZE
+  -- State update: stream' = RwStreamOpen(rwSTREAMMEMORY, rwSTREAMREAD, &mem)
+  -- State update: mi' = CModelInfo::GetModelInfo(streamId)
+  -- State update: success' = CFileLoader::LoadAtomicFile(stream, streamId)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerMillisecond, CModelInfo::GetModelInfo, mi->GetTxdSlot, CTxdStore::GetSlot
+  true
+end
+
+schema Streaming_GetCdSize
+  ΔStreamingModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_size
+  true
+end
+
+schema Streaming_IsPriority
+  ΔStreamingModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(m_flags & STREAMFLAGS_PRIORITY)
+  true
+end
+
+schema Streaming_HasModelLoaded
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED
+  true
+end
+
+schema Streaming_HasTxdLoaded
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = HasModelLoaded(id+STREAM_OFFSET_TXD)
+  true
+end
+
+schema Streaming_HasColLoaded
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = HasModelLoaded(id+STREAM_OFFSET_COL)
+  true
+end
+
+schema Streaming_HasAnimLoaded
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = HasModelLoaded(id+STREAM_OFFSET_ANIM)
+  true
+end
+
+schema Streaming_CanRemoveModel
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (ms_aInfoForModel[id].m_flags & STREAMFLAGS_CANT_REMOVE) == 0
+  true
+end
+
+schema Streaming_IsScriptOwnedModel
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED)
+  true
+end
+
+schema Streaming_CanRemoveTxd
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = CanRemoveModel(id+STREAM_OFFSET_TXD)
+  true
+end
+
+schema Streaming_CanRemoveCol
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = CanRemoveModel(id+STREAM_OFFSET_COL)
+  true
+end
+
+schema Streaming_CanRemoveAnim
+  ΔStreamingModuleState
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = CanRemoveModel(id+STREAM_OFFSET_ANIM)
+  true
+end
+
+schema Streaming_ReRequestModel
+  ΔStreamingModuleState
+  model? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_RequestTxd
+  ΔStreamingModuleState
+  txd? : ℤ
+  flags? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_ReRequestTxd
+  ΔStreamingModuleState
+  txd? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_RequestCol
+  ΔStreamingModuleState
+  col? : ℤ
+  flags? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_ReRequestCol
+  ΔStreamingModuleState
+  col? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_RequestAnim
+  ΔStreamingModuleState
+  col? : ℤ
+  flags? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_ReRequestAnim
+  ΔStreamingModuleState
+  col? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_RemoveTxd
+  ΔStreamingModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_RemoveCol
+  ΔStreamingModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Streaming_RemoveAnim
+  ΔStreamingModuleState
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

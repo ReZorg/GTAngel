@@ -1,0 +1,1682 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: World (core)
+-- Source File(s): core/World.cpp, core/World.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include EventList.zpp  (from "EventList.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Population.zpp  (from "Population.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Record.zpp  (from "Record.h")
+-- include References.zpp  (from "References.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include Game.zpp  (from "Game.h")
+-- include Lists.zpp  (from "Lists.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include Collision.zpp  (from "Collision.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+OBJECT_REPOSITION_OFFSET_Z : ℝ  -- #define OBJECT_REPOSITION_OFFSET_Z 2.0f
+LOSARGS : seq CHAR  -- #define LOSARGS 
+SECTOR_SIZE_X : ℝ  -- #define SECTOR_SIZE_X (40.0f)
+SECTOR_SIZE_Y : ℝ  -- #define SECTOR_SIZE_Y (40.0f)
+NUMSECTORS_X : seq CHAR  -- #define NUMSECTORS_X (100)
+NUMSECTORS_Y : seq CHAR  -- #define NUMSECTORS_Y (100)
+WORLD_SIZE_X : seq CHAR  -- #define WORLD_SIZE_X (NUMSECTORS_X * SECTOR_SIZE_X)
+WORLD_SIZE_Y : seq CHAR  -- #define WORLD_SIZE_Y (NUMSECTORS_Y * SECTOR_SIZE_Y)
+WORLD_MIN_X : ℝ  -- #define WORLD_MIN_X (-2000.0f)
+WORLD_MIN_Y : ℝ  -- #define WORLD_MIN_Y (-2000.0f)
+WORLD_MAX_X : seq CHAR  -- #define WORLD_MAX_X (WORLD_MIN_X + WORLD_SIZE_X)
+WORLD_MAX_Y : seq CHAR  -- #define WORLD_MAX_Y (WORLD_MIN_Y + WORLD_SIZE_Y)
+MAP_Z_LOW_LIMIT : ℝ  -- #define MAP_Z_LOW_LIMIT -100.0f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+World_Enum_1 ::= ENTITYLIST_BUILDINGS | ENTITYLIST_BUILDINGS_OVERLAP | ENTITYLIST_MULTIPLAYER | ENTITYLIST_OBJECTS | ENTITYLIST_OBJECTS_OVERLAP | ENTITYLIST_VEHICLES | ENTITYLIST_VEHICLES_OVERLAP | ENTITYLIST_PEDS | ENTITYLIST_PEDS_OVERLAP | ENTITYLIST_DUMMIES | ENTITYLIST_DUMMIES_OVERLAP | NUMSECTORENTITYLISTS
+
+World_Enum_2 ::= ENTITYLIST_BUILDINGS | ENTITYLIST_BUILDINGS_OVERLAP | ENTITYLIST_OBJECTS | ENTITYLIST_OBJECTS_OVERLAP | ENTITYLIST_VEHICLES | ENTITYLIST_VEHICLES_OVERLAP | ENTITYLIST_PEDS | ENTITYLIST_PEDS_OVERLAP | ENTITYLIST_DUMMIES | ENTITYLIST_DUMMIES_OVERLAP | NUMSECTORENTITYLISTS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSector
+  m_lists : seq CPtrList  -- bounded array [NUMSECTORENTITYLISTS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWorld
+  ms_bigBuildingsList : seq CPtrList  -- bounded array [NUM_LEVELS]
+  ms_listMovingEntityPtrs : CPtrList
+  ms_nCurrentScanCode : ℕ
+  PlayerInFocus : ℕ
+  Players : seq CPlayerInfo  -- bounded array [NUMPLAYERS]
+  pIgnoreEntity : Ref[CEntity]
+  bIncludeDeadPeds : 𝔹
+  bNoMoreCollisionTorque : 𝔹
+  bSecondShift : 𝔹
+  bForceProcessControl : 𝔹
+  bProcessCutsceneOnly : 𝔹
+  bDoingCarCollisions : 𝔹
+  bIncludeCarTyres : 𝔹
+  bIncludeBikers : 𝔹
+  m_aTempColPts : seq ℤ  -- bounded array [MAX_COLLISION_POINTS]
+where
+  ms_nCurrentScanCode ≥ 0
+  PlayerInFocus ≥ 0
+  #pIgnoreEntity ≤ 1
+end
+
+schema CWorld_Remove
+  ΔCWorld
+  entity? : Ref[CEntity]
+where
+  -- Declared member operation CWorld::Remove(CEntity *entity)
+  true
+end
+
+schema CWorld_Add_2
+  ΔCWorld
+  entity? : Ref[CEntity]
+where
+  -- Declared member operation CWorld::Add(CEntity *entity)
+  true
+end
+
+schema CWorld_GetSector_3
+  ΔCWorld
+  x? : ℤ
+  y? : ℤ
+  result! : Ref[CSector]
+where
+  -- Declared member operation CWorld::GetSector(int x, int y)
+  true
+end
+
+schema CWorld_GetBigBuildingList_4
+  ΔCWorld
+  i? : eLevelName
+  result! : CPtrList
+where
+  -- Declared member operation CWorld::GetBigBuildingList(eLevelName i)
+  true
+end
+
+schema CWorld_GetMovingEntityList_5
+  ΔCWorld
+  result! : CPtrList
+where
+  -- Declared member operation CWorld::GetMovingEntityList(void)
+  true
+end
+
+schema CWorld_GetCurrentScanCode_6
+  ΔCWorld
+  result! : ℕ
+where
+  -- Declared member operation CWorld::GetCurrentScanCode(void)
+  true
+end
+
+schema CWorld_AdvanceCurrentScanCode_7
+  ΔCWorld
+  result! : void
+where
+  -- Declared member operation CWorld::AdvanceCurrentScanCode(void)
+  true
+end
+
+schema CWorld_ClearScanCodes_8
+  ΔCWorld
+  result! : void
+where
+  -- Declared member operation CWorld::ClearScanCodes(void)
+  true
+end
+
+schema CWorld_ClearExcitingStuffFromArea_9
+  ΔCWorld
+  pos? : CVector
+  radius? : ℝ
+  bRemoveProjectilesAndTidyUpShadows? : 𝔹
+where
+  -- Declared member operation CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, bool bRemoveProjectilesAndTidyUpShadows)
+  true
+end
+
+schema CWorld_CameraToIgnoreThisObject_10
+  ΔCWorld
+  ent? : Ref[CEntity]
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::CameraToIgnoreThisObject(CEntity *ent)
+  true
+end
+
+schema CWorld_ProcessLineOfSight_11
+  ΔCWorld
+  point1? : CVector
+  point2? : CVector
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  ignoreShootThrough? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoint &point, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false, bool ignoreShootThrough = false)
+  true
+end
+
+schema CWorld_ProcessLineOfSightSector_12
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  ignoreShootThrough? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
+  true
+end
+
+schema CWorld_ProcessLineOfSightSectorList_13
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  ignoreShootThrough? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
+  true
+end
+
+schema CWorld_ProcessVerticalLine_14
+  ΔCWorld
+  point1? : CVector
+  z2? : ℝ
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::ProcessVerticalLine(const CVector &point1, float z2, CColPoint &point, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, CStoredCollPoly *poly)
+  true
+end
+
+schema CWorld_ProcessVerticalLineSector_15
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::ProcessVerticalLineSector(CSector &sector, const CColLine &line, CColPoint &point, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, CStoredCollPoly *poly)
+  true
+end
+
+schema CWorld_ProcessVerticalLineSectorList_16
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity, bool ignoreSeeThrough, CStoredCollPoly *poly)
+  true
+end
+
+schema CWorld_GetIsLineOfSightClear_17
+  ΔCWorld
+  point1? : CVector
+  point2? : CVector
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::GetIsLineOfSightClear(const CVector &point1, const CVector &point2, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false)
+  true
+end
+
+schema CWorld_GetIsLineOfSightSectorClear_18
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::GetIsLineOfSightSectorClear(CSector &sector, const CColLine &line, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false)
+  true
+end
+
+schema CWorld_GetIsLineOfSightSectorListClear_19
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bool ignoreSeeThrough, bool ignoreSomeObjects = false)
+  true
+end
+
+schema CWorld_TestSphereAgainstWorld_20
+  ΔCWorld
+  centre? : CVector
+  radius? : ℝ
+  entityToIgnore? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  result! : Ref[CEntity]
+where
+  -- Declared member operation CWorld::TestSphereAgainstWorld(CVector centre, float radius, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects)
+  true
+end
+
+schema CWorld_TestSphereAgainstSectorList_21
+  ΔCWorld
+  arg_1? : CPtrList
+  arg_2? : CVector
+  arg_3? : ℝ
+  arg_4? : Ref[CEntity]
+  arg_5? : 𝔹
+  result! : Ref[CEntity]
+where
+  -- Declared member operation CWorld::TestSphereAgainstSectorList(CPtrList&, CVector, float, CEntity*, bool)
+  true
+end
+
+schema CWorld_FindObjectsInRangeSectorList_22
+  ΔCWorld
+  list? : CPtrList
+  centre? : Const_CVector
+  radius? : ℝ
+  ignoreZ? : 𝔹
+  numObjects? : ℙ ℤ
+  lastObject? : ℤ
+  objects? : Ref[CEntity]
+where
+  -- Declared member operation CWorld::FindObjectsInRangeSectorList(CPtrList &list, Const CVector &centre, float radius, bool ignoreZ, int16 *numObjects, int16 lastObject, CEntity **objects)
+  true
+end
+
+schema CWorld_FindObjectsInRange_23
+  ΔCWorld
+  centre? : Const_CVector
+  radius? : ℝ
+  ignoreZ? : 𝔹
+  numObjects? : ℙ ℤ
+  lastObject? : ℤ
+  objects? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+where
+  -- Declared member operation CWorld::FindObjectsInRange(Const CVector &centre, float radius, bool ignoreZ, int16 *numObjects, int16 lastObject, CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies)
+  true
+end
+
+schema CWorld_FindObjectsOfTypeInRangeSectorList_24
+  ΔCWorld
+  modelId? : ℕ
+  list? : CPtrList
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+where
+  -- Declared member operation CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& list, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities)
+  true
+end
+
+schema CWorld_FindObjectsOfTypeInRange_25
+  ΔCWorld
+  modelId? : ℕ
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- Declared member operation CWorld::FindObjectsOfTypeInRange(uint32 modelId, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies)
+  true
+end
+
+schema CWorld_FindGroundZForCoord_26
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CWorld::FindGroundZForCoord(float x, float y)
+  true
+end
+
+schema CWorld_FindGroundZFor3DCoord_27
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  found? : ℙ 𝔹
+  result! : ℝ
+where
+  -- Declared member operation CWorld::FindGroundZFor3DCoord(float x, float y, float z, bool *found)
+  true
+end
+
+schema CWorld_FindRoofZFor3DCoord_28
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  found? : ℙ 𝔹
+  result! : ℝ
+where
+  -- Declared member operation CWorld::FindRoofZFor3DCoord(float x, float y, float z, bool *found)
+  true
+end
+
+schema CWorld_RemoveReferencesToDeletedObject_29
+  ΔCWorld
+  arg_1? : Ref[CEntity]
+where
+  -- Declared member operation CWorld::RemoveReferencesToDeletedObject(CEntity*)
+  true
+end
+
+schema CWorld_FindObjectsKindaColliding_30
+  ΔCWorld
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nCollidingEntities? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- Declared member operation CWorld::FindObjectsKindaColliding(const CVector& position, float radius, bool bCheck2DOnly, int16* nCollidingEntities, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWorld_Initialise
+  ΔCWorld
+where
+  -- State update: pIgnoreEntity' = ∅
+  -- State update: bDoingCarCollisions' = false
+  -- State update: bSecondShift' = false
+  -- State update: bNoMoreCollisionTorque' = false
+  -- State update: bProcessCutsceneOnly' = false
+  -- State update: bIncludeDeadPeds' = false
+  -- Invokes: CPools::Initialise
+  true
+end
+
+schema CWorld_Add
+  ΔCWorld
+  ent? : Ref[CEntity]
+where
+  -- Invokes: ent->IsVehicle, ent->IsPed, DMAudio.SetEntityStatus, ent->Add, ent->IsBuilding
+  true
+end
+
+schema CWorld_Remove
+  ΔCWorld
+  ent? : Ref[CEntity]
+where
+  -- Invokes: ent->IsVehicle, ent->IsPed, DMAudio.SetEntityStatus, ent->Remove, ent->IsBuilding
+  true
+end
+
+schema CWorld_ClearScanCodes
+  ΔCWorld
+where
+  -- State update: s' = &ms_aSectors[i][j]
+  -- State update: node' = s.m_lists[ENTITYLIST_BUILDINGS].first
+  -- State update: m_scanCode' = 0
+  -- State update: node' = s.m_lists[ENTITYLIST_VEHICLES].first
+  -- State update: m_scanCode' = 0
+  -- State update: node' = s.m_lists[ENTITYLIST_PEDS].first
+  true
+end
+
+schema CWorld_ClearExcitingStuffFromArea
+  ΔCWorld
+  pos? : CVector
+  radius? : ℝ
+  bRemoveProjectilesAndTidyUpShadows? : 𝔹
+where
+  -- State update: pedPool' = CPools::GetPedPool()
+  -- State update: pPed' = pedPool.GetSlot(i)
+  -- State update: VehiclePool' = CPools::GetVehiclePool()
+  -- State update: pVehicle' = VehiclePool.GetSlot(i)
+  -- State update: pVehicle.pDriver' = ∅
+  -- Invokes: CPools::GetPedPool, pedPool->GetSize, pedPool->GetSlot, pPed->IsPlayer, pPed->CanBeDeleted
+  true
+end
+
+schema CWorld_CameraToIgnoreThisObject
+  ΔCWorld
+  ent? : Ref[CEntity]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = ((CObject *)ent)->m_bCameraToAvoidThisObject != 1
+  -- Invokes: CGarages::IsModelIndexADoor, ent->GetModelIndex
+  true
+end
+
+schema CWorld_ProcessLineOfSight
+  ΔCWorld
+  point1? : CVector
+  point2? : CVector
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  ignoreShootThrough? : 𝔹
+where
+  -- State update: entity' = ∅
+  -- State update: dist' = 1.0f
+  -- State update: xstart' = GetSectorIndexX(point1.x)
+  -- State update: ystart' = GetSectorIndexY(point1.y)
+  -- State update: xend' = GetSectorIndexX(point2.x)
+  -- State update: yend' = GetSectorIndexY(point2.y)
+  -- Return postcondition: result! = ProcessLineOfSightSector(*GetSector(xstart, ystart), LOSARGS)
+  -- Return postcondition: result! = dist < 1.0f
+  -- Return postcondition: result! = dist < 1.0f
+  true
+end
+
+schema CWorld_ProcessLineOfSightSector
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  ignoreShootThrough? : 𝔹
+where
+  -- State update: mindist' = dist
+  -- State update: deadPeds' = !!bIncludeDeadPeds
+  -- State update: bikers' = !!bIncludeBikers
+  -- State update: bIncludeDeadPeds' = false
+  -- State update: bIncludeBikers' = false
+  -- State update: bIncludeDeadPeds' = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CWorld_ProcessLineOfSightSectorList
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+  ignoreShootThrough? : 𝔹
+where
+  -- State update: deadPeds' = false
+  -- State update: bikers' = false
+  -- State update: carTyres' = false
+  -- State update: mindist' = dist
+  -- State update: carTyres' = true
+  -- State update: tyreCol.numTriangles' = 0
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: e->IsPed, m_pMyVehicle->IsBike, m_pMyVehicle->IsBoat, CModelInfo::GetModelInfo, e->GetModelIndex
+  true
+end
+
+schema CWorld_ProcessVerticalLine
+  ΔCWorld
+  point1? : CVector
+  z2? : ℝ
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: secX' = GetSectorIndexX(point1.x)
+  -- State update: secY' = GetSectorIndexY(point1.y)
+  -- State update: secX' = Clamp(secX, 0, NUMSECTORS_X-1)
+  -- State update: secY' = Clamp(secY, 0, NUMSECTORS_Y-1)
+  true
+end
+
+schema CWorld_ProcessVerticalLineSector
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: mindist' = 1.0f
+  -- Return postcondition: result! = mindist < 1.0f
+  true
+end
+
+schema CWorld_ProcessVerticalLineSectorList
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  ignoreSeeThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+where
+  -- State update: mindist' = dist
+  -- State update: node' = list.first
+  -- State update: e' = (CEntity *)node.item
+  -- State update: e.m_scanCode' = GetCurrentScanCode()
+  -- State update: colmodel' = CModelInfo::GetColModel(e.GetModelIndex())
+  -- State update: entity' = e
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CModelInfo::GetColModel, e->GetModelIndex, CCollision::ProcessVerticalLine, e->GetMatrix
+  true
+end
+
+schema CWorld_GetIsLineOfSightClear
+  ΔCWorld
+  point1? : CVector
+  point2? : CVector
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: xstart' = GetSectorIndexX(point1.x)
+  -- State update: ystart' = GetSectorIndexY(point1.y)
+  -- State update: xend' = GetSectorIndexX(point2.x)
+  -- State update: yend' = GetSectorIndexY(point2.y)
+  -- State update: y' = ystart
+  -- State update: y' = ystart
+  -- Return postcondition: result! = GetIsLineOfSightSectorClear(*GetSector(xstart, ystart), LOSARGS)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CWorld_GetIsLineOfSightSectorClear
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CWorld_GetIsLineOfSightSectorListClear
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: node' = list.first
+  -- State update: e' = (CEntity *)node.item
+  -- State update: e.m_scanCode' = GetCurrentScanCode()
+  -- State update: colmodel' = CModelInfo::GetColModel(e.GetModelIndex())
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CModelInfo::GetColModel, e->GetModelIndex, CCollision::TestLineOfSight, e->GetMatrix
+  true
+end
+
+schema CWorld_FindObjectsInRangeSectorList
+  ΔCWorld
+  list? : CPtrList
+  centre? : Const_CVector
+  radius? : ℝ
+  ignoreZ? : 𝔹
+  numObjects? : ℙ ℤ
+  lastObject? : ℤ
+  objects? : Ref[CEntity]
+where
+  -- State update: radiusSqr' = radius * radius
+  -- State update: node' = list.first
+  -- State update: object' = (CEntity *)node.item
+  -- State update: object.m_scanCode' = GetCurrentScanCode()
+  -- State update: diff' = centre - object.GetPosition()
+  -- State update: objDistSqr' = diff.MagnitudeSqr2D()
+  -- Invokes: object->GetPosition, diff.MagnitudeSqr2D, diff.MagnitudeSqr
+  true
+end
+
+schema CWorld_FindObjectsInRange
+  ΔCWorld
+  centre? : Const_CVector
+  radius? : ℝ
+  ignoreZ? : 𝔹
+  numObjects? : ℙ ℤ
+  lastObject? : ℤ
+  objects? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+where
+  -- State update: minX' = GetSectorIndexX(centre.x - radius)
+  -- State update: minX' = 0
+  -- State update: minY' = GetSectorIndexY(centre.y - radius)
+  -- State update: minY' = 0
+  -- State update: maxX' = GetSectorIndexX(centre.x + radius)
+  -- State update: maxX' = NUMSECTORS_X - 1
+  true
+end
+
+schema CWorld_FindObjectsOfTypeInRangeSectorList
+  ΔCWorld
+  modelId? : ℕ
+  list? : CPtrList
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pEntity.m_scanCode' = GetCurrentScanCode()
+  -- State update: fMagnitude' = 0.0f
+  -- State update: fMagnitude' = (position - pEntity.GetPosition()).MagnitudeSqr2D()
+  -- State update: fMagnitude' = (position - pEntity.GetPosition()).MagnitudeSqr()
+  -- Invokes: pEntity->GetModelIndex, pEntity->GetPosition
+  true
+end
+
+schema CWorld_FindObjectsOfTypeInRange
+  ΔCWorld
+  modelId? : ℕ
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- State update: nEntitiesFound' = 0
+  -- State update: nStartX' = Max(GetSectorIndexX(vecSectorStartPos.x), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(vecSectorStartPos.y), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X)
+  true
+end
+
+schema CWorld_TestSphereAgainstWorld
+  ΔCWorld
+  centre? : CVector
+  radius? : ℝ
+  entityToIgnore? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: foundE' = ∅
+  -- State update: minX' = GetSectorIndexX(centre.x - radius)
+  -- State update: minX' = 0
+  -- State update: minY' = GetSectorIndexY(centre.y - radius)
+  -- State update: minY' = 0
+  -- State update: maxX' = GetSectorIndexX(centre.x + radius)
+  -- Return postcondition: result! = foundE
+  -- Return postcondition: result! = foundE
+  -- Return postcondition: result! = foundE
+  true
+end
+
+schema CWorld_TestSphereAgainstSectorList
+  ΔCWorld
+  list? : CPtrList
+  spherePos? : CVector
+  radius? : ℝ
+  entityToIgnore? : Ref[CEntity]
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: OurColModel.boundingSphere.center.x' = 0.0f
+  -- State update: OurColModel.boundingSphere.center.y' = 0.0f
+  -- State update: OurColModel.boundingSphere.center.z' = 0.0f
+  -- State update: OurColModel.boundingSphere.radius' = radius
+  -- State update: OurColModel.boundingBox.min.x' = -radius
+  -- State update: OurColModel.boundingBox.min.y' = -radius
+  -- Return postcondition: result! = e
+  -- Return postcondition: result! = nil
+  -- Invokes: sphereMat.SetTranslate, e->GetBoundCentre, e->GetPosition, diff.Magnitude, e->GetBoundRadius
+  true
+end
+
+schema CWorld_FindGroundZForCoord
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+where
+  -- Return postcondition: result! = point.point.z
+  -- Return postcondition: result! = 20.0f
+  true
+end
+
+schema CWorld_FindGroundZFor3DCoord
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  found? : ℙ 𝔹
+where
+  -- State update: found' = true
+  -- State update: found' = false
+  -- Return postcondition: result! = point.point.z
+  -- Return postcondition: result! = 0.0f
+  true
+end
+
+schema CWorld_FindRoofZFor3DCoord
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  found? : ℙ 𝔹
+where
+  -- State update: found' = true
+  -- State update: found' = false
+  -- Return postcondition: result! = point.point.z
+  -- Return postcondition: result! = 20.0f
+  true
+end
+
+schema CWorld_RemoveReferencesToDeletedObject
+  ΔCWorld
+  pDeletedObject? : Ref[CEntity]
+where
+  -- State update: pPed' = CPools::GetPedPool().GetSlot(i)
+  -- State update: pPed.m_pCurrentPhysSurface' = ∅
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: pObject' = CPools::GetObjectPool().GetSlot(i)
+  -- Invokes: CPools::GetPedPool, pPed->RemoveRefsToEntity, CPools::GetVehiclePool, pVehicle->RemoveRefsToEntity, pVehicle->RemoveRefsToVehicle
+  true
+end
+
+schema CWorld_FindObjectsKindaColliding
+  ΔCWorld
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nCollidingEntities? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- State update: nCollidingEntities' = 0
+  -- State update: nStartX' = Max(GetSectorIndexX(vecSectorStartPos.x), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(vecSectorStartPos.y), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X)
+  true
+end
+
+schema CWorld_FindObjectsKindaCollidingSectorList
+  ΔCWorld
+  list? : CPtrList
+  position? : CVector
+  radius? : ℝ
+  bCheck2DOnly? : 𝔹
+  nCollidingEntities? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pEntity.m_scanCode' = GetCurrentScanCode()
+  -- State update: fMagnitude' = 0.0f
+  -- State update: fMagnitude' = (position - pEntity.GetPosition()).Magnitude2D()
+  -- State update: fMagnitude' = (position - pEntity.GetPosition()).Magnitude()
+  -- Invokes: pEntity->GetPosition, pEntity->GetBoundRadius
+  true
+end
+
+schema CWorld_FindObjectsIntersectingCube
+  ΔCWorld
+  vecStartPos? : CVector
+  vecEndPos? : CVector
+  nIntersecting? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- State update: nIntersecting' = 0
+  -- State update: nStartX' = Max(GetSectorIndexX(vecStartPos.x), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(vecStartPos.y), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(vecStartPos.y), NUMSECTORS_Y - 1)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X)
+  true
+end
+
+schema CWorld_FindObjectsIntersectingCubeSectorList
+  ΔCWorld
+  list? : CPtrList
+  vecStartPos? : CVector
+  vecEndPos? : CVector
+  nIntersecting? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pEntity.m_scanCode' = GetCurrentScanCode()
+  -- State update: fRadius' = pEntity.GetBoundRadius()
+  -- State update: entityPos' = pEntity.GetPosition()
+  -- Invokes: pEntity->GetBoundRadius, pEntity->GetPosition
+  true
+end
+
+schema CWorld_FindObjectsIntersectingAngledCollisionBox
+  ΔCWorld
+  boundingBox? : CBox
+  matrix? : CMatrix
+  position? : CVector
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- State update: nEntitiesFound' = 0
+  -- State update: nStartX' = Max(GetSectorIndexX(fStartX), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(fStartY), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(fEndX), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y - 1)
+  -- State update: nEndX' = Min(GetSectorIndexX(fEndX), NUMSECTORS_X)
+  true
+end
+
+schema CWorld_FindObjectsIntersectingAngledCollisionBoxSectorList
+  ΔCWorld
+  list? : CPtrList
+  boundingBox? : CBox
+  matrix? : CMatrix
+  position? : CVector
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pEntity.m_scanCode' = GetCurrentScanCode()
+  -- State update: vecDistance' = pEntity.GetPosition() - position
+  -- State update: sphere.radius' = pEntity.GetBoundRadius()
+  -- State update: sphere.center' = Multiply3x3(vecDistance, matrix)
+  -- Invokes: pEntity->GetPosition, pEntity->GetBoundRadius, CCollision::TestSphereBox
+  true
+end
+
+schema CWorld_FindMissionEntitiesIntersectingCube
+  ΔCWorld
+  vecStartPos? : CVector
+  vecEndPos? : CVector
+  nIntersecting? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+where
+  -- State update: nIntersecting' = 0
+  -- State update: nStartX' = Max(GetSectorIndexX(vecStartPos.x), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(vecStartPos.y), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X)
+  true
+end
+
+schema CWorld_FindMissionEntitiesIntersectingCubeSectorList
+  ΔCWorld
+  list? : CPtrList
+  vecStartPos? : CVector
+  vecEndPos? : CVector
+  nIntersecting? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bIsVehicleList? : 𝔹
+  bIsPedList? : 𝔹
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pEntity.m_scanCode' = GetCurrentScanCode()
+  -- State update: bIsMissionEntity' = false
+  -- State update: fRadius' = pEntity.GetBoundRadius()
+  -- State update: entityPos' = pEntity.GetPosition()
+  -- Invokes: pEntity->GetBoundRadius, pEntity->GetPosition
+  true
+end
+
+schema CWorld_ClearCarsFromArea
+  ΔCWorld
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+where
+  -- State update: pVehiclePool' = CPools::GetVehiclePool()
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: position' = pVehicle.GetPosition()
+  -- State update: pVehicle.pDriver' = ∅
+  -- Invokes: CPools::GetVehiclePool, pVehiclePool->GetSize, pVehicle->GetPosition, pVehicle->CanBeDeleted, CPopulation::RemovePed
+  true
+end
+
+schema CWorld_ClearPedsFromArea
+  ΔCWorld
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+where
+  -- State update: pPedPool' = CPools::GetPedPool()
+  -- State update: pPed' = CPools::GetPedPool().GetSlot(i)
+  -- State update: position' = pPed.GetPosition()
+  -- Invokes: CPools::GetPedPool, pPedPool->GetSize, pPed->GetPosition, pPed->IsPlayer, pPed->CanBeDeleted
+  true
+end
+
+schema CWorld_CallOffChaseForArea
+  ΔCWorld
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+where
+  -- State update: fStartX' = x1 - 10.0f
+  -- State update: fStartY' = y1 - 10.0f
+  -- State update: fEndX' = x2 + 10.0f
+  -- State update: fEndY' = y2 + 10.0f
+  -- State update: nStartX' = Max(GetSectorIndexX(fStartX), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(fStartY), 0)
+  true
+end
+
+schema CWorld_CallOffChaseForAreaSectorListVehicles
+  ΔCWorld
+  list? : CPtrList
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+where
+  -- State update: pNode' = list.first
+  -- State update: pVehicle' = (CVehicle *)pNode.item
+  -- State update: pVehicle.m_scanCode' = GetCurrentScanCode()
+  -- State update: vehiclePos' = pVehicle.GetPosition()
+  -- State update: carMission' = pVehicle.AutoPilot.m_nCarMission
+  -- State update: pVehicle.AutoPilot.m_nTimeTempAction' = CTimer::GetTimeInMilliseconds() + 2000
+  -- Invokes: pVehicle->GetPosition, CTimer::GetTimeInMilliseconds, pVehicle->GetColModel, pVehicle->GetMatrix
+  true
+end
+
+schema CWorld_CallOffChaseForAreaSectorListPeds
+  ΔCWorld
+  list? : CPtrList
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+where
+  -- State update: pNode' = list.first
+  -- State update: pPed' = (CPed *)pNode.item
+  -- State update: pedPos' = pPed.GetPosition()
+  -- State update: pPed.m_scanCode' = GetCurrentScanCode()
+  -- State update: pPed.m_prevObjective' = OBJECTIVE_NONE
+  -- State update: pPed.m_nLastPedState' = PED_IDLE
+  -- Invokes: pPed->GetPosition, pPed->IsPedInControl, pPed->SetIdle, pPed->SetObjective
+  true
+end
+
+schema CWorld_RemoveEntityInsteadOfProcessingIt
+  ΔCWorld
+  ent? : Ref[CEntity]
+where
+  -- Invokes: ent->IsPed, CPopulation::RemovePed
+  true
+end
+
+schema CWorld_RemoveFallenPeds
+  ΔCWorld
+where
+  -- State update: poolSize' = CPools::GetPedPool().GetSize()
+  -- State update: poolIndex' = poolSize - 1
+  -- State update: ped' = CPools::GetPedPool().GetSlot(poolIndex)
+  -- State update: newPos' = ThePaths.m_pathNodes[closestNode].GetPosition()
+  -- State update: ped.m_vecMoveSpeed' = CVector(0.0f, 0.0f, 0.0f)
+  -- Invokes: CPools::GetPedPool, ped->GetPosition, ped->IsPlayer, ThePaths.FindNodeClosestToCoors, ped->Teleport
+  true
+end
+
+schema CWorld_RemoveFallenCars
+  ΔCWorld
+where
+  -- State update: poolSize' = CPools::GetVehiclePool().GetSize()
+  -- State update: poolIndex' = poolSize - 1
+  -- State update: veh' = CPools::GetVehiclePool().GetSlot(poolIndex)
+  -- State update: newPos' = ThePaths.m_pathNodes[closestNode].GetPosition()
+  -- State update: veh.m_vecMoveSpeed' = CVector(0.0f, 0.0f, 0.0f)
+  -- Invokes: CPools::GetVehiclePool, veh->GetPosition, pDriver->IsPlayer, ThePaths.FindNodeClosestToCoors, veh->Teleport
+  true
+end
+
+schema CWorld_StopAllLawEnforcersInTheirTracks
+  ΔCWorld
+where
+  -- State update: poolSize' = CPools::GetVehiclePool().GetSize()
+  -- State update: poolIndex' = poolSize - 1
+  -- State update: veh' = CPools::GetVehiclePool().GetSlot(poolIndex)
+  -- Invokes: CPools::GetVehiclePool, veh->SetMoveSpeed
+  true
+end
+
+schema CWorld_SetAllCarsCanBeDamaged
+  ΔCWorld
+  toggle? : 𝔹
+where
+  -- State update: poolSize' = CPools::GetVehiclePool().GetSize()
+  -- State update: poolIndex' = 0
+  -- State update: veh' = CPools::GetVehiclePool().GetSlot(poolIndex)
+  -- State update: veh.bCanBeDamaged' = toggle
+  -- Invokes: CPools::GetVehiclePool
+  true
+end
+
+schema CWorld_ExtinguishAllCarFiresInArea
+  ΔCWorld
+  point? : CVector
+  range? : ℝ
+where
+  -- State update: poolSize' = CPools::GetVehiclePool().GetSize()
+  -- State update: poolIndex' = 0
+  -- State update: veh' = CPools::GetVehiclePool().GetSlot(poolIndex)
+  -- Invokes: CPools::GetVehiclePool, veh->GetPosition, veh->ExtinguishCarFire
+  true
+end
+
+schema World_AddSteamsFromGround
+  ΔWorldModuleState
+  list? : CPtrList
+where
+  -- State update: pNode' = list.first
+  -- State update: pNode' = pNode.next
+  true
+end
+
+schema CWorld_AddParticles
+  ΔCWorld
+where
+  -- State update: y' = 0
+  -- State update: x' = 0
+  -- State update: pSector' = GetSector(x, y)
+  true
+end
+
+schema CWorld_ShutDown
+  ΔCWorld
+where
+  -- State update: pSector' = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y)
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_BUILDINGS].first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_VEHICLES].first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_PEDS].first
+  -- Invokes: ms_listMovingEntityPtrs.Flush, CPools::Shutdown
+  true
+end
+
+schema CWorld_ClearForRestart
+  ΔCWorld
+where
+  -- State update: pSector' = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y)
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_PEDS].first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pNode' = GetBigBuildingList(LEVEL_GENERIC).first
+  -- State update: pVehicle' = (CVehicle *)pNode.item
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_VEHICLES].first
+  -- Invokes: CCutsceneMgr::HasLoaded, CCutsceneMgr::DeleteCutsceneData, CProjectileInfo::RemoveAllProjectiles, CObject::DeleteAllTempObjects, CObject::DeleteAllMissionObjects
+  true
+end
+
+schema CWorld_RepositionCertainDynamicObjects
+  ΔCWorld
+where
+  -- State update: dummy' = CPools::GetDummyPool().GetSlot(i)
+  -- Invokes: CPools::GetDummyPool
+  true
+end
+
+schema CWorld_RepositionOneObject
+  ΔCWorld
+  pEntity? : Ref[CEntity]
+where
+  -- State update: modelId' = pEntity.GetModelIndex()
+  -- State update: position' = pEntity.GetMatrix().GetPosition()
+  -- State update: pColModel' = pEntity.GetColModel()
+  -- State update: fBoundingBoxMinZ' = pColModel.boundingBox.min.z
+  -- State update: fHeight' = pColModel.boundingBox.max.z - pColModel.boundingBox.min.z
+  -- State update: fHeight' = OBJECT_REPOSITION_OFFSET_Z
+  -- Invokes: pEntity->GetModelIndex, pEntity->GetMatrix, pEntity->GetColModel, pEntity->UpdateRwFrame, pEntity->GetPosition
+  true
+end
+
+schema CWorld_SetCarsOnFire
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  radius? : ℝ
+  reason? : Ref[CEntity]
+where
+  -- State update: poolSize' = CPools::GetVehiclePool().GetSize()
+  -- State update: poolIndex' = poolSize - 1
+  -- State update: veh' = CPools::GetVehiclePool().GetSlot(poolIndex)
+  -- Invokes: CPools::GetVehiclePool, veh->GetStatus, veh->GetPosition, gFireManager.StartFire
+  true
+end
+
+schema CWorld_SetPedsChoking
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  radius? : ℝ
+  reason? : Ref[CEntity]
+where
+  -- State update: poolSize' = CPools::GetPedPool().GetSize()
+  -- State update: pPed' = CPools::GetPedPool().GetSlot(i)
+  -- Invokes: CPools::GetPedPool, pPed->GetPosition, pPed->IsPlayer, pPed->SetFlee, pPed->InflictDamage
+  true
+end
+
+schema CWorld_SetPedsOnFire
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  radius? : ℝ
+  reason? : Ref[CEntity]
+where
+  -- State update: poolSize' = CPools::GetPedPool().GetSize()
+  -- State update: pPed' = CPools::GetPedPool().GetSlot(i)
+  -- Invokes: CPools::GetPedPool, pPed->GetPosition, gFireManager.StartFire
+  true
+end
+
+schema CWorld_RemoveStaticObjects
+  ΔCWorld
+where
+  -- State update: pSector' = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y)
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_BUILDINGS].first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_OBJECTS].first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pNode' = pSector.m_lists[ENTITYLIST_DUMMIES].first
+  true
+end
+
+schema CWorld_Process
+  ΔCWorld
+where
+  -- State update: csObj' = CCutsceneMgr::GetCutsceneObject(i)
+  -- State update: node' = ms_listMovingEntityPtrs.first
+  -- State update: movingEnt' = (CEntity *)node.item
+  -- State update: node' = ms_listMovingEntityPtrs.first
+  -- State update: movingEnt' = (CPhysical *)node.item
+  -- State update: y' = 0
+  -- Invokes: CTimer::GetFrameCounter, CReferences::PruneAllReferencesInWorld, CCutsceneMgr::GetCutsceneObject, csObj->UpdateAnim, csObj->ProcessControl
+  true
+end
+
+schema CWorld_TriggerExplosion
+  ΔCWorld
+  position? : CVector
+  fRadius? : ℝ
+  fPower? : ℝ
+  pCreator? : Ref[CEntity]
+  bProcessVehicleBombTimer? : 𝔹
+where
+  -- State update: nStartX' = Max(GetSectorIndexX(vecStartPos.x), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(vecStartPos.y), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1)
+  -- State update: y' = nStartY
+  -- State update: x' = nStartX
+  true
+end
+
+schema CWorld_TriggerExplosionSectorList
+  ΔCWorld
+  list? : CPtrList
+  position? : CVector
+  fRadius? : ℝ
+  fPower? : ℝ
+  pCreator? : Ref[CEntity]
+  bProcessVehicleBombTimer? : 𝔹
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CPhysical *)pNode.item
+  -- State update: vecDistance' = pEntity.GetPosition() - position
+  -- State update: fMagnitude' = vecDistance.Magnitude()
+  -- State update: pPed' = (CPed *)pEntity
+  -- State update: pObject' = (CObject *)pEntity
+  -- Invokes: pEntity->GetPosition, vecDistance.Magnitude, CWeapon::BlowUpExplosiveThings, pEntity->IsPed, pEntity->GetIsStatic
+  true
+end
+
+schema CWorld_UseDetonator
+  ΔCWorld
+  pEntity? : Ref[CEntity]
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: pCar' = (CAutomobile*)CPools::GetVehiclePool().GetSlot(i)
+  -- State update: pCar.m_bombType' = CARBOMB_NONE
+  -- State update: pCar.m_nBombTimer' = 500
+  -- State update: pCar.m_pBlowUpEntity' = pCar.m_pBombRigger
+  -- State update: pBike' = (CBike*)CPools::GetVehiclePool().GetSlot(i)
+  -- Invokes: CPools::GetVehiclePool, pVehicle->IsCar, m_pBlowUpEntity->RegisterReference, pVehicle->IsBike, CProjectileInfo::RemoveDetonatorProjectiles
+  true
+end
+
+schema CWorld_IsWanderPathClear
+  ΔCWorld
+  point1? : CVector
+  point2? : CVector
+  distance? : ℝ
+  maxSteps? : ℤ
+where
+  -- State update: vecBetween' = point2 - point1
+  -- State update: nSteps' = Max(vecBetween.Magnitude(), maxSteps)
+  -- State update: step' = 1
+  -- State update: step' = 1
+  -- State update: posThisStep' = point1 + vecBetween * step
+  -- State update: posThisStep.z' = level
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: vecBetween.Magnitude, vecBetween.Normalise, CWaterLevel::GetWaterLevel
+  true
+end
+
+schema CWorld_CheckObjectsEffectedByFire
+  ΔCWorld
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  radius? : ℝ
+  reason? : Ref[CEntity]
+where
+  -- State update: pObject' = CPools::GetObjectPool().GetSlot(i)
+  -- State update: pObject.m_nLastWeaponToDamage' = WEAPONTYPE_FLAMETHROWER
+  -- Invokes: CPools::GetObjectPool, pObject->GetPosition
+  true
+end
+
+schema CWorld_ProcessLineOfSight_2
+  ΔCWorld
+  point1? : CVector
+  point2? : CVector
+  point? : ℤ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: entity' = ∅
+  -- State update: dist' = 1.0f
+  -- State update: xstart' = GetSectorIndexX(point1.x)
+  -- State update: ystart' = GetSectorIndexY(point1.y)
+  -- State update: xend' = GetSectorIndexX(point2.x)
+  -- State update: yend' = GetSectorIndexY(point2.y)
+  -- Return postcondition: result! = ProcessLineOfSightSector(*GetSector(xstart, ystart), LOSARGS)
+  -- Return postcondition: result! = dist < 1.0f
+  -- Return postcondition: result! = dist < 1.0f
+  true
+end
+
+schema CWorld_ProcessLineOfSightSector_2
+  ΔCWorld
+  sector? : CSector
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  checkBuildings? : 𝔹
+  checkVehicles? : 𝔹
+  checkPeds? : 𝔹
+  checkObjects? : 𝔹
+  checkDummies? : 𝔹
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: mindist' = dist
+  -- State update: deadPeds' = !!bIncludeDeadPeds
+  -- State update: bIncludeDeadPeds' = false
+  -- State update: bIncludeDeadPeds' = true
+  -- State update: bIncludeDeadPeds' = false
+  -- State update: bIncludeDeadPeds' = deadPeds
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CWorld_ProcessLineOfSightSectorList_2
+  ΔCWorld
+  list? : CPtrList
+  line? : CColLine
+  point? : ℤ
+  dist? : ℝ
+  entity? : Ref[CEntity]
+  ignoreSeeThrough? : 𝔹
+  ignoreSomeObjects? : 𝔹
+where
+  -- State update: deadPeds' = false
+  -- State update: mindist' = dist
+  -- State update: deadPeds' = true
+  -- State update: node' = list.first
+  -- State update: e' = (CEntity *)node.item
+  -- State update: colmodel' = ∅
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: e->IsPed, e->GetClump, CModelInfo::GetModelInfo, e->GetModelIndex, CPedModelInfo::AnimatePedColModel
+  true
+end
+
+schema CWorld_FindObjectsIntersectingAngledCollisionBox_2
+  ΔCWorld
+  boundingBox? : CColBox
+  matrix? : CMatrix
+  position? : CVector
+  fStartX? : ℝ
+  fStartY? : ℝ
+  fEndX? : ℝ
+  fEndY? : ℝ
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+  bBuildings? : 𝔹
+  bVehicles? : 𝔹
+  bPeds? : 𝔹
+  bObjects? : 𝔹
+  bDummies? : 𝔹
+where
+  -- State update: nEntitiesFound' = 0
+  -- State update: nStartX' = Max(GetSectorIndexX(fStartX), 0)
+  -- State update: nStartY' = Max(GetSectorIndexY(fStartY), 0)
+  -- State update: nEndX' = Min(GetSectorIndexX(fEndX), NUMSECTORS_X - 1)
+  -- State update: nEndY' = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y - 1)
+  -- State update: y' = nStartY
+  true
+end
+
+schema CWorld_FindObjectsIntersectingAngledCollisionBoxSectorList_2
+  ΔCWorld
+  list? : CPtrList
+  boundingBox? : CColBox
+  matrix? : CMatrix
+  position? : CVector
+  nEntitiesFound? : ℙ ℤ
+  maxEntitiesToFind? : ℤ
+  aEntities? : Ref[CEntity]
+where
+  -- State update: pNode' = list.first
+  -- State update: pEntity' = (CEntity *)pNode.item
+  -- State update: pEntity.m_scanCode' = GetCurrentScanCode()
+  -- State update: vecDistance' = pEntity.GetPosition() - position
+  -- State update: sphere.radius' = pEntity.GetBoundRadius()
+  -- State update: sphere.center' = Multiply3x3(vecDistance, matrix)
+  -- Invokes: pEntity->GetPosition, pEntity->GetBoundRadius, CCollision::TestSphereBox
+  true
+end
+
+schema World_GetCurrentScanCode
+  ΔWorldModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = ms_nCurrentScanCode
+  true
+end
+
+schema World_AdvanceCurrentScanCode
+  ΔWorldModuleState
+where
+  -- State update: ms_nCurrentScanCode' = 1
+  -- Invokes: CWorld::ClearScanCodes
+  true
+end
+
+schema World_GetSectorX
+  ΔWorldModuleState
+  f? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = ((f - WORLD_MIN_X)/SECTOR_SIZE_X)
+  true
+end
+
+schema World_GetSectorY
+  ΔWorldModuleState
+  f? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y)
+  true
+end
+
+schema World_GetSectorIndexX
+  ΔWorldModuleState
+  f? : ℝ
+  result! : ℤ
+where
+  -- Return postcondition: result! = (int)GetSectorX(f)
+  true
+end
+
+schema World_GetSectorIndexY
+  ΔWorldModuleState
+  f? : ℝ
+  result! : ℤ
+where
+  -- Return postcondition: result! = (int)GetSectorY(f)
+  true
+end
+
+schema World_GetWorldX
+  ΔWorldModuleState
+  x? : ℤ
+  result! : ℝ
+where
+  -- Return postcondition: result! = x*SECTOR_SIZE_X + WORLD_MIN_X
+  true
+end
+
+schema World_GetWorldY
+  ΔWorldModuleState
+  y? : ℤ
+  result! : ℝ
+where
+  -- Return postcondition: result! = y*SECTOR_SIZE_Y + WORLD_MIN_Y
+  true
+end

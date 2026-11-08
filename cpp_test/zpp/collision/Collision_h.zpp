@@ -1,0 +1,366 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Collision (collision)
+-- Source File(s): collision/Collision.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include ColModel.zpp  (from "ColModel.h")
+-- include Game.zpp  (from "Game.h")
+-- include VuVector.zpp  (from "VuVector.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_COLLISION_POINTS : ℕ  -- #define MAX_COLLISION_POINTS 64
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStoredCollPoly
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCollision
+  ms_collisionInMemory : eLevelName
+  ms_colModelCache : Ref[CLinkList_CColModel]
+where
+  #ms_colModelCache ≤ 1
+end
+
+schema CCollision_Init
+  ΔCCollision
+where
+  -- Declared member operation CCollision::Init(void)
+  true
+end
+
+schema CCollision_Shutdown_2
+  ΔCCollision
+where
+  -- Declared member operation CCollision::Shutdown(void)
+  true
+end
+
+schema CCollision_Update_3
+  ΔCCollision
+where
+  -- Declared member operation CCollision::Update(void)
+  true
+end
+
+schema CCollision_LoadCollisionWhenINeedIt_4
+  ΔCCollision
+  changeLevel? : 𝔹
+where
+  -- Declared member operation CCollision::LoadCollisionWhenINeedIt(bool changeLevel)
+  true
+end
+
+schema CCollision_SortOutCollisionAfterLoad_5
+  ΔCCollision
+where
+  -- Declared member operation CCollision::SortOutCollisionAfterLoad(void)
+  true
+end
+
+schema CCollision_LoadCollisionScreen_6
+  ΔCCollision
+  level? : eLevelName
+where
+  -- Declared member operation CCollision::LoadCollisionScreen(eLevelName level)
+  true
+end
+
+schema CCollision_DrawColModel_7
+  ΔCCollision
+  mat? : CMatrix
+  colModel? : CColModel
+where
+  -- Declared member operation CCollision::DrawColModel(const CMatrix &mat, const CColModel &colModel)
+  true
+end
+
+schema CCollision_DrawColModel_Coloured_8
+  ΔCCollision
+  mat? : CMatrix
+  colModel? : CColModel
+  id? : ℤ
+where
+  -- Declared member operation CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel, int32 id)
+  true
+end
+
+schema CCollision_CalculateTrianglePlanes_9
+  ΔCCollision
+  model? : Ref[CColModel]
+where
+  -- Declared member operation CCollision::CalculateTrianglePlanes(CColModel *model)
+  true
+end
+
+schema CCollision_RemoveTrianglePlanes_10
+  ΔCCollision
+  model? : Ref[CColModel]
+where
+  -- Declared member operation CCollision::RemoveTrianglePlanes(CColModel *model)
+  true
+end
+
+schema CCollision_TestSphereSphere_11
+  ΔCCollision
+  s1? : CSphere
+  s2? : CSphere
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestSphereSphere(const CSphere &s1, const CSphere &s2)
+  true
+end
+
+schema CCollision_TestSphereBox_12
+  ΔCCollision
+  sph? : CSphere
+  box? : CBox
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestSphereBox(const CSphere &sph, const CBox &box)
+  true
+end
+
+schema CCollision_TestLineBox_13
+  ΔCCollision
+  line? : CColLine
+  box? : CBox
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestLineBox(const CColLine &line, const CBox &box)
+  true
+end
+
+schema CCollision_TestVerticalLineBox_14
+  ΔCCollision
+  line? : CColLine
+  box? : CBox
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestVerticalLineBox(const CColLine &line, const CBox &box)
+  true
+end
+
+schema CCollision_TestLineTriangle_15
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestLineTriangle(const CColLine &line, const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
+  true
+end
+
+schema CCollision_TestLineSphere_16
+  ΔCCollision
+  line? : CColLine
+  sph? : CColSphere
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestLineSphere(const CColLine &line, const CColSphere &sph)
+  true
+end
+
+schema CCollision_TestSphereTriangle_17
+  ΔCCollision
+  sphere? : CColSphere
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestSphereTriangle(const CColSphere &sphere, const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
+  true
+end
+
+schema CCollision_TestLineOfSight_18
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  ignoreSeeThrough? : 𝔹
+  ignoreShootThrough? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough, bool ignoreShootThrough)
+  true
+end
+
+schema CCollision_ProcessSphereSphere_19
+  ΔCCollision
+  s1? : CColSphere
+  s2? : CColSphere
+  point? : ℤ
+  mindistsq? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessSphereSphere(const CColSphere &s1, const CColSphere &s2, CColPoint &point, float &mindistsq)
+  true
+end
+
+schema CCollision_ProcessSphereBox_20
+  ΔCCollision
+  sph? : CColSphere
+  box? : CColBox
+  point? : ℤ
+  mindistsq? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessSphereBox(const CColSphere &sph, const CColBox &box, CColPoint &point, float &mindistsq)
+  true
+end
+
+schema CCollision_ProcessLineBox_21
+  ΔCCollision
+  line? : CColLine
+  box? : CColBox
+  point? : ℤ
+  mindist? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessLineBox(const CColLine &line, const CColBox &box, CColPoint &point, float &mindist)
+  true
+end
+
+schema CCollision_ProcessVerticalLineTriangle_22
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindist? : ℝ
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessVerticalLineTriangle(const CColLine &line, const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane, CColPoint &point, float &mindist, CStoredCollPoly *poly)
+  true
+end
+
+schema CCollision_ProcessLineTriangle_23
+  ΔCCollision
+  line? : CColLine
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindist? : ℝ
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessLineTriangle(const CColLine &line , const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane, CColPoint &point, float &mindist, CStoredCollPoly *poly = nil)
+  true
+end
+
+schema CCollision_ProcessLineSphere_24
+  ΔCCollision
+  line? : CColLine
+  sphere? : CColSphere
+  point? : ℤ
+  mindist? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessLineSphere(const CColLine &line, const CColSphere &sphere, CColPoint &point, float &mindist)
+  true
+end
+
+schema CCollision_ProcessSphereTriangle_25
+  ΔCCollision
+  sph? : CColSphere
+  verts? : Ref[CompressedVector]
+  tri? : CColTriangle
+  plane? : CColTrianglePlane
+  point? : ℤ
+  mindistsq? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessSphereTriangle(const CColSphere &sph, const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane, CColPoint &point, float &mindistsq)
+  true
+end
+
+schema CCollision_ProcessLineOfSight_26
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  point? : ℤ
+  mindist? : ℝ
+  ignoreSeeThrough? : 𝔹
+  ignoreShootThrough? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, CColPoint &point, float &mindist, bool ignoreSeeThrough, bool ignoreShootThrough)
+  true
+end
+
+schema CCollision_ProcessVerticalLine_27
+  ΔCCollision
+  line? : CColLine
+  matrix? : CMatrix
+  model? : CColModel
+  point? : ℤ
+  mindist? : ℝ
+  ignoreSeeThrough? : 𝔹
+  ignoreShootThrough? : 𝔹
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::ProcessVerticalLine(const CColLine &line, const CMatrix &matrix, CColModel &model, CColPoint &point, float &mindist, bool ignoreSeeThrough, bool ignoreShootThrough, CStoredCollPoly *poly)
+  true
+end
+
+schema CCollision_ProcessColModels_28
+  ΔCCollision
+  matrixA? : CMatrix
+  modelA? : CColModel
+  matrixB? : CMatrix
+  modelB? : CColModel
+  spherepoints? : ℙ ℤ
+  linepoints? : ℙ ℤ
+  linedists? : ℙ ℝ
+  result! : ℤ
+where
+  -- Declared member operation CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA, const CMatrix &matrixB, CColModel &modelB, CColPoint *spherepoints, CColPoint *linepoints, float *linedists)
+  true
+end
+
+schema CCollision_IsStoredPolyStillValidVerticalLine_29
+  ΔCCollision
+  pos? : CVector
+  z? : ℝ
+  point? : ℤ
+  poly? : Ref[CStoredCollPoly]
+  result! : 𝔹
+where
+  -- Declared member operation CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CColPoint &point, CStoredCollPoly *poly)
+  true
+end
+
+schema CCollision_DistToLine_30
+  ΔCCollision
+  l0? : Ref[CVector]
+  l1? : Ref[CVector]
+  point? : Ref[CVector]
+  result! : ℝ
+where
+  -- Declared member operation CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *point)
+  true
+end

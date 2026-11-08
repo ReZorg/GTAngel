@@ -1,0 +1,225 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: screendroplets (extras)
+-- Source File(s): extras/screendroplets.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+screendroplets_Enum_1 ::= MAXDROPS | MAXDROPSMOVING
+  -- val(MAXDROPS) = 2000
+  -- val(MAXDROPSMOVING) = 700
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ScreenDroplets
+  lifetime : ℝ
+  color : CRGBA
+  active : 𝔹
+  fades : 𝔹
+  dist : ℝ
+  ms_initialised : ℤ
+  ms_maskTex : Ref[RwTexture]
+  ms_screenTex : Ref[RwTexture]
+  ms_enabled : 𝔹
+  ms_movingEnabled : 𝔹
+  ms_drops : seq ScreenDrop  -- bounded array [MAXDROPS]
+  ms_numDrops : ℤ
+  ms_dropsMoving : seq ScreenDropMoving  -- bounded array [MAXDROPSMOVING]
+  ms_numDropsMoving : ℤ
+  ms_prevCamUp : CVector
+  ms_prevCamPos : CVector
+  ms_camMoveDelta : CVector
+  ms_camMoveDist : ℝ
+  ms_screenMoveDelta : CVector
+  ms_screenMoveDist : ℝ
+  ms_camUpAngle : ℝ
+  ms_splashDuration : ℤ
+  ms_splashObject : Ref[CParticleObject]
+where
+  #ms_maskTex ≤ 1
+  #ms_screenTex ≤ 1
+  #ms_splashObject ≤ 1
+end
+
+schema ScreenDroplets_Fade
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Fade(void)
+  true
+end
+
+schema ScreenDroplets_Initialise_2
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Initialise(void)
+  true
+end
+
+schema ScreenDroplets_InitDraw_3
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::InitDraw(void)
+  true
+end
+
+schema ScreenDroplets_Shutdown_4
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Shutdown(void)
+  true
+end
+
+schema ScreenDroplets_Process_5
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Process(void)
+  true
+end
+
+schema ScreenDroplets_Render_6
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Render(void)
+  true
+end
+
+schema ScreenDroplets_AddToRenderList_7
+  ΔScreenDroplets
+  drop? : Ref[ScreenDrop]
+where
+  -- Declared member operation ScreenDroplets::AddToRenderList(ScreenDrop *drop)
+  true
+end
+
+schema ScreenDroplets_Clear_8
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Clear(void)
+  true
+end
+
+schema ScreenDroplets_NewDrop_9
+  ΔScreenDroplets
+  x? : ℝ
+  y? : ℝ
+  size? : ℝ
+  lifetime? : ℝ
+  fades? : 𝔹
+  r? : ℤ
+  g? : ℤ
+  b? : ℤ
+  result! : Ref[ScreenDrop]
+where
+  -- Declared member operation ScreenDroplets::NewDrop(float x, float y, float size, float lifetime, bool fades, int r = 255, int g = 255, int b = 255)
+  true
+end
+
+schema ScreenDroplets_SetMoving_10
+  ΔScreenDroplets
+  drop? : Ref[ScreenDroplets__ScreenDrop]
+where
+  -- Declared member operation ScreenDroplets::SetMoving(ScreenDroplets::ScreenDrop *drop)
+  true
+end
+
+schema ScreenDroplets_FillScreen_11
+  ΔScreenDroplets
+  n? : ℤ
+where
+  -- Declared member operation ScreenDroplets::FillScreen(int n)
+  true
+end
+
+schema ScreenDroplets_FillScreenMoving_12
+  ΔScreenDroplets
+  amount? : ℝ
+  isBlood? : 𝔹
+where
+  -- Declared member operation ScreenDroplets::FillScreenMoving(float amount, bool isBlood = false)
+  true
+end
+
+schema ScreenDroplets_RegisterSplash_13
+  ΔScreenDroplets
+  pobj? : Ref[CParticleObject]
+where
+  -- Declared member operation ScreenDroplets::RegisterSplash(CParticleObject *pobj)
+  true
+end
+
+schema ScreenDroplets_ProcessCameraMovement_14
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::ProcessCameraMovement(void)
+  true
+end
+
+schema ScreenDroplets_SprayDrops_15
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::SprayDrops(void)
+  true
+end
+
+schema ScreenDroplets_NewTrace_16
+  ΔScreenDroplets
+  moving? : Ref[ScreenDroplets__ScreenDropMoving]
+where
+  -- Declared member operation ScreenDroplets::NewTrace(ScreenDroplets::ScreenDropMoving *moving)
+  true
+end
+
+schema ScreenDroplets_MoveDrop_17
+  ΔScreenDroplets
+  moving? : Ref[ScreenDropMoving]
+where
+  -- Declared member operation ScreenDroplets::MoveDrop(ScreenDropMoving *moving)
+  true
+end
+
+schema ScreenDroplets_ProcessMoving_18
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::ProcessMoving(void)
+  true
+end
+
+schema ScreenDroplets_Fade_19
+  ΔScreenDroplets
+where
+  -- Declared member operation ScreenDroplets::Fade(void)
+  true
+end
+
+schema ScreenDrop
+  time : ℝ
+  lifetime : ℝ
+  color : CRGBA
+  active : 𝔹
+  fades : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema ScreenDrop_Fade
+  ΔScreenDrop
+where
+  -- Declared member operation ScreenDrop::Fade(void)
+  true
+end
+
+schema ScreenDropMoving
+  drop : Ref[ScreenDrop]
+  dist : ℝ
+where
+  #drop ≤ 1
+end

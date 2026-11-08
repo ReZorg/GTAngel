@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColLine (collision)
+-- Source File(s): collision/ColLine.cpp, collision/ColLine.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ColLine.zpp  (from "ColLine.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CColLine
+  p0 : CVector
+  p1 : CVector
+  pad0 : ℤ
+  pad1 : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CColLine_CColLine
+  ΔCColLine
+where
+  -- Declared member operation CColLine::CColLine(void)
+  true
+end
+
+schema CColLine_CColLine_2
+  ΔCColLine
+  p0? : CVector
+  p1? : CVector
+where
+  -- Declared member operation CColLine::CColLine(const CVector &p0, const CVector &p1)
+  true
+end
+
+schema CColLine_Set_3
+  ΔCColLine
+  p0? : CVector
+  p1? : CVector
+where
+  -- Declared member operation CColLine::Set(const CVector &p0, const CVector &p1)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CColLine_Set
+  ΔCColLine
+  p0? : CVector
+  p1? : CVector
+where
+  -- State update: p0' = p0
+  -- State update: p1' = p1
+  true
+end

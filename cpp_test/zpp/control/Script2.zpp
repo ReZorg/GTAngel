@@ -1,0 +1,92 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script2 (control)
+-- Source File(s): control/Script2.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CarGen.zpp  (from "CarGen.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include EmergencyPed.zpp  (from "EmergencyPed.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include PedRoutes.zpp  (from "PedRoutes.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Population.zpp  (from "Population.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include User.zpp  (from "User.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_ProcessCommands300To399
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pVehicle.m_nAlarmState' = -1
+  -- State update: pos' = GET_VECTOR_PARAM(0)
+  -- State update: pCarGen' = &CTheCarGenerators::CarGeneratorArray[GET_INTEGER_PARAM(0)]
+  -- State update: zone' = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_INFO)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetModelIndex, CGarages::HasCarBeenCrushed, CTheCarGenerators::CreateCarGenerator, pCarGen->SwitchOff
+  true
+end
+
+schema CRunningScript_ProcessCommands400To499
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed.bScriptObjectiveCompleted' = false
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CPools::GetVehiclePool, UpsideDownCars.AddCarToCheck, UpsideDownCars.RemoveCarFromCheck, CPools::GetPedPool, pPed->SetObjective
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script2ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1637
+end

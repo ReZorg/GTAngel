@@ -1,0 +1,91 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendList (animation)
+-- Source File(s): animation/AnimBlendList.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlendLink
+  next : Ref[CAnimBlendLink]
+  prev : Ref[CAnimBlendLink]
+where
+  #next ≤ 1
+  #prev ≤ 1
+end
+
+schema CAnimBlendLink_Init
+  ΔCAnimBlendLink
+where
+  -- Declared member operation CAnimBlendLink::Init(void)
+  true
+end
+
+schema CAnimBlendLink_Prepend_2
+  ΔCAnimBlendLink
+  link? : Ref[CAnimBlendLink]
+  result! : void
+where
+  -- Declared member operation CAnimBlendLink::Prepend(CAnimBlendLink *link)
+  true
+end
+
+schema CAnimBlendLink_Remove_3
+  ΔCAnimBlendLink
+  result! : void
+where
+  -- Declared member operation CAnimBlendLink::Remove(void)
+  true
+end
+
+schema CAnimBlendLink_if_4
+  ΔCAnimBlendLink
+  arg_1? : next
+where
+  -- Declared member operation CAnimBlendLink::if(next)
+  true
+end
+
+schema CAnimBlendLink_Init_5
+  ΔCAnimBlendLink
+where
+  -- Declared member operation CAnimBlendLink::Init()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema AnimBlendList_Init
+  ΔAnimBlendListModuleState
+where
+  -- State update: next' = ∅
+  -- State update: prev' = ∅
+  true
+end
+
+schema AnimBlendList_Prepend
+  ΔAnimBlendListModuleState
+  link? : Ref[CAnimBlendLink]
+where
+  -- State update: next.prev' = link
+  -- State update: link.next' = next
+  -- State update: link.prev' = this
+  -- State update: next' = link
+  true
+end
+
+schema AnimBlendList_Remove
+  ΔAnimBlendListModuleState
+where
+  -- State update: prev.next' = next
+  -- State update: next.prev' = prev
+  true
+end

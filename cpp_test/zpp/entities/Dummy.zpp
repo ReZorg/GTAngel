@@ -1,0 +1,115 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Dummy (entities)
+-- Source File(s): entities/Dummy.cpp, entities/Dummy.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include World.zpp  (from "World.h")
+-- include Dummy.zpp  (from "Dummy.h")
+-- include Lists.zpp  (from "Lists.h")
+-- include Entity.zpp  (from "Entity.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDummy
+  CEntity  -- inherits base schema
+  m_entryInfoList : CEntryInfoList
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CDummy_CDummy
+  ΔCDummy
+where
+  -- Declared member operation CDummy::CDummy(void)
+  true
+end
+
+schema CDummy_Add_2
+  ΔCDummy
+  result! : void
+where
+  -- Declared member operation CDummy::Add(void)
+  true
+end
+
+schema CDummy_Remove_3
+  ΔCDummy
+where
+  -- Declared member operation CDummy::Remove(void)
+  true
+end
+
+schema CDummy_operator_new_4
+  ΔCDummy
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CDummy::operator new(size_t)
+  true
+end
+
+schema CDummy_operator_delete_5
+  ΔCDummy
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CDummy::operator delete(void*, size_t)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDummy_Add
+  ΔCDummy
+where
+  -- State update: bounds' = GetBoundRect()
+  -- State update: xstart' = CWorld::GetSectorIndexX(bounds.left)
+  -- State update: xend' = CWorld::GetSectorIndexX(bounds.right)
+  -- State update: xmid' = CWorld::GetSectorIndexX((bounds.left + bounds.right)/2.0f)
+  -- State update: ystart' = CWorld::GetSectorIndexY(bounds.top)
+  -- State update: yend' = CWorld::GetSectorIndexY(bounds.bottom)
+  -- Invokes: CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector, list->InsertItem, m_entryInfoList.InsertItem
+  true
+end
+
+schema CDummy_Remove
+  ΔCDummy
+where
+  -- State update: node' = m_entryInfoList.first
+  -- State update: next' = node.next
+  -- Invokes: list->DeleteNode, m_entryInfoList.DeleteNode
+  true
+end
+
+schema Dummy_IsDummyPointerValid
+  ΔDummyModuleState
+  pDummy? : Ref[CDummy]
+where
+  -- State update: index' = CPools::GetDummyPool().GetJustIndex_NoFreeAssert(pDummy)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = pDummy->m_entryInfoList.first
+  -- Invokes: CPools::GetDummyPool
+  true
+end
+
+schema Dummy_CDummy
+  ΔDummyModuleState
+where
+  -- State update: m_type' = ENTITY_TYPE_DUMMY
+  true
+end

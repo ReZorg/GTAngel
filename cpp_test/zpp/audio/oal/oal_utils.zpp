@@ -1,0 +1,109 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: oal_utils (audio)
+-- Source File(s): audio/oal/oal_utils.cpp, audio/oal/oal_utils.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include oal_utils.zpp  (from "oal_utils.h")
+-- include eax.zpp  (from "eax.h")
+-- include efx.zpp  (from "AL/efx.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema oal_utils_EFXInit
+  Δoal_utilsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema oal_utils_SetEffectsLevel
+  Δoal_utilsModuleState
+  uiFilter? : ℕ
+  level? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema oal_utils_gain_to_mB
+  Δoal_utilsModuleState
+  gain? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = (gain > 1e-5f) ? (float)(log10f(gain) * 2000.0f) : -10000l
+  true
+end
+
+schema oal_utils_mB_to_gain
+  Δoal_utilsModuleState
+  millibels? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = (millibels > -10000.0f) ? powf(10.0f, millibels/2000.0f) : 0.0f
+  true
+end
+
+schema oal_utils_clampF
+  Δoal_utilsModuleState
+  val? : ℝ
+  minval? : ℝ
+  maxval? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = maxval
+  -- Return postcondition: result! = minval
+  -- Return postcondition: result! = val
+  true
+end
+
+schema oal_utils_EAX3_Set
+  Δoal_utilsModuleState
+  effect? : ℕ
+  props? : Ref[EAXLISTENERPROPERTIES]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema oal_utils_EFX_Set
+  Δoal_utilsModuleState
+  effect? : ℕ
+  props? : Ref[EAXLISTENERPROPERTIES]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema oal_utils_EAX3_SetReverbMix
+  Δoal_utilsModuleState
+  filter? : ℕ
+  mix? : ℝ
+where
+  -- State update: mbvol' = gain_to_mB(mix)
+  -- State update: mb' = mbvol
+  -- State update: mbhf' = mbvol
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema oal_utilsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 235
+end

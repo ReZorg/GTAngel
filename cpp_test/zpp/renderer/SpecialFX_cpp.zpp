@@ -1,0 +1,603 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SpecialFX (renderer)
+-- Source File(s): renderer/SpecialFX.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Font.zpp  (from "Font.h")
+-- include Text.zpp  (from "Text.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include General.zpp  (from "General.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include main.zpp  (from "main.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Script.zpp  (from "Script.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+BRIGHTLIGHTS_MAX_DIST : ℝ  -- #define BRIGHTLIGHTS_MAX_DIST (60.0f)
+BRIGHTLIGHTS_FADE_DIST : ℝ  -- #define BRIGHTLIGHTS_FADE_DIST (45.0f)
+CARLIGHTS_MAX_DIST : ℝ  -- #define CARLIGHTS_MAX_DIST (30.0f)
+CARLIGHTS_FADE_DIST : ℝ  -- #define CARLIGHTS_FADE_DIST (15.0f)
+MONEY_MESSAGE_LIFETIME_MS : ℕ  -- #define MONEY_MESSAGE_LIFETIME_MS 2000
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSpecialFX_Init
+  ΔCSpecialFX
+where
+  -- Invokes: CBulletTraces::Init, CMotionBlurStreaks::Init, CBrightLights::Init, CShinyTexts::Init, CMoneyMessages::Init
+  true
+end
+
+schema CSpecialFX_AddWeaponStreak
+  ΔCSpecialFX
+  type? : ℤ
+where
+  -- State update: start' = matrix * CVector(0.02f, 0.05f, 0.07f)
+  -- State update: end' = matrix * CVector(0.246f, 0.0325f, 0.796f)
+  -- State update: start' = matrix * CVector(0.02f, 0.05f, 0.07f)
+  -- State update: end' = matrix * CVector(-0.054f, 0.0325f, 0.796f)
+  -- State update: start' = matrix * CVector(0.02f, 0.05f, 0.07f)
+  -- State update: end' = matrix * CVector(0.096f, -0.0175f, 1.096f)
+  -- Invokes: CMotionBlurStreaks::RegisterStreak
+  true
+end
+
+schema SpecialFX_LookForBatCB
+  ΔSpecialFXModuleState
+  object? : Ref[RwObject]
+  data? : ADDRESS
+where
+  -- State update: MatLTM' = CMatrix(RwFrameGetLTM(RpAtomicGetFrame((RpAtomic*)object)))
+  -- State update: p1' = MatLTM * CVector(0.02f, 0.05f, 0.07f)
+  -- State update: p2' = MatLTM * CVector(0.246f, 0.0325f, 0.796f)
+  -- Return postcondition: result! = nil
+  -- Invokes: CVisibilityPlugins::GetAtomicModelInfo, CMotionBlurStreaks::RegisterStreak
+  true
+end
+
+schema CSpecialFX_Update
+  ΔCSpecialFX
+where
+  -- Invokes: CMotionBlurStreaks::Update, CBulletTraces::Update, CModelInfo::GetModelInfo
+  true
+end
+
+schema CSpecialFX_Shutdown
+  ΔCSpecialFX
+where
+  -- State update: gpSmokeTrailTexture' = ∅
+  -- Invokes: C3dMarkers::Shutdown
+  true
+end
+
+schema CSpecialFX_Render
+  ΔCSpecialFX
+where
+  -- Invokes: CMotionBlurStreaks::Render, CBulletTraces::Render, CBrightLights::Render, CShinyTexts::Render, CMoneyMessages::Render
+  true
+end
+
+schema CSpecialFX_Render2DFXs
+  ΔCSpecialFX
+where
+  -- State update: posX' = CGeneral::GetRandomNumber() % (int32)SCREEN_WIDTH
+  -- State update: posY' = CGeneral::GetRandomNumber() % (int32)SCREEN_HEIGHT
+  -- State update: bSnapShotActive' = false
+  -- State update: tmp' = (255 - 255 * CSpecialFX::SnapShotFrames / 10) * 0.65f
+  -- Invokes: CFont::SetScale, CFont::SetJustifyOff, CFont::SetBackgroundOff, CFont::SetCentreSize, CFont::SetCentreOff
+  true
+end
+
+schema CRegisteredMotionBlurStreak_Update
+  ΔCRegisteredMotionBlurStreak
+where
+  -- State update: lastWasUpdated' = false
+  -- State update: wasUpdated' = true
+  -- State update: wasUpdated' = false
+  -- State update: lastWasUpdated' = wasUpdated
+  -- State update: m_id' = 0
+  true
+end
+
+schema CRegisteredMotionBlurStreak_Render
+  ΔCRegisteredMotionBlurStreak
+where
+  -- State update: a1' = (255/3)*(3-i)/3
+  -- State update: a2' = (255/3)*(3-(i+1))/3
+  true
+end
+
+schema CMotionBlurStreaks_Init
+  ΔCMotionBlurStreaks
+where
+  -- State update: m_id' = 0
+  true
+end
+
+schema CMotionBlurStreaks_Update
+  ΔCMotionBlurStreaks
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMotionBlurStreaks_RegisterStreak
+  ΔCMotionBlurStreaks
+  id? : ℕ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  p1? : CVector
+  p2? : CVector
+where
+  -- State update: m_red' = r
+  -- State update: m_green' = g
+  -- State update: m_blue' = b
+  -- State update: m_id' = id
+  -- State update: m_red' = r
+  -- State update: m_green' = g
+  true
+end
+
+schema CMotionBlurStreaks_Render
+  ΔCMotionBlurStreaks
+where
+  -- State update: setRenderStates' = false
+  -- State update: setRenderStates' = true
+  -- Invokes: CTimeCycle::GetFogRed, CTimeCycle::GetFogGreen, CTimeCycle::GetFogBlue
+  true
+end
+
+schema CBulletTraces_Init
+  ΔCBulletTraces
+where
+  -- State update: m_bInUse' = false
+  true
+end
+
+schema CBulletTraces_AddTrace
+  ΔCBulletTraces
+  start? : Ref[CVector]
+  end? : Ref[CVector]
+  thickness? : ℝ
+  lifeTime? : ℕ
+  visibility? : ℕ
+where
+  -- State update: enabledCount' = 0
+  -- State update: modifiedLifeTime' = lifeTime / 4
+  -- State update: modifiedLifeTime' = lifeTime / 2
+  -- State update: modifiedLifeTime' = lifeTime
+  -- State update: nextSlot' = 0
+  -- State update: m_vecStartPos' = *start
+  -- Invokes: CTimer::GetTimeInMilliseconds, TheCamera.GetForward, TheCamera.GetPosition, TheCamera.GetUp, TheCamera.GetRight
+  true
+end
+
+schema CBulletTraces_AddTrace_2
+  ΔCBulletTraces
+  start? : Ref[CVector]
+  end? : Ref[CVector]
+  weaponType? : ℤ
+  shooter? : Ref[class_CEntity]
+where
+  -- State update: camMode' = TheCamera.Cams[TheCamera.ActiveCam].Mode
+  -- State update: speed' = player.m_vecMoveSpeed.Magnitude()
+  -- Invokes: m_vecMoveSpeed.Magnitude, CBulletTraces::AddTrace
+  true
+end
+
+schema CBulletTraces_Render
+  ΔCBulletTraces
+where
+  -- State update: horizontalOffset' = aTraces[i].m_vecEndPos - aTraces[i].m_vecStartPos
+  -- State update: start' = aTraces[i].m_vecStartPos
+  -- State update: end' = aTraces[i].m_vecEndPos
+  -- State update: absStartProj' = Abs(startProj)
+  -- State update: absEndProj' = Abs(endProj)
+  -- State update: absStartProj' = Abs(startProj)
+  -- Invokes: CTimer::GetTimeInMilliseconds, horizontalOffset.Normalise, TheCamera.GetPosition, TheCamera.GetForward
+  true
+end
+
+schema CBulletTraces_Update
+  ΔCBulletTraces
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CBulletTrace_Update
+  ΔCBulletTrace
+where
+  -- State update: m_bInUse' = false
+  -- State update: diff' = m_vecCurrentPos - m_vecTargetPos
+  -- State update: remaining' = diff.Magnitude()
+  -- State update: m_vecCurrentPos' = m_vecTargetPos + (remaining - 0.8f) / remaining * diff
+  -- State update: m_bInUse' = false
+  -- State update: m_bInUse' = false
+  -- Invokes: diff.Magnitude
+  true
+end
+
+schema SpecialFX_MarkerAtomicCB
+  ΔSpecialFXModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- State update: data' = atomic
+  -- Return postcondition: result! = atomic
+  true
+end
+
+schema C3dMarker_AddMarker
+  ΔC3dMarker
+  identifier? : ℕ
+  type? : ℕ
+  fSize? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+  pulsePeriod? : ℕ
+  pulseFraction? : ℝ
+  rotateRate? : ℤ
+where
+  -- State update: m_nIdentifier' = identifier
+  -- State update: origAtomic' = ∅
+  -- State update: atomic' = RpAtomicClone(origAtomic)
+  -- State update: frame' = RwFrameCreate()
+  -- State update: geometry' = RpAtomicGetGeometry(atomic)
+  -- State update: m_pAtomic' = atomic
+  -- Return postcondition: result! = m_pAtomic != nil
+  -- Invokes: m_Matrix.SetUnity, CVisibilityPlugins::SetAtomicRenderCallback, m_Matrix.Attach, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema C3dMarker_DeleteMarkerObject
+  ΔC3dMarker
+where
+  -- State update: m_nIdentifier' = 0
+  -- State update: m_nStartTime' = 0
+  -- State update: m_bIsUsed' = false
+  -- State update: m_bFindZOnNextPlacement' = false
+  -- State update: m_nType' = MARKERTYPE_INVALID
+  -- State update: frame' = RpAtomicGetFrame(m_pAtomic)
+  true
+end
+
+schema C3dMarker_Render
+  ΔC3dMarker
+where
+  -- Invokes: m_Matrix.UpdateRW, matrix.Attach, matrix.Scale, matrix.UpdateRW
+  true
+end
+
+schema C3dMarkers_Init
+  ΔC3dMarkers
+where
+  -- State update: m_pAtomic' = ∅
+  -- State update: m_nType' = MARKERTYPE_INVALID
+  -- State update: m_bIsUsed' = false
+  -- State update: m_bFindZOnNextPlacement' = false
+  -- State update: m_nIdentifier' = 0
+  -- State update: m_Color.red' = 255
+  -- Invokes: CTxdStore::FindTxdSlot, CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd, CFileMgr::ChangeDir, CFileLoader::LoadAtomicFile2Return
+  true
+end
+
+schema C3dMarkers_Shutdown
+  ΔC3dMarkers
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema C3dMarkers_Render
+  ΔC3dMarkers
+where
+  -- State update: NumActiveMarkers' = 0
+  -- State update: m_bIsUsed' = false
+  -- Invokes: CCoronas::RegisterCorona, m_Matrix.GetPosition
+  true
+end
+
+schema C3dMarkers_PlaceMarker
+  ΔC3dMarkers
+  identifier? : ℕ
+  type? : ℕ
+  pos? : CVector
+  size? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+  pulsePeriod? : ℕ
+  pulseFraction? : ℝ
+  rotateRate? : ℤ
+where
+  -- State update: playerPos' = FindPlayerCentreOfWorld(0)
+  -- State update: pMarker' = ∅
+  -- State update: dist' = ((CVector2D)pos - playerPos).Magnitude()
+  -- State update: pMarker' = &m_aMarkerArray[i]
+  -- State update: pMarker' = &m_aMarkerArray[i]
+  -- State update: pMarker' = &m_aMarkerArray[i]
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pMarker
+  -- Return postcondition: result! = pMarker
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_Matrix.GetPosition, m_Matrix.RotateZ, CTimer::GetTimeStep, CColStore::HasCollisionLoaded
+  true
+end
+
+schema C3dMarkers_PlaceMarkerSet
+  ΔC3dMarkers
+  id? : ℕ
+  type? : ℕ
+  pos? : CVector
+  size? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+  pulsePeriod? : ℕ
+  pulseFraction? : ℝ
+  rotateRate? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema C3dMarkers_Update
+  ΔC3dMarkers
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CBrightLights_Init
+  ΔCBrightLights
+where
+  -- State update: NumBrightLights' = 0
+  true
+end
+
+schema CBrightLights_RegisterOne
+  ΔCBrightLights
+  pos? : CVector
+  up? : CVector
+  side? : CVector
+  front? : CVector
+  type? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+where
+  -- State update: m_camDist' = (pos - TheCamera.GetPosition()).Magnitude()
+  -- State update: m_pos' = pos
+  -- State update: m_up' = up
+  -- State update: m_side' = side
+  -- State update: m_front' = front
+  -- State update: m_type' = type
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CBrightLights_Render
+  ΔCBrightLights
+where
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: flicker' = (CGeneral::GetRandomNumber()&0xFF) * 0.2f
+  -- State update: r' = flicker
+  -- State update: g' = 255
+  -- State update: b' = flicker
+  -- Invokes: CGeneral::GetRandomNumber, TheCamera.GetRight, TheCamera.GetUp
+  true
+end
+
+schema CBrightLights_RenderOutGeometryBuffer
+  ΔCBrightLights
+where
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  true
+end
+
+schema CShinyTexts_Init
+  ΔCShinyTexts
+where
+  -- State update: NumShinyTexts' = 0
+  true
+end
+
+schema CShinyTexts_RegisterOne
+  ΔCShinyTexts
+  p0? : CVector
+  p1? : CVector
+  p2? : CVector
+  p3? : CVector
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  type? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  maxDist? : ℝ
+where
+  -- State update: m_camDist' = (p0 - TheCamera.GetPosition()).Magnitude()
+  -- State update: x' = u0
+  -- State update: y' = v0
+  -- State update: x' = u1
+  -- State update: y' = v1
+  -- State update: x' = u2
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CShinyTexts_Render
+  ΔCShinyTexts
+where
+  -- State update: lastTex' = ∅
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: r' = aShinyTexts[i].m_red
+  -- State update: g' = aShinyTexts[i].m_green
+  -- State update: b' = aShinyTexts[i].m_blue
+  true
+end
+
+schema CShinyTexts_RenderOutGeometryBuffer
+  ΔCShinyTexts
+where
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  true
+end
+
+schema CMoneyMessage_Render
+  ΔCMoneyMessage
+where
+  -- State update: MAX_SCALE' = 4.0f
+  -- State update: nLifeTime' = CTimer::GetTimeInMilliseconds() - m_nTimeRegistered
+  -- State update: m_nTimeRegistered' = 0
+  -- State update: fLifeTime' = (float)nLifeTime / MONEY_MESSAGE_LIFETIME_MS
+  -- State update: fScaleY' = Min(fDistY / 100.0f, MAX_SCALE)
+  -- State update: fScaleX' = Min(fDistX / 100.0f, MAX_SCALE)
+  -- Invokes: CTimer::GetTimeInMilliseconds, CSprite::CalcScreenCoors, CFont::SetPropOn, CFont::SetBackgroundOff, CFont::SetScale
+  true
+end
+
+schema CMoneyMessages_Init
+  ΔCMoneyMessages
+where
+  -- State update: m_nTimeRegistered' = 0
+  true
+end
+
+schema CMoneyMessages_Render
+  ΔCMoneyMessages
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMoneyMessages_RegisterOne
+  ΔCMoneyMessages
+  vecPos? : CVector
+  pText? : seq CHAR
+  bRed? : ℕ
+  bGreen? : ℕ
+  bBlue? : ℕ
+  fSize? : ℝ
+  fOpacity? : ℝ
+where
+  -- State update: m_nTimeRegistered' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_vecPosition' = vecPos
+  -- State update: m_Colour.red' = bRed
+  -- State update: m_Colour.green' = bGreen
+  -- State update: m_Colour.blue' = bBlue
+  -- State update: m_fSize' = fSize
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CSpecialParticleStuff_CreateFoamAroundObject
+  ΔCSpecialParticleStuff
+  pMatrix? : Ref[CMatrix]
+  innerFw? : ℝ
+  innerRg? : ℝ
+  innerUp? : ℝ
+  particles? : ℤ
+where
+  -- State update: outerFw' = innerFw + 5.0f
+  -- State update: outerRg' = innerRg + 5.0f
+  -- State update: outerUp' = innerUp + 5.0f
+  -- State update: attempts' = 0
+  -- State update: rnd' = CGeneral::GetRandomNumber()
+  -- State update: pos.x' = (int8)(rnd - 128) * innerFw / 110.0f
+  -- Invokes: CGeneral::GetRandomNumber, TheCamera.GetForward, pMatrix->GetPosition, pMatrix->GetForward, pMatrix->GetRight
+  true
+end
+
+schema CSpecialParticleStuff_StartBoatFoamAnimation
+  ΔCSpecialParticleStuff
+where
+  -- State update: BoatFromStart' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CSpecialParticleStuff_UpdateBoatFoamAnimation
+  ΔCSpecialParticleStuff
+  pMatrix? : Ref[CMatrix]
+where
+  -- State update: FrameInAnimation' = 0
+  -- State update: prev' = CTimer::GetPreviousTimeInMilliseconds()
+  -- State update: cur' = CTimer::GetTimeInMilliseconds()
+  -- State update: pos' = *pMatrix * CVector(X, Y, Z)
+  -- State update: FrameInAnimation' = 0
+  -- State update: FrameInAnimation' = 1
+  -- Invokes: CTimer::GetPreviousTimeInMilliseconds, CTimer::GetTimeInMilliseconds, CParticle::AddParticle, CGeneral::GetRandomNumber
+  true
+end
+
+schema CBulletTraces_AddTrace_3
+  ΔCBulletTraces
+  vecStart? : Ref[CVector]
+  vecTarget? : Ref[CVector]
+where
+  -- State update: index' = 0
+  -- State update: m_vecCurrentPos' = *vecStart
+  -- State update: m_vecTargetPos' = *vecTarget
+  -- State update: m_bInUse' = true
+  -- State update: m_framesInUse' = 0
+  -- State update: m_lifeTime' = 25 + CGeneral::GetRandomNumber() % 32
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SpecialFXModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1660
+end

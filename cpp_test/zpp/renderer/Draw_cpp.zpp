@@ -1,0 +1,98 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Draw (renderer)
+-- Source File(s): renderer/Draw.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Draw_FindAspectRatio
+  ΔDrawModuleState
+where
+  -- Return postcondition: result! = SCREEN_WIDTH / SCREEN_HEIGHT
+  -- Return postcondition: result! = 4.0f / 3.0f
+  -- Return postcondition: result! = 5.0f / 4.0f
+  true
+end
+
+schema CDraw_CalculateAspectRatio
+  ΔCDraw
+where
+  -- State update: ms_fAspectRatio' = (5.f / 3.f) * FindAspectRatio() / (16.f / 9.f)
+  -- State update: ms_fAspectRatio' = FindAspectRatio()
+  -- State update: ms_fAspectRatio' = 5.f / 3.f
+  -- State update: ms_fAspectRatio' = 16.f / 9.f
+  -- State update: ms_fAspectRatio' = 5.f/4.f
+  -- State update: ms_fAspectRatio' = 4.f/3.f
+  -- Return postcondition: result! = CDraw::ms_fAspectRatio
+  true
+end
+
+schema CDraw_ConvertFOV
+  ΔCDraw
+  hfov? : ℝ
+where
+  -- State update: ar1' = DEFAULT_ASPECT_RATIO
+  -- State update: ar2' = GetAspectRatio()
+  -- State update: hfov' = DEGTORAD(hfov)
+  -- State update: vfov' = Atan(tan(hfov/2) / ar1) *2
+  -- State update: hfov' = Atan(tan(vfov/2) * ar2) *2
+  -- Return postcondition: result! = RADTODEG(hfov)
+  true
+end
+
+schema CDraw_SetFOV
+  ΔCDraw
+  fov? : ℝ
+where
+  -- State update: ms_fScaledFOV' = ConvertFOV(fov)
+  -- State update: ms_fScaledFOV' = fov
+  -- State update: ms_fFOV' = fov
+  -- Invokes: CCutsceneMgr::IsRunning
+  true
+end
+
+schema CDraw_ScaleY
+  ΔCDraw
+  y? : ℝ
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDraw_FindAspectRatio
+  ΔCDraw
+where
+  -- Return postcondition: result! = 16.0f/9.0f
+  -- Return postcondition: result! = 4.0f/3.0f
+  -- Return postcondition: result! = SCREEN_WIDTH / SCREEN_HEIGHT
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema DrawModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 156
+end

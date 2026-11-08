@@ -1,0 +1,270 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Door (vehicles)
+-- Source File(s): vehicles/Door.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eDoorState ::= DOORST_SWINGING | DOORST_OPEN | DOORST_CLOSED
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDoor
+  m_fMaxAngle : ℝ
+  m_fMinAngle : ℝ
+  m_nDirn : ℤ
+  m_nAxis : ℤ
+  m_nDoorState : ℤ
+  m_fAngle : ℝ
+  m_fPrevAngle : ℝ
+  m_fAngVel : ℝ
+  m_vecSpeed : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CDoor_CDoor
+  ΔCDoor
+where
+  -- Declared member operation CDoor::CDoor(void)
+  true
+end
+
+schema CDoor_Init_2
+  ΔCDoor
+  minAngle? : ℝ
+  maxAngle? : ℝ
+  dir? : ℤ
+  axis? : ℤ
+where
+  -- Declared member operation CDoor::Init(float minAngle, float maxAngle, int8 dir, int8 axis)
+  true
+end
+
+schema CDoor_Open_3
+  ΔCDoor
+  ratio? : ℝ
+  result! : void
+where
+  -- Declared member operation CDoor::Open(float ratio)
+  true
+end
+
+schema CDoor_Process_4
+  ΔCDoor
+  veh? : Ref[CVehicle]
+where
+  -- Declared member operation CDoor::Process(CVehicle *veh)
+  true
+end
+
+schema CDoor_RetAngleWhenClosed_5
+  ΔCDoor
+  result! : ℝ
+where
+  -- Declared member operation CDoor::RetAngleWhenClosed(void)
+  true
+end
+
+schema CDoor_RetAngleWhenOpen_6
+  ΔCDoor
+  result! : ℝ
+where
+  -- Declared member operation CDoor::RetAngleWhenOpen(void)
+  true
+end
+
+schema CDoor_GetAngleOpenRatio_7
+  ΔCDoor
+  result! : ℝ
+where
+  -- Declared member operation CDoor::GetAngleOpenRatio(void)
+  true
+end
+
+schema CDoor_IsFullyOpen_8
+  ΔCDoor
+  result! : 𝔹
+where
+  -- Declared member operation CDoor::IsFullyOpen(void)
+  true
+end
+
+schema CDoor_IsClosed_9
+  ΔCDoor
+  result! : 𝔹
+where
+  -- Declared member operation CDoor::IsClosed(void)
+  true
+end
+
+schema CTrainDoor
+  m_fClosedPosn : ℝ
+  m_fOpenPosn : ℝ
+  m_nDirn : ℤ
+  m_nDoorState : ℤ
+  m_nAxis : ℤ
+  m_fPosn : ℝ
+  m_fPrevPosn : ℝ
+  field_14 : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTrainDoor_CTrainDoor
+  ΔCTrainDoor
+where
+  -- Declared member operation CTrainDoor::CTrainDoor(void)
+  true
+end
+
+schema CTrainDoor_Init_2
+  ΔCTrainDoor
+  open? : ℝ
+  closed? : ℝ
+  dir? : ℤ
+  axis? : ℤ
+where
+  -- Declared member operation CTrainDoor::Init(float open, float closed, int8 dir, int8 axis)
+  true
+end
+
+schema CTrainDoor_IsClosed_3
+  ΔCTrainDoor
+  result! : bool
+where
+  -- Declared member operation CTrainDoor::IsClosed(void)
+  true
+end
+
+schema CTrainDoor_IsFullyOpen_4
+  ΔCTrainDoor
+  result! : 𝔹
+where
+  -- Declared member operation CTrainDoor::IsFullyOpen(void)
+  true
+end
+
+schema CTrainDoor_RetTranslationWhenClosed_5
+  ΔCTrainDoor
+  result! : ℝ
+where
+  -- Declared member operation CTrainDoor::RetTranslationWhenClosed(void)
+  true
+end
+
+schema CTrainDoor_RetTranslationWhenOpen_6
+  ΔCTrainDoor
+  result! : ℝ
+where
+  -- Declared member operation CTrainDoor::RetTranslationWhenOpen(void)
+  true
+end
+
+schema CTrainDoor_Open_7
+  ΔCTrainDoor
+  ratio? : ℝ
+where
+  -- Declared member operation CTrainDoor::Open(float ratio)
+  true
+end
+
+schema CFerryDoor
+  m_fClosedPosn : ℝ
+  m_fOpenPosn : ℝ
+  m_nDirn : ℤ
+  m_nAxis : ℤ
+  m_nDoorState : ℤ
+  m_fPosn : ℝ
+  m_fPrevPosn : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CFerryDoor_IsInUse
+  ΔCFerryDoor
+  result! : 𝔹
+where
+  -- Declared member operation CFerryDoor::IsInUse(void)
+  true
+end
+
+schema CFerryDoor_RetTranslationWhenClosed_2
+  ΔCFerryDoor
+  result! : ℝ
+where
+  -- Declared member operation CFerryDoor::RetTranslationWhenClosed(void)
+  true
+end
+
+schema CFerryDoor_RetTranslationWhenOpen_3
+  ΔCFerryDoor
+  result! : ℝ
+where
+  -- Declared member operation CFerryDoor::RetTranslationWhenOpen(void)
+  true
+end
+
+schema CFerryDoor_IsClosed_4
+  ΔCFerryDoor
+  result! : 𝔹
+where
+  -- Declared member operation CFerryDoor::IsClosed(void)
+  true
+end
+
+schema CFerryDoor_IsFullyOpen_5
+  ΔCFerryDoor
+  result! : 𝔹
+where
+  -- Declared member operation CFerryDoor::IsFullyOpen(void)
+  true
+end
+
+schema CFerryDoor_Open_6
+  ΔCFerryDoor
+  ratio? : ℝ
+where
+  -- Declared member operation CFerryDoor::Open(float ratio)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Door_Init
+  ΔDoorModuleState
+  minAngle? : ℝ
+  maxAngle? : ℝ
+  dir? : ℤ
+  axis? : ℤ
+where
+  -- State update: m_fMinAngle' = minAngle
+  -- State update: m_fMaxAngle' = maxAngle
+  -- State update: m_nDirn' = dir
+  -- State update: m_nAxis' = axis
+  true
+end
+
+schema Door_Init_2
+  ΔDoorModuleState
+  open? : ℝ
+  closed? : ℝ
+  dir? : ℤ
+  axis? : ℤ
+where
+  -- State update: m_fOpenPosn' = open
+  -- State update: m_fClosedPosn' = closed
+  -- State update: m_nDirn' = dir
+  -- State update: m_nAxis' = axis
+  true
+end

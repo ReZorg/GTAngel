@@ -1,0 +1,57 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColBox (collision)
+-- Source File(s): collision/ColBox.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ColBox.zpp  (from "ColBox.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CColBox_Set
+  ΔCColBox
+  min? : CVector
+  max? : CVector
+  surf? : ℕ
+  piece? : ℕ
+where
+  -- State update: min' = min
+  -- State update: max' = max
+  -- State update: surface' = surf
+  -- State update: piece' = piece
+  true
+end
+
+schema CColBox_operator
+  ΔCColBox
+  other? : CColBox
+where
+  -- State update: min' = other.min
+  -- State update: max' = other.max
+  -- State update: surface' = other.surface
+  -- State update: piece' = other.piece
+  -- Return postcondition: result! = *this
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ColBoxModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 21
+end

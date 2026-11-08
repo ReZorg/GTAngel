@@ -1,0 +1,190 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendAssociation (animation)
+-- Source File(s): animation/AnimBlendAssociation.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendHierarchy.zpp  (from "AnimBlendHierarchy.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimBlendAssociation_CAnimBlendAssociation
+  ΔCAnimBlendAssociation
+where
+  -- State update: groupId' = -1
+  -- State update: nodes' = ∅
+  -- State update: blendAmount' = 1.0f
+  -- State update: blendDelta' = 0.0f
+  -- State update: currentTime' = 0.0f
+  -- State update: speed' = 1.0f
+  -- Invokes: link.Init
+  true
+end
+
+schema CAnimBlendAssociation_CAnimBlendAssociation_2
+  ΔCAnimBlendAssociation
+  other? : CAnimBlendAssociation
+where
+  -- State update: nodes' = ∅
+  -- State update: blendAmount' = 1.0f
+  -- State update: blendDelta' = 0.0f
+  -- State update: currentTime' = 0.0f
+  -- State update: speed' = 1.0f
+  -- State update: timeStep' = 0.0f
+  -- Invokes: link.Init
+  true
+end
+
+schema CAnimBlendAssociation_CAnimBlendAssociation_3
+  ΔCAnimBlendAssociation
+where
+  -- Invokes: link.Remove
+  true
+end
+
+schema CAnimBlendAssociation_AllocateAnimBlendNodeArray
+  ΔCAnimBlendAssociation
+  n? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_FreeAnimBlendNodeArray
+  ΔCAnimBlendAssociation
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_Init
+  ΔCAnimBlendAssociation
+  clump? : Ref[RpClump]
+  hier? : Ref[CAnimBlendHierarchy]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: numNodes' = clumpData.numFrames
+  -- State update: association' = this
+  -- State update: hierarchy' = hier
+  -- State update: seq' = &hier.sequences[i]
+  -- State update: frame' = RpAnimBlendClumpFindFrame(clump, seq.name)
+  true
+end
+
+schema CAnimBlendAssociation_Init_2
+  ΔCAnimBlendAssociation
+  assoc? : CAnimBlendAssociation
+where
+  -- State update: hierarchy' = assoc.hierarchy
+  -- State update: numNodes' = assoc.numNodes
+  -- State update: flags' = assoc.flags
+  -- State update: animId' = assoc.animId
+  -- State update: groupId' = assoc.groupId
+  -- State update: association' = this
+  true
+end
+
+schema CAnimBlendAssociation_SetBlend
+  ΔCAnimBlendAssociation
+  amount? : ℝ
+  delta? : ℝ
+where
+  -- State update: blendAmount' = amount
+  -- State update: blendDelta' = delta
+  true
+end
+
+schema CAnimBlendAssociation_SetCurrentTime
+  ΔCAnimBlendAssociation
+  time? : ℝ
+where
+  -- State update: currentTime' = time
+  -- State update: currentTime' = hierarchy.totalLength
+  -- Invokes: CAnimManager::UncompressAnimation
+  true
+end
+
+schema CAnimBlendAssociation_SyncAnimation
+  ΔCAnimBlendAssociation
+  other? : Ref[CAnimBlendAssociation]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_Start
+  ΔCAnimBlendAssociation
+  time? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_UpdateTimeStep
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  relSpeed? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_UpdateTime
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  relSpeed? : ℝ
+where
+  -- State update: currentTime' = hierarchy.totalLength
+  -- State update: blendDelta' = -4.0f
+  -- State update: callbackType' = CB_NONE
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CAnimBlendAssociation_UpdateBlend
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+where
+  -- State update: blendAmount' = 0.0f
+  -- State update: blendDelta' = Max(0.0f, blendDelta)
+  -- State update: blendAmount' = 1.0f
+  -- State update: blendDelta' = Min(0.0f, blendDelta)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CAnimBlendAssociation_Remove
+  ΔCAnimBlendAssociation
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema AnimBlendAssociationModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 259
+end

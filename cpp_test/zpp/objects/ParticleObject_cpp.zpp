@@ -1,0 +1,290 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ParticleObject (objects)
+-- Source File(s): objects/ParticleObject.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include General.zpp  (from "General.h")
+-- include ParticleMgr.zpp  (from "ParticleMgr.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Game.zpp  (from "Game.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include screendroplets.zpp  (from "screendroplets.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PARTICLE_OBJECT_SIZEOF : seq CHAR  -- #define PARTICLE_OBJECT_SIZEOF 0x88
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAudioHydrant_Add
+  ΔCAudioHydrant
+  particleobject? : Ref[CParticleObject]
+where
+  -- State update: AudioEntity' = DMAudio.CreateEntity(AUDIOTYPE_FIREHYDRANT, particleobject)
+  -- State update: pParticleObject' = particleobject
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: DMAudio.CreateEntity, DMAudio.SetEntityStatus
+  true
+end
+
+schema CAudioHydrant_Remove
+  ΔCAudioHydrant
+  particleobject? : Ref[CParticleObject]
+where
+  -- State update: AudioEntity' = AEHANDLE_NONE
+  -- State update: pParticleObject' = ∅
+  -- Invokes: DMAudio.DestroyEntity
+  true
+end
+
+schema CParticleObject_CParticleObject
+  ΔCParticleObject
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CParticleObject_Initialise
+  ΔCParticleObject
+where
+  -- State update: pCloseListHead' = ∅
+  -- State update: pFarListHead' = ∅
+  -- State update: pUnusedListHead' = &gPObjectArray[0]
+  -- State update: m_pPrev' = ∅
+  -- State update: m_pPrev' = &gPObjectArray[i - 1]
+  -- State update: m_pNext' = ∅
+  true
+end
+
+schema CParticleObject_AddObject
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  remove? : ℕ
+where
+  -- Return postcondition: result! = AddObject(type, pos, target, 0.0f, 0, color, remove)
+  true
+end
+
+schema CParticleObject_AddObject_2
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  size? : ℝ
+  remove? : ℕ
+where
+  -- Return postcondition: result! = AddObject(type, pos, target, size, 0, color, remove)
+  true
+end
+
+schema CParticleObject_AddObject_3
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  target? : CVector
+  size? : ℝ
+  remove? : ℕ
+where
+  -- Return postcondition: result! = AddObject(type, pos, target, size, 0, color, remove)
+  true
+end
+
+schema CParticleObject_AddObject_4
+  ΔCParticleObject
+  type? : ℕ
+  pos? : CVector
+  target? : CVector
+  size? : ℝ
+  lifeTime? : ℕ
+  color? : RwRGBA
+  remove? : ℕ
+where
+  -- State update: pobj' = pUnusedListHead
+  -- State update: pobj.m_nState' = POBJECTSTATE_UPDATE_CLOSE
+  -- State update: pobj.m_Type' = (eParticleObjectType)type
+  -- State update: pobj.m_vecTarget' = target
+  -- State update: pobj.m_nNumEffectCycles' = 1
+  -- State update: pobj.m_nSkipFrames' = 1
+  -- Return postcondition: result! = NULL
+  -- Return postcondition: result! = pobj
+  -- Invokes: pobj->SetPosition, CTimer::GetTimeInMilliseconds, CAudioHydrant::Add, ScreenDroplets::RegisterSplash, m_vecTarget.Normalise
+  true
+end
+
+schema CParticleObject_RemoveObject
+  ΔCParticleObject
+where
+  -- State update: m_nState' = POBJECTSTATE_FREE
+  -- State update: m_nState' = POBJECTSTATE_FREE
+  true
+end
+
+schema CParticleObject_UpdateAll
+  ΔCParticleObject
+where
+  -- State update: pobj' = pCloseListHead
+  -- State update: nextpobj' = pobj.m_pNext
+  -- State update: pobj' = nextpobj
+  -- State update: frame' = CTimer::GetFrameCounter() & 31
+  -- State update: counter' = 0
+  -- State update: pobj' = pFarListHead
+  -- Invokes: pobj->UpdateClose, CTimer::GetFrameCounter, pobj->UpdateFar
+  true
+end
+
+schema CParticleObject_UpdateClose
+  ΔCParticleObject
+where
+  -- State update: m_nState' = POBJECTSTATE_FREE
+  -- State update: m_nState' = POBJECTSTATE_UPDATE_FAR
+  -- State update: m_nFrameCounter' = 0
+  -- State update: randVal' = CGeneral::GetRandomNumber() % this.m_nCreationChance
+  -- State update: pos' = this.GetPosition()
+  -- State update: vel' = this.m_vecTarget
+  -- Invokes: this->GetPosition, TheCamera.GetPosition, CAudioHydrant::Remove, CGeneral::GetRandomNumber, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CParticleObject_UpdateFar
+  ΔCParticleObject
+where
+  -- State update: m_nState' = POBJECTSTATE_FREE
+  -- State update: dist' = this.GetPosition() - TheCamera.GetPosition()
+  -- State update: m_nState' = POBJECTSTATE_UPDATE_CLOSE
+  -- Invokes: CTimer::GetTimeInMilliseconds, CAudioHydrant::Remove, this->GetPosition, TheCamera.GetPosition, dist.MagnitudeSqr
+  true
+end
+
+schema ParticleObject_SaveOneParticle
+  ΔParticleObjectModuleState
+  p? : Ref[CParticleObject]
+  buffer? : ℙ ℕ
+where
+  -- Invokes: p->GetMatrix
+  true
+end
+
+schema CParticleObject_SaveParticle
+  ΔCParticleObject
+  buffer? : ℙ ℕ
+  length? : ℙ ℕ
+where
+  -- State update: numObjects' = 0
+  -- State update: p' = pCloseListHead
+  -- State update: p' = pFarListHead
+  -- State update: buffer' = numObjects
+  -- State update: objectsLength' = PARTICLE_OBJECT_SIZEOF * (numObjects + 1)
+  -- State update: dataLength' = objectsLength + sizeof(int32)
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CParticleObject_LoadParticle
+  ΔCParticleObject
+  buffer? : ℙ ℕ
+  length? : ℕ
+where
+  -- State update: numObjects' = *(int32 *)buffer
+  -- State update: dst' = pUnusedListHead
+  -- State update: src' = (CParticleObject *)buffer
+  -- State update: dst.m_nState' = POBJECTSTATE_UPDATE_CLOSE
+  -- State update: dst.m_Type' = src.m_Type
+  -- State update: dst.m_ParticleType' = src.m_ParticleType
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: dst->SetPosition, src->GetPosition, matrix.GetPosition
+  true
+end
+
+schema CParticleObject_RemoveAllParticleObjects
+  ΔCParticleObject
+where
+  -- State update: pUnusedListHead' = &gPObjectArray[0]
+  -- State update: pCloseListHead' = ∅
+  -- State update: pFarListHead' = ∅
+  -- State update: m_pPrev' = ∅
+  -- State update: m_pPrev' = &gPObjectArray[i - 1]
+  -- State update: m_pNext' = ∅
+  true
+end
+
+schema CParticleObject_MoveToList
+  ΔCParticleObject
+  from? : Ref[CParticleObject]
+  to? : Ref[CParticleObject]
+  obj? : Ref[CParticleObject]
+where
+  -- State update: from' = obj.m_pNext
+  -- State update: m_pPrev' = ∅
+  -- State update: obj.m_pPrev.m_pNext' = ∅
+  -- State update: obj.m_pNext.m_pPrev' = obj.m_pPrev
+  -- State update: obj.m_pPrev.m_pNext' = obj.m_pNext
+  -- State update: obj.m_pNext' = *to
+  true
+end
+
+schema CParticleObject_AddObject_5
+  ΔCParticleObject
+  type? : tParticleType
+  pos? : CVector
+  target? : CVector
+  size? : ℝ
+  lifeTime? : ℕ
+  numEffectCycles? : ℕ
+  skipFrames? : ℕ
+  creationChance? : ℕ
+  remove? : ℕ
+where
+  -- State update: pobj' = pUnusedListHead
+  -- State update: pobj.m_nState' = POBJECTSTATE_UPDATE_CLOSE
+  -- State update: pobj.m_Type' = (eParticleObjectType)-1
+  -- State update: pobj.m_ParticleType' = type
+  -- State update: pobj.m_vecTarget' = target
+  -- State update: pobj.m_nNumEffectCycles' = numEffectCycles
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pobj
+  -- Invokes: pobj->SetPosition, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CParticleObject_RemoveAllExpireableParticleObjects
+  ΔCParticleObject
+where
+  -- State update: pobj' = pCloseListHead
+  -- State update: nextpobj' = pobj.m_pNext
+  -- State update: pobj.m_nState' = POBJECTSTATE_FREE
+  -- State update: pobj' = nextpobj
+  -- State update: pobj' = pFarListHead
+  -- State update: nextpobj' = pobj.m_pNext
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ParticleObjectModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1487
+end

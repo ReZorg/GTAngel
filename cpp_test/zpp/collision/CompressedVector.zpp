@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CompressedVector (collision)
+-- Source File(s): collision/CompressedVector.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CompressedVector
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CompressedVector_Get
+  ΞCompressedVector
+  result! : CVector
+where
+  -- Declared member operation CompressedVector::Get(void)
+  true
+end
+
+schema CompressedVector_Set_2
+  ΔCompressedVector
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CompressedVector::Set(float x, float y, float z)
+  true
+end
+
+schema CompressedVector_Unpack_3
+  ΞCompressedVector
+  qword? : ℙ ℤ
+  result! : else_void
+where
+  -- Declared member operation CompressedVector::Unpack(int32 *qword)
+  true
+end
+
+schema CompressedVector_Get_4
+  ΞCompressedVector
+  result! : CVector
+where
+  -- Declared member operation CompressedVector::Get(void)
+  true
+end
+
+schema CompressedVector_Set_5
+  ΔCompressedVector
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CompressedVector::Set(float x, float y, float z)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CompressedVector_Unpack
+  ΞCompressedVectorModuleState
+  qword? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CompressedVector_Unpack_2
+  ΞCompressedVectorModuleState
+  qword? : ℙ ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

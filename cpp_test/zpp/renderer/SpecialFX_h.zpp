@@ -1,0 +1,584 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SpecialFX (renderer)
+-- Source File(s): renderer/SpecialFX.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+SpecialFX_Enum_1 ::= MARKERTYPE_0 | MARKERTYPE_ARROW | MARKERTYPE_2 | MARKERTYPE_3 | MARKERTYPE_CYLINDER | NUMMARKERTYPES | MARKERTYPE_INVALID
+  -- val(MARKERTYPE_0) = 0
+  -- val(MARKERTYPE_INVALID) = 0x101
+
+SpecialFX_Enum_2 ::= BRIGHTLIGHT_INVALID | BRIGHTLIGHT_TRAFFIC_GREEN | BRIGHTLIGHT_TRAFFIC_YELLOW | BRIGHTLIGHT_TRAFFIC_RED | BRIGHTLIGHT_FRONT_LONG | BRIGHTLIGHT_FRONT_SMALL | BRIGHTLIGHT_FRONT_BIG | BRIGHTLIGHT_FRONT_TALL | BRIGHTLIGHT_REAR_LONG | BRIGHTLIGHT_REAR_SMALL | BRIGHTLIGHT_REAR_BIG | BRIGHTLIGHT_REAR_TALL | BRIGHTLIGHT_SIREN | BRIGHTLIGHT_FRONT | BRIGHTLIGHT_REAR
+  -- val(BRIGHTLIGHT_FRONT) = BRIGHTLIGHT_FRONT_LONG
+  -- val(BRIGHTLIGHT_REAR) = BRIGHTLIGHT_REAR_LONG
+
+SpecialFX_Enum_3 ::= SHINYTEXT_WALK | SHINYTEXT_FLAT
+  -- val(SHINYTEXT_WALK) = 1
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSpecialFX
+  bVideoCam : 𝔹
+  bLiftCam : 𝔹
+  bSnapShotActive : 𝔹
+  SnapShotFrames : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSpecialFX_Render
+  ΔCSpecialFX
+where
+  -- Declared member operation CSpecialFX::Render(void)
+  true
+end
+
+schema CSpecialFX_Update_2
+  ΔCSpecialFX
+where
+  -- Declared member operation CSpecialFX::Update(void)
+  true
+end
+
+schema CSpecialFX_Init_3
+  ΔCSpecialFX
+where
+  -- Declared member operation CSpecialFX::Init(void)
+  true
+end
+
+schema CSpecialFX_Shutdown_4
+  ΔCSpecialFX
+where
+  -- Declared member operation CSpecialFX::Shutdown(void)
+  true
+end
+
+schema CSpecialFX_AddWeaponStreak_5
+  ΔCSpecialFX
+  type? : ℤ
+where
+  -- Declared member operation CSpecialFX::AddWeaponStreak(int type)
+  true
+end
+
+schema CSpecialFX_Render2DFXs_6
+  ΔCSpecialFX
+where
+  -- Declared member operation CSpecialFX::Render2DFXs()
+  true
+end
+
+schema CRegisteredMotionBlurStreak
+  m_id : ℕ
+  m_red : ℕ
+  m_green : ℕ
+  m_blue : ℕ
+  m_pos1 : seq CVector  -- bounded array [3]
+  m_pos2 : seq CVector  -- bounded array [3]
+  m_isValid : seq 𝔹  -- bounded array [3]
+where
+  m_id ≥ 0
+  m_red ≥ 0
+  m_green ≥ 0
+  m_blue ≥ 0
+  #m_pos1 = 3
+  #m_pos2 = 3
+  #m_isValid = 3
+end
+
+schema CRegisteredMotionBlurStreak_Update
+  ΔCRegisteredMotionBlurStreak
+where
+  -- Declared member operation CRegisteredMotionBlurStreak::Update(void)
+  true
+end
+
+schema CRegisteredMotionBlurStreak_Render_2
+  ΔCRegisteredMotionBlurStreak
+where
+  -- Declared member operation CRegisteredMotionBlurStreak::Render(void)
+  true
+end
+
+schema CMotionBlurStreaks
+  aStreaks : seq CRegisteredMotionBlurStreak  -- bounded array [NUMMBLURSTREAKS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMotionBlurStreaks_Init
+  ΔCMotionBlurStreaks
+where
+  -- Declared member operation CMotionBlurStreaks::Init(void)
+  true
+end
+
+schema CMotionBlurStreaks_Update_2
+  ΔCMotionBlurStreaks
+where
+  -- Declared member operation CMotionBlurStreaks::Update(void)
+  true
+end
+
+schema CMotionBlurStreaks_RegisterStreak_3
+  ΔCMotionBlurStreaks
+  id? : ℕ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  p1? : CVector
+  p2? : CVector
+where
+  -- Declared member operation CMotionBlurStreaks::RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2)
+  true
+end
+
+schema CMotionBlurStreaks_Render_4
+  ΔCMotionBlurStreaks
+where
+  -- Declared member operation CMotionBlurStreaks::Render(void)
+  true
+end
+
+schema CBulletTrace
+  m_vecStartPos : CVector
+  m_vecEndPos : CVector
+  m_bInUse : 𝔹
+  m_nCreationTime : ℕ
+  m_nLifeTime : ℕ
+  m_fThickness : ℝ
+  m_fVisibility : ℕ
+  m_vecCurrentPos : CVector
+  m_vecTargetPos : CVector
+  m_framesInUse : ℕ
+  m_lifeTime : ℕ
+where
+  m_nCreationTime ≥ 0
+  m_nLifeTime ≥ 0
+  m_fVisibility ≥ 0
+  m_framesInUse ≥ 0
+  m_lifeTime ≥ 0
+end
+
+schema CBulletTrace_Update
+  ΔCBulletTrace
+where
+  -- Declared member operation CBulletTrace::Update(void)
+  true
+end
+
+schema CBulletTraces
+  aTraces : seq CBulletTrace  -- bounded array [NUMBULLETTRACES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CBulletTraces_Init
+  ΔCBulletTraces
+where
+  -- Declared member operation CBulletTraces::Init(void)
+  true
+end
+
+schema CBulletTraces_Render_2
+  ΔCBulletTraces
+where
+  -- Declared member operation CBulletTraces::Render(void)
+  true
+end
+
+schema CBulletTraces_Update_3
+  ΔCBulletTraces
+where
+  -- Declared member operation CBulletTraces::Update(void)
+  true
+end
+
+schema CBulletTraces_AddTrace_4
+  ΔCBulletTraces
+  start? : Ref[CVector]
+  end? : Ref[CVector]
+  thickness? : ℝ
+  lifeTime? : ℕ
+  visibility? : ℕ
+where
+  -- Declared member operation CBulletTraces::AddTrace(CVector* start, CVector* end, float thickness, uint32 lifeTime, uint8 visibility)
+  true
+end
+
+schema CBulletTraces_AddTrace_5
+  ΔCBulletTraces
+  start? : Ref[CVector]
+  end? : Ref[CVector]
+  weaponType? : ℤ
+  shooter? : Ref[class_CEntity]
+where
+  -- Declared member operation CBulletTraces::AddTrace(CVector* start, CVector* end, int32 weaponType, class CEntity* shooter)
+  true
+end
+
+schema CBulletTraces_AddTrace_6
+  ΔCBulletTraces
+  arg_1? : Ref[CVector]
+  arg_2? : Ref[CVector]
+where
+  -- Declared member operation CBulletTraces::AddTrace(CVector*, CVector*)
+  true
+end
+
+schema C3dMarker
+  m_Matrix : CMatrix
+  m_pAtomic : Ref[RpAtomic]
+  m_pMaterial : Ref[RpMaterial]
+  m_nType : ℕ
+  m_bIsUsed : 𝔹
+  m_bFindZOnNextPlacement : 𝔹
+  m_nIdentifier : ℕ
+  m_Color : RwRGBA
+  m_nPulsePeriod : ℕ
+  m_nRotateRate : ℤ
+  m_nStartTime : ℕ
+  m_fPulseFraction : ℝ
+  m_fStdSize : ℝ
+  m_fSize : ℝ
+  m_fBrightness : ℝ
+  m_fCameraRange : ℝ
+where
+  #m_pAtomic ≤ 1
+  #m_pMaterial ≤ 1
+  m_nType ≥ 0
+  m_nIdentifier ≥ 0
+  m_nPulsePeriod ≥ 0
+  m_nStartTime ≥ 0
+end
+
+schema C3dMarker_AddMarker
+  ΔC3dMarker
+  identifier? : ℕ
+  type? : ℕ
+  fSize? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+  pulsePeriod? : ℕ
+  pulseFraction? : ℝ
+  rotateRate? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation C3dMarker::AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
+  true
+end
+
+schema C3dMarker_DeleteMarkerObject_2
+  ΔC3dMarker
+where
+  -- Declared member operation C3dMarker::DeleteMarkerObject()
+  true
+end
+
+schema C3dMarker_Render_3
+  ΔC3dMarker
+where
+  -- Declared member operation C3dMarker::Render()
+  true
+end
+
+schema C3dMarkers
+  m_aMarkerArray : seq C3dMarker  -- bounded array [NUM3DMARKERS]
+  NumActiveMarkers : ℤ
+  m_pRpClumpArray : seq Ref[RpClump]  -- bounded array [NUMMARKERTYPES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema C3dMarkers_Init
+  ΔC3dMarkers
+where
+  -- Declared member operation C3dMarkers::Init()
+  true
+end
+
+schema C3dMarkers_Shutdown_2
+  ΔC3dMarkers
+where
+  -- Declared member operation C3dMarkers::Shutdown()
+  true
+end
+
+schema C3dMarkers_PlaceMarker_3
+  ΔC3dMarkers
+  id? : ℕ
+  type? : ℕ
+  pos? : CVector
+  size? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+  pulsePeriod? : ℕ
+  pulseFraction? : ℝ
+  rotateRate? : ℤ
+  result! : Ref[C3dMarker]
+where
+  -- Declared member operation C3dMarkers::PlaceMarker(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
+  true
+end
+
+schema C3dMarkers_PlaceMarkerSet_4
+  ΔC3dMarkers
+  id? : ℕ
+  type? : ℕ
+  pos? : CVector
+  size? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+  pulsePeriod? : ℕ
+  pulseFraction? : ℝ
+  rotateRate? : ℤ
+where
+  -- Declared member operation C3dMarkers::PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
+  true
+end
+
+schema C3dMarkers_Render_5
+  ΔC3dMarkers
+where
+  -- Declared member operation C3dMarkers::Render()
+  true
+end
+
+schema C3dMarkers_Update_6
+  ΔC3dMarkers
+where
+  -- Declared member operation C3dMarkers::Update()
+  true
+end
+
+schema CBrightLight
+  m_pos : CVector
+  m_up : CVector
+  m_side : CVector
+  m_front : CVector
+  m_camDist : ℝ
+  m_type : ℕ
+  m_red : ℕ
+  m_green : ℕ
+  m_blue : ℕ
+where
+  m_type ≥ 0
+  m_red ≥ 0
+  m_green ≥ 0
+  m_blue ≥ 0
+end
+
+schema CBrightLights
+  NumBrightLights : ℤ
+  aBrightLights : seq CBrightLight  -- bounded array [NUMBRIGHTLIGHTS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CBrightLights_Init
+  ΔCBrightLights
+where
+  -- Declared member operation CBrightLights::Init(void)
+  true
+end
+
+schema CBrightLights_RegisterOne_2
+  ΔCBrightLights
+  pos? : CVector
+  up? : CVector
+  side? : CVector
+  front? : CVector
+  type? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+where
+  -- Declared member operation CBrightLights::RegisterOne(CVector pos, CVector up, CVector side, CVector front, uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0)
+  true
+end
+
+schema CBrightLights_Render_3
+  ΔCBrightLights
+where
+  -- Declared member operation CBrightLights::Render(void)
+  true
+end
+
+schema CBrightLights_RenderOutGeometryBuffer_4
+  ΔCBrightLights
+where
+  -- Declared member operation CBrightLights::RenderOutGeometryBuffer(void)
+  true
+end
+
+schema CShinyText
+  m_verts : seq CVector  -- bounded array [4]
+  m_texCoords : seq CVector2D  -- bounded array [4]
+  m_camDist : ℝ
+  m_type : ℕ
+  m_red : ℕ
+  m_green : ℕ
+  m_blue : ℕ
+where
+  #m_verts = 4
+  #m_texCoords = 4
+  m_type ≥ 0
+  m_red ≥ 0
+  m_green ≥ 0
+  m_blue ≥ 0
+end
+
+schema CShinyTexts
+  NumShinyTexts : ℤ
+  aShinyTexts : seq CShinyText  -- bounded array [NUMSHINYTEXTS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CShinyTexts_Init
+  ΔCShinyTexts
+where
+  -- Declared member operation CShinyTexts::Init(void)
+  true
+end
+
+schema CShinyTexts_RegisterOne_2
+  ΔCShinyTexts
+  p0? : CVector
+  p1? : CVector
+  p2? : CVector
+  p3? : CVector
+  u0? : ℝ
+  v0? : ℝ
+  u1? : ℝ
+  v1? : ℝ
+  u2? : ℝ
+  v2? : ℝ
+  u3? : ℝ
+  v3? : ℝ
+  type? : ℕ
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  maxDist? : ℝ
+where
+  -- Declared member operation CShinyTexts::RegisterOne(CVector p0, CVector p1, CVector p2, CVector p3, float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3, uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist)
+  true
+end
+
+schema CShinyTexts_Render_3
+  ΔCShinyTexts
+where
+  -- Declared member operation CShinyTexts::Render(void)
+  true
+end
+
+schema CShinyTexts_RenderOutGeometryBuffer_4
+  ΔCShinyTexts
+where
+  -- Declared member operation CShinyTexts::RenderOutGeometryBuffer(void)
+  true
+end
+
+schema CMoneyMessage
+  m_nTimeRegistered : ℕ
+  m_vecPosition : CVector
+  m_aText : seq CHAR
+  m_Colour : CRGBA
+  m_fSize : ℝ
+  m_fOpacity : ℝ
+where
+  m_nTimeRegistered ≥ 0
+  #m_aText = 16
+end
+
+schema CMoneyMessage_Render
+  ΔCMoneyMessage
+where
+  -- Declared member operation CMoneyMessage::Render()
+  true
+end
+
+schema CMoneyMessages
+  aMoneyMessages : seq CMoneyMessage  -- bounded array [NUMMONEYMESSAGES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CMoneyMessages_Init
+  ΔCMoneyMessages
+where
+  -- Declared member operation CMoneyMessages::Init()
+  true
+end
+
+schema CMoneyMessages_Render_2
+  ΔCMoneyMessages
+where
+  -- Declared member operation CMoneyMessages::Render()
+  true
+end
+
+schema CMoneyMessages_RegisterOne_3
+  ΔCMoneyMessages
+  vecPos? : CVector
+  pText? : seq CHAR
+  bRed? : ℕ
+  bGreen? : ℕ
+  bBlue? : ℕ
+  fSize? : ℝ
+  fOpacity? : ℝ
+where
+  -- Declared member operation CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity)
+  true
+end
+
+schema CSpecialParticleStuff
+  BoatFromStart : ℕ
+where
+  BoatFromStart ≥ 0
+end
+
+schema CSpecialParticleStuff_CreateFoamAroundObject
+  ΔCSpecialParticleStuff
+  arg_1? : Ref[CMatrix]
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℤ
+where
+  -- Declared member operation CSpecialParticleStuff::CreateFoamAroundObject(CMatrix*, float, float, float, int32)
+  true
+end
+
+schema CSpecialParticleStuff_StartBoatFoamAnimation_2
+  ΔCSpecialParticleStuff
+where
+  -- Declared member operation CSpecialParticleStuff::StartBoatFoamAnimation()
+  true
+end
+
+schema CSpecialParticleStuff_UpdateBoatFoamAnimation_3
+  ΔCSpecialParticleStuff
+  arg_1? : Ref[CMatrix]
+where
+  -- Declared member operation CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix*)
+  true
+end

@@ -1,0 +1,171 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WeaponEffects (weapons)
+-- Source File(s): weapons/WeaponEffects.cpp, weapons/WeaponEffects.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include WeaponEffects.zpp  (from "WeaponEffects.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include World.zpp  (from "World.h")
+-- include WeaponType.zpp  (from "WeaponType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeaponEffects
+  m_bActive : 𝔹
+  m_vecPos : CVector
+  m_nRed : ℕ
+  m_nGreen : ℕ
+  m_nBlue : ℕ
+  m_nAlpha : ℕ
+  m_fSize : ℝ
+  m_fRotation : ℝ
+where
+  m_nRed ≥ 0
+  m_nGreen ≥ 0
+  m_nBlue ≥ 0
+  m_nAlpha ≥ 0
+end
+
+schema CWeaponEffects_CWeaponEffects
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::CWeaponEffects()
+  true
+end
+
+schema CWeaponEffects_CWeaponEffects_2
+  ΔCWeaponEffects
+  result! : ANY
+where
+  -- Declared member operation CWeaponEffects::CWeaponEffects()
+  true
+end
+
+schema CWeaponEffects_Init_3
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::Init(void)
+  true
+end
+
+schema CWeaponEffects_Shutdown_4
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::Shutdown(void)
+  true
+end
+
+schema CWeaponEffects_MarkTarget_5
+  ΔCWeaponEffects
+  pos? : CVector
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  size? : ℝ
+where
+  -- Declared member operation CWeaponEffects::MarkTarget(CVector pos, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size)
+  true
+end
+
+schema CWeaponEffects_ClearCrossHair_6
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::ClearCrossHair(void)
+  true
+end
+
+schema CWeaponEffects_Render_7
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::Render(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWeaponEffects_CWeaponEffects
+  ΔCWeaponEffects
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWeaponEffects_CWeaponEffects_2
+  ΔCWeaponEffects
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWeaponEffects_Init
+  ΔCWeaponEffects
+where
+  -- State update: gCrossHair.m_bActive' = false
+  -- State update: gCrossHair.m_vecPos' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: gCrossHair.m_nRed' = 0
+  -- State update: gCrossHair.m_nGreen' = 0
+  -- State update: gCrossHair.m_nBlue' = 0
+  -- State update: gCrossHair.m_nAlpha' = 255
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::FindTxdSlot, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CWeaponEffects_Shutdown
+  ΔCWeaponEffects
+where
+  -- State update: gpCrossHairTex' = ∅
+  true
+end
+
+schema CWeaponEffects_MarkTarget
+  ΔCWeaponEffects
+  pos? : CVector
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  size? : ℝ
+where
+  -- State update: gCrossHair.m_bActive' = true
+  -- State update: gCrossHair.m_vecPos' = pos
+  -- State update: gCrossHair.m_nRed' = red
+  -- State update: gCrossHair.m_nGreen' = green
+  -- State update: gCrossHair.m_nBlue' = blue
+  -- State update: gCrossHair.m_nAlpha' = alpha
+  true
+end
+
+schema CWeaponEffects_ClearCrossHair
+  ΔCWeaponEffects
+where
+  -- State update: gCrossHair.m_bActive' = false
+  true
+end
+
+schema CWeaponEffects_Render
+  ΔCWeaponEffects
+where
+  -- State update: size' = aCrossHairSize[FindPlayerPed().GetWeapon().m_eWeaponType]
+  -- State update: recipz' = 1.0f / pos.z
+  -- State update: recipz2' = 1.0f / pos.z
+  -- State update: gCrossHair.m_fRotation' = 0.0
+  -- Invokes: CSprite::CalcScreenCoors, CSprite::RenderOneXLUSprite_Rotate_Aspect
+  true
+end

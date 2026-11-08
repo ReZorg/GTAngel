@@ -1,0 +1,1335 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: fake (fakerw)
+-- Source File(s): fakerw/fake.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include rwcore.zpp  (from "rwcore.h")
+-- include rpworld.zpp  (from "rpworld.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+-- include rphanim.zpp  (from "rphanim.h")
+-- include rpskin.zpp  (from "rpskin.h")
+-- include assert.zpp  (from "assert.h")
+-- include string.zpp  (from "string.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include rtquat.zpp  (from "rtquat.h")
+-- include rtcharse.zpp  (from "rtcharse.h")
+-- include rpanisot.zpp  (from "rpanisot.h")
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+_CRT_SECURE_NO_WARNINGS : seq CHAR  -- #define _CRT_SECURE_NO_WARNINGS #define WITH_D3D
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema fake_RwObjectGetType
+  ΔfakeModuleState
+  obj? : Ref[RwObject]
+  result! : ℕ
+where
+  -- Return postcondition: result! = obj->type
+  true
+end
+
+schema fake_rwObjectGetParent
+  ΔfakeModuleState
+  obj? : Ref[RwObject]
+  result! : Ref[RwFrame]
+where
+  -- Return postcondition: result! = (RwFrame*)obj->parent
+  true
+end
+
+schema fake_RwFree
+  ΔfakeModuleState
+  mem? : ADDRESS
+where
+  -- Invokes: memfuncs.rwfree
+  true
+end
+
+schema fake_RwV3dLength
+  ΔfakeModuleState
+  in? : Ref[RwV3d]
+  result! : ℝ
+where
+  -- Return postcondition: result! = length(*in)
+  true
+end
+
+schema fake_RwV3dAdd
+  ΔfakeModuleState
+  out? : Ref[RwV3d]
+  ina? : Ref[RwV3d]
+  inb? : Ref[RwV3d]
+where
+  -- State update: out' = add(*ina, *inb)
+  true
+end
+
+schema fake_RwV3dSub
+  ΔfakeModuleState
+  out? : Ref[RwV3d]
+  ina? : Ref[RwV3d]
+  inb? : Ref[RwV3d]
+where
+  -- State update: out' = sub(*ina, *inb)
+  true
+end
+
+schema fake_RwV3dScale
+  ΔfakeModuleState
+  out? : Ref[RwV3d]
+  in? : Ref[RwV3d]
+  scalar? : ℝ
+where
+  -- State update: out' = scale(*in, scalar)
+  true
+end
+
+schema fake_RwV3dIncrementScaled
+  ΔfakeModuleState
+  out? : Ref[RwV3d]
+  in? : Ref[RwV3d]
+  scalar? : ℝ
+where
+  -- State update: out' = add(*out, scale(*in, scalar))
+  true
+end
+
+schema fake_RwV3dNegate
+  ΔfakeModuleState
+  out? : Ref[RwV3d]
+  in? : Ref[RwV3d]
+where
+  -- State update: out' = neg(*in)
+  true
+end
+
+schema fake_RwV3dDotProduct
+  ΔfakeModuleState
+  ina? : Ref[RwV3d]
+  inb? : Ref[RwV3d]
+  result! : ℝ
+where
+  -- Return postcondition: result! = dot(*ina, *inb)
+  true
+end
+
+schema fake_RwMatrixDestroy
+  ΔfakeModuleState
+  mpMat? : Ref[RwMatrix]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: mpMat->destroy
+  true
+end
+
+schema fake_RwMatrixCopy
+  ΔfakeModuleState
+  dstMatrix? : Ref[RwMatrix]
+  srcMatrix? : Ref[RwMatrix]
+where
+  -- State update: dstMatrix' = *srcMatrix
+  true
+end
+
+schema fake_RwMatrixSetIdentity
+  ΔfakeModuleState
+  matrix? : Ref[RwMatrix]
+where
+  -- Invokes: matrix->setIdentity
+  true
+end
+
+schema fake_RwFrameDestroy
+  ΔfakeModuleState
+  frame? : Ref[RwFrame]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: frame->destroy
+  true
+end
+
+schema fake_RwFrameRegisterPlugin
+  ΔfakeModuleState
+  size? : ℤ
+  pluginID? : ℕ
+  constructCB? : RwPluginObjectConstructor
+  destructCB? : RwPluginObjectDestructor
+  copyCB? : RwPluginObjectCopy
+  result! : ℤ
+where
+  -- Invokes: Frame::registerPlugin
+  true
+end
+
+schema fake_RwFrameRegisterPluginStream
+  ΔfakeModuleState
+  pluginID? : ℕ
+  readCB? : RwPluginDataChunkReadCallBack
+  writeCB? : RwPluginDataChunkWriteCallBack
+  getSizeCB? : RwPluginDataChunkGetSizeCallBack
+  result! : ℤ
+where
+  -- Invokes: Frame::registerPluginStream
+  true
+end
+
+schema fake_RwCameraDestroy
+  ΔfakeModuleState
+  camera? : Ref[RwCamera]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: camera->destroy
+  true
+end
+
+schema fake_RwCameraFrustumTestSphere
+  ΔfakeModuleState
+  camera? : Ref[RwCamera]
+  sphere? : Ref[RwSphere]
+  result! : RwFrustumTestResult
+where
+  -- Return postcondition: result! = (RwFrustumTestResult)camera->frustumTestSphere(sphere)
+  -- Invokes: camera->frustumTestSphere
+  true
+end
+
+schema fake_RwCameraGetNearClipPlane
+  ΔfakeModuleState
+  camera? : Ref[RwCamera]
+  result! : ℝ
+where
+  -- Return postcondition: result! = camera->nearPlane
+  true
+end
+
+schema fake_RwCameraGetFarClipPlane
+  ΔfakeModuleState
+  camera? : Ref[RwCamera]
+  result! : ℝ
+where
+  -- Return postcondition: result! = camera->farPlane
+  true
+end
+
+schema fake_RwCameraGetFogDistance
+  ΔfakeModuleState
+  camera? : Ref[RwCamera]
+  result! : ℝ
+where
+  -- Return postcondition: result! = camera->fogPlane
+  true
+end
+
+schema fake_RwImageDestroy
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: image->destroy
+  true
+end
+
+schema fake_RwImageGetWidth
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  result! : ℤ
+where
+  -- Return postcondition: result! = image->width
+  true
+end
+
+schema fake_RwImageGetHeight
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  result! : ℤ
+where
+  -- Return postcondition: result! = image->height
+  true
+end
+
+schema fake_RwImageGetDepth
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  result! : ℤ
+where
+  -- Return postcondition: result! = image->depth
+  true
+end
+
+schema fake_RwImageGetStride
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  result! : ℤ
+where
+  -- Return postcondition: result! = image->stride
+  true
+end
+
+schema fake_RwRasterDestroy
+  ΔfakeModuleState
+  raster? : Ref[RwRaster]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: raster->destroy
+  true
+end
+
+schema fake_RwRasterGetWidth
+  ΔfakeModuleState
+  raster? : Ref[RwRaster]
+  result! : ℤ
+where
+  -- Return postcondition: result! = raster->width
+  true
+end
+
+schema fake_RwRasterGetHeight
+  ΔfakeModuleState
+  raster? : Ref[RwRaster]
+  result! : ℤ
+where
+  -- Return postcondition: result! = raster->height
+  true
+end
+
+schema fake_RwRasterGetDepth
+  ΔfakeModuleState
+  raster? : Ref[RwRaster]
+  result! : ℤ
+where
+  -- Return postcondition: result! = raster->depth
+  true
+end
+
+schema fake_RwTextureDestroy
+  ΔfakeModuleState
+  texture? : Ref[RwTexture]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: texture->destroy
+  true
+end
+
+schema fake_RwTextureSetMipmapping
+  ΔfakeModuleState
+  enable? : 𝔹
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RwTextureSetAutoMipmapping
+  ΔfakeModuleState
+  enable? : 𝔹
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_rwD3D8TexDictionaryEnableRasterFormatConversion
+  ΔfakeModuleState
+  enable? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema fake_rwNativeTextureHackRead
+  ΔfakeModuleState
+  stream? : Ref[RwStream]
+  tex? : Ref[RwTexture]
+  size? : ℤ
+  result! : 𝔹
+where
+  -- State update: tex' = Texture::streamReadNative(stream)
+  -- State update: raster' = rw::Raster::convertTexToCurrentPlatform((*tex).raster)
+  -- Return postcondition: result! = *tex != nil
+  -- Invokes: Texture::streamReadNative, Raster::convertTexToCurrentPlatform
+  true
+end
+
+schema fake_RwTexDictionaryDestroy
+  ΔfakeModuleState
+  dict? : Ref[RwTexDictionary]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: dict->destroy
+  true
+end
+
+schema fake_RwStreamClose
+  ΔfakeModuleState
+  stream? : Ref[RwStream]
+  pData? : ADDRESS
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: stream->close
+  true
+end
+
+schema fake_RwStreamRead
+  ΔfakeModuleState
+  stream? : Ref[RwStream]
+  buffer? : ADDRESS
+  length? : ℕ
+  result! : ℕ
+where
+  -- Return postcondition: result! = stream->read8(buffer, length)
+  -- Invokes: stream->read8
+  true
+end
+
+schema fake_RwStreamFindChunk
+  ΔfakeModuleState
+  stream? : Ref[RwStream]
+  type? : ℕ
+  lengthOut? : ℙ ℕ
+  versionOut? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = findChunk(stream, type, lengthOut, versionOut)
+  true
+end
+
+schema fake_RwIm2DVertexSetCameraX
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  camx? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema fake_RwIm2DVertexSetCameraY
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  camy? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema fake_RwIm2DVertexSetCameraZ
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  camz? : ℝ
+where
+  -- Invokes: vert->setCameraZ
+  true
+end
+
+schema fake_RwIm2DVertexSetRecipCameraZ
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  recipz? : ℝ
+where
+  -- Invokes: vert->setRecipCameraZ
+  true
+end
+
+schema fake_RwIm2DVertexSetScreenX
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  scrnx? : ℝ
+where
+  -- Invokes: vert->setScreenX
+  true
+end
+
+schema fake_RwIm2DVertexSetScreenY
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  scrny? : ℝ
+where
+  -- Invokes: vert->setScreenY
+  true
+end
+
+schema fake_RwIm2DVertexSetScreenZ
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  scrnz? : ℝ
+where
+  -- Invokes: vert->setScreenZ
+  true
+end
+
+schema fake_RwIm2DVertexGetScreenX
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  result! : ℝ
+where
+  -- Return postcondition: result! = vert->getScreenX()
+  -- Invokes: vert->getScreenX
+  true
+end
+
+schema fake_RwIm2DVertexGetScreenY
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  result! : ℝ
+where
+  -- Return postcondition: result! = vert->getScreenY()
+  -- Invokes: vert->getScreenY
+  true
+end
+
+schema fake_RwIm2DVertexGetScreenZ
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  result! : ℝ
+where
+  -- Return postcondition: result! = vert->getScreenZ()
+  -- Invokes: vert->getScreenZ
+  true
+end
+
+schema fake_RwIm2DVertexSetU
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  texU? : ℝ
+  recipz? : ℝ
+where
+  -- Invokes: vert->setU
+  true
+end
+
+schema fake_RwIm2DVertexSetV
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  texV? : ℝ
+  recipz? : ℝ
+where
+  -- Invokes: vert->setV
+  true
+end
+
+schema fake_RwIm2DVertexSetIntRGBA
+  ΔfakeModuleState
+  vert? : Ref[RwIm2DVertex]
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+where
+  -- Invokes: vert->setColor
+  true
+end
+
+schema fake_RwIm2DGetNearScreenZ
+  ΔfakeModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = im2d::GetNearZ()
+  -- Invokes: im2d::GetNearZ
+  true
+end
+
+schema fake_RwIm2DGetFarScreenZ
+  ΔfakeModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = im2d::GetFarZ()
+  -- Invokes: im2d::GetFarZ
+  true
+end
+
+schema fake_RwIm2DRenderLine
+  ΔfakeModuleState
+  vertices? : Ref[RwIm2DVertex]
+  numVertices? : ℤ
+  vert1? : ℤ
+  vert2? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im2d::RenderLine
+  true
+end
+
+schema fake_RwIm2DRenderTriangle
+  ΔfakeModuleState
+  vertices? : Ref[RwIm2DVertex]
+  numVertices? : ℤ
+  vert1? : ℤ
+  vert2? : ℤ
+  vert3? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im2d::RenderTriangle
+  true
+end
+
+schema fake_RwIm2DRenderPrimitive
+  ΔfakeModuleState
+  primType? : RwPrimitiveType
+  vertices? : Ref[RwIm2DVertex]
+  numVertices? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im2d::RenderPrimitive
+  true
+end
+
+schema fake_RwIm2DRenderIndexedPrimitive
+  ΔfakeModuleState
+  primType? : RwPrimitiveType
+  vertices? : Ref[RwIm2DVertex]
+  numVertices? : ℤ
+  indices? : Ref[RwImVertexIndex]
+  numIndices? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im2d::RenderIndexedPrimitive
+  true
+end
+
+schema fake_RwIm3DVertexSetPos
+  ΔfakeModuleState
+  vert? : Ref[RwIm3DVertex]
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Invokes: vert->setX, vert->setY, vert->setZ
+  true
+end
+
+schema fake_RwIm3DVertexSetU
+  ΔfakeModuleState
+  vert? : Ref[RwIm3DVertex]
+  u? : ℝ
+where
+  -- Invokes: vert->setU
+  true
+end
+
+schema fake_RwIm3DVertexSetV
+  ΔfakeModuleState
+  vert? : Ref[RwIm3DVertex]
+  v? : ℝ
+where
+  -- Invokes: vert->setV
+  true
+end
+
+schema fake_RwIm3DVertexSetRGBA
+  ΔfakeModuleState
+  vert? : Ref[RwIm3DVertex]
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  a? : ℕ
+where
+  -- Invokes: vert->setColor
+  true
+end
+
+schema fake_RwIm3DEnd
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im3d::End
+  true
+end
+
+schema fake_RwIm3DRenderLine
+  ΔfakeModuleState
+  vert1? : ℤ
+  vert2? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im3d::RenderIndexedPrimitive
+  true
+end
+
+schema fake_RwIm3DRenderIndexedPrimitive
+  ΔfakeModuleState
+  primType? : RwPrimitiveType
+  indices? : Ref[RwImVertexIndex]
+  numIndices? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: im3d::RenderIndexedPrimitive
+  true
+end
+
+schema fake_RwRenderStateGet
+  ΔfakeModuleState
+  state? : RwRenderState
+  value? : ADDRESS
+  result! : 𝔹
+where
+  -- State update: uival' = (uint32*)value
+  -- State update: value' = GetRenderStatePtr(TEXTURERASTER)
+  -- State update: uival' = GetRenderState(TEXTUREADDRESS)
+  -- State update: uival' = GetRenderState(TEXTUREADDRESSU)
+  -- State update: uival' = GetRenderState(TEXTUREADDRESSV)
+  -- State update: uival' = 1
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RwRenderStateSet
+  ΔfakeModuleState
+  state? : RwRenderState
+  value? : ADDRESS
+  result! : 𝔹
+where
+  -- State update: uival' = (uintptr)value
+  -- State update: fog' = (uival>>16)&0xFF
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RwEngineInit
+  ΔfakeModuleState
+  memFuncs? : Ref[RwMemoryFunctions]
+  initFlags? : ℕ
+  resArenaSize? : ℕ
+  result! : 𝔹
+where
+  -- State update: real_malloc' = memFuncs.rwmalloc
+  -- State update: real_realloc' = memFuncs.rwrealloc
+  -- State update: gMemfuncs.rwmalloc' = mallocWrap
+  -- State update: gMemfuncs.rwrealloc' = reallocWrap
+  -- State update: gMemfuncs.rwfree' = memFuncs.rwfree
+  -- Return postcondition: result! = true
+  -- Invokes: Engine::init
+  true
+end
+
+schema fake_RwEngineOpen
+  ΔfakeModuleState
+  initParams? : Ref[RwEngineOpenParams]
+  result! : 𝔹
+where
+  -- State update: openParams.window' = (HWND)initParams.displayID
+  -- State update: openParams' = *(EngineOpenParams*)initParams.displayID
+  -- Return postcondition: result! = Engine::open(&openParams)
+  -- Invokes: Engine::open
+  true
+end
+
+schema fake_RwEngineStart
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- State update: isP8supported' = false
+  -- Return postcondition: result! = Engine::start()
+  -- Invokes: Engine::start
+  true
+end
+
+schema fake_RwEngineStop
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: Engine::stop
+  true
+end
+
+schema fake_RwEngineClose
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: Engine::close
+  true
+end
+
+schema fake_RwEngineTerm
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: Engine::term
+  true
+end
+
+schema fake_RwEngineGetNumSubSystems
+  ΔfakeModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = Engine::getNumSubSystems()
+  -- Invokes: Engine::getNumSubSystems
+  true
+end
+
+schema fake_RwEngineGetCurrentSubSystem
+  ΔfakeModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = Engine::getCurrentSubSystem()
+  -- Invokes: Engine::getCurrentSubSystem
+  true
+end
+
+schema fake_RwEngineSetSubSystem
+  ΔfakeModuleState
+  subSystemIndex? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = Engine::setSubSystem(subSystemIndex)
+  -- Invokes: Engine::setSubSystem
+  true
+end
+
+schema fake_RwEngineGetNumVideoModes
+  ΔfakeModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = Engine::getNumVideoModes()
+  -- Invokes: Engine::getNumVideoModes
+  true
+end
+
+schema fake_RwEngineGetCurrentVideoMode
+  ΔfakeModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = Engine::getCurrentVideoMode()
+  -- Invokes: Engine::getCurrentVideoMode
+  true
+end
+
+schema fake_RwEngineSetVideoMode
+  ΔfakeModuleState
+  modeIndex? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = Engine::setVideoMode(modeIndex)
+  -- Invokes: Engine::setVideoMode
+  true
+end
+
+schema fake_RwD3D8EngineSetRefreshRate
+  ΔfakeModuleState
+  refreshRate? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema fake_RwD3D8DeviceSupportsDXTTexture
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RwD3D8EngineSetMultiSamplingLevels
+  ΔfakeModuleState
+  level? : ℕ
+where
+  -- Invokes: Engine::setMultiSamplingLevels
+  true
+end
+
+schema fake_RwD3D8EngineGetMaxMultiSamplingLevels
+  ΔfakeModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = Engine::getMaxMultiSamplingLevels()
+  -- Invokes: Engine::getMaxMultiSamplingLevels
+  true
+end
+
+schema fake_RpMaterialDestroy
+  ΔfakeModuleState
+  material? : Ref[RpMaterial]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: material->destroy
+  true
+end
+
+schema fake_RpLightGetRadius
+  ΔfakeModuleState
+  light? : Ref[RpLight]
+  result! : ℝ
+where
+  -- Return postcondition: result! = light->radius
+  true
+end
+
+schema fake_RpLightDestroy
+  ΔfakeModuleState
+  light? : Ref[RpLight]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: light->destroy
+  true
+end
+
+schema fake_RpGeometryDestroy
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: geometry->destroy
+  true
+end
+
+schema fake_RpGeometryAddMorphTargets
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  mtcount? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = n
+  -- Invokes: geometry->addMorphTargets
+  true
+end
+
+schema fake_RpGeometryAddMorphTarget
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  result! : ℤ
+where
+  -- Return postcondition: result! = RpGeometryAddMorphTargets(geometry, 1)
+  true
+end
+
+schema fake_RpGeometryGetNumTexCoordSets
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  result! : ℤ
+where
+  -- Return postcondition: result! = geometry->numTexCoordSets
+  true
+end
+
+schema fake_RpGeometryGetNumVertices
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  result! : ℤ
+where
+  -- Return postcondition: result! = geometry->numVertices
+  true
+end
+
+schema fake_RpGeometryGetNumTriangles
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  result! : ℤ
+where
+  -- Return postcondition: result! = geometry->numTriangles
+  true
+end
+
+schema fake_RpGeometryGetFlags
+  ΔfakeModuleState
+  geometry? : Ref[RpGeometry]
+  result! : ℕ
+where
+  -- Return postcondition: result! = geometry->flags
+  true
+end
+
+schema fake_RpClumpDestroy
+  ΔfakeModuleState
+  clump? : Ref[RpClump]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: clump->destroy
+  true
+end
+
+schema fake_RpClumpGetNumAtomics
+  ΔfakeModuleState
+  clump? : Ref[RpClump]
+  result! : ℤ
+where
+  -- Return postcondition: result! = clump->countAtomics()
+  -- Invokes: clump->countAtomics
+  true
+end
+
+schema fake_RpClumpRegisterPlugin
+  ΔfakeModuleState
+  size? : ℤ
+  pluginID? : ℕ
+  constructCB? : RwPluginObjectConstructor
+  destructCB? : RwPluginObjectDestructor
+  copyCB? : RwPluginObjectCopy
+  result! : ℤ
+where
+  -- Invokes: Clump::registerPlugin
+  true
+end
+
+schema fake_RpClumpRegisterPluginStream
+  ΔfakeModuleState
+  pluginID? : ℕ
+  readCB? : RwPluginDataChunkReadCallBack
+  writeCB? : RwPluginDataChunkWriteCallBack
+  getSizeCB? : RwPluginDataChunkGetSizeCallBack
+  result! : ℤ
+where
+  -- Invokes: Clump::registerPluginStream
+  true
+end
+
+schema fake_RpAtomicDestroy
+  ΔfakeModuleState
+  atomic? : Ref[RpAtomic]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: atomic->destroy
+  true
+end
+
+schema fake_RpAtomicGetFlags
+  ΔfakeModuleState
+  atomic? : Ref[RpAtomic]
+  result! : ℕ
+where
+  -- Return postcondition: result! = atomic->getFlags()
+  -- Invokes: atomic->getFlags
+  true
+end
+
+schema fake_RpAtomicSetRenderCallBack
+  ΔfakeModuleState
+  atomic? : Ref[RpAtomic]
+  callback? : RpAtomicCallBackRender
+where
+  -- Invokes: atomic->setRenderCB
+  true
+end
+
+schema fake_RpAtomicGetRenderCallBack
+  ΔfakeModuleState
+  atomic? : Ref[RpAtomic]
+  result! : RpAtomicCallBackRender
+where
+  -- Return postcondition: result! = (RpAtomicCallBackRender)atomic->renderCB
+  true
+end
+
+schema fake_RpAtomicRegisterPlugin
+  ΔfakeModuleState
+  size? : ℤ
+  pluginID? : ℕ
+  constructCB? : RwPluginObjectConstructor
+  destructCB? : RwPluginObjectDestructor
+  copyCB? : RwPluginObjectCopy
+  result! : ℤ
+where
+  -- Invokes: Atomic::registerPlugin
+  true
+end
+
+schema fake_RpWorldDestroy
+  ΔfakeModuleState
+  world? : Ref[RpWorld]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: world->destroy
+  true
+end
+
+schema fake_RpWorldPluginAttach
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: xbox::registerVertexFormatPlugin
+  true
+end
+
+schema fake_RpMatFXPluginAttach
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RpMatFXMaterialGetEffects
+  ΔfakeModuleState
+  material? : Ref[RpMaterial]
+  result! : RpMatFXMaterialFlags
+where
+  -- Return postcondition: result! = (RpMatFXMaterialFlags)MatFX::getEffects(material)
+  -- Invokes: MatFX::getEffects
+  true
+end
+
+schema fake_RpMatFXMaterialGetEnvMapCoefficient
+  ΔfakeModuleState
+  material? : Ref[RpMaterial]
+  result! : ℝ
+where
+  -- State update: mfx' = MatFX::get(material)
+  -- Return postcondition: result! = mfx->getEnvCoefficient()
+  -- Invokes: MatFX::get, mfx->getEnvCoefficient
+  true
+end
+
+schema fake_RpHAnimPluginAttach
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RpHAnimFrameGetID
+  ΔfakeModuleState
+  frame? : Ref[RwFrame]
+  result! : ℤ
+where
+  -- Return postcondition: result! = HAnimData::get(frame)->id
+  -- Invokes: HAnimData::get
+  true
+end
+
+schema fake_RpHAnimIDGetIndex
+  ΔfakeModuleState
+  hierarchy? : Ref[RpHAnimHierarchy]
+  ID? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = hierarchy->getIndex(ID)
+  -- Invokes: hierarchy->getIndex
+  true
+end
+
+schema fake_RpHAnimFrameSetHierarchy
+  ΔfakeModuleState
+  frame? : Ref[RwFrame]
+  hierarchy? : Ref[RpHAnimHierarchy]
+  result! : 𝔹
+where
+  -- State update: hierarchy' = hierarchy
+  -- Return postcondition: result! = true
+  -- Invokes: HAnimData::get
+  true
+end
+
+schema fake_RpHAnimHierarchySetCurrentAnim
+  ΔfakeModuleState
+  hierarchy? : Ref[RpHAnimHierarchy]
+  anim? : Ref[RpHAnimAnimation]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: interpolator->setCurrentAnim
+  true
+end
+
+schema fake_RpHAnimHierarchyAddAnimTime
+  ΔfakeModuleState
+  hierarchy? : Ref[RpHAnimHierarchy]
+  time? : ℝ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: interpolator->addTime
+  true
+end
+
+schema fake_RpHAnimHierarchyUpdateMatrices
+  ΔfakeModuleState
+  hierarchy? : Ref[RpHAnimHierarchy]
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: hierarchy->updateMatrices
+  true
+end
+
+schema fake_RpSkinPluginAttach
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema fake_RpSkinGetNumBones
+  ΔfakeModuleState
+  skin? : Ref[RpSkin]
+  result! : ℕ
+where
+  -- Return postcondition: result! = skin->numBones
+  true
+end
+
+schema fake_RtBMPImageWrite
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  imageName? : seq CHAR
+where
+  -- State update: r' = casepath(imageName)
+  -- Return postcondition: result! = image
+  -- Invokes: rw::writeBMP
+  true
+end
+
+schema fake_RtBMPImageRead
+  ΔfakeModuleState
+  imageName? : seq CHAR
+where
+  -- State update: r' = casepath(imageName)
+  -- State update: image' = rw::readBMP(r)
+  -- State update: image' = rw::readBMP(imageName)
+  -- Return postcondition: result! = image
+  -- Return postcondition: result! = rw::readBMP(imageName)
+  -- Invokes: rw::readBMP
+  true
+end
+
+schema fake_RtPNGImageWrite
+  ΔfakeModuleState
+  image? : Ref[RwImage]
+  imageName? : seq CHAR
+where
+  -- State update: r' = casepath(imageName)
+  -- Return postcondition: result! = image
+  -- Invokes: rw::writePNG
+  true
+end
+
+schema fake_RtPNGImageRead
+  ΔfakeModuleState
+  imageName? : seq CHAR
+where
+  -- State update: r' = casepath(imageName)
+  -- State update: image' = rw::readPNG(r)
+  -- State update: image' = rw::readPNG(imageName)
+  -- Return postcondition: result! = image
+  -- Return postcondition: result! = rw::readPNG(imageName)
+  -- Invokes: rw::readPNG
+  true
+end
+
+schema fake_RtQuatConvertToMatrix
+  ΔfakeModuleState
+  qpQuat? : Ref[RtQuat]
+  mpMatrix? : Ref[RwMatrix]
+where
+  -- Invokes: mpMatrix->rotate
+  true
+end
+
+schema fake_RtCharsetOpen
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = Charset::open()
+  -- Invokes: Charset::open
+  true
+end
+
+schema fake_RtCharsetClose
+  ΔfakeModuleState
+where
+  -- Return postcondition: result! = Charset::close()
+  -- Invokes: Charset::close
+  true
+end
+
+schema fake_RtCharsetBufferFlush
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: Charset::flushBuffer
+  true
+end
+
+schema fake_RtCharsetDestroy
+  ΔfakeModuleState
+  charSet? : seq CHAR
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: charSet->destroy
+  true
+end
+
+schema fake_RpAnisotGetMaxSupportedMaxAnisotropy
+  ΔfakeModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = rw::getMaxSupportedMaxAnisotropy()
+  -- Invokes: rw::getMaxSupportedMaxAnisotropy
+  true
+end
+
+schema fake_RpAnisotTextureGetMaxAnisotropy
+  ΔfakeModuleState
+  tex? : Ref[RwTexture]
+  result! : ℤ
+where
+  -- Return postcondition: result! = tex->getMaxAnisotropy()
+  -- Invokes: tex->getMaxAnisotropy
+  true
+end
+
+schema fake_RpAnisotPluginAttach
+  ΔfakeModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Invokes: rw::registerAnisotropyPlugin
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema fakeModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1172
+end

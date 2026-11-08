@@ -1,0 +1,852 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: custompipes_gl (extras)
+-- Source File(s): extras/custompipes_gl.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include World.zpp  (from "World.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include neoVehicle_frag.zpp  (from "shaders/obj/neoVehicle_frag.inc")
+-- include neoVehicle_vert.zpp  (from "shaders/obj/neoVehicle_vert.inc")
+-- include leedsDefault_vert.zpp  (from "shaders/obj/leedsDefault_vert.inc")
+-- include leedsDefault_frag.zpp  (from "shaders/obj/leedsDefault_frag.inc")
+-- include leedsVehicle_mobile_frag.zpp  (from "shaders/obj/leedsVehicle_mobile_frag.inc")
+-- include leedsVehicle_mobile_vert.zpp  (from "shaders/obj/leedsVehicle_mobile_vert.inc")
+-- include scale_frag.zpp  (from "shaders/obj/scale_frag.inc")
+-- include leedsBuilding_vert.zpp  (from "shaders/obj/leedsBuilding_vert.inc")
+-- include leedsBuilding_mobile_vert.zpp  (from "shaders/obj/leedsBuilding_mobile_vert.inc")
+-- include neoGloss_frag.zpp  (from "shaders/obj/neoGloss_frag.inc")
+-- include neoGloss_vert.zpp  (from "shaders/obj/neoGloss_vert.inc")
+-- include simple_frag.zpp  (from "shaders/obj/simple_frag.inc")
+-- include neoRimSkin_vert.zpp  (from "shaders/obj/neoRimSkin_vert.inc")
+-- include neoRim_vert.zpp  (from "shaders/obj/neoRim_vert.inc")
+-- include neoWorldIII_frag.zpp  (from "shaders/obj/neoWorldIII_frag.inc")
+-- include default_UV2_vert.zpp  (from "shaders/obj/default_UV2_vert.inc")
+-- include neoWorldVC_frag.zpp  (from "shaders/obj/neoWorldVC_frag.inc")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema BuildingInst
+  matrix : rw__Matrix
+  instHeader : Ref[rw__gl3__InstanceDataHeader]
+  fadeAlpha : ℕ
+  lighting : 𝔹
+where
+  #instHeader ≤ 1
+  fadeAlpha ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema custompipes_gl_uploadEnvMatrix
+  Δcustompipes_glModuleState
+  frame? : Ref[rw__Frame]
+where
+  -- State update: frame' = engine.currentCamera.getFrame()
+  -- State update: tmp' = *frame.getLTM()
+  -- State update: tmp.at.z' = 0.0f
+  -- State update: tmp.at' = normalize(tmp.at)
+  -- State update: tmp.right.x' = -tmp.at.y
+  -- State update: tmp.right.y' = tmp.at.x
+  -- Invokes: currentCamera->getFrame, frame->getLTM, up.set, pos.set, Matrix::invert
+  true
+end
+
+schema custompipes_gl_leedsVehicleRenderCB
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: coef' = 0.0f
+  -- State update: coef' = 1.0f
+  -- State update: cs' = 1.0f
+  -- State update: cs' = 2.0f
+  -- Invokes: atomic->getFrame, leedsVehicleShader_blend->use, leedsVehicleShader_add->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_uploadWorldLights
+  Δcustompipes_glModuleState
+where
+  -- State update: amb.red' = CTimeCycle::GetAmbientRed()
+  -- State update: amb.green' = CTimeCycle::GetAmbientGreen()
+  -- State update: amb.blue' = CTimeCycle::GetAmbientBlue()
+  -- State update: amb.alpha' = 1.0f
+  -- State update: emiss' = pAmbient.color
+  -- Invokes: CTimeCycle::GetAmbientRed, CTimeCycle::GetAmbientGreen, CTimeCycle::GetAmbientBlue
+  true
+end
+
+schema custompipes_gl_leedsVehicleRenderCB_mobile
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: skyTop.red' = CTimeCycle::GetSkyTopRed()/255.0f
+  -- State update: skyTop.green' = CTimeCycle::GetSkyTopGreen()/255.0f
+  -- State update: skyTop.blue' = CTimeCycle::GetSkyTopBlue()/255.0f
+  -- State update: skyBot.red' = CTimeCycle::GetSkyBottomRed()/255.0f
+  -- State update: skyBot.green' = CTimeCycle::GetSkyBottomGreen()/255.0f
+  -- Invokes: atomic->getFrame, leedsVehicleShader_mobile->use, CTimeCycle::GetSkyTopRed, CTimeCycle::GetSkyTopGreen, CTimeCycle::GetSkyTopBlue
+  true
+end
+
+schema custompipes_gl_uploadSpecLights
+  Δcustompipes_glModuleState
+where
+  -- State update: power' = 1.0f
+  -- State update: power' = Power.Get()
+  -- State update: speccol' = SpecColor.Get()
+  -- State update: red' = speccol.r
+  -- State update: green' = speccol.g
+  -- State update: blue' = speccol.b
+  -- Invokes: Power.Get, SpecColor.Get, pDirect->getFrame
+  true
+end
+
+schema custompipes_gl_vehicleRenderCB
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, neoVehicleShader->use, currentCamera->getFrame, Fresnel.Get, SpecColor.Get
+  true
+end
+
+schema custompipes_gl_CreateVehiclePipe
+  Δcustompipes_glModuleState
+where
+  -- State update: neoVehicleShader' = Shader::create(vs, fs)
+  -- State update: leedsVehicleShader_add' = Shader::create(vs, fs_add)
+  -- State update: leedsVehicleShader_blend' = Shader::create(vs, fs_blend)
+  -- State update: leedsVehicleShader_mobile' = Shader::create(vs, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- Invokes: Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyVehiclePipe
+  Δcustompipes_glModuleState
+where
+  -- State update: neoVehicleShader' = ∅
+  -- State update: leedsVehicleShader_add' = ∅
+  -- State update: leedsVehicleShader_blend' = ∅
+  -- State update: leedsVehicleShader_mobile' = ∅
+  -- State update: vehiclePipe' = ∅
+  -- Invokes: neoVehicleShader->destroy, leedsVehicleShader_add->destroy, leedsVehicleShader_blend->destroy, leedsVehicleShader_mobile->destroy
+  true
+end
+
+schema custompipes_gl_worldRenderCB
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: cs' = 1.0f
+  -- State update: cs' = 255/128.0f
+  -- State update: color' = m.color
+  -- Invokes: atomic->getFrame, leedsWorldShader_mobile->use, leedsWorldShader->use, CVisibilityPlugins::GetObjectDistanceAlpha, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_CreateWorldPipe
+  Δcustompipes_glModuleState
+where
+  -- State update: leedsWorldShader' = Shader::create(vs, fs)
+  -- State update: leedsWorldShader_mobile' = Shader::create(vs_mobile, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = ∅
+  -- State update: pipe.renderCB' = worldRenderCB
+  -- Invokes: Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyWorldPipe
+  Δcustompipes_glModuleState
+where
+  -- State update: leedsWorldShader' = ∅
+  -- State update: leedsWorldShader_mobile' = ∅
+  -- State update: worldPipe' = ∅
+  -- Invokes: leedsWorldShader->destroy, leedsWorldShader_mobile->destroy
+  true
+end
+
+schema custompipes_gl_glossRenderCB
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: m' = inst.material
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- State update: tex' = GetGlossTex(m)
+  -- Invokes: neoGlossShader->use, currentCamera->getFrame
+  true
+end
+
+schema custompipes_gl_CreateGlossPipe
+  Δcustompipes_glModuleState
+where
+  -- State update: neoGlossShader' = Shader::create(vs, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = ∅
+  -- State update: pipe.renderCB' = glossRenderCB
+  -- State update: glossPipe' = pipe
+  -- Invokes: Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyGlossPipe
+  Δcustompipes_glModuleState
+where
+  -- State update: neoGlossShader' = ∅
+  -- State update: glossPipe' = ∅
+  -- Invokes: neoGlossShader->destroy
+  true
+end
+
+schema custompipes_gl_uploadRimData
+  Δcustompipes_glModuleState
+  enable? : 𝔹
+where
+  -- State update: viewVec' = rw::engine.currentCamera.getFrame().getLTM().at
+  -- State update: col' = RampStart.Get()
+  -- State update: col' = RampEnd.Get()
+  -- Invokes: currentCamera->getFrame, Offset.Get, Scale.Get, Scaling.Get, RampStart.Get
+  true
+end
+
+schema custompipes_gl_rimSkinRenderCB
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: gl3::skinRenderCB, atomic->getFrame, neoRimSkinShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_rimRenderCB
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: gl3::defaultRenderCB, atomic->getFrame, neoRimShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_CreateRimLightPipes
+  Δcustompipes_glModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, RampStart)
+  -- State update: fp' = ReadTweakValueTable(fp, RampEnd)
+  -- State update: fp' = ReadTweakValueTable(fp, Offset)
+  -- State update: fp' = ReadTweakValueTable(fp, Scale)
+  -- State update: fp' = ReadTweakValueTable(fp, Scaling)
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyRimLightPipes
+  Δcustompipes_glModuleState
+where
+  -- State update: neoRimShader' = ∅
+  -- State update: neoRimSkinShader' = ∅
+  -- State update: rimPipe' = ∅
+  -- State update: rimSkinPipe' = ∅
+  -- Invokes: neoRimShader->destroy, neoRimSkinShader->destroy
+  true
+end
+
+schema custompipes_gl_CustomPipeRegisterGL
+  Δcustompipes_glModuleState
+where
+  -- State update: u_viewVec' = rw::gl3::registerUniform("u_viewVec")
+  -- State update: u_rampStart' = rw::gl3::registerUniform("u_rampStart")
+  -- State update: u_rampEnd' = rw::gl3::registerUniform("u_rampEnd")
+  -- State update: u_rimData' = rw::gl3::registerUniform("u_rimData")
+  -- State update: u_lightMap' = rw::gl3::registerUniform("u_lightMap")
+  -- State update: u_eye' = rw::gl3::registerUniform("u_eye")
+  -- Invokes: gl3::registerUniform
+  true
+end
+
+schema custompipes_gl_IsTextureTransparent
+  Δcustompipes_glModuleState
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema custompipes_gl_AtomicFirstPass
+  Δcustompipes_glModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (gl3::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = 255
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: setupDone' = false
+  -- State update: defer' = false
+  -- Invokes: atomic->getPipeline, atomic->getFrame, leedsWorldShader_mobile->use, leedsWorldShader->use, CustomPipes::uploadWorldLights
+  true
+end
+
+schema custompipes_gl_AtomicFullyTransparent
+  Δcustompipes_glModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+  fadeAlpha? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (gl3::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = fadeAlpha
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: building.matrix' = *atomic.getFrame().getLTM()
+  -- Invokes: atomic->getPipeline, atomic->getFrame
+  true
+end
+
+schema custompipes_gl_RenderBlendPass
+  Δcustompipes_glModuleState
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][i]
+  -- State update: inst' = building.instHeader.inst
+  -- State update: m' = inst.material
+  -- State update: color' = m.color
+  -- State update: color.alpha' = (color.alpha * building.fadeAlpha)/255
+  -- State update: cs' = 1.0f
+  -- Invokes: leedsWorldShader_mobile->use, leedsWorldShader->use, CustomPipes::uploadWorldLights
+  true
+end
+
+schema custompipes_gl_uploadSpecLights_2
+  Δcustompipes_glModuleState
+where
+  -- State update: power' = 1.0f
+  -- State update: power' = Power.Get()
+  -- State update: speccol' = SpecColor.Get()
+  -- State update: red' = speccol.r
+  -- State update: green' = speccol.g
+  -- State update: blue' = speccol.b
+  -- Invokes: Power.Get, SpecColor.Get, pDirect->getFrame
+  true
+end
+
+schema custompipes_gl_vehicleRenderCB_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: inst' = header.inst
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, neoVehicleShader->use, currentCamera->getFrame, Fresnel.Get, SpecColor.Get
+  true
+end
+
+schema custompipes_gl_CreateVehiclePipe_2
+  Δcustompipes_glModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, Fresnel)
+  -- State update: fp' = ReadTweakValueTable(fp, Power)
+  -- State update: fp' = ReadTweakValueTable(fp, DiffColor)
+  -- State update: fp' = ReadTweakValueTable(fp, SpecColor)
+  -- State update: neoVehicleShader' = Shader::create(vs, fs)
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyVehiclePipe_2
+  Δcustompipes_glModuleState
+where
+  -- State update: neoVehicleShader' = ∅
+  -- State update: vehiclePipe' = ∅
+  -- Invokes: neoVehicleShader->destroy
+  true
+end
+
+schema custompipes_gl_worldRenderCB_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: matfx' = MatFX::get(m)
+  -- State update: dualtex' = matfx.getDualTexture()
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- Invokes: gl3::defaultRenderCB, atomic->getFrame, neoWorldShader->use, MatFX::getEffects, MatFX::get
+  true
+end
+
+schema custompipes_gl_CreateWorldPipe_2
+  Δcustompipes_glModuleState
+where
+  -- State update: neoWorldShader' = Shader::create(vs, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = ∅
+  -- State update: pipe.renderCB' = worldRenderCB
+  -- State update: worldPipe' = pipe
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyWorldPipe_2
+  Δcustompipes_glModuleState
+where
+  -- State update: neoWorldShader' = ∅
+  -- State update: worldPipe' = ∅
+  -- Invokes: neoWorldShader->destroy
+  true
+end
+
+schema custompipes_gl_glossRenderCB_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: m' = inst.material
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- State update: tex' = GetGlossTex(m)
+  -- Invokes: neoGlossShader->use, currentCamera->getFrame
+  true
+end
+
+schema custompipes_gl_CreateGlossPipe_2
+  Δcustompipes_glModuleState
+where
+  -- State update: neoGlossShader' = Shader::create(vs, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = ∅
+  -- State update: pipe.renderCB' = glossRenderCB
+  -- State update: glossPipe' = pipe
+  -- Invokes: Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyGlossPipe_2
+  Δcustompipes_glModuleState
+where
+  -- State update: neoGlossShader' = ∅
+  -- State update: glossPipe' = ∅
+  -- Invokes: neoGlossShader->destroy
+  true
+end
+
+schema custompipes_gl_uploadRimData_2
+  Δcustompipes_glModuleState
+  enable? : 𝔹
+where
+  -- State update: viewVec' = rw::engine.currentCamera.getFrame().getLTM().at
+  -- State update: col' = RampStart.Get()
+  -- State update: col' = RampEnd.Get()
+  -- Invokes: currentCamera->getFrame, Offset.Get, Scale.Get, Scaling.Get, RampStart.Get
+  true
+end
+
+schema custompipes_gl_rimSkinRenderCB_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: gl3::skinRenderCB, atomic->getFrame, neoRimSkinShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_rimRenderCB_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: gl3::defaultRenderCB, atomic->getFrame, neoRimShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_CreateRimLightPipes_2
+  Δcustompipes_glModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, RampStart)
+  -- State update: fp' = ReadTweakValueTable(fp, RampEnd)
+  -- State update: fp' = ReadTweakValueTable(fp, Offset)
+  -- State update: fp' = ReadTweakValueTable(fp, Scale)
+  -- State update: fp' = ReadTweakValueTable(fp, Scaling)
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyRimLightPipes_2
+  Δcustompipes_glModuleState
+where
+  -- State update: neoRimShader' = ∅
+  -- State update: neoRimSkinShader' = ∅
+  -- State update: rimPipe' = ∅
+  -- State update: rimSkinPipe' = ∅
+  -- Invokes: neoRimShader->destroy, neoRimSkinShader->destroy
+  true
+end
+
+schema custompipes_gl_CustomPipeRegisterGL_2
+  Δcustompipes_glModuleState
+where
+  -- State update: u_viewVec' = rw::gl3::registerUniform("u_viewVec")
+  -- State update: u_rampStart' = rw::gl3::registerUniform("u_rampStart")
+  -- State update: u_rampEnd' = rw::gl3::registerUniform("u_rampEnd")
+  -- State update: u_rimData' = rw::gl3::registerUniform("u_rimData")
+  -- State update: u_lightMap' = rw::gl3::registerUniform("u_lightMap")
+  -- State update: u_eye' = rw::gl3::registerUniform("u_eye")
+  -- Invokes: gl3::registerUniform
+  true
+end
+
+schema custompipes_gl_IsTextureTransparent_2
+  Δcustompipes_glModuleState
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema custompipes_gl_AtomicFirstPass_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (gl3::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = 255
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: building.cullMode' = rw::GetRenderState(rw::CULLMODE)
+  -- State update: flags' = atomic.geometry.flags
+  -- Invokes: atomic->getPipeline, rw::GetRenderState, atomic->getFrame, rw::SetRenderState, defaultShader->use
+  true
+end
+
+schema custompipes_gl_AtomicFullyTransparent_2
+  Δcustompipes_glModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+  fadeAlpha? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (gl3::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = fadeAlpha
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: building.cullMode' = rw::GetRenderState(rw::CULLMODE)
+  -- State update: building.matrix' = *atomic.getFrame().getLTM()
+  -- Invokes: atomic->getPipeline, rw::GetRenderState, atomic->getFrame
+  true
+end
+
+schema custompipes_gl_RenderBlendPass_2
+  Δcustompipes_glModuleState
+  pass? : ℤ
+where
+  -- State update: lights.numAmbients' = 1
+  -- State update: lights.numDirectionals' = 0
+  -- State update: lights.numLocals' = 0
+  -- State update: building' = &blendInsts[pass][i]
+  -- State update: lights.ambient' = pAmbient.color
+  -- State update: lights.ambient' = black
+  -- Invokes: defaultShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_uploadSpecLights_3
+  Δcustompipes_glModuleState
+where
+  -- State update: power' = 1.0f
+  -- State update: power' = Power.Get()
+  -- State update: speccol' = SpecColor.Get()
+  -- State update: red' = speccol.r
+  -- State update: green' = speccol.g
+  -- State update: blue' = speccol.b
+  -- Invokes: Power.Get, SpecColor.Get, pDirect->getFrame
+  true
+end
+
+schema custompipes_gl_vehicleRenderCB_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: inst' = header.inst
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: m' = inst.material
+  -- Invokes: atomic->getFrame, neoVehicleShader->use, currentCamera->getFrame, Fresnel.Get, SpecColor.Get
+  true
+end
+
+schema custompipes_gl_CreateVehiclePipe_3
+  Δcustompipes_glModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, Fresnel)
+  -- State update: fp' = ReadTweakValueTable(fp, Power)
+  -- State update: fp' = ReadTweakValueTable(fp, DiffColor)
+  -- State update: fp' = ReadTweakValueTable(fp, SpecColor)
+  -- State update: neoVehicleShader' = Shader::create(vs, fs)
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyVehiclePipe_3
+  Δcustompipes_glModuleState
+where
+  -- State update: neoVehicleShader' = ∅
+  -- State update: vehiclePipe' = ∅
+  -- Invokes: neoVehicleShader->destroy
+  true
+end
+
+schema custompipes_gl_worldRenderCB_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- State update: matfx' = MatFX::get(m)
+  -- State update: dualtex' = matfx.getDualTexture()
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- Invokes: gl3::defaultRenderCB, atomic->getFrame, neoWorldShader->use, MatFX::getEffects, MatFX::get
+  true
+end
+
+schema custompipes_gl_CreateWorldPipe_3
+  Δcustompipes_glModuleState
+where
+  -- State update: neoWorldShader' = Shader::create(vs, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = ∅
+  -- State update: pipe.renderCB' = worldRenderCB
+  -- State update: worldPipe' = pipe
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyWorldPipe_3
+  Δcustompipes_glModuleState
+where
+  -- State update: neoWorldShader' = ∅
+  -- State update: worldPipe' = ∅
+  -- Invokes: neoWorldShader->destroy
+  true
+end
+
+schema custompipes_gl_glossRenderCB_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: inst' = header.inst
+  -- State update: eyePos' = rw::engine.currentCamera.getFrame().getLTM().pos
+  -- State update: m' = inst.material
+  -- State update: color' = { 255, 255, 255, m.color.alpha }
+  -- State update: tex' = GetGlossTex(m)
+  -- Invokes: neoGlossShader->use, currentCamera->getFrame
+  true
+end
+
+schema custompipes_gl_CreateGlossPipe_3
+  Δcustompipes_glModuleState
+where
+  -- State update: neoGlossShader' = Shader::create(vs, fs)
+  -- State update: pipe' = rw::gl3::ObjPipeline::create()
+  -- State update: pipe.instanceCB' = rw::gl3::defaultInstanceCB
+  -- State update: pipe.uninstanceCB' = ∅
+  -- State update: pipe.renderCB' = glossRenderCB
+  -- State update: glossPipe' = pipe
+  -- Invokes: Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyGlossPipe_3
+  Δcustompipes_glModuleState
+where
+  -- State update: neoGlossShader' = ∅
+  -- State update: glossPipe' = ∅
+  -- Invokes: neoGlossShader->destroy
+  true
+end
+
+schema custompipes_gl_uploadRimData_3
+  Δcustompipes_glModuleState
+  enable? : 𝔹
+where
+  -- State update: viewVec' = rw::engine.currentCamera.getFrame().getLTM().at
+  -- State update: col' = RampStart.Get()
+  -- State update: col' = RampEnd.Get()
+  -- Invokes: currentCamera->getFrame, Offset.Get, Scale.Get, Scaling.Get, RampStart.Get
+  true
+end
+
+schema custompipes_gl_rimSkinRenderCB_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: gl3::skinRenderCB, atomic->getFrame, neoRimSkinShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_rimRenderCB_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[rw__Atomic]
+  header? : Ref[rw__gl3__InstanceDataHeader]
+where
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: inst' = header.inst
+  -- State update: m' = inst.material
+  -- Invokes: gl3::defaultRenderCB, atomic->getFrame, neoRimShader->use, rw::SetRenderState
+  true
+end
+
+schema custompipes_gl_CreateRimLightPipes_3
+  Δcustompipes_glModuleState
+where
+  -- State update: fp' = (char*)work_buff
+  -- State update: fp' = ReadTweakValueTable(fp, RampStart)
+  -- State update: fp' = ReadTweakValueTable(fp, RampEnd)
+  -- State update: fp' = ReadTweakValueTable(fp, Offset)
+  -- State update: fp' = ReadTweakValueTable(fp, Scale)
+  -- State update: fp' = ReadTweakValueTable(fp, Scaling)
+  -- Invokes: CFileMgr::LoadFile, Shader::create, ObjPipeline::create
+  true
+end
+
+schema custompipes_gl_DestroyRimLightPipes_3
+  Δcustompipes_glModuleState
+where
+  -- State update: neoRimShader' = ∅
+  -- State update: neoRimSkinShader' = ∅
+  -- State update: rimPipe' = ∅
+  -- State update: rimSkinPipe' = ∅
+  -- Invokes: neoRimShader->destroy, neoRimSkinShader->destroy
+  true
+end
+
+schema custompipes_gl_CustomPipeRegisterGL_3
+  Δcustompipes_glModuleState
+where
+  -- State update: u_viewVec' = rw::gl3::registerUniform("u_viewVec")
+  -- State update: u_rampStart' = rw::gl3::registerUniform("u_rampStart")
+  -- State update: u_rampEnd' = rw::gl3::registerUniform("u_rampEnd")
+  -- State update: u_rimData' = rw::gl3::registerUniform("u_rimData")
+  -- State update: u_lightMap' = rw::gl3::registerUniform("u_lightMap")
+  -- State update: u_eye' = rw::gl3::registerUniform("u_eye")
+  -- Invokes: gl3::registerUniform
+  true
+end
+
+schema custompipes_gl_IsTextureTransparent_3
+  Δcustompipes_glModuleState
+  tex? : Ref[RwTexture]
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema custompipes_gl_AtomicFirstPass_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (gl3::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = 255
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: flags' = atomic.geometry.flags
+  -- State update: lights.numAmbients' = 1
+  -- Invokes: atomic->getPipeline, atomic->getFrame, defaultShader->use
+  true
+end
+
+schema custompipes_gl_AtomicFullyTransparent_3
+  Δcustompipes_glModuleState
+  atomic? : Ref[RpAtomic]
+  pass? : ℤ
+  fadeAlpha? : ℤ
+where
+  -- State update: building' = &blendInsts[pass][numBlendInsts[pass]]
+  -- State update: building.instHeader' = (gl3::InstanceDataHeader*)atomic.geometry.instData
+  -- State update: building.fadeAlpha' = fadeAlpha
+  -- State update: building.lighting' = !!(atomic.geometry.flags & rw::Geometry::LIGHT)
+  -- State update: building.matrix' = *atomic.getFrame().getLTM()
+  -- Invokes: atomic->getPipeline, atomic->getFrame
+  true
+end
+
+schema custompipes_gl_RenderBlendPass_3
+  Δcustompipes_glModuleState
+  pass? : ℤ
+where
+  -- State update: lights.numAmbients' = 1
+  -- State update: lights.numDirectionals' = 0
+  -- State update: lights.numLocals' = 0
+  -- State update: building' = &blendInsts[pass][i]
+  -- State update: lights.ambient' = pAmbient.color
+  -- State update: lights.ambient' = black
+  -- Invokes: defaultShader->use
+  true
+end

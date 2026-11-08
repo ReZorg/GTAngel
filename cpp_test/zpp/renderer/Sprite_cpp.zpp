@@ -1,0 +1,307 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Sprite (renderer)
+-- Source File(s): renderer/Sprite.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Frontend.zpp  (from "Frontend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SPRITEBUFFERSIZE : ℕ  -- #define SPRITEBUFFERSIZE 64
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Sprite_CalcScreenZ
+  ΔSpriteModuleState
+  z? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = CSprite::GetNearScreenZ()
+  -- Invokes: CSprite::GetNearScreenZ, CDraw::GetNearClipZ, CSprite::GetFarScreenZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_CalcHorizonCoors
+  ΔCSprite
+where
+  -- State update: p.z' = 0.0f
+  -- State update: p' = TheCamera.m_viewMatrix * p
+  -- Return postcondition: result! = p.y * SCREEN_HEIGHT / p.z
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CSprite_CalcScreenCoors
+  ΔCSprite
+  in? : RwV3d
+  out? : Ref[RwV3d]
+  outw? : ℙ ℝ
+  outh? : ℙ ℝ
+  farclip? : 𝔹
+where
+  -- State update: viewvec' = TheCamera.m_viewMatrix * in
+  -- State update: out' = viewvec
+  -- State update: recip' = 1.0f/out.z
+  -- State update: fov' = DefaultFOV
+  -- State update: fovScale' = fov / CDraw::GetFOV()
+  -- State update: outw' = fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ, CDraw::GetFOV
+  true
+end
+
+schema CSprite_InitSpriteBuffer
+  ΔCSprite
+where
+  -- State update: m_f2DNearScreenZ' = RwIm2DGetNearScreenZ()
+  -- State update: m_f2DFarScreenZ' = RwIm2DGetFarScreenZ()
+  true
+end
+
+schema CSprite_InitSpriteBuffer2D
+  ΔCSprite
+where
+  -- State update: m_fRecipNearClipPlane' = 1.0f / RwCameraGetNearClipPlane(Scene.camera)
+  true
+end
+
+schema CSprite_FlushSpriteBuffer
+  ΔCSprite
+where
+  -- State update: nSpriteBufferIndex' = 0
+  true
+end
+
+schema CSprite_RenderOneXLUSprite
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  a? : ℕ
+where
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_RenderOneXLUSprite_Rotate_Aspect
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  rotation? : ℝ
+  a? : ℕ
+where
+  -- State update: c' = Cos(rotation)
+  -- State update: s' = Sin(rotation)
+  -- State update: f' = (z - 1.3f)/(2.3f-1.3f) * 255
+  -- State update: r' = f*r >> 8
+  -- State update: g' = f*g >> 8
+  -- State update: b' = f*b >> 8
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  a? : ℕ
+where
+  -- State update: m_bFlushSpriteBufferSwitchZTest' = 0
+  -- State update: vert' = &SpriteBufferVerts[nSpriteBufferIndex*6]
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_Rotate_Dimension
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  rotation? : ℝ
+  a? : ℕ
+where
+  -- State update: m_bFlushSpriteBufferSwitchZTest' = 0
+  -- State update: c' = Cos(DEGTORAD(rotation))
+  -- State update: s' = Sin(DEGTORAD(rotation))
+  -- State update: vert' = &SpriteBufferVerts[nSpriteBufferIndex*6]
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_Rotate_Aspect
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r? : ℕ
+  g? : ℕ
+  b? : ℕ
+  intens? : ℤ
+  recipz? : ℝ
+  rotation? : ℝ
+  a? : ℕ
+where
+  -- State update: m_bFlushSpriteBufferSwitchZTest' = 0
+  -- State update: c' = Cos(rotation)
+  -- State update: s' = Sin(rotation)
+  -- State update: vert' = &SpriteBufferVerts[nSpriteBufferIndex*6]
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite_Rotate_2Colours
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  w? : ℝ
+  h? : ℝ
+  r1? : ℕ
+  g1? : ℕ
+  b1? : ℕ
+  r2? : ℕ
+  g2? : ℕ
+  b2? : ℕ
+  cx? : ℝ
+  cy? : ℝ
+  recipz? : ℝ
+  rotation? : ℝ
+  a? : ℕ
+where
+  -- State update: m_bFlushSpriteBufferSwitchZTest' = 0
+  -- State update: c' = Cos(rotation)
+  -- State update: s' = Sin(rotation)
+  -- State update: vert' = &SpriteBufferVerts[nSpriteBufferIndex*6]
+  -- Invokes: CDraw::GetNearClipZ, CDraw::GetFarClipZ
+  true
+end
+
+schema CSprite_Set6Vertices2D
+  ΔCSprite
+  verts? : Ref[RwIm2DVertex]
+  r? : CRect
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  -- State update: screenz' = m_f2DNearScreenZ
+  -- State update: recipz' = m_fRecipNearClipPlane
+  true
+end
+
+schema CSprite_Set6Vertices2D_2
+  ΔCSprite
+  verts? : Ref[RwIm2DVertex]
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+  c0? : CRGBA
+  c1? : CRGBA
+  c2? : CRGBA
+  c3? : CRGBA
+where
+  -- State update: z' = RwCameraGetNearClipPlane(Scene.camera)
+  -- State update: screenz' = m_f2DNearScreenZ
+  -- State update: recipz' = m_fRecipNearClipPlane
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite2D
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  w? : ℝ
+  h? : ℝ
+  colour? : RwRGBA
+  intens? : ℤ
+  alpha? : ℕ
+where
+  -- State update: m_bFlushSpriteBufferSwitchZTest' = 1
+  true
+end
+
+schema CSprite_RenderBufferedOneXLUSprite2D_Rotate_Dimension
+  ΔCSprite
+  x? : ℝ
+  y? : ℝ
+  w? : ℝ
+  h? : ℝ
+  colour? : RwRGBA
+  intens? : ℤ
+  rotation? : ℝ
+  alpha? : ℕ
+where
+  -- State update: m_bFlushSpriteBufferSwitchZTest' = 1
+  -- State update: c' = Cos(DEGTORAD(rotation))
+  -- State update: s' = Sin(DEGTORAD(rotation))
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SpriteModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 647
+end

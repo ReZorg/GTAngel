@@ -1,0 +1,201 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: main (core)
+-- Source File(s): core/main.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include time.zpp  (from "time.h")
+-- include rpmatfx.zpp  (from "rpmatfx.h")
+-- include rphanim.zpp  (from "rphanim.h")
+-- include rpskin.zpp  (from "rpskin.h")
+-- include rtbmp.zpp  (from "rtbmp.h")
+-- include rtpng.zpp  (from "rtpng.h")
+-- include rpanisot.zpp  (from "rpanisot.h")
+-- include main.zpp  (from "main.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Clouds.zpp  (from "Clouds.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include WaterCannon.zpp  (from "WaterCannon.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+-- include Antennas.zpp  (from "Antennas.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include WeaponEffects.zpp  (from "WeaponEffects.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include World.zpp  (from "World.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include User.zpp  (from "User.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Credits.zpp  (from "Credits.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Text.zpp  (from "Text.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include AnimViewer.zpp  (from "AnimViewer.h")
+-- include Script.zpp  (from "Script.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include Console.zpp  (from "Console.h")
+-- include timebars.zpp  (from "timebars.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include SceneEdit.zpp  (from "SceneEdit.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+-- include Ropes.zpp  (from "Ropes.h")
+-- include postfx.zpp  (from "postfx.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include screendroplets.zpp  (from "screendroplets.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include GitSHA1.zpp  (from "GitSHA1.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TOTALNUMCHUNKS : ℝ  -- #define TOTALNUMCHUNKS 52.0f
+WANT_TO_LOAD : seq CHAR  -- #define WANT_TO_LOAD TheMemoryCard.m_bWantToLoad
+FOUND_GAME_TO_LOAD : seq CHAR  -- #define FOUND_GAME_TO_LOAD TheMemoryCard.b_FoundRecentSavedGameWantToLoad
+CLEARMODE : seq CHAR  -- #define CLEARMODE (rwCAMERACLEARZ | rwCAMERACLEARSTENCIL)
+TILE_WIDTH : ℕ  -- #define TILE_WIDTH 576
+TILE_HEIGHT : ℕ  -- #define TILE_HEIGHT 432
+NUM_PREALLOC_ATOMICS : ℕ  -- #define NUM_PREALLOC_ATOMICS 1800
+NUM_PREALLOC_CLUMPS : ℕ  -- #define NUM_PREALLOC_CLUMPS 80
+NUM_PREALLOC_FRAMES : ℕ  -- #define NUM_PREALLOC_FRAMES 2600
+NUM_PREALLOC_GEOMETRIES : ℕ  -- #define NUM_PREALLOC_GEOMETRIES 850
+NUM_PREALLOC_TEXDICTS : ℕ  -- #define NUM_PREALLOC_TEXDICTS 121
+NUM_PREALLOC_TEXTURES : ℕ  -- #define NUM_PREALLOC_TEXTURES 1700
+NUM_PREALLOC_MATERIALS : ℕ  -- #define NUM_PREALLOC_MATERIALS 2600
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tZonePrint
+  name : seq CHAR
+  area : seq CHAR
+  rect : CRect
+where
+  #name = 11
+  #area = 5
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema main_debug
+  ΔmainModuleState
+  fmt? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema main_Error
+  ΔmainModuleState
+  fmt? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema main_ValidateVersion
+  ΔmainModuleState
+where
+  -- State update: file' = CFileMgr::OpenFile("models\\coll\\peds.col", "rb")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Seek, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema main_DoRWStuffStartOfFrame
+  ΔmainModuleState
+  TopRed? : ℤ
+  TopGreen? : ℤ
+  TopBlue? : ℤ
+  BottomRed? : ℤ
+  BottomGreen? : ℤ
+  BottomBlue? : ℤ
+  Alpha? : ℤ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CVisibilityPlugins::SetRenderWareCamera, CSprite2d::SetRecipNearClip, CSprite2d::InitPerFrame, CSprite2d::DrawRect
+  true
+end
+
+schema main_DoRWStuffStartOfFrame_Horizon
+  ΔmainModuleState
+  TopRed? : ℤ
+  TopGreen? : ℤ
+  TopBlue? : ℤ
+  BottomRed? : ℤ
+  BottomGreen? : ℤ
+  BottomBlue? : ℤ
+  Alpha? : ℤ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CVisibilityPlugins::SetRenderWareCamera, m_viewMatrix.Update, CClouds::RenderBackground
+  true
+end
+
+schema main_DoRWRenderHorizon
+  ΔmainModuleState
+where
+  -- Invokes: CClouds::RenderHorizon
+  true
+end
+
+schema main_DoFade
+  ΔmainModuleState
+where
+  -- State update: TheMemoryCard.JustLoadedDontFadeInYet' = false
+  -- State update: JustLoadedDontFadeInYet' = false
+  -- State update: TimeStartedCountingForFade' = CTimer::GetTimeInMilliseconds()
+  -- State update: TheMemoryCard.StillToFadeOut' = false
+  -- State update: StillToFadeOut' = false
+  -- State update: splash' = LoadSplash(∅)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = result
+  -- Return postcondition: result! = FALSE
+  -- Invokes: CTimer::GetIsPaused, CTimer::GetTimeInMilliseconds, TheCamera.Fade, TheCamera.ProcessFade, TheCamera.ProcessMusicFade
+  true
+end

@@ -1,0 +1,1181 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Frontend (core)
+-- Source File(s): core/Frontend.cpp, core/Frontend.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include platform.zpp  (from "platform.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Text.zpp  (from "Text.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Game.zpp  (from "Game.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include General.zpp  (from "General.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Script.zpp  (from "Script.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include World.zpp  (from "World.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include frontendoption.zpp  (from "frontendoption.h")
+-- include User.zpp  (from "User.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include Frontend_PS2.zpp  (from "Frontend_PS2.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FORCE_PC_SCALING : seq CHAR  -- #define FORCE_PC_SCALING #define WITHWINDOWS
+WITHDINPUT : seq CHAR  -- #define WITHDINPUT #include "common.h"
+TIDY_UP_PBP : seq CHAR  -- #define TIDY_UP_PBP #define MAX_VISIBLE_LIST_ROW 30
+SCROLLBAR_MAX_HEIGHT : ℝ  -- #define SCROLLBAR_MAX_HEIGHT 263.0f
+SCROLLABLE_PAGES : seq CHAR  -- #define SCROLLABLE_PAGES #define RED_DELETE_BACKGROUND
+MAX_VISIBLE_OPTION : ℕ  -- #define MAX_VISIBLE_OPTION 12
+MAX_VISIBLE_OPTION_ON_SCREEN : seq CHAR  -- #define MAX_VISIBLE_OPTION_ON_SCREEN (hasNativeList(m_nCurrScreen) ? MAX_VISIBLE_LIST_ROW : MAX_VISIBLE_OPTION)
+SCREEN_HAS_AUTO_SCROLLBAR : seq CHAR  -- #define SCREEN_HAS_AUTO_SCROLLBAR (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen))
+GetBackJustUp : seq CHAR  -- #define GetBackJustUp GetTriangleJustUp
+GetBackJustDown : seq CHAR  -- #define GetBackJustDown GetTriangleJustDown
+PAGE_NAME_X : seq CHAR  -- #define PAGE_NAME_X MENU_X_RIGHT_ALIGNED
+SCROLLBAR_BOTTOM_Y : ℝ  -- #define SCROLLBAR_BOTTOM_Y 125.0f
+SCROLLBAR_RIGHT_X : ℝ  -- #define SCROLLBAR_RIGHT_X 36.0f
+SCROLLBAR_WIDTH : ℝ  -- #define SCROLLBAR_WIDTH 9.5f
+SCROLLBAR_TOP_Y : ℕ  -- #define SCROLLBAR_TOP_Y 64
+optionWidth : ℝ  -- #define optionWidth MENU_X(66.0f)
+rawOptionHeight : ℝ  -- #define rawOptionHeight 22.0f
+optionBottom : ℝ  -- #define optionBottom SCREEN_SCALE_FROM_BOTTOM(20.0f)
+optionTop : ℝ  -- #define optionTop SCREEN_SCALE_FROM_BOTTOM(20.0f + rawOptionHeight)
+leftPadding : ℝ  -- #define leftPadding MENU_X_LEFT_ALIGNED(90.0f)
+int_STAT_IS_FLOAT : seq CHAR  -- #define int_STAT_IS_FLOAT false
+float_STAT_IS_FLOAT : seq CHAR  -- #define float_STAT_IS_FLOAT true
+DEFAULT_BRIGHTNESS : seq CHAR  -- #define DEFAULT_BRIGHTNESS 0x150
+MIN_BRIGHTNESS : ℕ  -- #define MIN_BRIGHTNESS 180
+MAX_BRIGHTNESS : ℕ  -- #define MAX_BRIGHTNESS 700
+MAP_MIN_SIZE : ℝ  -- #define MAP_MIN_SIZE 162.f
+MAP_SIZE_TO_ALLOW_X_MOVE : ℝ  -- #define MAP_SIZE_TO_ALLOW_X_MOVE 297.f
+MINUS_SCROLL_OFFSET : seq CHAR  -- #define MINUS_SCROLL_OFFSET - scrollOffset
+PLUS_LINE_HEIGHT_ON_SCREEN : seq CHAR  -- #define PLUS_LINE_HEIGHT_ON_SCREEN + MENU_DEFAULT_LINE_HEIGHT
+MENUHEADER_POS_X : ℝ  -- #define MENUHEADER_POS_X 10.0f
+MENUHEADER_POS_Y : ℝ  -- #define MENUHEADER_POS_Y 10.0f
+MENUHEADER_HEIGHT : ℝ  -- #define MENUHEADER_HEIGHT 2.0f
+MENUHEADER_WIDTH : ℝ  -- #define MENUHEADER_WIDTH 1.0f
+MENU_X_MARGIN : ℝ  -- #define MENU_X_MARGIN 10.0f
+MENUACTION_SCALE_MULT : ℝ  -- #define MENUACTION_SCALE_MULT 0.9f
+MENUSLIDER_BARS : ℕ  -- #define MENUSLIDER_BARS 16
+MENUSLIDER_LOGICAL_BARS : seq CHAR  -- #define MENUSLIDER_LOGICAL_BARS MENUSLIDER_BARS
+MENULABEL_X_MARGIN : ℝ  -- #define MENULABEL_X_MARGIN 80.0f
+MENULABEL_POS_X : ℝ  -- #define MENULABEL_POS_X 100.0f
+MENULABEL_POS_Y : ℝ  -- #define MENULABEL_POS_Y 97.0f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Frontend_Enum_1 ::= MENUALIGN_LEFT | MENUALIGN_RIGHT | MENUALIGN_CENTER
+  -- val(MENUALIGN_LEFT) = 1
+
+eMenuSprites ::= MENUSPRITE_BACKGROUND | MENUSPRITE_VCLOGO | MENUSPRITE_MOUSE | MENUSPRITE_MAPTOP01 | MENUSPRITE_MAPTOP02 | MENUSPRITE_MAPTOP03 | MENUSPRITE_MAPMID01 | MENUSPRITE_MAPMID02 | MENUSPRITE_MAPMID03 | MENUSPRITE_MAPBOT01 | MENUSPRITE_MAPBOT02 | MENUSPRITE_MAPBOT03 | MENUSPRITE_WILDSTYLE | MENUSPRITE_FLASH | MENUSPRITE_KCHAT | MENUSPRITE_FEVER | MENUSPRITE_VROCK | MENUSPRITE_VCPR | MENUSPRITE_ESPANTOSO | MENUSPRITE_EMOTION | MENUSPRITE_WAVE | MENUSPRITE_MP3 | MENUSPRITE_DOWNOFF | MENUSPRITE_DOWNON | MENUSPRITE_UPOFF | MENUSPRITE_UPON | MENUSPRITE_ARROWS1 | MENUSPRITE_ARROWS2 | MENUSPRITE_ARROWS3 | MENUSPRITE_ARROWS4 | MENUSPRITE_FINDGAME | MENUSPRITE_HOSTGAME | MENUSPRITE_MAINMENU | MENUSPRITE_PLAYERSET | MENUSPRITE_SINGLEPLAYER | MENUSPRITE_MULTIPLAYER | MENUSPRITE_DMALOGO | MENUSPRITE_GTALOGO | MENUSPRITE_RSTARLOGO | MENUSPRITE_GAMESPY | MENUSPRITE_MOUSET | MENUSPRITE_MP3LOGO | MENUSPRITE_GTA3LOGO | MENUSPRITE_UNUSED
+
+eSaveSlot ::= SAVESLOT_NONE | SAVESLOT_0 | SAVESLOT_1 | SAVESLOT_2 | SAVESLOT_3 | SAVESLOT_4 | SAVESLOT_5 | SAVESLOT_6 | SAVESLOT_7 | SAVESLOT_8 | SAVESLOT_LABEL
+  -- val(SAVESLOT_LABEL) = 36
+
+eMenuScreen ::= MENUPAGE_DISABLED | MENUPAGE_STATS | MENUPAGE_NEW_GAME | MENUPAGE_BRIEFS | MENUPAGE_SOUND_SETTINGS | MENUPAGE_DISPLAY_SETTINGS | MENUPAGE_LANGUAGE_SETTINGS | MENUPAGE_MAP | MENUPAGE_NEW_GAME_RELOAD | MENUPAGE_CHOOSE_LOAD_SLOT | MENUPAGE_CHOOSE_DELETE_SLOT | MENUPAGE_LOAD_SLOT_CONFIRM | MENUPAGE_DELETE_SLOT_CONFIRM | MENUPAGE_LOADING_IN_PROGRESS | MENUPAGE_DELETING_IN_PROGRESS | MENUPAGE_DELETE_SUCCESSFUL | MENUPAGE_CHOOSE_SAVE_SLOT | MENUPAGE_SAVE_OVERWRITE_CONFIRM | MENUPAGE_SAVING_IN_PROGRESS | MENUPAGE_SAVE_SUCCESSFUL | MENUPAGE_SAVE_CUSTOM_WARNING | MENUPAGE_SAVE_CHEAT_WARNING | MENUPAGE_SKIN_SELECT | MENUPAGE_SAVE_UNUSED | MENUPAGE_SAVE_FAILED | MENUPAGE_SAVE_FAILED_2 | MENUPAGE_LOAD_FAILED | MENUPAGE_CONTROLLER_PC | MENUPAGE_OPTIONS | MENUPAGE_EXIT | MENUPAGE_START_MENU | MENUPAGE_KEYBOARD_CONTROLS | MENUPAGE_MOUSE_CONTROLS | MENUPAGE_PAUSE_MENU | MENUPAGE_NONE | MENUPAGE_CONTROLLER_PC_OLD1 | MENUPAGE_CONTROLLER_PC_OLD2 | MENUPAGE_CONTROLLER_PC_OLD3 | MENUPAGE_CONTROLLER_PC_OLD4 | MENUPAGE_CONTROLLER_DEBUG | MENUPAGE_OUTRO | MENUPAGE_PS2_LOAD_FAILED | MENUPAGE_DELETE_FAILED | MENUPAGE_MEMORY_CARD_DEBUG | MENUPAGE_MEMORY_CARD_TEST | MENUPAGE_MULTIPLAYER_MAIN | MENUPAGE_PS2_SAVE_FAILED | MENUPAGE_PS2_SAVE_FAILED_2 | ... (62 total branches)
+  -- val(MENUPAGE_DISABLED) = -1
+  -- val(MENUPAGE_STATS) = 0
+  -- val(MENUPAGE_NEW_GAME) = 1
+  -- val(MENUPAGE_BRIEFS) = 2
+  -- val(MENUPAGE_SOUND_SETTINGS) = 3
+  -- val(MENUPAGE_DISPLAY_SETTINGS) = 4
+  -- val(MENUPAGE_LANGUAGE_SETTINGS) = 5
+  -- val(MENUPAGE_MAP) = 6
+  -- val(MENUPAGE_NEW_GAME_RELOAD) = 7
+  -- val(MENUPAGE_CHOOSE_LOAD_SLOT) = 8
+  -- val(MENUPAGE_CHOOSE_DELETE_SLOT) = 9
+  -- val(MENUPAGE_LOAD_SLOT_CONFIRM) = 10
+  -- val(MENUPAGE_DELETE_SLOT_CONFIRM) = 11
+  -- val(MENUPAGE_LOADING_IN_PROGRESS) = 12
+  -- val(MENUPAGE_DELETING_IN_PROGRESS) = 13
+  -- val(MENUPAGE_DELETE_SUCCESSFUL) = 14
+  -- val(MENUPAGE_CHOOSE_SAVE_SLOT) = 15
+  -- val(MENUPAGE_SAVE_OVERWRITE_CONFIRM) = 16
+  -- val(MENUPAGE_SAVING_IN_PROGRESS) = 17
+  -- val(MENUPAGE_SAVE_SUCCESSFUL) = 18
+  -- val(MENUPAGE_SAVE_CUSTOM_WARNING) = 19
+  -- val(MENUPAGE_SAVE_CHEAT_WARNING) = 20
+  -- val(MENUPAGE_SKIN_SELECT) = 21
+  -- val(MENUPAGE_SAVE_UNUSED) = 22
+
+eMenuAction ::= MENUACTION_CFO_SELECT | MENUACTION_CFO_DYNAMIC | MENUACTION_LABEL | MENUACTION_YES | MENUACTION_NO | MENUACTION_CHANGEMENU | MENUACTION_INVERTPADY | MENUACTION_CTRLDISPLAY | MENUACTION_FRAMESYNC | MENUACTION_FRAMELIMIT | MENUACTION_TRAILS | MENUACTION_SUBTITLES | MENUACTION_WIDESCREEN | MENUACTION_BRIGHTNESS | MENUACTION_MUSICVOLUME | MENUACTION_SFXVOLUME | MENUACTION_RADIO | MENUACTION_LANG_ENG | MENUACTION_LANG_FRE | MENUACTION_LANG_GER | MENUACTION_LANG_ITA | MENUACTION_LANG_SPA | MENUACTION_POPULATESLOTS_CHANGEMENU | MENUACTION_CHECKSAVE | MENUACTION_NEWGAME | MENUACTION_RESUME_FROM_SAVEZONE | MENUACTION_RELOADIDE | MENUACTION_SETDBGFLAG | MENUACTION_LOADRADIO | MENUACTION_SAVEGAME | MENUACTION_SWITCHBIGWHITEDEBUGLIGHT | MENUACTION_COLLISIONPOLYS | MENUACTION_LEGENDS | MENUACTION_RADARMODE | MENUACTION_HUD | MENUACTION_GOBACK | MENUACTION_KEYBOARDCTRLS | MENUACTION_GETKEY | MENUACTION_SHOWHEADBOB | MENUACTION_UNK38 | MENUACTION_INVVERT | MENUACTION_CANCELGAME | MENUACTION_RESUME | MENUACTION_DONTCANCEL | MENUACTION_SCREENRES | MENUACTION_AUDIOHW | MENUACTION_SPEAKERCONF | MENUACTION_PLAYERSETUP | ... (121 total branches)
+  -- val(MENUACTION_CFO_SELECT) = -2
+  -- val(MENUACTION_CFO_DYNAMIC) = -1
+
+eCheckHover ::= HOVEROPTION_0 | HOVEROPTION_1 | HOVEROPTION_RANDOM_ITEM | HOVEROPTION_3 | HOVEROPTION_4 | HOVEROPTION_5 | HOVEROPTION_6 | HOVEROPTION_7 | HOVEROPTION_8 | HOVEROPTION_BACK | HOVEROPTION_10 | HOVEROPTION_11 | HOVEROPTION_OVER_SCROLL_UP | HOVEROPTION_OVER_SCROLL_DOWN | HOVEROPTION_CLICKED_SCROLL_UP | HOVEROPTION_CLICKED_SCROLL_DOWN | HOVEROPTION_HOLDING_SCROLLBAR | HOVEROPTION_PAGEUP | HOVEROPTION_PAGEDOWN | HOVEROPTION_LIST | HOVEROPTION_SKIN | HOVEROPTION_USESKIN | HOVEROPTION_NEXT_RADIO | HOVEROPTION_PREV_RADIO | HOVEROPTION_INCREASE_BRIGHTNESS | HOVEROPTION_DECREASE_BRIGHTNESS | HOVEROPTION_INCREASE_DRAWDIST | HOVEROPTION_DECREASE_DRAWDIST | HOVEROPTION_INCREASE_MUSICVOLUME | HOVEROPTION_DECREASE_MUSICVOLUME | HOVEROPTION_INCREASE_SFXVOLUME | HOVEROPTION_DECREASE_SFXVOLUME | HOVEROPTION_INCREASE_MOUSESENS | HOVEROPTION_DECREASE_MOUSESENS | HOVEROPTION_INCREASE_MP3BOOST | HOVEROPTION_DECREASE_MP3BOOST | HOVEROPTION_DECREASE_CFO_SLIDER | HOVEROPTION_RADIO_0 | HOVEROPTION_RADIO_1 | HOVEROPTION_RADIO_2 | HOVEROPTION_RADIO_3 | HOVEROPTION_RADIO_4 | HOVEROPTION_RADIO_5 | HOVEROPTION_RADIO_6 | HOVEROPTION_RADIO_7 | HOVEROPTION_RADIO_8 | HOVEROPTION_RADIO_9
+
+eControlMethod ::= CONTROL_STANDARD | CONTROL_CLASSIC
+  -- val(CONTROL_STANDARD) = 0
+
+ControllerSetupColumn ::= CONTSETUP_PED_COLUMN | CONTSETUP_VEHICLE_COLUMN
+  -- val(CONTSETUP_PED_COLUMN) = 0
+  -- val(CONTSETUP_VEHICLE_COLUMN) = 16
+
+Frontend_Enum_10 ::= CONTROLLER_DUALSHOCK2 | CONTROLLER_DUALSHOCK3 | CONTROLLER_DUALSHOCK4 | CONTROLLER_XBOX360 | CONTROLLER_XBOXONE | CONTROLLER_NINTENDO_SWITCH
+  -- val(CONTROLLER_DUALSHOCK2) = 0
+
+LANGUAGE ::= LANGUAGE_AMERICAN | LANGUAGE_FRENCH | LANGUAGE_GERMAN | LANGUAGE_ITALIAN | LANGUAGE_SPANISH | LANGUAGE_RUSSIAN | LANGUAGE_JAPANESE
+
+Frontend_Enum_12 ::= ISLAND_LOADING_LOW | ISLAND_LOADING_MEDIUM | ISLAND_LOADING_HIGH
+  -- val(ISLAND_LOADING_LOW) = 0
+
+eFrontendSprites ::= FE2_MAINPANEL_UL | FE2_MAINPANEL_UR | FE2_MAINPANEL_DL | FE2_MAINPANEL_DR | FE2_MAINPANEL_DR2 | FE2_TABACTIVE | FE_ICONBRIEF | FE_ICONSTATS | FE_ICONCONTROLS | FE_ICONSAVE | FE_ICONAUDIO | FE_ICONDISPLAY | FE_ICONLANGUAGE | FE_CONTROLLER | FE_CONTROLLERSH | FE_ARROWS1 | FE_ARROWS2 | FE_ARROWS3 | FE_ARROWS4 | FE_RADIO1 | FE_RADIO2 | FE_RADIO3 | FE_RADIO4 | FE_RADIO5 | FE_RADIO6 | FE_RADIO7 | FE_RADIO8 | FE_RADIO9 | NUM_FE_SPRITES
+
+MapSprites ::= MAPMID1 | MAPMID2 | MAPMID3 | MAPBOT1 | MAPBOT2 | MAPBOT3 | MAPTOP1 | MAPTOP2 | MAPTOP3 | NUM_MAP_SPRITES
+
+Frontend_Enum_15 ::= NUM_MENUROWS
+  -- val(NUM_MENUROWS) = 18
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tSkinInfo
+  skinId : ℤ
+  skinNameDisplayed : seq CHAR
+  skinNameOriginal : seq CHAR
+  date : seq CHAR
+  nextSkin : Ref[tSkinInfo]
+where
+  #skinNameDisplayed = 256
+  #skinNameOriginal = 256
+  #date = 256
+  #nextSkin ≤ 1
+end
+
+schema BottomBarOption
+  name : seq CHAR
+  screenId : ℤ
+where
+  #name = 8
+end
+
+schema CMenuScreen
+  m_ScreenName : seq CHAR
+  unk : ℤ
+  m_PreviousPage : seq ℤ  -- bounded array [2]
+  m_ParentEntry : seq ℤ  -- bounded array [2]
+  m_EntryName : seq CHAR
+  m_SaveSlot : ℤ
+  m_TargetMenu : ℤ
+  m_X : ℕ
+  m_Y : ℕ
+  m_Align : ℕ
+where
+  #m_ScreenName = 8
+  #m_PreviousPage = 2
+  #m_ParentEntry = 2
+  #m_EntryName = 8
+  m_X ≥ 0
+  m_Y ≥ 0
+  m_Align ≥ 0
+end
+
+schema CMenuEntry
+  m_Action : ℤ
+  m_EntryName : seq CHAR
+  m_SaveSlot : ℤ
+  m_TargetMenu : ℤ
+where
+  #m_EntryName = 8
+end
+
+schema CCustomScreenLayout
+  startX : ℤ
+  startY : ℤ
+  lineHeight : ℤ
+  showLeftRightHelper : 𝔹
+  noInvasiveBorders : 𝔹
+  xMargin : ℤ
+  sprite : eMenuSprites
+  columnWidth : ℤ
+  headerHeight : ℤ
+  font : ℤ
+  alignment : ℤ
+  fontScaleX : ℝ
+  fontScaleY : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCFO
+  value : ADDRESS
+  saveCat : seq CHAR
+  save : seq CHAR
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCFOSelect
+  CCFO  -- inherits base schema
+  rightTexts : seq CHAR
+  numRightTexts : ℤ
+  onlyApplyOnEnter : 𝔹
+  displayedValue : ℤ
+  lastSavedValue : ℤ
+  changeFunc : ChangeFunc
+  disableIfGameLoaded : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCFOSelect_CCFOSelect
+  ΔCCFOSelect
+where
+  -- Declared member operation CCFOSelect::CCFOSelect()
+  true
+end
+
+schema CCFOSelect_CCFOSelect_2
+  ΔCCFOSelect
+  value? : ℙ ℤ
+  saveCat? : seq CHAR
+  save? : seq CHAR
+  rightTexts? : seq CHAR
+  numRightTexts? : ℤ
+  onlyApplyOnEnter? : 𝔹
+  changeFunc? : ChangeFunc
+  disableIfGameLoaded? : 𝔹
+where
+  -- Declared member operation CCFOSelect::CCFOSelect(int8* value, const char* saveCat, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc = nil, bool disableIfGameLoaded = false)
+  true
+end
+
+schema CCFOSelect_if_3
+  ΔCCFOSelect
+  arg_1? : value
+where
+  -- Declared member operation CCFOSelect::if(value)
+  true
+end
+
+schema CCFOSlider
+  CCFO  -- inherits base schema
+  changeFunc : ℝ
+  min : ℝ
+  max : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCFOSlider_CCFOSlider
+  ΔCCFOSlider
+where
+  -- Declared member operation CCFOSlider::CCFOSlider()
+  true
+end
+
+schema CCFOSlider_CCFOSlider_2
+  ΔCCFOSlider
+  value? : ℙ ℝ
+  saveCat? : seq CHAR
+  save? : seq CHAR
+  min? : ℝ
+  max? : ℝ
+  changeFunc? : ℝ
+where
+  -- Declared member operation CCFOSlider::CCFOSlider(float* value, const char* saveCat, const char* save, float min, float max, ChangeFuncFloat changeFunc = nil)
+  true
+end
+
+schema CCFODynamic
+  CCFO  -- inherits base schema
+  drawFunc : DrawFunc
+  buttonPressFunc : ButtonPressFunc
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCFODynamic_CCFODynamic
+  ΔCCFODynamic
+where
+  -- Declared member operation CCFODynamic::CCFODynamic()
+  true
+end
+
+schema CCFODynamic_CCFODynamic_2
+  ΔCCFODynamic
+  value? : ℙ ℤ
+  saveCat? : seq CHAR
+  save? : seq CHAR
+  drawFunc? : DrawFunc
+  buttonPressFunc? : ButtonPressFunc
+where
+  -- Declared member operation CCFODynamic::CCFODynamic(int8* value, const char* saveCat, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc)
+  true
+end
+
+schema CMenuScreenCustom
+  m_ScreenName : seq CHAR
+  m_PreviousPage : ℤ
+  layout : Ref[CCustomScreenLayout]
+  returnPrevPageFunc : ReturnPrevPageFunc
+  m_EntryName : seq CHAR
+  m_CFOSelect : Ref[CCFOSelect]
+  m_CFODynamic : Ref[CCFODynamic]
+  m_CFOSlider : Ref[CCFOSlider]
+  m_SaveSlot : ℤ
+  m_TargetMenu : ℤ
+  m_X : ℕ
+  m_Y : ℕ
+  m_Align : ℕ
+where
+  #m_ScreenName = 8
+  #layout ≤ 1
+  #m_EntryName = 8
+  #m_CFOSelect ≤ 1
+  #m_CFODynamic ≤ 1
+  #m_CFOSlider ≤ 1
+  m_X ≥ 0
+  m_Y ≥ 0
+  m_Align ≥ 0
+end
+
+schema MenuTrapezoid
+  topLeft_x : ℝ
+  topLeft_y : ℝ
+  topRight_x : ℝ
+  topRight_y : ℝ
+  bottomLeft_x : ℝ
+  bottomLeft_y : ℝ
+  bottomRight_x : ℝ
+  bottomRight_y : ℝ
+  old_topRight_x : ℝ
+  old_topRight_y : ℝ
+  old_topLeft_x : ℝ
+  old_topLeft_y : ℝ
+  old_bottomLeft_x : ℝ
+  old_bottomLeft_y : ℝ
+  old_bottomRight_x : ℝ
+  old_bottomRight_y : ℝ
+  mult_topRight_x : ℝ
+  mult_topRight_y : ℝ
+  mult_topLeft_x : ℝ
+  mult_topLeft_y : ℝ
+  mult_bottomLeft_x : ℝ
+  mult_bottomLeft_y : ℝ
+  mult_bottomRight_x : ℝ
+  mult_bottomRight_y : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema MenuTrapezoid_MenuTrapezoid
+  ΔMenuTrapezoid
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+where
+  -- Declared member operation MenuTrapezoid::MenuTrapezoid(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+  true
+end
+
+schema MenuTrapezoid_SaveCurrentCoors_2
+  ΔMenuTrapezoid
+where
+  -- Declared member operation MenuTrapezoid::SaveCurrentCoors()
+  true
+end
+
+schema MenuTrapezoid_Translate_3
+  ΔMenuTrapezoid
+  delta? : ℤ
+  result! : void
+where
+  -- Declared member operation MenuTrapezoid::Translate(int delta)
+  true
+end
+
+schema MenuTrapezoid_UpdateMultipliers_4
+  ΔMenuTrapezoid
+  result! : void
+where
+  -- Declared member operation MenuTrapezoid::UpdateMultipliers()
+  true
+end
+
+schema CMenuManager
+  m_StatsScrollDirection : ℤ
+  m_StatsScrollSpeed : ℝ
+  field_8 : ℕ
+  m_PrefsUseVibration : 𝔹
+  m_PrefsShowHud : 𝔹
+  m_PrefsRadarMode : ℤ
+  m_DisplayControllerOnFoot : 𝔹
+  m_bShutDownFrontEndRequested : 𝔹
+  m_bStartUpFrontEndRequested : 𝔹
+  m_KeyPressedCode : ℤ
+  m_PrefsBrightness : ℤ
+  m_PrefsLOD : ℝ
+  m_PrefsShowSubtitles : ℤ
+  m_PrefsShowLegends : ℤ
+  m_PrefsUseWideScreen : ℤ
+  m_PrefsVsync : ℤ
+  m_PrefsVsyncDisp : ℤ
+  m_PrefsFrameLimiter : ℤ
+  m_nPrefsAudio3DProviderIndex : ℤ
+  m_PrefsSpeakers : ℤ
+  m_PrefsDMA : ℤ
+  m_PrefsSfxVolume : ℤ
+  m_PrefsMusicVolume : ℤ
+  m_PrefsRadioStation : ℤ
+  m_PrefsStereoMono : ℕ
+  m_nCurrOption : ℤ
+  m_bQuitGameNoCD : 𝔹
+  m_bMenuMapActive : 𝔹
+  m_AllowNavigation : 𝔹
+  field_37 : ℕ
+  m_bMenuActive : 𝔹
+  m_bWantToRestart : 𝔹
+  m_bFirstTime : 𝔹
+  m_bActivateSaveMenu : 𝔹
+  m_bWantToLoad : 𝔹
+  m_fMapSize : ℝ
+  m_fMapCenterX : ℝ
+  m_fMapCenterY : ℝ
+  OS_Language : ℕ
+  m_PrefsLanguage : ℤ
+  field_54 : ℤ
+  m_bLanguageLoaded : ℤ
+  m_PrefsAllowNastyGame : ℕ
+  m_PrefsMP3BoostVolume : ℤ
+  m_ControlMethod : ℤ
+  m_nPrefsVideoMode : ℤ
+  m_nDisplayVideoMode : ℤ
+  m_nMouseTempPosX : ℤ
+  m_nMouseTempPosY : ℤ
+  m_bGameNotLoaded : 𝔹
+  m_lastWorking3DAudioProvider : ℤ
+  m_bFrontEnd_ReloadObrTxtGxt : 𝔹
+  pEditString : ℙ ℤ
+  field_74 : seq ℕ  -- bounded array [4]
+  pControlEdit : ℙ ℤ
+  m_OnlySaveMenu : 𝔹
+  m_firstStartCounter : ℤ
+  m_aFrontEndSprites : seq CSprite2d  -- bounded array [NUM_MENU_SPRITES]
+  m_bSpritesLoaded : 𝔹
+  m_LeftMostRadioX : ℤ
+  m_ScrollRadioBy : ℤ
+  m_nCurrScreen : ℤ
+  m_nPrevScreen : ℤ
+  m_nCurrSaveSlot : ℤ
+  m_LastScreenSwitch : ℕ
+  m_nMenuFadeAlpha : ℤ
+  m_nOptionHighlightTransitionBlend : ℤ
+  bMenuChangeOngoing : 𝔹
+  MouseButtonJustClicked : ℤ
+  JoyButtonJustClicked : ℤ
+  DisplayComboButtonErrMsg : 𝔹
+  m_NoEmptyBinding : 𝔹
+  m_ShowEmptyBindingError : 𝔹
+  m_nHelperTextAlpha : ℤ
+  m_bPressedPgUpOnList : 𝔹
+  m_bPressedPgDnOnList : 𝔹
+  m_bPressedUpOnList : 𝔹
+  m_bPressedDownOnList : 𝔹
+  m_bPressedScrollButton : 𝔹
+  field_129 : ℕ
+  field_12A : ℕ
+  field_12B : ℕ
+  m_nMousePosX : ℤ
+  m_nMousePosY : ℤ
+  m_nMouseOldPosX : ℤ
+  m_nMouseOldPosY : ℤ
+  m_nHoverOption : ℤ
+  m_bShowMouse : 𝔹
+  m_nOptionMouseHovering : ℤ
+  m_bStartWaitingForKeyBind : 𝔹
+  m_bWaitingForNewKeyBind : 𝔹
+  m_bKeyChangeNotProcessed : 𝔹
+  m_CurrCntrlAction : ℤ
+  field_150 : ℕ
+  field_151 : ℕ
+  field_152 : ℕ
+  field_153 : ℕ
+  m_nSelectedContSetupColumn : ℤ
+  m_bKeyIsOK : 𝔹
+  field_159 : 𝔹
+  m_nCurrExLayer : ℕ
+  m_PrefsSkinFile : seq CHAR
+  m_aSkinName : seq CHAR
+  field_35B : ℕ
+  m_nHelperTextMsgId : ℤ
+  m_pSkinListHead : tSkinInfo
+  m_pSelectedSkin : Ref[tSkinInfo]
+  m_nFirstVisibleRowOnList : ℤ
+  m_nScrollbarTopMargin : ℝ
+  m_nTotalListRow : ℤ
+  m_nSkinsTotal : ℤ
+  field_67C : seq ℕ  -- bounded array [4]
+  m_nSelectedListRow : ℤ
+  m_bSkinsEnumerated : 𝔹
+  m_nPrefsHeight : ℤ
+  m_nPrefsDepth : ℤ
+  m_nPrefsWindowed : ℤ
+  m_nPrefsSubsystem : ℤ
+  m_nSelectedScreenMode : ℤ
+  m_nDisplayMSAALevel : ℤ
+  m_PrefsControllerType : ℤ
+  m_PrefsDisableTutorials : 𝔹
+  m_PrefsIslandLoading : ℤ
+  m_nDialogHideTimerPauseMode : ℕ
+  m_bDialogOpen : 𝔹
+  m_pDialogText : seq CHAR
+  m_bSaveWasSuccessful : 𝔹
+  m_bMenuStateChanged : 𝔹
+  _unk0 : seq CHAR
+  m_bRenderGameInMenu : 𝔹
+  m_bSaveMenuActive : 𝔹
+  field_455 : seq CHAR
+  m_aMenuSprites : seq CSprite2d  -- bounded array [NUM_MENU_SPRITES]
+  field_518 : ℤ
+  _unk1 : seq CHAR
+  field_535 : 𝔹
+  field_558 : ℕ
+  m_nScreenChangeDelayTimer : ℤ
+  m_nPrefsMSAALevel : ℤ
+  m_SelectedMap : ℤ
+  m_SelectedGameType : ℤ
+  m_PrefsPlayerRed : ℕ
+  m_PrefsPlayerGreen : ℕ
+  m_PrefsPlayerBlue : ℕ
+  fMapSize : ℝ
+  fMapCenterY : ℝ
+  fMapCenterX : ℝ
+  m_aMapSprites : seq CSprite2d  -- bounded array [NUM_MAP_SPRITES]
+where
+  field_8 ≥ 0
+  m_PrefsStereoMono ≥ 0
+  field_37 ≥ 0
+  OS_Language ≥ 0
+  m_PrefsAllowNastyGame ≥ 0
+  #pEditString ≤ 1
+  #field_74 = 4
+  #pControlEdit ≤ 1
+  m_LastScreenSwitch ≥ 0
+  field_129 ≥ 0
+  field_12A ≥ 0
+  field_12B ≥ 0
+  field_150 ≥ 0
+  field_151 ≥ 0
+  field_152 ≥ 0
+  field_153 ≥ 0
+end
+
+schema CMenuManager_GetIsMenuActive
+  ΔCMenuManager
+  result! : 𝔹
+where
+  -- Declared member operation CMenuManager::GetIsMenuActive()
+  true
+end
+
+schema CMenuManager_CMenuManager_2
+  ΔCMenuManager
+  result! : ANY
+where
+  -- Declared member operation CMenuManager::CMenuManager(void)
+  true
+end
+
+schema CMenuManager_SetDialogText_3
+  ΔCMenuManager
+  arg_1? : seq CHAR
+where
+  -- Declared member operation CMenuManager::SetDialogText(const char*)
+  true
+end
+
+schema CMenuManager_DialogTextCmp_4
+  ΔCMenuManager
+  arg_1? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CMenuManager::DialogTextCmp(const char*)
+  true
+end
+
+schema CMenuManager_ToggleDialog_5
+  ΔCMenuManager
+  arg_1? : 𝔹
+where
+  -- Declared member operation CMenuManager::ToggleDialog(bool)
+  true
+end
+
+schema CMenuManager_SetDialogTimer_6
+  ΔCMenuManager
+  arg_1? : ℕ
+where
+  -- Declared member operation CMenuManager::SetDialogTimer(uint32)
+  true
+end
+
+schema CMenuManager_ProcessDialogTimer_7
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::ProcessDialogTimer(void)
+  true
+end
+
+schema CMenuManager_DrawOverlays_8
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawOverlays(void)
+  true
+end
+
+schema CMenuManager_CloseDialog_9
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::CloseDialog(void)
+  true
+end
+
+schema CMenuManager_PrintMap_10
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::PrintMap()
+  true
+end
+
+schema CMenuManager_SetFrontEndRenderStates_11
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::SetFrontEndRenderStates()
+  true
+end
+
+schema CMenuManager_CentreMousePointer_12
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::CentreMousePointer()
+  true
+end
+
+schema CMenuManager_CheckCodesForControls_13
+  ΔCMenuManager
+  arg_1? : ℤ
+where
+  -- Declared member operation CMenuManager::CheckCodesForControls(int)
+  true
+end
+
+schema CMenuManager_CheckHover_14
+  ΔCMenuManager
+  x1? : ℤ
+  x2? : ℤ
+  y1? : ℤ
+  y2? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CMenuManager::CheckHover(int x1, int x2, int y1, int y2)
+  true
+end
+
+schema CMenuManager_CheckSliderMovement_15
+  ΔCMenuManager
+  arg_1? : ℤ
+where
+  -- Declared member operation CMenuManager::CheckSliderMovement(int)
+  true
+end
+
+schema CMenuManager_DisplayHelperText_16
+  ΔCMenuManager
+  arg_1? : seq CHAR
+where
+  -- Declared member operation CMenuManager::DisplayHelperText(char*)
+  true
+end
+
+schema CMenuManager_DisplaySlider_17
+  ΔCMenuManager
+  arg_1? : ℝ
+  arg_2? : ℝ
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℝ
+  result! : ℤ
+where
+  -- Declared member operation CMenuManager::DisplaySlider(float, float, float, float, float, float, float)
+  true
+end
+
+schema CMenuManager_DoSettingsBeforeStartingAGame_18
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DoSettingsBeforeStartingAGame()
+  true
+end
+
+schema CMenuManager_DrawStandardMenus_19
+  ΔCMenuManager
+  arg_1? : 𝔹
+where
+  -- Declared member operation CMenuManager::DrawStandardMenus(bool)
+  true
+end
+
+schema CMenuManager_DrawControllerBound_20
+  ΔCMenuManager
+  arg_1? : ℤ
+  arg_2? : ℤ
+  arg_3? : ℤ
+  arg_4? : ℤ
+where
+  -- Declared member operation CMenuManager::DrawControllerBound(int32, int32, int32, int8)
+  true
+end
+
+schema CMenuManager_DrawControllerScreenExtraText_21
+  ΔCMenuManager
+  arg_1? : ℤ
+  arg_2? : ℤ
+  arg_3? : ℤ
+where
+  -- Declared member operation CMenuManager::DrawControllerScreenExtraText(int, int, int)
+  true
+end
+
+schema CMenuManager_DrawControllerSetupScreen_22
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawControllerSetupScreen()
+  true
+end
+
+schema CMenuManager_DrawQuitGameScreen_23
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawQuitGameScreen()
+  true
+end
+
+schema CMenuManager_DrawFrontEnd_24
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::DrawFrontEnd()
+  true
+end
+
+schema CMenuManager_DrawBackground_25
+  ΔCMenuManager
+  transitionCall? : 𝔹
+where
+  -- Declared member operation CMenuManager::DrawBackground(bool transitionCall)
+  true
+end
+
+schema CMenuManager_DrawPlayerSetupScreen_26
+  ΔCMenuManager
+  arg_1? : 𝔹
+where
+  -- Declared member operation CMenuManager::DrawPlayerSetupScreen(bool)
+  true
+end
+
+schema CMenuManager_FadeIn_27
+  ΔCMenuManager
+  alpha? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CMenuManager::FadeIn(int alpha)
+  true
+end
+
+schema CMenuManager_GetStartOptionsCntrlConfigScreens_28
+  ΔCMenuManager
+  result! : ℤ
+where
+  -- Declared member operation CMenuManager::GetStartOptionsCntrlConfigScreens()
+  true
+end
+
+schema CMenuManager_InitialiseChangedLanguageSettings_29
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::InitialiseChangedLanguageSettings()
+  true
+end
+
+schema CMenuManager_LoadAllTextures_30
+  ΔCMenuManager
+where
+  -- Declared member operation CMenuManager::LoadAllTextures()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Frontend_GetOptionCount
+  ΔFrontendModuleState
+  screen? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = i
+  true
+end
+
+schema CMenuManager_ScrollUpListByOne
+  ΔCMenuManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuManager_ScrollDownListByOne
+  ΔCMenuManager
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuManager_PageUpList
+  ΔCMenuManager
+  playSoundOnSuccess? : 𝔹
+where
+  -- State update: m_nFirstVisibleRowOnList' = 0
+  -- State update: m_nSelectedListRow' = 0
+  -- Invokes: DMAudio.PlayFrontEndSound
+  true
+end
+
+schema CMenuManager_PageDownList
+  ΔCMenuManager
+  playSoundOnSuccess? : 𝔹
+where
+  -- State update: m_nSelectedListRow' = Max(m_nSelectedListRow, m_nFirstVisibleRowOnList)
+  -- State update: m_nFirstVisibleRowOnList' = m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN
+  -- State update: m_nSelectedListRow' = m_nTotalListRow - 1
+  -- Invokes: DMAudio.PlayFrontEndSound
+  true
+end
+
+schema Frontend_ScreenHasOption
+  ΔFrontendModuleState
+  screen? : ℤ
+  gxtKey? : seq CHAR
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CMenuManager_ThingsToDoBeforeGoingBack
+  ΔCMenuManager
+where
+  -- State update: m_nPrefsAudio3DProviderIndex' = DMAudio.GetCurrent3DProviderIndex()
+  -- State update: m_nDisplayVideoMode' = m_nPrefsVideoMode
+  -- State update: m_nTotalListRow' = 0
+  -- State update: m_nSelectedListRow' = 0
+  -- State update: m_nFirstVisibleRowOnList' = 0
+  -- State update: m_nScrollbarTopMargin' = 0
+  -- Invokes: DMAudio.GetCurrent3DProviderIndex, DMAudio.StopFrontEndTrack, CPlayerSkin::EndFrontendSkinEdit, m_CFODynamic->buttonPressFunc
+  true
+end
+
+schema CMenuManager_GetPreviousPageOption
+  ΔCMenuManager
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = i
+  true
+end
+
+schema CMenuManager_ProcessList
+  ΔCMenuManager
+  goBack? : 𝔹
+  optionSelected? : 𝔹
+where
+  -- State update: m_nTotalListRow' = m_nSkinsTotal
+  -- State update: m_nSelectedListRow' = m_nTotalListRow - 1
+  -- State update: m_bShowMouse' = 0
+  -- State update: optionSelected' = true
+  -- State update: m_nHoverOption' = HOVEROPTION_NOT_HOVERING
+  -- State update: m_bWaitingForNewKeyBind' = true
+  -- Invokes: CPad::GetPad, CTimer::GetTimeInMillisecondsPauseMode, DMAudio.PlayFrontEndSound
+  true
+end
+
+schema CMenuManager_BuildStatLine
+  ΔCMenuManager
+  text? : seq CHAR
+  stat? : ADDRESS
+  itsFloat? : 𝔹
+  stat2? : ADDRESS
+where
+  -- Invokes: CFont::IsJapanese, TheText.Get
+  true
+end
+
+schema CMenuManager_CentreMousePointer
+  ΔCMenuManager
+where
+  -- State update: Point.x' = SCREEN_WIDTH / 2
+  -- State update: Point.y' = SCREEN_HEIGHT / 2
+  true
+end
+
+schema CMenuManager_CheckCodesForControls
+  ΔCMenuManager
+  typeOfControl? : ℤ
+where
+  -- State update: DisplayComboButtonErrMsg' = false
+  -- State update: invalidKey' = false
+  -- State update: escPressed' = false
+  -- State update: action' = (e_ControllerAction) m_CurrCntrlAction
+  -- State update: escPressed' = true
+  -- State update: typeToSave' = KEYBOARD
+  -- Invokes: ControlsManager.GetControllerKeyAssociatedWithAction, ControlsManager.GetIsActionAButtonCombo, ControlsManager.ClearSettingsAssociatedWithAction, ControlsManager.DeleteMatchingActionInitiators, ControlsManager.SetControllerKeyAssociatedWithAction
+  true
+end
+
+schema CMenuManager_CheckHover
+  ΔCMenuManager
+  x1? : ℤ
+  x2? : ℤ
+  y1? : ℤ
+  y2? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMenuManager_CheckSliderMovement
+  ΔCMenuManager
+  value? : ℤ
+where
+  -- State update: m_PrefsBrightness' = Clamp(m_PrefsBrightness, 0, 384)
+  -- State update: m_PrefsLOD' = Clamp(m_PrefsLOD, 0.925f, 1.8f)
+  -- State update: ms_lodDistScale' = m_PrefsLOD
+  -- State update: m_PrefsMusicVolume' = Clamp(m_PrefsMusicVolume, 0, 65)
+  -- State update: m_PrefsSfxVolume' = Clamp(m_PrefsSfxVolume, 0, 65)
+  -- State update: m_PrefsMP3BoostVolume' = Clamp(m_PrefsMP3BoostVolume, 0, 65)
+  -- Invokes: DMAudio.SetMusicMasterVolume, DMAudio.SetEffectsMasterVolume, DMAudio.IsMP3RadioChannelAvailable, DMAudio.SetMP3BoostVolume, m_CFOSlider->changeFunc
+  true
+end
+
+schema CMenuManager_DisplayHelperText
+  ΔCMenuManager
+where
+  -- State update: LastFlash' = 0
+  -- State update: LastFlash' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: alpha' = m_nHelperTextAlpha > 255 ? 255 : m_nHelperTextAlpha
+  -- State update: action' = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action
+  -- Invokes: CTimer::GetTimeInMillisecondsPauseMode, CTimer::GetLogicalFramesPassed, CFont::SetColor, CFont::PrintString, TheText.Get
+  true
+end
+
+schema CMenuManager_DisplaySlider
+  ΔCMenuManager
+  x? : ℝ
+  y? : ℝ
+  mostLeftBarSize? : ℝ
+  mostRightBarSize? : ℝ
+  rectSize? : ℝ
+  progress? : ℝ
+where
+  -- State update: lastActiveBarX' = 0
+  -- State update: curBarX' = 0.0f
+  -- State update: spacing' = SCREEN_SCALE_X(10.0f)
+  -- State update: curBarX' = i * rectSize/MENUSLIDER_BARS + x
+  -- State update: lastActiveBarX' = curBarX
+  -- State update: maxBarHeight' = Max(mostLeftBarSize, mostRightBarSize)
+  -- Return postcondition: result! = lastActiveBarX
+  -- Invokes: CSprite2d::DrawRect
+  true
+end
+
+schema CMenuManager_DoSettingsBeforeStartingAGame
+  ΔCMenuManager
+where
+  -- State update: m_PrefsVsync' = m_PrefsVsyncDisp
+  -- State update: m_bShutDownFrontEndRequested' = true
+  -- State update: m_bWantToRestart' = true
+  -- Invokes: DMAudio.DestroyAllGameCreatedEntities, DMAudio.Service, DMAudio.SetEffectsFadeVol, DMAudio.SetMusicFadeVol, DMAudio.ResetTimers
+  true
+end
+
+schema CMenuManager_Draw
+  ΔCMenuManager
+where
+  -- State update: nextYToUse' = 40.0f
+  -- State update: str' = TheText.Get("FES_LCG")
+  -- State update: str' = TheText.Get("FESZ_QZ")
+  -- State update: str' = TheText.Get("FEQ_SRW")
+  -- State update: itemsAreSelectable' = !bottomBarActive
+  -- State update: itemsAreSelectable' = true
+  -- Return postcondition: result! = number
+  -- Return postcondition: result! = alpha
+  -- Return postcondition: result! = Min(m_nMenuFadeAlpha, alpha)
+  -- Invokes: CFont::SetBackgroundOff, CFont::SetPropOn, CFont::SetCentreOff, CFont::SetJustifyOn, CFont::SetBackGroundOnlyTextOn
+  true
+end
+
+schema Frontend_CCFOSelect
+  ΔFrontendModuleState
+  value? : ℙ ℤ
+  saveCat? : seq CHAR
+  save? : seq CHAR
+  rightTexts? : seq CHAR
+  numRightTexts? : ℤ
+  onlyApplyOnEnter? : 𝔹
+  changeFunc? : ChangeFunc
+  disableIfGameLoaded? : 𝔹
+where
+  -- State update: value' = value
+  -- State update: displayedValue' = *value
+  -- State update: saveCat' = saveCat
+  -- State update: save' = save
+  -- State update: rightTexts' = (char**)rightTexts
+  -- State update: numRightTexts' = numRightTexts
+  true
+end
+
+schema Frontend_CCFOSlider
+  ΔFrontendModuleState
+  value? : ℙ ℝ
+  saveCat? : seq CHAR
+  save? : seq CHAR
+  min? : ℝ
+  max? : ℝ
+  changeFunc? : ℝ
+where
+  -- State update: value' = value
+  -- State update: saveCat' = saveCat
+  -- State update: save' = save
+  -- State update: changeFunc' = changeFunc
+  -- State update: min' = min
+  -- State update: max' = max
+  true
+end
+
+schema Frontend_CCFODynamic
+  ΔFrontendModuleState
+  value? : ℙ ℤ
+  saveCat? : seq CHAR
+  save? : seq CHAR
+  drawFunc? : DrawFunc
+  buttonPressFunc? : ButtonPressFunc
+where
+  -- State update: value' = value
+  -- State update: saveCat' = saveCat
+  -- State update: save' = save
+  -- State update: drawFunc' = drawFunc
+  -- State update: buttonPressFunc' = buttonPressFunc
+  true
+end
+
+schema Frontend_MenuTrapezoid
+  ΔFrontendModuleState
+  x1? : ℝ
+  y1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  x3? : ℝ
+  y3? : ℝ
+  x4? : ℝ
+  y4? : ℝ
+where
+  -- State update: topLeft_x' = x1
+  -- State update: topLeft_y' = y1
+  -- State update: topRight_x' = x2
+  -- State update: topRight_y' = y2
+  -- State update: bottomLeft_x' = x3
+  -- State update: bottomLeft_y' = y3
+  true
+end
+
+schema Frontend_SaveCurrentCoors
+  ΔFrontendModuleState
+where
+  -- State update: old_topLeft_x' = topLeft_x
+  -- State update: old_topLeft_y' = topLeft_y
+  -- State update: old_topRight_x' = topRight_x
+  -- State update: old_topRight_y' = topRight_y
+  -- State update: old_bottomLeft_x' = bottomLeft_x
+  -- State update: old_bottomLeft_y' = bottomLeft_y
+  true
+end
+
+schema Frontend_Translate
+  ΔFrontendModuleState
+  delta? : ℤ
+where
+  -- State update: bottomRight_x' = delta * mult_bottomRight_x + old_bottomRight_x
+  -- State update: bottomRight_y' = delta * mult_bottomRight_y + old_bottomRight_y
+  -- State update: bottomLeft_x' = delta * mult_bottomLeft_x + old_bottomLeft_x
+  -- State update: bottomLeft_y' = delta * mult_bottomLeft_y + old_bottomLeft_y
+  -- State update: topRight_x' = delta * mult_topRight_x + old_topRight_x
+  -- State update: topRight_y' = delta * mult_topRight_y + old_topRight_y
+  true
+end
+
+schema Frontend_UpdateMultipliers
+  ΔFrontendModuleState
+where
+  -- State update: mult_bottomRight_x' = (bottomRight_x - old_bottomRight_x) / 255.0f
+  -- State update: mult_bottomRight_y' = (bottomRight_y - old_bottomRight_y) / 255.0f
+  -- State update: mult_bottomLeft_x' = (bottomLeft_x - old_bottomLeft_x) / 255.0f
+  -- State update: mult_bottomLeft_y' = (bottomLeft_y - old_bottomLeft_y) / 255.0f
+  -- State update: mult_topRight_x' = (topRight_x - old_topRight_x) / 255.0f
+  -- State update: mult_topRight_y' = (topRight_y - old_topRight_y) / 255.0f
+  true
+end
+
+schema Frontend_GetIsMenuActive
+  ΔFrontendModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!m_bMenuActive
+  true
+end
+
+schema Frontend_CMenuManager
+  ΔFrontendModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

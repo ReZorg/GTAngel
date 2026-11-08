@@ -1,0 +1,495 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Automobile (vehicles)
+-- Source File(s): vehicles/Automobile.cpp, vehicles/Automobile.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Rubbish.zpp  (from "Rubbish.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include Glass.zpp  (from "Glass.h")
+-- include Antennas.zpp  (from "Antennas.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include WaterCannon.zpp  (from "WaterCannon.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include World.zpp  (from "World.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Record.zpp  (from "Record.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include Population.zpp  (from "Population.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Object.zpp  (from "Object.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include DamageManager.zpp  (from "DamageManager.h")
+-- include Door.zpp  (from "Door.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SAND_SLOWDOWN : ℝ  -- #define SAND_SLOWDOWN (0.01f)
+HYDRAULIC_UPPER_EXT : ℝ  -- #define HYDRAULIC_UPPER_EXT (-0.16f)
+HYDRAULIC_LOWER_EXT : ℝ  -- #define HYDRAULIC_LOWER_EXT (0.16f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Automobile_Enum_1 ::= CARWHEEL_FRONT_LEFT | CARWHEEL_REAR_LEFT | CARWHEEL_FRONT_RIGHT | CARWHEEL_REAR_RIGHT
+
+eCarNodes ::= CAR_WHEEL_RF | CAR_WHEEL_RM | CAR_WHEEL_RB | CAR_WHEEL_LF | CAR_WHEEL_LM | CAR_WHEEL_LB | CAR_BUMP_FRONT | CAR_BUMP_REAR | CAR_WING_RF | CAR_WING_RR | CAR_DOOR_RF | CAR_DOOR_RR | CAR_WING_LF | CAR_WING_LR | CAR_DOOR_LF | CAR_DOOR_LR | CAR_BONNET | CAR_BOOT | CAR_WINDSCREEN | NUM_CAR_NODES
+  -- val(CAR_WHEEL_RF) = 1
+
+eBombType ::= CARBOMB_NONE | CARBOMB_TIMED | CARBOMB_ONIGNITION | CARBOMB_REMOTE | CARBOMB_TIMEDACTIVE | CARBOMB_ONIGNITIONACTIVE
+
+Automobile_Enum_4 ::= CAR_DOOR_FLAG_UNKNOWN | CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR | CAR_DOOR_FLAG_RF | CAR_DOOR_FLAG_RR
+  -- val(CAR_DOOR_FLAG_UNKNOWN) = 0x0
+  -- val(CAR_DOOR_FLAG_LF) = 0x1
+  -- val(CAR_DOOR_FLAG_LR) = 0x2
+  -- val(CAR_DOOR_FLAG_RF) = 0x4
+  -- val(CAR_DOOR_FLAG_RR) = 0x8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAutomobile
+  CVehicle  -- inherits base schema
+  Damage : CDamageManager
+  Doors : seq CDoor  -- bounded array [6]
+  m_aCarNodes : seq Ref[RwFrame]  -- bounded array [NUM_CAR_NODES]
+  m_aWheelColPoints : seq ℤ  -- bounded array [4]
+  m_aSuspensionSpringRatio : seq ℝ  -- bounded array [4]
+  m_aSuspensionSpringRatioPrev : seq ℝ  -- bounded array [4]
+  m_aWheelTimer : seq ℝ  -- bounded array [4]
+  m_auto_unused1 : ℝ
+  m_fEngineInertiaVar1 : ℝ
+  m_fEngineInertiaVar2 : ℝ
+  m_aWheelSkidmarkType : seq eSkidmarkType  -- bounded array [4]
+  m_aWheelSkidmarkBloody : seq 𝔹  -- bounded array [4]
+  m_aWheelSkidmarkUnk : seq 𝔹  -- bounded array [4]
+  m_aWheelRotation : seq ℝ  -- bounded array [4]
+  m_aWheelPosition : seq ℝ  -- bounded array [4]
+  m_aWheelSpeed : seq ℝ  -- bounded array [4]
+  m_auto_unused2 : ℕ
+  m_bombType : 𝔹
+  bTaxiLight : 𝔹
+  bDriverLastFrame : 𝔹
+  bFixedColour : 𝔹
+  bBigWheels : 𝔹
+  bWaterTight : 𝔹
+  bNotDamagedUpsideDown : 𝔹
+  bMoreResistantToDamage : 𝔹
+  bTankDetonateCars : 𝔹
+  bStuckInSand : 𝔹
+  bHeliDestroyed : 𝔹
+  m_pBombRigger : Ref[CEntity]
+  m_doingBurnout : ℤ
+  m_hydraulicState : ℕ
+  m_nBusDoorTimerEnd : ℕ
+  m_nBusDoorTimerStart : ℕ
+  m_aSuspensionSpringLength : seq ℝ  -- bounded array [4]
+  m_aSuspensionLineLength : seq ℝ  -- bounded array [4]
+  m_fHeightAboveRoad : ℝ
+  m_fTraction : ℝ
+  m_fTireTemperature : ℝ
+  m_fOrientation : ℝ
+  m_fPlaneSteer : ℝ
+  m_fVelocityChangeForAudio : ℝ
+  m_randomValues : seq ℝ  -- bounded array [6]
+  m_fFireBlowUpTimer : ℝ
+  m_aGroundPhysical : seq Ref[CPhysical]  -- bounded array [4]
+  m_aGroundOffset : seq CVector  -- bounded array [4]
+  m_pSetOnFireEntity : Ref[CEntity]
+  m_weaponDoorTimerLeft : ℝ
+  m_weaponDoorTimerRight : ℝ
+  m_fCarGunLR : ℝ
+  m_fCarGunUD : ℝ
+  m_fHeliOrientation : ℝ
+  m_fPropellerRotation : ℝ
+  stuff4 : seq ℕ  -- bounded array [4]
+  m_nWheelsOnGround : ℕ
+  m_nDriveWheelsOnGround : ℕ
+  m_nDriveWheelsOnGroundPrev : ℕ
+  m_fGasPedalAudio : ℝ
+  m_aWheelState : seq tWheelState  -- bounded array [4]
+  m_sAllTaxiLights : 𝔹
+  m_auto_unk1 : ℤ
+where
+  #Doors = 6
+  #m_aWheelColPoints = 4
+  #m_aSuspensionSpringRatio = 4
+  #m_aSuspensionSpringRatioPrev = 4
+  #m_aWheelTimer = 4
+  #m_aWheelSkidmarkType = 4
+  #m_aWheelSkidmarkBloody = 4
+  #m_aWheelSkidmarkUnk = 4
+  #m_aWheelRotation = 4
+  #m_aWheelPosition = 4
+  #m_aWheelSpeed = 4
+  m_auto_unused2 ≥ 0
+  #m_bombType = 3
+  #bTaxiLight = 1
+  #bDriverLastFrame = 1
+  #bFixedColour = 1
+end
+
+schema CAutomobile_CAutomobile
+  ΔCAutomobile
+  id? : ℤ
+  CreatedBy? : ℕ
+where
+  -- Declared member operation CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
+  true
+end
+
+schema CAutomobile_SetModelIndex_2
+  ΔCAutomobile
+  id? : ℕ
+where
+  -- Declared member operation CAutomobile::SetModelIndex(uint32 id)
+  true
+end
+
+schema CAutomobile_ProcessControl_3
+  ΔCAutomobile
+where
+  -- Declared member operation CAutomobile::ProcessControl(void)
+  true
+end
+
+schema CAutomobile_Teleport_4
+  ΔCAutomobile
+  v? : CVector
+where
+  -- Declared member operation CAutomobile::Teleport(CVector v)
+  true
+end
+
+schema CAutomobile_PreRender_5
+  ΔCAutomobile
+where
+  -- Declared member operation CAutomobile::PreRender(void)
+  true
+end
+
+schema CAutomobile_Render_6
+  ΔCAutomobile
+where
+  -- Declared member operation CAutomobile::Render(void)
+  true
+end
+
+schema CAutomobile_ProcessEntityCollision_7
+  ΔCAutomobile
+  ent? : Ref[CEntity]
+  colpoints? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
+  true
+end
+
+schema CAutomobile_ProcessControlInputs_8
+  ΔCAutomobile
+  arg_1? : ℕ
+where
+  -- Declared member operation CAutomobile::ProcessControlInputs(uint8)
+  true
+end
+
+schema CAutomobile_GetComponentWorldPosition_9
+  ΔCAutomobile
+  component? : ℤ
+  pos? : CVector
+where
+  -- Declared member operation CAutomobile::GetComponentWorldPosition(int32 component, CVector &pos)
+  true
+end
+
+schema CAutomobile_IsComponentPresent_10
+  ΔCAutomobile
+  component? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsComponentPresent(int32 component)
+  true
+end
+
+schema CAutomobile_SetComponentRotation_11
+  ΔCAutomobile
+  component? : ℤ
+  rotation? : CVector
+where
+  -- Declared member operation CAutomobile::SetComponentRotation(int32 component, CVector rotation)
+  true
+end
+
+schema CAutomobile_OpenDoor_12
+  ΔCAutomobile
+  component? : ℤ
+  door? : eDoors
+  openRatio? : ℝ
+where
+  -- Declared member operation CAutomobile::OpenDoor(int32 component, eDoors door, float openRatio)
+  true
+end
+
+schema CAutomobile_ProcessOpenDoor_13
+  ΔCAutomobile
+  arg_1? : ℕ
+  arg_2? : ℕ
+  arg_3? : ℝ
+where
+  -- Declared member operation CAutomobile::ProcessOpenDoor(uint32, uint32, float)
+  true
+end
+
+schema CAutomobile_IsDoorReady_14
+  ΔCAutomobile
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsDoorReady(eDoors door)
+  true
+end
+
+schema CAutomobile_IsDoorFullyOpen_15
+  ΔCAutomobile
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsDoorFullyOpen(eDoors door)
+  true
+end
+
+schema CAutomobile_IsDoorClosed_16
+  ΔCAutomobile
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsDoorClosed(eDoors door)
+  true
+end
+
+schema CAutomobile_IsDoorMissing_17
+  ΔCAutomobile
+  door? : eDoors
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsDoorMissing(eDoors door)
+  true
+end
+
+schema CAutomobile_IsDoorReady_18
+  ΔCAutomobile
+  door? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsDoorReady(uint32 door)
+  true
+end
+
+schema CAutomobile_IsDoorMissing_19
+  ΔCAutomobile
+  door? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsDoorMissing(uint32 door)
+  true
+end
+
+schema CAutomobile_IsOpenTopCar_20
+  ΔCAutomobile
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsOpenTopCar(void)
+  true
+end
+
+schema CAutomobile_RemoveRefsToVehicle_21
+  ΔCAutomobile
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CAutomobile::RemoveRefsToVehicle(CEntity *ent)
+  true
+end
+
+schema CAutomobile_BlowUpCar_22
+  ΔCAutomobile
+  ent? : Ref[CEntity]
+where
+  -- Declared member operation CAutomobile::BlowUpCar(CEntity *ent)
+  true
+end
+
+schema CAutomobile_SetUpWheelColModel_23
+  ΔCAutomobile
+  colModel? : Ref[CColModel]
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::SetUpWheelColModel(CColModel *colModel)
+  true
+end
+
+schema CAutomobile_BurstTyre_24
+  ΔCAutomobile
+  tyre? : ℕ
+  applyForces? : 𝔹
+where
+  -- Declared member operation CAutomobile::BurstTyre(uint8 tyre, bool applyForces)
+  true
+end
+
+schema CAutomobile_IsRoomForPedToLeaveCar_25
+  ΔCAutomobile
+  component? : ℕ
+  doorOffset? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
+  true
+end
+
+schema CAutomobile_GetHeightAboveRoad_26
+  ΔCAutomobile
+  result! : ℝ
+where
+  -- Declared member operation CAutomobile::GetHeightAboveRoad(void)
+  true
+end
+
+schema CAutomobile_PlayCarHorn_27
+  ΔCAutomobile
+where
+  -- Declared member operation CAutomobile::PlayCarHorn(void)
+  true
+end
+
+schema CAutomobile_ProcessCarWheelPair_28
+  ΔCAutomobile
+  leftWheel? : ℤ
+  rightWheel? : ℤ
+  steerAngle? : ℝ
+  contactSpeeds? : Ref[CVector]
+  contactPoints? : Ref[CVector]
+  traction? : ℝ
+  acceleration? : ℝ
+  brake? : ℝ
+  bFront? : 𝔹
+where
+  -- Declared member operation CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector *contactSpeeds, CVector *contactPoints, float traction, float acceleration, float brake, bool bFront)
+  true
+end
+
+schema CAutomobile_FireTruckControl_29
+  ΔCAutomobile
+where
+  -- Declared member operation CAutomobile::FireTruckControl(void)
+  true
+end
+
+schema CAutomobile_TankControl_30
+  ΔCAutomobile
+where
+  -- Declared member operation CAutomobile::TankControl(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAutomobile_SetModelIndex
+  ΔCAutomobile
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex
+  true
+end
+
+schema CAutomobile_ProcessControl
+  ΔCAutomobile
+where
+  -- State update: brake' = 0.0f
+  -- State update: colModel' = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel
+  -- State update: colModel' = GetColModel()
+  -- State update: drivingInSand' = false
+  -- State update: bWarnedPeds' = false
+  -- State update: m_doingBurnout' = 0
+  -- Return postcondition: result! = numCollisions
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 0
+  -- Invokes: CReplay::IsPlayingBack, CWindModifiers::RegisterOne, m_pWanted->GetWantedLevel, m_vecMoveSpeed.Magnitude, pDriver->IsPlayer
+  true
+end
+
+schema Automobile_SetHeliOrientation
+  ΔAutomobileModuleState
+  orient? : ℝ
+where
+  -- State update: m_fHeliOrientation' = orient
+  true
+end
+
+schema Automobile_ClearHeliOrientation
+  ΔAutomobileModuleState
+where
+  -- State update: m_fHeliOrientation' = -1.0f
+  true
+end
+
+schema Automobile_GetCarDoorFlag
+  ΔAutomobileModuleState
+  carnode? : ℤ
+  result! : ℕ
+where
+  -- Return postcondition: result! = CAR_DOOR_FLAG_LF
+  -- Return postcondition: result! = CAR_DOOR_FLAG_LR
+  -- Return postcondition: result! = CAR_DOOR_FLAG_RF
+  true
+end

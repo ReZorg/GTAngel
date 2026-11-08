@@ -1,0 +1,194 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Debug (core)
+-- Source File(s): core/Debug.cpp, core/Debug.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include Lines.zpp  (from "Lines.h")
+-- include Font.zpp  (from "Font.h")
+-- include main.zpp  (from "main.h")
+-- include Text.zpp  (from "Text.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DEBUG_X_POS : seq CHAR  -- #define DEBUG_X_POS (300)
+DEBUG_Y_POS : seq CHAR  -- #define DEBUG_Y_POS (41)
+DEBUG_LINE_HEIGHT : seq CHAR  -- #define DEBUG_LINE_HEIGHT (22)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Debug_Enum_1 ::= MAX_LINES | MAX_STR_LEN | MAX_SCREEN_STRS | MAX_DEBUG_LINES
+  -- val(MAX_LINES) = 15
+  -- val(MAX_STR_LEN) = 80
+  -- val(MAX_SCREEN_STRS) = 100
+  -- val(MAX_DEBUG_LINES) = 100
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDebug
+  ms_nCurrentTextLine : ℤ
+  str : seq CHAR
+  ms_aScreenStrs : seq ScreenStr  -- bounded array [MAX_SCREEN_STRS]
+  ms_nScreenStrs : ℤ
+  c2 : ℕ
+  ms_aLines : seq Line  -- bounded array [MAX_DEBUG_LINES]
+  ms_nLines : ℤ
+where
+  #str = 256
+  c2 ≥ 0
+end
+
+schema CDebug_DebugInitTextBuffer
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DebugInitTextBuffer()
+  true
+end
+
+schema CDebug_DebugDisplayTextBuffer_2
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DebugDisplayTextBuffer()
+  true
+end
+
+schema CDebug_DebugAddText_3
+  ΔCDebug
+  str? : seq CHAR
+where
+  -- Declared member operation CDebug::DebugAddText(const char *str)
+  true
+end
+
+schema CDebug_PrintAt_4
+  ΔCDebug
+  str? : seq CHAR
+  x? : ℤ
+  y? : ℤ
+where
+  -- Declared member operation CDebug::PrintAt(const char *str, int x, int y)
+  true
+end
+
+schema CDebug_DisplayScreenStrings_5
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DisplayScreenStrings()
+  true
+end
+
+schema CDebug_AddLine_6
+  ΔCDebug
+  p1? : CVector
+  p2? : CVector
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- Declared member operation CDebug::AddLine(CVector p1, CVector p2, uint32 c1, uint32 c2)
+  true
+end
+
+schema CDebug_DrawLines_7
+  ΔCDebug
+where
+  -- Declared member operation CDebug::DrawLines(void)
+  true
+end
+
+schema ScreenStr
+  y : ℤ
+  str : seq CHAR
+where
+  #str = 256
+end
+
+schema Line
+  p2 : CVector_p1
+  c2 : ℕ
+where
+  c2 ≥ 0
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDebug_DebugInitTextBuffer
+  ΔCDebug
+where
+  -- State update: ms_nCurrentTextLine' = 0
+  true
+end
+
+schema CDebug_DebugAddText
+  ΔCDebug
+  str? : seq CHAR
+where
+  -- State update: ms_nCurrentTextLine' = 0
+  true
+end
+
+schema CDebug_DebugDisplayTextBuffer
+  ΔCDebug
+where
+  -- State update: y' = DEBUG_Y_POS
+  -- State update: line' = ms_aTextBuffer[(ms_nCurrentTextLine + i++) % MAX_LINES]
+  -- Invokes: CFont::SetPropOn, CFont::SetBackgroundOff, CFont::SetScale, CFont::SetCentreOff, CFont::SetRightJustifyOff
+  true
+end
+
+schema CDebug_DisplayScreenStrings
+  ΔCDebug
+where
+  -- State update: ms_nScreenStrs' = 0
+  -- Invokes: CFont::SetPropOn, CFont::SetBackgroundOff, CFont::SetScale, CFont::SetCentreOff, CFont::SetRightJustifyOff
+  true
+end
+
+schema CDebug_PrintAt
+  ΔCDebug
+  str? : seq CHAR
+  x? : ℤ
+  y? : ℤ
+where
+  -- State update: x' = x
+  -- State update: y' = y
+  true
+end
+
+schema CDebug_AddLine
+  ΔCDebug
+  p1? : CVector
+  p2? : CVector
+  c1? : ℕ
+  c2? : ℕ
+where
+  -- State update: p1' = p1
+  -- State update: p2' = p2
+  -- State update: c1' = c1
+  -- State update: c2' = c2
+  true
+end
+
+schema CDebug_DrawLines
+  ΔCDebug
+where
+  -- State update: l' = &ms_aLines[i]
+  -- State update: ms_nLines' = 0
+  -- Invokes: CLines::RenderLineWithClipping
+  true
+end

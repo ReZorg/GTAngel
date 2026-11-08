@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Remote (control)
+-- Source File(s): control/Remote.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include World.zpp  (from "World.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRemote_GivePlayerRemoteControlledCar
+  ΔCRemote
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  rot? : ℝ
+  model? : ℕ
+where
+  -- State update: car' = new CAutomobile(model, MISSION_VEHICLE)
+  -- State update: car.bIsLocked' = true
+  -- State update: car.AutoPilot.m_nCarMission' = MISSION_NONE
+  -- State update: car.AutoPilot.m_nTempAction' = TEMPACT_NONE
+  -- State update: car.AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_STOP_FOR_CARS
+  -- State update: car.AutoPilot.m_fMaxTrafficSpeed' = 9.0f
+  -- Return postcondition: result! = car
+  -- Invokes: car->GetDistanceFromCentreOfMassToBaseOfModel, CWorld::FindGroundZFor3DCoord, car->GetMatrix, car->SetPosition, car->SetStatus
+  true
+end
+
+schema CRemote_TakeRemoteControlledCarFromPlayer
+  ΔCRemote
+  blowUp? : 𝔹
+where
+  -- State update: m_pRemoteVehicle.VehicleCreatedBy' = RANDOM_VEHICLE
+  -- State update: m_pRemoteVehicle.bIsLocked' = false
+  -- State update: m_nTimeLostRemoteCar' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_bInRemoteMode' = true
+  -- State update: field_D5' = blowUp
+  -- State update: field_D6' = true
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CRemote_TakeRemoteControlledCarFromPlayer_2
+  ΔCRemote
+where
+  -- State update: m_pRemoteVehicle.VehicleCreatedBy' = RANDOM_VEHICLE
+  -- State update: m_pRemoteVehicle.bIsLocked' = false
+  -- State update: m_nTimeLostRemoteCar' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_bInRemoteMode' = true
+  -- State update: m_pRemoteVehicle.bRemoveFromWorld' = true
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RemoteModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 82
+end

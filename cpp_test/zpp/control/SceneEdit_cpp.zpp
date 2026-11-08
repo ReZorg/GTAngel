@@ -1,0 +1,240 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SceneEdit (control)
+-- Source File(s): control/SceneEdit.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include SceneEdit.zpp  (from "SceneEdit.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Font.zpp  (from "Font.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Population.zpp  (from "Population.h")
+-- include Text.zpp  (from "Text.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include WeaponInfo.zpp  (from "WeaponInfo.h")
+-- include World.zpp  (from "World.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SHADOW_OFFSET : ℝ  -- #define SHADOW_OFFSET (2.0f)
+ACTION_MESSAGE_X_RIGHT : ℝ  -- #define ACTION_MESSAGE_X_RIGHT (60.0f)
+ACTION_MESSAGE_Y : ℝ  -- #define ACTION_MESSAGE_Y (8.0f)
+SELECTED_MESSAGE_X_RIGHT : ℝ  -- #define SELECTED_MESSAGE_X_RIGHT (60.0f)
+SELECTED_MESSAGE_Y : ℝ  -- #define SELECTED_MESSAGE_Y (248.0f)
+COMMAND_NAME_X_RIGHT : ℝ  -- #define COMMAND_NAME_X_RIGHT (60.0f)
+COMMAND_NAME_Y : ℝ  -- #define COMMAND_NAME_Y (38.0f)
+COMMAND_NAME_HEIGHT : ℝ  -- #define COMMAND_NAME_HEIGHT (16.0f)
+NUM_COMMANDS_TO_DRAW : seq CHAR  -- #define NUM_COMMANDS_TO_DRAW (9)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema SceneEdit_NextValidModelId
+  ΔSceneEditModuleState
+  mi? : ℤ
+  step? : ℤ
+  result! : ℤ
+where
+  -- State update: step' = -step
+  -- State update: pInfo' = CModelInfo::GetModelInfo(i)
+  -- State update: pVehicleInfo' = (CVehicleModelInfo*)pInfo
+  -- Return postcondition: result! = result
+  -- Invokes: CModelInfo::GetModelInfo, pInfo->GetModelType
+  true
+end
+
+schema CSceneEdit_LoadMovie
+  ΔCSceneEdit
+where
+  -- State update: fid' = CFileMgr::OpenFile("movie.dat", "r")
+  -- State update: m_bCommandActive' = false
+  -- Invokes: CFileMgr::SetDir, CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema CSceneEdit_SaveMovie
+  ΔCSceneEdit
+where
+  -- State update: fid' = CFileMgr::OpenFileForWriting("movie.dat")
+  -- State update: m_bCommandActive' = false
+  -- Invokes: CFileMgr::SetDir, CFileMgr::OpenFileForWriting, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema CSceneEdit_Initialise
+  ΔCSceneEdit
+where
+  -- State update: m_nActor' = -1
+  -- State update: m_nActor2' = -1
+  -- State update: m_nVehicle' = -1
+  -- State update: m_nVehicle2' = -1
+  -- State update: m_nCurrentCommand' = MOVIE_NEW_ACTOR
+  -- State update: m_nVehiclemodelId' = MI_INFERNUS
+  true
+end
+
+schema CSceneEdit_InitPlayback
+  ΔCSceneEdit
+where
+  -- State update: m_nVehiclemodelId' = MI_INFERNUS
+  -- State update: m_nPedmodelId' = MI_MALE01
+  -- State update: m_bCommandActive' = false
+  -- State update: m_nNumActors' = 0
+  -- State update: m_nNumVehicles' = 0
+  -- State update: m_nActor' = -1
+  -- Invokes: CPopulation::RemovePed, CWorld::Remove
+  true
+end
+
+schema CSceneEdit_ReInitialise
+  ΔCSceneEdit
+where
+  -- State update: m_nVehiclemodelId' = MI_INFERNUS
+  -- State update: m_nPedmodelId' = MI_MALE01
+  -- State update: m_nCurrentCommand' = MOVIE_NEW_ACTOR
+  -- State update: m_bEditOn' = true
+  -- State update: m_bRecording' = true
+  -- State update: m_bCommandActive' = false
+  -- Invokes: CPopulation::RemovePed, CWorld::Remove
+  true
+end
+
+schema CSceneEdit_Update
+  ΔCSceneEdit
+where
+  -- Invokes: TheCamera.TakeControl
+  true
+end
+
+schema CSceneEdit_Draw
+  ΔCSceneEdit
+where
+  -- State update: nCommandDrawn' = m_nCurrentCommand + i - NUM_COMMANDS_TO_DRAW / 2
+  -- Invokes: CFont::SetPropOff, CFont::SetBackgroundOff, CFont::SetScale, CFont::SetCentreOn, CFont::SetRightJustifyOn
+  true
+end
+
+schema CSceneEdit_ProcessCommand
+  ΔCSceneEdit
+where
+  -- State update: m_nCurrentCommand' = MOVIE_END
+  -- State update: m_nCurrentCommand' = MOVIE_NEW_ACTOR
+  -- State update: m_bCommandActive' = true
+  -- State update: m_bCommandActive' = false
+  -- State update: pPed' = new CCivilianPed(PEDTYPE_SPECIAL, m_nPedmodelId)
+  -- State update: pPed.CharCreatedBy' = MISSION_CHAR
+  -- Invokes: CPad::GetPad, CStreaming::HasModelLoaded, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, pPed->SetPosition
+  true
+end
+
+schema CSceneEdit_PlayBack
+  ΔCSceneEdit
+where
+  -- State update: m_nCurrentCommand' = Movie[m_nCurrentMovieCommand].m_nCommandId
+  -- State update: m_nCurrentCommand' = MOVIE_DO_NOTHING
+  -- State update: m_bRecording' = true
+  -- State update: m_nPedmodelId' = Movie[m_nCurrentMovieCommand].m_nModelIndex
+  -- State update: m_vecCurrentPosition' = Movie[m_nCurrentMovieCommand].m_vecPosition
+  -- State update: pPed' = new CCivilianPed(PEDTYPE_SPECIAL, m_nPedmodelId)
+  -- Invokes: CPad::GetPad, CStreaming::HasModelLoaded, CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CWorld::Add
+  true
+end
+
+schema CSceneEdit_ClearForNewCommand
+  ΔCSceneEdit
+where
+  -- State update: m_nActor' = -1
+  -- State update: m_nActor2' = -1
+  -- State update: m_nVehicle' = -1
+  -- State update: m_bActorSelected' = false
+  -- State update: m_bActor2Selected' = false
+  -- State update: m_bVehicleSelected' = false
+  true
+end
+
+schema CSceneEdit_SelectActor
+  ΔCSceneEdit
+where
+  -- State update: m_bActorSelected' = false
+  -- State update: m_nActor' = NUM_ACTORS_IN_MOVIE - 1
+  -- State update: pPed' = pActors[m_nActor]
+  -- State update: Source' = pPed.GetPosition() - m_vecCamHeading
+  -- State update: m_nActor' = 0
+  -- State update: pPed' = pActors[m_nActor]
+  -- Invokes: CPad::GetPad, pPed->GetPosition
+  true
+end
+
+schema CSceneEdit_SelectActor2
+  ΔCSceneEdit
+where
+  -- State update: m_bActor2Selected' = false
+  -- State update: m_bCommandActive' = false
+  -- State update: m_nActor2' = NUM_ACTORS_IN_MOVIE - 1
+  -- State update: pPed' = pActors[m_nActor2]
+  -- State update: Source' = pPed.GetPosition() - m_vecCamHeading
+  -- State update: m_nActor2' = 0
+  -- Invokes: CPad::GetPad, pPed->GetPosition
+  true
+end
+
+schema CSceneEdit_SelectVehicle
+  ΔCSceneEdit
+where
+  -- State update: m_bVehicleSelected' = false
+  -- State update: m_nVehicle' = NUM_VEHICLES_IN_MOVIE - 1
+  -- State update: pVehicle' = pVehicles[m_nVehicle]
+  -- State update: m_nVehicle' = 0
+  -- State update: pVehicle' = pVehicles[m_nVehicle]
+  -- State update: m_vecCurrentPosition' = pVehicles[m_nVehicle].GetPosition()
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CSceneEdit_SelectWeapon
+  ΔCSceneEdit
+  result! : 𝔹
+where
+  -- State update: m_nWeaponType' = WEAPONTYPE_COLT45
+  -- State update: m_nWeaponType' = WEAPONTYPE_BRASSKNUCKLE
+  -- State update: m_nWeaponType' = WEAPONTYPE_MINIGUN
+  -- State update: m_bCommandActive' = false
+  -- State update: m_nWeaponType' = WEAPONTYPE_UNARMED
+  -- State update: m_bCommandActive' = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPad::GetPad, CWeaponInfo::GetWeaponInfo
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SceneEditModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1201
+end

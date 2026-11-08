@@ -1,0 +1,155 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Bridge (control)
+-- Source File(s): control/Bridge.cpp, control/Bridge.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Bridge.zpp  (from "Bridge.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Stats.zpp  (from "Stats.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+bridgeStates ::= STATE_BRIDGE_LOCKED | STATE_LIFT_PART_IS_UP | STATE_LIFT_PART_MOVING_DOWN | STATE_LIFT_PART_IS_DOWN | STATE_LIFT_PART_ABOUT_TO_MOVE_UP | STATE_LIFT_PART_MOVING_UP | STATE_BRIDGE_ALWAYS_UNLOCKED
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBridge
+  pWeight : Ref[CEntity_pLiftRoad__pLiftPart]
+  OldState : ℤ
+  DefaultZLiftWeight : ℝ
+  OldLift : ℝ
+  TimeOfBridgeBecomingOperational : ℕ
+where
+  #pWeight ≤ 1
+  TimeOfBridgeBecomingOperational ≥ 0
+end
+
+schema CBridge_Init
+  ΔCBridge
+where
+  -- Declared member operation CBridge::Init()
+  true
+end
+
+schema CBridge_Update_2
+  ΔCBridge
+where
+  -- Declared member operation CBridge::Update()
+  true
+end
+
+schema CBridge_ShouldLightsBeFlashing_3
+  ΔCBridge
+  result! : 𝔹
+where
+  -- Declared member operation CBridge::ShouldLightsBeFlashing()
+  true
+end
+
+schema CBridge_FindBridgeEntities_4
+  ΔCBridge
+where
+  -- Declared member operation CBridge::FindBridgeEntities()
+  true
+end
+
+schema CBridge_ThisIsABridgeObjectMovingUp_5
+  ΔCBridge
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CBridge::ThisIsABridgeObjectMovingUp(int)
+  true
+end
+
+schema CBridge_ForceBridgeState_6
+  ΔCBridge
+  state? : ℕ
+where
+  -- Declared member operation CBridge::ForceBridgeState(uint8 state)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CBridge_Init
+  ΔCBridge
+where
+  -- State update: State' = STATE_BRIDGE_LOCKED
+  -- State update: OldLift' = -1.0f
+  -- State update: DefaultZLiftPart' = pLiftPart.GetPosition().z
+  -- State update: DefaultZLiftRoad' = pLiftRoad.GetPosition().z
+  -- State update: DefaultZLiftWeight' = pWeight.GetPosition().z
+  -- Invokes: pLiftPart->GetPosition, pLiftRoad->GetPosition, pWeight->GetPosition, ThePaths.SetLinksBridgeLights
+  true
+end
+
+schema CBridge_Update
+  ΔCBridge
+where
+  -- State update: OldState' = State
+  -- State update: liftHeight' = 25.0f
+  -- State update: TimeOfBridgeBecomingOperational' = 0
+  -- State update: liftHeight' = 0.0f
+  -- State update: TimeOfBridgeBecomingOperational' = CTimer::GetTimeInMilliseconds() - 20001
+  -- State update: TimeOfBridgeBecomingOperational' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds, pLiftPart->GetMatrix, pLiftPart->UpdateRwFrame, pLiftRoad->GetMatrix, pLiftRoad->UpdateRwFrame
+  true
+end
+
+schema CBridge_ShouldLightsBeFlashing
+  ΔCBridge
+  result! : 𝔹
+where
+  -- Return postcondition: result! = State != STATE_LIFT_PART_IS_DOWN
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CBridge_FindBridgeEntities
+  ΔCBridge
+where
+  -- State update: pWeight' = ∅
+  -- State update: pLiftRoad' = ∅
+  -- State update: pLiftPart' = ∅
+  -- State update: entry' = CPools::GetBuildingPool().GetSlot(i)
+  -- State update: pLiftPart' = entry
+  -- State update: pLiftRoad' = entry
+  -- Invokes: CPools::GetBuildingPool, entry->GetModelIndex
+  true
+end
+
+schema CBridge_ThisIsABridgeObjectMovingUp
+  ΔCBridge
+  index? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CBridge_ForceBridgeState
+  ΔCBridge
+  state? : ℕ
+where
+  -- State update: State' = state
+  -- Invokes: ThePaths.SetLinksBridgeLights
+  true
+end

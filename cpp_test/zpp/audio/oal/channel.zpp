@@ -1,0 +1,465 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: channel (audio)
+-- Source File(s): audio/oal/channel.cpp, audio/oal/channel.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include channel.zpp  (from "channel.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include float.zpp  (from "float.h")
+-- include oal_utils.zpp  (from "oal/oal_utils.h")
+-- include al.zpp  (from "AL/al.h")
+-- include alext.zpp  (from "AL/alext.h")
+-- include efx.zpp  (from "AL/efx.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CChannel
+  id : ℕ
+  Gain : ℝ
+  Mix : ℝ
+  Data : ADDRESS
+  DataSize : ℕ
+  Frequency : ℤ
+  Position : seq ℝ  -- bounded array [3]
+  Distances : seq ℝ  -- bounded array [2]
+  LoopCount : ℤ
+  LoopPoints : seq ℤ  -- bounded array [2]
+  LastProcessedOffset : ℤ
+  bIs2D : 𝔹
+  channelsThatNeedService : ℤ
+where
+  id ≥ 0
+  DataSize ≥ 0
+  #Position = 3
+  #Distances = 2
+  #LoopPoints = 2
+end
+
+schema CChannel_InitChannels
+  ΔCChannel
+where
+  -- Declared member operation CChannel::InitChannels()
+  true
+end
+
+schema CChannel_DestroyChannels_2
+  ΔCChannel
+where
+  -- Declared member operation CChannel::DestroyChannels()
+  true
+end
+
+schema CChannel_CChannel_3
+  ΔCChannel
+where
+  -- Declared member operation CChannel::CChannel()
+  true
+end
+
+schema CChannel_SetDefault_4
+  ΔCChannel
+where
+  -- Declared member operation CChannel::SetDefault()
+  true
+end
+
+schema CChannel_Reset_5
+  ΔCChannel
+where
+  -- Declared member operation CChannel::Reset()
+  true
+end
+
+schema CChannel_Init_6
+  ΔCChannel
+  _id? : ℕ
+  Is2D? : 𝔹
+where
+  -- Declared member operation CChannel::Init(uint32 _id, bool Is2D = false)
+  true
+end
+
+schema CChannel_Term_7
+  ΔCChannel
+where
+  -- Declared member operation CChannel::Term()
+  true
+end
+
+schema CChannel_Start_8
+  ΔCChannel
+where
+  -- Declared member operation CChannel::Start()
+  true
+end
+
+schema CChannel_Stop_9
+  ΔCChannel
+where
+  -- Declared member operation CChannel::Stop()
+  true
+end
+
+schema CChannel_HasSource_10
+  ΔCChannel
+  result! : 𝔹
+where
+  -- Declared member operation CChannel::HasSource()
+  true
+end
+
+schema CChannel_IsUsed_11
+  ΔCChannel
+  result! : 𝔹
+where
+  -- Declared member operation CChannel::IsUsed()
+  true
+end
+
+schema CChannel_SetPitch_12
+  ΔCChannel
+  pitch? : ℝ
+where
+  -- Declared member operation CChannel::SetPitch(float pitch)
+  true
+end
+
+schema CChannel_SetGain_13
+  ΔCChannel
+  gain? : ℝ
+where
+  -- Declared member operation CChannel::SetGain(float gain)
+  true
+end
+
+schema CChannel_SetVolume_14
+  ΔCChannel
+  vol? : ℤ
+where
+  -- Declared member operation CChannel::SetVolume(int32 vol)
+  true
+end
+
+schema CChannel_SetSampleData_15
+  ΔCChannel
+  _data? : ADDRESS
+  _DataSize? : ℕ
+  freq? : ℤ
+where
+  -- Declared member operation CChannel::SetSampleData(void *_data, size_t _DataSize, int32 freq)
+  true
+end
+
+schema CChannel_SetCurrentFreq_16
+  ΔCChannel
+  freq? : ℕ
+where
+  -- Declared member operation CChannel::SetCurrentFreq(uint32 freq)
+  true
+end
+
+schema CChannel_SetLoopCount_17
+  ΔCChannel
+  count? : ℤ
+where
+  -- Declared member operation CChannel::SetLoopCount(int32 count)
+  true
+end
+
+schema CChannel_SetLoopPoints_18
+  ΔCChannel
+  start? : ℤ
+  end? : ℤ
+where
+  -- Declared member operation CChannel::SetLoopPoints(ALint start, ALint end)
+  true
+end
+
+schema CChannel_SetPosition_19
+  ΔCChannel
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CChannel::SetPosition(float x, float y, float z)
+  true
+end
+
+schema CChannel_SetDistances_20
+  ΔCChannel
+  max? : ℝ
+  min? : ℝ
+where
+  -- Declared member operation CChannel::SetDistances(float max, float min)
+  true
+end
+
+schema CChannel_SetPan_21
+  ΔCChannel
+  pan? : ℤ
+where
+  -- Declared member operation CChannel::SetPan(int32 pan)
+  true
+end
+
+schema CChannel_ClearBuffer_22
+  ΔCChannel
+where
+  -- Declared member operation CChannel::ClearBuffer()
+  true
+end
+
+schema CChannel_SetReverbMix_23
+  ΔCChannel
+  slot? : ℕ
+  mix? : ℝ
+where
+  -- Declared member operation CChannel::SetReverbMix(ALuint slot, float mix)
+  true
+end
+
+schema CChannel_UpdateReverb_24
+  ΔCChannel
+  slot? : ℕ
+where
+  -- Declared member operation CChannel::UpdateReverb(ALuint slot)
+  true
+end
+
+schema CChannel_Update_25
+  ΔCChannel
+  result! : 𝔹
+where
+  -- Declared member operation CChannel::Update()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CChannel_InitChannels
+  ΔCChannel
+where
+  -- State update: bChannelsCreated' = true
+  true
+end
+
+schema CChannel_DestroyChannels
+  ΔCChannel
+where
+  -- State update: bChannelsCreated' = false
+  true
+end
+
+schema CChannel_CChannel
+  ΔCChannel
+where
+  -- State update: Data' = ∅
+  -- State update: DataSize' = 0
+  -- State update: bIs2D' = false
+  true
+end
+
+schema CChannel_SetDefault
+  ΔCChannel
+where
+  -- State update: Pitch' = 1.0f
+  -- State update: Gain' = 1.0f
+  -- State update: Mix' = 0.0f
+  -- State update: LoopCount' = 1
+  -- State update: LastProcessedOffset' = UINT32_MAX
+  -- State update: Frequency' = MAX_FREQ
+  true
+end
+
+schema CChannel_Reset
+  ΔCChannel
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_Init
+  ΔCChannel
+  _id? : ℕ
+  Is2D? : 𝔹
+where
+  -- State update: id' = _id
+  -- State update: bIs2D' = true
+  true
+end
+
+schema CChannel_Term
+  ΔCChannel
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_Start
+  ΔCChannel
+where
+  -- State update: monoData' = (int16*)Data
+  -- State update: stereoData' = (int16*)tempStereoBuffer
+  true
+end
+
+schema CChannel_Stop
+  ΔCChannel
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_HasSource
+  ΔCChannel
+  result! : 𝔹
+where
+  -- Return postcondition: result! = alSources[id] != AL_NONE
+  true
+end
+
+schema CChannel_IsUsed
+  ΔCChannel
+  result! : 𝔹
+where
+  -- Return postcondition: result! = sourceState == AL_PLAYING
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CChannel_SetPitch
+  ΔCChannel
+  pitch? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetGain
+  ΔCChannel
+  gain? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetVolume
+  ΔCChannel
+  vol? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetSampleData
+  ΔCChannel
+  _data? : ADDRESS
+  _DataSize? : ℕ
+  freq? : ℤ
+where
+  -- State update: Data' = _data
+  -- State update: DataSize' = _DataSize
+  -- State update: Frequency' = freq
+  true
+end
+
+schema CChannel_SetCurrentFreq
+  ΔCChannel
+  freq? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetLoopCount
+  ΔCChannel
+  count? : ℤ
+where
+  -- State update: LoopCount' = count
+  true
+end
+
+schema CChannel_Update
+  ΔCChannel
+  result! : 𝔹
+where
+  -- State update: LastProcessedOffset' = offset
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CChannel_SetLoopPoints
+  ΔCChannel
+  start? : ℤ
+  end? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetPosition
+  ΔCChannel
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetDistances
+  ΔCChannel
+  max? : ℝ
+  min? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_SetPan
+  ΔCChannel
+  pan? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CChannel_ClearBuffer
+  ΔCChannel
+where
+  -- State update: Data' = ∅
+  -- State update: DataSize' = 0
+  true
+end
+
+schema CChannel_SetReverbMix
+  ΔCChannel
+  slot? : ℕ
+  mix? : ℝ
+where
+  -- State update: Mix' = mix
+  true
+end
+
+schema CChannel_UpdateReverb
+  ΔCChannel
+  slot? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

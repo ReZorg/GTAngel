@@ -1,0 +1,180 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Weather (renderer)
+-- Source File(s): renderer/Weather.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Weather_Enum_1 ::= WEATHER_RANDOM | WEATHER_SUNNY | WEATHER_CLOUDY | WEATHER_RAINY | WEATHER_FOGGY | WEATHER_EXTRA_SUNNY | WEATHER_HURRICANE | WEATHER_TOTAL | WEATHER_EXTRACOLOURS
+  -- val(WEATHER_RANDOM) = -1
+  -- val(WEATHER_SUNNY) = 0
+  -- val(WEATHER_EXTRACOLOURS) = 6
+
+Weather_Enum_2 ::= WEATHER_RANDOM | WEATHER_SUNNY | WEATHER_CLOUDY | WEATHER_RAINY | WEATHER_FOGGY | WEATHER_TOTAL
+  -- val(WEATHER_RANDOM) = -1
+  -- val(WEATHER_SUNNY) = 0
+  -- val(WEATHER_CLOUDY) = 1
+  -- val(WEATHER_RAINY) = 2
+  -- val(WEATHER_FOGGY) = 3
+  -- val(WEATHER_TOTAL) = 4
+
+Weather_Enum_3 ::= NUM_RAIN_STREAKS
+  -- val(NUM_RAIN_STREAKS) = 35
+
+Weather_Enum_4 ::= WEATHER_SUNNY | WEATHER_CLOUDY | WEATHER_RAINY | WEATHER_FOGGY
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeather
+  SoundHandle : ℤ
+  WeatherTypeInList : ℤ
+  OldWeatherType : ℤ
+  NewWeatherType : ℤ
+  ForcedWeatherType : ℤ
+  LightningFlash : 𝔹
+  LightningBurst : 𝔹
+  LightningStart : ℕ
+  LightningFlashLastChange : ℕ
+  WhenToPlayLightningSound : ℕ
+  LightningDuration : ℕ
+  StreamAfterRainTimer : ℤ
+  ExtraSunnyness : ℝ
+  Foggyness : ℝ
+  CloudCoverage : ℝ
+  Wind : ℝ
+  Rain : ℝ
+  InterpolationValue : ℝ
+  WetRoads : ℝ
+  Rainbow : ℝ
+  SunGlare : ℝ
+  WindClipped : ℝ
+  TrafficLightBrightness : ℝ
+  bScriptsForceRain : 𝔹
+  Stored_StateStored : 𝔹
+  Stored_InterpolationValue : ℝ
+  Stored_OldWeatherType : ℤ
+  Stored_NewWeatherType : ℤ
+  Stored_Rain : ℝ
+where
+  LightningStart ≥ 0
+  LightningFlashLastChange ≥ 0
+  WhenToPlayLightningSound ≥ 0
+  LightningDuration ≥ 0
+end
+
+schema CWeather_RenderRainStreaks
+  ΔCWeather
+where
+  -- Declared member operation CWeather::RenderRainStreaks(void)
+  true
+end
+
+schema CWeather_Update_2
+  ΔCWeather
+where
+  -- Declared member operation CWeather::Update(void)
+  true
+end
+
+schema CWeather_Init_3
+  ΔCWeather
+where
+  -- Declared member operation CWeather::Init(void)
+  true
+end
+
+schema CWeather_ReleaseWeather_4
+  ΔCWeather
+where
+  -- Declared member operation CWeather::ReleaseWeather()
+  true
+end
+
+schema CWeather_ForceWeather_5
+  ΔCWeather
+  arg_1? : ℤ
+where
+  -- Declared member operation CWeather::ForceWeather(int16)
+  true
+end
+
+schema CWeather_ForceWeatherNow_6
+  ΔCWeather
+  arg_1? : ℤ
+where
+  -- Declared member operation CWeather::ForceWeatherNow(int16)
+  true
+end
+
+schema CWeather_AddSplashesDuringHurricane_7
+  ΔCWeather
+where
+  -- Declared member operation CWeather::AddSplashesDuringHurricane()
+  true
+end
+
+schema CWeather_AddStreamAfterRain_8
+  ΔCWeather
+where
+  -- Declared member operation CWeather::AddStreamAfterRain()
+  true
+end
+
+schema CWeather_AddRain_9
+  ΔCWeather
+where
+  -- Declared member operation CWeather::AddRain()
+  true
+end
+
+schema CWeather_AddHeatHaze_10
+  ΔCWeather
+where
+  -- Declared member operation CWeather::AddHeatHaze()
+  true
+end
+
+schema CWeather_AddBeastie_11
+  ΔCWeather
+where
+  -- Declared member operation CWeather::AddBeastie()
+  true
+end
+
+schema CWeather_ForceHurricaneWeather_12
+  ΔCWeather
+where
+  -- Declared member operation CWeather::ForceHurricaneWeather()
+  true
+end
+
+schema CWeather_StoreWeatherState_13
+  ΔCWeather
+where
+  -- Declared member operation CWeather::StoreWeatherState()
+  true
+end
+
+schema CWeather_RestoreWeatherState_14
+  ΔCWeather
+where
+  -- Declared member operation CWeather::RestoreWeatherState()
+  true
+end
+
+schema tRainStreak
+  position : CVector
+  direction : CVector
+  timer : ℕ
+where
+  timer ≥ 0
+end

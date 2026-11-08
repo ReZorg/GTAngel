@@ -1,0 +1,115 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: skeleton (skel)
+-- Source File(s): skel/skeleton.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include rwcore.zpp  (from "rwcore.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+rsRESOURCESDEFAULTARENASIZE : seq CHAR  -- #define rsRESOURCESDEFAULTARENASIZE (1 << 20)
+RsSprintf : seq CHAR  -- #define RsSprintf rwsprintf
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RsInputDeviceType ::= rsKEYBOARD | rsMOUSE | rsPAD
+
+RsEventStatus ::= rsEVENTERROR | rsEVENTPROCESSED | rsEVENTNOTPROCESSED
+
+RsEvent ::= rsCAMERASIZE | rsCOMMANDLINE | rsFILELOAD | rsINITDEBUG | rsINPUTDEVICEATTACH | rsLEFTBUTTONDOWN | rsLEFTBUTTONUP | rsMOUSEMOVE | rsMOUSEWHEELMOVE | rsPLUGINATTACH | rsREGISTERIMAGELOADER | rsRIGHTBUTTONDOWN | rsRIGHTBUTTONUP | _rs_13 | _rs_14 | _rs_15 | _rs_16 | _rs_17 | _rs_18 | _rs_19 | _rs_20 | rsRWINITIALIZE | rsRWTERMINATE | rsSELECTDEVICE | rsINITIALIZE | rsTERMINATE | rsIDLE | rsFRONTENDIDLE | rsKEYDOWN | rsKEYUP | rsQUITAPP | rsPADBUTTONDOWN | rsPADBUTTONUP | rsPADANALOGUELEFT | rsPADANALOGUELEFTRESET | rsPADANALOGUERIGHT | rsPADANALOGUERIGHTRESET | rsPREINITCOMMANDLINE | rsACTIVATE
+
+RsKeyCodes ::= rsESC | rsF1 | rsF2 | rsF3 | rsF4 | rsF5 | rsF6 | rsF7 | rsF8 | rsF9 | rsF10 | rsF11 | rsF12 | rsINS | rsDEL | rsHOME | rsEND | rsPGUP | rsPGDN | rsUP | rsDOWN | rsLEFT | rsRIGHT | rsDIVIDE | rsTIMES | rsPLUS | rsMINUS | rsPADDEL | rsPADEND | rsPADDOWN | rsPADPGDN | rsPADLEFT | rsPAD5 | rsNUMLOCK | rsPADRIGHT | rsPADHOME | rsPADUP | rsPADPGUP | rsPADINS | rsPADENTER | rsSCROLL | rsPAUSE | rsBACKSP | rsTAB | rsCAPSLK | rsENTER | rsLSHIFT | rsRSHIFT | ... (64 total branches)
+  -- val(rsESC) = 1000
+  -- val(rsF1) = 1001
+  -- val(rsF2) = 1002
+  -- val(rsF3) = 1003
+  -- val(rsF4) = 1004
+  -- val(rsF5) = 1005
+  -- val(rsF6) = 1006
+  -- val(rsF7) = 1007
+  -- val(rsF8) = 1008
+  -- val(rsF9) = 1009
+  -- val(rsF10) = 1010
+  -- val(rsF11) = 1011
+  -- val(rsF12) = 1012
+  -- val(rsINS) = 1013
+  -- val(rsDEL) = 1014
+  -- val(rsHOME) = 1015
+  -- val(rsEND) = 1016
+  -- val(rsPGUP) = 1017
+  -- val(rsPGDN) = 1018
+  -- val(rsUP) = 1019
+  -- val(rsDOWN) = 1020
+  -- val(rsLEFT) = 1021
+  -- val(rsRIGHT) = 1022
+  -- val(rsDIVIDE) = 1023
+
+RsPadButtons ::= rsPADNULL | rsPADBUTTON1 | rsPADBUTTON2 | rsPADBUTTON3 | rsPADBUTTON4 | rsPADBUTTON5 | rsPADBUTTON6 | rsPADBUTTON7 | rsPADBUTTON8 | rsPADSELECT | rsPADBUTTONA1 | rsPADBUTTONA2 | rsPADSTART | rsPADDPADUP | rsPADDPADRIGHT | rsPADDPADDOWN | rsPADDPADLEFT
+  -- val(rsPADNULL) = 0
+  -- val(rsPADBUTTON1) = 1
+  -- val(rsPADBUTTON2) = 2
+  -- val(rsPADBUTTON3) = 3
+  -- val(rsPADBUTTON4) = 4
+  -- val(rsPADBUTTON5) = 5
+  -- val(rsPADBUTTON6) = 6
+  -- val(rsPADBUTTON7) = 7
+  -- val(rsPADBUTTON8) = 8
+  -- val(rsPADSELECT) = 9
+  -- val(rsPADBUTTONA1) = 10
+  -- val(rsPADBUTTONA2) = 11
+  -- val(rsPADSTART) = 12
+  -- val(rsPADDPADUP) = 13
+  -- val(rsPADDPADRIGHT) = 14
+  -- val(rsPADDPADDOWN) = 15
+  -- val(rsPADDPADLEFT) = 16
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema RsInputDevice
+  inputDeviceType : RsInputDeviceType
+  used : 𝔹
+  inputEventHandler : RsInputEventHandler
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema RsGlobalType
+  appName : seq CHAR
+  width : ℤ
+  height : ℤ
+  maximumWidth : ℤ
+  maximumHeight : ℤ
+  maxFPS : ℤ
+  quit : 𝔹
+  ps : ADDRESS
+  keyboard : RsInputDevice
+  mouse : RsInputDevice
+  pad : RsInputDevice
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema RsKeyStatus
+  keyCharCode : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema RsPadButtonStatus
+  padID : ℤ
+where
+  instance_addr ∈ ADDRESS
+end

@@ -1,0 +1,103 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PCSave (save)
+-- Source File(s): save/PCSave.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Font.zpp  (from "Font.h")
+-- include Game.zpp  (from "Game.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include PCSave.zpp  (from "PCSave.h")
+-- include Text.zpp  (from "Text.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema C_PcSave_SetSaveDirectory
+  ΔC_PcSave
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema C_PcSave_DeleteSlot
+  ΔC_PcSave
+  slot? : ℤ
+where
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_SUCCESSFUL
+  -- Return postcondition: result! = true
+  true
+end
+
+schema C_PcSave_SaveSlot
+  ΔC_PcSave
+  slot? : ℤ
+where
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_SUCCESSFUL
+  -- State update: file' = CFileMgr::OpenFile(ValidSaveName, "wb")
+  -- State update: nErrorCode' = SAVESTATUS_ERR_SAVE_CLOSE
+  -- State update: PcSaveHelper.nErrorCode' = SAVESTATUS_ERR_SAVE_CREATE
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile
+  true
+end
+
+schema C_PcSave_PcClassSaveRoutine
+  ΔC_PcSave
+  file? : ℤ
+  data? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: nErrorCode' = SAVESTATUS_ERR_SAVE_WRITE
+  -- State update: nErrorCode' = SAVESTATUS_ERR_SAVE_WRITE
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CFileMgr::Write, CFileMgr::GetErrorReadWrite
+  true
+end
+
+schema C_PcSave_PopulateSlotInfo
+  ΔC_PcSave
+where
+  -- State update: file' = CFileMgr::OpenFile(savename, "rb")
+  -- State update: month' = "JAN"
+  -- State update: month' = "FEB"
+  -- State update: month' = "MAR"
+  -- State update: month' = "APR"
+  -- State update: month' = "MAY"
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile, CMessages::InsertNumberInString, TheText.Get
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PCSaveModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 184
+end

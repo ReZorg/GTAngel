@@ -1,0 +1,574 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendAssociation (animation)
+-- Source File(s): animation/AnimBlendAssociation.cpp, animation/AnimBlendAssociation.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendHierarchy.zpp  (from "AnimBlendHierarchy.h")
+-- include AnimBlendClumpData.zpp  (from "AnimBlendClumpData.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+-- include AnimBlendList.zpp  (from "AnimBlendList.h")
+-- include AnimBlendNode.zpp  (from "AnimBlendNode.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AnimBlendAssociation_Enum_1 ::= ASSOC_RUNNING | ASSOC_REPEAT | ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION | ASSOC_WALK | ASSOC_IDLE | ASSOC_NOWALK | ASSOC_BLOCK | ASSOC_FRONTAL | ASSOC_DRIVING
+  -- val(ASSOC_RUNNING) = 1
+  -- val(ASSOC_REPEAT) = 2
+  -- val(ASSOC_DELETEFADEDOUT) = 4
+  -- val(ASSOC_FADEOUTWHENDONE) = 8
+  -- val(ASSOC_PARTIAL) = 0x10
+  -- val(ASSOC_MOVEMENT) = 0x20
+  -- val(ASSOC_HAS_TRANSLATION) = 0x40
+  -- val(ASSOC_HAS_X_TRANSLATION) = 0x80
+  -- val(ASSOC_WALK) = 0x100
+  -- val(ASSOC_IDLE) = 0x200
+  -- val(ASSOC_NOWALK) = 0x400
+  -- val(ASSOC_BLOCK) = 0x800
+  -- val(ASSOC_FRONTAL) = 0x1000
+  -- val(ASSOC_DRIVING) = 0x2000
+
+AnimBlendAssociation_Enum_2 ::= CB_NONE | CB_FINISH | CB_DELETE
+
+AnimBlendAssociation_Enum_3 ::= ASSOC_RUNNING | ASSOC_REPEAT | ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_WALK | ASSOC_IDLE | ASSOC_NOWALK | ASSOC_BLOCK | ASSOC_FRONTAL | ASSOC_HAS_X_TRANSLATION
+  -- val(ASSOC_RUNNING) = 1
+  -- val(ASSOC_REPEAT) = 2
+  -- val(ASSOC_DELETEFADEDOUT) = 4
+  -- val(ASSOC_FADEOUTWHENDONE) = 8
+  -- val(ASSOC_PARTIAL) = 0x10
+  -- val(ASSOC_MOVEMENT) = 0x20
+  -- val(ASSOC_HAS_TRANSLATION) = 0x40
+  -- val(ASSOC_WALK) = 0x80
+  -- val(ASSOC_IDLE) = 0x100
+  -- val(ASSOC_NOWALK) = 0x200
+  -- val(ASSOC_BLOCK) = 0x400
+  -- val(ASSOC_FRONTAL) = 0x800
+  -- val(ASSOC_HAS_X_TRANSLATION) = 0x1000
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimBlendAssociation
+  link : CAnimBlendLink
+  numNodes : ℤ
+  groupId : ℤ
+  nodes : Ref[CAnimBlendNode]
+  hierarchy : Ref[CAnimBlendHierarchy]
+  blendAmount : ℝ
+  blendDelta : ℝ
+  currentTime : ℝ
+  speed : ℝ
+  timeStep : ℝ
+  animId : ℤ
+  flags : ℤ
+  callbackType : ℤ
+  callbackArg : ADDRESS
+where
+  #nodes ≤ 1
+  #hierarchy ≤ 1
+end
+
+schema CAnimBlendAssociation_void
+  ΔCAnimBlendAssociation
+  arg_1? : Ref[callback]
+where
+  -- Declared member operation CAnimBlendAssociation::void(*callback)
+  true
+end
+
+schema CAnimBlendAssociation_IsRunning_2
+  ΔCAnimBlendAssociation
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendAssociation::IsRunning(void)
+  true
+end
+
+schema CAnimBlendAssociation_IsRepeating_3
+  ΔCAnimBlendAssociation
+  result! : bool
+where
+  -- Declared member operation CAnimBlendAssociation::IsRepeating(void)
+  true
+end
+
+schema CAnimBlendAssociation_IsPartial_4
+  ΔCAnimBlendAssociation
+  result! : bool
+where
+  -- Declared member operation CAnimBlendAssociation::IsPartial(void)
+  true
+end
+
+schema CAnimBlendAssociation_IsMovement_5
+  ΔCAnimBlendAssociation
+  result! : bool
+where
+  -- Declared member operation CAnimBlendAssociation::IsMovement(void)
+  true
+end
+
+schema CAnimBlendAssociation_HasTranslation_6
+  ΔCAnimBlendAssociation
+  result! : bool
+where
+  -- Declared member operation CAnimBlendAssociation::HasTranslation(void)
+  true
+end
+
+schema CAnimBlendAssociation_HasXTranslation_7
+  ΔCAnimBlendAssociation
+  result! : bool
+where
+  -- Declared member operation CAnimBlendAssociation::HasXTranslation(void)
+  true
+end
+
+schema CAnimBlendAssociation_GetBlendAmount_8
+  ΔCAnimBlendAssociation
+  weight? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::GetBlendAmount(float weight)
+  true
+end
+
+schema CAnimBlendAssociation_GetNode_9
+  ΔCAnimBlendAssociation
+  i? : ℤ
+  result! : Ref[CAnimBlendNode]
+where
+  -- Declared member operation CAnimBlendAssociation::GetNode(int i)
+  true
+end
+
+schema CAnimBlendAssociation_CAnimBlendAssociation_10
+  ΔCAnimBlendAssociation
+  result! : ANY
+where
+  -- Declared member operation CAnimBlendAssociation::CAnimBlendAssociation(void)
+  true
+end
+
+schema CAnimBlendAssociation_CAnimBlendAssociation_11
+  ΔCAnimBlendAssociation
+  other? : CAnimBlendAssociation
+where
+  -- Declared member operation CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendAssociation &other)
+  true
+end
+
+schema CAnimBlendAssociation_AllocateAnimBlendNodeArray_12
+  ΔCAnimBlendAssociation
+  n? : ℤ
+where
+  -- Declared member operation CAnimBlendAssociation::AllocateAnimBlendNodeArray(int n)
+  true
+end
+
+schema CAnimBlendAssociation_FreeAnimBlendNodeArray_13
+  ΔCAnimBlendAssociation
+where
+  -- Declared member operation CAnimBlendAssociation::FreeAnimBlendNodeArray(void)
+  true
+end
+
+schema CAnimBlendAssociation_Init_14
+  ΔCAnimBlendAssociation
+  clump? : Ref[RpClump]
+  hier? : Ref[CAnimBlendHierarchy]
+where
+  -- Declared member operation CAnimBlendAssociation::Init(RpClump *clump, CAnimBlendHierarchy *hier)
+  true
+end
+
+schema CAnimBlendAssociation_Init_15
+  ΔCAnimBlendAssociation
+  assoc? : CAnimBlendAssociation
+where
+  -- Declared member operation CAnimBlendAssociation::Init(CAnimBlendAssociation &assoc)
+  true
+end
+
+schema CAnimBlendAssociation_SetBlend_16
+  ΔCAnimBlendAssociation
+  amount? : ℝ
+  delta? : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::SetBlend(float amount, float delta)
+  true
+end
+
+schema CAnimBlendAssociation_SetFinishCallback_17
+  ΔCAnimBlendAssociation
+  callback? : Ref[void]
+where
+  -- Declared member operation CAnimBlendAssociation::SetFinishCallback(void (*callback)
+  true
+end
+
+schema CAnimBlendAssociation_SetDeleteCallback_18
+  ΔCAnimBlendAssociation
+  callback? : Ref[void]
+where
+  -- Declared member operation CAnimBlendAssociation::SetDeleteCallback(void (*callback)
+  true
+end
+
+schema CAnimBlendAssociation_SetCurrentTime_19
+  ΔCAnimBlendAssociation
+  time? : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::SetCurrentTime(float time)
+  true
+end
+
+schema CAnimBlendAssociation_SyncAnimation_20
+  ΔCAnimBlendAssociation
+  other? : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimBlendAssociation::SyncAnimation(CAnimBlendAssociation *other)
+  true
+end
+
+schema CAnimBlendAssociation_Start_21
+  ΔCAnimBlendAssociation
+  time? : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::Start(float time)
+  true
+end
+
+schema CAnimBlendAssociation_UpdateTimeStep_22
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  relSpeed? : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::UpdateTimeStep(float timeDelta, float relSpeed)
+  true
+end
+
+schema CAnimBlendAssociation_UpdateTime_23
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  relSpeed? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
+  true
+end
+
+schema CAnimBlendAssociation_UpdateBlend_24
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CAnimBlendAssociation::UpdateBlend(float timeDelta)
+  true
+end
+
+schema CAnimBlendAssociation_Remove_25
+  ΔCAnimBlendAssociation
+where
+  -- Declared member operation CAnimBlendAssociation::Remove()
+  true
+end
+
+schema CAnimBlendAssociation_SetRun_26
+  ΔCAnimBlendAssociation
+where
+  -- Declared member operation CAnimBlendAssociation::SetRun(void)
+  true
+end
+
+schema CAnimBlendAssociation_GetTimeLeft_27
+  ΔCAnimBlendAssociation
+  result! : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::GetTimeLeft()
+  true
+end
+
+schema CAnimBlendAssociation_GetProgress_28
+  ΔCAnimBlendAssociation
+  result! : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::GetProgress()
+  true
+end
+
+schema CAnimBlendAssociation_FromLink_29
+  ΔCAnimBlendAssociation
+  l? : Ref[CAnimBlendLink]
+  result! : Ref[CAnimBlendAssociation]
+where
+  -- Declared member operation CAnimBlendAssociation::FromLink(CAnimBlendLink *l)
+  true
+end
+
+schema CAnimBlendAssociation_GetTimeLeft_30
+  ΔCAnimBlendAssociation
+  result! : ℝ
+where
+  -- Declared member operation CAnimBlendAssociation::GetTimeLeft()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimBlendAssociation_CAnimBlendAssociation
+  ΔCAnimBlendAssociation
+where
+  -- State update: groupId' = -1
+  -- State update: nodes' = ∅
+  -- State update: blendAmount' = 1.0f
+  -- State update: blendDelta' = 0.0f
+  -- State update: currentTime' = 0.0f
+  -- State update: speed' = 1.0f
+  -- Invokes: link.Init
+  true
+end
+
+schema CAnimBlendAssociation_CAnimBlendAssociation_2
+  ΔCAnimBlendAssociation
+  other? : CAnimBlendAssociation
+where
+  -- State update: nodes' = ∅
+  -- State update: blendAmount' = 1.0f
+  -- State update: blendDelta' = 0.0f
+  -- State update: currentTime' = 0.0f
+  -- State update: speed' = 1.0f
+  -- State update: timeStep' = 0.0f
+  -- Invokes: link.Init
+  true
+end
+
+schema CAnimBlendAssociation_CAnimBlendAssociation_3
+  ΔCAnimBlendAssociation
+where
+  -- Invokes: link.Remove
+  true
+end
+
+schema CAnimBlendAssociation_AllocateAnimBlendNodeArray
+  ΔCAnimBlendAssociation
+  n? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_FreeAnimBlendNodeArray
+  ΔCAnimBlendAssociation
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_Init
+  ΔCAnimBlendAssociation
+  clump? : Ref[RpClump]
+  hier? : Ref[CAnimBlendHierarchy]
+where
+  -- State update: clumpData' = *RPANIMBLENDCLUMPDATA(clump)
+  -- State update: numNodes' = clumpData.numFrames
+  -- State update: association' = this
+  -- State update: hierarchy' = hier
+  -- State update: seq' = &hier.sequences[i]
+  -- State update: frame' = RpAnimBlendClumpFindFrame(clump, seq.name)
+  true
+end
+
+schema CAnimBlendAssociation_Init_2
+  ΔCAnimBlendAssociation
+  assoc? : CAnimBlendAssociation
+where
+  -- State update: hierarchy' = assoc.hierarchy
+  -- State update: numNodes' = assoc.numNodes
+  -- State update: flags' = assoc.flags
+  -- State update: animId' = assoc.animId
+  -- State update: groupId' = assoc.groupId
+  -- State update: association' = this
+  true
+end
+
+schema CAnimBlendAssociation_SetBlend
+  ΔCAnimBlendAssociation
+  amount? : ℝ
+  delta? : ℝ
+where
+  -- State update: blendAmount' = amount
+  -- State update: blendDelta' = delta
+  true
+end
+
+schema CAnimBlendAssociation_SetCurrentTime
+  ΔCAnimBlendAssociation
+  time? : ℝ
+where
+  -- State update: currentTime' = time
+  -- State update: currentTime' = hierarchy.totalLength
+  -- Invokes: CAnimManager::UncompressAnimation
+  true
+end
+
+schema CAnimBlendAssociation_SyncAnimation
+  ΔCAnimBlendAssociation
+  other? : Ref[CAnimBlendAssociation]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_Start
+  ΔCAnimBlendAssociation
+  time? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_UpdateTimeStep
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  relSpeed? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAnimBlendAssociation_UpdateTime
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+  relSpeed? : ℝ
+where
+  -- State update: currentTime' = hierarchy.totalLength
+  -- State update: blendDelta' = -4.0f
+  -- State update: callbackType' = CB_NONE
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CAnimBlendAssociation_UpdateBlend
+  ΔCAnimBlendAssociation
+  timeDelta? : ℝ
+where
+  -- State update: blendAmount' = 0.0f
+  -- State update: blendDelta' = Max(0.0f, blendDelta)
+  -- State update: blendAmount' = 1.0f
+  -- State update: blendDelta' = Min(0.0f, blendDelta)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CAnimBlendAssociation_Remove
+  ΔCAnimBlendAssociation
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema AnimBlendAssociation_IsRunning
+  ΔAnimBlendAssociationModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(flags & ASSOC_RUNNING)
+  true
+end
+
+schema AnimBlendAssociation_IsRepeating
+  ΔAnimBlendAssociationModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(flags & ASSOC_REPEAT)
+  true
+end
+
+schema AnimBlendAssociation_IsPartial
+  ΔAnimBlendAssociationModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(flags & ASSOC_PARTIAL)
+  true
+end
+
+schema AnimBlendAssociation_IsMovement
+  ΔAnimBlendAssociationModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(flags & ASSOC_MOVEMENT)
+  true
+end
+
+schema AnimBlendAssociation_HasTranslation
+  ΔAnimBlendAssociationModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(flags & ASSOC_HAS_TRANSLATION)
+  true
+end
+
+schema AnimBlendAssociation_HasXTranslation
+  ΔAnimBlendAssociationModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(flags & ASSOC_HAS_X_TRANSLATION)
+  true
+end
+
+schema AnimBlendAssociation_GetBlendAmount
+  ΔAnimBlendAssociationModuleState
+  weight? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = IsPartial() ? blendAmount : blendAmount*weight
+  true
+end
+
+schema AnimBlendAssociation_SetRun
+  ΔAnimBlendAssociationModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema AnimBlendAssociation_GetTimeLeft
+  ΔAnimBlendAssociationModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = hierarchy->totalLength - currentTime
+  true
+end
+
+schema AnimBlendAssociation_GetProgress
+  ΔAnimBlendAssociationModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = currentTime / hierarchy->totalLength
+  true
+end
+
+schema AnimBlendAssociation_GetTimeLeft_2
+  ΔAnimBlendAssociationModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = hierarchy->totalLength - currentTime
+  true
+end

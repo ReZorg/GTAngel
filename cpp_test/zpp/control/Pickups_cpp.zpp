@@ -1,0 +1,351 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pickups (control)
+-- Source File(s): control/Pickups.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Font.zpp  (from "Font.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Object.zpp  (from "Object.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Script.zpp  (from "Script.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Streaming.zpp  (from "Streaming.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PICKUPS_SAVE_SIZE : seq CHAR  -- #define PICKUPS_SAVE_SIZE 0x4440
+PICKUPS_FRAME_SPAN : seq CHAR  -- #define PICKUPS_FRAME_SPAN (6)
+PACMANPICKUPS_FRAME_SPAN : seq CHAR  -- #define PACMANPICKUPS_FRAME_SPAN (4)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Pickups_ModifyStringLabelForControlSetting
+  ΔPickupsModuleState
+  str? : seq CHAR
+where
+  -- State update: len' = (int)strlen(str)
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPickup_ExtractAmmoFromPickup
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+where
+  -- State update: weaponType' = CPickups::WeaponForModel(m_pObject.GetModelIndex())
+  -- State update: ammo' = m_nQuantity
+  -- State update: ammo' = AmmoForWeapon_OnStreet[weaponType]
+  -- State update: m_nQuantity' = 0
+  -- State update: m_bWasAmmoCollected' = true
+  -- Invokes: CPickups::WeaponForModel, m_pObject->GetModelIndex, CWeaponInfo::IsWeaponSlotAmmoMergeable, CWeaponInfo::GetWeaponInfo, player->GrantAmmo
+  true
+end
+
+schema CPickup_Remove
+  ΔCPickup
+where
+  -- State update: m_bRemoved' = true
+  -- State update: m_pObject' = ∅
+  -- State update: m_eType' = PICKUP_NONE
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CPickup_GiveUsAPickUpObject
+  ΔCPickup
+  ppObject? : Ref[CObject]
+  ppExtraObject? : Ref[CObject]
+  handle? : ℤ
+  extraHandle? : ℤ
+where
+  -- State update: object' = *ppObject
+  -- State update: extraObject' = *ppExtraObject
+  -- State update: extraObject' = ∅
+  -- State update: modelId' = -1
+  -- State update: modelId' = weaponInfo.m_nModelId
+  -- State update: modelId' = weaponInfo.m_nModel2Id
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = object
+  -- Invokes: CModelInfo::GetModelInfo, CWeaponInfo::GetWeaponInfo, CPools::MakeSureSlotInObjectPoolIsEmpty, object->SetPosition, object->SetOrientation
+  true
+end
+
+schema CPickup_CanBePickedUp
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+  playerId? : ℤ
+where
+  -- Return postcondition: result! = !cannotBePickedUp
+  -- Invokes: m_pObject->GetModelIndex, m_pWanted->GetWantedLevel, CTheScripts::IsPlayerOnAMission, CDarkel::FrenzyOnGoing
+  true
+end
+
+schema CPickup_Update
+  ΔCPickup
+  player? : Ref[CPlayerPed]
+  vehicle? : Ref[CVehicle]
+  playerId? : ℤ
+where
+  -- State update: timePassed' = CTimer::GetTimeInMilliseconds() - m_nTimer
+  -- State update: m_nTimer' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_fRevenue' = Min(m_fRevenue, m_nQuantity)
+  -- State update: m_pObject.m_nCostValue' = m_fRevenue < 10 ? 0 : m_fRevenue
+  -- State update: m_pObject' = GiveUsAPickUpObject(&m_pObject, &m_pExtraObject, -1, -1)
+  -- State update: m_bRemoved' = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = result
+  -- Invokes: m_pObject->GetMatrix, m_pExtraObject->GetMatrix, CTimer::GetTimeInMilliseconds, CWorld::Add, m_pObject->GetModelIndex
+  true
+end
+
+schema CPickup_ProcessGunShot
+  ΔCPickup
+  vec1? : Ref[CVector]
+  vec2? : Ref[CVector]
+where
+  -- State update: sphere.radius' = 4.0f
+  -- State update: sphere.center' = m_pObject.GetPosition()
+  -- State update: m_pObject' = ∅
+  -- State update: m_bRemoved' = true
+  -- State update: m_eType' = PICKUP_NONE
+  -- Invokes: m_pObject->GetPosition, CCollision::TestLineSphere, CExplosion::AddExplosion, CWorld::Remove
+  true
+end
+
+schema CPickup_GetRidOfObjects
+  ΔCPickup
+where
+  -- State update: m_pObject' = ∅
+  -- State update: m_pExtraObject' = ∅
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CPickups_Init
+  ΔCPickups
+where
+  -- State update: NumMessages' = 0
+  -- State update: m_eType' = PICKUP_NONE
+  -- State update: m_nIndex' = 1
+  -- State update: m_pObject' = ∅
+  -- State update: m_pExtraObject' = ∅
+  -- State update: CollectedPickUpIndex' = 0
+  true
+end
+
+schema CPickups_TestForPickupsInBubble
+  ΔCPickups
+  pos? : CVector
+  range? : ℝ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPickups_TryToMerge_WeaponType
+  ΔCPickups
+  pos? : CVector
+  weapon? : eWeaponType
+  type? : ℕ
+  quantity? : ℕ
+  unused? : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPickups_IsPickUpPickedUp
+  ΔCPickups
+  pickupId? : ℤ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPickups_PassTime
+  ΔCPickups
+  time? : ℕ
+where
+  -- State update: m_nTimer' = 0
+  true
+end
+
+schema CPickups_GetActualPickupIndex
+  ΔCPickups
+  index? : ℤ
+where
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = (uint16)index
+  true
+end
+
+schema CPickups_GivePlayerGoodiesWithPickUpMI
+  ΔCPickups
+  modelIndex? : ℤ
+  playerIndex? : ℤ
+where
+  -- State update: player' = CWorld::Players[CWorld::PlayerInFocus].m_pPed
+  -- State update: player' = CWorld::Players[playerIndex].m_pPed
+  -- State update: player.m_bAdrenalineActive' = true
+  -- State update: player.m_nAdrenalineTime' = CTimer::GetTimeInMilliseconds() + 20000
+  -- State update: player.m_fCurrentStamina' = player.m_fMaxStamina
+  -- State update: player.m_fArmour' = CWorld::Players[playerIndex].m_nMaxArmour
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CTimer::GetTimeInMilliseconds, DMAudio.PlayFrontEndSound, m_pWanted->GetWantedLevel, player->SetWantedLevel
+  true
+end
+
+schema CPickups_RemovePickUp
+  ΔCPickups
+  pickupIndex? : ℤ
+where
+  -- State update: index' = GetActualPickupIndex(pickupIndex)
+  -- State update: m_pObject' = ∅
+  -- State update: m_pExtraObject' = ∅
+  -- State update: m_eType' = PICKUP_NONE
+  -- State update: m_bRemoved' = true
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CPickups_GenerateNewOne
+  ΔCPickups
+  pos? : CVector
+  modelIndex? : ℕ
+  type? : ℕ
+  quantity? : ℕ
+  rate? : ℕ
+  highPriority? : 𝔹
+  pText? : seq CHAR
+where
+  -- State update: bFreeFound' = false
+  -- State update: slot' = 0
+  -- State update: slot' = NUMPICKUPS-1
+  -- State update: bFreeFound' = true
+  -- State update: slot' = 0
+  -- State update: bFreeFound' = true
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = GetNewUniquePickupIndex(slot)
+  -- Invokes: CTimer::GetTimeInMilliseconds, CWorld::Add
+  true
+end
+
+schema CPickups_GenerateNewOne_WeaponType
+  ΔCPickups
+  pos? : CVector
+  weaponType? : eWeaponType
+  type? : ℕ
+  quantity? : ℕ
+where
+  -- Return postcondition: result! = GenerateNewOne(pos, ModelForWeapon(weaponType), type, quantity)
+  true
+end
+
+schema CPickups_GetNewUniquePickupIndex
+  ΔCPickups
+  slot? : ℤ
+where
+  -- State update: m_nIndex' = 1
+  -- Return postcondition: result! = slot | (aPickUps[slot].m_nIndex << 16)
+  true
+end
+
+schema CPickups_ModelForWeapon
+  ΔCPickups
+  weaponType? : eWeaponType
+where
+  -- Return postcondition: result! = MI_BASEBALL_BAT
+  -- Return postcondition: result! = MI_COLT
+  -- Return postcondition: result! = MI_UZI
+  true
+end
+
+schema CPickups_WeaponForModel
+  ΔCPickups
+  model? : ℤ
+where
+  -- Return postcondition: result! = WEAPONTYPE_ARMOUR
+  -- Return postcondition: result! = WEAPONTYPE_GRENADE
+  -- Return postcondition: result! = WEAPONTYPE_AK47
+  true
+end
+
+schema CPickups_AddToCollectedPickupsArray
+  ΔCPickups
+  index? : ℤ
+where
+  -- State update: CollectedPickUpIndex' = 0
+  true
+end
+
+schema CPickups_Update
+  ΔCPickups
+where
+  -- State update: dist' = Distance2D(StaticCamCoors, FindPlayerCoors())
+  -- State update: mult' = 1.0f - (dist / 10.0f )
+  -- State update: mult' = 0.0f
+  -- State update: pos' = StaticCamCoors
+  -- State update: bPickUpcamActivated' = false
+  -- State update: colorId' = 11
+  -- Return postcondition: result! = PillsEatenInRace
+  -- Return postcondition: result! = FindPlayerVehicle()->m_nPacManPickupsCarried
+  -- Return postcondition: result! = 0
+  -- Invokes: CReplay::IsPlayingBack, pPlayerVehicle->GetColModel, boundingBox.GetSize, CTimer::GetTimeInMilliseconds, TheCamera.SetCamPositionForFixedMode
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PickupsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2147
+end

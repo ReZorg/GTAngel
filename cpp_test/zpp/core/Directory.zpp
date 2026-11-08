@@ -1,0 +1,165 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Directory (core)
+-- Source File(s): core/Directory.cpp, core/Directory.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Directory.zpp  (from "Directory.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDirectory
+  size : ℕ
+  name : seq CHAR
+  entries : Ref[DirectoryInfo]
+  maxEntries : ℤ
+  numEntries : ℤ
+where
+  size ≥ 0
+  #name = 24
+  #entries ≤ 1
+end
+
+schema CDirectory_CDirectory
+  ΔCDirectory
+  maxEntries? : ℤ
+where
+  -- Declared member operation CDirectory::CDirectory(int32 maxEntries)
+  true
+end
+
+schema CDirectory_CDirectory_2
+  ΔCDirectory
+  result! : ANY
+where
+  -- Declared member operation CDirectory::CDirectory(void)
+  true
+end
+
+schema CDirectory_ReadDirFile_3
+  ΔCDirectory
+  filename? : seq CHAR
+where
+  -- Declared member operation CDirectory::ReadDirFile(const char *filename)
+  true
+end
+
+schema CDirectory_WriteDirFile_4
+  ΔCDirectory
+  filename? : seq CHAR
+  result! : 𝔹
+where
+  -- Declared member operation CDirectory::WriteDirFile(const char *filename)
+  true
+end
+
+schema CDirectory_AddItem_5
+  ΔCDirectory
+  dirinfo? : DirectoryInfo
+where
+  -- Declared member operation CDirectory::AddItem(const DirectoryInfo &dirinfo)
+  true
+end
+
+schema CDirectory_AddItem_6
+  ΔCDirectory
+  dirinfo? : DirectoryInfo
+  imgId? : ℤ
+where
+  -- Declared member operation CDirectory::AddItem(const DirectoryInfo &dirinfo, int32 imgId)
+  true
+end
+
+schema CDirectory_FindItem_7
+  ΔCDirectory
+  name? : seq CHAR
+  offset? : ℕ
+  size? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CDirectory::FindItem(const char *name, uint32 &offset, uint32 &size)
+  true
+end
+
+schema DirectoryInfo
+  offset : ℕ
+  size : ℕ
+  name : seq CHAR
+where
+  offset ≥ 0
+  size ≥ 0
+  #name = 24
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CDirectory_CDirectory
+  ΔCDirectory
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDirectory_ReadDirFile
+  ΔCDirectory
+  filename? : seq CHAR
+where
+  -- State update: fd' = CFileMgr::OpenFile(filename, "rb")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema CDirectory_WriteDirFile
+  ΔCDirectory
+  filename? : seq CHAR
+where
+  -- State update: fd' = CFileMgr::OpenFileForWriting(filename)
+  -- Return postcondition: result! = n == numEntries*sizeof(DirectoryInfo)
+  -- Invokes: CFileMgr::OpenFileForWriting, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema CDirectory_AddItem
+  ΔCDirectory
+  dirinfo? : DirectoryInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CDirectory_AddItem_2
+  ΔCDirectory
+  dirinfo? : DirectoryInfo
+  imgId? : ℤ
+where
+  -- State update: di' = dirinfo
+  true
+end
+
+schema CDirectory_FindItem
+  ΔCDirectory
+  name? : seq CHAR
+  offset? : ℕ
+  size? : ℕ
+where
+  -- State update: offset' = entries[i].offset
+  -- State update: size' = entries[i].size
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CGeneral::faststricmp
+  true
+end

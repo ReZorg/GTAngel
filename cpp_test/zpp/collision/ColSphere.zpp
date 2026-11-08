@@ -1,0 +1,137 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColSphere (collision)
+-- Source File(s): collision/ColSphere.cpp, collision/ColSphere.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ColSphere.zpp  (from "ColSphere.h")
+-- include General.zpp  (from "General.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CColSphere
+  CSphere  -- inherits base schema
+  surface : ℕ
+  piece : ℕ
+  center : CVector
+  radius : ℝ
+where
+  surface ≥ 0
+  piece ≥ 0
+end
+
+schema CColSphere_Set
+  ΔCColSphere
+  radius? : ℝ
+  center? : CVector
+  surf? : ℕ
+  piece? : ℕ
+where
+  -- Declared member operation CColSphere::Set(float radius, const CVector &center, uint8 surf, uint8 piece)
+  true
+end
+
+schema CColSphere_IntersectRay_2
+  ΔCColSphere
+  from? : CVector
+  dir? : CVector
+  entry? : CVector
+  exit? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CColSphere::IntersectRay(CVector const &from, CVector const &dir, CVector &entry, CVector &exit)
+  true
+end
+
+schema CColSphere_Set_3
+  ΔCColSphere
+  radius? : ℝ
+  center? : CVector
+  surf? : ℕ
+  piece? : ℕ
+where
+  -- Declared member operation CColSphere::Set(float radius, const CVector &center, uint8 surf = SURFACE_DEFAULT, uint8 piece = 0)
+  true
+end
+
+schema CSphere
+  center : CVector
+  radius : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSphere_Set
+  ΔCSphere
+  radius? : ℝ
+  center? : CVector
+where
+  -- Declared member operation CSphere::Set(float radius, const CVector &center)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CColSphere_Set
+  ΔCColSphere
+  radius? : ℝ
+  center? : CVector
+  surf? : ℕ
+  piece? : ℕ
+where
+  -- State update: radius' = radius
+  -- State update: center' = center
+  -- State update: surface' = surf
+  -- State update: piece' = piece
+  true
+end
+
+schema CColSphere_IntersectRay
+  ΔCColSphere
+  from? : CVector
+  dir? : CVector
+  entry? : CVector
+  exit? : CVector
+where
+  -- State update: distToCenter' = from - center
+  -- State update: distToTouchSqr' = distToCenter.MagnitudeSqr() - sq(radius)
+  -- State update: entry' = from + dir * root1
+  -- State update: exit' = from + dir * root2
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: distToCenter.MagnitudeSqr, CGeneral::SolveQuadratic
+  true
+end
+
+schema ColSphere_Set
+  ΔColSphereModuleState
+  radius? : ℝ
+  center? : CVector
+where
+  -- State update: center' = center
+  -- State update: radius' = radius
+  true
+end
+
+schema ColSphere_Set_2
+  ΔColSphereModuleState
+  radius? : ℝ
+  center? : CVector
+where
+  -- State update: center' = center
+  -- State update: radius' = radius
+  true
+end

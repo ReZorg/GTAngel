@@ -1,0 +1,129 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Floater (vehicles)
+-- Source File(s): vehicles/Floater.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+tWaterLevel ::= FLOATER_ABOVE_WATER | FLOATER_IN_WATER | FLOATER_UNDER_WATER
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cBuoyancy
+  m_position : CVector
+  m_matrix : CMatrix
+  m_field_54 : ℤ
+  m_positionZ : CVector
+  m_waterlevel : ℝ
+  m_waterLevelInc : ℝ
+  m_buoyancy : ℝ
+  m_dimMax : CVector
+  m_dimMin : CVector
+  m_numPartialVolumes : ℝ
+  m_field_8C : ℤ
+  m_field_90 : ℤ
+  m_field_94 : ℤ
+  m_haveVolume : 𝔹
+  m_step : CVector
+  m_stepRatio : CVector
+  m_numSteps : ℝ
+  m_flipAverage : 𝔹
+  m_field_B9 : seq CHAR
+  m_isBoat : 𝔹
+  m_volumeUnderWater : ℝ
+  m_impulsePoint : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cBuoyancy_ProcessBuoyancy
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  buoyancy? : ℝ
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation cBuoyancy::ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *point, CVector *impulse)
+  true
+end
+
+schema cBuoyancy_ProcessBuoyancyBoat_2
+  ΔcBuoyancy
+  phys? : Ref[CVehicle]
+  buoyancy? : ℝ
+  point? : Ref[CVector]
+  impulse? : Ref[CVector]
+  bNoTurnForce? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation cBuoyancy::ProcessBuoyancyBoat(CVehicle *phys, float buoyancy, CVector *point, CVector *impulse, bool bNoTurnForce)
+  true
+end
+
+schema cBuoyancy_PreCalcSetup_3
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  buoyancy? : ℝ
+where
+  -- Declared member operation cBuoyancy::PreCalcSetup(CPhysical *phys, float buoyancy)
+  true
+end
+
+schema cBuoyancy_SimpleCalcBuoyancy_4
+  ΔcBuoyancy
+where
+  -- Declared member operation cBuoyancy::SimpleCalcBuoyancy(void)
+  true
+end
+
+schema cBuoyancy_SimpleSumBuoyancyData_5
+  ΔcBuoyancy
+  waterLevel? : CVector
+  waterPosition? : tWaterLevel
+  result! : ℝ
+where
+  -- Declared member operation cBuoyancy::SimpleSumBuoyancyData(CVector &waterLevel, tWaterLevel waterPosition)
+  true
+end
+
+schema cBuoyancy_FindWaterLevel_6
+  ΔcBuoyancy
+  zpos? : CVector
+  waterLevel? : Ref[CVector]
+  waterPosition? : Ref[tWaterLevel]
+where
+  -- Declared member operation cBuoyancy::FindWaterLevel(const CVector &zpos, CVector *waterLevel, tWaterLevel *waterPosition)
+  true
+end
+
+schema cBuoyancy_FindWaterLevelNorm_7
+  ΔcBuoyancy
+  zpos? : CVector
+  waterLevel? : Ref[CVector]
+  waterPosition? : Ref[tWaterLevel]
+  normal? : Ref[CVector]
+where
+  -- Declared member operation cBuoyancy::FindWaterLevelNorm(const CVector &zpos, CVector *waterLevel, tWaterLevel *waterPosition, CVector *normal)
+  true
+end
+
+schema cBuoyancy_CalcBuoyancyForce_8
+  ΔcBuoyancy
+  phys? : Ref[CPhysical]
+  impulse? : Ref[CVector]
+  point? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation cBuoyancy::CalcBuoyancyForce(CPhysical *phys, CVector *impulse, CVector *point)
+  true
+end

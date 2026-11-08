@@ -1,0 +1,184 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimViewer (core)
+-- Source File(s): core/AnimViewer.cpp, core/AnimViewer.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Font.zpp  (from "Font.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Text.zpp  (from "Text.h")
+-- include main.zpp  (from "main.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include General.zpp  (from "General.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include World.zpp  (from "World.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include AnimBlendAssocGroup.zpp  (from "AnimBlendAssocGroup.h")
+-- include AnimViewer.zpp  (from "AnimViewer.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include References.zpp  (from "References.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include TempColModels.zpp  (from "TempColModels.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include debugmenu.zpp  (from "debugmenu.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAnimViewer
+  animTxdSlot : ℤ
+  pTarget : Ref[CEntity]
+where
+  #pTarget ≤ 1
+end
+
+schema CAnimViewer_Initialise
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Initialise()
+  true
+end
+
+schema CAnimViewer_Render_2
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Render()
+  true
+end
+
+schema CAnimViewer_Shutdown_3
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Shutdown()
+  true
+end
+
+schema CAnimViewer_Update_4
+  ΔCAnimViewer
+where
+  -- Declared member operation CAnimViewer::Update()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAnimViewer_Render
+  ΔCAnimViewer
+where
+  -- Invokes: pTarget->IsPed, pTarget->GetClump, pTarget->Render, CRenderer::RenderOneNonRoad
+  true
+end
+
+schema CAnimViewer_Initialise
+  ΔCAnimViewer
+where
+  -- State update: hudSlot' = CTxdStore::AddTxdSlot("hud")
+  -- State update: m_Wants_To_Draw_Hud' = false
+  -- State update: animTxdSlot' = CTxdStore::AddTxdSlot("generic")
+  -- State update: particleSlot' = CTxdStore::AddTxdSlot("particle")
+  -- State update: Distance' = 5.0f
+  -- State update: PlayerInFocus' = 0
+  -- Invokes: CTxdStore::AddTxdSlot, CTxdStore::LoadTxd, CTxdStore::Create, CTxdStore::SetCurrentTxd, CPools::Initialise
+  true
+end
+
+schema AnimViewer_LastPedModelId
+  ΔAnimViewerModuleState
+  modelId? : ℤ
+where
+  -- State update: model' = CModelInfo::GetModelInfo(modelId)
+  -- Return postcondition: result! = modelId
+  -- Invokes: CModelInfo::GetNumModelInfos, CModelInfo::GetModelInfo, model->GetModelType
+  true
+end
+
+schema AnimViewer_FirstCarModelId
+  ΔAnimViewerModuleState
+  modelId? : ℤ
+where
+  -- State update: model' = CModelInfo::GetModelInfo(modelId)
+  -- Return postcondition: result! = modelId
+  -- Invokes: CModelInfo::GetNumModelInfos, CModelInfo::GetModelInfo, model->GetModelType
+  true
+end
+
+schema AnimViewer_NextModelId
+  ΔAnimViewerModuleState
+  modelId? : ℤ
+  wantedChange? : ℤ
+where
+  -- State update: tryCount' = 2
+  -- State update: ogModelId' = modelId
+  -- State update: wantedChange' = -wantedChange
+  -- State update: model' = CModelInfo::GetModelInfo(modelId)
+  -- Return postcondition: result! = modelId
+  -- Return postcondition: result! = ogModelId
+  -- Invokes: CModelInfo::GetNumModelInfos, CModelInfo::GetModelInfo
+  true
+end
+
+schema AnimViewer_PlayAnimation
+  ΔAnimViewerModuleState
+  clump? : Ref[RpClump]
+  animGroup? : AssocGroupId
+  anim? : AnimationId
+where
+  -- State update: currentAssoc' = RpAnimBlendClumpGetAssociation(clump, anim)
+  -- State update: animAssoc' = CAnimManager::BlendAnimation(clump, animGroup, anim, 8.0f)
+  -- Invokes: currentAssoc->IsPartial, CAnimManager::BlendAnimation, animAssoc->SetCurrentTime, animAssoc->SetRun
+  true
+end
+
+schema CAnimViewer_Update
+  ΔCAnimViewer
+where
+  -- State update: modelId' = 0
+  -- State update: animId' = 0
+  -- State update: reloadIFP' = false
+  -- State update: animGroup' = ASSOCGRP_STD
+  -- State update: nextModelId' = modelId
+  -- State update: modelInfo' = CModelInfo::GetModelInfo(modelId)
+  -- Invokes: CModelInfo::GetModelInfo, modelInfo->GetModelType, CWorld::Remove, CAnimManager::Shutdown, CAnimManager::Initialise
+  true
+end
+
+schema CAnimViewer_Shutdown
+  ΔCAnimViewer
+where
+  -- Invokes: CWorld::ShutDown, CModelInfo::ShutDown, CAnimManager::Shutdown, CTimer::Shutdown, CStreaming::Shutdown
+  true
+end

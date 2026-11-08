@@ -1,0 +1,119 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: NodeName (rw)
+-- Source File(s): rw/NodeName.cpp, rw/NodeName.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include NodeName.zpp  (from "NodeName.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+NodeName_Enum_1 ::= ID_NODENAME
+  -- val(ID_NODENAME) = MAKECHUNKID(rwVENDORID_ROCKSTAR
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema NodeName_NodeNameConstructor
+  ΔNodeNameModuleState
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema NodeName_NodeNameDestructor
+  ΔNodeNameModuleState
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- Return postcondition: result! = object
+  true
+end
+
+schema NodeName_NodeNameCopy
+  ΔNodeNameModuleState
+  dstObject? : ADDRESS
+  srcObject? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema NodeName_NodeNameStreamRead
+  ΔNodeNameModuleState
+  stream? : Ref[RwStream]
+  binaryLength? : ℤ
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- Return postcondition: result! = stream
+  true
+end
+
+schema NodeName_NodeNameStreamWrite
+  ΔNodeNameModuleState
+  stream? : Ref[RwStream]
+  binaryLength? : ℤ
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- Return postcondition: result! = stream
+  true
+end
+
+schema NodeName_NodeNameStreamGetSize
+  ΔNodeNameModuleState
+  object? : ADDRESS
+  offsetInObject? : ℤ
+  sizeInObject? : ℤ
+where
+  -- State update: name' = NODENAMEEXT(object)
+  -- Return postcondition: result! = name ? (RwInt32)rwstrlen(name) : 0
+  true
+end
+
+schema NodeName_NodeNamePluginAttach
+  ΔNodeNameModuleState
+where
+  -- Return postcondition: result! = gPluginOffset != -1
+  true
+end
+
+schema NodeName_GetFrameNodeName
+  ΔNodeNameModuleState
+  frame? : Ref[RwFrame]
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = NODENAMEEXT(frame)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema NodeNameModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 81
+end

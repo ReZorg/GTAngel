@@ -1,0 +1,113 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WaterCannon (renderer)
+-- Source File(s): renderer/WaterCannon.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WATERCANNON_GRAVITY : ℝ  -- #define WATERCANNON_GRAVITY (0.009f)
+WATERCANNON_LIFETIME : seq CHAR  -- #define WATERCANNON_LIFETIME (150)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+WaterCannon_Enum_1 ::= NUM_SEGMENTPOINTS
+  -- val(NUM_SEGMENTPOINTS) = 16
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWaterCannon
+  m_nId : ℤ
+  m_nCur : ℤ
+  m_nTimeCreated : ℕ
+  field_C : ℤ
+  m_avecPos : seq CVector  -- bounded array [NUM_SEGMENTPOINTS]
+  m_avecVelocity : seq CVector  -- bounded array [NUM_SEGMENTPOINTS]
+  m_abUsed : seq 𝔹  -- bounded array [NUM_SEGMENTPOINTS]
+where
+  m_nTimeCreated ≥ 0
+end
+
+schema CWaterCannon_Init
+  ΔCWaterCannon
+where
+  -- Declared member operation CWaterCannon::Init(void)
+  true
+end
+
+schema CWaterCannon_Update_OncePerFrame_2
+  ΔCWaterCannon
+  index? : ℤ
+where
+  -- Declared member operation CWaterCannon::Update_OncePerFrame(int16 index)
+  true
+end
+
+schema CWaterCannon_Update_NewInput_3
+  ΔCWaterCannon
+  pos? : Ref[CVector]
+  dir? : Ref[CVector]
+where
+  -- Declared member operation CWaterCannon::Update_NewInput(CVector *pos, CVector *dir)
+  true
+end
+
+schema CWaterCannon_Render_4
+  ΔCWaterCannon
+where
+  -- Declared member operation CWaterCannon::Render(void)
+  true
+end
+
+schema CWaterCannon_PushPeds_5
+  ΔCWaterCannon
+where
+  -- Declared member operation CWaterCannon::PushPeds(void)
+  true
+end
+
+schema CWaterCannons
+  aCannons : seq CWaterCannon  -- bounded array [NUM_WATERCANNONS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CWaterCannons_Init
+  ΔCWaterCannons
+where
+  -- Declared member operation CWaterCannons::Init(void)
+  true
+end
+
+schema CWaterCannons_UpdateOne_2
+  ΔCWaterCannons
+  id? : ℕ
+  pos? : Ref[CVector]
+  dir? : Ref[CVector]
+where
+  -- Declared member operation CWaterCannons::UpdateOne(uint32 id, CVector *pos, CVector *dir)
+  true
+end
+
+schema CWaterCannons_Update_3
+  ΔCWaterCannons
+where
+  -- Declared member operation CWaterCannons::Update()
+  true
+end
+
+schema CWaterCannons_Render_4
+  ΔCWaterCannons
+where
+  -- Declared member operation CWaterCannons::Render(void)
+  true
+end

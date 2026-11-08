@@ -1,0 +1,61 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: IniFile (core)
+-- Source File(s): core/IniFile.cpp, core/IniFile.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include IniFile.zpp  (from "IniFile.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include main.zpp  (from "main.h")
+-- include Population.zpp  (from "Population.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DEFAULT_MAX_NUMBER_OF_PEDS : ℝ  -- #define DEFAULT_MAX_NUMBER_OF_PEDS 25.0f
+DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR : ℝ  -- #define DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR 40.0f
+DEFAULT_MAX_NUMBER_OF_CARS : ℝ  -- #define DEFAULT_MAX_NUMBER_OF_CARS 12.0f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CIniFile
+  PedNumberMultiplier : ℝ
+  CarNumberMultiplier : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CIniFile_LoadIniFile
+  ΔCIniFile
+where
+  -- Declared member operation CIniFile::LoadIniFile()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CIniFile_LoadIniFile
+  ΔCIniFile
+where
+  -- State update: f' = CFileMgr::OpenFile("gta3.ini", "r")
+  -- State update: PedNumberMultiplier' = Min(3.0f, Max(0.5f, PedNumberMultiplier))
+  -- State update: CarNumberMultiplier' = Min(3.0f, Max(0.5f, CarNumberMultiplier))
+  -- State update: MaxNumberOfPedsInUse' = DEFAULT_MAX_NUMBER_OF_PEDS * PedNumberMultiplier
+  -- State update: MaxNumberOfPedsInUseInterior' = DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR * PedNumberMultiplier
+  -- State update: MaxNumberOfCarsInUse' = DEFAULT_MAX_NUMBER_OF_CARS * CarNumberMultiplier
+  -- Invokes: CFileMgr::SetDir, CFileMgr::OpenFile, CFileMgr::ReadLine, CFileMgr::CloseFile
+  true
+end

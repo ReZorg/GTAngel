@@ -1,0 +1,604 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: stream (audio)
+-- Source File(s): audio/oal/stream.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include al.zpp  (from "AL/al.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUM_STREAMBUFFERS : ℕ  -- #define NUM_STREAMBUFFERS 8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema IDecoder
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema IDecoder_IDecoder
+  ΔIDecoder
+  result! : ANY
+where
+  -- Declared member operation IDecoder::IDecoder()
+  true
+end
+
+schema IDecoder_FileOpen_2
+  ΔIDecoder
+where
+  -- Declared member operation IDecoder::FileOpen()
+  true
+end
+
+schema IDecoder_GetSampleSize_3
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetSampleSize()
+  true
+end
+
+schema IDecoder_GetSampleCount_4
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetSampleCount()
+  true
+end
+
+schema IDecoder_GetSampleRate_5
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetSampleRate()
+  true
+end
+
+schema IDecoder_GetChannels_6
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetChannels()
+  true
+end
+
+schema IDecoder_GetAvgSamplesPerSec_7
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetAvgSamplesPerSec()
+  true
+end
+
+schema IDecoder_ms2samples_8
+  ΔIDecoder
+  ms? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::ms2samples(uint32 ms)
+  true
+end
+
+schema IDecoder_samples2ms_9
+  ΔIDecoder
+  sm? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::samples2ms(uint32 sm)
+  true
+end
+
+schema IDecoder_GetBufferSamples_10
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetBufferSamples()
+  true
+end
+
+schema IDecoder_GetBufferSize_11
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetBufferSize()
+  true
+end
+
+schema IDecoder_Seek_12
+  ΔIDecoder
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation IDecoder::Seek(uint32 milliseconds)
+  true
+end
+
+schema IDecoder_Tell_13
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::Tell()
+  true
+end
+
+schema IDecoder_GetLength_14
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetLength()
+  true
+end
+
+schema IDecoder_float_15
+  ΔIDecoder
+  arg_1? : GetSampleCount
+  result! : return
+where
+  -- Declared member operation IDecoder::float(GetSampleCount()
+  true
+end
+
+schema IDecoder_Decode_16
+  ΔIDecoder
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::Decode(void *buffer)
+  true
+end
+
+schema tsQueue
+  true : return
+  count : ℤ
+  m_mutex : std__mutex
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tsQueue_tsQueue
+  ΔtsQueue
+where
+  -- Declared member operation tsQueue::tsQueue()
+  true
+end
+
+schema tsQueue_push_2
+  ΔtsQueue
+  arg_1? : value
+  result! : m_queue
+where
+  -- Declared member operation tsQueue::push(value)
+  true
+end
+
+schema tsQueue_peekPop_3
+  ΔtsQueue
+  retVal? : Ref[T]
+  result! : bool
+where
+  -- Declared member operation tsQueue::peekPop(T *retVal)
+  true
+end
+
+schema tsQueue_if_4
+  ΔtsQueue
+  arg_1? : count
+where
+  -- Declared member operation tsQueue::if(count == 0)
+  true
+end
+
+schema tsQueue_front_5
+  ΔtsQueue
+  result! : Ref[retVal___m_queue]
+where
+  -- Declared member operation tsQueue::front()
+  true
+end
+
+schema tsQueue_pop_6
+  ΔtsQueue
+  result! : m_queue
+where
+  -- Declared member operation tsQueue::pop()
+  true
+end
+
+schema tsQueue_swapNts_7
+  ΔtsQueue
+  replaceWith? : tsQueue_T
+  result! : void
+where
+  -- Declared member operation tsQueue::swapNts(tsQueue<T> &replaceWith)
+  true
+end
+
+schema tsQueue_emptyNts_8
+  ΔtsQueue
+  result! : bool
+where
+  -- Declared member operation tsQueue::emptyNts()
+  true
+end
+
+schema CStream
+  m_aFilename : seq CHAR
+  m_pAlSources : ℙ ℕ
+  m_bPaused : 𝔹
+  m_bActive : 𝔹
+  m_fillBuffers : ℕ
+  m_queueBuffers : ℕ
+  m_bDoSeek : 𝔹
+  m_SeekPos : ℕ
+  m_bIExist : 𝔹
+  m_bReset : 𝔹
+  m_nVolume : ℕ
+  m_nPan : ℕ
+  m_nPosBeforeReset : ℕ
+  m_nLoopCount : ℤ
+  m_pSoundFile : Ref[IDecoder]
+where
+  #m_aFilename = 128
+  #m_pAlSources ≤ 1
+  m_fillBuffers ≥ 0
+  m_queueBuffers ≥ 0
+  m_SeekPos ≥ 0
+  m_nVolume ≥ 0
+  m_nPan ≥ 0
+  m_nPosBeforeReset ≥ 0
+  #m_pSoundFile ≤ 1
+end
+
+schema CStream_ALuint
+  ΔCStream
+  m_alBuffers? : ANY
+where
+  -- Declared member operation CStream::ALuint(&m_alBuffers)
+  true
+end
+
+schema CStream_BuffersShouldBeFilled_2
+  ΔCStream
+where
+  -- Declared member operation CStream::BuffersShouldBeFilled()
+  true
+end
+
+schema CStream_BufferShouldBeFilledAndQueued_3
+  ΔCStream
+  ALuint? : std__pair
+  arg_2? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStream::BufferShouldBeFilledAndQueued(std::pair<ALuint, ALuint>*)
+  true
+end
+
+schema CStream_QueueBuffers_4
+  ΔCStream
+  result! : 𝔹
+where
+  -- Declared member operation CStream::QueueBuffers()
+  true
+end
+
+schema CStream_SetPosition_5
+  ΔCStream
+  i? : ℤ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CStream::SetPosition(int i, float x, float y, float z)
+  true
+end
+
+schema CStream_SetPitch_6
+  ΔCStream
+  pitch? : ℝ
+where
+  -- Declared member operation CStream::SetPitch(float pitch)
+  true
+end
+
+schema CStream_SetGain_7
+  ΔCStream
+  gain? : ℝ
+where
+  -- Declared member operation CStream::SetGain(float gain)
+  true
+end
+
+schema CStream_Pause_8
+  ΔCStream
+where
+  -- Declared member operation CStream::Pause()
+  true
+end
+
+schema CStream_SetPlay_9
+  ΔCStream
+  state? : 𝔹
+where
+  -- Declared member operation CStream::SetPlay(bool state)
+  true
+end
+
+schema CStream_FillBuffer_10
+  ΔCStream
+  alBuffer? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStream::FillBuffer(ALuint *alBuffer)
+  true
+end
+
+schema CStream_FillBuffers_11
+  ΔCStream
+  result! : ℤ
+where
+  -- Declared member operation CStream::FillBuffers()
+  true
+end
+
+schema CStream_ClearBuffers_12
+  ΔCStream
+where
+  -- Declared member operation CStream::ClearBuffers()
+  true
+end
+
+schema CStream_Initialise_13
+  ΔCStream
+where
+  -- Declared member operation CStream::Initialise()
+  true
+end
+
+schema CStream_Terminate_14
+  ΔCStream
+where
+  -- Declared member operation CStream::Terminate()
+  true
+end
+
+schema CStream_CStream_15
+  ΔCStream
+  sources? : ℙ ℕ
+  buffers? : ℕ
+where
+  -- Declared member operation CStream::CStream(ALuint *sources, ALuint (&buffers)
+  true
+end
+
+schema CStream_CStream_16
+  ΔCStream
+  result! : ANY
+where
+  -- Declared member operation CStream::CStream()
+  true
+end
+
+schema CStream_Delete_17
+  ΔCStream
+where
+  -- Declared member operation CStream::Delete()
+  true
+end
+
+schema CStream_Open_18
+  ΔCStream
+  filename? : seq CHAR
+  overrideSampleRate? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStream::Open(const char *filename, uint32 overrideSampleRate = 32000)
+  true
+end
+
+schema CStream_Close_19
+  ΔCStream
+where
+  -- Declared member operation CStream::Close()
+  true
+end
+
+schema CStream_IsOpened_20
+  ΔCStream
+  result! : 𝔹
+where
+  -- Declared member operation CStream::IsOpened()
+  true
+end
+
+schema CStream_IsPlaying_21
+  ΔCStream
+  result! : 𝔹
+where
+  -- Declared member operation CStream::IsPlaying()
+  true
+end
+
+schema CStream_SetPause_22
+  ΔCStream
+  bPause? : 𝔹
+where
+  -- Declared member operation CStream::SetPause(bool bPause)
+  true
+end
+
+schema CStream_SetVolume_23
+  ΔCStream
+  nVol? : ℕ
+where
+  -- Declared member operation CStream::SetVolume(uint32 nVol)
+  true
+end
+
+schema CStream_SetPan_24
+  ΔCStream
+  nPan? : ℕ
+where
+  -- Declared member operation CStream::SetPan(uint8 nPan)
+  true
+end
+
+schema CStream_SetPosMS_25
+  ΔCStream
+  nPos? : ℕ
+where
+  -- Declared member operation CStream::SetPosMS(uint32 nPos)
+  true
+end
+
+schema CStream_GetPosMS_26
+  ΔCStream
+  result! : ℕ
+where
+  -- Declared member operation CStream::GetPosMS()
+  true
+end
+
+schema CStream_GetLengthMS_27
+  ΔCStream
+  result! : ℕ
+where
+  -- Declared member operation CStream::GetLengthMS()
+  true
+end
+
+schema CStream_Setup_28
+  ΔCStream
+  imSureQueueIsEmpty? : 𝔹
+  lock? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CStream::Setup(bool imSureQueueIsEmpty = false, bool lock = true)
+  true
+end
+
+schema CStream_Start_29
+  ΔCStream
+where
+  -- Declared member operation CStream::Start()
+  true
+end
+
+schema CStream_Stop_30
+  ΔCStream
+where
+  -- Declared member operation CStream::Stop()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema stream_IDecoder
+  ΔstreamModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_GetAvgSamplesPerSec
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = GetChannels() * GetSampleRate()
+  true
+end
+
+schema stream_ms2samples
+  ΔstreamModuleState
+  ms? : ℕ
+  result! : ℕ
+where
+  -- Return postcondition: result! = float(ms) / 1000.0f * float(GetSampleRate())
+  true
+end
+
+schema stream_samples2ms
+  ΔstreamModuleState
+  sm? : ℕ
+  result! : ℕ
+where
+  -- Return postcondition: result! = float(sm) * 1000.0f / float(GetSampleRate())
+  true
+end
+
+schema stream_GetBufferSamples
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = (GetAvgSamplesPerSec() / 4)
+  true
+end
+
+schema stream_GetBufferSize
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = GetBufferSamples() * GetSampleSize()
+  true
+end
+
+schema stream_GetLength
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = float(GetSampleCount()) * 1000.0f / float(GetSampleRate())
+  true
+end
+
+schema stream_push
+  ΔstreamModuleState
+  value? : T
+where
+  -- Invokes: m_queue.push
+  true
+end
+
+schema stream_peekPop
+  ΔstreamModuleState
+  retVal? : Ref[T]
+  result! : 𝔹
+where
+  -- State update: retVal' = m_queue.front()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: m_queue.front, m_queue.pop
+  true
+end
+
+schema stream_swapNts
+  ΔstreamModuleState
+  replaceWith? : tsQueue_T
+where
+  -- State update: replaceWith.count' = count
+  -- Invokes: m_queue.swap
+  true
+end
+
+schema stream_emptyNts
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = count == 0
+  true
+end

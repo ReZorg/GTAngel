@@ -1,0 +1,68 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WindModifiers (renderer)
+-- Source File(s): renderer/WindModifiers.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include WindModifiers.zpp  (from "WindModifiers.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include General.zpp  (from "General.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_HEIGHT_DIST : ℝ  -- #define MAX_HEIGHT_DIST 40.0f
+MIN_FADE_DIST : ℝ  -- #define MIN_FADE_DIST 20.0f
+MAX_FADE_DIST : ℝ  -- #define MAX_FADE_DIST 50.0f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWindModifiers_RegisterOne
+  ΔCWindModifiers
+  pos? : CVector
+  type? : ℤ
+where
+  -- State update: m_pos' = pos
+  -- State update: m_type' = type
+  -- Invokes: TheCamera.GetPosition
+  true
+end
+
+schema CWindModifiers_FindWindModifier
+  ΔCWindModifiers
+  pos? : CVector
+  x? : ℙ ℝ
+  y? : ℙ ℝ
+where
+  -- State update: bWasWindModifierFound' = false
+  -- State update: zDist' = Abs(15.0f + pos.z - Array[i].m_pos.z)
+  -- State update: dist' = (pos - Array[i].m_pos).Magnitude()
+  -- State update: heightFade' = 1.0f - zDist / MAX_HEIGHT_DIST
+  -- State update: fade' = distFade * heightFade * 0.5f
+  -- State update: dir' = (pos - Array[i].m_pos) * fade / dist
+  -- Return postcondition: result! = bWasWindModifierFound
+  -- Invokes: CGeneral::GetRandomNumber
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema WindModifiersModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 52
+end

@@ -1,0 +1,88 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Vector (math)
+-- Source File(s): math/Vector.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CVector_Normalise
+  ΔCVector
+where
+  -- State update: sq' = MagnitudeSqr()
+  -- State update: invsqrt' = RecipSqrt(sq)
+  -- State update: x' = 1.0f
+  true
+end
+
+schema Vector_CrossProduct
+  ΔVectorModuleState
+  v1? : CVector
+  v2? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Vector_Multiply3x3
+  ΔVectorModuleState
+  mat? : CMatrix
+  vec? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Vector_Multiply3x3_2
+  ΔVectorModuleState
+  vec? : CVector
+  mat? : CMatrix
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Vector_operator
+  ΔVectorModuleState
+  mat? : CMatrix
+  vec? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Vector_RwV3dTransformPoints
+  ΔVectorModuleState
+  pointsOut? : Ref[CVector]
+  pointsIn? : Ref[CVector]
+  numPoints? : ℤ
+  matrix? : Ref[RwMatrix]
+where
+  -- State update: pointsOut.x' = x
+  -- State update: pointsOut.y' = y
+  -- State update: pointsOut.z' = z
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema VectorModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 67
+end

@@ -1,0 +1,574 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Record (control)
+-- Source File(s): control/Record.cpp, control/Record.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Record.zpp  (from "Record.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include VehicleModelInfo.zpp  (from "VehicleModelInfo.h")
+-- include World.zpp  (from "World.h")
+-- include Frontend.zpp  (from "Frontend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MEMORY_FOR_GAME_RECORD : seq CHAR  -- #define MEMORY_FOR_GAME_RECORD (150000)
+CHASE_SCENE_LENGTH_IN_SECONDS : seq CHAR  -- #define CHASE_SCENE_LENGTH_IN_SECONDS (80)
+CHASE_SCENE_FRAMES_PER_SECOND : seq CHAR  -- #define CHASE_SCENE_FRAMES_PER_SECOND (15)
+CHASE_SCENE_FRAMES_IN_RECORDING : seq CHAR  -- #define CHASE_SCENE_FRAMES_IN_RECORDING (CHASE_SCENE_LENGTH_IN_SECONDS * CHASE_SCENE_FRAMES_PER_SECOND)
+CHASE_SCENE_LENGTH_IN_FRAMES : seq CHAR  -- #define CHASE_SCENE_LENGTH_IN_FRAMES (CHASE_SCENE_FRAMES_IN_RECORDING * 2)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Record_Enum_1 ::= NUM_CHASE_CARS
+  -- val(NUM_CHASE_CARS) = 20
+
+Record_Enum_2 ::= STATE_NONE | STATE_RECORD | STATE_PLAYBACK_INIT | STATE_PLAYBACK | STATE_PLAYBACK_BEFORE_RECORDING
+  -- val(STATE_NONE) = 0
+  -- val(STATE_RECORD) = 1
+  -- val(STATE_PLAYBACK_INIT) = 2
+  -- val(STATE_PLAYBACK) = 3
+  -- val(STATE_PLAYBACK_BEFORE_RECORDING) = 4
+
+Record_Enum_3 ::= STATE_NONE | STATE_RECORD | STATE_PLAYBACK
+  -- val(STATE_NONE) = 0
+  -- val(STATE_RECORD) = 1
+  -- val(STATE_PLAYBACK) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tCoors
+  pos : CVector
+  angle : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CCarStateEachFrame
+  velX : ℤ
+  velY : ℤ
+  velZ : ℤ
+  rightX : ℤ
+  rightY : ℤ
+  rightZ : ℤ
+  forwardX : ℤ
+  forwardY : ℤ
+  forwardZ : ℤ
+  wheel : ℤ
+  gas : ℤ
+  brake : ℤ
+  handbrake : 𝔹
+  pos : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRecordDataForChase
+  Status : ℕ
+  PositionChanges : ℤ
+  CurrentCar : ℕ
+  AnimTime : ℝ
+  AnimStartTime : ℕ
+  pBaseMemForCar : seq Ref[CCarStateEachFrame]  -- bounded array [NUM_CHASE_CARS]
+  TimeMultiplier : ℝ
+  FId2 : ℤ
+where
+  Status ≥ 0
+  CurrentCar ≥ 0
+  AnimStartTime ≥ 0
+end
+
+schema CRecordDataForChase_IsRecording
+  ΔCRecordDataForChase
+  result! : 𝔹
+where
+  -- Declared member operation CRecordDataForChase::IsRecording(void)
+  true
+end
+
+schema CRecordDataForChase_Init_2
+  ΔCRecordDataForChase
+  result! : void
+where
+  -- Declared member operation CRecordDataForChase::Init(void)
+  true
+end
+
+schema CRecordDataForChase_SaveOrRetrieveDataForThisFrame_3
+  ΔCRecordDataForChase
+where
+  -- Declared member operation CRecordDataForChase::SaveOrRetrieveDataForThisFrame(void)
+  true
+end
+
+schema CRecordDataForChase_SaveOrRetrieveCarPositions_4
+  ΔCRecordDataForChase
+where
+  -- Declared member operation CRecordDataForChase::SaveOrRetrieveCarPositions(void)
+  true
+end
+
+schema CRecordDataForChase_StoreInfoForCar_5
+  ΔCRecordDataForChase
+  arg_1? : Ref[CAutomobile]
+  arg_2? : Ref[CCarStateEachFrame]
+where
+  -- Declared member operation CRecordDataForChase::StoreInfoForCar(CAutomobile*, CCarStateEachFrame*)
+  true
+end
+
+schema CRecordDataForChase_RestoreInfoForMatrix_6
+  ΔCRecordDataForChase
+  arg_1? : CMatrix
+  arg_2? : Ref[CCarStateEachFrame]
+where
+  -- Declared member operation CRecordDataForChase::RestoreInfoForMatrix(CMatrix&, CCarStateEachFrame*)
+  true
+end
+
+schema CRecordDataForChase_RestoreInfoForCar_7
+  ΔCRecordDataForChase
+  arg_1? : Ref[CAutomobile]
+  arg_2? : Ref[CCarStateEachFrame]
+  arg_3? : 𝔹
+where
+  -- Declared member operation CRecordDataForChase::RestoreInfoForCar(CAutomobile*, CCarStateEachFrame*, bool)
+  true
+end
+
+schema CRecordDataForChase_ProcessControlCars_8
+  ΔCRecordDataForChase
+where
+  -- Declared member operation CRecordDataForChase::ProcessControlCars(void)
+  true
+end
+
+schema CRecordDataForChase_ShouldThisPadBeLeftAlone_9
+  ΔCRecordDataForChase
+  pad? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CRecordDataForChase::ShouldThisPadBeLeftAlone(uint8 pad)
+  true
+end
+
+schema CRecordDataForChase_GiveUsACar_10
+  ΔCRecordDataForChase
+  arg_1? : ℤ
+  arg_2? : CVector
+  arg_3? : ℝ
+  arg_4? : Ref[CAutomobile]
+  arg_5? : ℕ
+  arg_6? : ℕ
+where
+  -- Declared member operation CRecordDataForChase::GiveUsACar(int32, CVector, float, CAutomobile**, uint8, uint8)
+  true
+end
+
+schema CRecordDataForChase_StartChaseScene_11
+  ΔCRecordDataForChase
+  arg_1? : ℝ
+where
+  -- Declared member operation CRecordDataForChase::StartChaseScene(float)
+  true
+end
+
+schema CRecordDataForChase_CleanUpChaseScene_12
+  ΔCRecordDataForChase
+where
+  -- Declared member operation CRecordDataForChase::CleanUpChaseScene(void)
+  true
+end
+
+schema CRecordDataForChase_SetUpCarsForChaseScene_13
+  ΔCRecordDataForChase
+where
+  -- Declared member operation CRecordDataForChase::SetUpCarsForChaseScene(void)
+  true
+end
+
+schema CRecordDataForChase_CleanUpCarsForChaseScene_14
+  ΔCRecordDataForChase
+where
+  -- Declared member operation CRecordDataForChase::CleanUpCarsForChaseScene(void)
+  true
+end
+
+schema CRecordDataForChase_RemoveCarFromChase_15
+  ΔCRecordDataForChase
+  arg_1? : ℤ
+where
+  -- Declared member operation CRecordDataForChase::RemoveCarFromChase(int32)
+  true
+end
+
+schema CRecordDataForChase_TurnChaseCarIntoScriptCar_16
+  ΔCRecordDataForChase
+  arg_1? : ℤ
+  result! : Ref[CVehicle]
+where
+  -- Declared member operation CRecordDataForChase::TurnChaseCarIntoScriptCar(int32)
+  true
+end
+
+schema tGameBuffer
+  m_fTimeStep : ℝ
+  m_nTimeInMilliseconds : ℕ
+  m_nSizeOfPads : seq ℕ  -- bounded array [2]
+  m_nChecksum : ℕ
+  m_ControllerBuffer : seq ℕ  -- bounded array [116]
+where
+  m_nTimeInMilliseconds ≥ 0
+  #m_nSizeOfPads = 2
+  m_nChecksum ≥ 0
+  #m_ControllerBuffer = 116
+end
+
+schema CRecordDataForGame
+  RecordingState : ℕ
+  pDataBuffer : ℙ ℕ
+  pDataBufferPointer : ℙ ℕ
+  FId : ℤ
+  pDataBufferForFrame : tGameBuffer
+where
+  RecordingState ≥ 0
+  #pDataBuffer ≤ 1
+  #pDataBufferPointer ≤ 1
+end
+
+schema CRecordDataForGame_IsRecording
+  ΔCRecordDataForGame
+  result! : 𝔹
+where
+  -- Declared member operation CRecordDataForGame::IsRecording()
+  true
+end
+
+schema CRecordDataForGame_IsPlayingBack_2
+  ΔCRecordDataForGame
+  result! : bool
+where
+  -- Declared member operation CRecordDataForGame::IsPlayingBack()
+  true
+end
+
+schema CRecordDataForGame_SaveOrRetrieveDataForThisFrame_3
+  ΔCRecordDataForGame
+  result! : void
+where
+  -- Declared member operation CRecordDataForGame::SaveOrRetrieveDataForThisFrame(void)
+  true
+end
+
+schema CRecordDataForGame_Init_4
+  ΔCRecordDataForGame
+where
+  -- Declared member operation CRecordDataForGame::Init(void)
+  true
+end
+
+schema CRecordDataForGame_CalcGameChecksum_5
+  ΔCRecordDataForGame
+  result! : ℕ
+where
+  -- Declared member operation CRecordDataForGame::CalcGameChecksum(void)
+  true
+end
+
+schema CRecordDataForGame_PackCurrentPadValues_6
+  ΔCRecordDataForGame
+  arg_1? : ℙ ℕ
+  arg_2? : Ref[CControllerState]
+  arg_3? : Ref[CControllerState]
+  result! : ℙ ℕ
+where
+  -- Declared member operation CRecordDataForGame::PackCurrentPadValues(uint8*, CControllerState*, CControllerState*)
+  true
+end
+
+schema CRecordDataForGame_UnPackCurrentPadValues_7
+  ΔCRecordDataForGame
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+  arg_3? : Ref[CControllerState]
+  result! : ℙ ℕ
+where
+  -- Declared member operation CRecordDataForGame::UnPackCurrentPadValues(uint8*, uint8, CControllerState*)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRecordDataForGame_Init
+  ΔCRecordDataForGame
+where
+  -- State update: RecordingState' = STATE_NONE
+  -- State update: pDataBufferPointer' = ∅
+  -- State update: pDataBuffer' = ∅
+  -- State update: FId' = CFileMgr::OpenFile("playback.dat", "r")
+  -- State update: RecordingState' = STATE_NONE
+  -- State update: FId' = CFileMgr::OpenFileForWriting("record.dat")
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile, CFileMgr::OpenFileForWriting, CFileMgr::Read
+  true
+end
+
+schema CRecordDataForGame_SaveOrRetrieveDataForThisFrame
+  ΔCRecordDataForGame
+where
+  -- State update: pDataBufferForFrame.m_fTimeStep' = CTimer::GetTimeStep()
+  -- State update: pDataBufferForFrame.m_nChecksum' = CalcGameChecksum()
+  -- State update: pEndPtr' = pController2
+  -- State update: pData' = (tGameBuffer*)pDataBufferPointer
+  -- State update: size1' = pData.m_nSizeOfPads[0]
+  -- State update: size2' = pData.m_nSizeOfPads[1]
+  -- Invokes: CTimer::GetTimeStep, CTimer::GetTimeInMilliseconds, CPad::GetPad, CFileMgr::Write, NewState.Clear
+  true
+end
+
+schema CRecordDataForGame_PackCurrentPadValues
+  ΔCRecordDataForGame
+  buf? : ℙ ℕ
+  os? : Ref[CControllerState]
+  ns? : Ref[CControllerState]
+  result! : ℙ ℕ
+where
+  -- Return postcondition: result! = buf
+  true
+end
+
+schema CRecordDataForGame_UnPackCurrentPadValues
+  ΔCRecordDataForGame
+  buf? : ℙ ℕ
+  total? : ℕ
+  state? : Ref[CControllerState]
+  result! : ℙ ℕ
+where
+  -- Return postcondition: result! = buf
+  true
+end
+
+schema CRecordDataForGame_CalcGameChecksum
+  ΔCRecordDataForGame
+  result! : ℕ
+where
+  -- State update: checksum' = 0
+  -- State update: pPed' = CPools::GetPedPool().GetSlot(i)
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- Return postcondition: result! = checksum ^ checksum >> 16
+  -- Invokes: CPools::GetPedPool, pPed->GetModelIndex, pPed->GetPosition, CPools::GetVehiclePool, pVehicle->GetModelIndex
+  true
+end
+
+schema CRecordDataForChase_Init
+  ΔCRecordDataForChase
+where
+  -- State update: Status' = STATE_NONE
+  -- State update: PositionChanges' = 0
+  -- State update: CurrentCar' = 0
+  -- State update: AnimStartTime' = 0
+  true
+end
+
+schema CRecordDataForChase_SaveOrRetrieveDataForThisFrame
+  ΔCRecordDataForChase
+where
+  -- State update: fid' = CFileMgr::OpenFileForWriting(gString)
+  -- State update: fs' = CHASE_SCENE_LENGTH_IN_FRAMES * sizeof(CCarStateEachFrame)
+  -- State update: fid2' = CFileMgr::OpenFileForWriting(gString)
+  -- State update: pState' = pBaseMemForCar[CurrentCar]
+  -- State update: pState' = (CCarStateEachFrame*)pChaseCars[CurrentCar]
+  -- State update: up' = CrossProduct(right, forward)
+  -- Invokes: CTimer::GetFrameCounter, CFileMgr::SetDir, CFileMgr::OpenFileForWriting, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema CRecordDataForChase_SaveOrRetrieveCarPositions
+  ΔCRecordDataForChase
+where
+  -- State update: Status' = STATE_RECORD
+  -- State update: Status' = STATE_PLAYBACK
+  -- State update: FlooredEOFTime' = EndOfFrameTime
+  -- State update: dp' = EndOfFrameTime - FlooredEOFTime
+  -- Invokes: CTimer::GetFrameCounter, CPad::GetPad, CTimer::GetTimeStepNonClippedInSeconds, tmp.GetRight, tmp.GetForward
+  true
+end
+
+schema CRecordDataForChase_StoreInfoForCar
+  ΔCRecordDataForChase
+  pCar? : Ref[CAutomobile]
+  pState? : Ref[CCarStateEachFrame]
+where
+  -- State update: pState.rightX' = INT8_MAX * pCar.GetRight().x
+  -- State update: pState.rightY' = INT8_MAX * pCar.GetRight().y
+  -- State update: pState.rightZ' = INT8_MAX * pCar.GetRight().z
+  -- State update: pState.forwardX' = INT8_MAX * pCar.GetForward().x
+  -- State update: pState.forwardY' = INT8_MAX * pCar.GetForward().y
+  -- State update: pState.forwardZ' = INT8_MAX * pCar.GetForward().z
+  -- Invokes: pCar->GetRight, pCar->GetForward, pCar->GetPosition, pCar->GetMoveSpeed
+  true
+end
+
+schema CRecordDataForChase_RestoreInfoForMatrix
+  ΔCRecordDataForChase
+  matrix? : CMatrix
+  pState? : Ref[CCarStateEachFrame]
+where
+  -- Invokes: matrix.GetRight, matrix.GetForward, matrix.GetUp, matrix.GetPosition
+  true
+end
+
+schema CRecordDataForChase_RestoreInfoForCar
+  ΔCRecordDataForChase
+  pCar? : Ref[CAutomobile]
+  pState? : Ref[CCarStateEachFrame]
+  stop? : 𝔹
+where
+  -- State update: oldPos' = pCar.GetPosition()
+  -- State update: pCar.m_fSteerAngle' = pState.wheel / 20.0f
+  -- State update: pCar.m_fGasPedal' = pState.gas / 100.0f
+  -- State update: pCar.m_fBrakePedal' = pState.brake / 100.0f
+  -- State update: pCar.bIsHandbrakeOn' = pState.handbrake
+  -- State update: pCar.m_currentColour1' = 58
+  -- Invokes: pCar->GetPosition, pCar->GetMatrix, pCar->SetMoveSpeed, pCar->SetTurnSpeed, pCar->GetModelInfo
+  true
+end
+
+schema CRecordDataForChase_ProcessControlCars
+  ΔCRecordDataForChase
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRecordDataForChase_ShouldThisPadBeLeftAlone
+  ΔCRecordDataForChase
+  pad? : ℕ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = pad != 0
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CRecordDataForChase_GiveUsACar
+  ΔCRecordDataForChase
+  mi? : ℤ
+  pos? : CVector
+  angle? : ℝ
+  ppCar? : Ref[CAutomobile]
+  colour1? : ℕ
+  colour2? : ℕ
+where
+  -- State update: pCar' = new CAutomobile(mi, MISSION_VEHICLE)
+  -- State update: pCar.pDriver' = ∅
+  -- State update: pCar.m_currentColour1' = colour1
+  -- State update: pCar.m_currentColour2' = colour2
+  -- State update: ppCar' = pCar
+  -- Invokes: CStreaming::RequestModel, CStreaming::LoadAllRequestedModels, CStreaming::HasModelLoaded, pCar->SetPosition, pCar->SetStatus
+  true
+end
+
+schema Record_RemoveUnusedCollision
+  ΔRecordModuleState
+where
+  -- State update: level' = LEVEL_GENERIC
+  -- State update: level' = LEVEL_COMMERCIAL
+  -- Invokes: CModelInfo::GetModelInfo, CModelInfo::RemoveColModelsFromOtherLevels
+  true
+end
+
+schema CRecordDataForChase_StartChaseScene
+  ΔCRecordDataForChase
+  startTime? : ℝ
+where
+  -- State update: Status' = STATE_PLAYBACK
+  -- State update: AnimTime' = startTime
+  -- State update: AnimStartTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: FId2' = CFileMgr::OpenFile(filename, "rb")
+  -- State update: TimeMultiplier' = 0.0f
+  -- Invokes: CTimer::GetTimeInMilliseconds, CStreaming::RemoveIslandsNotUsed, CGame::TidyUpMemory, CStreaming::ImGonnaUseStreamingMemory, CFileMgr::SetDir
+  true
+end
+
+schema CRecordDataForChase_CleanUpChaseScene
+  ΔCRecordDataForChase
+where
+  -- State update: Status' = STATE_NONE
+  true
+end
+
+schema CRecordDataForChase_SetUpCarsForChaseScene
+  ΔCRecordDataForChase
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRecordDataForChase_CleanUpCarsForChaseScene
+  ΔCRecordDataForChase
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CRecordDataForChase_RemoveCarFromChase
+  ΔCRecordDataForChase
+  i? : ℤ
+where
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CRecordDataForChase_TurnChaseCarIntoScriptCar
+  ΔCRecordDataForChase
+  i? : ℤ
+  result! : Ref[CVehicle]
+where
+  -- State update: pVehicle' = pChaseCars[i]
+  -- Return postcondition: result! = pVehicle
+  -- Invokes: pVehicle->SetStatus
+  true
+end
+
+schema Record_IsRecording
+  ΔRecordModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = Status == STATE_RECORD
+  true
+end
+
+schema Record_IsRecording_2
+  ΔRecordModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = RecordingState == STATE_RECORD
+  true
+end
+
+schema Record_IsPlayingBack
+  ΔRecordModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = RecordingState == STATE_PLAYBACK
+  true
+end

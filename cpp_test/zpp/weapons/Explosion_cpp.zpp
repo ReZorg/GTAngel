@@ -1,0 +1,179 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Explosion (weapons)
+-- Source File(s): weapons/Explosion.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Entity.zpp  (from "Entity.h")
+-- include EventList.zpp  (from "EventList.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include General.zpp  (from "General.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include PointLights.zpp  (from "PointLights.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CExplosion_Initialise
+  ΔCExplosion
+where
+  -- State update: m_ExplosionType' = EXPLOSION_GRENADE
+  -- State update: m_vecPosition' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_fRadius' = 1.0f
+  -- State update: m_fPropagationRate' = 0.0f
+  -- State update: m_fZshift' = 0.0f
+  -- State update: m_pCreatorEntity' = ∅
+  -- Invokes: DMAudio.CreateEntity, DMAudio.SetEntityStatus
+  true
+end
+
+schema CExplosion_ClearAllExplosions
+  ΔCExplosion
+where
+  -- State update: m_ExplosionType' = EXPLOSION_GRENADE
+  -- State update: m_vecPosition' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_fRadius' = 1.0f
+  -- State update: m_fPropagationRate' = 0.0f
+  -- State update: m_fZshift' = 0.0f
+  -- State update: m_pCreatorEntity' = ∅
+  true
+end
+
+schema CExplosion_Shutdown
+  ΔCExplosion
+where
+  -- State update: AudioHandle' = AEHANDLE_NONE
+  -- Invokes: DMAudio.DestroyEntity
+  true
+end
+
+schema CExplosion_GetExplosionActiveCounter
+  ΔCExplosion
+  id? : ℕ
+where
+  -- Return postcondition: result! = gaExplosion[id].m_nActiveCounter
+  true
+end
+
+schema CExplosion_ResetExplosionActiveCounter
+  ΔCExplosion
+  id? : ℕ
+where
+  -- State update: m_nActiveCounter' = 0
+  true
+end
+
+schema CExplosion_GetExplosionType
+  ΔCExplosion
+  id? : ℕ
+where
+  -- Return postcondition: result! = gaExplosion[id].m_ExplosionType
+  true
+end
+
+schema CExplosion_DoesExplosionMakeSound
+  ΔCExplosion
+  id? : ℕ
+where
+  -- Return postcondition: result! = gaExplosion[id].m_bMakeSound
+  true
+end
+
+schema CExplosion_GetExplosionPosition
+  ΔCExplosion
+  id? : ℕ
+where
+  -- Return postcondition: result! = &gaExplosion[id].m_vecPosition
+  true
+end
+
+schema CExplosion_Update
+  ΔCExplosion
+where
+  -- State update: color' = colUpdate
+  -- State update: explosion' = gaExplosion[i]
+  -- State update: explosion.m_nParticlesExpireTime' = 0
+  -- State update: someTime' = explosion.m_fStopTime - CTimer::GetTimeInMilliseconds()
+  -- State update: point1' = explosion.m_vecPosition
+  -- State update: explosion.m_fZshift' = colPoint.point.z
+  -- Invokes: CTimer::GetTimeInMilliseconds, CWorld::TriggerExplosion, CTimer::GetTimeStep, CTimer::GetFrameCounter, CPointLights::AddLight
+  true
+end
+
+schema CExplosion_TestForExplosionInArea
+  ΔCExplosion
+  type? : eExplosionType
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CExplosion_RemoveAllExplosionsInArea
+  ΔCExplosion
+  pos? : CVector
+  radius? : ℝ
+where
+  -- State update: m_nIteration' = 0
+  true
+end
+
+schema CExplosion_AddExplosion
+  ΔCExplosion
+  explodingEntity? : Ref[CEntity]
+  culprit? : Ref[CEntity]
+  type? : eExplosionType
+  pos? : CVector
+  lifetime? : ℕ
+where
+  -- State update: colorMedium' = colMedExpl
+  -- State update: bDontExplode' = false
+  -- State update: color' = { 160, 160, 160, 255 }
+  -- State update: pPosn' = pos
+  -- State update: explosion' = gaExplosion[n]
+  -- State update: explosion.m_ExplosionType' = type
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CShadows::AddPermanentShadow, culprit->RegisterReference, explodingEntity->RegisterReference, CTimer::GetTimeInMilliseconds, CWorld::FindGroundZFor3DCoord
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ExplosionModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 792
+end

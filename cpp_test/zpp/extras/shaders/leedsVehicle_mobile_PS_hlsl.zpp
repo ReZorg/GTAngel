@@ -1,0 +1,38 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: leedsVehicle_mobile_PS (extras)
+-- Source File(s): extras/shaders/leedsVehicle_mobile_PS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NdotV : seq CHAR  -- #define NdotV (input.ReflData.x)
+lightingCont : seq CHAR  -- #define lightingCont (input.ReflData.y)
+shininess : seq CHAR  -- #define shininess (fxparams.x)
+power : ℝ  -- #define power (4.0)
+preMult : ℝ  -- #define preMult (1.0)
+postMult : ℝ  -- #define postMult (1.0)
+minRefl : ℝ  -- #define minRefl (0.25)
+maxRefl : ℝ  -- #define maxRefl (3.0)
+minOpacity : ℝ  -- #define minOpacity (1.0)
+maxOpacity : ℝ  -- #define maxOpacity (1.0)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VS_out
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+  TEXCOORD1 : ℝ
+  TEXCOORD2 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end

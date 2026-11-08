@@ -1,0 +1,308 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Rect (math)
+-- Source File(s): math/Rect.cpp, math/Rect.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRect
+  left : ℝ
+  bottom : ℝ
+  right : ℝ
+  top : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRect_CRect
+  ΔCRect
+where
+  -- Declared member operation CRect::CRect(void)
+  true
+end
+
+schema CRect_CRect_2
+  ΔCRect
+  l? : ℝ
+  t? : ℝ
+  r? : ℝ
+  b? : ℝ
+where
+  -- Declared member operation CRect::CRect(float l, float t, float r, float b)
+  true
+end
+
+schema CRect_ContainPoint_3
+  ΔCRect
+  v? : CVector
+where
+  -- Declared member operation CRect::ContainPoint(CVector const &v)
+  true
+end
+
+schema CRect_if_4
+  ΔCRect
+  right? : v_x
+where
+  -- Declared member operation CRect::if(v.x > right)
+  true
+end
+
+schema CRect_if_5
+  ΔCRect
+  top? : v_y
+where
+  -- Declared member operation CRect::if(v.y < top)
+  true
+end
+
+schema CRect_if_6
+  ΔCRect
+  bottom? : v_y
+where
+  -- Declared member operation CRect::if(v.y > bottom)
+  true
+end
+
+schema CRect_ContainRect_7
+  ΔCRect
+  r? : CRect
+  result! : void
+where
+  -- Declared member operation CRect::ContainRect(const CRect &r)
+  true
+end
+
+schema CRect_if_8
+  ΔCRect
+  right? : r_right
+where
+  -- Declared member operation CRect::if(r.right > right)
+  true
+end
+
+schema CRect_if_9
+  ΔCRect
+  top? : r_top
+where
+  -- Declared member operation CRect::if(r.top < top)
+  true
+end
+
+schema CRect_if_10
+  ΔCRect
+  bottom? : r_bottom
+where
+  -- Declared member operation CRect::if(r.bottom > bottom)
+  true
+end
+
+schema CRect_IsPointInside_11
+  ΔCRect
+  p? : CVector2D
+  result! : bool
+where
+  -- Declared member operation CRect::IsPointInside(const CVector2D &p)
+  true
+end
+
+schema CRect_IsPointInside_12
+  ΔCRect
+  p? : CVector2D
+  extraRadius? : ℝ
+  result! : bool
+where
+  -- Declared member operation CRect::IsPointInside(const CVector2D &p, float extraRadius)
+  true
+end
+
+schema CRect_Translate_13
+  ΔCRect
+  x? : ℝ
+  y? : ℝ
+  result! : void
+where
+  -- Declared member operation CRect::Translate(float x, float y)
+  true
+end
+
+schema CRect_Grow_14
+  ΔCRect
+  r? : ℝ
+  result! : void
+where
+  -- Declared member operation CRect::Grow(float r)
+  true
+end
+
+schema CRect_Grow_15
+  ΔCRect
+  l? : ℝ
+  r? : ℝ
+  result! : void
+where
+  -- Declared member operation CRect::Grow(float l, float r)
+  true
+end
+
+schema CRect_Grow_16
+  ΔCRect
+  l? : ℝ
+  r? : ℝ
+  t? : ℝ
+  b? : ℝ
+  result! : void
+where
+  -- Declared member operation CRect::Grow(float l, float r, float t, float b)
+  true
+end
+
+schema CRect_GetWidth_17
+  ΔCRect
+  result! : ℝ
+where
+  -- Declared member operation CRect::GetWidth(void)
+  true
+end
+
+schema CRect_GetHeight_18
+  ΔCRect
+  result! : ℝ
+where
+  -- Declared member operation CRect::GetHeight(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRect_CRect
+  ΔCRect
+where
+  -- State update: left' = 1000000.0f
+  -- State update: top' = 1000000.0f
+  -- State update: right' = -1000000.0f
+  -- State update: bottom' = -1000000.0f
+  true
+end
+
+schema CRect_CRect_2
+  ΔCRect
+  l? : ℝ
+  t? : ℝ
+  r? : ℝ
+  b? : ℝ
+where
+  -- State update: left' = l
+  -- State update: top' = t
+  -- State update: right' = r
+  -- State update: bottom' = b
+  true
+end
+
+schema Rect_ContainPoint
+  ΔRectModuleState
+  v? : CVector
+where
+  -- State update: left' = v.x
+  -- State update: right' = v.x
+  -- State update: top' = v.y
+  -- State update: bottom' = v.y
+  true
+end
+
+schema Rect_ContainRect
+  ΔRectModuleState
+  r? : CRect
+where
+  -- State update: left' = r.left
+  -- State update: right' = r.right
+  -- State update: top' = r.top
+  -- State update: bottom' = r.bottom
+  true
+end
+
+schema Rect_IsPointInside
+  ΔRectModuleState
+  p? : CVector2D
+  result! : 𝔹
+where
+  -- Return postcondition: result! = p.x >= left && p.x <= right && p.y >= top && p.y <= bottom
+  true
+end
+
+schema Rect_IsPointInside_2
+  ΔRectModuleState
+  p? : CVector2D
+  extraRadius? : ℝ
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Rect_Translate
+  ΔRectModuleState
+  x? : ℝ
+  y? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Rect_Grow
+  ΔRectModuleState
+  r? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Rect_Grow_2
+  ΔRectModuleState
+  l? : ℝ
+  r? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Rect_Grow_3
+  ΔRectModuleState
+  l? : ℝ
+  r? : ℝ
+  t? : ℝ
+  b? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Rect_GetWidth
+  ΔRectModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = right - left
+  true
+end
+
+schema Rect_GetHeight
+  ΔRectModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = bottom - top
+  true
+end

@@ -1,0 +1,84 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Profile (core)
+-- Source File(s): core/Profile.cpp, core/Profile.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Profile.zpp  (from "Profile.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eProfile ::= PROFILE_FRAME_RATE | PROFILE_PHYSICS | PROFILE_COLLISION | PROFILE_PED_AI | PROFILE_PROCESSING_TIME | PROFILE_RENDERING_TIME | PROFILE_TOTAL | NUM_PROFILES
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CProfile
+  ms_afStartTime : seq ℝ  -- bounded array [NUM_PROFILES]
+  ms_afCumulativeTime : seq ℝ  -- bounded array [NUM_PROFILES]
+  ms_afEndTime : seq ℝ  -- bounded array [NUM_PROFILES]
+  ms_afMaxEndTime : seq ℝ  -- bounded array [NUM_PROFILES]
+  ms_afMaxCumulativeTime : seq ℝ  -- bounded array [NUM_PROFILES]
+  ms_pProfileString : seq CHAR
+  ms_aBarColours : seq RwRGBA  -- bounded array [NUM_PROFILES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CProfile_Initialise
+  ΔCProfile
+where
+  -- Declared member operation CProfile::Initialise()
+  true
+end
+
+schema CProfile_SuspendProfile_2
+  ΔCProfile
+  profile? : eProfile
+where
+  -- Declared member operation CProfile::SuspendProfile(eProfile profile)
+  true
+end
+
+schema CProfile_ShowResults_3
+  ΔCProfile
+where
+  -- Declared member operation CProfile::ShowResults()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CProfile_Initialise
+  ΔCProfile
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CProfile_SuspendProfile
+  ΔCProfile
+  profile? : eProfile
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CProfile_ShowResults
+  ΔCProfile
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

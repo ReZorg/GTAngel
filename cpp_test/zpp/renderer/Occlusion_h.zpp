@@ -1,0 +1,170 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Occlusion (renderer)
+-- Source File(s): renderer/Occlusion.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ActiveOccluderLine
+  origin : CVector2D
+  direction : CVector2D
+  length : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CActiveOccluder
+  lines : seq ActiveOccluderLine  -- bounded array [6]
+  linesCount : ℤ
+  radius : ℝ
+where
+  #lines = 6
+end
+
+schema CActiveOccluder_IsPointWithinOcclusionArea
+  ΔCActiveOccluder
+  x? : ℝ
+  y? : ℝ
+  area? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CActiveOccluder::IsPointWithinOcclusionArea(float x, float y, float area)
+  true
+end
+
+schema COccluder
+  height : ℤ
+  z : ℤ
+  angle : ℕ
+  listIndex : ℤ
+where
+  angle ≥ 0
+end
+
+schema COccluder_NearCamera
+  ΔCOccluder
+  result! : 𝔹
+where
+  -- Declared member operation COccluder::NearCamera()
+  true
+end
+
+schema COccluder_ProcessOneOccluder_2
+  ΔCOccluder
+  occl? : Ref[CActiveOccluder]
+  result! : 𝔹
+where
+  -- Declared member operation COccluder::ProcessOneOccluder(CActiveOccluder *occl)
+  true
+end
+
+schema COccluder_ProcessLineSegment_3
+  ΔCOccluder
+  corner1? : ℤ
+  corner2? : ℤ
+  occl? : Ref[CActiveOccluder]
+  result! : 𝔹
+where
+  -- Declared member operation COccluder::ProcessLineSegment(int corner1, int corner2, CActiveOccluder* occl)
+  true
+end
+
+schema COccluder_GetAngle_4
+  ΔCOccluder
+  result! : ℝ
+where
+  -- Declared member operation COccluder::GetAngle(void)
+  true
+end
+
+schema COcclusion
+  NumOccludersOnMap : ℤ
+  FarAwayList : ℤ
+  NearbyList : ℤ
+  ListWalkThroughFA : ℤ
+  PreviousListWalkThroughFA : ℤ
+  NumActiveOccluders : ℤ
+  aOccluders : seq COccluder  -- bounded array [NUMOCCLUSIONVOLUMES]
+  aActiveOccluders : seq CActiveOccluder  -- bounded array [NUMACTIVEOCCLUDERS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema COcclusion_Init
+  ΔCOcclusion
+where
+  -- Declared member operation COcclusion::Init(void)
+  true
+end
+
+schema COcclusion_AddOne_2
+  ΔCOcclusion
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  length? : ℝ
+  height? : ℝ
+  angle? : ℝ
+where
+  -- Declared member operation COcclusion::AddOne(float x, float y, float z, float width, float length, float height, float angle)
+  true
+end
+
+schema COcclusion_ProcessBeforeRendering_3
+  ΔCOcclusion
+where
+  -- Declared member operation COcclusion::ProcessBeforeRendering(void)
+  true
+end
+
+schema COcclusion_OccluderHidesBehind_4
+  ΔCOcclusion
+  occl1? : Ref[CActiveOccluder]
+  occl2? : Ref[CActiveOccluder]
+  result! : 𝔹
+where
+  -- Declared member operation COcclusion::OccluderHidesBehind(CActiveOccluder *occl1, CActiveOccluder *occl2)
+  true
+end
+
+schema COcclusion_IsAABoxOccluded_5
+  ΔCOcclusion
+  pos? : CVector
+  width? : ℝ
+  length? : ℝ
+  height? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation COcclusion::IsAABoxOccluded(CVector pos, float width, float length, float height)
+  true
+end
+
+schema COcclusion_IsPositionOccluded_6
+  ΔCOcclusion
+  pos? : CVector
+  side? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation COcclusion::IsPositionOccluded(CVector pos, float side)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Occlusion_GetAngle
+  ΔOcclusionModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = angle*TWOPI/UINT16_MAX
+  true
+end

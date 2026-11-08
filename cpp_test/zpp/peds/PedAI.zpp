@@ -1,0 +1,1221 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedAI (peds)
+-- Source File(s): peds/PedAI.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include General.zpp  (from "General.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Train.zpp  (from "Train.h")
+-- include PedRoutes.zpp  (from "PedRoutes.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Script.zpp  (from "Script.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Streaming.zpp  (from "Streaming.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPed_SetObjectiveTimer
+  ΔCPed
+  time? : ℤ
+where
+  -- State update: m_objectiveTimer' = 0
+  -- State update: m_objectiveTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_SetStoredObjective
+  ΔCPed
+where
+  -- State update: m_prevObjective' = m_objective
+  true
+end
+
+schema CPed_ForceStoredObjective
+  ΔCPed
+  objective? : eObjective
+where
+  -- State update: m_prevObjective' = m_objective
+  -- State update: m_prevObjective' = m_objective
+  true
+end
+
+schema CPed_IsTemporaryObjective
+  ΔCPed
+  objective? : eObjective
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPed_SetObjective
+  ΔCPed
+  newObj? : eObjective
+where
+  -- State update: bStartWanderPathOnFoot' = true
+  -- State update: m_objective' = OBJECTIVE_NONE
+  -- State update: m_prevObjective' = OBJECTIVE_NONE
+  -- State update: m_prevObjective' = newObj
+  -- State update: m_objective' = newObj
+  -- State update: bObjectiveCompleted' = false
+  true
+end
+
+schema CPed_SetObjective_2
+  ΔCPed
+  newObj? : eObjective
+  entity? : ADDRESS
+where
+  -- State update: bObjectiveCompleted' = false
+  -- State update: m_objectiveTimer' = 0
+  -- State update: m_prevObjective' = newObj
+  -- State update: m_objective' = newObj
+  -- State update: m_pedInObjective' = (CPed*)entity
+  -- State update: m_pNextPathNode' = ∅
+  -- Invokes: m_pedInObjective->RegisterReference, m_pedInObjective->CleanUpOldReference, m_pLookTarget->CleanUpOldReference, m_pLookTarget->RegisterReference, m_carInObjective->RegisterReference
+  true
+end
+
+schema CPed_SetObjective_3
+  ΔCPed
+  newObj? : eObjective
+  dest? : CVector
+  safeDist? : ℝ
+where
+  -- State update: bObjectiveCompleted' = false
+  -- State update: m_prevObjective' = newObj
+  -- State update: m_objective' = newObj
+  -- State update: m_vecSpotToGuard' = dest
+  -- State update: m_radiusToGuard' = safeDist
+  -- State update: m_pNextPathNode' = ∅
+  true
+end
+
+schema CPed_SetObjective_4
+  ΔCPed
+  newObj? : eObjective
+  routePoint? : ℤ
+  routeType? : ℤ
+where
+  -- State update: bObjectiveCompleted' = false
+  -- State update: m_prevObjective' = newObj
+  -- State update: m_objective' = newObj
+  true
+end
+
+schema CPed_SetObjective_5
+  ΔCPed
+  newObj? : eObjective
+  dest? : CVector
+where
+  -- State update: m_objectiveTimer' = 0
+  -- State update: bObjectiveCompleted' = false
+  -- State update: m_vecSpotToGuard' = dest
+  -- State update: m_radiusToGuard' = 5.0f
+  -- State update: bIsRunning' = false
+  -- State update: m_pNextPathNode' = ∅
+  -- Invokes: m_attractor->GetDistanceToCountSeekDone, m_attractor->GetAcceptableHeading
+  true
+end
+
+schema CPed_SetObjective_6
+  ΔCPed
+  newObj? : eObjective
+  heading? : ℝ
+  pos? : CVector
+where
+  -- State update: m_attractorHeading' = heading
+  true
+end
+
+schema CPed_ClearObjective
+  ΔCPed
+where
+  -- State update: m_objective' = OBJECTIVE_NONE
+  -- State update: m_pedInObjective' = ∅
+  -- State update: m_carInObjective' = ∅
+  -- State update: bWanderPathAfterExitingCar' = true
+  -- State update: m_nLastPedState' = PED_NONE
+  -- State update: bClearObjective' = true
+  true
+end
+
+schema CPed_ClearLeader
+  ΔCPed
+where
+  -- State update: m_leader' = ∅
+  -- State update: bClearObjective' = true
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CPed_UpdateFromLeader
+  ΔCPed
+where
+  -- State update: leaderDist' = m_leader.m_pMyVehicle.GetPosition() - GetPosition()
+  -- State update: leaderDist' = m_leader.GetPosition() - GetPosition()
+  -- State update: bWaitForLeaderToComeCloser' = true
+  -- State update: bWaitForLeaderToComeCloser' = false
+  -- State update: lookTargetOfLeader' = m_leader.m_pLookTarget
+  -- State update: m_pLookTarget' = m_threatEntity
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_leader->InVehicle, m_pMyVehicle->GetPosition, m_leader->GetPosition, leaderDist.Magnitude
+  true
+end
+
+schema CPed_RestorePreviousObjective
+  ΔCPed
+where
+  -- State update: m_pedInObjective' = ∅
+  -- State update: m_objective' = OBJECTIVE_NONE
+  -- State update: m_objective' = m_prevObjective
+  -- State update: m_prevObjective' = OBJECTIVE_NONE
+  -- State update: bObjectiveCompleted' = false
+  true
+end
+
+schema CPed_ProcessObjective
+  ΔCPed
+where
+  -- State update: bClearObjective' = false
+  -- State update: bInVehicle' = false
+  -- State update: carOrOurPos' = m_pMyVehicle.GetPosition()
+  -- State update: carOrOurPos' = GetPosition()
+  -- State update: targetCarOrHisPos' = m_pedInObjective.m_pMyVehicle.GetPosition()
+  -- State update: targetCarOrHisPos' = m_pedInObjective.GetPosition()
+  -- Invokes: m_pMyVehicle->GetPosition, m_pedInObjective->InVehicle, m_pedInObjective->GetPosition, m_carInObjective->GetPosition, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPed_SetFollowRoute
+  ΔCPed
+  currentPoint? : ℤ
+  routeType? : ℤ
+where
+  -- State update: m_routeLastPoint' = currentPoint
+  -- State update: m_routeType' = routeType
+  -- State update: m_routePointsBeingPassed' = 1
+  -- State update: m_routePointsPassed' = 0
+  -- State update: m_objective' = OBJECTIVE_FOLLOW_ROUTE
+  -- State update: m_routeStartPoint' = CRouteNode::GetRouteStart(currentPoint)
+  -- Invokes: CRouteNode::GetRouteStart, CRouteNode::GetPointPosition
+  true
+end
+
+schema CPed_GetNextPointOnRoute
+  ΔCPed
+where
+  -- State update: nextPoint' = -1
+  -- State update: m_routePointsBeingPassed' = -m_routePointsBeingPassed
+  -- State update: m_routePointsPassed' = -1
+  -- Return postcondition: result! = nextPoint
+  -- Invokes: CRouteNode::GetRouteThisPointIsOn
+  true
+end
+
+schema CPed_HaveReachedNextPointOnRoute
+  ΔCPed
+  distToCountReached? : ℝ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPed_CanSeeEntity
+  ΔCPed
+  entity? : Ref[CEntity]
+  threshold? : ℝ
+where
+  -- State update: ourAngle' = m_fRotationCur
+  -- State update: neededTurn' = Abs(neededAngle - ourAngle)
+  -- Return postcondition: result! = neededTurn < threshold || TWOPI - threshold < neededTurn
+  -- Invokes: CGeneral::GetRadianAngleBetweenPoints, entity->GetPosition
+  true
+end
+
+schema CPed_SelectGunIfArmed
+  ΔCPed
+where
+  -- State update: weaponType' = GetWeapon(i).m_eWeaponType
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPed_ReactToPointGun
+  ΔCPed
+  entWithGun? : Ref[CEntity]
+where
+  -- State update: pedWithGun' = (CPed*)entWithGun
+  -- State update: waitTime' = CGeneral::GetRandomNumberInRange(3000, 6000)
+  -- State update: m_pLookTarget' = pedWithGun
+  -- State update: waitTime' = CGeneral::GetRandomNumberInRange(3000, 6000)
+  -- State update: m_pLookTarget' = pedWithGun
+  -- State update: m_fleeFrom' = pedWithGun
+  -- Invokes: pedWithGun->GetPosition, CGeneral::GetRandomNumberInRange, m_pLookTarget->RegisterReference, pedWithGun->IsPlayer, m_pWanted->SetWantedLevelNoDrop
+  true
+end
+
+schema CPed_ReactToAttack
+  ΔCPed
+  attacker? : Ref[CEntity]
+where
+  -- State update: m_pMyVehicle.AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_AVOID_CARS
+  -- State update: attackerPed' = (CPed*)attacker
+  -- State update: m_duckAndCoverTimer' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: attacker->IsPed, CGeneral::GetRandomNumberInRange, m_pMyVehicle->GetStatus, CCarCtrl::SwitchVehicleToRealPhysics, m_pMyVehicle->SetStatus
+  true
+end
+
+schema CPed_PedAnimAlignCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: itsVan' = !!veh.bIsVan
+  -- State update: itsBus' = !!veh.bIsBus
+  -- State update: itsLow' = !!veh.bLowVehicle
+  -- Invokes: ped->IsNotInWreckedVehicle, ped->EnteringCar, ped->QuitEnteringCar, veh->IsBike, veh->GetStatus
+  true
+end
+
+schema CPed_PedAnimDoorOpenCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: pedInSeat' = ∅
+  -- State update: door' = DOOR_FRONT_RIGHT
+  -- State update: pedInSeat' = veh.pPassengers[0]
+  -- Invokes: ped->IsNotInWreckedVehicle, ped->EnteringCar, ped->QuitEnteringCar, CPad::GetPad, pedInSeat->IsPlayer
+  true
+end
+
+schema CPed_PedAnimPullPedOutCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: ped.bCancelEnteringCar' = false
+  -- State update: isLow' = !!veh.bLowVehicle
+  -- State update: padNo' = 0
+  -- Invokes: ped->EnteringCar, ped->IsNotInWreckedVehicle, ped->QuitEnteringCar, ped->RestorePreviousObjective, ped->IsPlayer
+  true
+end
+
+schema CPed_PedAnimGetInCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*) arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: ped.m_nLastPedState' = ped.m_nPedState
+  -- State update: ped.bGonnaKillTheCarJacker' = false
+  -- State update: veh.m_nNumGettingIn' = 0
+  -- Invokes: ped->IsNotInWreckedVehicle, ped->DyingOrDead, ped->EnteringCar, ped->QuitEnteringCar, ped->RemoveWeaponWhenEnteringVehicle
+  true
+end
+
+schema CPed_PedShuffle
+  ΔCPed
+where
+  -- State update: driver' = m_pMyVehicle.pDriver
+  -- State update: m_objective' = OBJECTIVE_ENTER_CAR_AS_DRIVER
+  -- State update: bInVehicle' = false
+  -- Invokes: CAnimManager::AddAnimation, m_pMyVehicle->RemovePassenger, m_pVehicleAnim->SetFinishCallback
+  true
+end
+
+schema CPed_PedAnimDoorCloseCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = (CAutomobile*)(ped.m_pMyVehicle)
+  -- State update: isLow' = !!veh.bLowVehicle
+  -- State update: door' = DOOR_FRONT_RIGHT
+  -- State update: door' = DOOR_REAR_RIGHT
+  -- State update: door' = DOOR_FRONT_LEFT
+  -- Invokes: ped->IsNotInWreckedVehicle, ped->DyingOrDead, ped->EnteringCar, veh->ProcessOpenDoor, Damage.GetDoorStatus
+  true
+end
+
+schema CPed_PedAnimShuffleCB
+  ΔCPed
+  assoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- Invokes: ped->EnteringCar, ped->QuitEnteringCar
+  true
+end
+
+schema CPed_SetFormation
+  ΔCPed
+  type? : eFormation
+where
+  -- State update: m_pedFormation' = type
+  true
+end
+
+schema CPed_GetFormationPosition
+  ΔCPed
+where
+  -- State update: m_pedInObjective' = ∅
+  -- State update: m_pedInObjective' = m_pedInObjective.m_pedInObjective
+  -- State update: offset' = CGeneral::GetRandomNumberInRange(1.f, 1.25f) * 1.75f
+  -- State update: formationOffset' = CVector(0.0f, -offset, 0.0f)
+  -- State update: formationOffset' = CVector(-offset, -offset, 0.0f)
+  -- State update: formationOffset' = CVector(offset, -offset, 0.0f)
+  -- Return postcondition: result! = GetPosition()
+  -- Return postcondition: result! = GetPosition()
+  -- Return postcondition: result! = m_pedInObjective->GetMatrix() * formationOffset
+  -- Invokes: CGeneral::GetRandomNumberInRange, m_pedInObjective->GetMatrix
+  true
+end
+
+schema CPed_PedAnimStepOutCarCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: posForZ' = ped.GetPosition()
+  -- State update: veh.m_nStaticFrames' = 0
+  -- State update: door' = DOOR_FRONT_RIGHT
+  -- Invokes: ped->RestoreHeadingRate, ped->GetPosition, CPedPlacement::FindZCoorForPed, veh->ProcessOpenDoor, veh->IsDoorMissing
+  true
+end
+
+schema CPed_LineUpPedWithCar
+  ΔCPed
+  phase? : PedLineUpPhase
+where
+  -- State update: vehIsUpsideDown' = false
+  -- State update: stillGettingInOut' = false
+  -- State update: seatPosMult' = 0.0f
+  -- State update: bChangedSeat' = true
+  -- State update: autoZPos' = GetPosition()
+  -- State update: z' = autoZPos.z
+  -- Invokes: CReplay::IsPlayingBack, m_pMyVehicle->IsBike, CPedPlacement::FindZCoorForPed, m_matrix.GetPosition, m_pVehicleAnim->GetProgress
+  true
+end
+
+schema CPed_SetCarJack
+  ΔCPed
+  car? : Ref[CVehicle]
+where
+  -- State update: pedInSeat' = ∅
+  -- State update: doorFlag' = CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_RF
+  -- State update: door' = DOOR_FRONT_RIGHT
+  -- State update: pedInSeat' = car.pDriver
+  -- State update: doorFlag' = CAR_DOOR_FLAG_LR | CAR_DOOR_FLAG_RR
+  -- State update: door' = DOOR_REAR_RIGHT
+  -- Invokes: car->IsBoat, car->IsBike, car->GetModelIndex, pedInSeat->IsPedDoingDriveByShooting, car->IsDoorReady
+  true
+end
+
+schema CPed_SetCarJack_AllClear
+  ΔCPed
+  car? : Ref[CVehicle]
+  doorNode? : ℕ
+  doorFlag? : ℕ
+where
+  -- State update: m_pSeekTarget' = car
+  -- State update: car.bIsBeingCarJacked' = true
+  -- State update: m_pMyVehicle' = (CVehicle*)m_pSeekTarget
+  -- State update: carEnterPos' = GetPositionToOpenCarDoor(car, m_vehDoor)
+  -- State update: m_vecOffsetSeek' = carEnterPos - GetPosition()
+  -- State update: m_nPedStateTimer' = CTimer::GetTimeInMilliseconds() + 600
+  -- Invokes: m_pSeekTarget->RegisterReference, m_pMyVehicle->RegisterReference, CTimer::GetTimeInMilliseconds, car->IsBike, CAnimManager::BlendAnimation
+  true
+end
+
+schema CPed_SetBeingDraggedFromCar
+  ΔCPed
+  veh? : Ref[CVehicle]
+  vehEnterType? : ℕ
+  quickJack? : 𝔹
+where
+  -- State update: bUsesCollision' = false
+  -- State update: m_vecMoveSpeed' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_nLastPedState' = PED_IDLE
+  -- State update: m_pSeekTarget' = veh
+  -- State update: bIsBeingPickedUp' = true
+  -- State update: m_vehDoor' = CAR_DOOR_LF
+  -- Invokes: m_pSeekTarget->RegisterReference, veh->IsBike, pDriver->IsPlayer, veh->SetStatus
+  true
+end
+
+schema CPed_BeingDraggedFromCar
+  ΔCPed
+where
+  -- State update: dontRunAnim' = false
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: enterAnim' = ANIM_STD_QUICKJACKED
+  -- State update: enterAnim' = ANIM_STD_JACKEDCAR_LO_LHS
+  -- State update: enterAnim' = ANIM_STD_JACKEDCAR_LHS
+  -- State update: enterAnim' = ANIM_STD_JACKEDCAR_LO_RHS
+  -- Invokes: CAnimManager::BlendAnimation, CAnimManager::AddAnimation, m_pVehicleAnim->SetFinishCallback, m_pMyVehicle->ProcessOpenDoor
+  true
+end
+
+schema CPed_SetEnterCar
+  ΔCPed
+  car? : Ref[CVehicle]
+  unused? : ℕ
+where
+  -- State update: doorFlag' = CAR_DOOR_FLAG_RF | CAR_DOOR_FLAG_LF
+  -- State update: door' = DOOR_FRONT_RIGHT
+  -- State update: doorFlag' = CAR_DOOR_FLAG_RR | CAR_DOOR_FLAG_LR
+  -- State update: door' = DOOR_REAR_RIGHT
+  -- State update: doorFlag' = CAR_DOOR_FLAG_UNKNOWN
+  -- State update: doorFlag' = CAR_DOOR_FLAG_RF | CAR_DOOR_FLAG_LF
+  -- Invokes: CCranes::IsThisCarBeingCarriedByAnyCrane, car->IsBike, car->IsDoorReady, car->IsDoorFullyOpen
+  true
+end
+
+schema CPed_SetEnterCar_AllClear
+  ΔCPed
+  car? : Ref[CVehicle]
+  doorNode? : ℕ
+  doorFlag? : ℕ
+where
+  -- State update: zDiff' = 0.0f
+  -- State update: bVehEnterDoorIsBlocked' = false
+  -- State update: m_pSeekTarget' = car
+  -- State update: m_vehDoor' = doorNode
+  -- State update: car.bIsBeingCarJacked' = true
+  -- State update: m_pMyVehicle' = (CVehicle*)m_pSeekTarget
+  -- Invokes: m_pSeekTarget->RegisterReference, m_pMyVehicle->RegisterReference, CTimer::GetTimeInMilliseconds, car->IsBoat, CAnimManager::BlendAnimation
+  true
+end
+
+schema CPed_EnterCar
+  ΔCPed
+where
+  -- State update: veh' = m_pMyVehicle
+  -- State update: bIsInTheAir' = false
+  -- State update: bike' = (CBike*)veh
+  -- State update: anim' = m_pVehicleAnim.animId
+  -- State update: bike.bIsBeingPickedUp' = true
+  -- State update: bike.bIsBeingPickedUp' = true
+  -- Invokes: veh->CanPedOpenLocks, veh->ProcessOpenDoor, veh->IsBike, bike->GetStatus, DMAudio.PlayOneShot
+  true
+end
+
+schema CPed_QuitEnteringCar
+  ΔCPed
+where
+  -- State update: veh' = m_pMyVehicle
+  -- State update: m_pVehicleAnim.blendDelta' = -1000.0f
+  -- State update: veh.bIsBeingCarJacked' = false
+  -- State update: bIsBeingPickedUp' = false
+  -- State update: bUsesCollision' = true
+  -- State update: m_pVehicleAnim.blendDelta' = -4.0f
+  -- Invokes: CAnimManager::BlendAnimation, veh->IsBike
+  true
+end
+
+schema CPed_SetExitBoat
+  ΔCPed
+  boat? : Ref[CVehicle]
+where
+  -- State update: firstPos' = GetPosition()
+  -- State update: m_vehDoor' = CAR_DOOR_RF
+  -- State update: m_vehDoor' = CAR_DOOR_RF
+  -- State update: bIsStanding' = true
+  -- State update: m_pCurSurface' = boat
+  -- State update: m_vecMoveSpeed' = boat.m_vecMoveSpeed
+  -- Invokes: CAnimManager::BlendAnimation, boat->GetModelIndex, boat->IsUpsideDown, m_pVehicleAnim->SetFinishCallback, m_pCurSurface->RegisterReference
+  true
+end
+
+schema CPed_SetExitCar
+  ΔCPed
+  veh? : Ref[CVehicle]
+  wantedDoorNode? : ℕ
+where
+  -- State update: optedDoorNode' = wantedDoorNode
+  -- State update: teleportNeeded' = false
+  -- State update: isLow' = !!veh.bLowVehicle
+  -- State update: canJumpOut' = false
+  -- State update: m_leaveCarTimer' = CTimer::GetTimeInMilliseconds() + 5000
+  -- State update: bHeldHostageInCar' = true
+  -- Invokes: veh->CanPedExitCar, veh->IsBike, veh->CanPedJumpOffBike, veh->CanPedJumpOutCar, pDriver->IsPlayer
+  true
+end
+
+schema CPed_ExitCar
+  ΔCPed
+where
+  -- State update: exitAnim' = (AnimationId) m_pVehicleAnim.animId
+  -- State update: animTime' = m_pVehicleAnim.currentTime
+  -- State update: foundPed' = ∅
+  -- State update: foundPed' = m_nearPeds[i]
+  -- Invokes: m_pMyVehicle->IsBike, m_pMyVehicle->IsCar, m_pMyVehicle->ProcessOpenDoor, m_pMyVehicle->GetUp, m_pMyVehicle->GetModelIndex
+  true
+end
+
+schema CPed_GetPositionToOpenCarDoor
+  ΔCPed
+  veh? : Ref[CVehicle]
+  component? : ℕ
+where
+  -- State update: vehModel' = veh.GetModelInfo()
+  -- State update: bike' = (CBike*)veh
+  -- State update: doorPos' = vehModel.GetFrontSeatPosn()
+  -- State update: vehDoorOffset' = vecPedVespaBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedHarleyBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedDirtBikeJumpRhsAnimOffset
+  -- Return postcondition: result! = correctedPos
+  -- Return postcondition: result! = Multiply3x3(veh->GetMatrix(), diffVec) + veh->GetPosition()
+  -- Invokes: veh->GetModelInfo, veh->IsBike, vehModel->GetFrontSeatPosn, bike->GetMatrix, bike->GetCorrectedWorldDoorPosition
+  true
+end
+
+schema CPed_GetNearestDoor
+  ΔCPed
+  veh? : Ref[CVehicle]
+  posToOpen? : CVector
+where
+  -- State update: enterOffset' = ∅
+  -- State update: m_vehDoor' = CAR_WINDSCREEN
+  -- State update: posToOpen' = GetPositionToOpenCarDoor(veh, CAR_WINDSCREEN)
+  -- State update: enterOffset' = &vecPedQuickDraggedOutCarAnimOffset
+  -- State update: lfPos' = GetPositionToOpenCarDoor(veh, CAR_DOOR_LF)
+  -- State update: rfPos' = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF)
+  -- Invokes: veh->IsBike, veh->GetRight, veh->GetPosition, veh->GetForward, veh->IsRoomForPedToLeaveCar
+  true
+end
+
+schema CPed_GetNearestPassengerDoor
+  ΔCPed
+  veh? : Ref[CVehicle]
+  posToOpen? : CVector
+where
+  -- State update: canEnter' = false
+  -- State update: m_vehDoor' = CAR_DOOR_RF
+  -- State update: posToOpen' = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF)
+  -- State update: lrPos' = GetPositionToOpenCarDoor(veh, CAR_DOOR_LR)
+  -- State update: canEnter' = true
+  -- State update: lrPosDist' = lrPos - GetPosition()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = canEnter
+  -- Invokes: CModelInfo::GetModelInfo, veh->GetModelIndex, veh->IsBike, veh->IsRoomForPedToLeaveCar, veh->ShufflePassengersToMakeSpace
+  true
+end
+
+schema CPed_GoToNearestDoor
+  ΔCPed
+  veh? : Ref[CVehicle]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPed_PedSetGetInCarPositionCB
+  ΔCPed
+  assoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: pPed' = (CPed*)arg
+  -- State update: pVehicle' = pPed.m_pMyVehicle
+  -- State update: position' = Multiply3x3(mat, offset) + pPed.GetPosition()
+  -- Invokes: pPed->GetMatrix, pPed->GetPosition, CPedPlacement::FindZCoorForPed, pPed->SetMoveSpeed, pPed->SetPosition
+  true
+end
+
+schema CPed_SetAnimOffsetForEnterOrExitVehicle
+  ΔCPed
+where
+  -- State update: vanBlock' = CAnimManager::GetAnimationBlockIndex("van")
+  -- State update: bikesBlock' = CAnimManager::GetAnimationBlockIndex("bikes")
+  -- State update: bikevBlock' = CAnimManager::GetAnimationBlockIndex("bikev")
+  -- State update: bikehBlock' = CAnimManager::GetAnimationBlockIndex("bikeh")
+  -- State update: bikedBlock' = CAnimManager::GetAnimationBlockIndex("biked")
+  -- State update: seq' = enterAssoc.sequences
+  -- Invokes: CAnimManager::GetAnimationBlockIndex, CStreaming::RequestAnim, CStreaming::LoadAllRequestedModels, CAnimManager::AddAnimBlockRef, CAnimManager::GetAnimAssociation
+  true
+end
+
+schema CPed_PedSetQuickDraggedOutCarPositionCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: ped.bUsesCollision' = true
+  -- State update: draggedOutOffset' = vecPedQuickDraggedOutCarAnimOffset
+  -- State update: draggedOutOffset.x' = -draggedOutOffset.x
+  -- State update: finalPos' = Multiply3x3(pedMat, draggedOutOffset) + ped.GetPosition()
+  -- Invokes: ped->GetMatrix, ped->RestartNonPartialAnims, ped->GetPosition, CPedPlacement::FindZCoorForPed, ped->SetPosition
+  true
+end
+
+schema CPed_PedSetDraggedOutCarPositionCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: ped.bUsesCollision' = true
+  -- State update: animGroup' = ((CBike*)ped.m_pMyVehicle).m_bikeAnimType
+  -- State update: draggedOutOffset' = vecPedVespaBikeJumpRhsAnimOffset
+  -- State update: draggedOutOffset' = vecPedHarleyBikeJumpRhsAnimOffset
+  -- State update: draggedOutOffset' = vecPedDirtBikeJumpRhsAnimOffset
+  -- Invokes: ped->RestartNonPartialAnims, ped->GetMatrix, m_pMyVehicle->IsBike, ped->GetPosition, CPedPlacement::FindZCoorForPed
+  true
+end
+
+schema CPed_GetNearestTrainDoor
+  ΔCPed
+  train? : Ref[CVehicle]
+  doorPos? : CVector
+where
+  -- Return postcondition: result! = 1
+  true
+end
+
+schema CPed_GetNearestTrainPedPosition
+  ΔCPed
+  train? : Ref[CVehicle]
+  enterPos? : CVector
+where
+  -- State update: trainMat' = CMatrix(train.GetMatrix())
+  -- State update: enterStepOffset' = CVector(1.5f, 0.0f, 0.0f)
+  -- State update: distLeftEntry' = 999.0f
+  -- State update: leftEntryPos' = Multiply3x3(trainMat, leftEntryPos)
+  -- State update: distLeftEntry' = (leftEntryPos - GetPosition()).Magnitude()
+  -- State update: distMidEntry' = 999.0f
+  -- Return postcondition: result! = 1
+  -- Invokes: CModelInfo::GetModelInfo, train->GetModelIndex, train->GetMatrix, train->GetPosition
+  true
+end
+
+schema CPed_PedSetInTrainCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = (CTrain*)ped.m_pMyVehicle
+  -- State update: ped.bInVehicle' = true
+  -- Invokes: ped->SetPedState, ped->RestorePreviousObjective, ped->SetMoveState, veh->AddPassenger
+  true
+end
+
+schema CPed_SetEnterTrain
+  ΔCPed
+  train? : Ref[CVehicle]
+  unused? : ℕ
+where
+  -- State update: m_fRotationCur' = train.GetForward().Heading() - HALFPI
+  -- State update: m_pMyVehicle' = train
+  -- State update: bUsesCollision' = false
+  -- Invokes: train->GetForward, m_pMyVehicle->RegisterReference, CAnimManager::BlendAnimation, m_pVehicleAnim->SetFinishCallback
+  true
+end
+
+schema CPed_EnterTrain
+  ΔCPed
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPed_SetPedPositionInTrain
+  ΔCPed
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPed_LineUpPedWithTrain
+  ΔCPed
+where
+  -- State update: m_vecMoveSpeed' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: m_fRotationCur' = m_pMyVehicle.GetForward().Heading() - HALFPI
+  -- State update: m_fRotationDest' = m_fRotationCur
+  -- State update: lineUpPos' = trainModel.m_positions[TRAIN_POS_LEFT_ENTRY] - enterOffset
+  -- State update: lineUpPos' = trainModel.m_positions[TRAIN_POS_MID_ENTRY] - enterOffset
+  -- State update: lineUpPos' = Multiply3x3(m_pMyVehicle.GetMatrix(), lineUpPos)
+  -- Invokes: CModelInfo::GetModelInfo, m_pMyVehicle->GetModelIndex, m_pMyVehicle->GetForward, m_pMyVehicle->GetMatrix, m_pMyVehicle->GetPosition
+  true
+end
+
+schema CPed_SetExitTrain
+  ΔCPed
+  train? : Ref[CVehicle]
+where
+  -- State update: bUsesCollision' = false
+  -- Invokes: train->GetStatus, CAnimManager::BlendAnimation, m_pVehicleAnim->SetFinishCallback
+  true
+end
+
+schema CPed_ExitTrain
+  ΔCPed
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPed_PedSetOutTrainCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = ped.m_pMyVehicle
+  -- State update: ped.m_pVehicleAnim.blendDelta' = -1000.0f
+  -- State update: ped.bUsesCollision' = true
+  -- State update: ped.m_pVehicleAnim' = ∅
+  -- State update: ped.bInVehicle' = false
+  -- Invokes: ped->SetPedState, ped->RestorePreviousObjective, ped->SetMoveState, ped->GetMatrix, veh->GetForward
+  true
+end
+
+schema CPed_RegisterThreatWithGangPeds
+  ΔCPed
+  attacker? : Ref[CEntity]
+where
+  -- State update: attackerPed' = ∅
+  -- State update: attackerPed' = (CPed*)attacker
+  -- State update: attackerPed' = ((CVehicle*)attacker).pDriver
+  -- State update: nearPed' = m_nearPeds[i]
+  -- State update: lastVehicle' = 8
+  -- State update: nearVeh' = (CVehicle*) vehicles[j]
+  -- Invokes: attacker->IsPed, attacker->IsVehicle, attackerPed->IsPlayer, attackerPed->IsGangMember, nearPed->IsPointerValid
+  true
+end
+
+schema PedAI_SelectClosestNodeForSeek
+  ΔPedAIModuleState
+  ped? : Ref[CPed]
+  node? : Ref[CPathNode]
+  closeDist? : CVector2D
+  farDist? : CVector2D
+  closeNode? : Ref[CPathNode]
+  closeNode2? : Ref[CPathNode]
+  runCount? : ℤ
+where
+  -- State update: dist' = posDiff.MagnitudeSqr()
+  -- State update: ped.m_pNextPathNode' = closeNode
+  -- State update: closeDist' = posDiff
+  -- State update: ped.m_pNextPathNode' = (closeNode2 ? closeNode2 : testNode)
+  -- State update: farDist' = posDiff
+  -- Invokes: ThePaths.ConnectedNode, testNode->GetPosition, posDiff.MagnitudeSqr, farDist.MagnitudeSqr, closeDist.MagnitudeSqr
+  true
+end
+
+schema CPed_FindBestCoordsFromNodes
+  ΔCPed
+  unused? : CVector
+  bestCoords? : Ref[CVector]
+where
+  -- State update: ourPos' = GetPosition()
+  -- State update: seekObjPos' = m_vecSeekPos
+  -- State update: m_pNextPathNode' = ∅
+  -- State update: closestNode' = &ThePaths.m_pathNodes[closestNodeId]
+  -- State update: m_pNextPathNode' = ∅
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: ThePaths.FindNodeClosestToCoors, CWorld::GetIsLineOfSightClear, closestNode->GetPosition, CPathFind::TakeWidthIntoAccountForWandering, seekPosDist.MagnitudeSqr
+  true
+end
+
+schema CPed_DuckAndCover
+  ΔCPed
+where
+  -- State update: m_pLookTarget' = m_pedInObjective
+  -- State update: bKindaStayInSamePlace' = false
+  -- State update: bCrouchWhenShooting' = false
+  -- State update: bDuckAndCover' = false
+  -- State update: m_headingRate' = 10.0f
+  -- State update: lastVehicle' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pLookTarget->RegisterReference, CGeneral::GetRandomNumberInRange, m_pSeekTarget->IsVehicle, CWorld::FindObjectsInRange
+  true
+end
+
+schema CPed_GetPositionToOpenCarDoor_2
+  ΔCPed
+  veh? : Ref[CVehicle]
+  component? : ℕ
+  offset? : ℝ
+where
+  -- State update: bike' = (CBike*)veh
+  -- State update: doorPos' = vehModel.GetFrontSeatPosn()
+  -- State update: vehDoorOffset' = vecPedVespaBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedHarleyBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedDirtBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedStdBikeJumpRhsAnimOffset
+  -- Return postcondition: result! = bike->GetMatrix() * (doorPos + vecPedBikeKickAnimOffset)
+  -- Return postcondition: result! = correctedPos
+  -- Invokes: veh->GetMatrix, veh->IsBike, CModelInfo::GetModelInfo, veh->GetModelIndex, vehModel->GetFrontSeatPosn
+  true
+end
+
+schema CPed_GetLocalPositionToOpenCarDoor
+  ΔCPed
+  veh? : Ref[CVehicle]
+  component? : ℕ
+  seatPosMult? : ℝ
+where
+  -- State update: bike' = (CBike*)veh
+  -- State update: vehDoorPos' = vehModel.GetFrontSeatPosn()
+  -- State update: vehDoorOffset' = vecPedVespaBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedHarleyBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedDirtBikeJumpRhsAnimOffset
+  -- State update: vehDoorOffset' = vecPedStdBikeJumpRhsAnimOffset
+  -- Return postcondition: result! = bike->GetMatrix() * (vehDoorPos + vecPedBikeKickAnimOffset)
+  -- Return postcondition: result! = vehDoorPos - vehDoorOffset
+  -- Invokes: CModelInfo::GetModelInfo, veh->GetModelIndex, veh->IsBike, vehModel->GetFrontSeatPosn, bike->GetMatrix
+  true
+end
+
+schema CPed_SetDuck
+  ΔCPed
+  time? : ℕ
+  sth? : 𝔹
+where
+  -- State update: m_duckTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- State update: bIsDucking' = true
+  -- State update: m_duckTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- State update: bIsDucking' = true
+  -- State update: m_duckTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- Invokes: CTimer::GetTimeInMilliseconds, CAnimManager::BlendAnimation
+  true
+end
+
+schema CPed_Duck
+  ΔCPed
+where
+  -- State update: weapon' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- State update: bIsDucking' = false
+  -- State update: bCrouchWhenShooting' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_ClearDuck
+  ΔCPed
+  clearTimer? : 𝔹
+where
+  -- State update: animAssoc.blendDelta' = -4.0f
+  -- State update: bIsDucking' = false
+  -- State update: m_duckTimer' = 0
+  true
+end
+
+schema CPed_InformMyGangOfAttack
+  ΔCPed
+  attacker? : Ref[CEntity]
+where
+  -- State update: attackerPed' = (CPed*)attacker
+  -- State update: attackerPed' = ((CVehicle*)attacker).pDriver
+  -- State update: nearPed' = m_nearPeds[i]
+  -- State update: leader' = nearPed.m_leader
+  -- Invokes: attacker->IsPed, attacker->IsVehicle, nearPed->SetObjective, nearPed->SetObjectiveTimer
+  true
+end
+
+schema CPed_PedAnimDoorCloseRollingCB
+  ΔCPed
+  animAssoc? : Ref[CAnimBlendAssociation]
+  arg? : ADDRESS
+where
+  -- State update: ped' = (CPed*)arg
+  -- State update: veh' = (CAutomobile*)(ped.m_pMyVehicle)
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- Invokes: veh->ProcessOpenDoor, Damage.GetDoorStatus, Damage.SetDoorStatus
+  true
+end
+
+schema CPed_SetSeekBoatPosition
+  ΔCPed
+  boat? : Ref[CVehicle]
+where
+  -- State update: m_carInObjective' = boat
+  -- State update: m_pMyVehicle' = boat
+  -- State update: m_distanceToCountSeekDone' = 0.5f
+  -- Invokes: m_carInObjective->RegisterReference, m_pMyVehicle->RegisterReference
+  true
+end
+
+schema CPed_SeekBoatPosition
+  ΔCPed
+where
+  -- State update: boatModel' = m_carInObjective.GetModelInfo()
+  -- State update: enterOffset' = boatModel.GetFrontSeatPosn()
+  -- State update: enterOffset.x' = 0.0f
+  -- State update: boatEnterPos' = Multiply3x3(boatMat, enterOffset)
+  -- State update: m_vecSeekPos' = boatEnterPos
+  -- State update: m_vehDoor' = 0
+  -- Invokes: m_carInObjective->GetModelInfo, boatModel->GetFrontSeatPosn, m_carInObjective->GetMatrix, m_carInObjective->GetPosition
+  true
+end
+
+schema CPed_IsRoomToBeCarJacked
+  ΔCPed
+where
+  -- State update: offset' = vecPedStdBikeJumpRhsAnimOffset
+  -- State update: offset' = vecPedDraggedOutCarAnimOffset
+  -- State update: offset' = vecPedQuickDraggedOutCarAnimOffset
+  -- State update: offset.z' = 0.0f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: m_pMyVehicle->IsBike, m_pMyVehicle->IsRoomForPedToLeaveCar
+  true
+end
+
+schema CPed_AddInCarAnims
+  ΔCPed
+  car? : Ref[CVehicle]
+  isDriver? : 𝔹
+where
+  -- Invokes: car->IsBoat, CAnimManager::BlendAnimation, car->IsBike
+  true
+end
+
+schema CPed_RemoveDrivebyAnims
+  ΔCPed
+where
+  -- State update: LeftAnim' = ANIM_STD_CAR_DRIVEBY_LEFT
+  -- State update: RightAnim' = ANIM_STD_CAR_DRIVEBY_RIGHT
+  -- State update: LeftAnim' = ANIM_BIKE_DRIVEBY_RHS
+  -- State update: RightAnim' = ANIM_BIKE_DRIVEBY_LHS
+  -- State update: LeftAnim' = ANIM_STD_CAR_DRIVEBY_LEFT_LO
+  -- State update: RightAnim' = ANIM_STD_CAR_DRIVEBY_RIGHT_LO
+  true
+end
+
+schema CPed_RemoveInCarAnims
+  ΔCPed
+where
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  -- State update: animAssoc.blendDelta' = -1000.0f
+  true
+end
+
+schema CPed_PositionPedOutOfCollision
+  ΔCPed
+where
+  -- State update: veh' = m_pMyVehicle
+  -- State update: foundAPos' = false
+  -- State update: vehCol' = veh.GetColModel()
+  -- State update: vehPos' = veh.GetPosition()
+  -- State update: ourPos' = GetPosition()
+  -- State update: newPos' = ourPos
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: veh->GetColModel, veh->GetPosition, veh->IsOnItsSide, CWorld::GetIsLineOfSightClear, veh->GetRight
+  true
+end
+
+schema CPed_PositionAnyPedOutOfCollision
+  ΔCPed
+where
+  -- State update: putNearVeh' = false
+  -- State update: putSomewhereClose' = false
+  -- State update: smallestDistNearVeh' = 999
+  -- State update: smallestDistSomewhereClose' = 999
+  -- State update: potentialPos.y' = GetPosition().y - 3.5f
+  -- State update: potentialPos.z' = GetPosition().z
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CPedPlacement::FindZCoorForPed, CWorld::TestSphereAgainstWorld, veh->GetModelInfo
+  true
+end
+
+schema CPed_WarpPedToNearLeaderOffScreen
+  ΔCPed
+where
+  -- State update: teleported' = false
+  -- State update: warpToPos' = m_leader.GetPosition()
+  -- State update: distVec' = warpToPos - GetPosition()
+  -- State update: halfOfDist' = distVec.Magnitude() * 0.5f
+  -- State update: halfNormalizedDist' = distVec / halfOfDist
+  -- State update: appropriatePos' = GetPosition()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = teleported
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_leader->GetPosition, distVec.Magnitude, CPedPlacement::FindZCoorForPed, TheCamera.IsSphereVisible
+  true
+end
+
+schema CPed_WarpPedToNearEntityOffScreen
+  ΔCPed
+  warpTo? : Ref[CEntity]
+where
+  -- State update: teleported' = false
+  -- State update: warpToPos' = warpTo.GetPosition()
+  -- State update: distVec' = warpToPos - GetPosition()
+  -- State update: halfOfDist' = distVec.Magnitude() * 0.5f
+  -- State update: halfNormalizedDist' = distVec / halfOfDist
+  -- State update: appropriatePos' = GetPosition()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = teleported
+  -- Invokes: CTimer::GetTimeInMilliseconds, warpTo->GetPosition, distVec.Magnitude, CPedPlacement::FindZCoorForPed, TheCamera.IsSphereVisible
+  true
+end
+
+schema CPed_KillCharOnFootArmed
+  ΔCPed
+  ourPos? : CVector
+  targetPos? : CVector
+  distWithTarget? : CVector
+where
+  -- State update: killPlayerInNoPoliceZone' = false
+  -- State update: killPlayerInNoPoliceZone' = true
+  -- State update: bNotAllowedToDuck' = true
+  -- State update: bNotAllowedToDuck' = false
+  -- State update: bCrouchWhenShooting' = false
+  -- State update: bNotAllowedToDuck' = false
+  -- Return postcondition: result! = CANT_ATTACK
+  -- Return postcondition: result! = CANT_ATTACK
+  -- Return postcondition: result! = CANT_ATTACK
+  -- Invokes: m_pedInObjective->IsPlayer, CCullZones::NoPolice, m_pedInObjective->GetWeapon, CTimer::GetTimeInMilliseconds, CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_KillCharOnFootMelee
+  ΔCPed
+  ourPos? : CVector
+  targetPos? : CVector
+  distWithTarget? : CVector
+where
+  -- State update: killPlayerInNoPoliceZone' = false
+  -- State update: distWithTargetSc' = distWithTarget.Magnitude()
+  -- State update: victimPlayer' = ∅
+  -- State update: victimPlayer' = (CPlayerPed*)m_pedInObjective
+  -- State update: bStopAndShoot' = true
+  -- State update: b158_8' = true
+  -- Return postcondition: result! = CANT_ATTACK
+  -- Return postcondition: result! = CANT_ATTACK
+  -- Return postcondition: result! = CANT_ATTACK
+  -- Invokes: distWithTarget.Magnitude, m_pedInObjective->IsPlayer, CCullZones::NoPolice, CTimer::GetTimeInMilliseconds, CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPed_CanBeDamagedByThisGangMember
+  ΔCPed
+  who? : Ref[CPed]
+where
+  -- Return postcondition: result! = m_gangFlags & (1 << (who->m_nPedType - PEDTYPE_GANG1))
+  true
+end
+
+schema CPed_SetCarJack_AllClear_2
+  ΔCPed
+  car? : Ref[CVehicle]
+  doorNode? : ℕ
+  doorFlag? : ℕ
+where
+  -- State update: m_pSeekTarget' = car
+  -- State update: car.bIsBeingCarJacked' = true
+  -- State update: m_pMyVehicle' = (CVehicle*)m_pSeekTarget
+  -- State update: carEnterPos' = GetPositionToOpenCarDoor(car, m_vehDoor)
+  -- State update: m_vecOffsetSeek' = carEnterPos - GetPosition()
+  -- State update: m_nPedStateTimer' = CTimer::GetTimeInMilliseconds() + 600
+  -- Invokes: m_pSeekTarget->RegisterReference, m_pMyVehicle->RegisterReference, CTimer::GetTimeInMilliseconds, CAnimManager::BlendAnimation, m_pVehicleAnim->SetFinishCallback
+  true
+end
+
+schema PedAI_AddYardieDoorSmoke
+  ΔPedAIModuleState
+  veh? : Ref[CVehicle]
+  doorNode? : ℕ
+where
+  -- State update: door' = DOOR_FRONT_RIGHT
+  -- State update: door' = DOOR_FRONT_LEFT
+  -- Invokes: veh->IsDoorMissing, veh->IsComponentPresent, veh->GetComponentWorldPosition, CParticle::AddYardieDoorSmoke, veh->GetMatrix
+  true
+end
+
+schema CPed_SetDuck_2
+  ΔCPed
+  time? : ℕ
+where
+  -- State update: bIsDucking' = true
+  -- State update: m_duckTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- State update: bIsDucking' = true
+  -- State update: m_duckTimer' = CTimer::GetTimeInMilliseconds() + time
+  -- Invokes: CTimer::GetTimeInMilliseconds, CAnimManager::BlendAnimation
+  true
+end
+
+schema CPed_ClearDuck_2
+  ΔCPed
+where
+  -- State update: bIsDucking' = false
+  -- Invokes: CAnimManager::BlendAnimation
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PedAIModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 7350
+end

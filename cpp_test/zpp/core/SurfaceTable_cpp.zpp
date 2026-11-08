@@ -1,0 +1,83 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SurfaceTable (core)
+-- Source File(s): core/SurfaceTable.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include SurfaceTable.zpp  (from "SurfaceTable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSurfaceTable_Initialise
+  ΔCSurfaceTable
+  filename? : seq CHAR
+where
+  -- State update: line' = (char*)work_buff
+  -- State update: lineno' = 0
+  -- State update: fieldno' = 0
+  -- State update: adhesiveLimit' = 0.0f
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema CSurfaceTable_GetAdhesionGroup
+  ΔCSurfaceTable
+  surfaceType? : ℕ
+where
+  -- Return postcondition: result! = ADHESIVE_ROAD
+  -- Return postcondition: result! = ADHESIVE_ROAD
+  -- Return postcondition: result! = ADHESIVE_LOOSE
+  true
+end
+
+schema CSurfaceTable_GetWetMultiplier
+  ΔCSurfaceTable
+  surfaceType? : ℕ
+where
+  -- Return postcondition: result! = 1.0f - CWeather::WetRoads*0.25f
+  -- Return postcondition: result! = 1.0f - CWeather::WetRoads*0.4f
+  -- Return postcondition: result! = 1.0f + CWeather::WetRoads*0.5f
+  true
+end
+
+schema CSurfaceTable_GetAdhesiveLimit
+  ΔCSurfaceTable
+  colpoint? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSurfaceTable_IsSoftLanding
+  ΔCSurfaceTable
+  surf? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SurfaceTableModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 167
+end

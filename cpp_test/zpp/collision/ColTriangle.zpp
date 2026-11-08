@@ -1,0 +1,319 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColTriangle (collision)
+-- Source File(s): collision/ColTriangle.cpp, collision/ColTriangle.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ColTriangle.zpp  (from "ColTriangle.h")
+-- include CompressedVector.zpp  (from "CompressedVector.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Direction ::= DIR_X_POS | DIR_X_NEG | DIR_Y_POS | DIR_Y_NEG | DIR_Z_POS | DIR_Z_NEG
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CColTriangle
+  a : ℕ
+  b : ℕ
+  c : ℕ
+  surface : ℕ
+where
+  a ≥ 0
+  b ≥ 0
+  c ≥ 0
+  surface ≥ 0
+end
+
+schema CColTriangle_Set
+  ΔCColTriangle
+  a? : ℤ
+  b? : ℤ
+  c? : ℤ
+  surf? : ℕ
+where
+  -- Declared member operation CColTriangle::Set(int a, int b, int c, uint8 surf)
+  true
+end
+
+schema CColTriangle_Set_2
+  ΔCColTriangle
+  v? : Ref[CompressedVector]
+  a? : ℤ
+  b? : ℤ
+  c? : ℤ
+  surf? : ℕ
+  piece? : ℕ
+  result! : void
+where
+  -- Declared member operation CColTriangle::Set(const CompressedVector *v, int a, int b, int c, uint8 surf, uint8 piece)
+  true
+end
+
+schema CColTrianglePlane
+  dist : ℤ
+  dir : ℕ
+where
+  dir ≥ 0
+end
+
+schema CColTrianglePlane_Set
+  ΔCColTrianglePlane
+  va? : CVector
+  vb? : CVector
+  vc? : CVector
+where
+  -- Declared member operation CColTrianglePlane::Set(const CVector &va, const CVector &vb, const CVector &vc)
+  true
+end
+
+schema CColTrianglePlane_Set_2
+  ΔCColTrianglePlane
+  v? : Ref[CompressedVector]
+  tri? : CColTriangle
+where
+  -- Declared member operation CColTrianglePlane::Set(const CompressedVector *v, CColTriangle &tri)
+  true
+end
+
+schema CColTrianglePlane_GetNormal_3
+  ΞCColTrianglePlane
+  n? : CVector
+  result! : void
+where
+  -- Declared member operation CColTrianglePlane::GetNormal(CVector &n)
+  true
+end
+
+schema CColTrianglePlane_CalcPoint_4
+  ΞCColTrianglePlane
+  v? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CColTrianglePlane::CalcPoint(const CVector &v)
+  true
+end
+
+schema CColTrianglePlane_GetNormal_5
+  ΔCColTrianglePlane
+  arg_1? : n
+where
+  -- Declared member operation CColTrianglePlane::GetNormal(n)
+  true
+end
+
+schema CColTrianglePlane_DotProduct_6
+  ΔCColTrianglePlane
+  arg_1? : n
+  arg_2? : v
+  result! : return
+where
+  -- Declared member operation CColTrianglePlane::DotProduct(n, v)
+  true
+end
+
+schema CColTrianglePlane_Unpack_7
+  ΞCColTrianglePlane
+  qword? : ℙ ℤ
+  result! : else_void
+where
+  -- Declared member operation CColTrianglePlane::Unpack(int32 *qword)
+  true
+end
+
+schema CColTrianglePlane_Set_8
+  ΔCColTrianglePlane
+  va? : CVector
+  vb? : CVector
+  vc? : CVector
+where
+  -- Declared member operation CColTrianglePlane::Set(const CVector &va, const CVector &vb, const CVector &vc)
+  true
+end
+
+schema CColTrianglePlane_Set_9
+  ΔCColTrianglePlane
+  v? : Ref[CompressedVector]
+  tri? : CColTriangle
+where
+  -- Declared member operation CColTrianglePlane::Set(const CompressedVector *v, CColTriangle &tri)
+  true
+end
+
+schema CColTrianglePlane_GetNormal_10
+  ΞCColTrianglePlane
+  n? : CVector
+  result! : void
+where
+  -- Declared member operation CColTrianglePlane::GetNormal(CVector &n)
+  true
+end
+
+schema CColTrianglePlane_GetNormalX_11
+  ΞCColTrianglePlane
+  result! : ℝ
+where
+  -- Declared member operation CColTrianglePlane::GetNormalX()
+  true
+end
+
+schema CColTrianglePlane_GetNormalY_12
+  ΞCColTrianglePlane
+  result! : ℝ
+where
+  -- Declared member operation CColTrianglePlane::GetNormalY()
+  true
+end
+
+schema CColTrianglePlane_GetNormalZ_13
+  ΞCColTrianglePlane
+  result! : ℝ
+where
+  -- Declared member operation CColTrianglePlane::GetNormalZ()
+  true
+end
+
+schema CColTrianglePlane_CalcPoint_14
+  ΞCColTrianglePlane
+  v? : CVector
+  result! : ℝ
+where
+  -- Declared member operation CColTrianglePlane::CalcPoint(const CVector &v)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CColTriangle_Set
+  ΔCColTriangle
+  arg_1? : Ref[CompressedVector]
+  a? : ℤ
+  b? : ℤ
+  c? : ℤ
+  surf? : ℕ
+  piece? : ℕ
+where
+  -- State update: a' = a
+  -- State update: b' = b
+  -- State update: c' = c
+  -- State update: surface' = surf
+  true
+end
+
+schema CColTrianglePlane_Set
+  ΔCColTrianglePlane
+  va? : CVector
+  vb? : CVector
+  vc? : CVector
+where
+  -- State update: normal' = CrossProduct(vc-va, vb-va)
+  -- State update: dist' = DotProduct(normal, va)
+  -- State update: dir' = normal.x < 0.0f ? DIR_X_NEG : DIR_X_POS
+  -- State update: dir' = normal.y < 0.0f ? DIR_Y_NEG : DIR_Y_POS
+  -- State update: dir' = normal.z < 0.0f ? DIR_Z_NEG : DIR_Z_POS
+  -- Invokes: normal.Normalise
+  true
+end
+
+schema ColTriangle_Set
+  ΔColTriangleModuleState
+  a? : ℤ
+  b? : ℤ
+  c? : ℤ
+  surf? : ℕ
+where
+  -- State update: a' = a
+  -- State update: b' = b
+  -- State update: c' = c
+  -- State update: surface' = surf
+  true
+end
+
+schema ColTriangle_Set_2
+  ΔColTriangleModuleState
+  v? : Ref[CompressedVector]
+  tri? : CColTriangle
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ColTriangle_GetNormal
+  ΞColTriangleModuleState
+  n? : CVector
+where
+  -- State update: n.x' = normal.x/4096.0f
+  -- State update: n.y' = normal.y/4096.0f
+  -- State update: n.z' = normal.z/4096.0f
+  true
+end
+
+schema ColTriangle_Unpack
+  ΞColTriangleModuleState
+  qword? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ColTriangle_Unpack_2
+  ΞColTriangleModuleState
+  qword? : ℙ ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ColTriangle_Set_3
+  ΔColTriangleModuleState
+  v? : Ref[CompressedVector]
+  tri? : CColTriangle
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ColTriangle_GetNormal_2
+  ΞColTriangleModuleState
+  n? : CVector
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ColTriangle_GetNormalX
+  ΞColTriangleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = normal.x
+  true
+end
+
+schema ColTriangle_GetNormalY
+  ΞColTriangleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = normal.y
+  true
+end
+
+schema ColTriangle_GetNormalZ
+  ΞColTriangleModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = normal.z
+  true
+end

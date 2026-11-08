@@ -1,0 +1,293 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ColStore (collision)
+-- Source File(s): collision/ColStore.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include templates.zpp  (from "templates.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema ColDef
+  unused : ℤ
+  isLoaded : 𝔹
+  bounds : CRect
+  name : seq CHAR
+  minIndex : ℤ
+  maxIndex : ℤ
+  chunk : ADDRESS
+where
+  #name = 20
+end
+
+schema CColStore
+  ms_pColPool : Ref[CPool_ColDef_ColDef]
+  m_onlyBB : 𝔹
+where
+  #ms_pColPool ≤ 1
+end
+
+schema CColStore_Initialise
+  ΔCColStore
+where
+  -- Declared member operation CColStore::Initialise(void)
+  true
+end
+
+schema CColStore_Shutdown_2
+  ΔCColStore
+where
+  -- Declared member operation CColStore::Shutdown(void)
+  true
+end
+
+schema CColStore_AddColSlot_3
+  ΔCColStore
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CColStore::AddColSlot(const char *name)
+  true
+end
+
+schema CColStore_RemoveColSlot_4
+  ΔCColStore
+  slot? : ℤ
+where
+  -- Declared member operation CColStore::RemoveColSlot(int32 slot)
+  true
+end
+
+schema CColStore_FindColSlot_5
+  ΔCColStore
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CColStore::FindColSlot(const char *name)
+  true
+end
+
+schema CColStore_GetColName_6
+  ΔCColStore
+  slot? : ℤ
+  result! : seq CHAR
+where
+  -- Declared member operation CColStore::GetColName(int32 slot)
+  true
+end
+
+schema CColStore_GetBoundingBox_7
+  ΔCColStore
+  slot? : ℤ
+  result! : CRect
+where
+  -- Declared member operation CColStore::GetBoundingBox(int32 slot)
+  true
+end
+
+schema CColStore_IncludeModelIndex_8
+  ΔCColStore
+  slot? : ℤ
+  modelIndex? : ℤ
+where
+  -- Declared member operation CColStore::IncludeModelIndex(int32 slot, int32 modelIndex)
+  true
+end
+
+schema CColStore_LoadCol_9
+  ΔCColStore
+  storeID? : ℤ
+  buffer? : ℙ ℕ
+  bufsize? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CColStore::LoadCol(int32 storeID, uint8 *buffer, int32 bufsize)
+  true
+end
+
+schema CColStore_LoadColCHK_10
+  ΔCColStore
+  slot? : ℤ
+  data? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- Declared member operation CColStore::LoadColCHK(int32 slot, void *data, void *chunk)
+  true
+end
+
+schema CColStore_RemoveCol_11
+  ΔCColStore
+  slot? : ℤ
+where
+  -- Declared member operation CColStore::RemoveCol(int32 slot)
+  true
+end
+
+schema CColStore_AddCollisionNeededAtPosn_12
+  ΔCColStore
+  pos? : CVector
+where
+  -- Declared member operation CColStore::AddCollisionNeededAtPosn(const CVector &pos)
+  true
+end
+
+schema CColStore_LoadAllCollision_13
+  ΔCColStore
+where
+  -- Declared member operation CColStore::LoadAllCollision(void)
+  true
+end
+
+schema CColStore_RemoveAllCollision_14
+  ΔCColStore
+where
+  -- Declared member operation CColStore::RemoveAllCollision(void)
+  true
+end
+
+schema CColStore_LoadCollision_15
+  ΔCColStore
+  pos? : CVector
+  level? : eLevelName
+where
+  -- Declared member operation CColStore::LoadCollision(const CVector &pos, eLevelName level = LEVEL_GENERIC)
+  true
+end
+
+schema CColStore_RequestCollision_16
+  ΔCColStore
+  pos? : CVector
+where
+  -- Declared member operation CColStore::RequestCollision(const CVector &pos)
+  true
+end
+
+schema CColStore_EnsureCollisionIsInMemory_17
+  ΔCColStore
+  pos? : CVector
+where
+  -- Declared member operation CColStore::EnsureCollisionIsInMemory(const CVector &pos)
+  true
+end
+
+schema CColStore_DoScriptsWantThisIn_18
+  ΔCColStore
+  slot? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CColStore::DoScriptsWantThisIn(int32 slot)
+  true
+end
+
+schema CColStore_HasCollisionLoaded_19
+  ΔCColStore
+  level? : eLevelName
+  result! : 𝔹
+where
+  -- Declared member operation CColStore::HasCollisionLoaded(eLevelName level)
+  true
+end
+
+schema CColStore_HasCollisionLoaded_20
+  ΔCColStore
+  pos? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CColStore::HasCollisionLoaded(const CVector &pos)
+  true
+end
+
+schema CColStore_Load_21
+  ΔCColStore
+  arg_1? : 𝔹
+  pool? : Ref[CPool_ColDef]
+where
+  -- Declared member operation CColStore::Load(bool, CPool<ColDef> *pool)
+  true
+end
+
+schema CColStore_GetSlot_22
+  ΔCColStore
+  slot? : ℤ
+  result! : Ref[ColDef]
+where
+  -- Declared member operation CColStore::GetSlot(int slot)
+  true
+end
+
+schema CColStore_assert_23
+  ΔCColStore
+  arg_1? : ms_pColPool
+where
+  -- Declared member operation CColStore::assert(ms_pColPool)
+  true
+end
+
+schema CColStore_assert_24
+  ΔCColStore
+  arg_1? : slot___ms_pColPool__GetSize
+where
+  -- Declared member operation CColStore::assert(slot < ms_pColPool->GetSize()
+  true
+end
+
+schema CColStore_GetSlot_25
+  ΔCColStore
+  arg_1? : slot
+  result! : return_ms_pColPool
+where
+  -- Declared member operation CColStore::GetSlot(slot)
+  true
+end
+
+schema CColStore_AddCollisionNeededAtPosn_26
+  ΔCColStore
+  pos? : CVector2D
+  result! : void
+where
+  -- Declared member operation CColStore::AddCollisionNeededAtPosn(const CVector2D &pos)
+  true
+end
+
+schema CColStore_LoadCollision_27
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- Declared member operation CColStore::LoadCollision(const CVector2D &pos)
+  true
+end
+
+schema CColStore_RequestCollision_28
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- Declared member operation CColStore::RequestCollision(const CVector2D &pos)
+  true
+end
+
+schema CColStore_EnsureCollisionIsInMemory_29
+  ΔCColStore
+  pos? : CVector2D
+where
+  -- Declared member operation CColStore::EnsureCollisionIsInMemory(const CVector2D &pos)
+  true
+end
+
+schema CColStore_HasCollisionLoaded_30
+  ΔCColStore
+  pos? : CVector2D
+  result! : 𝔹
+where
+  -- Declared member operation CColStore::HasCollisionLoaded(const CVector2D &pos)
+  true
+end

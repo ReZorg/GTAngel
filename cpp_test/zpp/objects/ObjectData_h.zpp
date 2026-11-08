@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ObjectData (objects)
+-- Source File(s): objects/ObjectData.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CObjectInfo
+  m_fMass : ℝ
+  m_fTurnMass : ℝ
+  m_fAirResistance : ℝ
+  m_fElasticity : ℝ
+  m_fBuoyancy : ℝ
+  m_fUprootLimit : ℝ
+  m_fCollisionDamageMultiplier : ℝ
+  m_nCollisionDamageEffect : ℕ
+  m_nSpecialCollisionResponseCases : ℕ
+  m_bCameraToAvoidThisObject : 𝔹
+where
+  m_nCollisionDamageEffect ≥ 0
+  m_nSpecialCollisionResponseCases ≥ 0
+end
+
+schema CObjectData
+  ms_aObjectInfo : seq CObjectInfo  -- bounded array [NUMOBJECTINFO]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CObjectData_Initialise
+  ΔCObjectData
+  filename? : seq CHAR
+where
+  -- Declared member operation CObjectData::Initialise(const char *filename)
+  true
+end
+
+schema CObjectData_SetObjectData_2
+  ΔCObjectData
+  modelId? : ℤ
+  object? : CObject
+where
+  -- Declared member operation CObjectData::SetObjectData(int32 modelId, CObject &object)
+  true
+end

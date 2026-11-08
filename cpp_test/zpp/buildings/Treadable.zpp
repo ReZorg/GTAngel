@@ -1,0 +1,66 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Treadable (buildings)
+-- Source File(s): buildings/Treadable.cpp, buildings/Treadable.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rpworld.zpp  (from "rpworld.h")
+-- include Treadable.zpp  (from "Treadable.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Building.zpp  (from "Building.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTreadable
+  CBuilding  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTreadable_operator_new
+  ΔCTreadable
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CTreadable::operator new(size_t)
+  true
+end
+
+schema CTreadable_operator_delete_2
+  ΔCTreadable
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CTreadable::operator delete(void*, size_t)
+  true
+end
+
+schema CTreadable_GetIsATreadable_3
+  ΔCTreadable
+  result! : 𝔹
+where
+  -- Declared member operation CTreadable::GetIsATreadable(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Treadable_GetIsATreadable
+  ΔTreadableModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end

@@ -1,0 +1,188 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AutoPilot (control)
+-- Source File(s): control/AutoPilot.cpp, control/AutoPilot.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AutoPilot.zpp  (from "AutoPilot.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Curves.zpp  (from "Curves.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Timer.zpp  (from "Timer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eCarMission ::= MISSION_NONE | MISSION_CRUISE | MISSION_RAMPLAYER_FARAWAY | MISSION_RAMPLAYER_CLOSE | MISSION_BLOCKPLAYER_FARAWAY | MISSION_BLOCKPLAYER_CLOSE | MISSION_BLOCKPLAYER_HANDBRAKESTOP | MISSION_WAITFORDELETION | MISSION_GOTOCOORDS | MISSION_GOTOCOORDS_STRAIGHT | MISSION_EMERGENCYVEHICLE_STOP | MISSION_STOP_FOREVER | MISSION_GOTOCOORDS_ACCURATE | MISSION_GOTO_COORDS_STRAIGHT_ACCURATE | MISSION_GOTOCOORDS_ASTHECROWSWIMS | MISSION_RAMCAR_FARAWAY | MISSION_RAMCAR_CLOSE | MISSION_BLOCKCAR_FARAWAY | MISSION_BLOCKCAR_CLOSE | MISSION_BLOCKCAR_HANDBRAKESTOP | MISSION_HELI_FLYTOCOORS | MISSION_ATTACKPLAYER | MISSION_PLANE_FLYTOCOORS | MISSION_HELI_LAND | MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1 | MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_2 | MISSION_BLOCKPLAYER_FORWARDANDBACK
+
+eCarTempAction ::= TEMPACT_NONE | TEMPACT_WAIT | TEMPACT_REVERSE | TEMPACT_HANDBRAKETURNLEFT | TEMPACT_HANDBRAKETURNRIGHT | TEMPACT_HANDBRAKESTRAIGHT | TEMPACT_TURNLEFT | TEMPACT_TURNRIGHT | TEMPACT_GOFORWARD | TEMPACT_SWERVELEFT | TEMPACT_SWERVERIGHT
+
+eCarDrivingStyle ::= DRIVINGSTYLE_STOP_FOR_CARS | DRIVINGSTYLE_SLOW_DOWN_FOR_CARS | DRIVINGSTYLE_AVOID_CARS | DRIVINGSTYLE_PLOUGH_THROUGH | DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAutoPilot
+  m_nCurrentRouteNode : ℤ
+  m_nNextRouteNode : ℤ
+  m_nPrevRouteNode : ℤ
+  m_nTimeEnteredCurve : ℤ
+  m_nTimeToSpendOnCurrentCurve : ℤ
+  m_nCurrentPathNodeInfo : ℕ
+  m_nNextPathNodeInfo : ℕ
+  m_nPreviousPathNodeInfo : ℕ
+  m_nAntiReverseTimer : ℕ
+  m_nTimeToStartMission : ℕ
+  m_nPreviousDirection : ℤ
+  m_nCurrentDirection : ℤ
+  m_nNextDirection : ℤ
+  m_nCurrentLane : ℤ
+  m_nNextLane : ℤ
+  m_nDrivingStyle : ℕ
+  m_nCarMission : ℕ
+  m_nTempAction : ℕ
+  m_nTimeTempAction : ℕ
+  m_fMaxTrafficSpeed : ℝ
+  m_nCruiseSpeed : ℕ
+  m_nCruiseSpeedMultiplierType : ℕ
+  m_fCruiseSpeedMultiplier : ℝ
+  m_bSlowedDownBecauseOfCars : 𝔹
+  m_bSlowedDownBecauseOfPeds : 𝔹
+  m_bStayInCurrentLevel : 𝔹
+  m_bStayInFastLane : 𝔹
+  m_bIgnorePathfinding : 𝔹
+  m_nSwitchDistance : ℕ
+  m_vecDestinationCoors : CVector
+  m_aPathFindNodesInfo : seq Ref[CPathNode]  -- bounded array [NUM_PATH_NODES_IN_AUTOPILOT]
+  m_nPathFindNodesCount : ℤ
+  m_pTargetCar : Ref[CVehicle]
+where
+  m_nCurrentPathNodeInfo ≥ 0
+  m_nNextPathNodeInfo ≥ 0
+  m_nPreviousPathNodeInfo ≥ 0
+  m_nAntiReverseTimer ≥ 0
+  m_nTimeToStartMission ≥ 0
+  m_nDrivingStyle ≥ 0
+  m_nCarMission ≥ 0
+  m_nTempAction ≥ 0
+  m_nTimeTempAction ≥ 0
+  m_nCruiseSpeed ≥ 0
+  m_nCruiseSpeedMultiplierType ≥ 0
+  #m_bSlowedDownBecauseOfCars = 1
+  #m_bSlowedDownBecauseOfPeds = 1
+  #m_bStayInCurrentLevel = 1
+  #m_bStayInFastLane = 1
+  #m_bIgnorePathfinding = 1
+end
+
+schema CAutoPilot_CAutoPilot
+  ΔCAutoPilot
+where
+  -- Declared member operation CAutoPilot::CAutoPilot(void)
+  true
+end
+
+schema CAutoPilot_GetTimeInMilliseconds_2
+  ΔCAutoPilot
+  result! : m_nTimeToStartMission___CTimer
+where
+  -- Declared member operation CAutoPilot::GetTimeInMilliseconds()
+  true
+end
+
+schema CAutoPilot_ModifySpeed_3
+  ΔCAutoPilot
+  arg_1? : ℝ
+  result! : void
+where
+  -- Declared member operation CAutoPilot::ModifySpeed(float)
+  true
+end
+
+schema CAutoPilot_RemoveOnePathNode_4
+  ΔCAutoPilot
+where
+  -- Declared member operation CAutoPilot::RemoveOnePathNode()
+  true
+end
+
+schema CAutoPilot_Load_5
+  ΔCAutoPilot
+  buf? : ℙ ℕ
+where
+  -- Declared member operation CAutoPilot::Load(uint8*& buf)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAutoPilot_ModifySpeed
+  ΔCAutoPilot
+  speed? : ℝ
+where
+  -- State update: m_fMaxTrafficSpeed' = Max(0.01f, speed)
+  -- State update: pCurrentLink' = &ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo]
+  -- State update: pNextLink' = &ThePaths.m_carPathLinks[m_nNextPathNodeInfo]
+  -- Invokes: CTimer::GetTimeInMilliseconds, pCurrentLink->GetX, pCurrentLink->GetY, pNextLink->GetX, pNextLink->GetY
+  true
+end
+
+schema CAutoPilot_RemoveOnePathNode
+  ΔCAutoPilot
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAutoPilot_Save
+  ΔCAutoPilot
+  buf? : ℙ ℕ
+where
+  -- State update: flags' = 0
+  true
+end
+
+schema CAutoPilot_Load
+  ΔCAutoPilot
+  buf? : ℙ ℕ
+where
+  -- State update: m_bSlowedDownBecauseOfCars' = !!(flags & BIT(0))
+  -- State update: m_bSlowedDownBecauseOfPeds' = !!(flags & BIT(1))
+  -- State update: m_bStayInCurrentLevel' = !!(flags & BIT(2))
+  -- State update: m_bStayInFastLane' = !!(flags & BIT(3))
+  -- State update: m_bIgnorePathfinding' = !!(flags & BIT(4))
+  true
+end
+
+schema AutoPilot_CAutoPilot
+  ΔAutoPilotModuleState
+where
+  -- State update: m_nPrevRouteNode' = 0
+  -- State update: m_nNextRouteNode' = m_nPrevRouteNode
+  -- State update: m_nCurrentRouteNode' = m_nNextRouteNode
+  -- State update: m_nTimeEnteredCurve' = 0
+  -- State update: m_nTimeToSpendOnCurrentCurve' = 1000
+  -- State update: m_nPreviousPathNodeInfo' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema AutoPilot_GetCruiseSpeed
+  ΔAutoPilotModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = m_nCruiseSpeed * m_fCruiseSpeedMultiplier
+  true
+end

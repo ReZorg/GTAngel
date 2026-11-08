@@ -1,0 +1,174 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Font (renderer)
+-- Source File(s): renderer/Font.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Font.zpp  (from "Font.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include main.zpp  (from "main.h")
+-- include Frontend.zpp  (from "Frontend.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+JAP_TERMINATION : seq CHAR  -- #define JAP_TERMINATION (0x8000 | '~')
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Font_AsciiToUnicode
+  ΔFontModuleState
+  src? : seq CHAR
+  dst? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Font_UnicodeStrcat
+  ΔFontModuleState
+  dst? : seq CHAR
+  append? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Font_UnicodeStrcpy
+  ΔFontModuleState
+  dst? : seq CHAR
+  src? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Font_UnicodeStrlen
+  ΔFontModuleState
+  str? : seq CHAR
+where
+  -- State update: len' = 0
+  -- Return postcondition: result! = len
+  true
+end
+
+schema Font_UnicodeMakeUpperCase
+  ΔFontModuleState
+  dst? : seq CHAR
+  src? : seq CHAR
+where
+  -- State update: dst' = *src
+  -- State update: dst' = *src - 32
+  -- State update: dst' = '\0'
+  true
+end
+
+schema Font_Align
+  ΔFontModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CFont_Initialise
+  ΔCFont
+where
+  -- State update: slot' = CTxdStore::AddTxdSlot("fonts")
+  -- State update: Slot' = slot
+  -- Invokes: CTxdStore::AddTxdSlot, CTxdStore::LoadTxd, CTxdStore::AddRef, CTxdStore::PushCurrentTxd, CTxdStore::SetCurrentTxd
+  true
+end
+
+schema CFont_LoadButtons
+  ΔCFont
+  txdPath? : seq CHAR
+where
+  -- State update: ButtonsSlot' = CTxdStore::AddTxdSlot("buttons")
+  -- State update: ButtonsSlot' = -1
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::CloseFile, CTxdStore::AddTxdSlot, CTxdStore::RemoveTxd, CTxdStore::LoadTxd
+  true
+end
+
+schema CFont_ReloadFonts
+  ΔCFont
+  set? : ℕ
+where
+  -- State update: LanguageSet' = set
+  -- Invokes: CTxdStore::PushCurrentTxd, CTxdStore::RemoveTxd, CTxdStore::LoadTxd, CTxdStore::SetCurrentTxd, CTxdStore::PopCurrentTxd
+  true
+end
+
+schema CFont_Shutdown
+  ΔCFont
+where
+  -- State update: ButtonsSlot' = -1
+  -- State update: Slot' = -1
+  -- Invokes: CTxdStore::RemoveTxdSlot, CTxdStore::FindTxdSlot
+  true
+end
+
+schema CFont_InitPerFrame
+  ΔCFont
+where
+  -- State update: RenderState.style' = -1
+  -- State update: Details.anonymous_25' = 0
+  -- State update: FontRenderStatePointer.pRenderState' = (CFontRenderState*)FontRenderStateBuf
+  -- State update: NewLine' = false
+  -- State update: PS2Symbol' = BUTTON_NONE
+  true
+end
+
+schema CFont_DrawButton
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: rect.left' = x
+  -- State update: rect.top' = RenderState.scaleY + RenderState.scaleY + y
+  -- State update: rect.right' = RenderState.scaleY * 17.0f + x
+  -- State update: rect.bottom' = RenderState.scaleY * 19.0f + y
+  true
+end
+
+schema CFont_PrintChar
+  ΔCFont
+  x? : ℝ
+  y? : ℝ
+  c? : seq CHAR
+where
+  -- State update: bDontPrint' = false
+  -- State update: w' = GetCharacterWidth(c) / 32.0f
+  -- State update: c' = '\0'
+  -- State update: xoff' = c % 16
+  -- State update: yoff' = c / 16
+  -- State update: w' = 21.0f
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CSprite2d::AddToBuffer, CFont::IsJapanesePunctuation, CFont::IsAnsiCharacter, CFont::RenderFontBuffer, tmpPointer.Align
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema FontModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 4926
+end

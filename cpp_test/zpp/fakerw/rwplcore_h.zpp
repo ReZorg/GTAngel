@@ -1,0 +1,199 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: rwplcore (fakerw)
+-- Source File(s): fakerw/rwplcore.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+__RWUNUSED__ : seq CHAR  -- #define __RWUNUSED__ #ifndef FALSE
+FALSE : ℕ  -- #define FALSE 0
+TRUE : seq CHAR  -- #define TRUE !FALSE
+rwsprintf : seq CHAR  -- #define rwsprintf sprintf
+rwvsprintf : seq CHAR  -- #define rwvsprintf vsprintf
+rwstrcpy : seq CHAR  -- #define rwstrcpy strcpy
+rwstrncpy : seq CHAR  -- #define rwstrncpy strncpy
+rwstrcat : seq CHAR  -- #define rwstrcat strcat
+rwstrncat : seq CHAR  -- #define rwstrncat strncat
+rwstrrchr : seq CHAR  -- #define rwstrrchr strrchr
+rwstrchr : seq CHAR  -- #define rwstrchr strchr
+rwstrstr : seq CHAR  -- #define rwstrstr strstr
+rwstrcmp : seq CHAR  -- #define rwstrcmp strcmp
+rwstricmp : seq CHAR  -- #define rwstricmp stricmp
+rwstrlen : seq CHAR  -- #define rwstrlen strlen
+rwstrupr : seq CHAR  -- #define rwstrupr strupr
+rwstrlwr : seq CHAR  -- #define rwstrlwr strlwr
+rwstrtok : seq CHAR  -- #define rwstrtok strtok
+rwsscanf : seq CHAR  -- #define rwsscanf sscanf
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RwTextureCoordinateIndex ::= rwNARWTEXTURECOORDINATEINDEX | rwTEXTURECOORDINATEINDEX0 | rwTEXTURECOORDINATEINDEX1 | rwTEXTURECOORDINATEINDEX2 | rwTEXTURECOORDINATEINDEX3 | rwTEXTURECOORDINATEINDEX4 | rwTEXTURECOORDINATEINDEX5 | rwTEXTURECOORDINATEINDEX6 | rwTEXTURECOORDINATEINDEX7
+  -- val(rwNARWTEXTURECOORDINATEINDEX) = 0
+
+RwCorePluginID ::= rwID_NAOBJECT | rwID_STRUCT | rwID_STRING | rwID_EXTENSION | rwID_CAMERA | rwID_TEXTURE | rwID_MATERIAL | rwID_MATLIST | rwID_ATOMICSECT | rwID_PLANESECT | rwID_WORLD | rwID_SPLINE | rwID_MATRIX | rwID_FRAMELIST | rwID_GEOMETRY | rwID_CLUMP | rwID_LIGHT | rwID_UNICODESTRING | rwID_ATOMIC | rwID_TEXTURENATIVE | rwID_TEXDICTIONARY | rwID_ANIMDATABASE | rwID_IMAGE | rwID_SKINANIMATION | rwID_GEOMETRYLIST | rwID_HANIMANIMATION | rwID_TEAM | rwID_CROWD | rwID_DMORPHANIMATION | rwID_RIGHTTORENDER | rwID_MTEFFECTNATIVE | rwID_MTEFFECTDICT | rwID_TEAMDICTIONARY | rwID_PITEXDICTIONARY | rwID_TOC | rwID_PRTSTDGLOBALDATA | rwID_COREPLUGINIDMAX
+  -- val(rwID_NAOBJECT) = 0x00
+  -- val(rwID_STRUCT) = 0x01
+  -- val(rwID_STRING) = 0x02
+  -- val(rwID_EXTENSION) = 0x03
+  -- val(rwID_CAMERA) = 0x05
+  -- val(rwID_TEXTURE) = 0x06
+  -- val(rwID_MATERIAL) = 0x07
+  -- val(rwID_MATLIST) = 0x08
+  -- val(rwID_ATOMICSECT) = 0x09
+  -- val(rwID_PLANESECT) = 0x0A
+  -- val(rwID_WORLD) = 0x0B
+  -- val(rwID_SPLINE) = 0x0C
+  -- val(rwID_MATRIX) = 0x0D
+  -- val(rwID_FRAMELIST) = 0x0E
+  -- val(rwID_GEOMETRY) = 0x0F
+  -- val(rwID_CLUMP) = 0x10
+  -- val(rwID_LIGHT) = 0x12
+  -- val(rwID_UNICODESTRING) = 0x13
+  -- val(rwID_ATOMIC) = 0x14
+  -- val(rwID_TEXTURENATIVE) = 0x15
+  -- val(rwID_TEXDICTIONARY) = 0x16
+  -- val(rwID_ANIMDATABASE) = 0x17
+  -- val(rwID_IMAGE) = 0x18
+  -- val(rwID_SKINANIMATION) = 0x19
+
+RwStreamType ::= rwNASTREAM | rwSTREAMFILE | rwSTREAMFILENAME | rwSTREAMMEMORY | rwSTREAMCUSTOM
+  -- val(rwNASTREAM) = 0
+
+RwStreamAccessType ::= rwNASTREAMACCESS | rwSTREAMREAD | rwSTREAMWRITE | rwSTREAMAPPEND
+  -- val(rwNASTREAMACCESS) = 0
+
+RwOpCombineType ::= rwCOMBINEREPLACE | rwCOMBINEPRECONCAT | rwCOMBINEPOSTCONCAT
+  -- val(rwCOMBINEREPLACE) = rw::COMBINEREPLACE
+  -- val(rwCOMBINEPRECONCAT) = rw::COMBINEPRECONCAT
+  -- val(rwCOMBINEPOSTCONCAT) = rw::COMBINEPOSTCONCAT
+
+RwMatrixType ::= rwMATRIXTYPENORMAL | rwMATRIXTYPEORTHOGANAL | rwMATRIXTYPEORTHONORMAL | rwMATRIXTYPEMASK
+  -- val(rwMATRIXTYPENORMAL) = rw::Matrix::TYPENORMAL
+  -- val(rwMATRIXTYPEORTHOGANAL) = rw::Matrix::TYPEORTHOGONAL
+  -- val(rwMATRIXTYPEORTHONORMAL) = rw::Matrix::TYPEORTHONORMAL
+  -- val(rwMATRIXTYPEMASK) = 0x00000003
+
+RwRenderState ::= rwRENDERSTATENARENDERSTATE | rwRENDERSTATETEXTURERASTER | rwRENDERSTATETEXTUREADDRESS | rwRENDERSTATETEXTUREADDRESSU | rwRENDERSTATETEXTUREADDRESSV | rwRENDERSTATETEXTUREPERSPECTIVE | rwRENDERSTATEZTESTENABLE | rwRENDERSTATESHADEMODE | rwRENDERSTATEZWRITEENABLE | rwRENDERSTATETEXTUREFILTER | rwRENDERSTATESRCBLEND | rwRENDERSTATEDESTBLEND | rwRENDERSTATEVERTEXALPHAENABLE | rwRENDERSTATEBORDERCOLOR | rwRENDERSTATEFOGENABLE | rwRENDERSTATEFOGCOLOR | rwRENDERSTATEFOGTYPE | rwRENDERSTATEFOGDENSITY | rwRENDERSTATEFOGTABLE | rwRENDERSTATEALPHAPRIMITIVEBUFFER | rwRENDERSTATECULLMODE | rwRENDERSTATESTENCILENABLE | rwRENDERSTATESTENCILFAIL | rwRENDERSTATESTENCILZFAIL | rwRENDERSTATESTENCILPASS | rwRENDERSTATESTENCILFUNCTION | rwRENDERSTATESTENCILFUNCTIONREF | rwRENDERSTATESTENCILFUNCTIONMASK | rwRENDERSTATESTENCILFUNCTIONWRITEMASK
+  -- val(rwRENDERSTATENARENDERSTATE) = 0
+
+RwShadeMode ::= rwSHADEMODENASHADEMODE | rwSHADEMODEFLAT | rwSHADEMODEGOURAUD
+  -- val(rwSHADEMODENASHADEMODE) = 0
+
+RwBlendFunction ::= rwBLENDNABLEND | rwBLENDZERO | rwBLENDONE | rwBLENDSRCCOLOR | rwBLENDINVSRCCOLOR | rwBLENDSRCALPHA | rwBLENDINVSRCALPHA | rwBLENDDESTALPHA | rwBLENDINVDESTALPHA | rwBLENDDESTCOLOR | rwBLENDINVDESTCOLOR | rwBLENDSRCALPHASAT
+  -- val(rwBLENDNABLEND) = 0
+  -- val(rwBLENDZERO) = rw::BLENDZERO
+  -- val(rwBLENDONE) = rw::BLENDONE
+  -- val(rwBLENDSRCCOLOR) = rw::BLENDSRCCOLOR
+  -- val(rwBLENDINVSRCCOLOR) = rw::BLENDINVSRCCOLOR
+  -- val(rwBLENDSRCALPHA) = rw::BLENDSRCALPHA
+  -- val(rwBLENDINVSRCALPHA) = rw::BLENDINVSRCALPHA
+  -- val(rwBLENDDESTALPHA) = rw::BLENDDESTALPHA
+  -- val(rwBLENDINVDESTALPHA) = rw::BLENDINVDESTALPHA
+  -- val(rwBLENDDESTCOLOR) = rw::BLENDDESTCOLOR
+  -- val(rwBLENDINVDESTCOLOR) = rw::BLENDINVDESTCOLOR
+  -- val(rwBLENDSRCALPHASAT) = rw::BLENDSRCALPHASAT
+
+RwFogType ::= rwFOGTYPENAFOGTYPE | rwFOGTYPELINEAR | rwFOGTYPEEXPONENTIAL | rwFOGTYPEEXPONENTIAL2
+  -- val(rwFOGTYPENAFOGTYPE) = 0
+
+RwTextureFilterMode ::= rwFILTERNAFILTERMODE | rwFILTERNEAREST | rwFILTERLINEAR | rwFILTERMIPNEAREST | rwFILTERMIPLINEAR | rwFILTERLINEARMIPNEAREST | rwFILTERLINEARMIPLINEAR
+  -- val(rwFILTERNAFILTERMODE) = 0
+  -- val(rwFILTERNEAREST) = rw::Texture::NEAREST
+  -- val(rwFILTERLINEAR) = rw::Texture::LINEAR
+  -- val(rwFILTERMIPNEAREST) = rw::Texture::MIPNEAREST
+  -- val(rwFILTERMIPLINEAR) = rw::Texture::MIPLINEAR
+  -- val(rwFILTERLINEARMIPNEAREST) = rw::Texture::LINEARMIPNEAREST
+  -- val(rwFILTERLINEARMIPLINEAR) = rw::Texture::LINEARMIPLINEAR
+
+RwTextureAddressMode ::= rwTEXTUREADDRESSNATEXTUREADDRESS | rwTEXTUREADDRESSWRAP | rwTEXTUREADDRESSMIRROR | rwTEXTUREADDRESSCLAMP | rwTEXTUREADDRESSBORDER
+  -- val(rwTEXTUREADDRESSNATEXTUREADDRESS) = 0
+  -- val(rwTEXTUREADDRESSWRAP) = rw::Texture::WRAP
+  -- val(rwTEXTUREADDRESSMIRROR) = rw::Texture::MIRROR
+  -- val(rwTEXTUREADDRESSCLAMP) = rw::Texture::CLAMP
+  -- val(rwTEXTUREADDRESSBORDER) = rw::Texture::BORDER
+
+RwCullMode ::= rwCULLMODENACULLMODE | rwCULLMODECULLNONE | rwCULLMODECULLBACK | rwCULLMODECULLFRONT
+  -- val(rwCULLMODENACULLMODE) = 0
+  -- val(rwCULLMODECULLNONE) = rw::CULLNONE
+  -- val(rwCULLMODECULLBACK) = rw::CULLBACK
+  -- val(rwCULLMODECULLFRONT) = rw::CULLFRONT
+
+RwPrimitiveType ::= rwPRIMTYPENAPRIMTYPE | rwPRIMTYPELINELIST | rwPRIMTYPEPOLYLINE | rwPRIMTYPETRILIST | rwPRIMTYPETRISTRIP | rwPRIMTYPETRIFAN | rwPRIMTYPEPOINTLIST
+  -- val(rwPRIMTYPENAPRIMTYPE) = rw::PRIMTYPENONE
+  -- val(rwPRIMTYPELINELIST) = rw::PRIMTYPELINELIST
+  -- val(rwPRIMTYPEPOLYLINE) = rw::PRIMTYPEPOLYLINE
+  -- val(rwPRIMTYPETRILIST) = rw::PRIMTYPETRILIST
+  -- val(rwPRIMTYPETRISTRIP) = rw::PRIMTYPETRISTRIP
+  -- val(rwPRIMTYPETRIFAN) = rw::PRIMTYPETRIFAN
+  -- val(rwPRIMTYPEPOINTLIST) = rw::PRIMTYPEPOINTLIST
+
+RwVideoModeFlag ::= rwVIDEOMODEEXCLUSIVE
+  -- val(rwVIDEOMODEEXCLUSIVE) = rw::VIDEOMODEEXCLUSIVE
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema RwMemoryFunctions
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema RwMemoryFunctions_void
+  ΔRwMemoryFunctions
+  arg_1? : Ref[rwfree]
+where
+  -- Declared member operation RwMemoryFunctions::void(*rwfree)
+  true
+end
+
+schema RwMemory
+  start : ℙ ℕ
+  length : ℕ
+where
+  #start ≤ 1
+  length ≥ 0
+end
+
+schema RwEngineOpenParams
+  displayID : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema RwFileFunctions
+  rwfexist : rwFnFexist
+  rwfopen : rwFnFopen
+  rwfclose : rwFnFclose
+  rwfread : rwFnFread
+  rwfwrite : rwFnFwrite
+  rwfgets : rwFnFgets
+  rwfputs : rwFnFputs
+  rwfeof : rwFnFeof
+  rwfseek : rwFnFseek
+  rwfflush : rwFnFflush
+  rwftell : rwFnFtell
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema rwplcore_RwRGBAAssign
+  ΔrwplcoreModuleState
+  target? : Ref[RwRGBA]
+  source? : Ref[RwRGBA]
+where
+  -- State update: target' = *source
+  true
+end

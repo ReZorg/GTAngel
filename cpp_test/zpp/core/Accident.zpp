@@ -1,0 +1,184 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Accident (core)
+-- Source File(s): core/Accident.cpp, core/Accident.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Accident.zpp  (from "Accident.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include World.zpp  (from "World.h")
+-- include config.zpp  (from "config.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Accident_Enum_1 ::= MAX_MEDICS_TO_ATTEND_ACCIDENT
+  -- val(MAX_MEDICS_TO_ATTEND_ACCIDENT) = 2
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAccident
+  m_pVictim : Ref[CPed]
+  m_nMedicsAttending : ℕ
+  m_nMedicsPerformingCPR : ℕ
+where
+  #m_pVictim ≤ 1
+  m_nMedicsAttending ≥ 0
+  m_nMedicsPerformingCPR ≥ 0
+end
+
+schema CAccident_CAccident
+  ΔCAccident
+where
+  -- Declared member operation CAccident::CAccident()
+  true
+end
+
+schema CAccidentManager
+  m_aAccidents : seq CAccident  -- bounded array [NUM_ACCIDENTS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CAccidentManager_GetNextFreeAccident
+  ΔCAccidentManager
+  result! : Ref[CAccident]
+where
+  -- Declared member operation CAccidentManager::GetNextFreeAccident()
+  true
+end
+
+schema CAccidentManager_ReportAccident_2
+  ΔCAccidentManager
+  ped? : Ref[CPed]
+where
+  -- Declared member operation CAccidentManager::ReportAccident(CPed *ped)
+  true
+end
+
+schema CAccidentManager_Update_3
+  ΔCAccidentManager
+where
+  -- Declared member operation CAccidentManager::Update()
+  true
+end
+
+schema CAccidentManager_FindNearestAccident_4
+  ΔCAccidentManager
+  vecPos? : CVector
+  pDistance? : ℙ ℝ
+  result! : Ref[CAccident]
+where
+  -- Declared member operation CAccidentManager::FindNearestAccident(CVector vecPos, float *pDistance)
+  true
+end
+
+schema CAccidentManager_CountActiveAccidents_5
+  ΔCAccidentManager
+  result! : ℕ
+where
+  -- Declared member operation CAccidentManager::CountActiveAccidents()
+  true
+end
+
+schema CAccidentManager_UnattendedAccidents_6
+  ΔCAccidentManager
+  result! : 𝔹
+where
+  -- Declared member operation CAccidentManager::UnattendedAccidents()
+  true
+end
+
+schema CAccidentManager_WorkToDoForMedics_7
+  ΔCAccidentManager
+  result! : 𝔹
+where
+  -- Declared member operation CAccidentManager::WorkToDoForMedics()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAccidentManager_GetNextFreeAccident
+  ΔCAccidentManager
+where
+  -- Return postcondition: result! = &m_aAccidents[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CAccidentManager_ReportAccident
+  ΔCAccidentManager
+  ped? : Ref[CPed]
+where
+  -- State update: point' = ped.GetPosition()
+  -- State update: accident' = GetNextFreeAccident()
+  -- State update: accident.m_pVictim' = ped
+  -- State update: accident.m_nMedicsPerformingCPR' = 0
+  -- State update: accident.m_nMedicsAttending' = 0
+  -- State update: ped.m_lastAccident' = accident
+  -- Invokes: ped->IsPlayer, ped->GetPosition, CWorld::ProcessVerticalLine, ped->RegisterReference
+  true
+end
+
+schema CAccidentManager_Update
+  ΔCAccidentManager
+where
+  -- State update: ped' = CPools::GetPed(gaEvent[e].entityRef)
+  -- Invokes: CEventList::GetEvent, CPools::GetPed, CEventList::ClearEvent
+  true
+end
+
+schema CAccidentManager_FindNearestAccident
+  ΔCAccidentManager
+  vecPos? : CVector
+  pDistance? : ℙ ℝ
+where
+  -- State update: accidentId' = -1
+  -- State update: minDistance' = 999999
+  -- State update: pVictim' = m_aAccidents[j].m_pVictim
+  -- State update: distance' = (pVictim.GetPosition() - vecPos).Magnitude2D()
+  -- State update: minDistance' = distance
+  -- State update: accidentId' = j
+  -- Return postcondition: result! = &m_aAccidents[accidentId]
+  -- Return postcondition: result! = nil
+  -- Invokes: pVictim->GetPosition
+  true
+end
+
+schema CAccidentManager_CountActiveAccidents
+  ΔCAccidentManager
+where
+  -- State update: accidents' = 0
+  -- Return postcondition: result! = accidents
+  true
+end
+
+schema CAccidentManager_WorkToDoForMedics
+  ΔCAccidentManager
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CAccidentManager_UnattendedAccidents
+  ΔCAccidentManager
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end

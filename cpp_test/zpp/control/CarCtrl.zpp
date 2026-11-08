@@ -1,0 +1,1514 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CarCtrl (control)
+-- Source File(s): control/CarCtrl.cpp, control/CarCtrl.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Accident.zpp  (from "Accident.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include CarGen.zpp  (from "CarGen.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Curves.zpp  (from "Curves.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include Game.zpp  (from "Game.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include IniFile.zpp  (from "IniFile.h")
+-- include Lines.zpp  (from "Lines.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Population.zpp  (from "Population.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include RoadBlocks.zpp  (from "RoadBlocks.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include TrafficLights.zpp  (from "TrafficLights.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Boat.zpp  (from "Boat.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+DISTANCE_TO_SPAWN_ROADBLOCK_PEDS : ℝ  -- #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS (51.0f)
+DISTANCE_TO_SCAN_FOR_DANGER : ℝ  -- #define DISTANCE_TO_SCAN_FOR_DANGER (14.0f)
+DISTANCE_TO_SCAN_FOR_PED_DANGER : ℝ  -- #define DISTANCE_TO_SCAN_FOR_PED_DANGER (11.0f)
+SAFE_DISTANCE_TO_PED : ℝ  -- #define SAFE_DISTANCE_TO_PED (3.0f)
+INFINITE_Z : ℝ  -- #define INFINITE_Z (1000000000.0f)
+VEHICLE_HEIGHT_DIFF_TO_CONSIDER_WEAVING : ℝ  -- #define VEHICLE_HEIGHT_DIFF_TO_CONSIDER_WEAVING (4.0f)
+PED_HEIGHT_DIFF_TO_CONSIDER_WEAVING : ℝ  -- #define PED_HEIGHT_DIFF_TO_CONSIDER_WEAVING (4.0f)
+OBJECT_HEIGHT_DIFF_TO_CONSIDER_WEAVING : ℝ  -- #define OBJECT_HEIGHT_DIFF_TO_CONSIDER_WEAVING (8.0f)
+WIDTH_COEF_TO_WEAVE_SAFELY : ℝ  -- #define WIDTH_COEF_TO_WEAVE_SAFELY (1.2f)
+OBJECT_WIDTH_TO_WEAVE : ℝ  -- #define OBJECT_WIDTH_TO_WEAVE (0.3f)
+PED_WIDTH_TO_WEAVE : ℝ  -- #define PED_WIDTH_TO_WEAVE (0.8f)
+PATH_DIRECTION_NONE : seq CHAR  -- #define PATH_DIRECTION_NONE (0)
+PATH_DIRECTION_STRAIGHT : seq CHAR  -- #define PATH_DIRECTION_STRAIGHT (1)
+PATH_DIRECTION_RIGHT : seq CHAR  -- #define PATH_DIRECTION_RIGHT (2)
+PATH_DIRECTION_LEFT : seq CHAR  -- #define PATH_DIRECTION_LEFT (4)
+ATTEMPTS_TO_FIND_NEXT_NODE : seq CHAR  -- #define ATTEMPTS_TO_FIND_NEXT_NODE (15)
+DISTANCE_TO_SWITCH_FROM_BLOCK_TO_STOP : ℝ  -- #define DISTANCE_TO_SWITCH_FROM_BLOCK_TO_STOP (5.0f)
+DISTANCE_TO_SWITCH_FROM_STOP_TO_BLOCK : ℝ  -- #define DISTANCE_TO_SWITCH_FROM_STOP_TO_BLOCK (10.0f)
+MAX_SPEED_TO_ACCOUNT_IN_INTERCEPTING : ℝ  -- #define MAX_SPEED_TO_ACCOUNT_IN_INTERCEPTING (0.13f)
+DISTANCE_TO_NEXT_NODE_TO_CONSIDER_SLOWING_DOWN : ℝ  -- #define DISTANCE_TO_NEXT_NODE_TO_CONSIDER_SLOWING_DOWN (40.0f)
+MAX_ANGLE_TO_STEER_AT_HIGH_SPEED : ℝ  -- #define MAX_ANGLE_TO_STEER_AT_HIGH_SPEED (0.2f)
+MIN_SPEED_TO_START_LIMITING_STEER : ℝ  -- #define MIN_SPEED_TO_START_LIMITING_STEER (0.45f)
+DISTANCE_TO_NEXT_NODE_TO_SELECT_NEW : ℝ  -- #define DISTANCE_TO_NEXT_NODE_TO_SELECT_NEW (5.0f)
+DISTANCE_TO_FACING_NEXT_NODE_TO_SELECT_NEW : ℝ  -- #define DISTANCE_TO_FACING_NEXT_NODE_TO_SELECT_NEW (8.0f)
+DEFAULT_MAX_STEER_ANGLE : ℝ  -- #define DEFAULT_MAX_STEER_ANGLE (0.5f)
+MIN_LOWERING_SPEED_COEFFICIENT : ℝ  -- #define MIN_LOWERING_SPEED_COEFFICIENT (0.4f)
+MAX_ANGLE_FOR_SPEED_LIMITING : ℝ  -- #define MAX_ANGLE_FOR_SPEED_LIMITING (1.2f)
+MIN_ANGLE_FOR_SPEED_LIMITING : ℝ  -- #define MIN_ANGLE_FOR_SPEED_LIMITING (0.4f)
+MIN_ANGLE_FOR_SPEED_LIMITING_BETWEEN_NODES : ℝ  -- #define MIN_ANGLE_FOR_SPEED_LIMITING_BETWEEN_NODES (0.1f)
+MIN_ANGLE_TO_APPLY_HANDBRAKE : ℝ  -- #define MIN_ANGLE_TO_APPLY_HANDBRAKE (0.7f)
+MIN_SPEED_TO_APPLY_HANDBRAKE : ℝ  -- #define MIN_SPEED_TO_APPLY_HANDBRAKE (0.3f)
+PROBABILITY_OF_DEAD_PED_ACCIDENT : ℝ  -- #define PROBABILITY_OF_DEAD_PED_ACCIDENT (0.005f)
+DISTANCE_BETWEEN_CAR_AND_DEAD_PED : ℝ  -- #define DISTANCE_BETWEEN_CAR_AND_DEAD_PED (6.0f)
+PROBABILITY_OF_PASSENGER_IN_VEHICLE : ℝ  -- #define PROBABILITY_OF_PASSENGER_IN_VEHICLE (0.125f)
+ONSCREEN_DESPAWN_RANGE : ℝ  -- #define ONSCREEN_DESPAWN_RANGE (160.0f)
+MINIMAL_DISTANCE_TO_SPAWN_ONSCREEN : ℝ  -- #define MINIMAL_DISTANCE_TO_SPAWN_ONSCREEN (100.0f)
+MAX_DISTANCE_FROM_CAMERA_TO_SPAWN_ONSCREEN : ℝ  -- #define MAX_DISTANCE_FROM_CAMERA_TO_SPAWN_ONSCREEN (82.5f)
+REQUEST_ONSCREEN_DISTANCE : ℝ  -- #define REQUEST_ONSCREEN_DISTANCE (140.0f)
+OFFSCREEN_DESPAWN_RANGE : ℝ  -- #define OFFSCREEN_DESPAWN_RANGE (60.0f)
+MINIMAL_DISTANCE_TO_SPAWN_OFFSCREEN : ℝ  -- #define MINIMAL_DISTANCE_TO_SPAWN_OFFSCREEN (40.0f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+CarCtrl_Enum_1 ::= MAX_CARS_TO_KEEP | MAX_CAR_MODELS_IN_ARRAY
+  -- val(MAX_CARS_TO_KEEP) = 2
+  -- val(MAX_CAR_MODELS_IN_ARRAY) = 25
+
+CarCtrl_Enum_2 ::= TOTAL_MULTIPLAYER_CAR_BANKS | CARS_IN_MULTIPLAYER_BANK
+  -- val(TOTAL_MULTIPLAYER_CAR_BANKS) = 3
+  -- val(CARS_IN_MULTIPLAYER_BANK) = 8
+
+eCarClass ::= NORMAL | POOR | RICH | EXEC | WORKER | BIG | TAXI | MOPED | MOTORBIKE | LEISUREBOAT | WORKERBOAT | COPS | CUBAN | HAITIAN | STREET | DIAZ | BIKER | SECURITY | PLAYER | GOLFERS | GANG9 | COPS_BOAT | FIRST_CAR_RATING | FIRST_BOAT_RATING | FIRST_GANG_CAR_RATING | NUM_CAR_CLASSES | NUM_BOAT_CLASSES | NUM_GANG_CAR_CLASSES | TOTAL_CUSTOM_CLASSES
+  -- val(NORMAL) = 0
+  -- val(FIRST_CAR_RATING) = NORMAL
+  -- val(FIRST_BOAT_RATING) = LEISUREBOAT
+
+CarCtrl_Enum_4 ::= MAX_CARS_TO_KEEP | MAX_CAR_MODELS_IN_ARRAY
+  -- val(MAX_CARS_TO_KEEP) = 2
+  -- val(MAX_CAR_MODELS_IN_ARRAY) = 256
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CCarCtrl
+  NumLawEnforcerCars : ℤ
+  NumAmbulancesOnDuty : ℤ
+  NumFiretrucksOnDuty : ℤ
+  NumRandomCars : ℤ
+  NumMissionCars : ℤ
+  NumParkedCars : ℤ
+  NumPermanentCars : ℤ
+  bCarsGeneratedAroundCamera : 𝔹
+  CarDensityMultiplier : ℝ
+  CountDownToCarsAtStart : ℤ
+  MaxNumberOfCarsInUse : ℤ
+  LastTimeLawEnforcerCreated : ℕ
+  LastTimeFireTruckCreated : ℕ
+  LastTimeAmbulanceCreated : ℕ
+  TotalNumOfCarsOfRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+  MiamiViceCycle : ℤ
+  LastTimeMiamiViceGenerated : ℕ
+  NumRequestsOfCarRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+  NumOfLoadedCarsOfRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+  scriptControlsMpCarLimit : 𝔹
+  angle : return
+  NextCarOfRating : seq ℤ  -- bounded array [TOTAL_CUSTOM_CLASSES]
+where
+  LastTimeLawEnforcerCreated ≥ 0
+  LastTimeFireTruckCreated ≥ 0
+  LastTimeAmbulanceCreated ≥ 0
+  LastTimeMiamiViceGenerated ≥ 0
+end
+
+schema CCarCtrl_SwitchVehicleToRealPhysics
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*)
+  true
+end
+
+schema CCarCtrl_AddToCarArray_2
+  ΔCCarCtrl
+  id? : ℤ
+  vehclass? : ℤ
+where
+  -- Declared member operation CCarCtrl::AddToCarArray(int32 id, int32 vehclass)
+  true
+end
+
+schema CCarCtrl_UpdateCarCount_3
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : 𝔹
+where
+  -- Declared member operation CCarCtrl::UpdateCarCount(CVehicle*, bool)
+  true
+end
+
+schema CCarCtrl_ChooseCarModel_4
+  ΔCCarCtrl
+  vehclass? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChooseCarModel(int32 vehclass)
+  true
+end
+
+schema CCarCtrl_JoinCarWithRoadSystemGotoCoors_5
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : CVector
+  arg_3? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool)
+  true
+end
+
+schema CCarCtrl_JoinCarWithRoadSystem_6
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::JoinCarWithRoadSystem(CVehicle*)
+  true
+end
+
+schema CCarCtrl_UpdateCarOnRails_7
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::UpdateCarOnRails(CVehicle*)
+  true
+end
+
+schema CCarCtrl_MapCouldMoveInThisArea_8
+  ΔCCarCtrl
+  x? : ℝ
+  y? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::MapCouldMoveInThisArea(float x, float y)
+  true
+end
+
+schema CCarCtrl_ScanForPedDanger_9
+  ΔCCarCtrl
+  veh? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::ScanForPedDanger(CVehicle *veh)
+  true
+end
+
+schema CCarCtrl_RemoveFromInterestingVehicleList_10
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::RemoveFromInterestingVehicleList(CVehicle*)
+  true
+end
+
+schema CCarCtrl_GenerateRandomCars_11
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::GenerateRandomCars(void)
+  true
+end
+
+schema CCarCtrl_GenerateOneRandomCar_12
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::GenerateOneRandomCar(void)
+  true
+end
+
+schema CCarCtrl_GenerateEmergencyServicesCar_13
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::GenerateEmergencyServicesCar(void)
+  true
+end
+
+schema CCarCtrl_ChooseModel_14
+  ΔCCarCtrl
+  arg_1? : Ref[CZoneInfo]
+  arg_2? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChooseModel(CZoneInfo*, int*)
+  true
+end
+
+schema CCarCtrl_ChoosePoliceCarModel_15
+  ΔCCarCtrl
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChoosePoliceCarModel(void)
+  true
+end
+
+schema CCarCtrl_ChooseGangCarModel_16
+  ΔCCarCtrl
+  gang? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::ChooseGangCarModel(int32 gang)
+  true
+end
+
+schema CCarCtrl_RemoveDistantCars_17
+  ΔCCarCtrl
+where
+  -- Declared member operation CCarCtrl::RemoveDistantCars(void)
+  true
+end
+
+schema CCarCtrl_PossiblyRemoveVehicle_18
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::PossiblyRemoveVehicle(CVehicle*)
+  true
+end
+
+schema CCarCtrl_IsThisVehicleInteresting_19
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::IsThisVehicleInteresting(CVehicle*)
+  true
+end
+
+schema CCarCtrl_RegisterVehicleOfInterest_20
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::RegisterVehicleOfInterest(CVehicle*)
+  true
+end
+
+schema CCarCtrl_CountCarsOfType_21
+  ΔCCarCtrl
+  mi? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CCarCtrl::CountCarsOfType(int32 mi)
+  true
+end
+
+schema CCarCtrl_SlowCarOnRailsDownForTrafficAndLights_22
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle*)
+  true
+end
+
+schema CCarCtrl_PickNextNodeAccordingStrategy_23
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*)
+  true
+end
+
+schema CCarCtrl_DragCarToPoint_24
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVector]
+where
+  -- Declared member operation CCarCtrl::DragCarToPoint(CVehicle*, CVector*)
+  true
+end
+
+schema CCarCtrl_FindMaximumSpeedForThisCarInTraffic_25
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Declared member operation CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle*)
+  true
+end
+
+schema CCarCtrl_SlowCarDownForCarsSectorList_26
+  ΔCCarCtrl
+  arg_1? : CPtrList
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℙ ℝ
+  arg_8? : ℝ
+where
+  -- Declared member operation CCarCtrl::SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float)
+  true
+end
+
+schema CCarCtrl_SlowCarDownForPedsSectorList_27
+  ΔCCarCtrl
+  arg_1? : CPtrList
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℙ ℝ
+  arg_8? : ℝ
+where
+  -- Declared member operation CCarCtrl::SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float)
+  true
+end
+
+schema CCarCtrl_SlowCarDownForOtherCar_28
+  ΔCCarCtrl
+  arg_1? : Ref[CEntity]
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℙ ℝ
+  arg_4? : ℝ
+where
+  -- Declared member operation CCarCtrl::SlowCarDownForOtherCar(CEntity*, CVehicle*, float*, float)
+  true
+end
+
+schema CCarCtrl_TestCollisionBetween2MovingRects_29
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CVehicle]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : Ref[CVector]
+  arg_6? : Ref[CVector]
+  arg_7? : ℕ
+  result! : ℝ
+where
+  -- Declared member operation CCarCtrl::TestCollisionBetween2MovingRects(CVehicle*, CVehicle*, float, float, CVector*, CVector*, uint8)
+  true
+end
+
+schema CCarCtrl_FindAngleToWeaveThroughTraffic_30
+  ΔCCarCtrl
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[CPhysical]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  result! : ℝ
+where
+  -- Declared member operation CCarCtrl::FindAngleToWeaveThroughTraffic(CVehicle*, CPhysical*, float, float)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCarCtrl_GenerateRandomCars
+  ΔCCarCtrl
+where
+  -- State update: CountDownToCarsAtStart' = 2
+  -- State update: GenerateEvenIfPlayerIsCloseCounter' = 20
+  -- Invokes: CCutsceneMgr::IsRunning, CTimer::GetTimeInMilliseconds, CTimer::GetPreviousTimeInMilliseconds
+  true
+end
+
+schema CCarCtrl_GenerateOneRandomCar
+  ΔCCarCtrl
+where
+  -- State update: unk' = 0
+  -- State update: bTopDownCamera' = false
+  -- State update: pPlayer' = &CWorld::Players[CWorld::PlayerInFocus]
+  -- State update: vecTargetPos' = FindPlayerCentreOfWorld(CWorld::PlayerInFocus)
+  -- State update: vecPlayerSpeed' = FindPlayerSpeed()
+  -- State update: pPlayer.m_nTrafficMultiplier' = pPlayer.m_fRoadDensity * zone.carDensity
+  -- Invokes: CTheZones::GetZoneInfoForTimeOfDay, pWanted->GetWantedLevel, CGame::IsInInterior, CTimer::GetTimeInMilliseconds, vecPlayerVehicleSpeed.Magnitude
+  true
+end
+
+schema CCarCtrl_ChooseBoatModel
+  ΔCCarCtrl
+  rating? : ℤ
+where
+  -- Return postcondition: result! = ChooseCarModel(rating)
+  true
+end
+
+schema CCarCtrl_ChooseBoatRating
+  ΔCCarCtrl
+  pZoneInfo? : Ref[CZoneInfo]
+where
+  -- State update: rnd' = CGeneral::GetRandomNumberInRange(0, 1000)
+  -- Return postcondition: result! = FIRST_BOAT_RATING + i
+  -- Return postcondition: result! = FIRST_BOAT_RATING + NUM_BOAT_CLASSES - 1
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarCtrl_ChooseCarRating
+  ΔCCarCtrl
+  pZoneInfo? : Ref[CZoneInfo]
+where
+  -- State update: rnd' = CGeneral::GetRandomNumberInRange(0, 1000)
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = FIRST_CAR_RATING + NUM_CAR_CLASSES - 1
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarCtrl_ChooseModel
+  ΔCCarCtrl
+  pZone? : Ref[CZoneInfo]
+  pClass? : ℙ ℤ
+where
+  -- State update: model' = -1
+  -- State update: pClass' = ChooseCarRating(pZone)
+  -- State update: model' = ChooseCarModel(*pClass)
+  -- State update: found' = false
+  -- State update: found' = true
+  -- State update: model' = -1
+  -- Return postcondition: result! = model
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = -1
+  -- Invokes: CStreaming::HasModelLoaded, CGeneral::GetRandomNumberInRange, CModelInfo::GetColModel
+  true
+end
+
+schema CCarCtrl_ChooseCarModel
+  ΔCCarCtrl
+  vehclass? : ℤ
+where
+  -- State update: model' = -1
+  -- State update: model' = CarArrays[vehclass][NextCarOfRating[vehclass]]
+  -- State update: total' = TotalNumOfCarsOfRating[vehclass]
+  -- Return postcondition: result! = model
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarCtrl_AddToLoadedVehicleArray
+  ΔCCarCtrl
+  mi? : ℤ
+  rating? : ℤ
+  freq? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCarCtrl_RemoveFromLoadedVehicleArray
+  ΔCCarCtrl
+  mi? : ℤ
+  rating? : ℤ
+where
+  -- State update: index' = 0
+  -- State update: freq' = CarFreqArrays[rating][index]
+  true
+end
+
+schema CCarCtrl_ChooseCarModelToLoad
+  ΔCCarCtrl
+  rating? : ℤ
+where
+  -- Invokes: CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CCarCtrl_ChoosePoliceCarModel
+  ΔCCarCtrl
+where
+  -- Return postcondition: result! = MI_VICECHEE
+  -- Return postcondition: result! = MI_VICECHEE
+  -- Return postcondition: result! = MI_VICECHEE
+  -- Invokes: m_pWanted->AreMiamiViceRequired, CTimer::GetTimeInMilliseconds, CStreaming::HasModelLoaded, m_pWanted->AreSwatRequired, CGeneral::GetRandomNumber
+  true
+end
+
+schema CCarCtrl_ChooseGangCarModel
+  ΔCCarCtrl
+  gang? : ℤ
+where
+  -- Return postcondition: result! = CGangs::GetGangVehicleModel(gang)
+  -- Return postcondition: result! = -1
+  -- Invokes: CStreaming::HasModelLoaded, CGangs::GetGangVehicleModel
+  true
+end
+
+schema CCarCtrl_AddToCarArray
+  ΔCCarCtrl
+  id? : ℤ
+  vehclass? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCarCtrl_RemoveDistantCars
+  ΔCCarCtrl
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: pVehicle.bCreateRoadBlockPeds' = false
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetPosition, CRoadBlocks::GenerateRoadBlockCopsForCar
+  true
+end
+
+schema CCarCtrl_RemoveCarsIfThePoolGetsFull
+  ΔCCarCtrl
+where
+  -- State update: md' = 10000000.f
+  -- State update: pClosestVehicle' = ∅
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: md' = distance
+  -- State update: pClosestVehicle' = pVehicle
+  -- Invokes: CTimer::GetFrameCounter, CPools::GetVehiclePool, pVehicle->CanBeDeleted, CCranes::IsThisCarBeingTargettedByAnyCrane, TheCamera.GetPosition
+  true
+end
+
+schema CCarCtrl_PossiblyRemoveVehicle
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: vecPlayerPos' = FindPlayerCentreOfWorld(CWorld::PlayerInFocus)
+  -- State update: distanceToPlayer' = (pVehicle.GetPosition() - vecPlayerPos).Magnitude2D()
+  -- State update: despawnMultiplier' = 1.0f
+  -- State update: despawnMultiplier' = 0.75f
+  -- State update: threshold' = OFFSCREEN_DESPAWN_RANGE * despawnMultiplier
+  -- State update: threshold' = 70.0f
+  -- Invokes: pVehicle->CanBeDeleted, CCranes::IsThisCarBeingTargettedByAnyCrane, CVisibilityPlugins::GetClumpAlpha, pVehicle->GetClump, CWorld::Remove
+  true
+end
+
+schema CCarCtrl_CountCarsOfType
+  ΔCCarCtrl
+  mi? : ℤ
+where
+  -- State update: total' = 0
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetSlot(i)
+  -- Return postcondition: result! = total
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetModelIndex
+  true
+end
+
+schema CarCtrl_GetRandomOffsetForVehicle
+  ΔCarCtrlModuleState
+  pVehicle? : Ref[CVehicle]
+  bNext? : 𝔹
+  result! : CVector
+where
+  -- State update: offset.x' = (seed - 3) * 0.009f
+  -- State update: offset.y' = ((seed >> 3) - 3) * 0.009f
+  -- State update: offset.z' = 0.0f
+  -- Return postcondition: result! = offset
+  true
+end
+
+schema CCarCtrl_UpdateCarOnRails
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nTempAction' = TEMPACT_NONE
+  -- State update: pVehicle.AutoPilot.m_nAntiReverseTimer' = CTimer::GetTimeInMilliseconds()
+  -- State update: nextPathLinkForwardX' = pNextLink.GetDirX() * pVehicle.AutoPilot.m_nNextDirection
+  -- State update: nextPathLinkForwardY' = pNextLink.GetDirY() * pVehicle.AutoPilot.m_nNextDirection
+  -- State update: directionCurrentLink' = GetRandomOffsetForVehicle(pVehicle, false)
+  -- State update: directionNextLink' = GetRandomOffsetForVehicle(pVehicle, true)
+  -- Invokes: pVehicle->SetMoveSpeed, AutoPilot.ModifySpeed, CTimer::GetTimeInMilliseconds, pVehicle->GetStatus, pCurrentLink->GetDirX
+  true
+end
+
+schema CCarCtrl_FindMaximumSpeedForThisCarInTraffic
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: left' = pVehicle.GetPosition().x - DISTANCE_TO_SCAN_FOR_DANGER
+  -- State update: right' = pVehicle.GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER
+  -- State update: top' = pVehicle.GetPosition().y - DISTANCE_TO_SCAN_FOR_DANGER
+  -- State update: bottom' = pVehicle.GetPosition().y + DISTANCE_TO_SCAN_FOR_DANGER
+  -- State update: xstart' = Max(0, CWorld::GetSectorIndexX(left))
+  -- State update: xend' = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right))
+  -- Return postcondition: result! = pVehicle->AutoPilot.GetCruiseSpeed()
+  -- Return postcondition: result! = maxSpeed
+  -- Return postcondition: result! = (maxSpeed + pVehicle->AutoPilot.GetCruiseSpeed()) / 2
+  -- Invokes: AutoPilot.GetCruiseSpeed, pVehicle->GetPosition, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::AdvanceCurrentScanCode
+  true
+end
+
+schema CCarCtrl_ScanForPedDanger
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: storedSlowDownFlag' = pVehicle.AutoPilot.m_bSlowedDownBecauseOfPeds
+  -- State update: left' = pVehicle.GetPosition().x - DISTANCE_TO_SCAN_FOR_PED_DANGER
+  -- State update: right' = pVehicle.GetPosition().x + DISTANCE_TO_SCAN_FOR_PED_DANGER
+  -- State update: top' = pVehicle.GetPosition().y - DISTANCE_TO_SCAN_FOR_PED_DANGER
+  -- State update: bottom' = pVehicle.GetPosition().y + DISTANCE_TO_SCAN_FOR_PED_DANGER
+  -- State update: xstart' = Max(0, CWorld::GetSectorIndexX(left))
+  -- Invokes: pVehicle->GetPosition, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::AdvanceCurrentScanCode, CWorld::GetSector
+  true
+end
+
+schema CCarCtrl_SlowCarOnRailsDownForTrafficAndLights
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: maxSpeed' = 0.0f
+  -- State update: maxSpeed' = FindMaximumSpeedForThisCarInTraffic(pVehicle)
+  -- State update: curSpeed' = pVehicle.AutoPilot.m_fMaxTrafficSpeed
+  -- Invokes: CTrafficLights::ShouldCarStopForLight, CTrafficLights::ShouldCarStopForBridge, CCarAI::CarHasReasonToStop, AutoPilot.ModifySpeed, CTimer::GetTimeStep
+  true
+end
+
+schema CCarCtrl_SlowCarDownForPedsSectorList
+  ΔCCarCtrl
+  lst? : CPtrList
+  pVehicle? : Ref[CVehicle]
+  x_inf? : ℝ
+  y_inf? : ℝ
+  x_sup? : ℝ
+  y_sup? : ℝ
+  pSpeed? : ℙ ℝ
+  curSpeed? : ℝ
+where
+  -- State update: frontOffset' = pVehicle.GetModelInfo().GetColModel().boundingBox.max.y
+  -- State update: frontSafe' = frontOffset + SAFE_DISTANCE_TO_PED
+  -- State update: pNode' = lst.first
+  -- State update: pPed' = (CPed*)pNode.item
+  -- State update: pPed.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: vecPedPos' = pPed.GetPosition()
+  -- Invokes: pVehicle->GetModelInfo, CWorld::GetCurrentScanCode, pPed->GetPosition, pVehicle->GetPosition, pVehicle->GetForward
+  true
+end
+
+schema CCarCtrl_SlowCarDownForCarsSectorList
+  ΔCCarCtrl
+  lst? : CPtrList
+  pVehicle? : Ref[CVehicle]
+  x_inf? : ℝ
+  y_inf? : ℝ
+  x_sup? : ℝ
+  y_sup? : ℝ
+  pSpeed? : ℙ ℝ
+  curSpeed? : ℝ
+where
+  -- State update: pNode' = lst.first
+  -- State update: pTestVehicle' = (CVehicle*)pNode.item
+  -- State update: pTestVehicle.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: boundCenter' = pTestVehicle.GetBoundCentre()
+  -- Invokes: CWorld::GetCurrentScanCode, pTestVehicle->GetBoundCentre, pVehicle->GetPosition
+  true
+end
+
+schema CCarCtrl_SlowCarDownForOtherCar
+  ΔCCarCtrl
+  pOtherEntity? : Ref[CEntity]
+  pVehicle? : Ref[CVehicle]
+  pSpeed? : ℙ ℝ
+  curSpeed? : ℝ
+where
+  -- State update: forwardA' = pVehicle.GetForward()
+  -- State update: forwardB' = pOtherEntity.GetForward()
+  -- State update: forwardB.z' = 0.0f
+  -- State update: pOtherVehicle' = (CVehicle*)pOtherEntity
+  -- State update: speedOtherX' = GAME_SPEED_TO_CARAI_SPEED * pOtherVehicle.GetMoveSpeed().x
+  -- State update: speedOtherY' = GAME_SPEED_TO_CARAI_SPEED * pOtherVehicle.GetMoveSpeed().y
+  -- Invokes: pVehicle->GetForward, pOtherEntity->GetPosition, pVehicle->GetPosition, pOtherEntity->GetForward, pOtherVehicle->GetMoveSpeed
+  true
+end
+
+schema CCarCtrl_TestCollisionBetween2MovingRects
+  ΔCCarCtrl
+  pVehicleA? : Ref[CVehicle]
+  pVehicleB? : Ref[CVehicle]
+  projectionX? : ℝ
+  projectionY? : ℝ
+  pForwardA? : Ref[CVector]
+  pForwardB? : Ref[CVector]
+  id? : ℕ
+  result! : ℝ
+where
+  -- State update: vecBToA' = pVehicleA.GetPosition() - pVehicleB.GetPosition()
+  -- State update: lenB' = pVehicleB.GetModelInfo().GetColModel().boundingBox.max.y
+  -- State update: widthB' = pVehicleB.GetModelInfo().GetColModel().boundingBox.max.x
+  -- State update: lenA' = pVehicleA.GetModelInfo().GetColModel().boundingBox.max.y
+  -- State update: widthA' = pVehicleA.GetModelInfo().GetColModel().boundingBox.max.x
+  -- State update: proximity' = 1.0f
+  -- Return postcondition: result! = proximity
+  -- Invokes: pVehicleA->GetPosition, pVehicleB->GetPosition, pVehicleB->GetModelInfo, pVehicleA->GetModelInfo
+  true
+end
+
+schema CCarCtrl_FindAngleToWeaveThroughTraffic
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CPhysical]
+  angleToTarget? : ℝ
+  angleForward? : ℝ
+  result! : ℝ
+where
+  -- State update: left' = pVehicle.GetPosition().x - distanceToTest
+  -- State update: right' = pVehicle.GetPosition().x + distanceToTest
+  -- State update: top' = pVehicle.GetPosition().y - distanceToTest
+  -- State update: bottom' = pVehicle.GetPosition().y + distanceToTest
+  -- State update: xstart' = Max(0, CWorld::GetSectorIndexX(left))
+  -- State update: xend' = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right))
+  -- Return postcondition: result! = angleToBisectActualToTarget
+  -- Return postcondition: result! = angleToWeaveRight
+  -- Return postcondition: result! = angleDiffLeft < angleDiffRight ? angleToWeaveLeft : angleToWeaveRight
+  -- Invokes: pVehicle->GetMoveSpeed, pVehicle->GetPosition, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::AdvanceCurrentScanCode
+  true
+end
+
+schema CCarCtrl_WeaveThroughCarsSectorList
+  ΔCCarCtrl
+  lst? : CPtrList
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CPhysical]
+  x_inf? : ℝ
+  y_inf? : ℝ
+  x_sup? : ℝ
+  y_sup? : ℝ
+  pAngleToWeaveLeft? : ℙ ℝ
+  pAngleToWeaveRight? : ℙ ℝ
+where
+  -- State update: pNode' = lst.first
+  -- State update: pTestVehicle' = (CVehicle*)pNode.item
+  -- State update: pTestVehicle.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- Invokes: CWorld::GetCurrentScanCode, pTestVehicle->GetBoundCentre, pTestVehicle->GetPosition, pVehicle->GetPosition
+  true
+end
+
+schema CCarCtrl_WeaveForOtherCar
+  ΔCCarCtrl
+  pOtherEntity? : Ref[CEntity]
+  pVehicle? : Ref[CVehicle]
+  pAngleToWeaveLeft? : ℙ ℝ
+  pAngleToWeaveRight? : ℙ ℝ
+where
+  -- State update: pOtherCar' = (CVehicle*)pOtherEntity
+  -- State update: vecDiff' = pOtherCar.GetPosition() - pVehicle.GetPosition()
+  -- State update: angleBetweenVehicles' = CGeneral::GetATanOfXY(vecDiff.x, vecDiff.y)
+  -- State update: distance' = vecDiff.Magnitude()
+  -- State update: forward' = pVehicle.GetForward()
+  -- State update: forwardAngle' = CGeneral::GetATanOfXY(forward.x, forward.y)
+  -- Invokes: pOtherCar->GetPosition, pVehicle->GetPosition, CGeneral::GetATanOfXY, vecDiff.Magnitude, pVehicle->GetMoveSpeed
+  true
+end
+
+schema CCarCtrl_WeaveThroughPedsSectorList
+  ΔCCarCtrl
+  lst? : CPtrList
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CPhysical]
+  x_inf? : ℝ
+  y_inf? : ℝ
+  x_sup? : ℝ
+  y_sup? : ℝ
+  pAngleToWeaveLeft? : ℙ ℝ
+  pAngleToWeaveRight? : ℙ ℝ
+where
+  -- State update: pNode' = lst.first
+  -- State update: pPed' = (CPed*)pNode.item
+  -- State update: pPed.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- Invokes: CWorld::GetCurrentScanCode, pPed->GetPosition, pVehicle->GetPosition
+  true
+end
+
+schema CCarCtrl_WeaveForPed
+  ΔCCarCtrl
+  pOtherEntity? : Ref[CEntity]
+  pVehicle? : Ref[CVehicle]
+  pAngleToWeaveLeft? : ℙ ℝ
+  pAngleToWeaveRight? : ℙ ℝ
+where
+  -- State update: pPed' = (CPed*)pOtherEntity
+  -- State update: vecDiff' = pPed.GetPosition() - pVehicle.GetPosition()
+  -- State update: angleBetweenVehicleAndPed' = CGeneral::GetATanOfXY(vecDiff.x, vecDiff.y)
+  -- State update: distance' = vecDiff.Magnitude()
+  -- State update: diffToLeftAngle' = ABS(diffToLeftAngle)
+  -- State update: angleToWeave' = lengthToEvade / 2
+  -- Invokes: pPed->GetPosition, pVehicle->GetPosition, CGeneral::GetATanOfXY, vecDiff.Magnitude, pVehicle->GetColModel
+  true
+end
+
+schema CCarCtrl_WeaveThroughObjectsSectorList
+  ΔCCarCtrl
+  lst? : CPtrList
+  pVehicle? : Ref[CVehicle]
+  x_inf? : ℝ
+  y_inf? : ℝ
+  x_sup? : ℝ
+  y_sup? : ℝ
+  pAngleToWeaveLeft? : ℙ ℝ
+  pAngleToWeaveRight? : ℙ ℝ
+where
+  -- State update: pNode' = lst.first
+  -- State update: pObject' = (CObject*)pNode.item
+  -- State update: pObject.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- Invokes: CWorld::GetCurrentScanCode, pObject->GetPosition, pVehicle->GetPosition, pObject->GetUp
+  true
+end
+
+schema CCarCtrl_WeaveForObject
+  ΔCCarCtrl
+  pOtherEntity? : Ref[CEntity]
+  pVehicle? : Ref[CVehicle]
+  pAngleToWeaveLeft? : ℙ ℝ
+  pAngleToWeaveRight? : ℙ ℝ
+where
+  -- State update: rightCoef' = 2.957f
+  -- State update: forwardCoef' = 0.147f
+  -- State update: rightCoef' = 0.744f
+  -- State update: forwardCoef' = 0.0f
+  -- State update: rightCoef' = 0.043f
+  -- State update: forwardCoef' = 0.0f
+  -- Invokes: pOtherEntity->GetModelIndex, pObject->GetPosition, pObject->GetRight, pObject->GetForward, pVehicle->GetPosition
+  true
+end
+
+schema CCarCtrl_PickNextNodeAccordingStrategy
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = PickNextNodeToFollowPath(pVehicle)
+  -- Return postcondition: result! = false
+  -- Invokes: m_pTargetCar->GetPosition, ThePaths.GetNode, pVehicle->GetModelIndex
+  true
+end
+
+schema CCarCtrl_PickNextNodeRandomly
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: prevNode' = pVehicle.AutoPilot.m_nCurrentRouteNode
+  -- State update: curNode' = pVehicle.AutoPilot.m_nNextRouteNode
+  -- State update: totalLinks' = ThePaths.m_pathNodes[curNode].numLinks
+  -- State update: lanesOnCurrentPath' = pCurLink.numLeftLanes
+  -- State update: lanesOnCurrentPath' = pCurLink.numRightLanes
+  -- State update: allowedDirections' = PATH_DIRECTION_NONE
+  -- Invokes: CGeneral::SetRandomSeed, CGeneral::GetRandomNumber, ThePaths.ConnectedNode, pVehicle->SetStatus, pCurLink->GetDirX
+  true
+end
+
+schema CCarCtrl_FindPathDirection
+  ΔCCarCtrl
+  prevNode? : ℤ
+  curNode? : ℤ
+  nextNode? : ℤ
+  result! : ℕ
+where
+  -- State update: distPrevToCur' = prevToCur.Magnitude()
+  -- State update: sin_a' = prevToCur.x / distPrevToCur
+  -- State update: cos_a' = prevToCur.y / distPrevToCur
+  -- State update: distCurToNext' = curToNext.Magnitude()
+  -- State update: sin_b' = curToNext.y / distCurToNext
+  -- State update: cos_b' = curToNext.x / distCurToNext
+  -- Return postcondition: result! = PATH_DIRECTION_NONE
+  -- Return postcondition: result! = PATH_DIRECTION_NONE
+  -- Return postcondition: result! = PATH_DIRECTION_LEFT
+  -- Invokes: prevToCur.Magnitude, curToNext.Magnitude
+  true
+end
+
+schema CCarCtrl_PickNextNodeToFollowPath
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- State update: curNode' = pVehicle.AutoPilot.m_nNextRouteNode
+  -- State update: pCurNode' = &ThePaths.m_pathNodes[curNode]
+  -- State update: pNextPathNode' = &ThePaths.m_pathNodes[pVehicle.AutoPilot.m_nNextRouteNode]
+  -- State update: pVehicle.AutoPilot.m_nPrevRouteNode' = pVehicle.AutoPilot.m_nCurrentRouteNode
+  -- State update: pVehicle.AutoPilot.m_nCurrentRouteNode' = pVehicle.AutoPilot.m_nNextRouteNode
+  -- State update: pVehicle.AutoPilot.m_nCurrentDirection' = pVehicle.AutoPilot.m_nNextDirection
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CGeneral::SetRandomSeed, ThePaths.DoPathSearch, pVehicle->GetPosition, AutoPilot.RemoveOnePathNode, ThePaths.ConnectedNode
+  true
+end
+
+schema CCarCtrl_Init
+  ΔCCarCtrl
+where
+  -- State update: NumRandomCars' = 0
+  -- State update: NumLawEnforcerCars' = 0
+  -- State update: NumMissionCars' = 0
+  -- State update: NumParkedCars' = 0
+  -- State update: NumPermanentCars' = 0
+  -- State update: NumAmbulancesOnDuty' = 0
+  true
+end
+
+schema CCarCtrl_ReInit
+  ΔCCarCtrl
+where
+  -- State update: NumRandomCars' = 0
+  -- State update: NumLawEnforcerCars' = 0
+  -- State update: NumMissionCars' = 0
+  -- State update: NumParkedCars' = 0
+  -- State update: NumPermanentCars' = 0
+  -- State update: NumAmbulancesOnDuty' = 0
+  true
+end
+
+schema CCarCtrl_DragCarToPoint
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pPoint? : Ref[CVector]
+where
+  -- State update: posTarget' = *pPoint
+  -- State update: direction' = posBehind - posTarget
+  -- State update: midPos' = posTarget + direction * 3 / direction.Magnitude()
+  -- State update: actualAheadZ' = point.point.z
+  -- State update: actualAheadZ' = point.point.z
+  -- State update: pVehicle.m_pCurGroundEntity' = pRoadObject
+  -- Invokes: pVehicle->GetPosition, pVehicle->GetForward, direction.Magnitude, CCollision::IsStoredPolyStillValidVerticalLine, CWorld::ProcessVerticalLine
+  true
+end
+
+schema CCarCtrl_FindSpeedMultiplier
+  ΔCCarCtrl
+  angleChange? : ℝ
+  minAngle? : ℝ
+  maxAngle? : ℝ
+  coef? : ℝ
+  result! : ℝ
+where
+  -- State update: angle' = Abs(LimitRadianAngle(angleChange))
+  -- State update: d' = maxAngle - minAngle
+  -- State update: mult' = 1.0f - n / d * (1.0f - coef)
+  -- Return postcondition: result! = coef
+  -- Return postcondition: result! = mult
+  true
+end
+
+schema CCarCtrl_SteerAICarWithPhysics
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: swerve' = 0.0f
+  -- State update: accel' = 0.0f
+  -- State update: brake' = 0.2f
+  -- State update: handbrake' = false
+  -- State update: pVehicle.AutoPilot.m_nTempAction' = TEMPACT_NONE
+  -- State update: pVehicle.AutoPilot.m_nAntiReverseTimer' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds, pVehicle->GetMoveSpeed, pVehicle->GetForward
+  true
+end
+
+schema CCarCtrl_SteerAICarWithPhysics_OnlyMission
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: pSwerve' = 0.0f
+  -- State update: pAccel' = 0.0f
+  -- State update: pBrake' = 0.5f
+  -- State update: pHandbrake' = true
+  -- State update: pAccel' = 0.0f
+  -- State update: pBrake' = 1.0f
+  -- Invokes: CTrafficLights::ShouldCarStopForBridge, pVehicle->GetForward, pVehicle->GetColModel, pVehicle->GetPosition, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCarCtrl_SteerAICarBlockingPlayerForwardAndBack
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: pSwerve' = 0.0f
+  -- State update: pHandbrake' = false
+  -- State update: player' = FindPlayerSpeed() + 0.1f * FindPlayerEntity().GetForward()
+  -- State update: player.z' = 0.0f
+  -- State update: dpPlayerAndRight' = DotProduct(player, right)
+  -- State update: dpPlayerAndRight' = 0.01f
+  -- Invokes: pVehicle->GetRight, right.Normalise, pVehicle->GetForward, forward.Normalise, pVehicle->GetPosition
+  true
+end
+
+schema CCarCtrl_SteerAIBoatWithPhysicsHeadingForTarget
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  targetX? : ℝ
+  targetY? : ℝ
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+where
+  -- State update: forward' = pVehicle.GetForward()
+  -- State update: angleForward' = CGeneral::GetATanOfXY(forward.x, forward.y)
+  -- State update: steerAngle' = LimitRadianAngle(angleToTarget - angleForward)
+  -- State update: speedTarget' = pVehicle.AutoPilot.GetCruiseSpeed()
+  -- State update: speedTarget' = pVehicle.AutoPilot.m_nCruiseSpeed
+  -- State update: speedDiff' = speedTarget - currentSpeed
+  -- Invokes: pVehicle->GetForward, forward.Normalise, CGeneral::GetATanOfXY, pVehicle->GetPosition, AutoPilot.GetCruiseSpeed
+  true
+end
+
+schema CCarCtrl_SteerAIBoatWithPhysicsAttackingPlayer
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: distanceToPlayer' = (FindPlayerCoors() - pVehicle.GetPosition()).Magnitude()
+  -- State update: projection' = Min(distanceToPlayer / 20.0f, 2.0f)
+  -- State update: forward' = pVehicle.GetForward()
+  -- State update: angleForward' = CGeneral::GetATanOfXY(forward.x, forward.y)
+  -- State update: steerAngle' = LimitRadianAngle(angleToTarget - angleForward)
+  -- State update: speedTarget' = pVehicle.AutoPilot.GetCruiseSpeed()
+  -- Invokes: pVehicle->GetPosition, pVehicle->GetForward, forward.Normalise, CGeneral::GetATanOfXY, AutoPilot.GetCruiseSpeed
+  true
+end
+
+schema CCarCtrl_FindMaxSteerAngle
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Invokes: pVehicle->GetModelIndex
+  true
+end
+
+schema CCarCtrl_SteerAIHeliTowardsTargetCoors
+  ΔCCarCtrl
+  pHeli? : Ref[CAutomobile]
+where
+  -- State update: distanceToTarget' = vecToTarget.Magnitude()
+  -- State update: speed' = pHeli.AutoPilot.GetCruiseSpeed() * 0.01f
+  -- State update: speed' = pHeli.AutoPilot.m_nCruiseSpeed * 0.01f
+  -- State update: resistance' = Pow(0.997f, CTimer::GetTimeStep())
+  -- State update: vecSpeedDirection' = vecAdvanceThisFrame - pHeli.m_vecMoveSpeed
+  -- State update: vecSpeedChangeLength' = vecSpeedDirection.Magnitude()
+  -- Invokes: pHeli->GetPosition, vecToTarget.Magnitude, AutoPilot.GetCruiseSpeed, vecToTarget.Normalise, CTimer::GetTimeStep
+  true
+end
+
+schema CCarCtrl_SteerAIPlaneTowardsTargetCoors
+  ΔCCarCtrl
+  pPlane? : Ref[CAutomobile]
+where
+  -- State update: fForwardZ' = Clamp(fForwardZ, -0.3f, 0.3f)
+  -- State update: angle' = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y)
+  -- State update: difference' = LimitRadianAngle(angle - pPlane.m_fOrientation)
+  -- State update: steer' = difference > 0.0f ? 0.04f : -0.04f
+  -- State update: steerChange' = steer - pPlane.m_fPlaneSteer
+  -- State update: maxChange' = 0.003f * CTimer::GetTimeStep()
+  -- Invokes: pPlane->GetPosition, vecToTarget.Magnitude, CGeneral::GetATanOfXY, CTimer::GetTimeStep, up.Normalise
+  true
+end
+
+schema CCarCtrl_SteerAICarWithPhysicsFollowPath
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: forward' = pVehicle.GetForward()
+  -- State update: nextPathLinkForwardX' = pNextLink.GetDirX() * pVehicle.AutoPilot.m_nNextDirection
+  -- State update: nextPathLinkForwardY' = pNextLink.GetDirY() * pVehicle.AutoPilot.m_nNextDirection
+  -- State update: scalarDistanceToNextNode' = distanceToNextNode.Magnitude()
+  -- State update: dp' = DotProduct2D(distanceBetweenNodes, distanceToNextNode)
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_GOTOCOORDS_STRAIGHT
+  -- Invokes: pVehicle->GetForward, forward.Normalise, pCurrentLink->GetDirX, pCurrentLink->GetDirY, pNextLink->GetDirX
+  true
+end
+
+schema CCarCtrl_SteerAICarWithPhysicsHeadingForTarget
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  pTarget? : Ref[CPhysical]
+  targetX? : ℝ
+  targetY? : ℝ
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: pHandbrake' = false
+  -- State update: forward' = pVehicle.GetForward()
+  -- State update: angleForward' = CGeneral::GetATanOfXY(forward.x, forward.y)
+  -- State update: steerAngle' = LimitRadianAngle(angleToTarget - angleForward)
+  -- State update: pHandbrake' = true
+  -- State update: maxAngle' = FindMaxSteerAngle(pVehicle)
+  -- Invokes: pVehicle->GetForward, forward.NormaliseSafe, CGeneral::GetATanOfXY, pVehicle->GetPosition, pVehicle->GetMoveSpeed
+  true
+end
+
+schema CCarCtrl_SteerAICarWithPhysicsTryingToBlockTarget
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  targetX? : ℝ
+  targetY? : ℝ
+  targetSpeedX? : ℝ
+  targetSpeedY? : ℝ
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: trajectoryLen' = offset.Magnitude()
+  -- State update: pVehicle.AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_AVOID_CARS
+  -- Invokes: offset.Magnitude, pVehicle->GetPosition
+  true
+end
+
+schema CCarCtrl_SteerAICarWithPhysicsTryingToBlockTarget_Stop
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  targetX? : ℝ
+  targetY? : ℝ
+  targetSpeedX? : ℝ
+  targetSpeedY? : ℝ
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+  pHandbrake? : ℙ 𝔹
+where
+  -- State update: pSwerve' = 0.0f
+  -- State update: pAccel' = 0.0f
+  -- State update: pBrake' = 1.0f
+  -- State update: pHandbrake' = true
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 0
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_NONE
+  -- Invokes: pVehicle->GetPosition, pVehicle->GetMoveSpeed, CCarAI::TellOccupantsToLeaveCar, CTimer::GetTimeStepInMilliseconds, CTimer::GetTimeStep
+  true
+end
+
+schema CCarCtrl_RegisterVehicleOfInterest
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: oldestCarWeKeepTime' = UINT32_MAX
+  -- State update: oldestCarWeKeepIndex' = 0
+  -- State update: oldestCarWeKeepTime' = aCarsToKeepTime[i]
+  -- State update: oldestCarWeKeepIndex' = i
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCarCtrl_IsThisVehicleInteresting
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCarCtrl_RemoveFromInterestingVehicleList
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCarCtrl_ClearInterestingVehicleList
+  ΔCCarCtrl
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CCarCtrl_SwitchVehicleToRealPhysics
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nCarMission' = MISSION_CRUISE
+  -- State update: pVehicle.AutoPilot.m_nTempAction' = TEMPACT_NONE
+  -- State update: pVehicle.AutoPilot.m_nAntiReverseTimer' = CTimer::GetTimeInMilliseconds()
+  -- State update: pVehicle.AutoPilot.m_nTimeTempAction' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCarCtrl_JoinCarWithRoadSystem
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pVehicle.AutoPilot.m_nNextRouteNode' = 0
+  -- State update: pVehicle.AutoPilot.m_nNextPathNodeInfo' = 0
+  -- State update: pNode' = &ThePaths.m_pathNodes[nodeId]
+  -- State update: prevNodeId' = -1
+  -- State update: minDistance' = 999999.9f
+  -- State update: candidateId' = ThePaths.ConnectedNode(i + pNode.firstLink)
+  -- Invokes: ThePaths.FindNodeClosestToCoorsFavourDirection, pVehicle->GetPosition, pVehicle->GetForward, ThePaths.ConnectedNode, pCandidateNode->GetPosition
+  true
+end
+
+schema CCarCtrl_JoinCarWithRoadSystemGotoCoors
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  vecTarget? : CVector
+  isProperNow? : 𝔹
+  result! : 𝔹
+where
+  -- State update: pVehicle.AutoPilot.m_nNextRouteNode' = 0
+  -- State update: pVehicle.AutoPilot.m_nPrevRouteNode' = 0
+  -- State update: pVehicle.AutoPilot.m_nCurrentLane' = 0
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: ThePaths.DoPathSearch, pVehicle->GetPosition, ThePaths.RemoveBadStartNode, AutoPilot.RemoveOnePathNode
+  true
+end
+
+schema CCarCtrl_FindLinksToGoWithTheseNodes
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: nextLink' = 0
+  -- State update: curLink' = 0
+  -- State update: curConnection' = ThePaths.m_carPathConnections[pCurNode.firstLink]
+  -- State update: closestLink' = -1
+  -- State update: md' = 999999.9f
+  -- State update: curLink' = 0
+  -- Invokes: CGeneral::SetRandomSeed, ThePaths.ConnectedNode, pCurNode->GetPosition, pNode->GetPosition, CCollision::DistToLine
+  true
+end
+
+schema CCarCtrl_GenerateEmergencyServicesCar
+  ΔCCarCtrl
+where
+  -- State update: distance' = 30.0f
+  -- State update: LastTimeAmbulanceCreated' = CTimer::GetTimeInMilliseconds()
+  -- State update: distance' = 30.0f
+  -- State update: pNearestFire' = gFireManager.FindNearestFire(FindPlayerCoors(), &distance)
+  -- State update: LastTimeFireTruckCreated' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: m_pWanted->GetWantedLevel, CGame::IsInInterior, gAccidentManager.CountActiveAccidents, CStreaming::HasModelLoaded, CStreaming::SetModelIsDeletable
+  true
+end
+
+schema CCarCtrl_GenerateOneEmergencyServicesCar
+  ΔCCarCtrl
+  mi? : ℕ
+  vecPos? : CVector
+  result! : 𝔹
+where
+  -- State update: pPlayerPos' = FindPlayerCentreOfWorld(CWorld::PlayerInFocus)
+  -- State update: created' = false
+  -- State update: attempts' = 0
+  -- State update: created' = true
+  -- State update: pVehicle' = new CAutomobile(mi, RANDOM_VEHICLE)
+  -- State update: pVehicle.AutoPilot.m_nCruiseSpeed' = 25
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: ThePaths.GenerateCarCreationCoors, ThePaths.GetNode, CWorld::FindObjectsKindaColliding, pVehicle->SetPosition, direction.Normalise
+  true
+end
+
+schema CCarCtrl_UpdateCarCount
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+  remove? : 𝔹
+where
+  -- State update: NumLawEnforcerCars' = 0
+  -- State update: NumRandomCars' = 0
+  -- State update: NumMissionCars' = 0
+  -- State update: NumParkedCars' = 0
+  -- State update: NumPermanentCars' = 0
+  true
+end
+
+schema CCarCtrl_ThisRoadObjectCouldMove
+  ΔCCarCtrl
+  mi? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = mi == MI_BRIDGELIFT || mi == MI_BRIDGEROADSEGMENT
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCarCtrl_MapCouldMoveInThisArea
+  ΔCCarCtrl
+  x? : ℝ
+  y? : ℝ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = x > -342.0f && x < -219.0f && y > -677.0f && y < -580.0f
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CCarCtrl_BoatWithTallMast
+  ΔCCarCtrl
+  mi? : ℤ
+where
+  -- Return postcondition: result! = mi == MI_RIO || mi == MI_TROPIC || mi == MI_MARQUIS
+  true
+end
+
+schema CCarCtrl_OkToCreateVehicleAtThisPosition
+  ΔCCarCtrl
+  pos? : CVector
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CCarCtrl_FindSpeedMultiplierWithSpeedFromNodes
+  ΔCCarCtrl
+  type? : ℤ
+  result! : ℝ
+where
+  -- Return postcondition: result! = 1.5f
+  -- Return postcondition: result! = 2.0f
+  -- Return postcondition: result! = 1.0f
+  true
+end
+
+schema CCarCtrl_RenderDebugInfo
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pNextNode' = &ThePaths.m_pathNodes[pVehicle.AutoPilot.m_nNextRouteNode]
+  -- State update: vPrevPos' = vCurPos
+  -- Invokes: pCurNode->GetPosition, pNextNode->GetPosition, pCurLink->GetDirX, pCurLink->GetDirY, pNextLink->GetDirX
+  true
+end
+
+schema CCarCtrl_SetMultiplayerAmbientCarLimit
+  ΔCCarCtrl
+  limit? : ℕ
+where
+  -- State update: maxRandomMpCars' = limit
+  true
+end
+
+schema CCarCtrl_ToggleScriptControlsMpCarLimit
+  ΔCCarCtrl
+  toggle? : 𝔹
+where
+  -- State update: scriptControlsMpCarLimit' = toggle
+  true
+end
+
+schema CCarCtrl_MultiPlayerRemoveVehicleAndDriver
+  ΔCCarCtrl
+  pVehicle? : Ref[CVehicle]
+where
+  -- State update: pDriver' = pVehicle.pDriver
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CCarCtrl_Write
+  ΔCCarCtrl
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw
+  true
+end
+
+schema CCarCtrl_ChooseModel_2
+  ΔCCarCtrl
+  pZone? : Ref[CZoneInfo]
+  pPos? : Ref[CVector]
+  pClass? : ℙ ℤ
+where
+  -- State update: model' = -1
+  -- State update: rnd' = CGeneral::GetRandomNumberInRange(0, 1000)
+  -- State update: pClass' = POOR))
+  -- State update: pClass' = RICH))
+  -- State update: pClass' = EXEC))
+  -- State update: pClass' = WORKER))
+  -- Return postcondition: result! = model
+  -- Invokes: CStreaming::HasModelLoaded, CGeneral::GetRandomNumberInRange, CCarCtrl::ChooseCarModel, CCarCtrl::ChoosePoliceCarModel, CCarCtrl::ChooseGangCarModel
+  true
+end
+
+schema CCarCtrl_SteerAIBoatWithPhysics
+  ΔCCarCtrl
+  pBoat? : Ref[CBoat]
+where
+  -- State update: pBoat.m_fSteeringLeftRight' = 0.0f
+  -- State update: pBoat.m_fAccelerate' = 0.0f
+  -- State update: pBoat.m_fBrake' = 0.0f
+  -- State update: pBoat.m_fSteerAngle' = pBoat.m_fSteeringLeftRight
+  -- State update: pBoat.m_fGasPedal' = pBoat.m_fAccelerate
+  -- State update: pBoat.m_fBrakePedal' = pBoat.m_fBrake
+  true
+end
+
+schema CCarCtrl_SteerAIBoatWithPhysicsHeadingForTarget_2
+  ΔCCarCtrl
+  pBoat? : Ref[CBoat]
+  targetX? : ℝ
+  targetY? : ℝ
+  pSwerve? : ℙ ℝ
+  pAccel? : ℙ ℝ
+  pBrake? : ℙ ℝ
+where
+  -- State update: distanceToTarget' = CVector2D(targetX, targetY) - pBoat.GetPosition()
+  -- State update: angleForward' = CGeneral::GetATanOfXY(forward.x, forward.y)
+  -- State update: angleDiff' = LimitRadianAngle(angleToTarget - angleForward)
+  -- State update: currentSpeed' = pBoat.GetMoveSpeed().Magnitude2D()
+  -- State update: speedDiff' = pBoat.AutoPilot.m_nCruiseSpeed - currentSpeed * 60.0f
+  -- State update: accRemaining' = speedDiff / pBoat.AutoPilot.m_nCruiseSpeed
+  -- Invokes: pBoat->GetForward, forward.NormaliseSafe, pBoat->GetPosition, CGeneral::GetATanOfXY, pBoat->GetMoveSpeed
+  true
+end
+
+schema CarCtrl_GetPositionAlongCurrentCurve
+  ΔCarCtrlModuleState
+  pVehicle? : Ref[CVehicle]
+  result! : ℝ
+where
+  -- Return postcondition: result! = (float)timeInCurve / pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CarCtrl_LimitRadianAngle
+  ΔCarCtrlModuleState
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = CGeneral::LimitRadianAngle(angle)
+  -- Invokes: CGeneral::LimitRadianAngle
+  true
+end

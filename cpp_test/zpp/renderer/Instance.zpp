@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Instance (renderer)
+-- Source File(s): renderer/Instance.cpp, renderer/Instance.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Instance.zpp  (from "Instance.h")
+-- include Placeable.zpp  (from "Placeable.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CInstance
+  CPlaceable  -- inherits base schema
+  m_modelIndex : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CInstance_CInstance
+  ΔCInstance
+  result! : ANY
+where
+  -- Declared member operation CInstance::CInstance()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CInstance_Shutdown
+  ΔCInstance
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Instance_CInstance
+  ΔInstanceModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

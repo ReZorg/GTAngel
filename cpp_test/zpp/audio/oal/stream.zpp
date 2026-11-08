@@ -1,0 +1,2910 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: stream (audio)
+-- Source File(s): audio/oal/stream.cpp, audio/oal/stream.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include sndfile.zpp  (from "sndfile.h")
+-- include mpg123.zpp  (from "mpg123.h")
+-- include opusfile.zpp  (from "opusfile.h")
+-- include queue.zpp  (from "queue")
+-- include utility.zpp  (from "utility")
+-- include emscripten.zpp  (from "emscripten.h")
+-- include iostream.zpp  (from "iostream")
+-- include thread.zpp  (from "thread")
+-- include mutex.zpp  (from "mutex")
+-- include condition_variable.zpp  (from "condition_variable")
+-- include MusicManager.zpp  (from "MusicManager.h")
+-- include stream.zpp  (from "stream.h")
+-- include sampman.zpp  (from "sampman.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include al.zpp  (from "AL/al.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+SAMPLES_IN_LINE : seq CHAR  -- #define SAMPLES_IN_LINE (8)
+VAG_LINE_SIZE : seq CHAR  -- #define VAG_LINE_SIZE (0x10)
+VAG_SAMPLES_IN_LINE : seq CHAR  -- #define VAG_SAMPLES_IN_LINE (28)
+VB_BLOCK_SIZE : seq CHAR  -- #define VB_BLOCK_SIZE (0x2000)
+NUM_VAG_LINES_IN_BLOCK : seq CHAR  -- #define NUM_VAG_LINES_IN_BLOCK (VB_BLOCK_SIZE / VAG_LINE_SIZE)
+NUM_VAG_SAMPLES_IN_BLOCK : seq CHAR  -- #define NUM_VAG_SAMPLES_IN_BLOCK (NUM_VAG_LINES_IN_BLOCK * VAG_SAMPLES_IN_LINE)
+NUM_STREAMBUFFERS : ℕ  -- #define NUM_STREAMBUFFERS 8
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+stream_Enum_1 ::= WAVEFMT_PCM | WAVEFMT_IMA_ADPCM | WAVEFMT_XBOX_ADPCM
+  -- val(WAVEFMT_PCM) = 1
+  -- val(WAVEFMT_IMA_ADPCM) = 0x11
+  -- val(WAVEFMT_XBOX_ADPCM) = 0x69
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSortStereoBuffer
+  PcmBuf : ℙ ℕ
+  BufSize : ℕ
+where
+  #PcmBuf ≤ 1
+  BufSize ≥ 0
+end
+
+schema CSortStereoBuffer_CSortStereoBuffer
+  ΔCSortStereoBuffer
+where
+  -- Declared member operation CSortStereoBuffer::CSortStereoBuffer()
+  true
+end
+
+schema CSortStereoBuffer_GetBuffer_2
+  ΔCSortStereoBuffer
+  size? : ℕ
+  result! : ℙ ℕ
+where
+  -- Declared member operation CSortStereoBuffer::GetBuffer(size_t size)
+  true
+end
+
+schema CSortStereoBuffer_if_3
+  ΔCSortStereoBuffer
+  PcmBuf? : ANY
+where
+  -- Declared member operation CSortStereoBuffer::if(!PcmBuf)
+  true
+end
+
+schema CSortStereoBuffer_malloc_4
+  ΔCSortStereoBuffer
+  arg_1? : BufSize
+  result! : ℙ ℕ
+where
+  -- Declared member operation CSortStereoBuffer::malloc(BufSize)
+  true
+end
+
+schema CSortStereoBuffer_if_5
+  ΔCSortStereoBuffer
+  size? : BufSize
+  result! : else
+where
+  -- Declared member operation CSortStereoBuffer::if(BufSize < size)
+  true
+end
+
+schema CSortStereoBuffer_realloc_6
+  ΔCSortStereoBuffer
+  arg_1? : PcmBuf
+  arg_2? : size
+  result! : ℙ ℕ
+where
+  -- Declared member operation CSortStereoBuffer::realloc(PcmBuf, size)
+  true
+end
+
+schema CSortStereoBuffer_SortStereo_7
+  ΔCSortStereoBuffer
+  buf? : ADDRESS
+  size? : ℕ
+  result! : void
+where
+  -- Declared member operation CSortStereoBuffer::SortStereo(void* buf, size_t size)
+  true
+end
+
+schema CSortStereoBuffer_GetBuffer_8
+  ΔCSortStereoBuffer
+  arg_1? : size
+  result! : ℙ ℕ
+where
+  -- Declared member operation CSortStereoBuffer::GetBuffer(size)
+  true
+end
+
+schema CSortStereoBuffer_if_9
+  ΔCSortStereoBuffer
+  OutBuf? : ANY
+where
+  -- Declared member operation CSortStereoBuffer::if(!OutBuf)
+  true
+end
+
+schema CSortStereoBuffer_memcpy_10
+  ΔCSortStereoBuffer
+  arg_1? : InBuf
+  arg_2? : OutBuf
+  arg_3? : size
+  result! : ANY
+where
+  -- Declared member operation CSortStereoBuffer::memcpy(InBuf, OutBuf, size)
+  true
+end
+
+schema CImaADPCMDecoder
+  StepIndex : ℤ
+  size : i
+  Sample : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CImaADPCMDecoder_CImaADPCMDecoder
+  ΔCImaADPCMDecoder
+where
+  -- Declared member operation CImaADPCMDecoder::CImaADPCMDecoder()
+  true
+end
+
+schema CImaADPCMDecoder_Init_2
+  ΔCImaADPCMDecoder
+  _Sample? : ℤ
+  _StepIndex? : ℤ
+  result! : void
+where
+  -- Declared member operation CImaADPCMDecoder::Init(int16 _Sample, int16 _StepIndex)
+  true
+end
+
+schema CImaADPCMDecoder_Decode_3
+  ΔCImaADPCMDecoder
+  inbuf? : ℙ ℕ
+  _outbuf? : ℙ ℤ
+  size? : ℕ
+  result! : void
+where
+  -- Declared member operation CImaADPCMDecoder::Decode(uint8 *inbuf, int16 *_outbuf, size_t size)
+  true
+end
+
+schema CImaADPCMDecoder_DecodeSample_4
+  ΔCImaADPCMDecoder
+  xF? : inbuf_i___0
+  result! : Ref[i_______outbuf]
+where
+  -- Declared member operation CImaADPCMDecoder::DecodeSample(inbuf[i] & 0xF)
+  true
+end
+
+schema CImaADPCMDecoder_DecodeSample_5
+  ΔCImaADPCMDecoder
+  arg_1? : inbuf_i_____4
+  result! : Ref[outbuf]
+where
+  -- Declared member operation CImaADPCMDecoder::DecodeSample(inbuf[i] >> 4)
+  true
+end
+
+schema CImaADPCMDecoder_DecodeSample_6
+  ΔCImaADPCMDecoder
+  adpcm? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CImaADPCMDecoder::DecodeSample(uint8 adpcm)
+  true
+end
+
+schema CImaADPCMDecoder_if_7
+  ΔCImaADPCMDecoder
+  arg_1? : adpcm__4
+where
+  -- Declared member operation CImaADPCMDecoder::if(adpcm & 4)
+  true
+end
+
+schema CImaADPCMDecoder_Clamp_8
+  ΔCImaADPCMDecoder
+  arg_1? : StepIndex
+  arg_2? : 0
+  arg_3? : 88
+  result! : StepIndex
+where
+  -- Declared member operation CImaADPCMDecoder::Clamp(StepIndex, 0, 88)
+  true
+end
+
+schema CImaADPCMDecoder_if_9
+  ΔCImaADPCMDecoder
+  arg_1? : adpcm__1
+where
+  -- Declared member operation CImaADPCMDecoder::if(adpcm & 1)
+  true
+end
+
+schema CImaADPCMDecoder_if_10
+  ΔCImaADPCMDecoder
+  arg_1? : adpcm__2
+where
+  -- Declared member operation CImaADPCMDecoder::if(adpcm & 2)
+  true
+end
+
+schema CImaADPCMDecoder_if_11
+  ΔCImaADPCMDecoder
+  arg_1? : adpcm__4
+where
+  -- Declared member operation CImaADPCMDecoder::if(adpcm & 4)
+  true
+end
+
+schema CImaADPCMDecoder_if_12
+  ΔCImaADPCMDecoder
+  arg_1? : adpcm__8
+where
+  -- Declared member operation CImaADPCMDecoder::if(adpcm & 8)
+  true
+end
+
+schema CImaADPCMDecoder_Clamp_13
+  ΔCImaADPCMDecoder
+  arg_1? : newSample
+  arg_2? : 32768
+  arg_3? : 32767
+  result! : Sample
+where
+  -- Declared member operation CImaADPCMDecoder::Clamp(newSample, -32768, 32767)
+  true
+end
+
+schema CWavFile
+  IDecoder  -- inherits base schema
+  Size : ℕ
+  NumChannels : ℕ
+  SampleRate : ℕ
+  ByteRate : ℕ
+  BlockAlign : ℕ
+  BitsPerSample : ℕ
+  extra : seq ℕ  -- bounded array [2]
+  m_pFile : Ref[FILE]
+  m_bIsOpen : 𝔹
+  m_FormatHeader : tFormatHeader
+  m_DataStartOffset : ℕ
+  m_nSampleCount : ℕ
+  m_nSamplesPerBlock : ℕ
+  m_pAdpcmBuffer : ℙ ℕ
+  m_ppPcmBuffers : ℙ ℤ
+  m_pAdpcmDecoders : Ref[CImaADPCMDecoder]
+  WAVE : ℤ
+  size : return
+where
+  Size ≥ 0
+  NumChannels ≥ 0
+  SampleRate ≥ 0
+  ByteRate ≥ 0
+  BlockAlign ≥ 0
+  BitsPerSample ≥ 0
+  #extra = 2
+  #m_pFile ≤ 1
+  m_DataStartOffset ≥ 0
+  m_nSampleCount ≥ 0
+  m_nSamplesPerBlock ≥ 0
+  #m_pAdpcmBuffer ≤ 1
+  #m_ppPcmBuffers ≤ 1
+  #m_pAdpcmDecoders ≤ 1
+end
+
+schema CWavFile_tFormatHeader
+  ΔCWavFile
+where
+  -- Declared member operation CWavFile::tFormatHeader()
+  true
+end
+
+schema CWavFile_Close_2
+  ΔCWavFile
+where
+  -- Declared member operation CWavFile::Close()
+  true
+end
+
+schema CWavFile_GetCurrentSample_3
+  ΞCWavFile
+  result! : ℕ
+where
+  -- Declared member operation CWavFile::GetCurrentSample()
+  true
+end
+
+schema CWavFile_if_4
+  ΔCWavFile
+  arg_1? : FilePos
+where
+  -- Declared member operation CWavFile::if(FilePos <= m_DataStartOffset)
+  true
+end
+
+schema CWavFile_return_5
+  ΔCWavFile
+  m_DataStartOffset? : FilePos
+where
+  -- Declared member operation CWavFile::return(FilePos - m_DataStartOffset)
+  true
+end
+
+schema CWavFile_CWavFile_6
+  ΔCWavFile
+  path? : seq CHAR
+  result! : public
+where
+  -- Declared member operation CWavFile::CWavFile(const char* path)
+  true
+end
+
+schema CWavFile_if_7
+  ΔCWavFile
+  m_pFile? : ANY
+where
+  -- Declared member operation CWavFile::if(!m_pFile)
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_8
+  ΔCWavFile
+  DataHeader? : fread
+  DataHeader? : sizeof
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader)
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_9
+  ΔCWavFile
+  arg_1? : DataHeader_ID
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(DataHeader.ID != 'FFIR')
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_10
+  ΔCWavFile
+  WAVE? : fread
+  arg_2? : 4
+  arg_3? : 1
+  arg_4? : m_pFile
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(fread(&WAVE, 4, 1, m_pFile)
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_11
+  ΔCWavFile
+  arg_1? : WAVE
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(WAVE != 'EVAW')
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_12
+  ΔCWavFile
+  arg_1? : DataHeader_ID
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(DataHeader.ID != ' tmf')
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_13
+  ΔCWavFile
+  m_FormatHeader? : fread
+  Size? : Min_DataHeader
+  tFormatHeader? : sizeof
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(fread(&m_FormatHeader, Min(DataHeader.Size, sizeof(tFormatHeader)
+  true
+end
+
+schema CWavFile_CLOSE_ON_ERROR_14
+  ΔCWavFile
+  tFormatHeader? : DataHeader_Size___sizeof
+where
+  -- Declared member operation CWavFile::CLOSE_ON_ERROR(DataHeader.Size > sizeof(tFormatHeader)
+  true
+end
+
+schema CWavFile_switch_15
+  ΔCWavFile
+  AudioFormat? : m_FormatHeader
+where
+  -- Declared member operation CWavFile::switch(m_FormatHeader.AudioFormat)
+  true
+end
+
+schema CWavFile_if_16
+  ΔCWavFile
+  arg_1? : m_FormatHeader_BitsPerSample
+where
+  -- Declared member operation CWavFile::if(m_FormatHeader.BitsPerSample != 16)
+  true
+end
+
+schema CWavFile_Close_17
+  ΔCWavFile
+where
+  -- Declared member operation CWavFile::Close()
+  true
+end
+
+schema CWavFile_debug_18
+  ΔCWavFile
+  s? : Unsupported_wav_format_0x_x
+  result! : default
+where
+  -- Declared member operation CWavFile::debug("Unsupported wav format 0x%x (%s)
+  true
+end
+
+schema CWavFile_Close_19
+  ΔCWavFile
+where
+  -- Declared member operation CWavFile::Close()
+  true
+end
+
+schema CWavFile_while_20
+  ΔCWavFile
+  arg_1? : true
+  result! : ANY
+where
+  -- Declared member operation CWavFile::while(true)
+  true
+end
+
+schema CWavFile_if_21
+  ΔCWavFile
+  ID? : DataHeader
+where
+  -- Declared member operation CWavFile::if(DataHeader.ID == 'atad')
+  true
+end
+
+schema CWavFile_fseek_22
+  ΔCWavFile
+  arg_1? : m_pFile
+  Size? : DataHeader
+  arg_3? : SEEK_CUR
+where
+  -- Declared member operation CWavFile::fseek(m_pFile, DataHeader.Size, SEEK_CUR)
+  true
+end
+
+schema CWavFile_ftell_23
+  ΔCWavFile
+  arg_1? : m_pFile
+  result! : m_DataStartOffset
+where
+  -- Declared member operation CWavFile::ftell(m_pFile)
+  true
+end
+
+schema CWavFile_IsOpened_24
+  ΔCWavFile
+  result! : bool
+where
+  -- Declared member operation CWavFile::IsOpened()
+  true
+end
+
+schema CWavFile_GetSampleSize_25
+  ΔCWavFile
+  result! : ℕ
+where
+  -- Declared member operation CWavFile::GetSampleSize()
+  true
+end
+
+schema CWavFile_GetSampleCount_26
+  ΔCWavFile
+  result! : ℕ
+where
+  -- Declared member operation CWavFile::GetSampleCount()
+  true
+end
+
+schema CWavFile_GetSampleRate_27
+  ΔCWavFile
+  result! : ℕ
+where
+  -- Declared member operation CWavFile::GetSampleRate()
+  true
+end
+
+schema CWavFile_GetChannels_28
+  ΔCWavFile
+  result! : ℕ
+where
+  -- Declared member operation CWavFile::GetChannels()
+  true
+end
+
+schema CWavFile_Seek_29
+  ΔCWavFile
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation CWavFile::Seek(uint32 milliseconds)
+  true
+end
+
+schema CWavFile_fseek_30
+  ΔCWavFile
+  arg_1? : m_pFile
+  milliseconds? : m_DataStartOffset___ms2samples
+where
+  -- Declared member operation CWavFile::fseek(m_pFile, m_DataStartOffset + ms2samples(milliseconds)
+  true
+end
+
+schema tDataHeader
+  ID : ℕ
+  Size : ℕ
+where
+  ID ≥ 0
+  Size ≥ 0
+end
+
+schema tFormatHeader
+  AudioFormat : ℕ
+  NumChannels : ℕ
+  SampleRate : ℕ
+  ByteRate : ℕ
+  BlockAlign : ℕ
+  BitsPerSample : ℕ
+  extra : seq ℕ  -- bounded array [2]
+where
+  AudioFormat ≥ 0
+  NumChannels ≥ 0
+  SampleRate ≥ 0
+  ByteRate ≥ 0
+  BlockAlign ≥ 0
+  BitsPerSample ≥ 0
+  #extra = 2
+end
+
+schema tFormatHeader_tFormatHeader
+  ΔtFormatHeader
+where
+  -- Declared member operation tFormatHeader::tFormatHeader()
+  true
+end
+
+schema CSndFile
+  IDecoder  -- inherits base schema
+  m_pfSound : Ref[SNDFILE]
+  m_soundInfo : SF_INFO
+  size : return
+where
+  #m_pfSound ≤ 1
+end
+
+schema CSndFile_CSndFile
+  ΔCSndFile
+  path? : seq CHAR
+where
+  -- Declared member operation CSndFile::CSndFile(const char *path)
+  true
+end
+
+schema CSndFile_sf_open_2
+  ΔCSndFile
+  arg_1? : path
+  arg_2? : SFM_READ
+  m_soundInfo? : ANY
+  result! : m_pfSound
+where
+  -- Declared member operation CSndFile::sf_open(path, SFM_READ, &m_soundInfo)
+  true
+end
+
+schema CSndFile_FileOpen_3
+  ΔCSndFile
+  result! : void
+where
+  -- Declared member operation CSndFile::FileOpen()
+  true
+end
+
+schema CSndFile_IsOpened_4
+  ΔCSndFile
+  result! : bool
+where
+  -- Declared member operation CSndFile::IsOpened()
+  true
+end
+
+schema CSndFile_GetSampleSize_5
+  ΔCSndFile
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::GetSampleSize()
+  true
+end
+
+schema CSndFile_GetSampleCount_6
+  ΔCSndFile
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::GetSampleCount()
+  true
+end
+
+schema CSndFile_GetSampleRate_7
+  ΔCSndFile
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::GetSampleRate()
+  true
+end
+
+schema CSndFile_GetChannels_8
+  ΔCSndFile
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::GetChannels()
+  true
+end
+
+schema CSndFile_Seek_9
+  ΔCSndFile
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation CSndFile::Seek(uint32 milliseconds)
+  true
+end
+
+schema CSndFile_sf_seek_10
+  ΔCSndFile
+  arg_1? : m_pfSound
+  milliseconds? : ms2samples
+where
+  -- Declared member operation CSndFile::sf_seek(m_pfSound, ms2samples(milliseconds)
+  true
+end
+
+schema CSndFile_Tell_11
+  ΔCSndFile
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::Tell()
+  true
+end
+
+schema CSndFile_samples2ms_12
+  ΔCSndFile
+  m_pfSound? : sf_seek
+  arg_2? : 0
+  arg_3? : SF_SEEK_CUR
+  result! : return
+where
+  -- Declared member operation CSndFile::samples2ms(sf_seek(m_pfSound, 0, SF_SEEK_CUR)
+  true
+end
+
+schema CSndFile_Decode_13
+  ΔCSndFile
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::Decode(void *buffer)
+  true
+end
+
+schema CSndFile_sf_read_short_14
+  ΔCSndFile
+  arg_1? : m_pfSound
+  arg_2? : ℙ ℤ
+  result! : ℕ
+where
+  -- Declared member operation CSndFile::sf_read_short(m_pfSound, (short*)
+  true
+end
+
+schema CSndFile_if_15
+  ΔCSndFile
+  arg_1? : GetChannels
+where
+  -- Declared member operation CSndFile::if(GetChannels()
+  true
+end
+
+schema CMP3File
+  IDecoder  -- inherits base schema
+  m_pMH : Ref[mpg123_handle]
+  m_bOpened : 𝔹
+  m_nRate : ℕ
+  m_nChannels : ℕ
+  m_pPath : seq CHAR
+  m_bFileNotOpenedYet : 𝔹
+  size : ℕ
+where
+  #m_pMH ≤ 1
+  m_nRate ≥ 0
+  m_nChannels ≥ 0
+  size ≥ 0
+end
+
+schema CMP3File_CMP3File
+  ΔCMP3File
+where
+  -- Declared member operation CMP3File::CMP3File()
+  true
+end
+
+schema CMP3File_if_2
+  ΔCMP3File
+  arg_1? : m_pMH
+where
+  -- Declared member operation CMP3File::if(m_pMH)
+  true
+end
+
+schema CMP3File_mpg123_open_3
+  ΔCMP3File
+  arg_1? : m_pMH
+  arg_2? : m_pPath
+  result! : m_bOpened
+where
+  -- Declared member operation CMP3File::mpg123_open(m_pMH, m_pPath)
+  true
+end
+
+schema CMP3File_if_4
+  ΔCMP3File
+  arg_1? : IsOpened
+where
+  -- Declared member operation CMP3File::if(IsOpened()
+  true
+end
+
+schema CMP3File_mpg123_format_5
+  ΔCMP3File
+  arg_1? : m_pMH
+  arg_2? : rate
+  arg_3? : channels
+  arg_4? : encoding
+where
+  -- Declared member operation CMP3File::mpg123_format(m_pMH, rate, channels, encoding)
+  true
+end
+
+schema CMP3File_CMP3File_6
+  ΔCMP3File
+  result! : ANY
+where
+  -- Declared member operation CMP3File::CMP3File()
+  true
+end
+
+schema CMP3File_mpg123_delete_7
+  ΔCMP3File
+  arg_1? : m_pMH
+where
+  -- Declared member operation CMP3File::mpg123_delete(m_pMH)
+  true
+end
+
+schema CMP3File_IsOpened_8
+  ΔCMP3File
+  result! : bool
+where
+  -- Declared member operation CMP3File::IsOpened()
+  true
+end
+
+schema CMP3File_GetSampleSize_9
+  ΔCMP3File
+  result! : ℕ
+where
+  -- Declared member operation CMP3File::GetSampleSize()
+  true
+end
+
+schema CMP3File_GetSampleCount_10
+  ΔCMP3File
+  result! : ℕ
+where
+  -- Declared member operation CMP3File::GetSampleCount()
+  true
+end
+
+schema CMP3File_mpg123_length_11
+  ΔCMP3File
+  arg_1? : m_pMH
+  result! : return
+where
+  -- Declared member operation CMP3File::mpg123_length(m_pMH)
+  true
+end
+
+schema CMP3File_GetSampleRate_12
+  ΔCMP3File
+  result! : ℕ
+where
+  -- Declared member operation CMP3File::GetSampleRate()
+  true
+end
+
+schema CMP3File_GetChannels_13
+  ΔCMP3File
+  result! : ℕ
+where
+  -- Declared member operation CMP3File::GetChannels()
+  true
+end
+
+schema CMP3File_Seek_14
+  ΔCMP3File
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation CMP3File::Seek(uint32 milliseconds)
+  true
+end
+
+schema CMP3File_mpg123_seek_15
+  ΔCMP3File
+  arg_1? : m_pMH
+  milliseconds? : ms2samples
+where
+  -- Declared member operation CMP3File::mpg123_seek(m_pMH, ms2samples(milliseconds)
+  true
+end
+
+schema CMP3File_Tell_16
+  ΔCMP3File
+  result! : ℕ
+where
+  -- Declared member operation CMP3File::Tell()
+  true
+end
+
+schema CMP3File_samples2ms_17
+  ΔCMP3File
+  m_pMH? : mpg123_tell
+  result! : return
+where
+  -- Declared member operation CMP3File::samples2ms(mpg123_tell(m_pMH)
+  true
+end
+
+schema CMP3File_Decode_18
+  ΔCMP3File
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Declared member operation CMP3File::Decode(void *buffer)
+  true
+end
+
+schema CMP3File_mpg123_read_19
+  ΔCMP3File
+  arg_1? : m_pMH
+  arg_2? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CMP3File::mpg123_read(m_pMH, (unsigned char *)
+  true
+end
+
+schema CMP3File_if_20
+  ΔCMP3File
+  arg_1? : GetChannels
+where
+  -- Declared member operation CMP3File::if(GetChannels()
+  true
+end
+
+schema CMP3File_return_21
+  ΔCMP3File
+  arg_1? : ℕ
+where
+  -- Declared member operation CMP3File::return(uint32)
+  true
+end
+
+schema CADFFile
+  CMP3File  -- inherits base schema
+  size : i
+  bytesRead : return
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CADFFile_r_read
+  ΔCADFFile
+  fh? : ADDRESS
+  buf? : ADDRESS
+  size? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation CADFFile::r_read(void* fh, void* buf, size_t size)
+  true
+end
+
+schema CADFFile_r_seek_2
+  ΔCADFFile
+  fh? : ADDRESS
+  pos? : off_t
+  seekType? : ℤ
+  result! : off_t
+where
+  -- Declared member operation CADFFile::r_seek(void* fh, off_t pos, int seekType)
+  true
+end
+
+schema CADFFile_ftell_3
+  ΔCADFFile
+  arg_1? : Ref[FILE]
+  result! : return
+where
+  -- Declared member operation CADFFile::ftell((FILE*)
+  true
+end
+
+schema CADFFile_r_close_4
+  ΔCADFFile
+  fh? : ADDRESS
+  result! : void
+where
+  -- Declared member operation CADFFile::r_close(void* fh)
+  true
+end
+
+schema CADFFile_CADFFile_5
+  ΔCADFFile
+  path? : seq CHAR
+  result! : public
+where
+  -- Declared member operation CADFFile::CADFFile(const char* path)
+  true
+end
+
+schema CADFFile_if_6
+  ΔCADFFile
+  arg_1? : m_pMH
+where
+  -- Declared member operation CADFFile::if(m_pMH)
+  true
+end
+
+schema CADFFile_fopen_7
+  ΔCADFFile
+  arg_1? : m_pPath
+  arg_2? : rb
+  result! : Ref[FILE_f]
+where
+  -- Declared member operation CADFFile::fopen(m_pPath, "rb")
+  true
+end
+
+schema CADFFile_mpg123_replace_reader_handle_8
+  ΔCADFFile
+  arg_1? : m_pMH
+  arg_2? : r_read
+  arg_3? : r_seek
+  arg_4? : r_close
+  result! : m_bOpened___f
+where
+  -- Declared member operation CADFFile::mpg123_replace_reader_handle(m_pMH, r_read, r_seek, r_close)
+  true
+end
+
+schema CADFFile_if_9
+  ΔCADFFile
+  arg_1? : IsOpened
+where
+  -- Declared member operation CADFFile::if(IsOpened()
+  true
+end
+
+schema CADFFile_mpg123_format_10
+  ΔCADFFile
+  arg_1? : m_pMH
+  arg_2? : rate
+  arg_3? : channels
+  arg_4? : encoding
+where
+  -- Declared member operation CADFFile::mpg123_format(m_pMH, rate, channels, encoding)
+  true
+end
+
+schema CVagDecoder
+  s_1 : ℝ
+  s_2 : ℝ
+  flags : ℤ
+  VAG_SAMPLES_IN_LINE : i
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CVagDecoder_CVagDecoder
+  ΔCVagDecoder
+where
+  -- Declared member operation CVagDecoder::CVagDecoder()
+  true
+end
+
+schema CVagDecoder_ResetState_2
+  ΔCVagDecoder
+  result! : void
+where
+  -- Declared member operation CVagDecoder::ResetState()
+  true
+end
+
+schema CVagDecoder_quantize_3
+  ΔCVagDecoder
+  sample? : ℝ
+  result! : ℤ
+where
+  -- Declared member operation CVagDecoder::quantize(double sample)
+  true
+end
+
+schema CVagDecoder_short_4
+  ΔCVagDecoder
+  a? : Clamp
+  arg_2? : 32768
+  arg_3? : 32767
+  result! : return
+where
+  -- Declared member operation CVagDecoder::short(Clamp(a, -32768, 32767)
+  true
+end
+
+schema CVagDecoder_Decode_5
+  ΔCVagDecoder
+  _inbuf? : ADDRESS
+  _outbuf? : ℙ ℤ
+  size? : ℕ
+  result! : void
+where
+  -- Declared member operation CVagDecoder::Decode(void* _inbuf, int16* _outbuf, size_t size)
+  true
+end
+
+schema CVagDecoder_while_6
+  ΔCVagDecoder
+  arg_1? : size___0
+where
+  -- Declared member operation CVagDecoder::while(size > 0)
+  true
+end
+
+schema CVagDecoder_if_7
+  ΔCVagDecoder
+  arg_1? : flags
+where
+  -- Declared member operation CVagDecoder::if(flags == 7)
+  true
+end
+
+schema CVagDecoder_int16_8
+  ΔCVagDecoder
+  xf? : d__0
+  result! : ℤ
+where
+  -- Declared member operation CVagDecoder::int16((d & 0xf)
+  true
+end
+
+schema CVagDecoder_int16_9
+  ΔCVagDecoder
+  xf0? : d__0
+  result! : s
+where
+  -- Declared member operation CVagDecoder::int16((d & 0xf0)
+  true
+end
+
+schema CVagDecoder_quantize_10
+  ΔCVagDecoder
+  arg_1? : samples_i____0_5
+  result! : Ref[outbuf]
+where
+  -- Declared member operation CVagDecoder::quantize(samples[i] + 0.5)
+  true
+end
+
+schema CVbFile
+  IDecoder  -- inherits base schema
+  m_pFile : Ref[FILE]
+  m_pVagDecoders : Ref[CVagDecoder]
+  m_FileSize : ℕ
+  m_nNumberOfBlocks : ℕ
+  m_nSampleRate : ℕ
+  m_nChannels : ℕ
+  m_bBlockRead : 𝔹
+  m_LineInBlock : ℕ
+  m_CurrentBlock : ℕ
+  m_ppVagBuffers : ℙ ℕ
+  m_ppPcmBuffers : ℙ ℤ
+  nChannels : i
+  VAG_SAMPLES_IN_LINE : Ref[return_m_nNumberOfBlocks__NUM_VAG_LINES_IN_BLOCK]
+where
+  #m_pFile ≤ 1
+  #m_pVagDecoders ≤ 1
+  m_FileSize ≥ 0
+  m_nNumberOfBlocks ≥ 0
+  m_nSampleRate ≥ 0
+  m_nChannels ≥ 0
+  m_LineInBlock ≥ 0
+  m_CurrentBlock ≥ 0
+  #m_ppVagBuffers ≤ 1
+  #m_ppPcmBuffers ≤ 1
+  #VAG_SAMPLES_IN_LINE ≤ 1
+end
+
+schema CVbFile_ReadBlock
+  ΔCVbFile
+  block? : ℤ
+where
+  -- Declared member operation CVbFile::ReadBlock(int32 block = -1)
+  true
+end
+
+schema CVbFile_fread_2
+  ΔCVbFile
+  arg_1? : m_ppVagBuffers_i
+  arg_2? : VB_BLOCK_SIZE
+  arg_3? : 1
+  arg_4? : m_pFile
+  result! : i
+where
+  -- Declared member operation CVbFile::fread(m_ppVagBuffers[i], VB_BLOCK_SIZE, 1, m_pFile)
+  true
+end
+
+schema CVbFile_CVbFile_3
+  ΔCVbFile
+  path? : seq CHAR
+  nSampleRate? : ℕ
+  nChannels? : ℕ
+  result! : public
+where
+  -- Declared member operation CVbFile::CVbFile(const char* path, uint32 nSampleRate = 32000, uint8 nChannels = 2)
+  true
+end
+
+schema CVbFile_if_4
+  ΔCVbFile
+  m_pFile? : ANY
+where
+  -- Declared member operation CVbFile::if(!m_pFile)
+  true
+end
+
+schema CVbFile_fseek_5
+  ΔCVbFile
+  arg_1? : m_pFile
+  arg_2? : 0
+  arg_3? : SEEK_END
+where
+  -- Declared member operation CVbFile::fseek(m_pFile, 0, SEEK_END)
+  true
+end
+
+schema CVbFile_ftell_6
+  ΔCVbFile
+  arg_1? : m_pFile
+  result! : m_FileSize
+where
+  -- Declared member operation CVbFile::ftell(m_pFile)
+  true
+end
+
+schema CVbFile_fseek_7
+  ΔCVbFile
+  arg_1? : m_pFile
+  arg_2? : 0
+  arg_3? : SEEK_SET
+where
+  -- Declared member operation CVbFile::fseek(m_pFile, 0, SEEK_SET)
+  true
+end
+
+schema CVbFile_FileOpen_8
+  ΔCVbFile
+  result! : void
+where
+  -- Declared member operation CVbFile::FileOpen()
+  true
+end
+
+schema CVbFile_IsOpened_9
+  ΔCVbFile
+  result! : bool
+where
+  -- Declared member operation CVbFile::IsOpened()
+  true
+end
+
+schema CVbFile_GetSampleSize_10
+  ΔCVbFile
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::GetSampleSize()
+  true
+end
+
+schema CVbFile_GetSampleCount_11
+  ΔCVbFile
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::GetSampleCount()
+  true
+end
+
+schema CVbFile_GetSampleRate_12
+  ΔCVbFile
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::GetSampleRate()
+  true
+end
+
+schema CVbFile_GetChannels_13
+  ΔCVbFile
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::GetChannels()
+  true
+end
+
+schema CVbFile_Seek_14
+  ΔCVbFile
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation CVbFile::Seek(uint32 milliseconds)
+  true
+end
+
+schema CVbFile_ms2samples_15
+  ΔCVbFile
+  arg_1? : milliseconds
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::ms2samples(milliseconds)
+  true
+end
+
+schema CVbFile_if_16
+  ΔCVbFile
+  m_nNumberOfBlocks? : block
+where
+  -- Declared member operation CVbFile::if(block > m_nNumberOfBlocks)
+  true
+end
+
+schema CVbFile_if_17
+  ΔCVbFile
+  arg_1? : block
+  result! : ANY
+where
+  -- Declared member operation CVbFile::if(block != m_CurrentBlock)
+  true
+end
+
+schema CVbFile_if_18
+  ΔCVbFile
+  arg_1? : m_CurrentBlock
+where
+  -- Declared member operation CVbFile::if(m_CurrentBlock != block || m_LineInBlock != newLine)
+  true
+end
+
+schema CVbFile_GetChannels_19
+  ΔCVbFile
+  result! : i
+where
+  -- Declared member operation CVbFile::GetChannels()
+  true
+end
+
+schema CVbFile_ResetState_20
+  ΔCVbFile
+  result! : i____m_pVagDecoders_i
+where
+  -- Declared member operation CVbFile::ResetState()
+  true
+end
+
+schema CVbFile_Tell_21
+  ΔCVbFile
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::Tell()
+  true
+end
+
+schema CVbFile_samples2ms_22
+  ΔCVbFile
+  arg_1? : pos
+  result! : return
+where
+  -- Declared member operation CVbFile::samples2ms(pos)
+  true
+end
+
+schema CVbFile_Decode_23
+  ΔCVbFile
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Declared member operation CVbFile::Decode(void* buffer)
+  true
+end
+
+schema CVbFile_if_24
+  ΔCVbFile
+  arg_1? : m_CurrentBlock
+where
+  -- Declared member operation CVbFile::if(m_CurrentBlock >= m_nNumberOfBlocks)
+  true
+end
+
+schema CVbFile_if_25
+  ΔCVbFile
+  m_bBlockRead? : ANY
+where
+  -- Declared member operation CVbFile::if(!m_bBlockRead)
+  true
+end
+
+schema CVbFile_GetBufferSamples_26
+  ΔCVbFile
+  result! : ℤ
+where
+  -- Declared member operation CVbFile::GetBufferSamples()
+  true
+end
+
+schema CVbFile_Min_27
+  ΔCVbFile
+  arg_1? : numberOfRequiredLines
+  arg_2? : numberOfRemainingLines
+  result! : ℤ
+where
+  -- Declared member operation CVbFile::Min(numberOfRequiredLines, numberOfRemainingLines)
+  true
+end
+
+schema CVbFile_while_28
+  ΔCVbFile
+  bufSizePerChannel? : size
+where
+  -- Declared member operation CVbFile::while(size < bufSizePerChannel)
+  true
+end
+
+schema CVbFile_Decode_29
+  ΔCVbFile
+  VAG_LINE_SIZE? : Ref[m_ppVagBuffers_i____m_LineInBlock]
+  arg_2? : m_ppPcmBuffers_i
+  arg_3? : VAG_LINE_SIZE
+  result! : i______m_pVagDecoders_i
+where
+  -- Declared member operation CVbFile::Decode(m_ppVagBuffers[i] + m_LineInBlock * VAG_LINE_SIZE, m_ppPcmBuffers[i], VAG_LINE_SIZE)
+  true
+end
+
+schema CVbFile_GetSampleSize_30
+  ΔCVbFile
+  result! : Ref[size____VAG_SAMPLES_IN_LINE]
+where
+  -- Declared member operation CVbFile::GetSampleSize()
+  true
+end
+
+schema COpusFile
+  IDecoder  -- inherits base schema
+  m_FileH : Ref[OggOpusFile]
+  m_bOpened : 𝔹
+  m_nRate : ℕ
+  m_nChannels : ℕ
+where
+  #m_FileH ≤ 1
+  m_nRate ≥ 0
+  m_nChannels ≥ 0
+end
+
+schema COpusFile_COpusFile
+  ΔCOpusFile
+  path? : seq CHAR
+where
+  -- Declared member operation COpusFile::COpusFile(const char *path)
+  true
+end
+
+schema COpusFile_op_open_file_2
+  ΔCOpusFile
+  arg_1? : path
+  ret? : ANY
+  result! : m_FileH
+where
+  -- Declared member operation COpusFile::op_open_file(path, &ret)
+  true
+end
+
+schema COpusFile_if_3
+  ΔCOpusFile
+  arg_1? : m_FileH
+where
+  -- Declared member operation COpusFile::if(m_FileH)
+  true
+end
+
+schema COpusFile_op_tags_4
+  ΔCOpusFile
+  arg_1? : m_FileH
+  arg_2? : 0
+  result! : Ref[OpusTags_tags]
+where
+  -- Declared member operation COpusFile::op_tags(m_FileH, 0)
+  true
+end
+
+schema COpusFile_if_5
+  ΔCOpusFile
+  user_comments? : seq strncmp_tags  -- bounded array [i]
+  arg_2? : SAMPLERATE
+  arg_3? : sizeof__SAMPLERATE
+  result! : i
+where
+  -- Declared member operation COpusFile::if(strncmp(tags->user_comments[i], "SAMPLERATE", sizeof("SAMPLERATE")
+  true
+end
+
+schema COpusFile_FileOpen_6
+  ΔCOpusFile
+  result! : void
+where
+  -- Declared member operation COpusFile::FileOpen()
+  true
+end
+
+schema COpusFile_IsOpened_7
+  ΔCOpusFile
+  result! : bool
+where
+  -- Declared member operation COpusFile::IsOpened()
+  true
+end
+
+schema COpusFile_GetSampleSize_8
+  ΔCOpusFile
+  result! : ℕ
+where
+  -- Declared member operation COpusFile::GetSampleSize()
+  true
+end
+
+schema COpusFile_GetSampleCount_9
+  ΔCOpusFile
+  result! : ℕ
+where
+  -- Declared member operation COpusFile::GetSampleCount()
+  true
+end
+
+schema COpusFile_op_pcm_total_10
+  ΔCOpusFile
+  arg_1? : m_FileH
+  arg_2? : 0
+  result! : return
+where
+  -- Declared member operation COpusFile::op_pcm_total(m_FileH, 0)
+  true
+end
+
+schema COpusFile_GetSampleRate_11
+  ΔCOpusFile
+  result! : ℕ
+where
+  -- Declared member operation COpusFile::GetSampleRate()
+  true
+end
+
+schema COpusFile_GetChannels_12
+  ΔCOpusFile
+  result! : ℕ
+where
+  -- Declared member operation COpusFile::GetChannels()
+  true
+end
+
+schema COpusFile_Seek_13
+  ΔCOpusFile
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation COpusFile::Seek(uint32 milliseconds)
+  true
+end
+
+schema COpusFile_op_pcm_seek_14
+  ΔCOpusFile
+  arg_1? : m_FileH
+  milliseconds? : ms2samples
+where
+  -- Declared member operation COpusFile::op_pcm_seek(m_FileH, ms2samples(milliseconds)
+  true
+end
+
+schema COpusFile_Tell_15
+  ΔCOpusFile
+  result! : ℕ
+where
+  -- Declared member operation COpusFile::Tell()
+  true
+end
+
+schema COpusFile_samples2ms_16
+  ΔCOpusFile
+  m_FileH? : op_pcm_tell
+  result! : return
+where
+  -- Declared member operation COpusFile::samples2ms(op_pcm_tell(m_FileH)
+  true
+end
+
+schema COpusFile_Decode_17
+  ΔCOpusFile
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Declared member operation COpusFile::Decode(void *buffer)
+  true
+end
+
+schema COpusFile_op_read_18
+  ΔCOpusFile
+  arg_1? : m_FileH
+  arg_2? : ℙ ℤ
+  result! : ℤ
+where
+  -- Declared member operation COpusFile::op_read(m_FileH, (opus_int16 *)
+  true
+end
+
+schema COpusFile_if_19
+  ΔCOpusFile
+  arg_1? : size___0
+where
+  -- Declared member operation COpusFile::if(size < 0)
+  true
+end
+
+schema COpusFile_if_20
+  ΔCOpusFile
+  arg_1? : GetChannels
+where
+  -- Declared member operation COpusFile::if(GetChannels()
+  true
+end
+
+schema COpusFile_GetSampleSize_21
+  ΔCOpusFile
+  result! : Ref[return_size__m_nChannels]
+where
+  -- Declared member operation COpusFile::GetSampleSize()
+  true
+end
+
+schema IDecoder
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema IDecoder_IDecoder
+  ΔIDecoder
+  result! : ANY
+where
+  -- Declared member operation IDecoder::IDecoder()
+  true
+end
+
+schema IDecoder_FileOpen_2
+  ΔIDecoder
+where
+  -- Declared member operation IDecoder::FileOpen()
+  true
+end
+
+schema IDecoder_GetSampleSize_3
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetSampleSize()
+  true
+end
+
+schema IDecoder_GetSampleCount_4
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetSampleCount()
+  true
+end
+
+schema IDecoder_GetSampleRate_5
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetSampleRate()
+  true
+end
+
+schema IDecoder_GetChannels_6
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetChannels()
+  true
+end
+
+schema IDecoder_GetAvgSamplesPerSec_7
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetAvgSamplesPerSec()
+  true
+end
+
+schema IDecoder_ms2samples_8
+  ΔIDecoder
+  ms? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::ms2samples(uint32 ms)
+  true
+end
+
+schema IDecoder_samples2ms_9
+  ΔIDecoder
+  sm? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::samples2ms(uint32 sm)
+  true
+end
+
+schema IDecoder_GetBufferSamples_10
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetBufferSamples()
+  true
+end
+
+schema IDecoder_GetBufferSize_11
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetBufferSize()
+  true
+end
+
+schema IDecoder_Seek_12
+  ΔIDecoder
+  milliseconds? : ℕ
+  result! : void
+where
+  -- Declared member operation IDecoder::Seek(uint32 milliseconds)
+  true
+end
+
+schema IDecoder_Tell_13
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::Tell()
+  true
+end
+
+schema IDecoder_GetLength_14
+  ΔIDecoder
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::GetLength()
+  true
+end
+
+schema IDecoder_float_15
+  ΔIDecoder
+  arg_1? : GetSampleCount
+  result! : return
+where
+  -- Declared member operation IDecoder::float(GetSampleCount()
+  true
+end
+
+schema IDecoder_Decode_16
+  ΔIDecoder
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Declared member operation IDecoder::Decode(void *buffer)
+  true
+end
+
+schema tsQueue
+  true : return
+  count : ℤ
+  m_mutex : std__mutex
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tsQueue_tsQueue
+  ΔtsQueue
+where
+  -- Declared member operation tsQueue::tsQueue()
+  true
+end
+
+schema tsQueue_push_2
+  ΔtsQueue
+  arg_1? : value
+  result! : m_queue
+where
+  -- Declared member operation tsQueue::push(value)
+  true
+end
+
+schema tsQueue_peekPop_3
+  ΔtsQueue
+  retVal? : Ref[T]
+  result! : bool
+where
+  -- Declared member operation tsQueue::peekPop(T *retVal)
+  true
+end
+
+schema tsQueue_if_4
+  ΔtsQueue
+  arg_1? : count
+where
+  -- Declared member operation tsQueue::if(count == 0)
+  true
+end
+
+schema tsQueue_front_5
+  ΔtsQueue
+  result! : Ref[retVal___m_queue]
+where
+  -- Declared member operation tsQueue::front()
+  true
+end
+
+schema tsQueue_pop_6
+  ΔtsQueue
+  result! : m_queue
+where
+  -- Declared member operation tsQueue::pop()
+  true
+end
+
+schema tsQueue_swapNts_7
+  ΔtsQueue
+  replaceWith? : tsQueue_T
+  result! : void
+where
+  -- Declared member operation tsQueue::swapNts(tsQueue<T> &replaceWith)
+  true
+end
+
+schema tsQueue_emptyNts_8
+  ΔtsQueue
+  result! : bool
+where
+  -- Declared member operation tsQueue::emptyNts()
+  true
+end
+
+schema CStream
+  m_aFilename : seq CHAR
+  m_pAlSources : ℙ ℕ
+  m_bPaused : 𝔹
+  m_bActive : 𝔹
+  m_fillBuffers : ℕ
+  m_queueBuffers : ℕ
+  m_bDoSeek : 𝔹
+  m_SeekPos : ℕ
+  m_bIExist : 𝔹
+  m_bReset : 𝔹
+  m_nVolume : ℕ
+  m_nPan : ℕ
+  m_nPosBeforeReset : ℕ
+  m_nLoopCount : ℤ
+  m_pSoundFile : Ref[IDecoder]
+where
+  #m_aFilename = 128
+  #m_pAlSources ≤ 1
+  m_fillBuffers ≥ 0
+  m_queueBuffers ≥ 0
+  m_SeekPos ≥ 0
+  m_nVolume ≥ 0
+  m_nPan ≥ 0
+  m_nPosBeforeReset ≥ 0
+  #m_pSoundFile ≤ 1
+end
+
+schema CStream_ALuint
+  ΔCStream
+  m_alBuffers? : ANY
+where
+  -- Declared member operation CStream::ALuint(&m_alBuffers)
+  true
+end
+
+schema CStream_BuffersShouldBeFilled_2
+  ΔCStream
+where
+  -- Declared member operation CStream::BuffersShouldBeFilled()
+  true
+end
+
+schema CStream_BufferShouldBeFilledAndQueued_3
+  ΔCStream
+  ALuint? : std__pair
+  arg_2? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStream::BufferShouldBeFilledAndQueued(std::pair<ALuint, ALuint>*)
+  true
+end
+
+schema CStream_QueueBuffers_4
+  ΔCStream
+  result! : 𝔹
+where
+  -- Declared member operation CStream::QueueBuffers()
+  true
+end
+
+schema CStream_SetPosition_5
+  ΔCStream
+  i? : ℤ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+where
+  -- Declared member operation CStream::SetPosition(int i, float x, float y, float z)
+  true
+end
+
+schema CStream_SetPitch_6
+  ΔCStream
+  pitch? : ℝ
+where
+  -- Declared member operation CStream::SetPitch(float pitch)
+  true
+end
+
+schema CStream_SetGain_7
+  ΔCStream
+  gain? : ℝ
+where
+  -- Declared member operation CStream::SetGain(float gain)
+  true
+end
+
+schema CStream_Pause_8
+  ΔCStream
+where
+  -- Declared member operation CStream::Pause()
+  true
+end
+
+schema CStream_SetPlay_9
+  ΔCStream
+  state? : 𝔹
+where
+  -- Declared member operation CStream::SetPlay(bool state)
+  true
+end
+
+schema CStream_FillBuffer_10
+  ΔCStream
+  alBuffer? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStream::FillBuffer(ALuint *alBuffer)
+  true
+end
+
+schema CStream_FillBuffers_11
+  ΔCStream
+  result! : ℤ
+where
+  -- Declared member operation CStream::FillBuffers()
+  true
+end
+
+schema CStream_ClearBuffers_12
+  ΔCStream
+where
+  -- Declared member operation CStream::ClearBuffers()
+  true
+end
+
+schema CStream_Initialise_13
+  ΔCStream
+where
+  -- Declared member operation CStream::Initialise()
+  true
+end
+
+schema CStream_Terminate_14
+  ΔCStream
+where
+  -- Declared member operation CStream::Terminate()
+  true
+end
+
+schema CStream_CStream_15
+  ΔCStream
+  sources? : ℙ ℕ
+  buffers? : ℕ
+where
+  -- Declared member operation CStream::CStream(ALuint *sources, ALuint (&buffers)
+  true
+end
+
+schema CStream_CStream_16
+  ΔCStream
+  result! : ANY
+where
+  -- Declared member operation CStream::CStream()
+  true
+end
+
+schema CStream_Delete_17
+  ΔCStream
+where
+  -- Declared member operation CStream::Delete()
+  true
+end
+
+schema CStream_Open_18
+  ΔCStream
+  filename? : seq CHAR
+  overrideSampleRate? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CStream::Open(const char *filename, uint32 overrideSampleRate = 32000)
+  true
+end
+
+schema CStream_Close_19
+  ΔCStream
+where
+  -- Declared member operation CStream::Close()
+  true
+end
+
+schema CStream_IsOpened_20
+  ΔCStream
+  result! : 𝔹
+where
+  -- Declared member operation CStream::IsOpened()
+  true
+end
+
+schema CStream_IsPlaying_21
+  ΔCStream
+  result! : 𝔹
+where
+  -- Declared member operation CStream::IsPlaying()
+  true
+end
+
+schema CStream_SetPause_22
+  ΔCStream
+  bPause? : 𝔹
+where
+  -- Declared member operation CStream::SetPause(bool bPause)
+  true
+end
+
+schema CStream_SetVolume_23
+  ΔCStream
+  nVol? : ℕ
+where
+  -- Declared member operation CStream::SetVolume(uint32 nVol)
+  true
+end
+
+schema CStream_SetPan_24
+  ΔCStream
+  nPan? : ℕ
+where
+  -- Declared member operation CStream::SetPan(uint8 nPan)
+  true
+end
+
+schema CStream_SetPosMS_25
+  ΔCStream
+  nPos? : ℕ
+where
+  -- Declared member operation CStream::SetPosMS(uint32 nPos)
+  true
+end
+
+schema CStream_GetPosMS_26
+  ΔCStream
+  result! : ℕ
+where
+  -- Declared member operation CStream::GetPosMS()
+  true
+end
+
+schema CStream_GetLengthMS_27
+  ΔCStream
+  result! : ℕ
+where
+  -- Declared member operation CStream::GetLengthMS()
+  true
+end
+
+schema CStream_Setup_28
+  ΔCStream
+  imSureQueueIsEmpty? : 𝔹
+  lock? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CStream::Setup(bool imSureQueueIsEmpty = false, bool lock = true)
+  true
+end
+
+schema CStream_Start_29
+  ΔCStream
+where
+  -- Declared member operation CStream::Start()
+  true
+end
+
+schema CStream_Stop_30
+  ΔCStream
+where
+  -- Declared member operation CStream::Stop()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema stream_CSortStereoBuffer
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_GetBuffer
+  ΔstreamModuleState
+  size? : ℕ
+  result! : ℙ ℕ
+where
+  -- State update: BufSize' = size
+  -- State update: PcmBuf' = (uint16*)malloc(BufSize)
+  -- State update: BufSize' = size
+  -- State update: PcmBuf' = (uint16*)realloc(PcmBuf, size)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = PcmBuf
+  true
+end
+
+schema stream_SortStereo
+  ΔstreamModuleState
+  buf? : ADDRESS
+  size? : ℕ
+where
+  -- State update: InBuf' = (uint16*)buf
+  -- State update: OutBuf' = GetBuffer(size)
+  -- State update: rightStart' = size / 4
+  true
+end
+
+schema stream_CImaADPCMDecoder
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_Init
+  ΔstreamModuleState
+  _Sample? : ℤ
+  _StepIndex? : ℤ
+where
+  -- State update: Sample' = _Sample
+  -- State update: StepIndex' = _StepIndex
+  true
+end
+
+schema stream_Decode
+  ΔstreamModuleState
+  inbuf? : ℙ ℕ
+  _outbuf? : ℙ ℤ
+  size? : ℕ
+where
+  -- State update: outbuf' = _outbuf
+  true
+end
+
+schema stream_DecodeSample
+  ΔstreamModuleState
+  adpcm? : ℕ
+  result! : ℤ
+where
+  -- State update: step' = StepTable[StepIndex]
+  -- State update: StepIndex' = Clamp(StepIndex, 0, 88)
+  -- State update: delta' = step >> 3
+  -- State update: delta' = -delta
+  -- State update: newSample' = Sample + delta
+  -- State update: Sample' = Clamp(newSample, -32768, 32767)
+  -- Return postcondition: result! = Sample
+  true
+end
+
+schema stream_tFormatHeader
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_Close
+  ΔstreamModuleState
+where
+  -- State update: m_pFile' = ∅
+  true
+end
+
+schema stream_GetCurrentSample
+  ΞstreamModuleState
+  result! : ℕ
+where
+  -- State update: FilePos' = ftell(m_pFile)
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema stream_FileOpen
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_CWavFile
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_IsOpened
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bIsOpen
+  true
+end
+
+schema stream_GetSampleSize
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(uint16)
+  true
+end
+
+schema stream_GetSampleCount
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nSampleCount
+  true
+end
+
+schema stream_GetSampleRate
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_FormatHeader.SampleRate
+  true
+end
+
+schema stream_GetChannels
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_FormatHeader.NumChannels
+  true
+end
+
+schema stream_Seek
+  ΔstreamModuleState
+  milliseconds? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_Tell
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = samples2ms(GetCurrentSample())
+  true
+end
+
+schema stream_Decode_2
+  ΔstreamModuleState
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- State update: size' = fread(buffer, 1, GetBufferSize(), m_pFile)
+  -- State update: nMaxSamples' = GetBufferSamples() / m_FormatHeader.NumChannels
+  -- State update: nSamplesLeft' = m_nSampleCount - GetCurrentSample()
+  -- State update: nMaxSamples' = Min(nMaxSamples, nSamplesLeft)
+  -- State update: nMaxSamples' = nMaxSamples / m_nSamplesPerBlock * m_nSamplesPerBlock
+  -- State update: OutBufSizePerChannel' = nMaxSamples * GetSampleSize()
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = size
+  -- Return postcondition: result! = 0
+  -- Invokes: SortStereoBuffer.SortStereo
+  true
+end
+
+schema stream_FileOpen_2
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_CSndFile
+  ΔstreamModuleState
+where
+  -- State update: m_pfSound' = ∅
+  true
+end
+
+schema stream_IsOpened_2
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_pfSound != nil
+  true
+end
+
+schema stream_GetSampleSize_2
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(uint16)
+  true
+end
+
+schema stream_GetSampleCount_2
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_soundInfo.frames
+  true
+end
+
+schema stream_GetSampleRate_2
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_soundInfo.samplerate
+  true
+end
+
+schema stream_GetChannels_2
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_soundInfo.channels
+  true
+end
+
+schema stream_Seek_2
+  ΔstreamModuleState
+  milliseconds? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_Tell_2
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = samples2ms(sf_seek(m_pfSound, 0, SF_SEEK_CUR))
+  true
+end
+
+schema stream_Decode_3
+  ΔstreamModuleState
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = size
+  -- Invokes: SortStereoBuffer.SortStereo
+  true
+end
+
+schema stream_FileOpen_3
+  ΔstreamModuleState
+where
+  -- State update: rate' = 0
+  -- State update: channels' = 0
+  -- State update: encoding' = 0
+  -- State update: m_nRate' = rate
+  -- State update: m_nChannels' = channels
+  -- State update: m_bFileNotOpenedYet' = false
+  true
+end
+
+schema stream_CMP3File
+  ΔstreamModuleState
+where
+  -- State update: m_pMH' = ∅
+  true
+end
+
+schema stream_IsOpened_3
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bOpened
+  true
+end
+
+schema stream_GetSampleSize_3
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(uint16)
+  true
+end
+
+schema stream_GetSampleCount_3
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = mpg123_length(m_pMH)
+  true
+end
+
+schema stream_GetSampleRate_3
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nRate
+  true
+end
+
+schema stream_GetChannels_3
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nChannels
+  true
+end
+
+schema stream_Seek_3
+  ΔstreamModuleState
+  milliseconds? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_Tell_3
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = samples2ms(mpg123_tell(m_pMH))
+  true
+end
+
+schema stream_Decode_4
+  ΔstreamModuleState
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = (uint32)size
+  -- Invokes: SortStereoBuffer.SortStereo
+  true
+end
+
+schema stream_r_read
+  ΔstreamModuleState
+  fh? : ADDRESS
+  buf? : ADDRESS
+  size? : ℕ
+  result! : ℕ
+where
+  -- State update: bytesRead' = fread(buf, 1, size, (FILE*)fh)
+  -- State update: _buf' = (uint8*)buf
+  -- Return postcondition: result! = bytesRead
+  true
+end
+
+schema stream_r_seek
+  ΔstreamModuleState
+  fh? : ADDRESS
+  pos? : off_t
+  seekType? : ℤ
+  result! : off_t
+where
+  -- Return postcondition: result! = ftell((FILE*)fh)
+  true
+end
+
+schema stream_r_close
+  ΔstreamModuleState
+  fh? : ADDRESS
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_CADFFile
+  ΔstreamModuleState
+  path? : seq CHAR
+where
+  -- State update: m_pMH' = mpg123_new(∅, ∅)
+  -- State update: m_bOpened' = true
+  -- State update: m_bFileNotOpenedYet' = true
+  -- State update: m_pPath' = path
+  true
+end
+
+schema stream_FileOpen_4
+  ΔstreamModuleState
+where
+  -- State update: rate' = 0
+  -- State update: channels' = 0
+  -- State update: encoding' = 0
+  -- State update: f' = fopen(m_pPath, "rb")
+  -- State update: m_nRate' = rate
+  -- State update: m_nChannels' = channels
+  true
+end
+
+schema stream_CVagDecoder
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_ResetState
+  ΔstreamModuleState
+where
+  -- State update: s_2' = 0.0
+  true
+end
+
+schema stream_quantize
+  ΔstreamModuleState
+  sample? : ℝ
+  result! : ℤ
+where
+  -- State update: a' = int(sample + 0.5)
+  -- Return postcondition: result! = short(Clamp(a, -32768, 32767))
+  true
+end
+
+schema stream_Decode_5
+  ΔstreamModuleState
+  _inbuf? : ADDRESS
+  _outbuf? : ℙ ℤ
+  size? : ℕ
+where
+  -- State update: inbuf' = (uint8*)_inbuf
+  -- State update: outbuf' = _outbuf
+  -- State update: predict_nr' = *(inbuf++)
+  -- State update: shift_factor' = predict_nr & 0xf
+  -- State update: flags' = *(inbuf++)
+  -- State update: d' = *(inbuf++)
+  true
+end
+
+schema stream_ReadBlock
+  ΔstreamModuleState
+  block? : ℤ
+where
+  -- State update: m_bBlockRead' = true
+  true
+end
+
+schema stream_FileOpen_5
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_CVbFile
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_IsOpened_4
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_pFile != nil
+  true
+end
+
+schema stream_GetSampleSize_4
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(uint16)
+  true
+end
+
+schema stream_GetSampleCount_4
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = m_nNumberOfBlocks * NUM_VAG_LINES_IN_BLOCK * VAG_SAMPLES_IN_LINE
+  true
+end
+
+schema stream_GetSampleRate_4
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nSampleRate
+  true
+end
+
+schema stream_GetChannels_4
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nChannels
+  true
+end
+
+schema stream_Seek_4
+  ΔstreamModuleState
+  milliseconds? : ℕ
+where
+  -- State update: samples' = ms2samples(milliseconds)
+  -- State update: block' = samples / NUM_VAG_SAMPLES_IN_BLOCK
+  -- State update: samples' = 0
+  -- State update: block' = 0
+  -- State update: m_bBlockRead' = false
+  -- State update: remainingSamples' = samples - block * NUM_VAG_SAMPLES_IN_BLOCK
+  true
+end
+
+schema stream_Tell_4
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = samples2ms(pos)
+  true
+end
+
+schema stream_Decode_6
+  ΔstreamModuleState
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- State update: numberOfRequiredLines' = GetBufferSamples() / m_nChannels / VAG_SAMPLES_IN_LINE
+  -- State update: size' = 0
+  -- State update: m_LineInBlock' = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = bufSizePerChannel * m_nChannels
+  true
+end
+
+schema stream_FileOpen_6
+  ΔstreamModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_COpusFile
+  ΔstreamModuleState
+where
+  -- State update: m_FileH' = ∅
+  true
+end
+
+schema stream_IsOpened_5
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bOpened
+  true
+end
+
+schema stream_GetSampleSize_5
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = sizeof(uint16)
+  true
+end
+
+schema stream_GetSampleCount_5
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = op_pcm_total(m_FileH, 0)
+  true
+end
+
+schema stream_GetSampleRate_5
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nRate
+  true
+end
+
+schema stream_GetChannels_5
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nChannels
+  true
+end
+
+schema stream_Seek_5
+  ΔstreamModuleState
+  milliseconds? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_Tell_5
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = samples2ms(op_pcm_tell(m_FileH) * GetChannels())
+  true
+end
+
+schema stream_Decode_7
+  ΔstreamModuleState
+  buffer? : ADDRESS
+  result! : ℕ
+where
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = size * m_nChannels * GetSampleSize()
+  -- Invokes: SortStereoBuffer.SortStereo
+  true
+end
+
+schema CStream_BuffersShouldBeFilled
+  ΔCStream
+where
+  -- State update: m_bActive' = true
+  -- Invokes: tempQueue.push, m_fillBuffers.swap
+  true
+end
+
+schema CStream_BufferShouldBeFilledAndQueued
+  ΔCStream
+  ALuint? : std__pair
+  bufs? : ℙ ℕ
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: m_fillBuffers.push
+  true
+end
+
+schema CStream_FlagAsToBeProcessed
+  ΔCStream
+  close? : 𝔹
+where
+  -- Invokes: gAudioThreadQueueMutex.lock, gStreamsToClose.push, gStreamsToProcess.push, gAudioThreadQueueMutex.unlock, gAudioThreadCv.notify_one
+  true
+end
+
+schema stream_audioFileOpsThread
+  ΔstreamModuleState
+where
+  -- State update: streamToClose' = gStreamsToClose.front()
+  -- State update: stream' = gStreamsToProcess.front()
+  -- State update: insertBufsAfterCheck' = false
+  -- State update: stream.m_bDoSeek' = false
+  -- State update: pos' = stream.m_SeekPos
+  -- State update: insertBufsAfterCheck' = false
+  -- Invokes: gAudioThreadCv.wait, gStreamsToProcess.size, gStreamsToClose.size, gStreamsToClose.empty, gStreamsToClose.front
+  true
+end
+
+schema CStream_Initialise
+  ΔCStream
+where
+  -- State update: gAudioThread' = std::thread(audioFileOpsThread)
+  -- Invokes: std::thread
+  true
+end
+
+schema CStream_Terminate
+  ΔCStream
+where
+  -- State update: gAudioThreadTerm' = true
+  -- Invokes: gAudioThreadQueueMutex.lock, gAudioThreadQueueMutex.unlock, gAudioThreadCv.notify_one, gAudioThread.join
+  true
+end
+
+schema CStream_Open
+  ΔCStream
+  filename? : seq CHAR
+  overrideSampleRate? : ℕ
+  result! : 𝔹
+where
+  -- State update: m_bDoSeek' = false
+  -- State update: m_SeekPos' = 0
+  -- State update: m_bPaused' = false
+  -- State update: m_bActive' = false
+  -- State update: m_bReset' = false
+  -- State update: m_nVolume' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: m_pSoundFile->IsOpened, m_pSoundFile->GetBufferSize, m_pSoundFile->GetAvgSamplesPerSec, m_pSoundFile->GetSampleCount, m_pSoundFile->GetSampleRate
+  true
+end
+
+schema stream_IDecoder
+  ΔstreamModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema stream_GetAvgSamplesPerSec
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = GetChannels() * GetSampleRate()
+  true
+end
+
+schema stream_ms2samples
+  ΔstreamModuleState
+  ms? : ℕ
+  result! : ℕ
+where
+  -- Return postcondition: result! = float(ms) / 1000.0f * float(GetSampleRate())
+  true
+end
+
+schema stream_samples2ms
+  ΔstreamModuleState
+  sm? : ℕ
+  result! : ℕ
+where
+  -- Return postcondition: result! = float(sm) * 1000.0f / float(GetSampleRate())
+  true
+end
+
+schema stream_GetBufferSamples
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = (GetAvgSamplesPerSec() / 4)
+  true
+end
+
+schema stream_GetBufferSize
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = GetBufferSamples() * GetSampleSize()
+  true
+end
+
+schema stream_GetLength
+  ΔstreamModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = float(GetSampleCount()) * 1000.0f / float(GetSampleRate())
+  true
+end
+
+schema stream_push
+  ΔstreamModuleState
+  value? : T
+where
+  -- Invokes: m_queue.push
+  true
+end
+
+schema stream_peekPop
+  ΔstreamModuleState
+  retVal? : Ref[T]
+  result! : 𝔹
+where
+  -- State update: retVal' = m_queue.front()
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: m_queue.front, m_queue.pop
+  true
+end
+
+schema stream_swapNts
+  ΔstreamModuleState
+  replaceWith? : tsQueue_T
+where
+  -- State update: replaceWith.count' = count
+  -- Invokes: m_queue.swap
+  true
+end
+
+schema stream_emptyNts
+  ΔstreamModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = count == 0
+  true
+end

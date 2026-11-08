@@ -1,0 +1,85 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: timebars (core)
+-- Source File(s): core/timebars.cpp, core/timebars.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Font.zpp  (from "Font.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Text.zpp  (from "Text.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_TIMERS : seq CHAR  -- #define MAX_TIMERS (50)
+MAX_MS_COLLECTED : seq CHAR  -- #define MAX_MS_COLLECTED (40)
+FRAMETIME : seq CHAR  -- #define FRAMETIME struct sTimeBar
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema sTimeBar
+  name : seq CHAR
+  startTime : ℝ
+  endTime : ℝ
+  unk : ℤ
+where
+  #name = 20
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema timebars_tbInit
+  ΔtimebarsModuleState
+where
+  -- State update: TimerBar.count' = 0
+  -- State update: MaxFrameTime' = 0.0f
+  -- Invokes: CTimer::GetFrameCounter, CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerFrame
+  true
+end
+
+schema timebars_tbStartTimer
+  ΔtimebarsModuleState
+  unk? : ℤ
+  name? : seq CHAR
+where
+  -- State update: unk' = unk
+  -- Invokes: CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerFrame
+  true
+end
+
+schema timebars_tbEndTimer
+  ΔtimebarsModuleState
+  name? : seq CHAR
+where
+  -- Invokes: CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerFrame
+  true
+end
+
+schema timebars_Diag_GetFPS
+  ΔtimebarsModuleState
+  result! : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema timebars_tbDisplay
+  ΔtimebarsModuleState
+where
+  -- State update: MaxFrameTime' = Max(MaxFrameTime, FrameEndTime - FrameInitTime)
+  -- Invokes: CTimer::GetCurrentTimeInCycles, CTimer::GetCyclesPerFrame, CFont::SetBackgroundOff, CFont::SetBackgroundColor, CFont::SetScale
+  true
+end

@@ -1,0 +1,596 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PlayerInfo (core)
+-- Source File(s): core/PlayerInfo.cpp, core/PlayerInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bridge.zpp  (from "Bridge.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include General.zpp  (from "General.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include PlayerInfo.zpp  (from "PlayerInfo.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include PlayerSkin.zpp  (from "PlayerSkin.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Script.zpp  (from "Script.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Text.zpp  (from "Text.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include main.zpp  (from "main.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include ColModel.zpp  (from "ColModel.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eWastedBustedState ::= WBSTATE_PLAYING | WBSTATE_WASTED | WBSTATE_BUSTED | WBSTATE_FAILED_CRITICAL_MISSION
+
+eBustedAudioState ::= BUSTEDAUDIO_NONE | BUSTEDAUDIO_LOADING | BUSTEDAUDIO_DONE
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlayerInfo
+  m_pPed : Ref[CPlayerPed]
+  m_pRemoteVehicle : Ref[CVehicle]
+  m_ColModel : CColModel
+  m_pVehicleEx : Ref[CVehicle]
+  m_aPlayerName : seq CHAR
+  m_nMoney : ℤ
+  m_nVisibleMoney : ℤ
+  m_nCollectedPackages : ℤ
+  m_nTotalPackages : ℤ
+  m_nLastBumpPlayerCarTimer : ℕ
+  m_nUnusedTaxiTimer : ℕ
+  m_bUnusedTaxiThing : 𝔹
+  m_nNextSexFrequencyUpdateTime : ℕ
+  m_nNextSexMoneyUpdateTime : ℕ
+  m_nSexFrequency : ℤ
+  m_pHooker : Ref[CCivilianPed]
+  m_WBState : ℤ
+  m_nWBTime : ℕ
+  m_bInRemoteMode : 𝔹
+  field_D5 : 𝔹
+  field_D6 : 𝔹
+  m_nTimeLostRemoteCar : ℕ
+  m_nTimeLastHealthLoss : ℕ
+  m_nTimeLastArmourLoss : ℕ
+  m_nTimeTankShotGun : ℕ
+  m_nUpsideDownCounter : ℤ
+  field_EC : ℤ
+  m_nTimeCarSpentOnTwoWheels : ℤ
+  m_nDistanceCarTravelledOnTwoWheels : ℝ
+  m_nTimeNotFullyOnGround : ℤ
+  m_nTimeSpentOnWheelie : ℤ
+  m_nDistanceTravelledOnWheelie : ℝ
+  m_nTimeSpentOnStoppie : ℤ
+  m_nDistanceTravelledOnStoppie : ℝ
+  m_nCancelWheelStuntTimer : ℤ
+  m_nLastTimeCarSpentOnTwoWheels : ℤ
+  m_nLastDistanceCarTravelledOnTwoWheels : ℝ
+  m_nLastTimeSpentOnWheelie : ℤ
+  m_nLastDistanceTravelledOnWheelie : ℝ
+  m_nLastTimeSpentOnStoppie : ℤ
+  m_nLastDistanceTravelledOnStoppie : ℝ
+  m_nTrafficMultiplier : ℤ
+  field_12A : ℤ
+  m_fRoadDensity : ℝ
+  m_nPreviousTimeRewardedForExplosion : ℕ
+  m_nExplosionsSinceLastReward : ℕ
+  m_nHavocLevel : ℕ
+  m_fMediaAttention : ℝ
+  m_bInfiniteSprint : 𝔹
+  m_bFastReload : 𝔹
+  m_bFireproof : 𝔹
+  m_nMaxHealth : ℕ
+  m_nMaxArmour : ℕ
+  m_bGetOutOfJailFree : 𝔹
+  m_bGetOutOfHospitalFree : 𝔹
+  m_bDriveByAllowed : 𝔹
+  m_nBustedAudioStatus : ℕ
+  m_nCurrentBustedAudio : ℤ
+  m_pSkinTexture : Ref[RwTexture]
+  field_268 : ℤ
+  field_272 : ℤ
+where
+  #m_pPed ≤ 1
+  #m_pRemoteVehicle ≤ 1
+  #m_pVehicleEx ≤ 1
+  #m_aPlayerName = 70
+  m_nLastBumpPlayerCarTimer ≥ 0
+  m_nUnusedTaxiTimer ≥ 0
+  m_nNextSexFrequencyUpdateTime ≥ 0
+  m_nNextSexMoneyUpdateTime ≥ 0
+  #m_pHooker ≤ 1
+  m_nWBTime ≥ 0
+  m_nTimeLostRemoteCar ≥ 0
+  m_nTimeLastHealthLoss ≥ 0
+  m_nTimeLastArmourLoss ≥ 0
+  m_nTimeTankShotGun ≥ 0
+  m_nPreviousTimeRewardedForExplosion ≥ 0
+  m_nExplosionsSinceLastReward ≥ 0
+end
+
+schema CPlayerInfo_GetPos
+  ΔCPlayerInfo
+  result! : CVector
+where
+  -- Declared member operation CPlayerInfo::GetPos()
+  true
+end
+
+schema CPlayerInfo_Process_2
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::Process(void)
+  true
+end
+
+schema CPlayerInfo_KillPlayer_3
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::KillPlayer(void)
+  true
+end
+
+schema CPlayerInfo_ArrestPlayer_4
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::ArrestPlayer(void)
+  true
+end
+
+schema CPlayerInfo_IsPlayerInRemoteMode_5
+  ΔCPlayerInfo
+  result! : 𝔹
+where
+  -- Declared member operation CPlayerInfo::IsPlayerInRemoteMode(void)
+  true
+end
+
+schema CPlayerInfo_PlayerFailedCriticalMission_6
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::PlayerFailedCriticalMission(void)
+  true
+end
+
+schema CPlayerInfo_Clear_7
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::Clear(void)
+  true
+end
+
+schema CPlayerInfo_BlowUpRCBuggy_8
+  ΔCPlayerInfo
+  arg_1? : 𝔹
+where
+  -- Declared member operation CPlayerInfo::BlowUpRCBuggy(bool)
+  true
+end
+
+schema CPlayerInfo_CancelPlayerEnteringCars_9
+  ΔCPlayerInfo
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CPlayerInfo::CancelPlayerEnteringCars(CVehicle*)
+  true
+end
+
+schema CPlayerInfo_IsRestartingAfterDeath_10
+  ΔCPlayerInfo
+  result! : 𝔹
+where
+  -- Declared member operation CPlayerInfo::IsRestartingAfterDeath(void)
+  true
+end
+
+schema CPlayerInfo_IsRestartingAfterArrest_11
+  ΔCPlayerInfo
+  result! : 𝔹
+where
+  -- Declared member operation CPlayerInfo::IsRestartingAfterArrest(void)
+  true
+end
+
+schema CPlayerInfo_EvaluateCarPosition_12
+  ΔCPlayerInfo
+  arg_1? : Ref[CEntity]
+  arg_2? : Ref[CPed]
+  arg_3? : ℝ
+  arg_4? : ℙ ℝ
+  arg_5? : Ref[CVehicle]
+where
+  -- Declared member operation CPlayerInfo::EvaluateCarPosition(CEntity*, CPed*, float, float*, CVehicle**)
+  true
+end
+
+schema CPlayerInfo_LoadPlayerInfo_13
+  ΔCPlayerInfo
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CPlayerInfo::LoadPlayerInfo(uint8 *buf, uint32 size)
+  true
+end
+
+schema CPlayerInfo_SavePlayerInfo_14
+  ΔCPlayerInfo
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CPlayerInfo::SavePlayerInfo(uint8 *buf, uint32* size)
+  true
+end
+
+schema CPlayerInfo_FindClosestCarSectorList_15
+  ΔCPlayerInfo
+  arg_1? : CPtrList
+  arg_2? : Ref[CPed]
+  arg_3? : ℝ
+  arg_4? : ℝ
+  arg_5? : ℝ
+  arg_6? : ℝ
+  arg_7? : ℙ ℝ
+  arg_8? : Ref[CVehicle]
+where
+  -- Declared member operation CPlayerInfo::FindClosestCarSectorList(CPtrList&, CPed*, float, float, float, float, float*, CVehicle**)
+  true
+end
+
+schema CPlayerInfo_SetPlayerSkin_16
+  ΔCPlayerInfo
+  skin? : seq CHAR
+where
+  -- Declared member operation CPlayerInfo::SetPlayerSkin(const char *skin)
+  true
+end
+
+schema CPlayerInfo_DeletePlayerSkin_17
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::DeletePlayerSkin()
+  true
+end
+
+schema CPlayerInfo_AwardMoneyForExplosion_18
+  ΔCPlayerInfo
+  vehicle? : Ref[CVehicle]
+where
+  -- Declared member operation CPlayerInfo::AwardMoneyForExplosion(CVehicle *vehicle)
+  true
+end
+
+schema CPlayerInfo_BlowUpRCBuggy_19
+  ΔCPlayerInfo
+where
+  -- Declared member operation CPlayerInfo::BlowUpRCBuggy(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPlayerInfo_Clear
+  ΔCPlayerInfo
+where
+  -- State update: m_pPed' = ∅
+  -- State update: m_pRemoteVehicle' = ∅
+  -- State update: m_pVehicleEx.bUsingSpecialColModel' = false
+  -- State update: m_pVehicleEx' = ∅
+  -- State update: m_nVisibleMoney' = 0
+  -- State update: m_nMoney' = m_nVisibleMoney
+  true
+end
+
+schema CPlayerInfo_Process
+  ΔCPlayerInfo
+where
+  -- State update: startTaxiTimer' = true
+  -- State update: veh' = m_pPed.m_pMyVehicle
+  -- State update: timePassed' = CTimer::GetTimeInMilliseconds() - m_nUnusedTaxiTimer
+  -- State update: startTaxiTimer' = false
+  -- State update: m_nUnusedTaxiTimer' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_nTimeCarSpentOnTwoWheels' = 0
+  -- Invokes: CReplay::IsPlayingBack, veh->IsTaxi, CTimer::GetTimeInMilliseconds, m_pPed->InVehicle, m_pMyVehicle->IsCar
+  true
+end
+
+schema CPlayerInfo_IsPlayerInRemoteMode
+  ΔCPlayerInfo
+where
+  -- Return postcondition: result! = m_pRemoteVehicle || m_bInRemoteMode
+  true
+end
+
+schema CPlayerInfo_SavePlayerInfo
+  ΔCPlayerInfo
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = sizeof(CPlayerInfo)
+  true
+end
+
+schema CPlayerInfo_LoadPlayerInfo
+  ΔCPlayerInfo
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlayerInfo_FindClosestCarSectorList
+  ΔCPlayerInfo
+  carList? : CPtrList
+  ped? : Ref[CPed]
+  unk1? : ℝ
+  unk2? : ℝ
+  unk3? : ℝ
+  unk4? : ℝ
+  lastCloseness? : ℙ ℝ
+  closestCarOutput? : Ref[CVehicle]
+where
+  -- State update: node' = carList.first
+  -- State update: car' = (CVehicle*)node.item
+  -- State update: car.m_scanCode' = CWorld::GetCurrentScanCode()
+  -- State update: carCentre' = car.GetBoundCentre()
+  -- State update: dist' = (ped.GetPosition() - carCentre).Magnitude2D()
+  -- Invokes: CWorld::GetCurrentScanCode, car->IsVehicle, car->GetStatus, car->GetUp, car->GetBoundCentre
+  true
+end
+
+schema CPlayerInfo_EvaluateCarPosition
+  ΔCPlayerInfo
+  carToTest? : Ref[CEntity]
+  player? : Ref[CPed]
+  carBoundCentrePedDist? : ℝ
+  lastCloseness? : ℙ ℝ
+  closestCarOutput? : Ref[CVehicle]
+where
+  -- State update: lastCloseness' = closeness
+  -- State update: closestCarOutput' = (CVehicle*)carToTest
+  -- Invokes: carToTest->GetPosition, player->GetPosition, CGeneral::GetATanOfXY, player->GetForward
+  true
+end
+
+schema CPlayerInfo_GetPos
+  ΔCPlayerInfo
+where
+  -- Return postcondition: result! = TheCamera.GetPosition()
+  -- Return postcondition: result! = m_pPed->m_pMyVehicle->GetPosition()
+  -- Return postcondition: result! = m_pPed->GetPosition()
+  -- Invokes: TheCamera.GetPosition, m_pPed->InVehicle, m_pMyVehicle->GetPosition, m_pPed->GetPosition
+  true
+end
+
+schema PlayerInfo_FindPlayerCoors
+  ΔPlayerInfoModuleState
+where
+  -- State update: ped' = FindPlayerPed()
+  -- Return postcondition: result! = TheCamera.GetPosition()
+  -- Return postcondition: result! = ped->m_pMyVehicle->GetPosition()
+  -- Return postcondition: result! = ped->GetPosition()
+  -- Invokes: CReplay::IsPlayingBack, TheCamera.GetPosition, ped->InVehicle, m_pMyVehicle->GetPosition, ped->GetPosition
+  true
+end
+
+schema PlayerInfo_FindPlayerSpeed
+  ΔPlayerInfoModuleState
+where
+  -- State update: ped' = FindPlayerPed()
+  -- Return postcondition: result! = vecTmpVector
+  -- Return postcondition: result! = ped->m_pMyVehicle->m_vecMoveSpeed
+  -- Return postcondition: result! = ped->m_vecMoveSpeed
+  -- Invokes: CReplay::IsPlayingBack, ped->InVehicle
+  true
+end
+
+schema PlayerInfo_FindPlayerVehicle
+  ΔPlayerInfoModuleState
+where
+  -- State update: ped' = FindPlayerPed()
+  -- Return postcondition: result! = ped->m_pMyVehicle
+  -- Return postcondition: result! = nil
+  -- Invokes: ped->InVehicle
+  true
+end
+
+schema PlayerInfo_FindPlayerEntity
+  ΔPlayerInfoModuleState
+where
+  -- State update: ped' = FindPlayerPed()
+  -- Return postcondition: result! = ped->m_pMyVehicle
+  -- Return postcondition: result! = ped
+  -- Invokes: ped->InVehicle
+  true
+end
+
+schema PlayerInfo_FindPlayerTrain
+  ΔPlayerInfoModuleState
+where
+  -- Return postcondition: result! = FindPlayerVehicle()
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema PlayerInfo_FindPlayerPed
+  ΔPlayerInfoModuleState
+where
+  -- Return postcondition: result! = CWorld::Players[CWorld::PlayerInFocus].m_pPed
+  true
+end
+
+schema PlayerInfo_FindPlayerCentreOfWorld
+  ΔPlayerInfoModuleState
+  player? : ℤ
+where
+  -- Return postcondition: result! = TheCamera.GetPosition()
+  -- Return postcondition: result! = TheCamera.GetPosition()
+  -- Return postcondition: result! = CWorld::Players[player].m_pRemoteVehicle->GetPosition()
+  -- Invokes: CReplay::IsPlayingBack, TheCamera.GetPosition, m_pRemoteVehicle->GetPosition, m_pPed->GetPosition
+  true
+end
+
+schema PlayerInfo_FindPlayerCentreOfWorld_NoSniperShift
+  ΔPlayerInfoModuleState
+where
+  -- Return postcondition: result! = TheCamera.GetPosition()
+  -- Return postcondition: result! = TheCamera.GetPosition()
+  -- Invokes: CReplay::IsPlayingBack, TheCamera.GetPosition, m_pRemoteVehicle->GetPosition
+  true
+end
+
+schema PlayerInfo_FindPlayerHeading
+  ΔPlayerInfoModuleState
+where
+  -- Return postcondition: result! = FindPlayerVehicle()->GetForward().Heading()
+  -- Return postcondition: result! = FindPlayerPed()->GetForward().Heading()
+  -- Invokes: m_pRemoteVehicle->GetForward
+  true
+end
+
+schema CPlayerInfo_IsRestartingAfterDeath
+  ΔCPlayerInfo
+where
+  -- Return postcondition: result! = m_WBState == WBSTATE_WASTED
+  true
+end
+
+schema CPlayerInfo_IsRestartingAfterArrest
+  ΔCPlayerInfo
+where
+  -- Return postcondition: result! = m_WBState == WBSTATE_BUSTED
+  true
+end
+
+schema CPlayerInfo_KillPlayer
+  ΔCPlayerInfo
+where
+  -- State update: m_WBState' = WBSTATE_WASTED
+  -- State update: m_nWBTime' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds, CDarkel::ResetOnPlayerDeath, CMessages::AddBigMessage, TheText.Get
+  true
+end
+
+schema CPlayerInfo_ArrestPlayer
+  ΔCPlayerInfo
+where
+  -- State update: m_WBState' = WBSTATE_BUSTED
+  -- State update: m_nWBTime' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_nBustedAudioStatus' = BUSTEDAUDIO_NONE
+  -- Invokes: CTimer::GetTimeInMilliseconds, CDarkel::ResetOnPlayerDeath, CMessages::AddBigMessage, TheText.Get
+  true
+end
+
+schema CPlayerInfo_PlayerFailedCriticalMission
+  ΔCPlayerInfo
+where
+  -- State update: m_WBState' = WBSTATE_FAILED_CRITICAL_MISSION
+  -- State update: m_nWBTime' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds, CDarkel::ResetOnPlayerDeath
+  true
+end
+
+schema CPlayerInfo_CancelPlayerEnteringCars
+  ΔCPlayerInfo
+  car? : Ref[CVehicle]
+where
+  -- Invokes: m_pPed->EnteringCar, m_pPed->QuitEnteringCar, m_pPed->ClearObjective
+  true
+end
+
+schema CPlayerInfo_MakePlayerSafe
+  ΔCPlayerInfo
+  toggle? : 𝔹
+where
+  -- State update: m_pPed.m_pWanted.m_bIgnoredByEveryone' = true
+  -- State update: m_pPed.bBulletProof' = true
+  -- State update: m_pPed.bFireProof' = true
+  -- State update: m_pPed.bCollisionProof' = true
+  -- State update: m_pPed.bMeleeProof' = true
+  -- State update: m_pPed.bOnlyDamagedByPlayer' = true
+  -- Invokes: CTheScripts::ResetCountdownToMakePlayerUnsafe, CWorld::StopAllLawEnforcersInTheirTracks, CPad::GetPad, CPad::StopPadsShaking, gFireManager.ExtinguishPoint
+  true
+end
+
+schema CPlayerInfo_BlowUpRCBuggy
+  ΔCPlayerInfo
+  actually? : 𝔹
+where
+  -- Invokes: CRemote::TakeRemoteControlledCarFromPlayer, m_pRemoteVehicle->BlowUpCar
+  true
+end
+
+schema CPlayerInfo_SetPlayerSkin
+  ΔCPlayerInfo
+  skin? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlayerInfo_LoadPlayerSkin
+  ΔCPlayerInfo
+where
+  -- State update: m_pSkinTexture' = CPlayerSkin::GetSkinTexture(m_aSkinName)
+  -- State update: m_pSkinTexture' = CPlayerSkin::GetSkinTexture(DEFAULT_SKIN_NAME)
+  -- Invokes: CPlayerSkin::GetSkinTexture
+  true
+end
+
+schema CPlayerInfo_DeletePlayerSkin
+  ΔCPlayerInfo
+where
+  -- State update: m_pSkinTexture' = ∅
+  true
+end
+
+schema CPlayerInfo_BlowUpRCBuggy_2
+  ΔCPlayerInfo
+where
+  -- Invokes: CRemote::TakeRemoteControlledCarFromPlayer, m_pRemoteVehicle->BlowUpCar
+  true
+end
+
+schema CPlayerInfo_AwardMoneyForExplosion
+  ΔCPlayerInfo
+  wreckedCar? : Ref[CVehicle]
+where
+  -- State update: m_nExplosionsSinceLastReward' = 1
+  -- State update: m_nPreviousTimeRewardedForExplosion' = CTimer::GetTimeInMilliseconds()
+  -- State update: award' = wreckedCar.pHandling.nMonetaryValue * 0.002f
+  -- Invokes: CTimer::GetTimeInMilliseconds, CMoneyMessages::RegisterOne, wreckedCar->GetPosition, CGeneral::GetRandomNumber
+  true
+end

@@ -1,0 +1,154 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: maths (math)
+-- Source File(s): math/maths.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema maths_Sin
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = sinf(x)
+  true
+end
+
+schema maths_Asin
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = asinf(x)
+  true
+end
+
+schema maths_Cos
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = cosf(x)
+  true
+end
+
+schema maths_Acos
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = acosf(x)
+  true
+end
+
+schema maths_Tan
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = tanf(x)
+  true
+end
+
+schema maths_Atan
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = atanf(x)
+  true
+end
+
+schema maths_Atan2
+  ΔmathsModuleState
+  y? : ℝ
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = atan2f(y, x)
+  true
+end
+
+schema maths_Abs
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = fabsf(x)
+  true
+end
+
+schema maths_Sqrt
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = sqrtf(x)
+  true
+end
+
+schema maths_RecipSqrt
+  ΔmathsModuleState
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = x/Sqrt(y)
+  true
+end
+
+schema maths_RecipSqrt_2
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = RecipSqrt(1.0f, x)
+  true
+end
+
+schema maths_Pow
+  ΔmathsModuleState
+  x? : ℝ
+  y? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = powf(x, y)
+  true
+end
+
+schema maths_Floor
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = floorf(x)
+  true
+end
+
+schema maths_Ceil
+  ΔmathsModuleState
+  x? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = ceilf(x)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema mathsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 19
+end

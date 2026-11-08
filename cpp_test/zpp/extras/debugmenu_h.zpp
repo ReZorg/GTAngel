@@ -1,0 +1,276 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: debugmenu (extras)
+-- Source File(s): extras/debugmenu.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TWEAKPATH : seq CHAR  -- #define TWEAKPATH ___tw___TWEAKPATH
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CTweakVar
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTweakVar_AddDBG
+  ΔCTweakVar
+  path? : seq CHAR
+where
+  -- Declared member operation CTweakVar::AddDBG(const char *path)
+  true
+end
+
+schema CTweakVar_AddDBG_2
+  ΔCTweakVar
+  path? : seq CHAR
+where
+  -- Declared member operation CTweakVar::AddDBG(const char* path)
+  true
+end
+
+schema CTweakVars
+  instance_addr : ADDRESS
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTweakVars_Add
+  ΔCTweakVars
+  var? : Ref[CTweakVar]
+where
+  -- Declared member operation CTweakVars::Add(CTweakVar *var)
+  true
+end
+
+schema CTweakVars_AddDBG_2
+  ΔCTweakVars
+  path? : seq CHAR
+where
+  -- Declared member operation CTweakVars::AddDBG(const char *path)
+  true
+end
+
+schema CTweakVars_Add_3
+  ΔCTweakVars
+  var? : Ref[CTweakVar]
+where
+  -- Declared member operation CTweakVars::Add(CTweakVar* var)
+  true
+end
+
+schema CTweakVars_AddDBG_4
+  ΔCTweakVars
+  path? : seq CHAR
+where
+  -- Declared member operation CTweakVars::AddDBG(const char* path)
+  true
+end
+
+schema CTweakFunc
+  CTweakVar  -- inherits base schema
+  m_pVarName : seq CHAR
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTweakFunc_void
+  ΔCTweakFunc
+  arg_1? : Ref[m_pFunc]
+where
+  -- Declared member operation CTweakFunc::void(*m_pFunc)
+  true
+end
+
+schema CTweakFunc_CTweakFunc_2
+  ΔCTweakFunc
+  pFunc? : Ref[void]
+where
+  -- Declared member operation CTweakFunc::CTweakFunc(void (*pFunc)
+  true
+end
+
+schema CTweakFunc_AddDBG_3
+  ΔCTweakFunc
+  path? : seq CHAR
+  result! : void
+where
+  -- Declared member operation CTweakFunc::AddDBG(const char *path)
+  true
+end
+
+schema CTweakFunc_CTweakFunc_4
+  ΔCTweakFunc
+  pFunc? : Ref[void]
+where
+  -- Declared member operation CTweakFunc::CTweakFunc(void (*pFunc)
+  true
+end
+
+schema CTweakBool
+  CTweakVar  -- inherits base schema
+  m_pVarName : seq CHAR
+  m_pBoolVar : ℙ 𝔹
+where
+  #m_pBoolVar ≤ 1
+end
+
+schema CTweakBool_CTweakBool
+  ΔCTweakBool
+  pBool? : ℙ 𝔹
+  strName? : seq CHAR
+  strPath? : seq CHAR
+where
+  -- Declared member operation CTweakBool::CTweakBool(bool *pBool, const char *strName, const char *strPath)
+  true
+end
+
+schema CTweakBool_AddDBG_2
+  ΔCTweakBool
+  path? : seq CHAR
+  result! : void
+where
+  -- Declared member operation CTweakBool::AddDBG(const char *path)
+  true
+end
+
+schema CTweakBool_CTweakBool_3
+  ΔCTweakBool
+  pBool? : ℙ 𝔹
+  strName? : seq CHAR
+  strPath? : seq CHAR
+where
+  -- Declared member operation CTweakBool::CTweakBool(bool* pBool, const char* strName, const char* strPath)
+  true
+end
+
+schema CTweakSwitch
+  CTweakVar  -- inherits base schema
+  m_pVarName : seq CHAR
+  m_pIntVar : ADDRESS
+  m_nMax : ℤ
+  m_aStr : seq CHAR
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CTweakSwitch_void
+  ΔCTweakSwitch
+  arg_1? : Ref[m_pFunc]
+where
+  -- Declared member operation CTweakSwitch::void(*m_pFunc)
+  true
+end
+
+schema CTweakSwitch_CTweakSwitch_2
+  ΔCTweakSwitch
+  pInt? : ADDRESS
+  strName? : seq CHAR
+  nMin? : ℤ
+  nMax? : ℤ
+  aStr? : seq CHAR
+  pFunc? : Ref[void]
+where
+  -- Declared member operation CTweakSwitch::CTweakSwitch(void *pInt, const char *strName, int32 nMin, int32 nMax, const char **aStr, void (*pFunc)
+  true
+end
+
+schema CTweakSwitch_AddDBG_3
+  ΔCTweakSwitch
+  path? : seq CHAR
+  result! : void
+where
+  -- Declared member operation CTweakSwitch::AddDBG(const char *path)
+  true
+end
+
+schema CTweakSwitch_CTweakSwitch_4
+  ΔCTweakSwitch
+  pInt? : ADDRESS
+  strName? : seq CHAR
+  nMin? : ℤ
+  nMax? : ℤ
+  aStr? : seq CHAR
+  pFunc? : Ref[void]
+where
+  -- Declared member operation CTweakSwitch::CTweakSwitch(void* pInt, const char* strName, int32 nMin, int32 nMax, const char** aStr, void (*pFunc)
+  true
+end
+
+schema name
+  CTweakVar_______________________________________________________________  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema name_name
+  Δname
+  pInt? : Ref[type]
+  strName? : seq CHAR
+  nLower? : type
+  nUpper? : type
+  nStep? : type
+  strPath? : seq CHAR
+  result! : ANY
+where
+  -- Declared member operation name::name(type *pInt, const char *strName, type nLower, type nUpper, type nStep, \ const char *strPath)
+  true
+end
+
+schema name_AddDBG_2
+  Δname
+  path? : seq CHAR
+  result! : void
+where
+  -- Declared member operation name::AddDBG(const char *path)
+  true
+end
+
+schema MenuEntry
+  type : ℤ
+  name : seq CHAR
+  next : Ref[MenuEntry]
+  r : RwRect
+  menu : Ref[Menu]
+where
+  #next ≤ 1
+  #menu ≤ 1
+end
+
+schema MenuEntry_MenuEntry
+  ΔMenuEntry
+  name? : seq CHAR
+where
+  -- Declared member operation MenuEntry::MenuEntry(const char *name)
+  true
+end
+
+schema MenuEntry_MenuEntry_2
+  ΔMenuEntry
+  result! : ANY
+where
+  -- Declared member operation MenuEntry::MenuEntry(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema debugmenu_MenuEntry
+  ΔdebugmenuModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

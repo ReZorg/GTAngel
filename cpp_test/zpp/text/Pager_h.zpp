@@ -1,0 +1,106 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Pager (text)
+-- Source File(s): text/Pager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUMPAGERMESSAGES : ℕ  -- #define NUMPAGERMESSAGES 8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema PagerMessage
+  m_pText : seq CHAR
+  m_nSpeedMs : ℕ
+  m_nCurrentPosition : ℤ
+  m_nStringLength : ℕ
+  m_nPriority : ℕ
+  m_nTimeToChangePosition : ℕ
+  unused : ℤ
+  m_nNumber : seq ℤ  -- bounded array [6]
+where
+  m_nSpeedMs ≥ 0
+  m_nStringLength ≥ 0
+  m_nPriority ≥ 0
+  m_nTimeToChangePosition ≥ 0
+  #m_nNumber = 6
+end
+
+schema CPager
+  m_nNumDisplayLetters : ℤ
+  m_messages : seq PagerMessage  -- bounded array [NUMPAGERMESSAGES]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPager_Init
+  ΔCPager
+where
+  -- Declared member operation CPager::Init()
+  true
+end
+
+schema CPager_Process_2
+  ΔCPager
+where
+  -- Declared member operation CPager::Process()
+  true
+end
+
+schema CPager_Display_3
+  ΔCPager
+where
+  -- Declared member operation CPager::Display()
+  true
+end
+
+schema CPager_AddMessage_4
+  ΔCPager
+  arg_1? : seq CHAR
+  arg_2? : ℕ
+  arg_3? : ℕ
+  arg_4? : ℕ
+where
+  -- Declared member operation CPager::AddMessage(wchar*, uint16, uint16, uint16)
+  true
+end
+
+schema CPager_AddMessageWithNumber_5
+  ΔCPager
+  str? : seq CHAR
+  n1? : ℤ
+  n2? : ℤ
+  n3? : ℤ
+  n4? : ℤ
+  n5? : ℤ
+  n6? : ℤ
+  speed? : ℕ
+  priority? : ℕ
+  a11? : ℕ
+where
+  -- Declared member operation CPager::AddMessageWithNumber(wchar *str, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, uint16 speed, uint16 priority, uint16 a11)
+  true
+end
+
+schema CPager_ClearMessages_6
+  ΔCPager
+where
+  -- Declared member operation CPager::ClearMessages()
+  true
+end
+
+schema CPager_RestartCurrentMessage_7
+  ΔCPager
+where
+  -- Declared member operation CPager::RestartCurrentMessage()
+  true
+end

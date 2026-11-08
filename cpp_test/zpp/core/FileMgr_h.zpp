@@ -1,0 +1,174 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: FileMgr (core)
+-- Source File(s): core/FileMgr.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CFileMgr
+  ms_rootDirName : seq CHAR
+  ms_dirName : seq CHAR
+where
+  #ms_rootDirName = 128
+  #ms_dirName = 128
+end
+
+schema CFileMgr_Initialise
+  ΔCFileMgr
+where
+  -- Declared member operation CFileMgr::Initialise(void)
+  true
+end
+
+schema CFileMgr_ChangeDir_2
+  ΔCFileMgr
+  dir? : seq CHAR
+where
+  -- Declared member operation CFileMgr::ChangeDir(const char *dir)
+  true
+end
+
+schema CFileMgr_SetDir_3
+  ΔCFileMgr
+  dir? : seq CHAR
+where
+  -- Declared member operation CFileMgr::SetDir(const char *dir)
+  true
+end
+
+schema CFileMgr_SetDirMyDocuments_4
+  ΔCFileMgr
+where
+  -- Declared member operation CFileMgr::SetDirMyDocuments(void)
+  true
+end
+
+schema CFileMgr_LoadFile_5
+  ΔCFileMgr
+  file? : seq CHAR
+  buf? : ℙ ℕ
+  maxlen? : ℤ
+  mode? : seq CHAR
+  result! : ℕ
+where
+  -- Declared member operation CFileMgr::LoadFile(const char *file, uint8 *buf, int maxlen, const char *mode)
+  true
+end
+
+schema CFileMgr_OpenFile_6
+  ΔCFileMgr
+  file? : seq CHAR
+  mode? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileMgr::OpenFile(const char *file, const char *mode)
+  true
+end
+
+schema CFileMgr_OpenFile_7
+  ΔCFileMgr
+  file? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileMgr::OpenFile(const char *file)
+  true
+end
+
+schema CFileMgr_OpenFileForWriting_8
+  ΔCFileMgr
+  file? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation CFileMgr::OpenFileForWriting(const char *file)
+  true
+end
+
+schema CFileMgr_Read_9
+  ΔCFileMgr
+  fd? : ℤ
+  buf? : seq CHAR
+  len? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation CFileMgr::Read(int fd, const char *buf, ssize_t len)
+  true
+end
+
+schema CFileMgr_Write_10
+  ΔCFileMgr
+  fd? : ℤ
+  buf? : seq CHAR
+  len? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation CFileMgr::Write(int fd, const char *buf, ssize_t len)
+  true
+end
+
+schema CFileMgr_Seek_11
+  ΔCFileMgr
+  fd? : ℤ
+  offset? : ℤ
+  whence? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CFileMgr::Seek(int fd, int offset, int whence)
+  true
+end
+
+schema CFileMgr_ReadLine_12
+  ΔCFileMgr
+  fd? : ℤ
+  buf? : seq CHAR
+  len? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CFileMgr::ReadLine(int fd, char *buf, int len)
+  true
+end
+
+schema CFileMgr_CloseFile_13
+  ΔCFileMgr
+  fd? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CFileMgr::CloseFile(int fd)
+  true
+end
+
+schema CFileMgr_GetErrorReadWrite_14
+  ΔCFileMgr
+  fd? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CFileMgr::GetErrorReadWrite(int fd)
+  true
+end
+
+schema CFileMgr_GetRootDirName_15
+  ΔCFileMgr
+  result! : seq CHAR
+where
+  -- Declared member operation CFileMgr::GetRootDirName()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema FileMgr_OpenFile
+  ΔFileMgrModuleState
+  file? : seq CHAR
+  result! : ℤ
+where
+  -- Return postcondition: result! = OpenFile(file, "rb")
+  true
+end

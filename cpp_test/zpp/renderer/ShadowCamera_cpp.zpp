@@ -1,0 +1,194 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ShadowCamera (renderer)
+-- Source File(s): renderer/ShadowCamera.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include ShadowCamera.zpp  (from "ShadowCamera.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TEXELOFFSET : ℝ  -- #define TEXELOFFSET 0.5f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CShadowCamera_CShadowCamera
+  ΔCShadowCamera
+where
+  -- State update: m_pCamera' = ∅
+  -- State update: m_pTexture' = ∅
+  true
+end
+
+schema CShadowCamera_CShadowCamera_2
+  ΔCShadowCamera
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CShadowCamera_Destroy
+  ΔCShadowCamera
+where
+  -- State update: frame' = RwCameraGetFrame(m_pCamera)
+  -- State update: raster' = RwCameraGetZRaster(m_pCamera)
+  -- State update: raster' = RwCameraGetRaster(m_pCamera)
+  -- State update: m_pTexture' = ∅
+  -- State update: m_pCamera' = ∅
+  true
+end
+
+schema CShadowCamera_Create
+  ΔCShadowCamera
+  rasterSize? : ℤ
+where
+  -- State update: size' = 1 << rasterSize
+  -- State update: m_pCamera' = RwCameraCreate()
+  -- State update: zRaster' = RwRasterCreate(size, size, 0, rwRASTERTYPEZBUFFER)
+  -- State update: raster' = RwRasterCreate(size, size, 0, rwRASTERTYPECAMERATEXTURE)
+  -- State update: m_pTexture' = RwTextureCreate(raster)
+  -- Return postcondition: result! = (m_pCamera)
+  -- Return postcondition: result! = (nil)
+  true
+end
+
+schema CShadowCamera_SetFrustum
+  ΔCShadowCamera
+  objectRadius? : ℝ
+where
+  -- State update: vw.x' = objectRadius
+  -- State update: vw.y' = objectRadius
+  -- Return postcondition: result! = m_pCamera
+  true
+end
+
+schema CShadowCamera_SetLight
+  ΔCShadowCamera
+  light? : Ref[RpLight]
+where
+  -- State update: camFrame' = RwCameraGetFrame(m_pCamera)
+  -- State update: camMatrix' = RwFrameGetMatrix(camFrame)
+  -- State update: lightFrame' = RpLightGetFrame(light)
+  -- State update: lightMatrix' = RwFrameGetMatrix(lightFrame)
+  -- Return postcondition: result! = m_pCamera
+  true
+end
+
+schema CShadowCamera_SetCenter
+  ΔCShadowCamera
+  center? : Ref[RwV3d]
+where
+  -- State update: camFrame' = RwCameraGetFrame(m_pCamera)
+  -- State update: camMatrix' = RwFrameGetMatrix(camFrame)
+  -- Return postcondition: result! = m_pCamera
+  true
+end
+
+schema CShadowCamera_Update
+  ΔCShadowCamera
+  clump? : Ref[RpClump]
+where
+  -- State update: bgColor' = { 255, 255, 255, 0 }
+  -- State update: geometry' = RpAtomicGetGeometry(GetFirstAtomic(clump))
+  -- State update: flags' = RpGeometryGetFlags(geometry)
+  -- Return postcondition: result! = m_pCamera
+  true
+end
+
+schema CShadowCamera_Update_2
+  ΔCShadowCamera
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: bgColor' = { 255, 255, 255, 0 }
+  -- State update: geometry' = RpAtomicGetGeometry(atomic)
+  -- State update: flags' = RpGeometryGetFlags(geometry)
+  -- Return postcondition: result! = m_pCamera
+  true
+end
+
+schema CShadowCamera_InvertRaster
+  ΔCShadowCamera
+where
+  -- State update: raster' = RwCameraGetRaster(m_pCamera)
+  -- State update: crw' = (float)RwRasterGetWidth(raster)
+  -- State update: crh' = (float)RwRasterGetHeight(raster)
+  -- State update: recipZ' = 1.0f / RwCameraGetNearClipPlane(m_pCamera)
+  true
+end
+
+schema CShadowCamera_MakeGradientRaster
+  ΔCShadowCamera
+where
+  -- State update: recipCamZ' = 1.0f / RwCameraGetNearClipPlane(m_pCamera)
+  -- State update: raster' = RwCameraGetRaster(m_pCamera)
+  -- State update: width' = (float)RwRasterGetWidth(raster)
+  -- State update: height' = (float)RwRasterGetHeight(raster)
+  -- State update: color' = 255.0f
+  -- State update: step' = (-191.0f / height)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = raster
+  true
+end
+
+schema CShadowCamera_RasterResample
+  ΔCShadowCamera
+  dstRaster? : Ref[RwRaster]
+where
+  -- State update: raster' = RwCameraGetRaster(m_pCamera)
+  -- State update: size' = (float) RwRasterGetWidth(raster)
+  -- State update: uvOffset' = TEXELOFFSET / size
+  -- State update: recipCamZ' = 1.0f / RwCameraGetNearClipPlane(m_pCamera)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = raster
+  true
+end
+
+schema CShadowCamera_RasterBlur
+  ΔCShadowCamera
+  dstRaster? : Ref[RwRaster]
+  numPasses? : ℤ
+where
+  -- State update: raster' = RwCameraGetRaster(m_pCamera)
+  -- State update: size' = (float) RwRasterGetWidth(dstRaster)
+  -- State update: recipCamZ' = 1.0f / RwCameraGetNearClipPlane(m_pCamera)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = dstRaster
+  true
+end
+
+schema CShadowCamera_RasterGradient
+  ΔCShadowCamera
+  dstRaster? : Ref[RwRaster]
+where
+  -- State update: raster' = RwCameraGetRaster(m_pCamera)
+  -- State update: size' = (float)RwRasterGetWidth(dstRaster)
+  -- State update: recipCamZ' = 1.0f / RwCameraGetNearClipPlane(m_pCamera)
+  -- Return postcondition: result! = dstRaster
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ShadowCameraModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 549
+end

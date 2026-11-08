@@ -1,0 +1,119 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Restart (control)
+-- Source File(s): control/Restart.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NUM_RESTART_POINTS : ℕ  -- #define NUM_RESTART_POINTS 8
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRestart
+  OverrideHospitalLevel : ℕ
+  OverridePoliceStationLevel : ℕ
+  bFadeInAfterNextArrest : 𝔹
+  bFadeInAfterNextDeath : 𝔹
+  bOverrideRestart : 𝔹
+  OverridePosition : CVector
+  OverrideHeading : ℝ
+  HospitalRestartPoints : seq CVector  -- bounded array [NUM_RESTART_POINTS]
+  HospitalRestartHeadings : seq ℝ  -- bounded array [NUM_RESTART_POINTS]
+  NumberOfHospitalRestarts : ℕ
+  PoliceRestartPoints : seq CVector  -- bounded array [NUM_RESTART_POINTS]
+  PoliceRestartHeadings : seq ℝ  -- bounded array [NUM_RESTART_POINTS]
+  NumberOfPoliceRestarts : ℕ
+where
+  OverrideHospitalLevel ≥ 0
+  OverridePoliceStationLevel ≥ 0
+  NumberOfHospitalRestarts ≥ 0
+  NumberOfPoliceRestarts ≥ 0
+end
+
+schema CRestart_AddPoliceRestartPoint
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CRestart::AddPoliceRestartPoint(const CVector&, float)
+  true
+end
+
+schema CRestart_AddHospitalRestartPoint_2
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CRestart::AddHospitalRestartPoint(const CVector&, float)
+  true
+end
+
+schema CRestart_OverrideNextRestart_3
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : ℝ
+where
+  -- Declared member operation CRestart::OverrideNextRestart(const CVector&, float)
+  true
+end
+
+schema CRestart_FindClosestHospitalRestartPoint_4
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : Ref[CVector]
+  arg_3? : ℙ ℝ
+where
+  -- Declared member operation CRestart::FindClosestHospitalRestartPoint(const CVector &, CVector *, float *)
+  true
+end
+
+schema CRestart_FindClosestPoliceRestartPoint_5
+  ΔCRestart
+  arg_1? : CVector
+  arg_2? : Ref[CVector]
+  arg_3? : ℙ ℝ
+where
+  -- Declared member operation CRestart::FindClosestPoliceRestartPoint(const CVector &, CVector *, float *)
+  true
+end
+
+schema CRestart_Initialise_6
+  ΔCRestart
+where
+  -- Declared member operation CRestart::Initialise()
+  true
+end
+
+schema CRestart_CancelOverrideRestart_7
+  ΔCRestart
+where
+  -- Declared member operation CRestart::CancelOverrideRestart()
+  true
+end
+
+schema CRestart_LoadAllRestartPoints_8
+  ΔCRestart
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Declared member operation CRestart::LoadAllRestartPoints(uint8 *buf, uint32 size)
+  true
+end
+
+schema CRestart_SaveAllRestartPoints_9
+  ΔCRestart
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Declared member operation CRestart::SaveAllRestartPoints(uint8 *buf, uint32 *size)
+  true
+end

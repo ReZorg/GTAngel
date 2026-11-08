@@ -1,0 +1,93 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: AnimBlendClumpData (animation)
+-- Source File(s): animation/AnimBlendClumpData.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include AnimBlendList.zpp  (from "AnimBlendList.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+AnimBlendClumpData_Enum_1 ::= IGNORE_ROTATION | IGNORE_TRANSLATION | VELOCITY_EXTRACTION | VELOCITY_EXTRACTION_3D | UPDATE_KEYFRAMES | COMPRESSED
+  -- val(IGNORE_ROTATION) = 2
+  -- val(IGNORE_TRANSLATION) = 4
+  -- val(VELOCITY_EXTRACTION) = 8
+  -- val(VELOCITY_EXTRACTION_3D) = 0x10
+  -- val(UPDATE_KEYFRAMES) = 0x20
+  -- val(COMPRESSED) = 0x40
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema AnimBlendFrameData
+  flag : ℕ
+  resetPos : RwV3d
+  hanimFrame : ℙ ℤ
+  nodeID : ℤ
+where
+  flag ≥ 0
+  #hanimFrame ≤ 1
+end
+
+schema CAnimBlendClumpData
+  link : CAnimBlendLink
+  numFrames : ℤ
+  velocity3d : Ref[CVector]
+  frames : Ref[AnimBlendFrameData]
+where
+  #velocity3d ≤ 1
+  #frames ≤ 1
+end
+
+schema CAnimBlendClumpData_CAnimBlendClumpData
+  ΔCAnimBlendClumpData
+where
+  -- Declared member operation CAnimBlendClumpData::CAnimBlendClumpData(void)
+  true
+end
+
+schema CAnimBlendClumpData_CAnimBlendClumpData_2
+  ΔCAnimBlendClumpData
+  result! : ANY
+where
+  -- Declared member operation CAnimBlendClumpData::CAnimBlendClumpData(void)
+  true
+end
+
+schema CAnimBlendClumpData_SetNumberOfFrames_3
+  ΔCAnimBlendClumpData
+  n? : ℤ
+where
+  -- Declared member operation CAnimBlendClumpData::SetNumberOfFrames(int n)
+  true
+end
+
+schema CAnimBlendClumpData_ForAllFrames_4
+  ΔCAnimBlendClumpData
+  cb? : Ref[void]
+  result! : endif_void
+where
+  -- Declared member operation CAnimBlendClumpData::ForAllFrames(void (*cb)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema AnimBlendClumpData_SetNumberOfBones
+  ΔAnimBlendClumpDataModuleState
+  n? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

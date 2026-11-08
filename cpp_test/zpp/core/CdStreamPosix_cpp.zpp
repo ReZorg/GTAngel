@@ -1,0 +1,195 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CdStreamPosix (core)
+-- Source File(s): core/CdStreamPosix.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include signal.zpp  (from "signal.h")
+-- include pthread.zpp  (from "pthread.h")
+-- include semaphore.zpp  (from "semaphore.h")
+-- include types.zpp  (from "sys/types.h")
+-- include unistd.zpp  (from "unistd.h")
+-- include time.zpp  (from "sys/time.h")
+-- include statvfs.zpp  (from "sys/statvfs.h")
+-- include stat.zpp  (from "sys/stat.h")
+-- include fcntl.zpp  (from "fcntl.h")
+-- include resource.zpp  (from "sys/resource.h")
+-- include stdarg.zpp  (from "stdarg.h")
+-- include limits.zpp  (from "limits.h")
+-- include syscall.zpp  (from "sys/syscall.h")
+-- include emscripten.zpp  (from "emscripten.h")
+-- include CdStream.zpp  (from "CdStream.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+RE3_SEM_OPEN : seq CHAR  -- #define RE3_SEM_OPEN re3_sem_open
+RE3_SEM_CLOSE : seq CHAR  -- #define RE3_SEM_CLOSE re3_sem_close
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CdReadInfo
+  nSectorOffset : ℕ
+  nSectorsToRead : ℕ
+  pBuffer : ADDRESS
+  bLocked : 𝔹
+  bReading : 𝔹
+  nStatus : ℤ
+  pChannelThread : pthread_t
+  pStartSemaphore : Ref[sem_t]
+  hFile : ℤ
+where
+  nSectorOffset ≥ 0
+  nSectorsToRead ≥ 0
+  #pStartSemaphore ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CdStreamPosix_re3_sem_open
+  ΔCdStreamPosixModuleState
+where
+  -- State update: sem' = (sem_t*)malloc(sizeof(sem_t))
+  -- State update: sem' = SEM_FAILED
+  -- Return postcondition: result! = sem
+  true
+end
+
+schema CdStreamPosix_re3_sem_close
+  ΔCdStreamPosixModuleState
+  sem? : Ref[sem_t]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CdStreamPosix_re3_sem_open_2
+  ΔCdStreamPosixModuleState
+  format? : seq CHAR
+where
+  -- State update: re3Sem' = new sem_t
+  -- Return postcondition: result! = sem_open(semName, O_CREAT, 0644, 1)
+  -- Return postcondition: result! = re3Sem
+  true
+end
+
+schema CdStreamPosix_re3_sem_close_2
+  ΔCdStreamPosixModuleState
+  sem? : Ref[sem_t]
+  format? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CdStreamPosix_CdStreamInitThread
+  ΔCdStreamPosixModuleState
+where
+  -- State update: gChannelRequestQ.items' = (int32 *)calloc(gNumChannels + 1, sizeof(int32))
+  -- State update: gChannelRequestQ.head' = 0
+  -- State update: gChannelRequestQ.tail' = 0
+  -- State update: gChannelRequestQ.size' = gNumChannels + 1
+  -- State update: gCdStreamSema' = RE3_SEM_OPEN("/semaphore_cd_stream")
+  -- State update: pDoneSemaphore' = RE3_SEM_OPEN("/semaphore_done%d", i)
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema CdStreamPosix_CdStreamInit
+  ΔCdStreamPosixModuleState
+  numChannels? : ℤ
+where
+  -- State update: _gdwCdStreamFlags' = O_RDONLY | O_NOATIME
+  -- State update: _gdwCdStreamFlags' = O_RDONLY
+  -- State update: gNumImages' = 0
+  -- State update: gNumChannels' = numChannels
+  -- State update: gpReadInfo' = (CdReadInfo *)calloc(numChannels, sizeof(CdReadInfo))
+  true
+end
+
+schema CdStreamPosix_GetGTA3ImgSize
+  ΔCdStreamPosixModuleState
+where
+  -- State update: real' = casepath(gImgNames[0], false)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = (uint32)statbuf.st_size
+  true
+end
+
+schema CdStreamPosix_CdStreamShutdown
+  ΔCdStreamPosixModuleState
+where
+  -- State update: gCdStreamThreadStatus' = 2
+  -- State update: nThreadStatus' = 2
+  true
+end
+
+schema CdStreamPosix_CdStreamRead
+  ΔCdStreamPosixModuleState
+  channel? : ℤ
+  buffer? : ADDRESS
+  offset? : ℕ
+  size? : ℕ
+where
+  -- State update: lastPosnRead' = size + offset
+  -- State update: hImage' = gImgFiles[_GET_INDEX(offset)]
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: pChannel.hFile' = hImage - 1
+  -- State update: pChannel.nStatus' = STREAM_NONE
+  -- State update: pChannel.nSectorOffset' = _GET_OFFSET(offset)
+  -- Return postcondition: result! = STREAM_SUCCESS
+  -- Return postcondition: result! = STREAM_NONE
+  -- Return postcondition: result! = STREAM_SUCCESS
+  true
+end
+
+schema CdStreamPosix_CdStreamGetStatus
+  ΔCdStreamPosixModuleState
+  channel? : ℤ
+where
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: status' = pChannel.nStatus
+  -- State update: pChannel.nStatus' = STREAM_NONE
+  -- Return postcondition: result! = STREAM_NONE
+  -- Return postcondition: result! = STREAM_NONE
+  -- Return postcondition: result! = STREAM_READING
+  true
+end
+
+schema CdStreamPosix_CdStreamGetLastPosn
+  ΔCdStreamPosixModuleState
+where
+  -- Return postcondition: result! = lastPosnRead
+  true
+end
+
+schema CdStreamPosix_CdStreamSync
+  ΔCdStreamPosixModuleState
+  channel? : ℤ
+where
+  -- State update: pChannel' = &gpReadInfo[channel]
+  -- State update: pChannel.nSectorsToRead' = 0
+  -- State update: pChannel.bLocked' = true
+  -- State update: pChannel.bLocked' = true
+  -- State update: pChannel.bReading' = false
+  -- State update: pChannel.bLocked' = true
+  -- Return postcondition: result! = STREAM_NONE
+  -- Return postcondition: result! = pChannel->nStatus
+  -- Return postcondition: result! = -1
+  true
+end

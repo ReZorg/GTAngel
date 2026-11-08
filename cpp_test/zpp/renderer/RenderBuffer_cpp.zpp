@@ -1,0 +1,67 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RenderBuffer (renderer)
+-- Source File(s): renderer/RenderBuffer.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema RenderBuffer_ClearRenderBuffer
+  ΔRenderBuffer
+where
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: TempBufferIndicesStored' = 0
+  true
+end
+
+schema RenderBuffer_StartStoring
+  ΔRenderBuffer
+  numIndices? : ℤ
+  numVertices? : ℤ
+  indexStart? : Ref[RwImVertexIndex]
+  vertexStart? : Ref[RwIm3DVertex]
+where
+  -- State update: indexStart' = &TempBufferRenderIndexList[TempBufferIndicesStored]
+  -- State update: vertexStart' = &TempBufferRenderVertices[TempBufferVerticesStored]
+  -- State update: IndicesToBeStored' = numIndices
+  -- State update: VerticesToBeStored' = numVertices
+  true
+end
+
+schema RenderBuffer_StopStoring
+  ΔRenderBuffer
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema RenderBuffer_RenderStuffInBuffer
+  ΔRenderBuffer
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RenderBufferModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 66
+end

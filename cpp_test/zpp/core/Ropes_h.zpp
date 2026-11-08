@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Ropes (core)
+-- Source File(s): core/Ropes.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRope
+  m_bActive : 𝔹
+  m_bWasRegistered : 𝔹
+  m_unk : 𝔹
+  m_id : ℕ
+  m_updateTimer : ℕ
+  m_pos : seq CVector  -- bounded array [32]
+  m_speed : seq CVector  -- bounded array [32]
+where
+  m_id ≥ 0
+  m_updateTimer ≥ 0
+  #m_pos = 32
+  #m_speed = 32
+end
+
+schema CRope_Update
+  ΔCRope
+where
+  -- Declared member operation CRope::Update(void)
+  true
+end
+
+schema CRope_Render_2
+  ΔCRope
+where
+  -- Declared member operation CRope::Render(void)
+  true
+end
+
+schema CRopes
+  aRopes : seq CRope  -- bounded array [8]
+where
+  #aRopes = 8
+end
+
+schema CRopes_Init
+  ΔCRopes
+where
+  -- Declared member operation CRopes::Init(void)
+  true
+end
+
+schema CRopes_Update_2
+  ΔCRopes
+where
+  -- Declared member operation CRopes::Update(void)
+  true
+end
+
+schema CRopes_Render_3
+  ΔCRopes
+where
+  -- Declared member operation CRopes::Render(void)
+  true
+end
+
+schema CRopes_RegisterRope_4
+  ΔCRopes
+  id? : ℕ
+  pos? : CVector
+  setUpdateTimer? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CRopes::RegisterRope(uintptr id, CVector pos, bool setUpdateTimer)
+  true
+end
+
+schema CRopes_SetSpeedOfTopNode_5
+  ΔCRopes
+  id? : ℕ
+  speed? : CVector
+where
+  -- Declared member operation CRopes::SetSpeedOfTopNode(uintptr id, CVector speed)
+  true
+end
+
+schema CRopes_FindCoorsAlongRope_6
+  ΔCRopes
+  id? : ℕ
+  t? : ℝ
+  coors? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CRopes::FindCoorsAlongRope(uintptr id, float t, CVector *coors)
+  true
+end
+
+schema CRopes_CreateRopeWithSwatComingDown_7
+  ΔCRopes
+  pos? : CVector
+  result! : 𝔹
+where
+  -- Declared member operation CRopes::CreateRopeWithSwatComingDown(CVector pos)
+  true
+end

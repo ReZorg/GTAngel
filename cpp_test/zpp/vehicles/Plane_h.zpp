@@ -1,0 +1,252 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Plane (vehicles)
+-- Source File(s): vehicles/Plane.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Vehicle.zpp  (from "Vehicle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+ePlaneNodes ::= PLANE_BACKROTOR | PLANE_WHEEL_READ | NUM_PLANE_NODES
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlaneNode
+  p : CVector
+  t : ℝ
+  bOnGround : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaneInterpolationLine
+  type : ℕ
+  time : ℝ
+  position : ℝ
+  speed : ℝ
+  acceleration : ℝ
+where
+  type ≥ 0
+end
+
+schema CPlane
+  CVehicle  -- inherits base schema
+  m_fRotorRotation : ℝ
+  m_isFarAway : ℤ
+  m_nCurPathNode : ℤ
+  m_fSpeed : ℝ
+  m_nFrameWhenHit : ℕ
+  m_bHasBeenHit : 𝔹
+  m_bIsDrugRunCesna : 𝔹
+  m_bIsDropOffCesna : 𝔹
+  m_bTempPlane : 𝔹
+where
+  m_nFrameWhenHit ≥ 0
+end
+
+schema CPlane_CPlane
+  ΔCPlane
+  id? : ℤ
+  CreatedBy? : ℕ
+where
+  -- Declared member operation CPlane::CPlane(int32 id, uint8 CreatedBy)
+  true
+end
+
+schema CPlane_CPlane_2
+  ΔCPlane
+  result! : ANY
+where
+  -- Declared member operation CPlane::CPlane(void)
+  true
+end
+
+schema CPlane_SetModelIndex_3
+  ΔCPlane
+  id? : ℕ
+where
+  -- Declared member operation CPlane::SetModelIndex(uint32 id)
+  true
+end
+
+schema CPlane_DeleteRwObject_4
+  ΔCPlane
+where
+  -- Declared member operation CPlane::DeleteRwObject(void)
+  true
+end
+
+schema CPlane_ProcessControl_5
+  ΔCPlane
+where
+  -- Declared member operation CPlane::ProcessControl(void)
+  true
+end
+
+schema CPlane_PreRender_6
+  ΔCPlane
+where
+  -- Declared member operation CPlane::PreRender(void)
+  true
+end
+
+schema CPlane_Render_7
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Render(void)
+  true
+end
+
+schema CPlane_FlagToDestroyWhenNextProcessed_8
+  ΔCPlane
+where
+  -- Declared member operation CPlane::FlagToDestroyWhenNextProcessed()
+  true
+end
+
+schema CPlane_RenderAllRemaning_9
+  ΔCPlane
+  result! : void
+where
+  -- Declared member operation CPlane::RenderAllRemaning(void)
+  true
+end
+
+schema CPlane_InitPlanes_10
+  ΔCPlane
+where
+  -- Declared member operation CPlane::InitPlanes(void)
+  true
+end
+
+schema CPlane_Shutdown_11
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Shutdown(void)
+  true
+end
+
+schema CPlane_LoadPath_12
+  ΔCPlane
+  filename? : seq CHAR
+  numNodes? : ℤ
+  totalLength? : ℝ
+  loop? : 𝔹
+  result! : Ref[CPlaneNode]
+where
+  -- Declared member operation CPlane::LoadPath(char const *filename, int32 &numNodes, float &totalLength, bool loop)
+  true
+end
+
+schema CPlane_RemoveTemporaryPlanes_13
+  ΔCPlane
+where
+  -- Declared member operation CPlane::RemoveTemporaryPlanes(void)
+  true
+end
+
+schema CPlane_UpdatePlanes_14
+  ΔCPlane
+where
+  -- Declared member operation CPlane::UpdatePlanes(void)
+  true
+end
+
+schema CPlane_TestRocketCollision_15
+  ΔCPlane
+  rocketPos? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::TestRocketCollision(CVector *rocketPos)
+  true
+end
+
+schema CPlane_CreateIncomingCesna_16
+  ΔCPlane
+where
+  -- Declared member operation CPlane::CreateIncomingCesna(void)
+  true
+end
+
+schema CPlane_CreateDropOffCesna_17
+  ΔCPlane
+where
+  -- Declared member operation CPlane::CreateDropOffCesna(void)
+  true
+end
+
+schema CPlane_FindDrugPlaneCoordinates_18
+  ΔCPlane
+  result! : CVector
+where
+  -- Declared member operation CPlane::FindDrugPlaneCoordinates(void)
+  true
+end
+
+schema CPlane_FindDropOffCesnaCoordinates_19
+  ΔCPlane
+  result! : CVector
+where
+  -- Declared member operation CPlane::FindDropOffCesnaCoordinates(void)
+  true
+end
+
+schema CPlane_HasCesnaLanded_20
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::HasCesnaLanded(void)
+  true
+end
+
+schema CPlane_HasCesnaBeenDestroyed_21
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::HasCesnaBeenDestroyed(void)
+  true
+end
+
+schema CPlane_HasDropOffCesnaBeenShotDown_22
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::HasDropOffCesnaBeenShotDown(void)
+  true
+end
+
+schema CPlane_Load_23
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Load(void)
+  true
+end
+
+schema CPlane_Save_24
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Save(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Plane_FlagToDestroyWhenNextProcessed
+  ΔPlaneModuleState
+where
+  -- State update: bRemoveFromWorld' = true
+  true
+end

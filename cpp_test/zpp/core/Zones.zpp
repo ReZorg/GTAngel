@@ -1,0 +1,923 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Zones (core)
+-- Source File(s): core/Zones.cpp, core/Zones.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include ctype.zpp  (from "ctype.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Text.zpp  (from "Text.h")
+-- include World.zpp  (from "World.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+-- include Game.zpp  (from "Game.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+ZONEARRAY_SAVE_SIZE : seq CHAR  -- #define ZONEARRAY_SAVE_SIZE 0xAF0
+MAPZONEARRAY_SAVE_SIZE : seq CHAR  -- #define MAPZONEARRAY_SAVE_SIZE 0x578
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eZoneType ::= ZONE_DEFAULT | ZONE_NAVIG | ZONE_INFO | ZONE_MAPZONE
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CZone
+  name : seq CHAR
+  minx : ℝ
+  miny : ℝ
+  minz : ℝ
+  maxx : ℝ
+  maxy : ℝ
+  maxz : ℝ
+  type : eZoneType
+  level : eLevelName
+  zoneinfoDay : ℤ
+  zoneinfoNight : ℤ
+  child : Ref[CZone]
+  parent : Ref[CZone]
+  next : Ref[CZone]
+where
+  #name = 8
+  #child ≤ 1
+  #parent ≤ 1
+  #next ≤ 1
+end
+
+schema CZone_GetTranslatedName
+  ΔCZone
+  result! : seq CHAR
+where
+  -- Declared member operation CZone::GetTranslatedName(void)
+  true
+end
+
+schema CZoneInfo
+  carDensity : ℤ
+  carThreshold : seq ℤ  -- bounded array [CCarCtrl::NUM_CAR_CLASSES]
+  boatThreshold : seq ℤ  -- bounded array [CCarCtrl::NUM_BOAT_CLASSES]
+  gangThreshold : seq ℤ  -- bounded array [NUM_GANGS]
+  copThreshold : ℤ
+  pedDensity : ℕ
+  gangPedThreshold : seq ℕ  -- bounded array [NUM_GANGS]
+  copPedThreshold : ℕ
+  pedGroup : ℕ
+  copDensity : ℕ
+  gangDensity : seq ℕ  -- bounded array [NUM_GANGS]
+where
+  pedDensity ≥ 0
+  copPedThreshold ≥ 0
+  pedGroup ≥ 0
+  copDensity ≥ 0
+end
+
+schema CTheZones
+  FindIndex : ℤ
+  NumberOfAudioZones : ℕ
+  AudioZoneArray : seq ℤ  -- bounded array [NUMAUDIOZONES]
+  TotalNumberOfMapZones : ℕ
+  TotalNumberOfInfoZones : ℕ
+  TotalNumberOfNavigationZones : ℕ
+  InfoZoneArray : seq CZone  -- bounded array [NUMINFOZONES]
+  MapZoneArray : seq CZone  -- bounded array [NUMMAPZONES]
+  NavigationZoneArray : seq CZone  -- bounded array [NUMNAVIGZONES]
+  TotalNumberOfZoneInfos : ℕ
+  ZoneInfoArray : seq CZoneInfo  -- bounded array [2*NUMINFOZONES]
+  m_CurrLevel : eLevelName
+  m_pPlayersZone : Ref[CZone]
+  TotalNumberOfZones : ℕ
+  ZoneArray : seq CZone  -- bounded array [NUMZONES]
+where
+  NumberOfAudioZones ≥ 0
+  TotalNumberOfMapZones ≥ 0
+  TotalNumberOfInfoZones ≥ 0
+  TotalNumberOfNavigationZones ≥ 0
+  TotalNumberOfZoneInfos ≥ 0
+  #m_pPlayersZone ≤ 1
+  TotalNumberOfZones ≥ 0
+end
+
+schema CTheZones_Init
+  ΔCTheZones
+where
+  -- Declared member operation CTheZones::Init(void)
+  true
+end
+
+schema CTheZones_Update_2
+  ΔCTheZones
+where
+  -- Declared member operation CTheZones::Update(void)
+  true
+end
+
+schema CTheZones_CreateZone_3
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+  minx? : ℝ
+  miny? : ℝ
+  minz? : ℝ
+  maxx? : ℝ
+  maxy? : ℝ
+  maxz? : ℝ
+  level? : eLevelName
+where
+  -- Declared member operation CTheZones::CreateZone(char *name, eZoneType type, float minx, float miny, float minz, float maxx, float maxy, float maxz, eLevelName level)
+  true
+end
+
+schema CTheZones_GetInfoZone_4
+  ΔCTheZones
+  i? : ℕ
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::GetInfoZone(uint16 i)
+  true
+end
+
+schema CTheZones_GetNavigationZone_5
+  ΔCTheZones
+  i? : ℕ
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::GetNavigationZone(uint16 i)
+  true
+end
+
+schema CTheZones_GetMapZone_6
+  ΔCTheZones
+  i? : ℕ
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::GetMapZone(uint16 i)
+  true
+end
+
+schema CTheZones_GetAudioZone_7
+  ΔCTheZones
+  i? : ℕ
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::GetAudioZone(uint16 i)
+  true
+end
+
+schema CTheZones_PostZoneCreation_8
+  ΔCTheZones
+  result! : void
+where
+  -- Declared member operation CTheZones::PostZoneCreation(void)
+  true
+end
+
+schema CTheZones_CheckZonesForOverlap_9
+  ΔCTheZones
+where
+  -- Declared member operation CTheZones::CheckZonesForOverlap(void)
+  true
+end
+
+schema CTheZones_InsertZoneIntoZoneHierarchy_10
+  ΔCTheZones
+  zone? : Ref[CZone]
+where
+  -- Declared member operation CTheZones::InsertZoneIntoZoneHierarchy(CZone *zone)
+  true
+end
+
+schema CTheZones_InsertZoneIntoZoneHierRecursive_11
+  ΔCTheZones
+  z1? : Ref[CZone]
+  z2? : Ref[CZone]
+  result! : 𝔹
+where
+  -- Declared member operation CTheZones::InsertZoneIntoZoneHierRecursive(CZone *z1, CZone *z2)
+  true
+end
+
+schema CTheZones_ZoneIsEntirelyContainedWithinOtherZone_12
+  ΔCTheZones
+  z1? : Ref[CZone]
+  z2? : Ref[CZone]
+  result! : 𝔹
+where
+  -- Declared member operation CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *z1, CZone *z2)
+  true
+end
+
+schema CTheZones_PointLiesWithinZone_13
+  ΔCTheZones
+  v? : Ref[CVector]
+  zone? : Ref[CZone]
+  result! : 𝔹
+where
+  -- Declared member operation CTheZones::PointLiesWithinZone(const CVector *v, CZone *zone)
+  true
+end
+
+schema CTheZones_GetLevelFromPosition_14
+  ΔCTheZones
+  v? : Ref[CVector]
+  result! : eLevelName
+where
+  -- Declared member operation CTheZones::GetLevelFromPosition(const CVector *v)
+  true
+end
+
+schema CTheZones_FindInformationZoneForPosition_15
+  ΔCTheZones
+  v? : Ref[CVector]
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::FindInformationZoneForPosition(const CVector *v)
+  true
+end
+
+schema CTheZones_FindSmallestNavigationZoneForPosition_16
+  ΔCTheZones
+  v? : Ref[CVector]
+  findDefault? : 𝔹
+  findNavig? : 𝔹
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::FindSmallestNavigationZoneForPosition(const CVector *v, bool findDefault, bool findNavig)
+  true
+end
+
+schema CTheZones_FindZoneByLabelAndReturnIndex_17
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+  result! : ℤ
+where
+  -- Declared member operation CTheZones::FindZoneByLabelAndReturnIndex(char *name, eZoneType type)
+  true
+end
+
+schema CTheZones_FindNextZoneByLabelAndReturnIndex_18
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+  result! : ℤ
+where
+  -- Declared member operation CTheZones::FindNextZoneByLabelAndReturnIndex(char *name, eZoneType type)
+  true
+end
+
+schema CTheZones_GetZoneInfo_19
+  ΔCTheZones
+  v? : Ref[CVector]
+  day? : ℕ
+  result! : Ref[CZoneInfo]
+where
+  -- Declared member operation CTheZones::GetZoneInfo(const CVector *v, uint8 day)
+  true
+end
+
+schema CTheZones_GetZoneInfoForTimeOfDay_20
+  ΔCTheZones
+  pos? : Ref[CVector]
+  info? : Ref[CZoneInfo]
+where
+  -- Declared member operation CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
+  true
+end
+
+schema CTheZones_SetZoneCarInfo_21
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  carDensity? : ℤ
+  copCarDensity? : ℤ
+  gangCarDensities? : ℙ ℤ
+where
+  -- Declared member operation CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity, int16 copCarDensity, const int16 *gangCarDensities)
+  true
+end
+
+schema CTheZones_SetZoneCivilianCarInfo_22
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  carDensities? : ℙ ℤ
+  boatDensities? : ℙ ℤ
+where
+  -- Declared member operation CTheZones::SetZoneCivilianCarInfo(uint16 zoneid, uint8 day, const int16* carDensities, const int16* boatDensities)
+  true
+end
+
+schema CTheZones_SetZonePedInfo_23
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  pedDensity? : ℤ
+  gang0Density? : ℤ
+  gang1Density? : ℤ
+  gang2Density? : ℤ
+  gang3Density? : ℤ
+  gang4Density? : ℤ
+  gang5Density? : ℤ
+  gang6Density? : ℤ
+  gang7Density? : ℤ
+  gang8Density? : ℤ
+  copDensity? : ℤ
+where
+  -- Declared member operation CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity, int16 gang0Density, int16 gang1Density, int16 gang2Density, int16 gang3Density, int16 gang4Density, int16 gang5Density, int16 gang6Density, int16 gang7Density, int16 gang8Density, int16 copDensity)
+  true
+end
+
+schema CTheZones_SetCarDensity_24
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  cardensity? : ℕ
+where
+  -- Declared member operation CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
+  true
+end
+
+schema CTheZones_SetPedDensity_25
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  peddensity? : ℕ
+where
+  -- Declared member operation CTheZones::SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity)
+  true
+end
+
+schema CTheZones_SetPedGroup_26
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  pedgroup? : ℕ
+where
+  -- Declared member operation CTheZones::SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup)
+  true
+end
+
+schema CTheZones_FindAudioZone_27
+  ΔCTheZones
+  pos? : Ref[CVector]
+  result! : ℤ
+where
+  -- Declared member operation CTheZones::FindAudioZone(CVector *pos)
+  true
+end
+
+schema CTheZones_GetPointerForNavigationZoneIndex_28
+  ΔCTheZones
+  i? : ℕ
+  result! : Ref[CZone]
+where
+  -- Declared member operation CTheZones::GetPointerForNavigationZoneIndex(ssize_t i)
+  true
+end
+
+schema CTheZones_GetIndexForNavigationZonePointer_29
+  ΔCTheZones
+  zone? : Ref[CZone]
+  result! : ℕ
+where
+  -- Declared member operation CTheZones::GetIndexForNavigationZonePointer(CZone *zone)
+  true
+end
+
+schema CTheZones_AddZoneToAudioZoneArray_30
+  ΔCTheZones
+  zone? : Ref[CZone]
+  result! : void
+where
+  -- Declared member operation CTheZones::AddZoneToAudioZoneArray(CZone *zone)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Zones_IsNormalZone
+  ΔZonesModuleState
+  type? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = type == ZONE_DEFAULT || type == ZONE_NAVIG || type == ZONE_INFO
+  true
+end
+
+schema Zones_CheckZoneInfo
+  ΔZonesModuleState
+  info? : Ref[CZoneInfo]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CZone_GetTranslatedName
+  ΔCZone
+where
+  -- Return postcondition: result! = TheText.Get(name)
+  -- Invokes: TheText.Get
+  true
+end
+
+schema CTheZones_Init
+  ΔCTheZones
+where
+  -- State update: NumberOfAudioZones' = 0
+  -- State update: x' = 1000/9
+  -- State update: carDensity' = 10
+  -- State update: copThreshold' = 50
+  -- State update: pedDensity' = 12
+  -- State update: copPedThreshold' = 50
+  true
+end
+
+schema CTheZones_Update
+  ΔCTheZones
+where
+  -- State update: pos' = FindPlayerCoors()
+  -- State update: m_pPlayersZone' = FindSmallestZonePosition(&pos)
+  -- State update: m_CurrLevel' = GetLevelFromPosition(&pos)
+  -- Invokes: CTimer::GetFrameCounter
+  true
+end
+
+schema CTheZones_CreateZone
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+  minx? : ℝ
+  miny? : ℝ
+  minz? : ℝ
+  maxx? : ℝ
+  maxy? : ℝ
+  maxz? : ℝ
+  level? : eLevelName
+where
+  -- State update: p' = name
+  -- State update: p' = toupper(*p)
+  -- State update: type' = type
+  -- State update: minx' = minx
+  -- State update: miny' = miny
+  -- State update: minz' = minz
+  true
+end
+
+schema CTheZones_CreateMapZone
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+  minx? : ℝ
+  miny? : ℝ
+  minz? : ℝ
+  maxx? : ℝ
+  maxy? : ℝ
+  maxz? : ℝ
+  level? : eLevelName
+where
+  -- State update: p' = name
+  -- State update: p' = toupper(*p)
+  -- State update: zone' = &MapZoneArray[TotalNumberOfMapZones++]
+  -- State update: zone.type' = type
+  -- State update: zone.minx' = minx
+  -- State update: zone.miny' = miny
+  true
+end
+
+schema CTheZones_PostZoneCreation
+  ΔCTheZones
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTheZones_InsertZoneIntoZoneHierarchy
+  ΔCTheZones
+  zone? : Ref[CZone]
+where
+  -- State update: zone.child' = ∅
+  -- State update: zone.parent' = ∅
+  -- State update: zone.next' = ∅
+  true
+end
+
+schema CTheZones_InsertZoneIntoZoneHierRecursive
+  ΔCTheZones
+  inner? : Ref[CZone]
+  outer? : Ref[CZone]
+where
+  -- State update: child' = outer.child
+  -- State update: child' = outer.child
+  -- State update: inner.next' = outer.child
+  -- State update: inner.parent' = outer
+  -- State update: outer.child' = inner
+  -- State update: insert' = inner
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CTheZones_ZoneIsEntirelyContainedWithinOtherZone
+  ΔCTheZones
+  inner? : Ref[CZone]
+  outer? : Ref[CZone]
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CTheZones_PointLiesWithinZone
+  ΔCTheZones
+  v? : Ref[CVector]
+  zone? : Ref[CZone]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTheZones_GetLevelFromPosition
+  ΔCTheZones
+  v? : Ref[CVector]
+where
+  -- Return postcondition: result! = MapZoneArray[i].level
+  -- Return postcondition: result! = MapZoneArray[0].level
+  true
+end
+
+schema CTheZones_FindSmallestZonePosition
+  ΔCTheZones
+  v? : Ref[CVector]
+where
+  -- State update: best' = &ZoneArray[0]
+  -- State update: zone' = ZoneArray[0].child
+  -- State update: best' = zone
+  -- State update: zone' = zone.child
+  -- State update: zone' = zone.next
+  -- Return postcondition: result! = best
+  true
+end
+
+schema CTheZones_FindSmallestZonePositionType
+  ΔCTheZones
+  v? : Ref[CVector]
+  type? : eZoneType
+where
+  -- State update: best' = ∅
+  -- State update: best' = &ZoneArray[0]
+  -- State update: zone' = ZoneArray[0].child
+  -- State update: best' = zone
+  -- State update: zone' = zone.child
+  -- State update: zone' = zone.next
+  -- Return postcondition: result! = best
+  true
+end
+
+schema CTheZones_FindSmallestZonePositionILN
+  ΔCTheZones
+  v? : Ref[CVector]
+where
+  -- State update: best' = ∅
+  -- State update: best' = &ZoneArray[0]
+  -- State update: zone' = ZoneArray[0].child
+  -- State update: best' = zone
+  -- State update: zone' = zone.child
+  -- State update: zone' = zone.next
+  -- Return postcondition: result! = best
+  true
+end
+
+schema CTheZones_FindZoneByLabelAndReturnIndex
+  ΔCTheZones
+  name? : seq CHAR
+where
+  -- State update: FindIndex' = 0
+  -- Return postcondition: result! = FindIndex
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CTheZones_GetZoneInfo
+  ΔCTheZones
+  v? : Ref[CVector]
+  day? : ℕ
+where
+  -- State update: zone' = FindInformationZoneForPosition(v)
+  -- Return postcondition: result! = &ZoneInfoArray[0]
+  -- Return postcondition: result! = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight]
+  true
+end
+
+schema CTheZones_GetZoneInfoForTimeOfDay
+  ΔCTheZones
+  pos? : Ref[CVector]
+  info? : Ref[CZoneInfo]
+where
+  -- State update: day' = GetZoneInfo(pos, 1)
+  -- State update: night' = GetZoneInfo(pos, 0)
+  -- State update: info' = *day
+  -- State update: info' = *night
+  -- State update: d' = 1.0f - n
+  -- State update: d' = (CClock::GetHours() - 5) / 3.0f
+  -- Invokes: CClock::GetIsTimeInRange, CClock::GetHours
+  true
+end
+
+schema CTheZones_SetZonePedInfo
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  pedDensity? : ℤ
+  gang0Density? : ℤ
+  gang1Density? : ℤ
+  gang2Density? : ℤ
+  gang3Density? : ℤ
+  gang4Density? : ℤ
+  gang5Density? : ℤ
+  gang6Density? : ℤ
+  gang7Density? : ℤ
+  gang8Density? : ℤ
+  copDensity? : ℤ
+where
+  -- State update: zone' = GetInfoZone(zoneid)
+  -- State update: info.pedDensity' = pedDensity
+  -- State update: info.copPedThreshold' = copDensity
+  true
+end
+
+schema CTheZones_SetCarDensity
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  cardensity? : ℕ
+where
+  -- State update: zone' = GetZone(zoneid)
+  -- State update: carDensity' = cardensity
+  true
+end
+
+schema CTheZones_SetPedDensity
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  peddensity? : ℕ
+where
+  -- State update: zone' = GetZone(zoneid)
+  -- State update: pedDensity' = peddensity
+  true
+end
+
+schema CTheZones_SetPedGroup
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  pedgroup? : ℕ
+where
+  -- State update: zone' = GetZone(zoneid)
+  -- State update: pedGroup' = pedgroup
+  true
+end
+
+schema CTheZones_FindAudioZone
+  ΔCTheZones
+  pos? : Ref[CVector]
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CTheZones_FindZoneForPoint
+  ΔCTheZones
+  pos? : CVector
+where
+  -- Return postcondition: result! = LEVEL_INDUSTRIAL
+  -- Return postcondition: result! = LEVEL_COMMERCIAL
+  -- Return postcondition: result! = LEVEL_SUBURBAN
+  true
+end
+
+schema CTheZones_AddZoneToAudioZoneArray
+  ΔCTheZones
+  zone? : Ref[CZone]
+where
+  -- State update: z' = -1
+  -- State update: z' = i
+  true
+end
+
+schema CTheZones_InitialiseAudioZoneArray
+  ΔCTheZones
+where
+  -- State update: gonext' = false
+  -- State update: zone' = &NavigationZoneArray[0]
+  -- State update: gonext' = false
+  -- State update: zone' = zone.next
+  -- State update: zone' = zone.parent
+  -- State update: zone' = zone.child
+  true
+end
+
+schema Zones_SaveOneZone
+  ΔZonesModuleState
+  zone? : CZone
+  buffer? : ℙ ℕ
+where
+  -- Invokes: CTheZones::GetIndexForZonePointer
+  true
+end
+
+schema CTheZones_SaveAllZones
+  ΔCTheZones
+  buffer? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: zone' = WriteSaveBuf(buffer, ZoneArray[i])
+  -- State update: zone.child' = (CZone*)GetIndexForZonePointer(ZoneArray[i].child)
+  -- State update: zone.parent' = (CZone*)GetIndexForZonePointer(ZoneArray[i].parent)
+  -- State update: zone.next' = (CZone*)GetIndexForZonePointer(ZoneArray[i].next)
+  -- State update: zone' = WriteSaveBuf(buffer, MapZoneArray[i])
+  -- State update: zone.child' = (CZone*)GetIndexForZonePointer(MapZoneArray[i].child)
+  true
+end
+
+schema Zones_LoadOneZone
+  ΔZonesModuleState
+  zone? : CZone
+  buffer? : ℙ ℕ
+where
+  -- State update: zone.child' = CTheZones::GetPointerForZoneIndex(tmp)
+  -- State update: zone.parent' = CTheZones::GetPointerForZoneIndex(tmp)
+  -- State update: zone.next' = CTheZones::GetPointerForZoneIndex(tmp)
+  -- Invokes: CTheZones::GetPointerForZoneIndex
+  true
+end
+
+schema CTheZones_LoadAllZones
+  ΔCTheZones
+  buffer? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: m_pPlayersZone' = GetPointerForZoneIndex(i)
+  -- State update: child' = GetPointerForZoneIndex((uintptr)ZoneArray[i].child)
+  -- State update: parent' = GetPointerForZoneIndex((uintptr)ZoneArray[i].parent)
+  -- State update: next' = GetPointerForZoneIndex((uintptr)ZoneArray[i].next)
+  -- State update: child' = GetPointerForZoneIndex((uintptr)MapZoneArray[i].child)
+  -- State update: parent' = GetPointerForZoneIndex((uintptr)MapZoneArray[i].parent)
+  true
+end
+
+schema CTheZones_CheckZonesForOverlap
+  ΔCTheZones
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTheZones_FindInformationZoneForPosition
+  ΔCTheZones
+  v? : Ref[CVector]
+where
+  -- Return postcondition: result! = &InfoZoneArray[i]
+  -- Return postcondition: result! = &InfoZoneArray[0]
+  true
+end
+
+schema CTheZones_FindSmallestNavigationZoneForPosition
+  ΔCTheZones
+  v? : Ref[CVector]
+  findDefault? : 𝔹
+  findNavig? : 𝔹
+where
+  -- State update: best' = ∅
+  -- State update: best' = &NavigationZoneArray[0]
+  -- State update: zone' = NavigationZoneArray[0].child
+  -- State update: best' = zone
+  -- State update: zone' = zone.child
+  -- State update: zone' = zone.next
+  -- Return postcondition: result! = best
+  true
+end
+
+schema CTheZones_FindZoneByLabelAndReturnIndex_2
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+where
+  -- State update: FindIndex' = 0
+  -- State update: FindIndex' = 0
+  -- State update: FindIndex' = 0
+  -- Return postcondition: result! = FindIndex
+  -- Return postcondition: result! = FindIndex
+  -- Return postcondition: result! = FindIndex
+  true
+end
+
+schema CTheZones_FindNextZoneByLabelAndReturnIndex
+  ΔCTheZones
+  name? : seq CHAR
+  type? : eZoneType
+where
+  -- Return postcondition: result! = FindIndex
+  -- Return postcondition: result! = FindIndex
+  -- Return postcondition: result! = FindIndex
+  true
+end
+
+schema CTheZones_SetZoneCarInfo
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  carDensity? : ℤ
+  copCarDensity? : ℤ
+  gangCarDensities? : ℙ ℤ
+where
+  -- State update: zone' = GetInfoZone(zoneid)
+  -- State update: info.carDensity' = carDensity
+  -- State update: info.copThreshold' = copCarDensity
+  true
+end
+
+schema CTheZones_SetZoneCivilianCarInfo
+  ΔCTheZones
+  zoneid? : ℕ
+  day? : ℕ
+  carDensities? : ℙ ℤ
+  boatDensities? : ℙ ℤ
+where
+  -- State update: zone' = GetInfoZone(zoneid)
+  true
+end
+
+schema CTheZones_SaveOneZone
+  ΔCTheZones
+  zone? : Ref[CZone]
+  buffer? : ℙ ℕ
+  length? : ℙ ℕ
+  zoneType? : eZoneType
+where
+  -- State update: zoneId' = GetIndexForNavigationZonePointer(zone.child)
+  -- State update: zoneId' = GetIndexForNavigationZonePointer(zone.parent)
+  -- State update: zoneId' = GetIndexForNavigationZonePointer(zone.next)
+  true
+end
+
+schema CTheZones_LoadOneZone
+  ΔCTheZones
+  zone? : Ref[CZone]
+  buffer? : ℙ ℕ
+  length? : ℙ ℕ
+  zoneType? : eZoneType
+where
+  -- State update: zone.child' = GetPointerForNavigationZoneIndex(zoneId)
+  -- State update: zone.parent' = GetPointerForNavigationZoneIndex(zoneId)
+  -- State update: zone.next' = GetPointerForNavigationZoneIndex(zoneId)
+  true
+end
+
+schema Zones_GetIndexForNavigationZonePointer
+  ΔZonesModuleState
+  zone? : Ref[CZone]
+  result! : ℕ
+where
+  -- Return postcondition: result! = zone == nil ? -1 : zone - NavigationZoneArray
+  true
+end
+
+schema Zones_CreateMapZone
+  ΔZonesModuleState
+  name? : seq CHAR
+  type? : eZoneType
+  i? : ℙ ℕ
+where
+  -- Return postcondition: result! = &ZoneArray[i]
+  true
+end
+
+schema Zones_GetIndexForZonePointer
+  ΔZonesModuleState
+  zone? : Ref[CZone]
+  result! : ℕ
+where
+  -- Return postcondition: result! = zone == nil ? -1 : zone - ZoneArray
+  true
+end

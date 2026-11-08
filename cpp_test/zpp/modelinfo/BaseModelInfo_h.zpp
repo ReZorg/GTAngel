@@ -1,0 +1,473 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: BaseModelInfo (modelinfo)
+-- Source File(s): modelinfo/BaseModelInfo.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_MODEL_NAME : seq CHAR  -- #define MAX_MODEL_NAME (24)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+ModelInfoType ::= MITYPE_NA | MITYPE_SIMPLE | MITYPE_MLO | MITYPE_TIME | MITYPE_WEAPON | MITYPE_CLUMP | MITYPE_VEHICLE | MITYPE_PED | MITYPE_XTRACOMPS | MITYPE_HAND
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CBaseModelInfo
+  m_unk : seq ℕ  -- bounded array [2]
+  m_nameKey : ℕ
+  m_chunk : ADDRESS
+  m_type : ℕ
+  m_num2dEffects : ℕ
+  m_bOwnsColModel : 𝔹
+  m_colModel : Ref[CColModel]
+  m_2dEffectsID : ℤ
+  m_objectId : ℤ
+  m_refCount : ℕ
+  m_txdSlot : ℤ
+  m_twodEffects : Ref[C2dEffect]
+  m_bIsTree : 𝔹
+  m_bCanBeIgnored : 𝔹
+where
+  #m_unk = 2
+  m_nameKey ≥ 0
+  m_type ≥ 0
+  m_num2dEffects ≥ 0
+  #m_colModel ≤ 1
+  m_refCount ≥ 0
+  #m_twodEffects ≤ 1
+end
+
+schema CBaseModelInfo_CBaseModelInfo
+  ΔCBaseModelInfo
+  type? : ModelInfoType
+where
+  -- Declared member operation CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
+  true
+end
+
+schema CBaseModelInfo_CBaseModelInfo_2
+  ΔCBaseModelInfo
+  result! : else
+where
+  -- Declared member operation CBaseModelInfo::CBaseModelInfo()
+  true
+end
+
+schema CBaseModelInfo_DeleteRwObject_3
+  ΔCBaseModelInfo
+where
+  -- Declared member operation CBaseModelInfo::DeleteRwObject(void)
+  true
+end
+
+schema CBaseModelInfo_CreateInstance_4
+  ΔCBaseModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CBaseModelInfo::CreateInstance(void)
+  true
+end
+
+schema CBaseModelInfo_CreateInstance_5
+  ΔCBaseModelInfo
+  arg_1? : Ref[RwMatrix]
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CBaseModelInfo::CreateInstance(RwMatrix *)
+  true
+end
+
+schema CBaseModelInfo_GetRwObject_6
+  ΔCBaseModelInfo
+  result! : Ref[RwObject]
+where
+  -- Declared member operation CBaseModelInfo::GetRwObject(void)
+  true
+end
+
+schema CBaseModelInfo_SetAnimFile_7
+  ΔCBaseModelInfo
+  file? : seq CHAR
+where
+  -- Declared member operation CBaseModelInfo::SetAnimFile(const char *file)
+  true
+end
+
+schema CBaseModelInfo_LoadModel_8
+  ΔCBaseModelInfo
+  model? : ADDRESS
+  chunk? : ADDRESS
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::LoadModel(void *model, const void *chunk)
+  true
+end
+
+schema CBaseModelInfo_DeleteChunk_9
+  ΔCBaseModelInfo
+where
+  -- Declared member operation CBaseModelInfo::DeleteChunk(void)
+  true
+end
+
+schema CBaseModelInfo_Write_10
+  ΔCBaseModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CBaseModelInfo::Write(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CBaseModelInfo_WriteModel_11
+  ΔCBaseModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : ADDRESS
+where
+  -- Declared member operation CBaseModelInfo::WriteModel(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CBaseModelInfo_RcWriteThis_12
+  ΔCBaseModelInfo
+  writer? : base__cRelocatableChunkWriter
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CBaseModelInfo_RcWriteEmpty_13
+  ΔCBaseModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Declared member operation CBaseModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+  true
+end
+
+schema CBaseModelInfo_GetModelType_14
+  ΞCBaseModelInfo
+  result! : ℕ
+where
+  -- Declared member operation CBaseModelInfo::GetModelType()
+  true
+end
+
+schema CBaseModelInfo_IsBuilding_15
+  ΔCBaseModelInfo
+  result! : bool
+where
+  -- Declared member operation CBaseModelInfo::IsBuilding(void)
+  true
+end
+
+schema CBaseModelInfo_IsSimple_16
+  ΔCBaseModelInfo
+  result! : bool
+where
+  -- Declared member operation CBaseModelInfo::IsSimple(void)
+  true
+end
+
+schema CBaseModelInfo_IsClump_17
+  ΔCBaseModelInfo
+  result! : bool
+where
+  -- Declared member operation CBaseModelInfo::IsClump(void)
+  true
+end
+
+schema CBaseModelInfo_GetModelName_18
+  ΔCBaseModelInfo
+  result! : seq CHAR
+where
+  -- Declared member operation CBaseModelInfo::GetModelName(void)
+  true
+end
+
+schema CBaseModelInfo_SetModelName_19
+  ΔCBaseModelInfo
+  name? : seq CHAR
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::SetModelName(const char *name)
+  true
+end
+
+schema CBaseModelInfo_GetNameHashKey_20
+  ΔCBaseModelInfo
+  result! : ℕ
+where
+  -- Declared member operation CBaseModelInfo::GetNameHashKey()
+  true
+end
+
+schema CBaseModelInfo_SetColModel_21
+  ΔCBaseModelInfo
+  col? : Ref[CColModel]
+  owns? : 𝔹
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::SetColModel(CColModel *col, bool owns = false)
+  true
+end
+
+schema CBaseModelInfo_GetColModel_22
+  ΔCBaseModelInfo
+  result! : Ref[CColModel]
+where
+  -- Declared member operation CBaseModelInfo::GetColModel(void)
+  true
+end
+
+schema CBaseModelInfo_DoesOwnColModel_23
+  ΔCBaseModelInfo
+  result! : bool
+where
+  -- Declared member operation CBaseModelInfo::DoesOwnColModel(void)
+  true
+end
+
+schema CBaseModelInfo_DeleteCollisionModel_24
+  ΔCBaseModelInfo
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::DeleteCollisionModel(void)
+  true
+end
+
+schema CBaseModelInfo_ClearTexDictionary_25
+  ΔCBaseModelInfo
+where
+  -- Declared member operation CBaseModelInfo::ClearTexDictionary(void)
+  true
+end
+
+schema CBaseModelInfo_GetObjectID_26
+  ΔCBaseModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CBaseModelInfo::GetObjectID(void)
+  true
+end
+
+schema CBaseModelInfo_SetObjectID_27
+  ΔCBaseModelInfo
+  id? : ℤ
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::SetObjectID(int16 id)
+  true
+end
+
+schema CBaseModelInfo_GetTxdSlot_28
+  ΔCBaseModelInfo
+  result! : ℤ
+where
+  -- Declared member operation CBaseModelInfo::GetTxdSlot(void)
+  true
+end
+
+schema CBaseModelInfo_AddRef_29
+  ΔCBaseModelInfo
+  result! : void
+where
+  -- Declared member operation CBaseModelInfo::AddRef(void)
+  true
+end
+
+schema CBaseModelInfo_RemoveRef_30
+  ΔCBaseModelInfo
+where
+  -- Declared member operation CBaseModelInfo::RemoveRef(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema BaseModelInfo_CBaseModelInfo
+  ΔBaseModelInfoModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_CBaseModelInfo_2
+  ΔBaseModelInfoModuleState
+  result! : ANY
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_SetAnimFile
+  ΔBaseModelInfoModuleState
+  file? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_ConvertAnimFileIndex
+  ΔBaseModelInfoModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_GetAnimFileIndex
+  ΔBaseModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema BaseModelInfo_GetModelType
+  ΞBaseModelInfoModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_type
+  true
+end
+
+schema BaseModelInfo_IsBuilding
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME
+  true
+end
+
+schema BaseModelInfo_IsSimple
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_IsClump
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_GetNameHashKey
+  ΔBaseModelInfoModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nameKey
+  true
+end
+
+schema BaseModelInfo_SetColModel
+  ΔBaseModelInfoModuleState
+  col? : Ref[CColModel]
+  owns? : 𝔹
+where
+  -- State update: m_colModel' = col
+  -- State update: m_bOwnsColModel' = owns
+  true
+end
+
+schema BaseModelInfo_DoesOwnColModel
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bOwnsColModel
+  true
+end
+
+schema BaseModelInfo_ClearTexDictionary
+  ΔBaseModelInfoModuleState
+where
+  -- State update: m_txdSlot' = -1
+  true
+end
+
+schema BaseModelInfo_GetObjectID
+  ΔBaseModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_objectId
+  true
+end
+
+schema BaseModelInfo_SetObjectID
+  ΔBaseModelInfoModuleState
+  id? : ℤ
+where
+  -- State update: m_objectId' = id
+  true
+end
+
+schema BaseModelInfo_GetTxdSlot
+  ΔBaseModelInfoModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_txdSlot
+  true
+end
+
+schema BaseModelInfo_GetNum2dEffects
+  ΞBaseModelInfoModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_num2dEffects
+  true
+end
+
+schema BaseModelInfo_GetNumRefs
+  ΞBaseModelInfoModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_refCount
+  true
+end
+
+schema BaseModelInfo_RenderDoubleSided
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_bIsDoubleSided || m_bIsTree
+  true
+end
+
+schema BaseModelInfo_IsSimple_2
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME
+  true
+end
+
+schema BaseModelInfo_IsClump_2
+  ΔBaseModelInfoModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema BaseModelInfo_SetModelName
+  ΔBaseModelInfoModuleState
+  name? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end

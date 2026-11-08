@@ -1,0 +1,1312 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ini (extras)
+-- Source File(s): extras/ini.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include string.zpp  (from "string")
+-- include sstream.zpp  (from "sstream")
+-- include algorithm.zpp  (from "algorithm")
+-- include utility.zpp  (from "utility")
+-- include unordered_map.zpp  (from "unordered_map")
+-- include vector.zpp  (from "vector")
+-- include memory.zpp  (from "memory")
+-- include fstream.zpp  (from "fstream")
+-- include stat.zpp  (from "sys/stat.h")
+-- include cctype.zpp  (from "cctype")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MINI_INI_H_ : seq CHAR  -- #define MINI_INI_H_ #include <string>
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema INIMap
+  dataIndexMap : T_DataIndexMap
+  data : T_DataContainer
+  index : return
+  data_size : i
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema INIMap_setEmpty
+  ΔINIMap
+  key? : std__string
+  result! : ℕ
+where
+  -- Declared member operation INIMap::setEmpty(std::string& key)
+  true
+end
+
+schema INIMap_emplace_back_2
+  ΔINIMap
+  arg_1? : key
+  arg_2? : T
+  result! : data
+where
+  -- Declared member operation INIMap::emplace_back(key, T()
+  true
+end
+
+schema INIMap_INIMap_3
+  ΔINIMap
+where
+  -- Declared member operation INIMap::INIMap()
+  true
+end
+
+schema INIMap_emplace_back_4
+  ΔINIMap
+  arg_1? : key
+  arg_2? : obj
+  result! : data
+where
+  -- Declared member operation INIMap::emplace_back(key, obj)
+  true
+end
+
+schema INIMap_T_DataIndexMap_5
+  ΔINIMap
+  dataIndexMap? : other
+  result! : dataIndexMap
+where
+  -- Declared member operation INIMap::T_DataIndexMap(other.dataIndexMap)
+  true
+end
+
+schema INIMap_operator_6
+  ΔINIMap
+  key? : std__string
+  result! : T
+where
+  -- Declared member operation INIMap::operator[](std::string key)
+  true
+end
+
+schema INIMap_end_7
+  ΔINIMap
+  result! : bool_hasIt____it____dataIndexMap
+where
+  -- Declared member operation INIMap::end()
+  true
+end
+
+schema INIMap_setEmpty_8
+  ΔINIMap
+  arg_1? : key
+  result! : ℕ
+where
+  -- Declared member operation INIMap::setEmpty(key)
+  true
+end
+
+schema INIMap_get_9
+  ΞINIMap
+  key? : std__string
+  result! : T
+where
+  -- Declared member operation INIMap::get(std::string key)
+  true
+end
+
+schema INIMap_if_10
+  ΔINIMap
+  arg_1? : it
+where
+  -- Declared member operation INIMap::if(it == dataIndexMap.end()
+  true
+end
+
+schema INIMap_T_11
+  ΔINIMap
+  second? : data_it__second
+  result! : return
+where
+  -- Declared member operation INIMap::T(data[it->second].second)
+  true
+end
+
+schema INIMap_has_12
+  ΞINIMap
+  key? : std__string
+  result! : bool
+where
+  -- Declared member operation INIMap::has(std::string key)
+  true
+end
+
+schema INIMap_set_13
+  ΔINIMap
+  key? : std__string
+  obj? : T
+  result! : void
+where
+  -- Declared member operation INIMap::set(std::string key, T obj)
+  true
+end
+
+schema INIMap_if_14
+  ΔINIMap
+  arg_1? : it
+where
+  -- Declared member operation INIMap::if(it != dataIndexMap.end()
+  true
+end
+
+schema INIMap_size_15
+  ΔINIMap
+  result! : else___dataIndexMap_key____data
+where
+  -- Declared member operation INIMap::size()
+  true
+end
+
+schema INIMap_emplace_back_16
+  ΔINIMap
+  arg_1? : key
+  arg_2? : obj
+  result! : data
+where
+  -- Declared member operation INIMap::emplace_back(key, obj)
+  true
+end
+
+schema INIMap_set_17
+  ΔINIMap
+  multiArgs? : T_MultiArgs
+  result! : void
+where
+  -- Declared member operation INIMap::set(T_MultiArgs const& multiArgs)
+  true
+end
+
+schema INIMap_set_18
+  ΔINIMap
+  arg_1? : key
+  arg_2? : obj
+where
+  -- Declared member operation INIMap::set(key, obj)
+  true
+end
+
+schema INIMap_remove_19
+  ΔINIMap
+  key? : std__string
+  result! : bool
+where
+  -- Declared member operation INIMap::remove(std::string key)
+  true
+end
+
+schema INIMap_if_20
+  ΔINIMap
+  arg_1? : it
+where
+  -- Declared member operation INIMap::if(it != dataIndexMap.end()
+  true
+end
+
+schema INIMap_erase_21
+  ΔINIMap
+  arg_1? : data_begin
+  result! : data
+where
+  -- Declared member operation INIMap::erase(data.begin()
+  true
+end
+
+schema INIMap_erase_22
+  ΔINIMap
+  arg_1? : it
+  result! : dataIndexMap
+where
+  -- Declared member operation INIMap::erase(it)
+  true
+end
+
+schema INIMap_for_23
+  ΔINIMap
+  dataIndexMap? : auto_it2
+where
+  -- Declared member operation INIMap::for(auto& it2 : dataIndexMap)
+  true
+end
+
+schema INIMap_if_24
+  ΔINIMap
+  index? : vi
+where
+  -- Declared member operation INIMap::if(vi > index)
+  true
+end
+
+schema INIMap_clear_25
+  ΔINIMap
+  result! : void
+where
+  -- Declared member operation INIMap::clear()
+  true
+end
+
+schema INIMap_clear_26
+  ΔINIMap
+  result! : dataIndexMap
+where
+  -- Declared member operation INIMap::clear()
+  true
+end
+
+schema INIMap_size_27
+  ΞINIMap
+  result! : ℕ
+where
+  -- Declared member operation INIMap::size()
+  true
+end
+
+schema INIMap_begin_28
+  ΞINIMap
+  result! : const_iterator
+where
+  -- Declared member operation INIMap::begin()
+  true
+end
+
+schema INIMap_end_29
+  ΞINIMap
+  result! : const_iterator
+where
+  -- Declared member operation INIMap::end()
+  true
+end
+
+schema PDataType
+  char  -- inherits base schema
+  PDATA_UNKNOWN : PDATA_NONE__PDATA_COMMENT__PDATA_SECTION__PDATA_KEYVALUE
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema INIReader
+  fileReadStream : std__ifstream
+  lineData : T_LineDataPtr
+  output : T_LineData
+  fileSize : i
+  section : std__string
+  parseData : INIParser__T_ParseValues
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema INIReader_readFile
+  ΔINIReader
+  result! : T_LineData
+where
+  -- Declared member operation INIReader::readFile()
+  true
+end
+
+schema INIReader_seekg_2
+  ΔINIReader
+  arg_1? : 0
+  end? : std__ios
+  result! : fileReadStream
+where
+  -- Declared member operation INIReader::seekg(0, std::ios::end)
+  true
+end
+
+schema INIReader_resize_3
+  ΔINIReader
+  arg_1? : fileReadStream_tellg
+  result! : fileContents
+where
+  -- Declared member operation INIReader::resize(fileReadStream.tellg()
+  true
+end
+
+schema INIReader_seekg_4
+  ΔINIReader
+  arg_1? : 0
+  beg? : std__ios
+  result! : fileReadStream
+where
+  -- Declared member operation INIReader::seekg(0, std::ios::beg)
+  true
+end
+
+schema INIReader_size_5
+  ΔINIReader
+  result! : ℕ
+where
+  -- Declared member operation INIReader::size()
+  true
+end
+
+schema INIReader_read_6
+  ΔINIReader
+  fileContents? : seq ANY  -- bounded array [0]
+  arg_2? : fileSize
+  result! : fileReadStream
+where
+  -- Declared member operation INIReader::read(&fileContents[0], fileSize)
+  true
+end
+
+schema INIReader_close_7
+  ΔINIReader
+  result! : fileReadStream
+where
+  -- Declared member operation INIReader::close()
+  true
+end
+
+schema INIReader_if_8
+  ΔINIReader
+  arg_1? : fileSize
+where
+  -- Declared member operation INIReader::if(fileSize == 0)
+  true
+end
+
+schema INIReader_reserve_9
+  ΔINIReader
+  arg_1? : 50
+  result! : buffer
+where
+  -- Declared member operation INIReader::reserve(50)
+  true
+end
+
+schema INIReader_if_10
+  ΔINIReader
+  arg_1? : c
+where
+  -- Declared member operation INIReader::if(c == '\n')
+  true
+end
+
+schema INIReader_clear_11
+  ΔINIReader
+  result! : buffer
+where
+  -- Declared member operation INIReader::clear()
+  true
+end
+
+schema INIReader_if_12
+  ΔINIReader
+  arg_1? : c
+  result! : ANY
+where
+  -- Declared member operation INIReader::if(c != '\0' && c != '\r')
+  true
+end
+
+schema INIReader_emplace_back_13
+  ΔINIReader
+  arg_1? : buffer
+  result! : output
+where
+  -- Declared member operation INIReader::emplace_back(buffer)
+  true
+end
+
+schema INIReader_INIReader_14
+  ΔINIReader
+  filename? : std__string
+  keepLineData? : 𝔹
+  result! : public
+where
+  -- Declared member operation INIReader::INIReader(std::string const& filename, bool keepLineData = false)
+  true
+end
+
+schema INIReader_if_15
+  ΔINIReader
+  arg_1? : keepLineData
+where
+  -- Declared member operation INIReader::if(keepLineData)
+  true
+end
+
+schema INIReader_INIReader_16
+  ΔINIReader
+  result! : ANY
+where
+  -- Declared member operation INIReader::INIReader()
+  true
+end
+
+schema INIReader_readFile_17
+  ΔINIReader
+  result! : T_LineData_fileLines
+where
+  -- Declared member operation INIReader::readFile()
+  true
+end
+
+schema INIReader_for_18
+  ΔINIReader
+  fileLines? : auto__line
+where
+  -- Declared member operation INIReader::for(auto const& line : fileLines)
+  true
+end
+
+schema INIReader_if_19
+  ΔINIReader
+  arg_1? : parseResult
+where
+  -- Declared member operation INIReader::if(parseResult == INIParser::PDataType::PDATA_SECTION)
+  true
+end
+
+schema INIReader_if_20
+  ΔINIReader
+  parseResult? : inSection
+  result! : else
+where
+  -- Declared member operation INIReader::if(inSection && parseResult == INIParser::PDataType::PDATA_KEYVALUE)
+  true
+end
+
+schema INIReader_if_21
+  ΔINIReader
+  arg_1? : lineData__parseResult
+  result! : ANY
+where
+  -- Declared member operation INIReader::if(lineData && parseResult != INIParser::PDataType::PDATA_UNKNOWN)
+  true
+end
+
+schema INIReader_emplace_back_22
+  ΔINIReader
+  arg_1? : line
+  result! : lineData
+where
+  -- Declared member operation INIReader::emplace_back(line)
+  true
+end
+
+schema INIReader_getLines_23
+  ΔINIReader
+  result! : T_LineDataPtr
+where
+  -- Declared member operation INIReader::getLines()
+  true
+end
+
+schema INIGenerator
+  fileWriteStream : std__ofstream
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema INIGenerator_INIGenerator
+  ΔINIGenerator
+  filename? : std__string
+where
+  -- Declared member operation INIGenerator::INIGenerator(std::string const& filename)
+  true
+end
+
+schema INIGenerator_INIGenerator_2
+  ΔINIGenerator
+  result! : ANY
+where
+  -- Declared member operation INIGenerator::INIGenerator()
+  true
+end
+
+schema INIGenerator_if_3
+  ΔINIGenerator
+  arg_1? : data_size
+  result! : ANY
+where
+  -- Declared member operation INIGenerator::if(!data.size()
+  true
+end
+
+schema INIGenerator_begin_4
+  ΔINIGenerator
+  result! : auto_it___data
+where
+  -- Declared member operation INIGenerator::begin()
+  true
+end
+
+schema INIGenerator_if_5
+  ΔINIGenerator
+  arg_1? : collection_size
+where
+  -- Declared member operation INIGenerator::if(collection.size()
+  true
+end
+
+schema INIGenerator_begin_6
+  ΔINIGenerator
+  result! : auto_it2___collection
+where
+  -- Declared member operation INIGenerator::begin()
+  true
+end
+
+schema INIGenerator_replace_7
+  ΔINIGenerator
+  arg_1? : key
+  arg_2? : ANY
+  arg_3? : ANY
+  result! : INIStringUtil
+where
+  -- Declared member operation INIGenerator::replace(key, "=", "\\=")
+  true
+end
+
+schema INIGenerator_trim_8
+  ΔINIGenerator
+  arg_1? : value
+  result! : INIStringUtil
+where
+  -- Declared member operation INIGenerator::trim(value)
+  true
+end
+
+schema INIGenerator_if_9
+  ΔINIGenerator
+  it2? : ANY
+where
+  -- Declared member operation INIGenerator::if(++it2 == collection.end()
+  true
+end
+
+schema INIGenerator_if_10
+  ΔINIGenerator
+  it? : ANY
+  result! : ANY
+where
+  -- Declared member operation INIGenerator::if(++it == data.end()
+  true
+end
+
+schema INIGenerator_if_11
+  ΔINIGenerator
+  arg_1? : ℤ
+where
+  -- Declared member operation INIGenerator::if(prettyPrint)
+  true
+end
+
+schema INIWriter
+  filename : std__string
+  parseData : INIParser__T_ParseValues
+  sectionCurrent : std__string
+  data : return_generator
+  lineData : T_LineDataPtr
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema INIWriter_getLazyOutput
+  ΔINIWriter
+  lineData? : T_LineDataPtr
+  data? : INIStructure
+  original? : INIStructure
+  result! : T_LineData
+where
+  -- Declared member operation INIWriter::getLazyOutput(T_LineDataPtr const& lineData, INIStructure& data, INIStructure& original)
+  true
+end
+
+schema INIWriter_for_2
+  ΔINIWriter
+  line? : auto
+where
+  -- Declared member operation INIWriter::for(auto line = lineData->begin()
+  true
+end
+
+schema INIWriter_end_3
+  ΔINIWriter
+  result! : line____lineData
+where
+  -- Declared member operation INIWriter::end()
+  true
+end
+
+schema INIWriter_if_4
+  ΔINIWriter
+  writeNewKeys? : ANY
+  result! : line
+where
+  -- Declared member operation INIWriter::if(!writeNewKeys)
+  true
+end
+
+schema INIWriter_if_5
+  ΔINIWriter
+  arg_1? : parseResult
+where
+  -- Declared member operation INIWriter::if(parseResult == INIParser::PDataType::PDATA_SECTION)
+  true
+end
+
+schema INIWriter_if_6
+  ΔINIWriter
+  sectionCurrent? : data_has
+where
+  -- Declared member operation INIWriter::if(data.has(sectionCurrent)
+  true
+end
+
+schema INIWriter_emplace_back_7
+  ΔINIWriter
+  arg_1? : Ref[line]
+  result! : output
+where
+  -- Declared member operation INIWriter::emplace_back(*line)
+  true
+end
+
+schema INIWriter_size_8
+  ΔINIWriter
+  result! : lastKeyLine___output
+where
+  -- Declared member operation INIWriter::size()
+  true
+end
+
+schema INIWriter_if_9
+  ΔINIWriter
+  arg_1? : parseResult
+  result! : else
+where
+  -- Declared member operation INIWriter::if(parseResult == INIParser::PDataType::PDATA_KEYVALUE)
+  true
+end
+
+schema INIWriter_if_10
+  ΔINIWriter
+  sectionCurrent? : data_has
+  result! : ANY
+where
+  -- Declared member operation INIWriter::if(data.has(sectionCurrent)
+  true
+end
+
+schema INIWriter_if_11
+  ΔINIWriter
+  key? : collection_has
+where
+  -- Declared member operation INIWriter::if(collection.has(key)
+  true
+end
+
+schema INIWriter_if_12
+  ΔINIWriter
+  arg_1? : value
+where
+  -- Declared member operation INIWriter::if(value == outputValue)
+  true
+end
+
+schema INIWriter_trim_13
+  ΔINIWriter
+  arg_1? : outputValue
+  result! : else___INIStringUtil
+where
+  -- Declared member operation INIWriter::trim(outputValue)
+  true
+end
+
+schema INIWriter_replace_14
+  ΔINIWriter
+  arg_1? : lineNorm
+  arg_2? : ANY
+  arg_3? : ANY
+  result! : INIStringUtil
+where
+  -- Declared member operation INIWriter::replace(lineNorm, "\\=", " ")
+  true
+end
+
+schema INIWriter_find_first_of_15
+  ΔINIWriter
+  arg_1? : ANY
+  result! : auto_equalsAt___lineNorm
+where
+  -- Declared member operation INIWriter::find_first_of('=')
+  true
+end
+
+schema INIWriter_find_first_not_of_16
+  ΔINIWriter
+  whitespaceDelimiters? : INIStringUtil
+  arg_2? : equalsAt___1
+  result! : auto_valueAt___lineNorm
+where
+  -- Declared member operation INIWriter::find_first_not_of(INIStringUtil::whitespaceDelimiters, equalsAt + 1)
+  true
+end
+
+schema INIWriter_substr_17
+  ΔINIWriter
+  arg_1? : 0
+  arg_2? : valueAt
+  result! : std__string_outputLine___line
+where
+  -- Declared member operation INIWriter::substr(0, valueAt)
+  true
+end
+
+schema INIWriter_if_18
+  ΔINIWriter
+  arg_1? : ℤ
+where
+  -- Declared member operation INIWriter::if(prettyPrint && equalsAt + 1 == valueAt)
+  true
+end
+
+schema INIWriter_emplace_back_19
+  ΔINIWriter
+  arg_1? : outputLine
+  result! : output
+where
+  -- Declared member operation INIWriter::emplace_back(outputLine)
+  true
+end
+
+schema INIWriter_size_20
+  ΔINIWriter
+  result! : lastKeyLine___output
+where
+  -- Declared member operation INIWriter::size()
+  true
+end
+
+schema INIWriter_if_21
+  ΔINIWriter
+  arg_1? : discardNextEmpty__line__empty
+  result! : else
+where
+  -- Declared member operation INIWriter::if(discardNextEmpty && line->empty()
+  true
+end
+
+schema INIWriter_if_22
+  ΔINIWriter
+  arg_1? : parseResult
+  result! : else
+where
+  -- Declared member operation INIWriter::if(parseResult != INIParser::PDataType::PDATA_UNKNOWN)
+  true
+end
+
+schema INIWriter_if_23
+  ΔINIWriter
+  line? : writeNewKeys____std__next
+  result! : ANY
+where
+  -- Declared member operation INIWriter::if(writeNewKeys || std::next(line)
+  true
+end
+
+schema INIWriter_if_24
+  ΔINIWriter
+  sectionCurrent? : data_has
+where
+  -- Declared member operation INIWriter::if(data.has(sectionCurrent)
+  true
+end
+
+schema INIWriter_for_25
+  ΔINIWriter
+  collection? : auto__it
+where
+  -- Declared member operation INIWriter::for(auto const& it : collection)
+  true
+end
+
+schema INIWriter_if_26
+  ΔINIWriter
+  key? : collectionOriginal_has
+where
+  -- Declared member operation INIWriter::if(collectionOriginal.has(key)
+  true
+end
+
+schema INIWriter_replace_27
+  ΔINIWriter
+  arg_1? : key
+  arg_2? : ANY
+  arg_3? : ANY
+  result! : INIStringUtil
+where
+  -- Declared member operation INIWriter::replace(key, "=", "\\=")
+  true
+end
+
+schema INIWriter_trim_28
+  ΔINIWriter
+  arg_1? : value
+  result! : INIStringUtil
+where
+  -- Declared member operation INIWriter::trim(value)
+  true
+end
+
+schema INIWriter_emplace_back_29
+  ΔINIWriter
+  prettyPrint? : key
+  result! : linesToAdd
+where
+  -- Declared member operation INIWriter::emplace_back(key + ((prettyPrint)
+  true
+end
+
+schema INIWriter_if_30
+  ΔINIWriter
+  arg_1? : linesToAdd_empty
+  result! : ANY
+where
+  -- Declared member operation INIWriter::if(!linesToAdd.empty()
+  true
+end
+
+schema INIFile
+  filename : std__string
+  data : return_reader
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema INIFile_INIFile
+  ΔINIFile
+  filename? : std__string
+where
+  -- Declared member operation INIFile::INIFile(std::string const& filename)
+  true
+end
+
+schema INIFile_if_2
+  ΔINIFile
+  arg_1? : filename_empty
+  result! : ANY
+where
+  -- Declared member operation INIFile::if(filename.empty()
+  true
+end
+
+schema INIFile_reader_3
+  ΔINIFile
+  arg_1? : filename
+  result! : INIReader
+where
+  -- Declared member operation INIFile::reader(filename)
+  true
+end
+
+schema INIFile_generate_4
+  ΞINIFile
+  data? : INIStructure
+  pretty? : 𝔹
+  result! : bool
+where
+  -- Declared member operation INIFile::generate(INIStructure const& data, bool pretty = false)
+  true
+end
+
+schema INIFile_generator_5
+  ΔINIFile
+  arg_1? : filename
+  result! : INIGenerator
+where
+  -- Declared member operation INIFile::generator(filename)
+  true
+end
+
+schema INIFile_write_6
+  ΞINIFile
+  data? : INIStructure
+  pretty? : 𝔹
+  result! : bool
+where
+  -- Declared member operation INIFile::write(INIStructure& data, bool pretty = false)
+  true
+end
+
+schema INIFile_writer_7
+  ΔINIFile
+  arg_1? : filename
+  result! : INIWriter
+where
+  -- Declared member operation INIFile::writer(filename)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ini_trim
+  ΔiniModuleState
+  str? : std__string
+where
+  -- Invokes: str.erase, str.find_last_not_of, str.find_first_not_of
+  true
+end
+
+schema ini_toLower
+  ΔiniModuleState
+  str? : std__string
+where
+  -- Return postcondition: result! = static_cast<const char>(std::tolower(c))
+  -- Invokes: std::transform, str.begin, str.end, std::tolower
+  true
+end
+
+schema ini_replace
+  ΔiniModuleState
+  str? : std__string
+  a? : std__string
+  b? : std__string
+where
+  -- State update: pos' = 0
+  -- Invokes: a.empty, str.find, str.replace, a.size, b.size
+  true
+end
+
+schema ini_setEmpty
+  ΔiniModuleState
+  key? : std__string
+  result! : ℕ
+where
+  -- State update: index' = data.size()
+  -- Return postcondition: result! = index
+  -- Invokes: data.size, data.emplace_back
+  true
+end
+
+schema ini_INIMap
+  ΔiniModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ini_INIMap_2
+  ΔiniModuleState
+  other? : INIMap
+where
+  -- State update: data_size' = other.data.size()
+  -- State update: key' = other.data[i].first
+  -- State update: obj' = other.data[i].second
+  -- State update: dataIndexMap' = T_DataIndexMap(other.dataIndexMap)
+  -- Invokes: data.size, data.emplace_back
+  true
+end
+
+schema ini_operator
+  ΔiniModuleState
+  key? : std__string
+  result! : T
+where
+  -- State update: it' = dataIndexMap.find(key)
+  -- State update: index' = (hasIt) ? it.second : setEmpty(key)
+  -- Return postcondition: result! = data[index].second
+  -- Invokes: INIStringUtil::trim, INIStringUtil::toLower, dataIndexMap.find, dataIndexMap.end
+  true
+end
+
+schema ini_get
+  ΞiniModuleState
+  key? : std__string
+  result! : T
+where
+  -- State update: it' = dataIndexMap.find(key)
+  -- Return postcondition: result! = T()
+  -- Return postcondition: result! = T(data[it->second].second)
+  -- Invokes: INIStringUtil::trim, INIStringUtil::toLower, dataIndexMap.find, dataIndexMap.end
+  true
+end
+
+schema ini_has
+  ΞiniModuleState
+  key? : std__string
+  result! : 𝔹
+where
+  -- Return postcondition: result! = (dataIndexMap.count(key) == 1)
+  -- Invokes: INIStringUtil::trim, INIStringUtil::toLower, dataIndexMap.count
+  true
+end
+
+schema ini_set
+  ΔiniModuleState
+  key? : std__string
+  obj? : T
+where
+  -- State update: it' = dataIndexMap.find(key)
+  -- State update: second' = obj
+  -- Invokes: INIStringUtil::trim, INIStringUtil::toLower, dataIndexMap.find, dataIndexMap.end, data.size
+  true
+end
+
+schema ini_set_2
+  ΔiniModuleState
+  multiArgs? : T_MultiArgs
+where
+  -- State update: key' = it.first
+  -- State update: obj' = it.second
+  true
+end
+
+schema ini_remove
+  ΔiniModuleState
+  key? : std__string
+  result! : 𝔹
+where
+  -- State update: it' = dataIndexMap.find(key)
+  -- State update: index' = it.second
+  -- State update: vi' = it2.second
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: INIStringUtil::trim, INIStringUtil::toLower, dataIndexMap.find, dataIndexMap.end, data.erase
+  true
+end
+
+schema ini_clear
+  ΔiniModuleState
+where
+  -- Invokes: data.clear, dataIndexMap.clear
+  true
+end
+
+schema ini_size
+  ΞiniModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = data.size()
+  -- Invokes: data.size
+  true
+end
+
+schema ini_begin
+  ΞiniModuleState
+  result! : const_iterator
+where
+  -- Return postcondition: result! = data.begin()
+  -- Invokes: data.begin
+  true
+end
+
+schema ini_end
+  ΞiniModuleState
+  result! : const_iterator
+where
+  -- Return postcondition: result! = data.end()
+  -- Invokes: data.end
+  true
+end
+
+schema ini_parseLine
+  ΔiniModuleState
+  line? : std__string
+  parseData? : T_ParseValues
+  result! : PDataType
+where
+  -- State update: firstCharacter' = line[0]
+  -- State update: commentAt' = line.find_first_of('
+  -- State update: line' = line.substr(0, commentAt)
+  -- State update: closingBracketAt' = line.find_last_of(']')
+  -- State update: section' = line.substr(1, closingBracketAt - 1)
+  -- State update: parseData.first' = section
+  -- Return postcondition: result! = PDataType::PDATA_NONE
+  -- Return postcondition: result! = PDataType::PDATA_COMMENT
+  -- Return postcondition: result! = PDataType::PDATA_SECTION
+  -- Invokes: first.clear, second.clear, INIStringUtil::trim, line.empty, line.find_first_of
+  true
+end
+
+schema ini_readFile
+  ΔiniModuleState
+  result! : T_LineData
+where
+  -- State update: fileSize' = fileContents.size()
+  -- State update: c' = fileContents[i]
+  -- Return postcondition: result! = output
+  -- Return postcondition: result! = output
+  -- Invokes: fileReadStream.seekg, fileContents.resize, fileReadStream.tellg, fileContents.size, fileReadStream.read
+  true
+end
+
+schema ini_INIReader
+  ΔiniModuleState
+  filename? : std__string
+  keepLineData? : 𝔹
+where
+  -- State update: lineData' = std::make_shared<T_LineData>()
+  -- Invokes: fileReadStream.open
+  true
+end
+
+schema ini_INIReader_2
+  ΔiniModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ini_operator_2
+  ΔiniModuleState
+  data? : INIStructure
+  result! : 𝔹
+where
+  -- State update: fileLines' = readFile()
+  -- State update: inSection' = false
+  -- State update: parseResult' = INIParser::parseLine(line, parseData)
+  -- State update: inSection' = true
+  -- State update: section' = parseData.first]
+  -- State update: key' = parseData.first
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: fileReadStream.is_open, INIParser::parseLine, lineData->emplace_back
+  true
+end
+
+schema ini_getLines
+  ΔiniModuleState
+  result! : T_LineDataPtr
+where
+  -- Return postcondition: result! = lineData
+  true
+end
+
+schema ini_INIGenerator
+  ΔiniModuleState
+  filename? : std__string
+where
+  -- Invokes: fileWriteStream.open
+  true
+end
+
+schema ini_INIGenerator_2
+  ΔiniModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ini_operator_3
+  ΔiniModuleState
+  data? : INIStructure
+  result! : 𝔹
+where
+  -- State update: it' = data.begin()
+  -- State update: section' = it.first
+  -- State update: collection' = it.second
+  -- State update: it2' = collection.begin()
+  -- State update: key' = it2.first
+  -- State update: value' = it2.second
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: fileWriteStream.is_open, data.size, data.begin, collection.size, collection.begin
+  true
+end
+
+schema ini_getLazyOutput
+  ΔiniModuleState
+  lineData? : T_LineDataPtr
+  data? : INIStructure
+  original? : INIStructure
+  result! : T_LineData
+where
+  -- State update: parsingSection' = false
+  -- State update: continueToNextSection' = false
+  -- State update: discardNextEmpty' = false
+  -- State update: writeNewKeys' = false
+  -- State update: lastKeyLine' = 0
+  -- State update: line' = lineData.begin()
+  -- Return postcondition: result! = output
+  -- Invokes: lineData->begin, lineData->end, INIParser::parseLine, data.has, output.emplace_back
+  true
+end
+
+schema ini_INIWriter
+  ΔiniModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ini_operator_4
+  ΔiniModuleState
+  data? : INIStructure
+  result! : 𝔹
+where
+  -- State update: generator.prettyPrint' = prettyPrint
+  -- State update: readSuccess' = false
+  -- State update: lineData' = reader.getLines()
+  -- State update: output' = getLazyOutput(lineData, data, originalData)
+  -- State update: line' = output.begin()
+  -- Return postcondition: result! = generator << data
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: filename.c_str, reader.getLines, fileWriteStream.is_open, output.size, output.begin
+  true
+end
+
+schema ini_INIFile
+  ΔiniModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ini_read
+  ΞiniModuleState
+  data? : INIStructure
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = reader >> data
+  -- Invokes: data.size, data.clear, filename.empty
+  true
+end
+
+schema ini_generate
+  ΞiniModuleState
+  data? : INIStructure
+  pretty? : 𝔹
+  result! : 𝔹
+where
+  -- State update: generator.prettyPrint' = pretty
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = generator << data
+  -- Invokes: filename.empty
+  true
+end
+
+schema ini_write
+  ΞiniModuleState
+  data? : INIStructure
+  pretty? : 𝔹
+  result! : 𝔹
+where
+  -- State update: writer.prettyPrint' = pretty
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = writer << data
+  -- Invokes: filename.empty
+  true
+end

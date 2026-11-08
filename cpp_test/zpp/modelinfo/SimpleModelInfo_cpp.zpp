@@ -1,0 +1,280 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SimpleModelInfo (modelinfo)
+-- Source File(s): modelinfo/SimpleModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+-- include Leeds.zpp  (from "Leeds.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+NEAR_DRAW_DIST : ℝ  -- #define NEAR_DRAW_DIST 100.0f
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSimpleModelInfo_DeleteRwObject
+  ΔCSimpleModelInfo
+where
+  -- State update: f' = RpAtomicGetFrame(m_atomics[i])
+  -- State update: m_atomics' = ∅
+  -- Invokes: CAnimManager::RemoveAnimBlockRef, CStreaming::UnregisterPointer, CStreaming::UnregisterAtomic
+  true
+end
+
+schema CSimpleModelInfo_CreateInstance
+  ΔCSimpleModelInfo
+where
+  -- State update: atomic' = RpAtomicClone(m_atomics[0])
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = (RwObject*)atomic
+  -- Invokes: CStreaming::RegisterInstance
+  true
+end
+
+schema CSimpleModelInfo_CreateInstance_2
+  ΔCSimpleModelInfo
+  matrix? : Ref[RwMatrix]
+where
+  -- State update: atomic' = RpAtomicClone(m_atomics[0])
+  -- State update: frame' = RwFrameCreate()
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = (RwObject*)atomic
+  -- Invokes: CStreaming::RegisterInstance
+  true
+end
+
+schema CSimpleModelInfo_Init
+  ΔCSimpleModelInfo
+where
+  -- State update: m_numAtomics' = 0
+  -- State update: m_firstDamaged' = 0
+  -- State update: m_wetRoadReflection' = 0
+  -- State update: m_isDamaged' = 0
+  -- State update: m_isBigBuilding' = 0
+  -- State update: m_noFade' = 0
+  true
+end
+
+schema CSimpleModelInfo_SetAtomic
+  ΔCSimpleModelInfo
+  n? : ℤ
+  atomic? : Ref[RpAtomic]
+where
+  -- State update: m_atomics' = new RpAtomic*[3]
+  -- State update: geo' = RpAtomicGetGeometry(atomic)
+  -- Invokes: CAnimManager::AddAnimBlockRef, CustomPipes::AttachGlossPipe, CustomPipes::AttachWorldPipe
+  true
+end
+
+schema CSimpleModelInfo_SetLodDistances
+  ΔCSimpleModelInfo
+  dist? : ℙ ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSimpleModelInfo_IncreaseAlpha
+  ΔCSimpleModelInfo
+where
+  -- State update: m_alpha' = 0xFF
+  true
+end
+
+schema CSimpleModelInfo_GetLodDistance
+  ΔCSimpleModelInfo
+  i? : ℤ
+where
+  -- Return postcondition: result! = m_lodDistances[i] * TheCamera.LODDistMultiplier
+  true
+end
+
+schema CSimpleModelInfo_GetNearDistance
+  ΔCSimpleModelInfo
+where
+  -- Return postcondition: result! = m_lodDistances[2] * TheCamera.LODDistMultiplier
+  true
+end
+
+schema CSimpleModelInfo_GetLargestLodDistance
+  ΔCSimpleModelInfo
+where
+  -- State update: d' = m_lodDistances[m_numAtomics-1]
+  -- State update: d' = m_lodDistances[m_firstDamaged-1]
+  -- Return postcondition: result! = d * TheCamera.LODDistMultiplier
+  true
+end
+
+schema CSimpleModelInfo_GetLodAtomic
+  ΔCSimpleModelInfo
+  n? : ℤ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[n]
+  true
+end
+
+schema CSimpleModelInfo_GetLastAtomic
+  ΔCSimpleModelInfo
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[m_numAtomics-1]
+  -- Return postcondition: result! = m_atomics[m_firstDamaged-1]
+  true
+end
+
+schema CSimpleModelInfo_GetLastAtomic_2
+  ΔCSimpleModelInfo
+  dist? : ℝ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[n]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CSimpleModelInfo_GetAtomicFromDistance
+  ΔCSimpleModelInfo
+  dist? : ℝ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CSimpleModelInfo_GetFirstAtomicFromDistance
+  ΔCSimpleModelInfo
+  dist? : ℝ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics[0]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CSimpleModelInfo_FindRelatedModel
+  ΔCSimpleModelInfo
+where
+  -- State update: thisIndex' = 0
+  -- State update: thisIndex' = -1
+  -- State update: otherIndex' = 0
+  -- State update: mi' = CModelInfo::GetModelInfo(m_sTempIdeData[otherIndex].id)
+  -- Invokes: CModelInfo::GetModelInfo, CGeneral::faststrcmp, mi->IsSimple, this->SetRelatedModel
+  true
+end
+
+schema CSimpleModelInfo_SetupBigBuilding
+  ΔCSimpleModelInfo
+where
+  -- State update: m_isBigBuilding' = 1
+  -- State update: related' = GetRelatedModel()
+  -- State update: m_drawLast' = false
+  -- Invokes: related->GetLargestLodDistance
+  true
+end
+
+schema CSimpleModelInfo_LoadModel
+  ΔCSimpleModelInfo
+  atomics? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: m_chunk' = (void*)chunk
+  -- State update: m_atomics' = (RpAtomic**)atomics
+  -- Invokes: CStreaming::RegisterPointer, CStreaming::RegisterAtomic
+  true
+end
+
+schema CSimpleModelInfo_Write
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: m_atomics' = ∅
+  -- Invokes: CBaseModelInfo::Write, writer.AddPatch
+  true
+end
+
+schema CSimpleModelInfo_WriteModel
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- State update: numAtomics' = 0
+  -- State update: firstDam' = m_firstDamaged - m_numAtomics + numAtomics
+  -- State update: m_firstDamaged' = firstDam
+  -- State update: m_firstDamaged' = 0
+  -- State update: m_numAtomics' = numAtomics
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = m_atomics
+  -- Invokes: writer.AllocateRaw, writer.AddPatch
+  true
+end
+
+schema CSimpleModelInfo_RcWriteThis
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CSimpleModelInfo_RcWriteEmpty
+  ΔCSimpleModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CSimpleModelInfo_FindRelatedModel_2
+  ΔCSimpleModelInfo
+  minID? : ℤ
+  maxID? : ℤ
+where
+  -- State update: mi' = CModelInfo::GetModelInfo(i)
+  -- Invokes: CModelInfo::GetModelInfo, CGeneral::faststrcmp, mi->GetModelName, mi->IsSimple, this->SetRelatedModel
+  true
+end
+
+schema CSimpleModelInfo_SetupBigBuilding_2
+  ΔCSimpleModelInfo
+  minID? : ℤ
+  maxID? : ℤ
+where
+  -- State update: m_isBigBuilding' = 1
+  -- State update: related' = GetRelatedModel()
+  -- State update: m_drawLast' = false
+  -- Invokes: related->GetLargestLodDistance
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SimpleModelInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 436
+end

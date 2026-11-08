@@ -1,0 +1,1256 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Replay (control)
+-- Source File(s): control/Replay.cpp, control/Replay.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include AnimBlendAssocGroup.zpp  (from "AnimBlendAssocGroup.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Draw.zpp  (from "Draw.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include main.zpp  (from "main.h")
+-- include Matrix.zpp  (from "Matrix.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Object.zpp  (from "Object.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include PedAttractor.zpp  (from "PedAttractor.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Population.zpp  (from "Population.h")
+-- include Projectile.zpp  (from "Projectile.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include References.zpp  (from "References.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include Skidmarks.zpp  (from "Skidmarks.h")
+-- include Stinger.zpp  (from "Stinger.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Train.zpp  (from "Train.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Font.zpp  (from "Font.h")
+-- include Text.zpp  (from "Text.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include WaterCreatures.zpp  (from "WaterCreatures.h")
+-- include World.zpp  (from "World.h")
+-- include WeaponEffects.zpp  (from "WeaponEffects.h")
+-- include ParticleType.zpp  (from "ParticleType.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+FIX_REPLAY_BUGS : seq CHAR  -- #define FIX_REPLAY_BUGS #endif
+REPLAY_STUB : seq CHAR  -- #define REPLAY_STUB #else
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Replay_Enum_1 ::= NUM_MAIN_ANIMS_IN_REPLAY | NUM_PARTIAL_ANIMS_IN_REPLAY
+  -- val(NUM_MAIN_ANIMS_IN_REPLAY) = 3
+  -- val(NUM_PARTIAL_ANIMS_IN_REPLAY) = 6
+
+Replay_Enum_2 ::= MODE_RECORD | MODE_PLAYBACK
+  -- val(MODE_RECORD) = 0
+  -- val(MODE_PLAYBACK) = 1
+
+Replay_Enum_3 ::= REPLAYCAMMODE_ASSTORED | REPLAYCAMMODE_TOPDOWN | REPLAYCAMMODE_FIXED
+  -- val(REPLAYCAMMODE_ASSTORED) = 0
+
+Replay_Enum_4 ::= REPLAYPACKET_END | REPLAYPACKET_VEHICLE | REPLAYPACKET_BIKE | REPLAYPACKET_PED_HEADER | REPLAYPACKET_PED_UPDATE | REPLAYPACKET_GENERAL | REPLAYPACKET_CLOCK | REPLAYPACKET_WEATHER | REPLAYPACKET_ENDOFFRAME | REPLAYPACKET_TIMER | REPLAYPACKET_BULLET_TRACES | REPLAYPACKET_PARTICLE | REPLAYPACKET_MISC
+  -- val(REPLAYPACKET_END) = 0
+
+Replay_Enum_5 ::= REPLAYBUFFER_UNUSED | REPLAYBUFFER_PLAYBACK | REPLAYBUFFER_RECORD
+  -- val(REPLAYBUFFER_UNUSED) = 0
+  -- val(REPLAYBUFFER_PLAYBACK) = 1
+  -- val(REPLAYBUFFER_RECORD) = 2
+
+Replay_Enum_6 ::= NUM_REPLAYBUFFERS | REPLAYBUFFERSIZE
+  -- val(NUM_REPLAYBUFFERS) = 8
+  -- val(REPLAYBUFFERSIZE) = 100000
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAddressInReplayBuffer
+  m_nOffset : ℕ
+  m_pBase : ℙ ℕ
+  m_bSlot : ℕ
+where
+  m_nOffset ≥ 0
+  #m_pBase ≤ 1
+  m_bSlot ≥ 0
+end
+
+schema CStoredAnimationState
+  animId : ℕ
+  time : ℕ
+  speed : ℕ
+  groupId : ℕ
+  secAnimId : ℕ
+  secTime : ℕ
+  secSpeed : ℕ
+  secGroupId : ℕ
+  blendAmount : ℕ
+  partAnimId : ℕ
+  partAnimTime : ℕ
+  partAnimSpeed : ℕ
+  partBlendAmount : ℕ
+  partGroupId : ℕ
+where
+  animId ≥ 0
+  time ≥ 0
+  speed ≥ 0
+  groupId ≥ 0
+  secAnimId ≥ 0
+  secTime ≥ 0
+  secSpeed ≥ 0
+  secGroupId ≥ 0
+  blendAmount ≥ 0
+  partAnimId ≥ 0
+  partAnimTime ≥ 0
+  partAnimSpeed ≥ 0
+  partBlendAmount ≥ 0
+  partGroupId ≥ 0
+end
+
+schema CStoredDetailedAnimationState
+  aAnimId : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aCurTime : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aSpeed : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aBlendAmount : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aBlendDelta : seq ℤ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aFunctionCallbackID : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aFlags : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aGroupId : seq ℕ  -- bounded array [NUM_MAIN_ANIMS_IN_REPLAY]
+  aAnimId2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aCurTime2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aSpeed2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aBlendAmount2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aBlendDelta2 : seq ℤ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aFunctionCallbackID2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aFlags2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+  aGroupId2 : seq ℕ  -- bounded array [NUM_PARTIAL_ANIMS_IN_REPLAY]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CReplay
+  in_rcvehicle : 𝔹
+  camera_pos : CMatrix
+  player_pos : CVector
+  hours : ℕ
+  minutes : ℕ
+  __align : ℕ
+  old_weather : ℕ
+  new_weather : ℕ
+  interpolation : ℝ
+  timer : ℕ
+  index : ℕ
+  mi : ℕ
+  pedtype : ℕ
+  frames : ℕ
+  lifetime : ℕ
+  inf : CVector
+  sup : CVector
+  heading : ℤ
+  vehicle_index : ℤ
+  anim_state : CStoredAnimationState
+  matrix : CCompressedMatrixNotAligned
+  weapon_model : ℕ
+  assoc_group_id : ℤ
+  is_visible : 𝔹
+  health : ℕ
+  acceleration : ℕ
+  door_angles : seq ℤ  -- bounded array [2]
+  panels : ℕ
+  velocityX : ℤ
+  velocityY : ℤ
+  velocityZ : ℤ
+  wheel_state : ℤ
+  wheel_susp_dist : seq ℕ  -- bounded array [4]
+  wheel_rotation : seq ℕ  -- bounded array [4]
+  door_status : ℕ
+  primary_color : ℕ
+  secondary_color : ℕ
+  render_scorched : 𝔹
+  skimmer_speed : ℤ
+  vehicle_type : ℤ
+  lean_angle : ℤ
+  wheel_angle : ℤ
+  particle_type : ℕ
+  dir_x : ℤ
+  dir_y : ℤ
+  dir_z : ℤ
+  r : ℕ
+  g : ℕ
+  b : ℕ
+  a : ℕ
+  pos_x : ℤ
+  pos_y : ℤ
+  pos_z : ℤ
+  size : ℝ
+  cam_shake_start : ℕ
+  cam_shake_strength : ℝ
+  cur_area : ℕ
+  video_cam : 𝔹
+  lift_cam : 𝔹
+  Mode : ℕ
+  Record : CAddressInReplayBuffer
+  Playback : CAddressInReplayBuffer
+  pBuf0 : ℙ ℕ
+  pBuf1 : Ref[CAutomobile]
+  pBuf2 : ℙ ℕ
+  pBuf3 : Ref[CPlayerPed]
+  pBuf4 : ℙ ℕ
+  pBuf5 : Ref[CCutsceneObject]
+  pBuf6 : ℙ ℕ
+  pBuf7 : Ref[CPtrNode]
+  pBuf8 : ℙ ℕ
+  pBuf9 : Ref[CEntryInfoNode]
+  pBuf10 : ℙ ℕ
+  pBuf11 : Ref[CDummyPed]
+  pRadarBlips : ℙ ℕ
+  pStoredCam : ℙ ℕ
+  pWorld1 : ℙ ℕ
+  pEmptyReferences : Ref[CReference]
+  pPedAnims : Ref[CStoredDetailedAnimationState]
+  pPickups : ℙ ℕ
+  pReferences : ℙ ℕ
+  BufferStatus : seq ℕ  -- bounded array [NUM_REPLAYBUFFERS]
+  bPlayingBackFromFile : 𝔹
+  bReplayEnabled : 𝔹
+  SlowMotion : ℕ
+  FramesActiveLookAroundCam : ℕ
+  bDoLoadSceneWhenDone : 𝔹
+  WorldPtrList : Ref[CPtrNode]
+  BigBuildingPtrList : Ref[CPtrNode]
+  PlayerWanted : CWanted
+  PlayerInfo : CPlayerInfo
+  Time1 : ℕ
+  Time2 : ℕ
+  Time3 : ℕ
+  Time4 : ℕ
+  Frame : ℕ
+  ClockHours : ℕ
+  ClockMinutes : ℕ
+  OldWeatherType : ℕ
+  NewWeatherType : ℕ
+  WeatherInterpolationValue : ℝ
+  TimeStepNonClipped : ℝ
+  TimeStep : ℝ
+  TimeScale : ℝ
+  CameraFixedX : ℝ
+  CameraFixedY : ℝ
+  CameraFixedZ : ℝ
+  OldRadioStation : ℤ
+  CameraMode : ℤ
+  bAllowLookAroundCam : 𝔹
+  LoadSceneX : ℝ
+  LoadSceneY : ℝ
+  LoadSceneZ : ℝ
+  CameraFocusX : ℝ
+  CameraFocusY : ℝ
+  CameraFocusZ : ℝ
+  bPlayerInRCBuggy : 𝔹
+  fDistanceLookAroundCam : ℝ
+  fAlphaAngleLookAroundCam : ℝ
+  fBetaAngleLookAroundCam : ℝ
+  ms_nNumCivMale_Stored : ℤ
+  ms_nNumCivFemale_Stored : ℤ
+  ms_nNumCop_Stored : ℤ
+  ms_nNumEmergency_Stored : ℤ
+  ms_nNumGang1_Stored : ℤ
+  ms_nNumGang2_Stored : ℤ
+  ms_nNumGang3_Stored : ℤ
+  ms_nNumGang4_Stored : ℤ
+  ms_nNumGang5_Stored : ℤ
+  ms_nNumGang6_Stored : ℤ
+  ms_nNumGang7_Stored : ℤ
+  ms_nNumGang8_Stored : ℤ
+  ms_nNumGang9_Stored : ℤ
+  ms_nNumDummy_Stored : ℤ
+  ms_nTotalCarPassengerPeds_Stored : ℤ
+  ms_nTotalCivPeds_Stored : ℤ
+  ms_nTotalGangPeds_Stored : ℤ
+  ms_nTotalPeds_Stored : ℤ
+  ms_nTotalMissionPeds_Stored : ℤ
+  pGarages : ℙ ℕ
+  FireArray : Ref[CFire]
+  NumOfFires : ℕ
+  paProjectileInfo : ℙ ℕ
+  paProjectiles : ℙ ℕ
+  CurrArea : ℕ
+where
+  hours ≥ 0
+  minutes ≥ 0
+  __align ≥ 0
+  old_weather ≥ 0
+  new_weather ≥ 0
+  timer ≥ 0
+  index ≥ 0
+  mi ≥ 0
+  pedtype ≥ 0
+  frames ≥ 0
+  lifetime ≥ 0
+  weapon_model ≥ 0
+  health ≥ 0
+  acceleration ≥ 0
+  #door_angles = 2
+  panels ≥ 0
+end
+
+schema CReplay_VALIDATE_SIZE
+  ΔCReplay
+  arg_1? : tGeneralPacket
+  arg_2? : 88
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tGeneralPacket, 88)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_2
+  ΔCReplay
+  arg_1? : tClockPacket
+  arg_2? : 4
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tClockPacket, 4)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_3
+  ΔCReplay
+  arg_1? : tWeatherPacket
+  arg_2? : 8
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tWeatherPacket, 8)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_4
+  ΔCReplay
+  arg_1? : tTimerPacket
+  arg_2? : 8
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tTimerPacket, 8)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_5
+  ΔCReplay
+  arg_1? : tPedHeaderPacket
+  arg_2? : 8
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tPedHeaderPacket, 8)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_6
+  ΔCReplay
+  arg_1? : tBulletTracePacket
+  arg_2? : 28
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tBulletTracePacket, 28)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_7
+  ΔCReplay
+  arg_1? : tEndOfFramePacket
+  arg_2? : 4
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tEndOfFramePacket, 4)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_8
+  ΔCReplay
+  arg_1? : tPedUpdatePacket
+  arg_2? : 40
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tPedUpdatePacket, 40)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_9
+  ΔCReplay
+  arg_1? : tVehicleUpdatePacket
+  arg_2? : 52
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tVehicleUpdatePacket, 52)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_10
+  ΔCReplay
+  arg_1? : tBikeUpdatePacket
+  arg_2? : 44
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tBikeUpdatePacket, 44)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_11
+  ΔCReplay
+  arg_1? : tParticlePacket
+  arg_2? : 20
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tParticlePacket, 20)
+  true
+end
+
+schema CReplay_VALIDATE_SIZE_12
+  ΔCReplay
+  arg_1? : tMiscPacket
+  arg_2? : 16
+where
+  -- Declared member operation CReplay::VALIDATE_SIZE(tMiscPacket, 16)
+  true
+end
+
+schema CReplay_DisableReplays_13
+  ΔCReplay
+where
+  -- Declared member operation CReplay::DisableReplays(void)
+  true
+end
+
+schema CReplay_EnableReplays_14
+  ΔCReplay
+where
+  -- Declared member operation CReplay::EnableReplays(void)
+  true
+end
+
+schema CReplay_Update_15
+  ΔCReplay
+where
+  -- Declared member operation CReplay::Update(void)
+  true
+end
+
+schema CReplay_FinishPlayback_16
+  ΔCReplay
+where
+  -- Declared member operation CReplay::FinishPlayback(void)
+  true
+end
+
+schema CReplay_EmptyReplayBuffer_17
+  ΔCReplay
+where
+  -- Declared member operation CReplay::EmptyReplayBuffer(void)
+  true
+end
+
+schema CReplay_Display_18
+  ΔCReplay
+where
+  -- Declared member operation CReplay::Display(void)
+  true
+end
+
+schema CReplay_TriggerPlayback_19
+  ΔCReplay
+  cam_mode? : ℕ
+  cam_x? : ℝ
+  cam_y? : ℝ
+  cam_z? : ℝ
+  load_scene? : 𝔹
+where
+  -- Declared member operation CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene)
+  true
+end
+
+schema CReplay_StreamAllNecessaryCarsAndPeds_20
+  ΔCReplay
+where
+  -- Declared member operation CReplay::StreamAllNecessaryCarsAndPeds(void)
+  true
+end
+
+schema CReplay_RecordParticle_21
+  ΔCReplay
+  type? : tParticleType
+  vecPos? : CVector
+  vecDir? : CVector
+  fSize? : ℝ
+  color? : RwRGBA
+where
+  -- Declared member operation CReplay::RecordParticle(tParticleType type, CVector const& vecPos, CVector const& vecDir, float fSize, RwRGBA const& color)
+  true
+end
+
+schema CReplay_IsPlayingBack_22
+  ΔCReplay
+  result! : bool
+where
+  -- Declared member operation CReplay::IsPlayingBack()
+  true
+end
+
+schema CReplay_IsPlayingBackFromFile_23
+  ΔCReplay
+  result! : bool
+where
+  -- Declared member operation CReplay::IsPlayingBackFromFile()
+  true
+end
+
+schema CReplay_ShouldStandardCameraBeProcessed_24
+  ΔCReplay
+  result! : else__bool
+where
+  -- Declared member operation CReplay::ShouldStandardCameraBeProcessed(void)
+  true
+end
+
+schema CReplay_IsPlayingBack_25
+  ΔCReplay
+  result! : 𝔹
+where
+  -- Declared member operation CReplay::IsPlayingBack()
+  true
+end
+
+schema CReplay_IsPlayingBackFromFile_26
+  ΔCReplay
+  result! : bool
+where
+  -- Declared member operation CReplay::IsPlayingBackFromFile()
+  true
+end
+
+schema CReplay_RecordThisFrame_27
+  ΔCReplay
+  result! : private___void
+where
+  -- Declared member operation CReplay::RecordThisFrame(void)
+  true
+end
+
+schema CReplay_StorePedUpdate_28
+  ΔCReplay
+  ped? : Ref[CPed]
+  id? : ℤ
+where
+  -- Declared member operation CReplay::StorePedUpdate(CPed *ped, int id)
+  true
+end
+
+schema CReplay_StorePedAnimation_29
+  ΔCReplay
+  ped? : Ref[CPed]
+  state? : Ref[CStoredAnimationState]
+where
+  -- Declared member operation CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
+  true
+end
+
+schema CReplay_StoreDetailedPedAnimation_30
+  ΔCReplay
+  ped? : Ref[CPed]
+  state? : Ref[CStoredDetailedAnimationState]
+where
+  -- Declared member operation CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
+  true
+end
+
+schema tGeneralPacket
+  type : ℕ
+  in_rcvehicle : 𝔹
+  camera_pos : CMatrix
+  player_pos : CVector
+where
+  type ≥ 0
+end
+
+schema tClockPacket
+  type : ℕ
+  hours : ℕ
+  minutes : ℕ
+  __align : ℕ
+where
+  type ≥ 0
+  hours ≥ 0
+  minutes ≥ 0
+  __align ≥ 0
+end
+
+schema tWeatherPacket
+  type : ℕ
+  old_weather : ℕ
+  new_weather : ℕ
+  interpolation : ℝ
+where
+  type ≥ 0
+  old_weather ≥ 0
+  new_weather ≥ 0
+end
+
+schema tTimerPacket
+  type : ℕ
+  timer : ℕ
+where
+  type ≥ 0
+  timer ≥ 0
+end
+
+schema tPedHeaderPacket
+  type : ℕ
+  index : ℕ
+  mi : ℕ
+  pedtype : ℕ
+  __align : seq ℕ  -- bounded array [3]
+where
+  type ≥ 0
+  index ≥ 0
+  mi ≥ 0
+  pedtype ≥ 0
+  #__align = 3
+end
+
+schema tBulletTracePacket
+  type : ℕ
+  frames : ℕ
+  lifetime : ℕ
+  index : ℕ
+  inf : CVector
+  sup : CVector
+where
+  type ≥ 0
+  frames ≥ 0
+  lifetime ≥ 0
+  index ≥ 0
+end
+
+schema tEndOfFramePacket
+  type : ℕ
+  __align : seq ℕ  -- bounded array [3]
+where
+  type ≥ 0
+  #__align = 3
+end
+
+schema tPedUpdatePacket
+  type : ℕ
+  index : ℕ
+  heading : ℤ
+  vehicle_index : ℤ
+  anim_state : CStoredAnimationState
+  matrix : CCompressedMatrixNotAligned
+  weapon_model : ℕ
+  assoc_group_id : ℤ
+  is_visible : 𝔹
+where
+  type ≥ 0
+  index ≥ 0
+  weapon_model ≥ 0
+end
+
+schema tVehicleUpdatePacket
+  type : ℕ
+  index : ℕ
+  health : ℕ
+  acceleration : ℕ
+  matrix : CCompressedMatrixNotAligned
+  door_angles : seq ℤ  -- bounded array [2]
+  mi : ℕ
+  panels : ℕ
+  velocityX : ℤ
+  velocityY : ℤ
+  velocityZ : ℤ
+  wheel_state : ℤ
+  wheel_susp_dist : seq ℕ  -- bounded array [4]
+  wheel_rotation : seq ℕ  -- bounded array [4]
+  door_status : ℕ
+  primary_color : ℕ
+  secondary_color : ℕ
+  render_scorched : 𝔹
+  skimmer_speed : ℤ
+  vehicle_type : ℤ
+where
+  type ≥ 0
+  index ≥ 0
+  health ≥ 0
+  acceleration ≥ 0
+  #door_angles = 2
+  mi ≥ 0
+  panels ≥ 0
+  #wheel_susp_dist = 4
+  #wheel_rotation = 4
+  door_status ≥ 0
+  primary_color ≥ 0
+  secondary_color ≥ 0
+end
+
+schema tBikeUpdatePacket
+  type : ℕ
+  index : ℕ
+  health : ℕ
+  acceleration : ℕ
+  matrix : CCompressedMatrixNotAligned
+  door_angles : seq ℤ  -- bounded array [2]
+  mi : ℕ
+  velocityX : ℤ
+  velocityY : ℤ
+  velocityZ : ℤ
+  wheel_state : ℤ
+  wheel_susp_dist : seq ℕ  -- bounded array [4]
+  wheel_rotation : seq ℕ  -- bounded array [4]
+  primary_color : ℕ
+  secondary_color : ℕ
+  lean_angle : ℤ
+  wheel_angle : ℤ
+where
+  type ≥ 0
+  index ≥ 0
+  health ≥ 0
+  acceleration ≥ 0
+  #door_angles = 2
+  mi ≥ 0
+  #wheel_susp_dist = 4
+  #wheel_rotation = 4
+  primary_color ≥ 0
+  secondary_color ≥ 0
+end
+
+schema tParticlePacket
+  type : ℕ
+  particle_type : ℕ
+  dir_x : ℤ
+  dir_y : ℤ
+  dir_z : ℤ
+  r : ℕ
+  g : ℕ
+  b : ℕ
+  a : ℕ
+  pos_x : ℤ
+  pos_y : ℤ
+  pos_z : ℤ
+  size : ℝ
+where
+  type ≥ 0
+  particle_type ≥ 0
+  r ≥ 0
+  g ≥ 0
+  b ≥ 0
+  a ≥ 0
+end
+
+schema tMiscPacket
+  type : ℕ
+  cam_shake_start : ℕ
+  cam_shake_strength : ℝ
+  cur_area : ℕ
+  video_cam : 𝔹
+  lift_cam : 𝔹
+where
+  type ≥ 0
+  cam_shake_start ≥ 0
+  cur_area ≥ 0
+  #video_cam = 1
+  #lift_cam = 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Replay_ApplyPanelDamageToCar
+  ΔReplayModuleState
+  panels? : ℕ
+  vehicle? : Ref[CAutomobile]
+  flying? : 𝔹
+where
+  -- Invokes: Damage.GetPanelStatus, CDamageManager::GetPanelStatus, Damage.SetPanelStatus, vehicle->SetPanelDamage
+  true
+end
+
+schema Replay_PrintElementsInPtrList
+  ΔReplayModuleState
+where
+  -- State update: node' = CWorld::GetBigBuildingList(LEVEL_GENERIC).first
+  -- Invokes: CWorld::GetBigBuildingList
+  true
+end
+
+schema CReplay_Init
+  ΔCReplay
+where
+  -- State update: pBuf0' = ∅
+  -- State update: pBuf1' = ∅
+  -- State update: pBuf2' = ∅
+  -- State update: pBuf3' = ∅
+  -- State update: pBuf4' = ∅
+  -- State update: pBuf5' = ∅
+  true
+end
+
+schema CReplay_DisableReplays
+  ΔCReplay
+where
+  -- State update: bReplayEnabled' = false
+  true
+end
+
+schema CReplay_EnableReplays
+  ΔCReplay
+where
+  -- State update: bReplayEnabled' = true
+  true
+end
+
+schema CReplay_Update
+  ΔCReplay
+where
+  -- Invokes: CCutsceneMgr::IsCutsceneProcessing, CPad::GetPad, CScriptPaths::IsOneActive, FrontEndMenuManager.GetIsMenuActive
+  true
+end
+
+schema CReplay_RecordThisFrame
+  ΔCReplay
+where
+  -- State update: vehiclesT' = CPools::GetVehiclePool()
+  -- State update: v' = vehiclesT.GetSlot(i)
+  -- State update: pedsT' = CPools::GetPedPool()
+  -- State update: p' = pedsT.GetSlot(i)
+  -- State update: Record.m_bSlot' = (Record.m_bSlot + 1) % NUM_REPLAYBUFFERS
+  -- State update: Record.m_pBase' = Buffers[Record.m_bSlot]
+  -- Invokes: CPools::GetVehiclePool, vehiclesT->GetSize, vehiclesT->GetSlot, v->GetModelIndex, CPools::GetPedPool
+  true
+end
+
+schema CReplay_GoToNextBlock
+  ΔCReplay
+where
+  -- State update: Record.m_bSlot' = (Record.m_bSlot + 1) % NUM_REPLAYBUFFERS
+  -- State update: Record.m_pBase' = Buffers[Record.m_bSlot]
+  -- State update: Record.m_nOffset' = 0
+  -- State update: Record.m_pBase' = REPLAYPACKET_END
+  true
+end
+
+schema CReplay_RecordParticle
+  ΔCReplay
+  type? : tParticleType
+  vecPos? : CVector
+  vecDir? : CVector
+  fSize? : ℝ
+  color? : RwRGBA
+where
+  -- State update: pp' = (tParticlePacket*)&Record.m_pBase[Record.m_nOffset]
+  -- State update: pp.type' = REPLAYPACKET_PARTICLE
+  -- State update: pp.particle_type' = type
+  -- State update: pp.pos_x' = 4.0f * vecPos.x
+  -- State update: pp.pos_y' = 4.0f * vecPos.y
+  -- State update: pp.pos_z' = 4.0f * vecPos.z
+  true
+end
+
+schema CReplay_StorePedUpdate
+  ΔCReplay
+  ped? : Ref[CPed]
+  id? : ℤ
+where
+  -- State update: pp' = (tPedUpdatePacket*)&Record.m_pBase[Record.m_nOffset]
+  -- State update: pp.type' = REPLAYPACKET_PED_UPDATE
+  -- State update: pp.index' = id
+  -- State update: pp.heading' = 128.0f / PI * ped.m_fRotationCur
+  -- State update: pp.assoc_group_id' = ped.m_animGroup
+  -- State update: pp.is_visible' = ped.bIsVisible
+  -- Invokes: matrix.CompressFromFullMatrix, ped->GetMatrix, ped->InVehicle, CPools::GetVehiclePool
+  true
+end
+
+schema CReplay_StorePedAnimation
+  ΔCReplay
+  ped? : Ref[CPed]
+  state? : Ref[CStoredAnimationState]
+where
+  -- State update: state.animId' = main.animId
+  -- State update: state.time' = 255.0f / 4.0f * Clamp(main.currentTime, 0.0f, 4.0f)
+  -- State update: state.speed' = 255.0f / 3.0f * Clamp(main.speed, 0.0f, 3.0f)
+  -- State update: state.groupId' = main.groupId
+  -- State update: state.animId' = 3
+  -- State update: state.time' = 0
+  true
+end
+
+schema CReplay_StoreDetailedPedAnimation
+  ΔCReplay
+  ped? : Ref[CPed]
+  state? : Ref[CStoredDetailedAnimationState]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CReplay_ProcessPedUpdate
+  ΔCReplay
+  ped? : Ref[CPed]
+  interpolation? : ℝ
+  buffer? : Ref[CAddressInReplayBuffer]
+where
+  -- State update: pp' = (tPedUpdatePacket*)&buffer.m_pBase[buffer.m_nOffset]
+  -- State update: ped.m_fRotationCur' = pp.heading * PI / 128.0f
+  -- State update: ped.m_fRotationDest' = pp.heading * PI / 128.0f
+  -- State update: ped.m_pMyVehicle' = CPools::GetVehiclePool().GetSlot(pp.vehicle_index - 1)
+  -- State update: ped.bInVehicle' = true
+  -- State update: ped.m_pMyVehicle' = ∅
+  -- Invokes: matrix.DecompressIntoFullMatrix, ped->GetMatrix, CPools::GetVehiclePool, ped->RemoveWeaponModel, CStreaming::HasModelLoaded
+  true
+end
+
+schema Replay_HasAnimGroupLoaded
+  ΔReplayModuleState
+  group? : ℕ
+  result! : 𝔹
+where
+  -- State update: pGroup' = &CAnimManager::GetAnimAssocGroups()[group]
+  -- Return postcondition: result! = pGroup->animBlock && pGroup->animBlock->isLoaded
+  -- Invokes: CAnimManager::GetAnimAssocGroups
+  true
+end
+
+schema CReplay_RetrievePedAnimation
+  ΔCReplay
+  ped? : Ref[CPed]
+  state? : Ref[CStoredAnimationState]
+where
+  -- State update: anim1.speed' = state.speed * 3.0f / 255.0f
+  -- State update: anim1.callbackType' = CAnimBlendAssociation::CB_NONE
+  -- State update: time' = state.secTime * 4.0f / 255.0f
+  -- State update: speed' = state.secSpeed * 3.0f / 255.0f
+  -- State update: blend' = state.blendAmount * 2.0f / 255.0f
+  -- State update: anim2.speed' = speed
+  -- Invokes: CAnimManager::BlendAnimation, anim1->SetCurrentTime, anim1->SetBlend, anim2->SetCurrentTime, anim2->SetBlend
+  true
+end
+
+schema CReplay_RetrieveDetailedPedAnimation
+  ΔCReplay
+  ped? : Ref[CPed]
+  state? : Ref[CStoredDetailedAnimationState]
+where
+  -- State update: assoc' = RpAnimBlendClumpGetMainAssociation_N(ped.GetClump(), i)))
+  -- State update: anim.speed' = state.aSpeed[i] * 3.0f / 255.0f
+  -- State update: anim.flags' = state.aFlags[i]
+  -- State update: callback' = state.aFunctionCallbackID[i]
+  -- State update: anim.callbackType' = CAnimBlendAssociation::CB_NONE
+  -- State update: anim.speed' = state.aSpeed2[i] * 3.0f / 255.0f
+  -- Invokes: ped->GetClump, assoc->SetBlend, CAnimManager::AddAnimation, CAnimManager::BlendAnimation, anim->SetCurrentTime
+  true
+end
+
+schema CReplay_PlaybackThisFrame
+  ΔCReplay
+where
+  -- State update: FrameSloMo' = 0
+  -- State update: buf' = Playback
+  -- State update: buf_sm' = buf
+  -- State update: FrameSloMo' = (FrameSloMo + 1) % SlowMotion
+  -- State update: Playback' = buf
+  -- Invokes: DMAudio.SetEffectsFadeVol, DMAudio.SetMusicFadeVol
+  true
+end
+
+schema CReplay_TriggerPlaybackLastCoupleOfSeconds
+  ΔCReplay
+  start? : ℕ
+  cam_mode? : ℕ
+  cam_x? : ℝ
+  cam_y? : ℝ
+  cam_z? : ℝ
+  slomo? : ℕ
+where
+  -- State update: SlowMotion' = slomo
+  -- State update: bAllowLookAroundCam' = false
+  -- State update: Mode' = MODE_RECORD
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CReplay_FastForwardToTime
+  ΔCReplay
+  start? : ℕ
+  result! : 𝔹
+where
+  -- State update: timer' = 0
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CReplay_StoreCarUpdate
+  ΔCReplay
+  vehicle? : Ref[CVehicle]
+  id? : ℤ
+where
+  -- State update: vp' = (tVehicleUpdatePacket*)&Record.m_pBase[Record.m_nOffset]
+  -- State update: vp.type' = REPLAYPACKET_VEHICLE
+  -- State update: vp.index' = id
+  -- State update: vp.health' = vehicle.m_fHealth / 4.0f
+  -- State update: vp.acceleration' = vehicle.m_fGasPedal * 100.0f
+  -- State update: vp.velocityX' = 8000.0f * Max(-4.0f, Min(4.0f, vehicle.GetMoveSpeed().x))
+  -- Invokes: matrix.CompressFromFullMatrix, vehicle->GetMatrix, vehicle->IsCar, vehicle->GetMoveSpeed, vehicle->GetModelIndex
+  true
+end
+
+schema CReplay_StoreBikeUpdate
+  ΔCReplay
+  vehicle? : Ref[CVehicle]
+  id? : ℤ
+where
+  -- State update: bike' = (CBike*)vehicle
+  -- State update: vp' = (tBikeUpdatePacket*)&Record.m_pBase[Record.m_nOffset]
+  -- State update: vp.type' = REPLAYPACKET_BIKE
+  -- State update: vp.index' = id
+  -- State update: vp.health' = vehicle.m_fHealth / 4.0f
+  -- State update: vp.acceleration' = vehicle.m_fGasPedal * 100.0f
+  -- Invokes: matrix.CompressFromFullMatrix, vehicle->GetMatrix, vehicle->GetMoveSpeed, vehicle->GetModelIndex
+  true
+end
+
+schema CReplay_ProcessCarUpdate
+  ΔCReplay
+  vehicle? : Ref[CVehicle]
+  interpolation? : ℝ
+  buffer? : Ref[CAddressInReplayBuffer]
+where
+  -- State update: vp' = (tVehicleUpdatePacket*)&buffer.m_pBase[buffer.m_nOffset]
+  -- State update: vehicle.m_vecTurnSpeed' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: vehicle.m_fHealth' = 4 * vp.health
+  -- State update: vehicle.m_fGasPedal' = vp.acceleration / 100.0f
+  -- State update: m_fCarGunLR' = vp.car_gun * PI / 128.0f
+  -- State update: vehicle.m_fSteerAngle' = 0.0f
+  -- Invokes: matrix.DecompressIntoFullMatrix, vehicle->GetMatrix, vehicle->IsCar, vehicle->GetModelIndex, Damage.SetDoorStatus
+  true
+end
+
+schema CReplay_ProcessBikeUpdate
+  ΔCReplay
+  vehicle? : Ref[CVehicle]
+  interpolation? : ℝ
+  buffer? : Ref[CAddressInReplayBuffer]
+where
+  -- State update: bike' = (CBike*)vehicle
+  -- State update: vp' = (tBikeUpdatePacket*)&buffer.m_pBase[buffer.m_nOffset]
+  -- State update: vehicle.m_vecTurnSpeed' = CVector(0.0f, 0.0f, 0.0f)
+  -- State update: vehicle.m_fHealth' = 4 * vp.health
+  -- State update: vehicle.m_fGasPedal' = vp.acceleration / 100.0f
+  -- State update: vehicle.m_fSteerAngle' = vp.wheel_state / 50.0f
+  -- Invokes: matrix.DecompressIntoFullMatrix, vehicle->GetMatrix, bike->CalculateLeanMatrix, CWorld::Remove, CWorld::Add
+  true
+end
+
+schema CReplay_PlayBackThisFrameInterpolation
+  ΔCReplay
+  buffer? : Ref[CAddressInReplayBuffer]
+  interpolation? : ℝ
+  pTimer? : ℙ ℕ
+  result! : 𝔹
+where
+  -- State update: split' = 1.0f - interpolation
+  -- State update: ped_min_index' = 0
+  -- State update: vehicle_min_index' = 0
+  -- State update: ptr' = buffer.m_pBase
+  -- State update: offset' = buffer.m_nOffset
+  -- State update: type' = ptr[offset]
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CBulletTraces::Init, CPools::GetVehiclePool, CWorld::Remove, CStreaming::RequestModel, new_v->SetStatus
+  true
+end
+
+schema CReplay_FinishPlayback
+  ΔCReplay
+where
+  -- State update: Mode' = MODE_RECORD
+  -- State update: currLevel' = CTheZones::GetLevelFromPosition(&v_ls)
+  -- State update: bDoLoadSceneWhenDone' = false
+  -- Invokes: CTheZones::GetLevelFromPosition, CCollision::SortOutCollisionAfterLoad, CStreaming::LoadScene, DMAudio.SetEffectsFadeVol, DMAudio.SetMusicFadeVol
+  true
+end
+
+schema CReplay_EmptyReplayBuffer
+  ΔCReplay
+where
+  -- State update: Record.m_nOffset' = 0
+  -- State update: Record.m_bSlot' = 0
+  -- State update: Record.m_pBase' = Buffers[0]
+  true
+end
+
+schema CReplay_ProcessReplayCamera
+  ΔCReplay
+where
+  -- State update: pm' = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera))
+  -- State update: pm.pos' = TheCamera.GetPosition()
+  -- State update: pm.at' = TheCamera.GetForward()
+  -- State update: pm.up' = TheCamera.GetUp()
+  -- State update: pm.right' = TheCamera.GetRight()
+  -- State update: right' = CrossProduct(CVector(0.0f, 0.0f, 1.0f), forward)
+  -- Invokes: TheCamera.SetPosition, TheCamera.GetForward, TheCamera.GetUp, TheCamera.GetRight, TheCamera.GetPosition
+  true
+end
+
+schema CReplay_TriggerPlayback
+  ΔCReplay
+  cam_mode? : ℕ
+  cam_x? : ℝ
+  cam_y? : ℝ
+  cam_z? : ℝ
+  load_scene? : 𝔹
+where
+  -- State update: CameraFixedX' = cam_x
+  -- State update: CameraFixedY' = cam_y
+  -- State update: CameraFixedZ' = cam_z
+  -- State update: Mode' = MODE_PLAYBACK
+  -- State update: FramesActiveLookAroundCam' = 0
+  -- State update: CameraMode' = cam_mode
+  -- Invokes: DMAudio.GetRadioInCar, DMAudio.ChangeMusicMode, DMAudio.SetEffectsFadeVol, DMAudio.SetMusicFadeVol, CEscalators::Shutdown
+  true
+end
+
+schema CReplay_StoreStuffInMem
+  ΔCReplay
+where
+  -- State update: ped' = CPools::GetPedPool().GetSlot(i)
+  -- State update: pWorld1' = new uint8[sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y]
+  -- State update: WorldPtrList' = CWorld::GetMovingEntityList().first
+  -- State update: BigBuildingPtrList' = CWorld::GetBigBuildingList(LEVEL_GENERIC).first
+  -- State update: pPickups' = new uint8[sizeof(CPickup) * NUMPICKUPS]
+  -- State update: pReferences' = new uint8[(sizeof(CReference) * NUMREFERENCES)]
+  -- Invokes: CPools::GetPedPool, CPools::GetVehiclePool, CPools::GetObjectPool, CPools::GetPtrNodePool, CPools::GetEntryInfoNodePool
+  true
+end
+
+schema CReplay_RestoreStuffFromMem
+  ΔCReplay
+where
+  -- State update: pWorld1' = ∅
+  -- State update: first' = WorldPtrList
+  -- State update: first' = BigBuildingPtrList
+  -- State update: pPickups' = ∅
+  -- State update: pReferences' = ∅
+  -- State update: pEmptyList' = pEmptyReferences
+  -- Invokes: CPools::GetVehiclePool, CPools::GetPedPool, CPools::GetObjectPool, CPools::GetPtrNodePool, CPools::GetEntryInfoNodePool
+  true
+end
+
+schema CReplay_EmptyPedsAndVehiclePools
+  ΔCReplay
+where
+  -- State update: v' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: p' = CPools::GetPedPool().GetSlot(i)
+  -- Invokes: CPools::GetVehiclePool, CWorld::Remove, CPools::GetPedPool
+  true
+end
+
+schema CReplay_EmptyAllPools
+  ΔCReplay
+where
+  -- State update: o' = CPools::GetObjectPool().GetSlot(i)
+  -- State update: d' = CPools::GetDummyPool().GetSlot(i)
+  -- Invokes: CPools::GetObjectPool, CWorld::Remove, CPools::GetDummyPool
+  true
+end
+
+schema CReplay_MarkEverythingAsNew
+  ΔCReplay
+where
+  -- State update: v' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: v.bHasAlreadyBeenRecorded' = false
+  -- State update: p' = CPools::GetPedPool().GetSlot(i)
+  -- State update: p.bHasAlreadyBeenRecorded' = false
+  -- Invokes: CPools::GetVehiclePool, CPools::GetPedPool
+  true
+end
+
+schema CReplay_SaveReplayToHD
+  ΔCReplay
+where
+  -- State update: fw' = CFileMgr::OpenFileForWriting("replay.rep")
+  -- State update: current' = 0
+  -- State update: first' = (current + 1) % NUM_REPLAYBUFFERS
+  -- State update: fr' = CFileMgr::OpenFile("replay.rep", "rb")
+  -- State update: slot' = 0
+  -- State update: bPlayingBackFromFile' = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = FindPlayerVehicle() != nil
+  -- Invokes: CFileMgr::SetDirMyDocuments, CFileMgr::OpenFileForWriting, CFileMgr::SetDir, CFileMgr::Write, CFileMgr::CloseFile
+  true
+end
+
+schema Replay_ShouldStandardCameraBeProcessed
+  ΔReplayModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema Replay_IsPlayingBack
+  ΔReplayModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Replay_IsPlayingBackFromFile
+  ΔReplayModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Replay_IsPlayingBack_2
+  ΔReplayModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = Mode == MODE_PLAYBACK
+  true
+end
+
+schema Replay_IsPlayingBackFromFile_2
+  ΔReplayModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = bPlayingBackFromFile
+  true
+end

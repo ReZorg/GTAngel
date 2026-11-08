@@ -1,0 +1,1347 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script (control)
+-- Source File(s): control/Script.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Font.zpp  (from "Font.h")
+-- include Ped.zpp  (from "Ped.h")
+-- include PedType.zpp  (from "PedType.h")
+-- include Text.zpp  (from "Text.h")
+-- include sList.zpp  (from "sList.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PICKUP_PLACEMENT_OFFSET : ℝ  -- #define PICKUP_PLACEMENT_OFFSET (0.5f)
+PED_FIND_Z_OFFSET : ℝ  -- #define PED_FIND_Z_OFFSET (5.0f)
+COP_PED_FIND_Z_OFFSET : ℝ  -- #define COP_PED_FIND_Z_OFFSET (10.0f)
+UPSIDEDOWN_UP_THRESHOLD : ℝ  -- #define UPSIDEDOWN_UP_THRESHOLD (-0.97f)
+UPSIDEDOWN_MOVE_SPEED_THRESHOLD : ℝ  -- #define UPSIDEDOWN_MOVE_SPEED_THRESHOLD (0.01f)
+UPSIDEDOWN_TURN_SPEED_THRESHOLD : ℝ  -- #define UPSIDEDOWN_TURN_SPEED_THRESHOLD (0.02f)
+UPSIDEDOWN_TIMER_THRESHOLD : seq CHAR  -- #define UPSIDEDOWN_TIMER_THRESHOLD (1000)
+SPHERE_MARKER_R : seq CHAR  -- #define SPHERE_MARKER_R (255)
+SPHERE_MARKER_G : seq CHAR  -- #define SPHERE_MARKER_G (255)
+SPHERE_MARKER_B : seq CHAR  -- #define SPHERE_MARKER_B (128)
+SPHERE_MARKER_A : seq CHAR  -- #define SPHERE_MARKER_A (228)
+SPHERE_MARKER_PULSE_PERIOD : ℕ  -- #define SPHERE_MARKER_PULSE_PERIOD 2048
+SPHERE_MARKER_PULSE_FRACTION : ℝ  -- #define SPHERE_MARKER_PULSE_FRACTION 0.1f
+MILES_IN_METER : ℝ  -- #define MILES_IN_METER (0.000621371192f)
+METERS_IN_FOOT : ℝ  -- #define METERS_IN_FOOT (0.3048f)
+FEET_IN_METER : ℝ  -- #define FEET_IN_METER (3.28084f)
+KEY_LENGTH_IN_SCRIPT : seq CHAR  -- #define KEY_LENGTH_IN_SCRIPT (8)
+GTA_SCRIPT_COLLECTIVE : seq CHAR  -- #define GTA_SCRIPT_COLLECTIVE struct intro_script_rectangle
+CARDS_IN_SUIT : seq CHAR  -- #define CARDS_IN_SUIT (13)
+NUM_SUITS : seq CHAR  -- #define NUM_SUITS (4)
+MAX_DECKS : seq CHAR  -- #define MAX_DECKS (6)
+CARDS_IN_DECK : seq CHAR  -- #define CARDS_IN_DECK (CARDS_IN_SUIT * NUM_SUITS)
+CARDS_IN_STACK : seq CHAR  -- #define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Script_Enum_1 ::= SCRIPT_TEXT_MAX_LENGTH
+  -- val(SCRIPT_TEXT_MAX_LENGTH) = 100
+
+Script_Enum_2 ::= CLEANUP_UNUSED | CLEANUP_CAR | CLEANUP_CHAR | CLEANUP_OBJECT
+  -- val(CLEANUP_UNUSED) = 0
+
+Script_Enum_3 ::= MAX_CLEANUP | MAX_UPSIDEDOWN_CAR_CHECKS | MAX_STUCK_CAR_CHECKS
+  -- val(MAX_CLEANUP) = 50
+  -- val(MAX_UPSIDEDOWN_CAR_CHECKS) = 6
+  -- val(MAX_STUCK_CAR_CHECKS) = 16
+
+Script_Enum_4 ::= MAX_STACK_DEPTH | NUM_LOCAL_VARS | NUM_TIMERS | NUM_GLOBAL_SLOTS
+  -- val(MAX_STACK_DEPTH) = 16
+  -- val(NUM_LOCAL_VARS) = 96
+  -- val(NUM_TIMERS) = 2
+  -- val(NUM_GLOBAL_SLOTS) = 26
+
+Script_Enum_5 ::= ARGUMENT_END | ARGUMENT_INT_ZERO | ARGUMENT_FLOAT_ZERO | ARGUMENT_FLOAT_1BYTE | ARGUMENT_FLOAT_2BYTES | ARGUMENT_FLOAT_3BYTES | ARGUMENT_INT32 | ARGUMENT_INT8 | ARGUMENT_INT16 | ARGUMENT_FLOAT | ARGUMENT_TIMER | ARGUMENT_LOCAL | ARGUMENT_LOCAL_ARRAY | ARGUMENT_GLOBAL | ARGUMENT_GLOBAL_ARRAY | MAX_ARGUMENT
+  -- val(ARGUMENT_END) = 0
+  -- val(ARGUMENT_LOCAL) = ARGUMENT_TIMER + NUM_TIMERS
+  -- val(ARGUMENT_LOCAL_ARRAY) = ARGUMENT_LOCAL + NUM_LOCAL_VARS
+  -- val(ARGUMENT_GLOBAL) = ARGUMENT_LOCAL_ARRAY + NUM_LOCAL_VARS
+  -- val(ARGUMENT_GLOBAL_ARRAY) = ARGUMENT_GLOBAL + NUM_GLOBAL_SLOTS
+  -- val(MAX_ARGUMENT) = ARGUMENT_GLOBAL_ARRAY + NUM_GLOBAL_SLOTS
+
+Script_Enum_6 ::= USED_OBJECT_NAME_LENGTH
+  -- val(USED_OBJECT_NAME_LENGTH) = 24
+
+Script_Enum_7 ::= ANDOR_NONE | ANDS_1 | ANDS_2 | ANDS_3 | ANDS_4 | ANDS_5 | ANDS_6 | ANDS_7 | ANDS_8 | ORS_1 | ORS_2 | ORS_3 | ORS_4 | ORS_5 | ORS_6 | ORS_7 | ORS_8
+  -- val(ANDOR_NONE) = 0
+  -- val(ANDS_1) = 1
+  -- val(ORS_1) = 21
+
+Script_Enum_8 ::= STACKVALUE_IP_BITS | STACKVALUE_INVERT_RETURN_BIT | STACKVALUE_IS_FUNCTION_CALL_BIT | STACKVALUE_IP_PARAMS_OFFSET | STACKVALUE_IP_MASK
+  -- val(STACKVALUE_IP_BITS) = 22
+  -- val(STACKVALUE_INVERT_RETURN_BIT) = STACKVALUE_IP_BITS
+  -- val(STACKVALUE_IP_MASK) = ((1 << STACKVALUE_IP_BITS) - 1)
+
+Script_Enum_9 ::= VAR_LOCAL | VAR_GLOBAL
+  -- val(VAR_LOCAL) = 1
+  -- val(VAR_GLOBAL) = 2
+
+Script_Enum_10 ::= MAX_NUM_SCRIPTS | MAX_NUM_INTRO_TEXT_LINES | MAX_NUM_INTRO_RECTANGLES | MAX_NUM_SCRIPT_SRPITES | MAX_NUM_SCRIPT_SPHERES | MAX_NUM_COLLECTIVES | MAX_NUM_USED_OBJECTS | MAX_NUM_MISSION_SCRIPTS | MAX_NUM_BUILDING_SWAPS | MAX_NUM_INVISIBILITY_SETTINGS | MAX_NUM_STORED_LINES | MAX_ALLOWED_COLLISIONS
+  -- val(MAX_NUM_SCRIPTS) = 128
+  -- val(MAX_NUM_INTRO_TEXT_LINES) = 48
+  -- val(MAX_NUM_INTRO_RECTANGLES) = 16
+  -- val(MAX_NUM_SCRIPT_SRPITES) = 16
+  -- val(MAX_NUM_SCRIPT_SPHERES) = 16
+  -- val(MAX_NUM_COLLECTIVES) = 32
+  -- val(MAX_NUM_USED_OBJECTS) = 305
+  -- val(MAX_NUM_MISSION_SCRIPTS) = 150
+  -- val(MAX_NUM_BUILDING_SWAPS) = 80
+  -- val(MAX_NUM_INVISIBILITY_SETTINGS) = 52
+  -- val(MAX_NUM_STORED_LINES) = 1024
+  -- val(MAX_ALLOWED_COLLISIONS) = 2
+
+Script_Enum_11 ::= MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER | MISSION_RETRY_TYPE_1 | MISSION_RETRY_TYPE_BEGIN_RESTARTING
+  -- val(MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER) = 0
+
+Script_Enum_12 ::= MISSION_RETRY_STAGE_NORMAL | MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE | MISSION_RETRY_STAGE_START_PROCESSING | MISSION_RETRY_STAGE_WAIT_FOR_DELAY | MISSION_RETRY_STAGE_WAIT_FOR_MENU | MISSION_RETRY_STAGE_WAIT_FOR_USER | MISSION_RETRY_STAGE_START_RESTARTING | MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART
+  -- val(MISSION_RETRY_STAGE_NORMAL) = 0
+
+Script_Enum_13 ::= ARGUMENT_END | ARGUMENT_INT32 | ARGUMENT_GLOBALVAR | ARGUMENT_LOCALVAR | ARGUMENT_INT8 | ARGUMENT_INT16 | ARGUMENT_FLOAT
+  -- val(ARGUMENT_END) = 0
+
+Script_Enum_14 ::= MAX_STACK_DEPTH | NUM_LOCAL_VARS | NUM_TIMERS
+  -- val(MAX_STACK_DEPTH) = 6
+  -- val(NUM_LOCAL_VARS) = 16
+  -- val(NUM_TIMERS) = 2
+
+Script_Enum_15 ::= SIZE_SCRIPT_SPACE
+  -- val(SIZE_SCRIPT_SPACE) = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
+
+Script_Enum_16 ::= MAX_NUM_SCRIPTS | MAX_NUM_INTRO_TEXT_LINES | MAX_NUM_INTRO_RECTANGLES | MAX_NUM_SCRIPT_SRPITES | MAX_NUM_SCRIPT_SPHERES | MAX_NUM_USED_OBJECTS | MAX_NUM_MISSION_SCRIPTS | MAX_NUM_BUILDING_SWAPS | MAX_NUM_INVISIBILITY_SETTINGS | MAX_NUM_STORED_LINES
+  -- val(MAX_NUM_SCRIPTS) = 128
+  -- val(MAX_NUM_INTRO_TEXT_LINES) = 48
+  -- val(MAX_NUM_INTRO_RECTANGLES) = 16
+  -- val(MAX_NUM_SCRIPT_SRPITES) = 16
+  -- val(MAX_NUM_SCRIPT_SPHERES) = 16
+  -- val(MAX_NUM_USED_OBJECTS) = 220
+  -- val(MAX_NUM_MISSION_SCRIPTS) = 120
+  -- val(MAX_NUM_BUILDING_SWAPS) = 25
+  -- val(MAX_NUM_INVISIBILITY_SETTINGS) = 20
+  -- val(MAX_NUM_STORED_LINES) = 1024
+
+Script_Enum_17 ::= SCRIPT_TEXT_MAX_LENGTH
+  -- val(SCRIPT_TEXT_MAX_LENGTH) = 500
+
+Script_Enum_18 ::= MAX_CLEANUP | MAX_UPSIDEDOWN_CAR_CHECKS | MAX_STUCK_CAR_CHECKS
+  -- val(MAX_CLEANUP) = 50
+  -- val(MAX_UPSIDEDOWN_CAR_CHECKS) = 6
+  -- val(MAX_STUCK_CAR_CHECKS) = 6
+
+Script_Enum_19 ::= NUM_TIMERS
+  -- val(NUM_TIMERS) = 2
+
+Script_Enum_20 ::= SIZE_MAIN_SCRIPT | SIZE_MISSION_SCRIPT | SIZE_SCRIPT_SPACE
+  -- val(SIZE_MAIN_SCRIPT) = 128 * 1024
+  -- val(SIZE_MISSION_SCRIPT) = 32 * 1024
+  -- val(SIZE_SCRIPT_SPACE) = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
+
+Script_Enum_21 ::= MAX_NUM_SCRIPTS | MAX_NUM_CONTACTS | MAX_NUM_INTRO_TEXT_LINES | MAX_NUM_INTRO_RECTANGLES | MAX_NUM_SCRIPT_SRPITES | MAX_NUM_SCRIPT_SPHERES | MAX_NUM_COLLECTIVES | MAX_NUM_USED_OBJECTS | MAX_NUM_MISSION_SCRIPTS | MAX_NUM_BUILDING_SWAPS | MAX_NUM_INVISIBILITY_SETTINGS | MAX_NUM_STORED_LINES
+  -- val(MAX_NUM_SCRIPTS) = 128
+  -- val(MAX_NUM_CONTACTS) = 16
+  -- val(MAX_NUM_INTRO_TEXT_LINES) = 2
+  -- val(MAX_NUM_INTRO_RECTANGLES) = 16
+  -- val(MAX_NUM_SCRIPT_SRPITES) = 16
+  -- val(MAX_NUM_SCRIPT_SPHERES) = 16
+  -- val(MAX_NUM_COLLECTIVES) = 32
+  -- val(MAX_NUM_USED_OBJECTS) = 200
+  -- val(MAX_NUM_MISSION_SCRIPTS) = 120
+  -- val(MAX_NUM_BUILDING_SWAPS) = 25
+  -- val(MAX_NUM_INVISIBILITY_SETTINGS) = 20
+  -- val(MAX_NUM_STORED_LINES) = 1024
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema intro_script_rectangle
+  m_bIsUsed : 𝔹
+  m_bBeforeFade : 𝔹
+  m_nTextureId : ℤ
+  m_sRect : CRect
+  m_sColor : CRGBA
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema intro_script_rectangle_intro_script_rectangle
+  Δintro_script_rectangle
+where
+  -- Declared member operation intro_script_rectangle::intro_script_rectangle()
+  true
+end
+
+schema intro_text_line
+  m_fScaleX : ℝ
+  m_fScaleY : ℝ
+  m_sColor : CRGBA
+  m_bJustify : 𝔹
+  m_bCentered : 𝔹
+  m_bBackground : 𝔹
+  m_bBackgroundOnly : 𝔹
+  m_fWrapX : ℝ
+  m_fCenterSize : ℝ
+  m_sBackgroundColor : CRGBA
+  m_bTextProportional : 𝔹
+  m_bTextBeforeFade : 𝔹
+  m_bRightJustify : 𝔹
+  m_nFont : ℤ
+  m_fAtX : ℝ
+  m_fAtY : ℝ
+  m_Text : seq CHAR
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema intro_text_line_intro_text_line
+  Δintro_text_line
+where
+  -- Declared member operation intro_text_line::intro_text_line()
+  true
+end
+
+schema intro_text_line_CRGBA_2
+  Δintro_text_line
+  arg_1? : 225
+  arg_2? : 225
+  arg_3? : 225
+  arg_4? : 255
+  result! : m_sColor
+where
+  -- Declared member operation intro_text_line::CRGBA(225, 225, 225, 255)
+  true
+end
+
+schema intro_text_line_CRGBA_3
+  Δintro_text_line
+  arg_1? : 128
+  arg_2? : 128
+  arg_3? : 128
+  arg_4? : 128
+  result! : m_sBackgroundColor
+where
+  -- Declared member operation intro_text_line::CRGBA(128, 128, 128, 128)
+  true
+end
+
+schema intro_text_line_memset_4
+  Δintro_text_line
+  m_Text? : ANY
+  arg_2? : 0
+  m_Text? : sizeof
+where
+  -- Declared member operation intro_text_line::memset(&m_Text, 0, sizeof(m_Text)
+  true
+end
+
+schema script_sphere_struct
+  m_bInUse : 𝔹
+  m_Index : ℕ
+  m_Id : ℕ
+  m_vecCenter : CVector
+  m_fRadius : ℝ
+where
+  m_Index ≥ 0
+  m_Id ≥ 0
+end
+
+schema script_sphere_struct_script_sphere_struct
+  Δscript_sphere_struct
+where
+  -- Declared member operation script_sphere_struct::script_sphere_struct()
+  true
+end
+
+schema CStoredLine
+  vecInf : CVector
+  vecSup : CVector
+  color1 : ℕ
+  color2 : ℕ
+where
+  color1 ≥ 0
+  color2 ≥ 0
+end
+
+schema cleanup_entity_struct
+  type : ℕ
+  id : ℤ
+where
+  type ≥ 0
+end
+
+schema CMissionCleanup
+  m_sEntities : seq cleanup_entity_struct  -- bounded array [MAX_CLEANUP]
+  m_nCount : ℕ
+where
+  m_nCount ≥ 0
+end
+
+schema CMissionCleanup_CMissionCleanup
+  ΔCMissionCleanup
+where
+  -- Declared member operation CMissionCleanup::CMissionCleanup()
+  true
+end
+
+schema CMissionCleanup_Init_2
+  ΔCMissionCleanup
+where
+  -- Declared member operation CMissionCleanup::Init()
+  true
+end
+
+schema CMissionCleanup_FindFree_3
+  ΔCMissionCleanup
+  result! : Ref[cleanup_entity_struct]
+where
+  -- Declared member operation CMissionCleanup::FindFree()
+  true
+end
+
+schema CMissionCleanup_AddEntityToList_4
+  ΔCMissionCleanup
+  arg_1? : ℤ
+  arg_2? : ℕ
+where
+  -- Declared member operation CMissionCleanup::AddEntityToList(int32, uint8)
+  true
+end
+
+schema CMissionCleanup_RemoveEntityFromList_5
+  ΔCMissionCleanup
+  arg_1? : ℤ
+  arg_2? : ℕ
+where
+  -- Declared member operation CMissionCleanup::RemoveEntityFromList(int32, uint8)
+  true
+end
+
+schema CMissionCleanup_Process_6
+  ΔCMissionCleanup
+where
+  -- Declared member operation CMissionCleanup::Process()
+  true
+end
+
+schema CMissionCleanup_CheckIfCollisionHasLoadedForMissionObjects_7
+  ΔCMissionCleanup
+where
+  -- Declared member operation CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
+  true
+end
+
+schema upsidedown_car_data
+  m_nVehicleIndex : ℤ
+  m_nUpsideDownTimer : ℕ
+where
+  m_nUpsideDownTimer ≥ 0
+end
+
+schema CUpsideDownCarCheck
+  m_sCars : seq upsidedown_car_data  -- bounded array [MAX_UPSIDEDOWN_CAR_CHECKS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CUpsideDownCarCheck_Init
+  ΔCUpsideDownCarCheck
+where
+  -- Declared member operation CUpsideDownCarCheck::Init()
+  true
+end
+
+schema CUpsideDownCarCheck_IsCarUpsideDown_2
+  ΔCUpsideDownCarCheck
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CUpsideDownCarCheck::IsCarUpsideDown(int32)
+  true
+end
+
+schema CUpsideDownCarCheck_IsCarUpsideDown_3
+  ΔCUpsideDownCarCheck
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CUpsideDownCarCheck::IsCarUpsideDown(CVehicle*)
+  true
+end
+
+schema CUpsideDownCarCheck_UpdateTimers_4
+  ΔCUpsideDownCarCheck
+where
+  -- Declared member operation CUpsideDownCarCheck::UpdateTimers()
+  true
+end
+
+schema CUpsideDownCarCheck_AreAnyCarsUpsideDown_5
+  ΔCUpsideDownCarCheck
+  result! : 𝔹
+where
+  -- Declared member operation CUpsideDownCarCheck::AreAnyCarsUpsideDown()
+  true
+end
+
+schema CUpsideDownCarCheck_AddCarToCheck_6
+  ΔCUpsideDownCarCheck
+  arg_1? : ℤ
+where
+  -- Declared member operation CUpsideDownCarCheck::AddCarToCheck(int32)
+  true
+end
+
+schema CUpsideDownCarCheck_RemoveCarFromCheck_7
+  ΔCUpsideDownCarCheck
+  arg_1? : ℤ
+where
+  -- Declared member operation CUpsideDownCarCheck::RemoveCarFromCheck(int32)
+  true
+end
+
+schema CUpsideDownCarCheck_HasCarBeenUpsideDownForAWhile_8
+  ΔCUpsideDownCarCheck
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32)
+  true
+end
+
+schema stuck_car_data
+  m_nVehicleIndex : ℤ
+  m_vecPos : CVector
+  m_nLastCheck : ℤ
+  m_fRadius : ℝ
+  m_nStuckTime : ℕ
+  m_bStuck : 𝔹
+where
+  m_nStuckTime ≥ 0
+end
+
+schema stuck_car_data_stuck_car_data
+  Δstuck_car_data
+where
+  -- Declared member operation stuck_car_data::stuck_car_data()
+  true
+end
+
+schema CStuckCarCheck
+  m_sCars : seq stuck_car_data  -- bounded array [MAX_STUCK_CAR_CHECKS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CStuckCarCheck_Init
+  ΔCStuckCarCheck
+where
+  -- Declared member operation CStuckCarCheck::Init()
+  true
+end
+
+schema CStuckCarCheck_Process_2
+  ΔCStuckCarCheck
+where
+  -- Declared member operation CStuckCarCheck::Process()
+  true
+end
+
+schema CStuckCarCheck_AddCarToCheck_3
+  ΔCStuckCarCheck
+  arg_1? : ℤ
+  arg_2? : ℝ
+  arg_3? : ℕ
+where
+  -- Declared member operation CStuckCarCheck::AddCarToCheck(int32, float, uint32)
+  true
+end
+
+schema CStuckCarCheck_RemoveCarFromCheck_4
+  ΔCStuckCarCheck
+  arg_1? : ℤ
+where
+  -- Declared member operation CStuckCarCheck::RemoveCarFromCheck(int32)
+  true
+end
+
+schema CStuckCarCheck_HasCarBeenStuckForAWhile_5
+  ΔCStuckCarCheck
+  arg_1? : ℤ
+  result! : 𝔹
+where
+  -- Declared member operation CStuckCarCheck::HasCarBeenStuckForAWhile(int32)
+  true
+end
+
+schema tCollectiveData
+  colIndex : ℤ
+  pedIndex : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tUsedObject
+  name : seq CHAR
+  index : ℤ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tBuildingSwap
+  m_pBuilding : Ref[CBuilding]
+  m_nNewModel : ℤ
+  m_nOldModel : ℤ
+where
+  #m_pBuilding ≤ 1
+end
+
+schema script_corona
+  id : ℤ
+  x : ℝ
+  y : ℝ
+  z : ℝ
+  size : ℝ
+  r : ℕ
+  g : ℕ
+  b : ℕ
+  type : ℤ
+  flareType : ℤ
+where
+  r ≥ 0
+  g ≥ 0
+  b ≥ 0
+end
+
+schema CRunningScript
+  next : Ref[CRunningScript]
+  prev : Ref[CRunningScript]
+  m_nId : ℤ
+  m_abScriptName : seq CHAR
+  m_nIp : ℕ
+  m_anStack : seq ℕ  -- bounded array [MAX_STACK_DEPTH]
+  m_nStackPointer : ℕ
+  m_anLocalVariables : seq ℤ  -- bounded array [NUM_LOCAL_VARS + 8 + NUM_TIMERS]
+  m_nLocalsPointer : ℤ
+  m_bIsActive : 𝔹
+  m_bCondResult : 𝔹
+  m_bIsMissionScript : 𝔹
+  m_bSkipWakeTime : 𝔹
+  m_nWakeTime : ℕ
+  m_nAndOrState : ℕ
+  m_bNotFlag : 𝔹
+  m_bDeatharrestEnabled : 𝔹
+  m_bDeatharrestExecuted : 𝔹
+  m_bMissionFlag : 𝔹
+  NUM_TIMERS : i
+  nSaveStructSize : ℕ
+  storedIp : ℕ
+  false : default__return
+  ScriptsArray : seq CRunningScript  -- bounded array [MAX_NUM_SCRIPTS]
+  IntroTextLines : seq ℤ  -- bounded array [MAX_NUM_INTRO_TEXT_LINES]
+  IntroRectangles : seq ℤ  -- bounded array [MAX_NUM_INTRO_RECTANGLES]
+  ScriptSprites : seq CSprite2d  -- bounded array [MAX_NUM_SCRIPT_SRPITES]
+  ScriptSphereArray : seq script_sphere_struct  -- bounded array [MAX_NUM_SCRIPT_SPHERES]
+  CollectiveArray : seq tCollectiveData  -- bounded array [MAX_NUM_COLLECTIVES]
+  UsedObjectArray : seq tUsedObject  -- bounded array [MAX_NUM_USED_OBJECTS]
+  MultiScriptArray : seq ℤ  -- bounded array [MAX_NUM_MISSION_SCRIPTS]
+  BuildingSwapArray : seq tBuildingSwap  -- bounded array [MAX_NUM_BUILDING_SWAPS]
+  InvisibilitySettingArray : seq Ref[CEntity]  -- bounded array [MAX_NUM_INVISIBILITY_SETTINGS]
+  aStoredLines : seq CStoredLine  -- bounded array [MAX_NUM_STORED_LINES]
+  DbgFlag : 𝔹
+  OnAMissionFlag : ℕ
+  MissionCleanUp : CMissionCleanup
+  StuckCars : CStuckCarCheck
+  UpsideDownCars : CUpsideDownCarCheck
+  StoreVehicleIndex : ℤ
+  StoreVehicleWasRandom : 𝔹
+  pIdleScripts : Ref[CRunningScript]
+  pActiveScripts : Ref[CRunningScript]
+  NextFreeCollectiveIndex : ℤ
+  LastRandomPedId : ℤ
+  NumberOfUsedObjects : ℕ
+  bAlreadyRunningAMissionScript : 𝔹
+  bUsingAMultiScriptFile : 𝔹
+  NumberOfMissionScripts : ℕ
+  LargestMissionScriptSize : ℕ
+  MainScriptSize : ℕ
+  FailCurrentMission : ℕ
+  NumScriptDebugLines : ℕ
+  NumberOfIntroRectanglesThisFrame : ℕ
+  NumberOfIntroTextLinesThisFrame : ℕ
+  UseTextCommands : ℕ
+  CommandsExecuted : ℕ
+  ScriptsUpdated : ℕ
+  LastMissionPassedTime : ℕ
+  NumberOfExclusiveMissionScripts : ℕ
+  bPlayerIsInTheStatium : 𝔹
+  RiotIntensity : ℕ
+  bPlayerHasMetDebbieHarry : 𝔹
+  AllowedCollision : seq ℤ  -- bounded array [MAX_ALLOWED_COLLISIONS]
+  SavedVarIndices : ℙ ℕ
+  NumSaveVars : ℤ
+  FSDestroyedFlag : ℤ
+  NextProcessId : ℤ
+  InTheScripts : 𝔹
+  pCurrent : Ref[CRunningScript]
+  NumTrueGlobals : ℕ
+  MostGlobals : ℕ
+  mCoronas : base__cSList_script_corona
+  NextScriptCoronaID : ℤ
+  retval : return
+  text : return
+  CardStackPosition : ℤ
+  BaseBriefIdForContact : seq ℤ  -- bounded array [MAX_NUM_CONTACTS]
+  OnAMissionForContactFlag : seq ℤ  -- bounded array [MAX_NUM_CONTACTS]
+  CountdownToMakePlayerUnsafe : ℕ
+  DelayMakingPlayerUnsafeThisTime : ℕ
+  ScriptParams : seq ℤ  -- bounded array [32]
+  WaitForMissionActivate : ℕ
+  WaitForSave : ℕ
+  MissionStartTime : ℕ
+  missionRetryScriptIndex : ℤ
+  doingMissionRetry : 𝔹
+  gbTryingPorn4Again : 𝔹
+  IsInAmmunation : ℤ
+  MissionSkipLevel : ℤ
+  gScriptsFile : ℤ
+  gVectorSetInLua : CVector
+  UsingMobileScript : 𝔹
+where
+  #next ≤ 1
+  #prev ≤ 1
+  #m_abScriptName = 8
+  m_nIp ≥ 0
+  m_nStackPointer ≥ 0
+  m_nWakeTime ≥ 0
+  m_nAndOrState ≥ 0
+  nSaveStructSize ≥ 0
+  storedIp ≥ 0
+  OnAMissionFlag ≥ 0
+  #pIdleScripts ≤ 1
+  #pActiveScripts ≤ 1
+  NumberOfUsedObjects ≥ 0
+  NumberOfMissionScripts ≥ 0
+  LargestMissionScriptSize ≥ 0
+  MainScriptSize ≥ 0
+end
+
+schema CRunningScript_SetIP
+  ΔCRunningScript
+  ip? : ℕ
+where
+  -- Declared member operation CRunningScript::SetIP(uint32 ip)
+  true
+end
+
+schema CRunningScript_GetNext_2
+  ΞCRunningScript
+  result! : Ref[CRunningScript]
+where
+  -- Declared member operation CRunningScript::GetNext()
+  true
+end
+
+schema CRunningScript_Save_3
+  ΔCRunningScript
+  buf? : ℙ ℕ
+  result! : void
+where
+  -- Declared member operation CRunningScript::Save(uint8*& buf)
+  true
+end
+
+schema CRunningScript_Load_4
+  ΔCRunningScript
+  buf? : ℙ ℕ
+where
+  -- Declared member operation CRunningScript::Load(uint8*& buf)
+  true
+end
+
+schema CRunningScript_UpdateTimers_5
+  ΔCRunningScript
+  timeStep? : ℝ
+where
+  -- Declared member operation CRunningScript::UpdateTimers(float timeStep)
+  true
+end
+
+schema CRunningScript_Init_6
+  ΔCRunningScript
+  result! : void
+where
+  -- Declared member operation CRunningScript::Init()
+  true
+end
+
+schema CRunningScript_Process_7
+  ΔCRunningScript
+where
+  -- Declared member operation CRunningScript::Process()
+  true
+end
+
+schema CRunningScript_RemoveScriptFromList_8
+  ΔCRunningScript
+  arg_1? : Ref[CRunningScript]
+where
+  -- Declared member operation CRunningScript::RemoveScriptFromList(CRunningScript**)
+  true
+end
+
+schema CRunningScript_AddScriptToList_9
+  ΔCRunningScript
+  arg_1? : Ref[CRunningScript]
+where
+  -- Declared member operation CRunningScript::AddScriptToList(CRunningScript**)
+  true
+end
+
+schema CRunningScript_CollectParameters_10
+  ΔCRunningScript
+  arg_1? : ℙ ℕ
+  arg_2? : ℤ
+  pParams? : ℙ ℤ
+where
+  -- Declared member operation CRunningScript::CollectParameters(uint32*, int16, int* pParams = (int*)
+  true
+end
+
+schema CRunningScript_CollectNextParameterWithoutIncreasingPC_11
+  ΔCRunningScript
+  arg_1? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32)
+  true
+end
+
+schema CRunningScript_GetPointerToScriptVariable_12
+  ΔCRunningScript
+  arg_1? : ℙ ℕ
+  arg_2? : ℤ
+  result! : ℙ ℤ
+where
+  -- Declared member operation CRunningScript::GetPointerToScriptVariable(uint32*, int16)
+  true
+end
+
+schema CRunningScript_StoreParameters_13
+  ΔCRunningScript
+  arg_1? : ℙ ℕ
+  arg_2? : ℤ
+where
+  -- Declared member operation CRunningScript::StoreParameters(uint32*, int16)
+  true
+end
+
+schema CRunningScript_ProcessOneCommand_14
+  ΔCRunningScript
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessOneCommand()
+  true
+end
+
+schema CRunningScript_DoDeatharrestCheck_15
+  ΔCRunningScript
+where
+  -- Declared member operation CRunningScript::DoDeatharrestCheck()
+  true
+end
+
+schema CRunningScript_UpdateCompareFlag_16
+  ΔCRunningScript
+  flag? : 𝔹
+where
+  -- Declared member operation CRunningScript::UpdateCompareFlag(bool flag)
+  true
+end
+
+schema CRunningScript_if_17
+  ΔCRunningScript
+  arg_1? : m_nAndOrState
+where
+  -- Declared member operation CRunningScript::if(m_nAndOrState == ANDOR_NONE)
+  true
+end
+
+schema CRunningScript_if_18
+  ΔCRunningScript
+  arg_1? : m_nAndOrState
+  result! : ANY
+where
+  -- Declared member operation CRunningScript::if(m_nAndOrState >= ANDS_1 && m_nAndOrState <= ANDS_8)
+  true
+end
+
+schema CRunningScript_if_19
+  ΔCRunningScript
+  arg_1? : m_nAndOrState
+where
+  -- Declared member operation CRunningScript::if(m_nAndOrState == ANDS_1)
+  true
+end
+
+schema CRunningScript_if_20
+  ΔCRunningScript
+  arg_1? : m_nAndOrState
+where
+  -- Declared member operation CRunningScript::if(m_nAndOrState <= ORS_1)
+  true
+end
+
+schema CRunningScript_GetPadState_21
+  ΔCRunningScript
+  arg_1? : ℕ
+  arg_2? : ℕ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::GetPadState(uint16, uint16)
+  true
+end
+
+schema CRunningScript_ProcessCommands0To99_22
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands0To99(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands100To199_23
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands100To199(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands200To299_24
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands200To299(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands300To399_25
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands300To399(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands400To499_26
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands400To499(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands500To599_27
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands500To599(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands600To699_28
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands600To699(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands700To799_29
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands700To799(int32)
+  true
+end
+
+schema CRunningScript_ProcessCommands800To899_30
+  ΔCRunningScript
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRunningScript::ProcessCommands800To899(int32)
+  true
+end
+
+schema CTheScripts
+  ScriptSpace : ℙ ℕ
+  ScriptsArray : seq CRunningScript  -- bounded array [MAX_NUM_SCRIPTS]
+  IntroTextLines : seq ℤ  -- bounded array [MAX_NUM_INTRO_TEXT_LINES]
+  IntroRectangles : seq ℤ  -- bounded array [MAX_NUM_INTRO_RECTANGLES]
+  ScriptSprites : seq CSprite2d  -- bounded array [MAX_NUM_SCRIPT_SRPITES]
+  ScriptSphereArray : seq script_sphere_struct  -- bounded array [MAX_NUM_SCRIPT_SPHERES]
+  CollectiveArray : seq tCollectiveData  -- bounded array [MAX_NUM_COLLECTIVES]
+  UsedObjectArray : seq tUsedObject  -- bounded array [MAX_NUM_USED_OBJECTS]
+  MultiScriptArray : seq ℤ  -- bounded array [MAX_NUM_MISSION_SCRIPTS]
+  BuildingSwapArray : seq tBuildingSwap  -- bounded array [MAX_NUM_BUILDING_SWAPS]
+  InvisibilitySettingArray : seq Ref[CEntity]  -- bounded array [MAX_NUM_INVISIBILITY_SETTINGS]
+  aStoredLines : seq CStoredLine  -- bounded array [MAX_NUM_STORED_LINES]
+  DbgFlag : 𝔹
+  OnAMissionFlag : ℕ
+  MissionCleanUp : CMissionCleanup
+  StuckCars : CStuckCarCheck
+  UpsideDownCars : CUpsideDownCarCheck
+  StoreVehicleIndex : ℤ
+  StoreVehicleWasRandom : 𝔹
+  pIdleScripts : Ref[CRunningScript]
+  pActiveScripts : Ref[CRunningScript]
+  NextFreeCollectiveIndex : ℤ
+  LastRandomPedId : ℤ
+  NumberOfUsedObjects : ℕ
+  bAlreadyRunningAMissionScript : 𝔹
+  bUsingAMultiScriptFile : 𝔹
+  NumberOfMissionScripts : ℕ
+  LargestMissionScriptSize : ℕ
+  MainScriptSize : ℕ
+  FailCurrentMission : ℕ
+  NumScriptDebugLines : ℕ
+  NumberOfIntroRectanglesThisFrame : ℕ
+  NumberOfIntroTextLinesThisFrame : ℕ
+  UseTextCommands : ℕ
+  CommandsExecuted : ℕ
+  ScriptsUpdated : ℕ
+  LastMissionPassedTime : ℕ
+  NumberOfExclusiveMissionScripts : ℕ
+  bPlayerIsInTheStatium : 𝔹
+  RiotIntensity : ℕ
+  bPlayerHasMetDebbieHarry : 𝔹
+  AllowedCollision : seq ℤ  -- bounded array [MAX_ALLOWED_COLLISIONS]
+  SavedVarIndices : ℙ ℕ
+  NumSaveVars : ℤ
+  FSDestroyedFlag : ℤ
+  NextProcessId : ℤ
+  InTheScripts : 𝔹
+  pCurrent : Ref[CRunningScript]
+  NumTrueGlobals : ℕ
+  MostGlobals : ℕ
+  mCoronas : base__cSList_script_corona
+  NextScriptCoronaID : ℤ
+  retval : return
+  text : return
+  CardStackPosition : ℤ
+  BaseBriefIdForContact : seq ℤ  -- bounded array [MAX_NUM_CONTACTS]
+  OnAMissionForContactFlag : seq ℤ  -- bounded array [MAX_NUM_CONTACTS]
+  CountdownToMakePlayerUnsafe : ℕ
+  DelayMakingPlayerUnsafeThisTime : ℕ
+where
+  #ScriptSpace ≤ 1
+  OnAMissionFlag ≥ 0
+  #pIdleScripts ≤ 1
+  #pActiveScripts ≤ 1
+  NumberOfUsedObjects ≥ 0
+  NumberOfMissionScripts ≥ 0
+  LargestMissionScriptSize ≥ 0
+  MainScriptSize ≥ 0
+  FailCurrentMission ≥ 0
+  NumScriptDebugLines ≥ 0
+  NumberOfIntroRectanglesThisFrame ≥ 0
+  NumberOfIntroTextLinesThisFrame ≥ 0
+  UseTextCommands ≥ 0
+  CommandsExecuted ≥ 0
+  ScriptsUpdated ≥ 0
+  LastMissionPassedTime ≥ 0
+end
+
+schema CTheScripts_Init
+  ΔCTheScripts
+  loaddata? : 𝔹
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::Init(bool loaddata = false)
+  true
+end
+
+schema CTheScripts_Process_2
+  ΔCTheScripts
+where
+  -- Declared member operation CTheScripts::Process()
+  true
+end
+
+schema CTheScripts_StartTestScript_3
+  ΔCTheScripts
+  result! : Ref[CRunningScript]
+where
+  -- Declared member operation CTheScripts::StartTestScript()
+  true
+end
+
+schema CTheScripts_IsPlayerOnAMission_4
+  ΔCTheScripts
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::IsPlayerOnAMission()
+  true
+end
+
+schema CTheScripts_ClearSpaceForMissionEntity_5
+  ΔCTheScripts
+  arg_1? : CVector
+  arg_2? : Ref[CEntity]
+where
+  -- Declared member operation CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*)
+  true
+end
+
+schema CTheScripts_UndoBuildingSwaps_6
+  ΔCTheScripts
+where
+  -- Declared member operation CTheScripts::UndoBuildingSwaps()
+  true
+end
+
+schema CTheScripts_UndoEntityInvisibilitySettings_7
+  ΔCTheScripts
+where
+  -- Declared member operation CTheScripts::UndoEntityInvisibilitySettings()
+  true
+end
+
+schema CTheScripts_SaveAllScripts_8
+  ΔCTheScripts
+  arg_1? : ℙ ℕ
+  arg_2? : ℙ ℕ
+where
+  -- Declared member operation CTheScripts::SaveAllScripts(uint8*, uint32*)
+  true
+end
+
+schema CTheScripts_LoadAllScripts_9
+  ΔCTheScripts
+  arg_1? : ℙ ℕ
+  arg_2? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::LoadAllScripts(uint8*, uint32)
+  true
+end
+
+schema CTheScripts_IsDebugOn_10
+  ΔCTheScripts
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::IsDebugOn()
+  true
+end
+
+schema CTheScripts_InvertDebugFlag_11
+  ΔCTheScripts
+where
+  -- Declared member operation CTheScripts::InvertDebugFlag()
+  true
+end
+
+schema CTheScripts_GetPointerToScriptVariable_12
+  ΔCTheScripts
+  offset? : ℤ
+  result! : ℙ ℤ
+where
+  -- Declared member operation CTheScripts::GetPointerToScriptVariable(int32 offset)
+  true
+end
+
+schema CTheScripts_return_13
+  ΔCTheScripts
+  arg_1? : ℙ ℤ
+where
+  -- Declared member operation CTheScripts::return(int32*)
+  true
+end
+
+schema CTheScripts_Read4BytesFromScript_14
+  ΔCTheScripts
+  pIp? : ℙ ℕ
+  result! : ℤ
+where
+  -- Declared member operation CTheScripts::Read4BytesFromScript(uint32* pIp)
+  true
+end
+
+schema CTheScripts_Read2BytesFromScript_15
+  ΔCTheScripts
+  pIp? : ℙ ℕ
+  result! : ℤ
+where
+  -- Declared member operation CTheScripts::Read2BytesFromScript(uint32* pIp)
+  true
+end
+
+schema CTheScripts_Read1ByteFromScript_16
+  ΔCTheScripts
+  pIp? : ℙ ℕ
+  result! : ℤ
+where
+  -- Declared member operation CTheScripts::Read1ByteFromScript(uint32* pIp)
+  true
+end
+
+schema CTheScripts_ReadFloatFromScript_17
+  ΔCTheScripts
+  pIp? : ℙ ℕ
+  result! : ℝ
+where
+  -- Declared member operation CTheScripts::ReadFloatFromScript(uint32* pIp)
+  true
+end
+
+schema CTheScripts_ReadTextLabelFromScript_18
+  ΔCTheScripts
+  pIp? : ℙ ℕ
+  buf? : seq CHAR
+  result! : void
+where
+  -- Declared member operation CTheScripts::ReadTextLabelFromScript(uint32* pIp, char* buf)
+  true
+end
+
+schema CTheScripts_GetTextByKeyFromScript_19
+  ΔCTheScripts
+  pIp? : ℙ ℕ
+  result! : seq CHAR
+where
+  -- Declared member operation CTheScripts::GetTextByKeyFromScript(uint32* pIp)
+  true
+end
+
+schema CTheScripts_GetSizeOfVariableSpace_20
+  ΔCTheScripts
+  result! : ℤ
+where
+  -- Declared member operation CTheScripts::GetSizeOfVariableSpace()
+  true
+end
+
+schema CTheScripts_Read4BytesFromScript_21
+  ΔCTheScripts
+  tmp? : ANY
+  result! : return
+where
+  -- Declared member operation CTheScripts::Read4BytesFromScript(&tmp)
+  true
+end
+
+schema CTheScripts_StartNewScript_22
+  ΔCTheScripts
+  arg_1? : ℕ
+  result! : Ref[CRunningScript]
+where
+  -- Declared member operation CTheScripts::StartNewScript(uint32)
+  true
+end
+
+schema CTheScripts_CleanUpThisVehicle_23
+  ΔCTheScripts
+  arg_1? : Ref[CVehicle]
+where
+  -- Declared member operation CTheScripts::CleanUpThisVehicle(CVehicle*)
+  true
+end
+
+schema CTheScripts_CleanUpThisPed_24
+  ΔCTheScripts
+  arg_1? : Ref[CPed]
+where
+  -- Declared member operation CTheScripts::CleanUpThisPed(CPed*)
+  true
+end
+
+schema CTheScripts_CleanUpThisObject_25
+  ΔCTheScripts
+  arg_1? : Ref[CObject]
+where
+  -- Declared member operation CTheScripts::CleanUpThisObject(CObject*)
+  true
+end
+
+schema CTheScripts_IsPedStopped_26
+  ΔCTheScripts
+  arg_1? : Ref[CPed]
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::IsPedStopped(CPed*)
+  true
+end
+
+schema CTheScripts_IsPlayerStopped_27
+  ΔCTheScripts
+  arg_1? : Ref[CPlayerInfo]
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::IsPlayerStopped(CPlayerInfo*)
+  true
+end
+
+schema CTheScripts_IsVehicleStopped_28
+  ΔCTheScripts
+  arg_1? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Declared member operation CTheScripts::IsVehicleStopped(CVehicle*)
+  true
+end
+
+schema CTheScripts_PrintListSizes_29
+  ΔCTheScripts
+where
+  -- Declared member operation CTheScripts::PrintListSizes()
+  true
+end
+
+schema CTheScripts_ReadObjectNamesFromScript_30
+  ΔCTheScripts
+where
+  -- Declared member operation CTheScripts::ReadObjectNamesFromScript()
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Script_intro_script_rectangle
+  ΔScriptModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_intro_script_rectangle_2
+  ΔScriptModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_intro_text_line
+  ΔScriptModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_intro_text_line_2
+  ΔScriptModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_Reset
+  ΔScriptModuleState
+where
+  -- State update: m_fScaleX' = 0.48f
+  -- State update: m_fScaleY' = 1.12f
+  -- State update: m_sColor' = CRGBA(225, 225, 225, 255)
+  -- State update: m_bJustify' = false
+  -- State update: m_bRightJustify' = false
+  -- State update: m_bCentered' = false
+  true
+end
+
+schema Script_script_sphere_struct
+  ΔScriptModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_stuck_car_data
+  ΔScriptModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_SetIP
+  ΔScriptModuleState
+  ip? : ℕ
+where
+  -- State update: m_nIp' = ip
+  true
+end
+
+schema Script_GetNext
+  ΞScriptModuleState
+  result! : Ref[CRunningScript]
+where
+  -- Return postcondition: result! = next
+  true
+end
+
+schema Script_UpdateTimers
+  ΔScriptModuleState
+  timeStep? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Script_UpdateCompareFlag
+  ΔScriptModuleState
+  flag? : 𝔹
+where
+  -- State update: flag' = !flag
+  -- State update: m_bCondResult' = flag
+  -- State update: m_nAndOrState' = ANDOR_NONE
+  -- State update: m_nAndOrState' = ANDOR_NONE
+  true
+end
+
+schema Script_LimitAngleOnCircle
+  ΔScriptModuleState
+  angle? : ℝ
+  result! : ℝ
+where
+  -- Return postcondition: result! = angle < 0.0f ? angle + 360.0f : angle
+  true
+end
+
+schema Script_ThisIsAValidRandomPed
+  ΔScriptModuleState
+  pedtype? : ℕ
+  result! : 𝔹
+where
+  -- State update: loaddata' = false)
+  -- State update: DbgFlag' = !DbgFlag
+  -- State update: retval' = ScriptSpace[*pIp + 1] << 8 | ScriptSpace[*pIp]
+  -- State update: retval' = ScriptSpace[*pIp]
+  -- State update: text' = TheText.Get((const char*)&CTheScripts::ScriptSpace[*pIp])
+  -- State update: tmp' = 3
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = DbgFlag
+  -- Invokes: CTheScripts::GetSizeOfVariableSpace, TheText.Get
+  true
+end

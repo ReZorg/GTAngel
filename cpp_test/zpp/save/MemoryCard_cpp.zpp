@@ -1,0 +1,717 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MemoryCard (save)
+-- Source File(s): save/MemoryCard.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+-- include main.zpp  (from "main.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include AudioScriptObject.zpp  (from "AudioScriptObject.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarGen.zpp  (from "CarGen.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include Date.zpp  (from "Date.h")
+-- include Font.zpp  (from "Font.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Game.zpp  (from "Game.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Gangs.zpp  (from "Gangs.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include ParticleObject.zpp  (from "ParticleObject.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include PCSave.zpp  (from "PCSave.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include ProjectileInfo.zpp  (from "ProjectileInfo.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include Script.zpp  (from "Script.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include TimeStep.zpp  (from "TimeStep.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Frontend_PS2.zpp  (from "Frontend_PS2.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHWINDOWS : seq CHAR  -- #define WITHWINDOWS #include "common.h"
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema MemoryCard_align4bytes
+  ΔMemoryCardModuleState
+  size? : ℤ
+where
+  -- Return postcondition: result! = (size + 3) & 0xFFFFFFFC
+  true
+end
+
+schema MemoryCard_Ascii2Sjis
+  ΔMemoryCardModuleState
+  ascii_code? : unsigned_char
+where
+  -- State update: sjis_code' = 0
+  -- State update: stmp2' = 0
+  -- State update: stmp2' = 1
+  -- State update: stmp' = 0
+  -- State update: stmp2' = 11
+  -- State update: stmp' = 1
+  true
+end
+
+schema MemoryCard_PCMCInit
+  ΔMemoryCardModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMemoryCardInfo_CMemoryCardInfo
+  ΔCMemoryCardInfo
+where
+  -- State update: type' = 0
+  -- State update: free' = 0
+  -- State update: format' = 0
+  true
+end
+
+schema CMemoryCard_Init
+  ΔCMemoryCard
+where
+  -- Return postcondition: result! = RES_SUCCESS
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_SUCCESS
+  true
+end
+
+schema CMemoryCard_CMemoryCard
+  ΔCMemoryCard
+where
+  -- State update: _unk0' = 0
+  -- State update: CurrentCard' = CARD_ONE
+  -- State update: port' = 0
+  -- State update: port' = 1
+  -- State update: m_bWantToLoad' = false
+  -- State update: _bunk2' = false
+  true
+end
+
+schema CMemoryCard_RestoreForStartLoad
+  ΔCMemoryCard
+where
+  -- State update: file' = OpenMemCardFileForReading(CurrentCard, LoadFileName)
+  -- State update: pBuf' = buf + sizeof(uint32) + sizeof(uint32)
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Invokes: TheCamera.GetMatrix, CStreaming::RemoveBigBuildings, CStreaming::RemoveIslandsNotUsed, CCollision::SortOutCollisionAfterLoad, CStreaming::RequestBigBuildings
+  true
+end
+
+schema CMemoryCard_LoadSavedGame
+  ΔCMemoryCard
+where
+  -- State update: CheckSum' = 0
+  -- State update: saveSize' = 0
+  -- State update: size' = 0
+  -- State update: oldLang' = CMenuManager::m_PrefsLanguage
+  -- State update: file' = OpenMemCardFileForReading(CurrentCard, LoadFileName)
+  -- State update: size' = align4bytes(size)
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Invokes: CPad::ResetCheats, TheCamera.GetMatrix, CPad::GetPad, CProjectileInfo::RemoveAllProjectiles, CObject::DeleteAllTempObjects
+  true
+end
+
+schema CMemoryCard_CheckCardInserted
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoCardInfo
+  -- State update: type' = sceMcTypeNoCard
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_NONE
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_PopulateCardFlags
+  ΔCMemoryCard
+  cardID? : ℤ
+  bSlotFlag? : 𝔹
+  bTypeFlag? : 𝔹
+  bFreeFlag? : 𝔹
+  bFormatFlag? : 𝔹
+where
+  -- State update: cmd' = sceMcFuncNoCardInfo
+  -- State update: type' = sceMcTypeNoCard
+  -- State update: free' = 0
+  -- State update: format' = 0
+  -- State update: type' = 0
+  -- State update: free' = 0
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_FormatCard
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoFormat
+  -- State update: r' = CheckCardInserted(cardID)
+  -- State update: nError' = ERR_FORMATFAILED
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = r
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_PopulateFileTable
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoGetDir
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_FILETABLENOENTRY
+  -- State update: nError' = ERR_NONE
+  -- State update: num' = 0
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_CreateRootDirectory
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoMkdir
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_DIRFULLDEVICE
+  -- State update: nError' = ERR_DIRBADENTRY
+  -- State update: nError' = ERR_NONE
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_ChangeDirectory
+  ΔCMemoryCard
+  cardID? : ℤ
+  dir? : seq CHAR
+where
+  -- State update: cmd' = sceMcFuncNoChDir
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_DIRNOENTRY
+  -- State update: nError' = ERR_NONE
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_CreateIconFiles
+  ΔCMemoryCard
+  cardID? : ℤ
+  icon_one? : seq CHAR
+  icon_two? : seq CHAR
+  icon_three? : seq CHAR
+where
+  -- State update: ambient' = { 0.50, 0.50, 0.50, 0.00 }
+  -- State update: icon.OffsLF' = 24
+  -- State update: icon.TransRate' = 0x60
+  -- State update: titleName' = (unsigned short *)icon.TitleName
+  -- State update: titlec' = 0
+  -- State update: sjis' = Ascii2Sjis(title[titlec])
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  true
+end
+
+schema CMemoryCard_LoadIconFiles
+  ΔCMemoryCard
+  cardID? : ℤ
+  icon_one? : seq CHAR
+  icon_two? : seq CHAR
+  icon_three? : seq CHAR
+where
+  -- State update: size' = 50968
+  -- State update: data' = new uint8[size]
+  -- State update: hostlen' = strlen(HostFileLocationOfIcons)
+  -- State update: ico1file' = CFileMgr::OpenFile(icon1_path)
+  -- State update: ico1mc' = CreateMemCardFileReadWrite(Cards[cardID].port, icon1)
+  -- State update: ico2file' = CFileMgr::OpenFile(icon2_path)
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Invokes: CFileMgr::OpenFile, CFileMgr::Read, CFileMgr::CloseFile
+  true
+end
+
+schema CMemoryCard_CloseMemCardFile
+  ΔCMemoryCard
+  file? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoClose
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_OPENNOENTRY
+  -- State update: nError' = ERR_NONE
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop, CFileMgr::CloseFile
+  true
+end
+
+schema CMemoryCard_CreateMemCardFileReadWrite
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+where
+  -- State update: cmd' = sceMcFuncNoOpen
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_FILEFULLDEVICE
+  -- State update: nError' = ERR_FILENOPATHENTRY
+  -- State update: nError' = ERR_FILEDENIED
+  -- Return postcondition: result! = result
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop, CFileMgr::OpenFile
+  true
+end
+
+schema CMemoryCard_OpenMemCardFileForReading
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+where
+  -- State update: cmd' = sceMcFuncNoOpen
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_FILEFULLDEVICE
+  -- State update: nError' = ERR_FILENOPATHENTRY
+  -- State update: nError' = ERR_FILEDENIED
+  -- Return postcondition: result! = result
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop, CFileMgr::OpenFile
+  true
+end
+
+schema CMemoryCard_ReadFromMemCard
+  ΔCMemoryCard
+  file? : ℤ
+  buff? : ADDRESS
+  size? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoRead
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_READNOENTRY
+  -- State update: nError' = ERR_READDENIED
+  -- State update: nError' = ERR_NONE
+  -- Return postcondition: result! = result
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop, CFileMgr::Read
+  true
+end
+
+schema CMemoryCard_DeleteMemoryCardFile
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+where
+  -- State update: cmd' = sceMcFuncNoDelete
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_DELETENOENTRY
+  -- State update: nError' = ERR_DELETEDENIED
+  -- State update: nError' = ERR_DELETEFAILED
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop, CFileMgr::OpenFile, CFileMgr::CloseFile
+  true
+end
+
+schema CMemoryCard_PopulateErrorMessage
+  ΔCMemoryCard
+where
+  -- State update: pErrorMsg' = TheText.Get("SLONDR")
+  -- State update: pErrorMsg' = TheText.Get("SLONFM")
+  -- State update: pErrorMsg' = TheText.Get("SLNSP")
+  -- State update: pErrorMsg' = TheText.Get("SLONNF")
+  -- State update: pErrorMsg' = TheText.Get("SLONNO")
+  -- Invokes: TheText.Get
+  true
+end
+
+schema CMemoryCard_WritetoMemCard
+  ΔCMemoryCard
+  file? : ℤ
+  buff? : ADDRESS
+  size? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoWrite
+  -- State update: result1' = sceMcResSucceed
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_WRITEFULLDEVICE
+  -- State update: nError' = ERR_WRITENOENTRY
+  -- State update: nError' = ERR_WRITEDENIED
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop, CFileMgr::Write
+  true
+end
+
+schema MemoryCard_MakeSpaceForSizeInBufferPointer
+  ΔMemoryCardModuleState
+  presize? : ℙ ℕ
+  buf? : ℙ ℕ
+  postsize? : ℙ ℕ
+where
+  -- State update: presize' = buf
+  -- State update: postsize' = buf
+  true
+end
+
+schema MemoryCard_CopySizeAndPreparePointer
+  ΔMemoryCardModuleState
+  buf? : ℙ ℕ
+  postbuf? : ℙ ℕ
+  postbuf2? : ℙ ℕ
+  unused? : ℕ
+  size? : ℕ
+where
+  -- State update: size' = align4bytes(size)
+  -- State update: postbuf' = postbuf2
+  true
+end
+
+schema CMemoryCard_SaveGame
+  ΔCMemoryCard
+where
+  -- State update: saveSize' = 0
+  -- State update: totalSize' = 0
+  -- State update: CurrentCard' = CARD_ONE
+  -- State update: CheckSum' = 0
+  -- State update: ped' = FindPlayerPed()
+  -- State update: ped.m_fCurrentStamina' = ped.m_fMaxStamina
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CGameLogic::PassTime, CGame::TidyUpMemory, CTimer::Update, CTimer::GetTimeInMillisecondsPauseMode, TheCamera.GetPosition
+  true
+end
+
+schema CMemoryCard_DoHackRoundSTUPIDSonyDateTimeStuff
+  ΔCMemoryCard
+  port? : ℤ
+  filename? : seq CHAR
+where
+  -- State update: cmd' = sceMcFuncNoFileInfo
+  -- State update: info._Create.Sec' = ROUNDHACK(rtc.second)
+  -- State update: info._Create.Min' = ROUNDHACK(rtc.minute)
+  -- State update: info._Create.Hour' = ROUNDHACK(rtc.hour)
+  -- State update: info._Create.Day' = ROUNDHACK(rtc.day)
+  -- State update: info._Create.Month' = ROUNDHACK(rtc.month)
+  -- Return postcondition: result! = sceMcResSucceed >= result
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CMemoryCard_LookForRootDirectory
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoGetDir
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_FILETABLENOENTRY
+  -- State update: nError' = ERR_NONE
+  -- Return postcondition: result! = ERR_NOROOTDIR
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_FillFirstFileWithGuff
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: file' = CreateMemCardFileReadWrite(Cards[cardID].port, buff)
+  -- State update: kBlockSize' = GUFF_FILE_SIZE / 3
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_FindMostRecentFileName
+  ΔCMemoryCard
+  cardID? : ℤ
+  filename? : seq CHAR
+where
+  -- State update: cmd' = sceMcFuncNoGetDir
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: entry' = 7
+  -- State update: found' = false
+  -- State update: date1.m_nSecond' = Cards[CARD_ONE].table[entry]._Modify.Sec
+  -- State update: date1.m_nMinute' = Cards[CARD_ONE].table[entry]._Modify.Min
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_ClearFileTableBuffer
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: FileSizeByte' = 0
+  true
+end
+
+schema CMemoryCard_GetClusterAmountForFileCreation
+  ΔCMemoryCard
+  port? : ℤ
+where
+  -- State update: cmd' = sceMcFuncNoEntSpace
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- State update: nError' = ERR_NOFORMAT
+  -- State update: nError' = ERR_NONE
+  -- State update: nError' = NO_ERR_SUCCESS
+  -- Return postcondition: result! = result
+  -- Return postcondition: result! = nError
+  -- Return postcondition: result! = nError
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_DeleteEverythingInGameRoot
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CTimer::Stop
+  true
+end
+
+schema CMemoryCard_CheckDataNotCorrupt
+  ΔCMemoryCard
+  filename? : seq CHAR
+where
+  -- State update: CheckSum' = 0
+  -- State update: lang' = 0
+  -- State update: level' = 0
+  -- State update: LastBlockSize' = 0
+  -- State update: file' = OpenMemCardFileForReading(CurrentCard, buf)
+  -- State update: bytes_processed' = 0
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  -- Return postcondition: result! = RES_FAILED
+  true
+end
+
+schema CMemoryCard_GetLanguageToLoad
+  ΔCMemoryCard
+where
+  -- Return postcondition: result! = m_LanguageToLoad
+  true
+end
+
+schema CMemoryCard_GetLevelToLoad
+  ΔCMemoryCard
+where
+  -- Return postcondition: result! = m_LevelToLoad
+  true
+end
+
+schema CMemoryCard_CreateGameDirectoryFromScratch
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: err' = RES_SUCCESS
+  -- State update: startTime' = CTimer::GetTimeInMillisecondsPauseMode()
+  -- State update: nError' = ERR_DIRFULLDEVICE
+  -- State update: r' = LookForRootDirectory(CARD_ONE)
+  -- State update: entryExist' = false
+  -- State update: entryExist' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: TheMemoryCard.PopulateCardFlags, CTimer::Update, CTimer::GetTimeInMillisecondsPauseMode, TheMemoryCard.ChangeDirectory, TheMemoryCard.PopulateFileTable
+  true
+end
+
+schema CMemoryCard_CheckGameDirectoryThere
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: entryExist' = false
+  -- State update: entryExist' = true
+  -- State update: entryExist' = false
+  -- State update: entryExist' = true
+  -- State update: entryExist' = false
+  -- State update: entryExist' = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: TheMemoryCard.PopulateCardFlags, TheMemoryCard.ChangeDirectory, TheMemoryCard.PopulateFileTable
+  true
+end
+
+schema CMemoryCard_PopulateSlotInfo
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- State update: slot' = 0
+  -- State update: entry' = 7
+  -- State update: entry' = 0
+  -- State update: entryname' = (char *)Cards[cardID].table[entry].EntryName
+  -- State update: bFound' = false
+  -- State update: bFound' = true
+  -- Invokes: CTimer::Stop, TheText.Get, TheMemoryCard.PopulateCardFlags, TheMemoryCard.ChangeDirectory
+  true
+end
+
+schema CMemoryCard_GetInfoOnSpecificSlot
+  ΔCMemoryCard
+  slotID? : ℤ
+where
+  -- Return postcondition: result! = Slots[slotID]
+  true
+end
+
+schema CMemoryCard_GetDateAndTimeOfSavedGame
+  ΔCMemoryCard
+  slotID? : ℤ
+where
+  -- Return postcondition: result! = SlotSaveDate[slotID]
+  true
+end
+
+schema CMemoryCard_CheckCardStateAtGameStartUp
+  ΔCMemoryCard
+  cardID? : ℤ
+where
+  -- Return postcondition: result! = MCSTATE_OK
+  -- Return postcondition: result! = MCSTATE_NOCARD
+  -- Return postcondition: result! = MCSTATE_NOCARD
+  -- Invokes: TheMemoryCard.PopulateCardFlags, TheMemoryCard.CheckCardInserted, TheMemoryCard.ChangeDirectory, TheMemoryCard.FindMostRecentFileName, TheMemoryCard.CheckDataNotCorrupt
+  true
+end
+
+schema CMemoryCard_SaveSlot
+  ΔCMemoryCard
+  slotID? : ℤ
+where
+  -- State update: bSave' = true
+  -- State update: bSave' = CreateGameDirectoryFromScratch(CARD_ONE)
+  -- Invokes: TheText.Get, TheMemoryCard.ChangeDirectory, TheMemoryCard.DeleteMemoryCardFile, CTimer::Stop, CStreaming::FlushRequestList
+  true
+end
+
+schema CMemoryCard_DeleteSlot
+  ΔCMemoryCard
+  slotID? : ℤ
+where
+  -- Invokes: TheMemoryCard.ChangeDirectory, TheMemoryCard.DeleteMemoryCardFile
+  true
+end
+
+schema CMemoryCard_LoadSlotToBuffer
+  ΔCMemoryCard
+  slotID? : ℤ
+where
+  -- Invokes: CStreaming::DeleteAllRwObjects, TheMemoryCard.ChangeDirectory, TheMemoryCard.CheckDataNotCorrupt
+  true
+end
+
+schema CMemoryCard_GetNameOfSavedGame
+  ΔCMemoryCard
+  slotID? : ℤ
+where
+  -- Return postcondition: result! = SlotFileName[slotID]
+  true
+end
+
+schema CMemoryCard_DoClassSaveRoutine
+  ΔCMemoryCard
+  file? : ℤ
+  data? : ℙ ℕ
+  size? : ℕ
+where
+  -- Return postcondition: result! = ERR_NONE
+  -- Return postcondition: result! = ERR_NONE
+  -- Return postcondition: result! = nError
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MemoryCardModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3084
+end

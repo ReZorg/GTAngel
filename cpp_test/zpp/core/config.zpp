@@ -1,0 +1,95 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: config (core)
+-- Source File(s): core/config.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+VANILLA_DEFINES : seq CHAR  -- #define VANILLA_DEFINES #endif
+GTA_PC : seq CHAR  -- #define GTA_PC #define GTA_TRAIN
+GTA_BRIDGE : seq CHAR  -- #define GTA_BRIDGE #define GTAVC_PS2	400
+GTAVC_PC_10 : ℕ  -- #define GTAVC_PC_10 410
+GTAVC_PC_11 : ℕ  -- #define GTAVC_PC_11 411
+GTAVC_PC_JAP : ℕ  -- #define GTAVC_PC_JAP 412
+GTA_VERSION : seq CHAR  -- #define GTA_VERSION GTAVC_PC_11
+GTA_HANDHELD : seq CHAR  -- #define GTA_HANDHELD #if defined GTA_PS2
+FINAL : seq CHAR  -- #define FINAL #define NO_CDCHECK
+DEFAULT_NATIVE_RESOLUTION : seq CHAR  -- #define DEFAULT_NATIVE_RESOLUTION #ifdef VANILLA_DEFINES
+MASTER : seq CHAR  -- #define MASTER #define THIS_IS_STUPID
+DONT_FIX_REPLAY_BUGS : seq CHAR  -- #define DONT_FIX_REPLAY_BUGS #define USE_TXD_CDIMAGE
+AUDIO_REFLECTIONS : seq CHAR  -- #define AUDIO_REFLECTIONS #else
+GTA_PS2_STUFF : seq CHAR  -- #define GTA_PS2_STUFF #define NASTY_GAME
+DRAW_GAME_VERSION_TEXT : seq CHAR  -- #define DRAW_GAME_VERSION_TEXT #ifdef DRAW_GAME_VERSION_TEXT
+COMPRESSED_COL_VECTORS : seq CHAR  -- #define COMPRESSED_COL_VECTORS #undef DRAW_GAME_VERSION_TEXT
+VALIDATE_SAVE_SIZE : seq CHAR  -- #define VALIDATE_SAVE_SIZE #define DEBUGMENU
+FIX_BUGS : seq CHAR  -- #define FIX_BUGS #define COMPATIBLE_SAVES
+LOAD_INI_SETTINGS : seq CHAR  -- #define LOAD_INI_SETTINGS #define NO_MOVIES
+EXTENDED_OFFSCREEN_DESPAWN_RANGE : seq CHAR  -- #define EXTENDED_OFFSCREEN_DESPAWN_RANGE #if defined(__LP64__) || defined(_WIN64)
+FIX_BUGS_64 : seq CHAR  -- #define FIX_BUGS_64 #define ASCII_STRCMP
+RELOADABLES : seq CHAR  -- #define RELOADABLES #define MISSION_SWITCHER
+ASPECT_RATIO_SCALE : seq CHAR  -- #define ASPECT_RATIO_SCALE #define PROPER_SCALING
+PS2_ALPHA_TEST : seq CHAR  -- #define PS2_ALPHA_TEST #define IMPROVED_VIDEOMODE
+DISABLE_VSYNC_ON_TEXTURE_CONVERSION : seq CHAR  -- #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION #define ANISOTROPIC_FILTERING
+EXTENDED_COLOURFILTER : seq CHAR  -- #define EXTENDED_COLOURFILTER #define EXTENDED_PIPELINES
+SCREEN_DROPLETS : seq CHAR  -- #define SCREEN_DROPLETS #define NEW_RENDERER
+FIX_SPRITES : seq CHAR  -- #define FIX_SPRITES #ifndef EXTENDED_COLOURFILTER
+WATER_CHEATS : seq CHAR  -- #define WATER_CHEATS #if !defined(RW_GL3) && defined(_WIN32)
+DETECT_JOYSTICK_MENU : seq CHAR  -- #define DETECT_JOYSTICK_MENU #define DETECT_PAD_INPUT_SWITCH
+KANGAROO_CHEAT : seq CHAR  -- #define KANGAROO_CHEAT #define RESTORE_ALLCARSHELI_CHEAT
+BETTER_ALLCARSAREDODO_CHEAT : seq CHAR  -- #define BETTER_ALLCARSAREDODO_CHEAT #define WALLCLIMB_CHEAT
+REGISTER_START_BUTTON : seq CHAR  -- #define REGISTER_START_BUTTON #define BIND_VEHICLE_FIREWEAPON
+BUTTON_ICONS : seq CHAR  -- #define BUTTON_ICONS #define PC_MENU
+FIX_RADAR : seq CHAR  -- #define FIX_RADAR #define RADIO_OFF_TEXT
+LEGACY_MENU_OPTIONS : seq CHAR  -- #define LEGACY_MENU_OPTIONS #define MUCH_SHORTER_OUTRO_SCREEN
+USE_DEBUG_SCRIPT_LOADER : seq CHAR  -- #define USE_DEBUG_SCRIPT_LOADER #define USE_MEASUREMENTS_IN_METERS
+USE_PRECISE_MEASUREMENT_CONVERTION : seq CHAR  -- #define USE_PRECISE_MEASUREMENT_CONVERTION #define SUPPORT_JAPANESE_SCRIPT
+USE_ADVANCED_SCRIPT_DEBUG_OUTPUT : seq CHAR  -- #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT #define SCRIPT_LOG_FILE_LEVEL 1
+USE_BASIC_SCRIPT_DEBUG_OUTPUT : seq CHAR  -- #define USE_BASIC_SCRIPT_DEBUG_OUTPUT #undef USE_BASIC_SCRIPT_DEBUG_OUTPUT
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Config ::= NUMPLAYERS | NUMCDIMAGES | MAX_CDIMAGES | MAX_CDCHANNELS | MODELINFOSIZE | TXDSTORESIZE | COLSTORESIZE | EXTRADIRSIZE | CUTSCENEDIRSIZE | SIMPLEMODELSIZE | TIMEMODELSIZE | CLUMPMODELSIZE | WEAPONMODELSIZE | PEDMODELSIZE | VEHICLEMODELSIZE | TWODFXSIZE | MAXVEHICLESLOADED | NUMOBJECTINFO | NUMPTRNODES | NUMENTRYINFOS | NUMPEDS | NUMVEHICLES | NUMBUILDINGS | NUMTREADABLES | NUMOBJECTS | NUMDUMMIES | NUMAUDIOSCRIPTOBJECTS | NUMCOLMODELS | NUMCUTSCENEOBJECTS | NUMANIMBLOCKS | NUMANIMATIONS | NUMTEMPOBJECTS | NUM_PATHNODES | NUM_CARPATHLINKS | NUM_MAPOBJECTS | NUM_PATHCONNECTIONS | NUMALPHALIST | NUMBOATALPHALIST | NUMALPHAENTITYLIST | NUMALPHAUNTERWATERENTITYLIST | NUMCOLCACHELINKS | NUMREFERENCES | NUMAUDIOZONES | NUMINFOZONES | NUMMAPZONES | NUMNAVIGZONES | NUMATTRIBZONES | NUMOCCLUSIONVOLUMES | ... (110 total branches)
+  -- val(NUMPLAYERS) = 1
+  -- val(NUMCDIMAGES) = 6
+  -- val(MAX_CDIMAGES) = 8
+  -- val(MAX_CDCHANNELS) = 5
+  -- val(MODELINFOSIZE) = 4900
+  -- val(TXDSTORESIZE) = 1200
+  -- val(COLSTORESIZE) = 15
+  -- val(EXTRADIRSIZE) = 256
+  -- val(CUTSCENEDIRSIZE) = 512
+  -- val(SIMPLEMODELSIZE) = 3885
+  -- val(TIMEMODELSIZE) = 385
+  -- val(CLUMPMODELSIZE) = 10
+  -- val(WEAPONMODELSIZE) = 37
+  -- val(PEDMODELSIZE) = 130
+  -- val(VEHICLEMODELSIZE) = 110
+  -- val(TWODFXSIZE) = 1210
+  -- val(MAXVEHICLESLOADED) = 50
+  -- val(NUMOBJECTINFO) = 210
+  -- val(NUMPTRNODES) = 50000
+  -- val(NUMENTRYINFOS) = 4000
+  -- val(NUMPEDS) = 140
+  -- val(NUMVEHICLES) = 110
+  -- val(NUMBUILDINGS) = 7000
+  -- val(NUMTREADABLES) = 1300
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema configModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 739
+end

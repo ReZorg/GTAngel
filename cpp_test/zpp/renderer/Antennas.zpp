@@ -1,0 +1,133 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Antennas (renderer)
+-- Source File(s): renderer/Antennas.cpp, renderer/Antennas.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Antennas.zpp  (from "Antennas.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CAntenna
+  active : 𝔹
+  updatedLastFrame : 𝔹
+  id : ℕ
+  segmentLength : ℝ
+  pos : seq CVector  -- bounded array [6]
+  speed : seq CVector  -- bounded array [6]
+where
+  id ≥ 0
+  #pos = 6
+  #speed = 6
+end
+
+schema CAntenna_Update
+  ΔCAntenna
+  dir? : CVector
+  pos? : CVector
+where
+  -- Declared member operation CAntenna::Update(CVector dir, CVector pos)
+  true
+end
+
+schema CAntennas
+  aAntennas : seq CAntenna  -- bounded array [NUMANTENNAS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CAntennas_Init
+  ΔCAntennas
+where
+  -- Declared member operation CAntennas::Init(void)
+  true
+end
+
+schema CAntennas_Update_2
+  ΔCAntennas
+where
+  -- Declared member operation CAntennas::Update(void)
+  true
+end
+
+schema CAntennas_RegisterOne_3
+  ΔCAntennas
+  id? : ℕ
+  dir? : CVector
+  position? : CVector
+  length? : ℝ
+where
+  -- Declared member operation CAntennas::RegisterOne(uint32 id, CVector dir, CVector position, float length)
+  true
+end
+
+schema CAntennas_Render_4
+  ΔCAntennas
+where
+  -- Declared member operation CAntennas::Render(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CAntennas_Init
+  ΔCAntennas
+where
+  -- State update: active' = false
+  -- State update: updatedLastFrame' = false
+  true
+end
+
+schema CAntennas_Update
+  ΔCAntennas
+where
+  -- State update: active' = false
+  -- State update: updatedLastFrame' = false
+  true
+end
+
+schema CAntennas_RegisterOne
+  ΔCAntennas
+  id? : ℕ
+  dir? : CVector
+  position? : CVector
+  length? : ℝ
+where
+  -- State update: active' = true
+  -- State update: updatedLastFrame' = true
+  -- State update: id' = id
+  -- State update: segmentLength' = length/6.0f
+  -- State update: updatedLastFrame' = true
+  true
+end
+
+schema CAntennas_Render
+  ΔCAntennas
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CAntenna_Update
+  ΔCAntenna
+  dir? : CVector
+  basepos? : CVector
+where
+  -- State update: basedir' = pos[i-1] - pos[i-2]
+  -- State update: newpos' = pos[i-1] + (basedir + newdir)/2.0f
+  -- Invokes: newdir.Normalise
+  true
+end

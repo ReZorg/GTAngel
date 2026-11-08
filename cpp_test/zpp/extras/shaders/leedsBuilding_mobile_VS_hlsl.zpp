@@ -1,0 +1,65 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: leedsBuilding_mobile_VS (extras)
+-- Source File(s): extras/shaders/leedsBuilding_mobile_VS.hlsl
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include standardConstants.zpp  (from "standardConstants.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+surfEmissive : seq CHAR  -- #define surfEmissive (surfProps.w)
+vertContrast : ℝ  -- #define vertContrast (1.5)
+vertBrightness : ℝ  -- #define vertBrightness (0.25)
+ambientContrast : ℝ  -- #define ambientContrast (1.2)
+ambientBrightness : ℝ  -- #define ambientBrightness (0.1)
+emissiveContrast : ℝ  -- #define emissiveContrast (1.25)
+emissiveBrightness : ℝ  -- #define emissiveBrightness (0.05)
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema VS_in
+  POSITION : ℝ
+  NORMAL : ℝ
+  TEXCOORD0 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema VS_out
+  POSITION : ℝ
+  TEXCOORD0 : ℝ
+  COLOR0 : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema leedsBuilding_mobile_VS_main
+  ΔleedsBuilding_mobile_VSModuleState
+  input? : in_VS_in
+  result! : VS_out
+where
+  -- State update: output.Position' = mul(combinedMat, input.Position)
+  -- State update: Vertex' = mul(worldMat, input.Position).xyz
+  -- State update: Normal' = mul(normalMat, input.Normal)
+  -- State update: output.TexCoord0.xy' = input.TexCoord
+  -- State update: vertCol' = input.Prelight
+  -- State update: amb' = ambient
+  -- Return postcondition: result! = output
+  true
+end

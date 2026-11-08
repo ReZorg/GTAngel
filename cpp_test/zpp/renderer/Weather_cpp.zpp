@@ -1,0 +1,243 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Weather (renderer)
+-- Source File(s): renderer/Weather.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include General.zpp  (from "General.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include RenderBuffer.zpp  (from "RenderBuffer.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Shadows.zpp  (from "Shadows.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Replay.zpp  (from "Replay.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MIN_TIME_BETWEEN_LIGHTNING_FLASH_CHANGES : seq CHAR  -- #define MIN_TIME_BETWEEN_LIGHTNING_FLASH_CHANGES (50)
+RAIN_CHANGE_SPEED : ℝ  -- #define RAIN_CHANGE_SPEED (0.003f)
+DROPLETS_LEFT_OFFSET : ℝ  -- #define DROPLETS_LEFT_OFFSET (10.0f)
+DROPLETS_RIGHT_OFFSET : ℝ  -- #define DROPLETS_RIGHT_OFFSET (10.0f)
+DROPLETS_TOP_OFFSET : ℝ  -- #define DROPLETS_TOP_OFFSET (10.0f)
+DROPLETS_BOTTOM_OFFSET : ℝ  -- #define DROPLETS_BOTTOM_OFFSET (10.0f)
+STREAK_U : ℝ  -- #define STREAK_U (10.0f)
+STREAK_V : ℝ  -- #define STREAK_V (18.0f)
+LARGE_STREAK_COEFFICIENT : ℝ  -- #define LARGE_STREAK_COEFFICIENT (1.23f)
+STREAK_MIN_DISTANCE : ℝ  -- #define STREAK_MIN_DISTANCE (8.0f)
+STREAK_MAX_DISTANCE : ℝ  -- #define STREAK_MAX_DISTANCE (16.0f)
+SPLASH_CHECK_RADIUS : ℝ  -- #define SPLASH_CHECK_RADIUS (7.0f)
+SPLASH_OFFSET_RADIUS : ℝ  -- #define SPLASH_OFFSET_RADIUS (2.0f)
+STREAK_LIFETIME : ℝ  -- #define STREAK_LIFETIME (4.0f)
+STREAK_INTEROLATION_TIME : ℝ  -- #define STREAK_INTEROLATION_TIME (0.3f)
+RAIN_COLOUR_R : seq CHAR  -- #define RAIN_COLOUR_R (200)
+RAIN_COLOUR_G : seq CHAR  -- #define RAIN_COLOUR_G (200)
+RAIN_COLOUR_B : seq CHAR  -- #define RAIN_COLOUR_B (256)
+RAIN_ALPHA : seq CHAR  -- #define RAIN_ALPHA (255)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWeather_Init
+  ΔCWeather
+where
+  -- State update: NewWeatherType' = WEATHER_SUNNY
+  -- State update: bScriptsForceRain' = false
+  -- State update: OldWeatherType' = WEATHER_CLOUDY
+  -- State update: Stored_StateStored' = false
+  -- State update: InterpolationValue' = 0.0f
+  -- State update: WhenToPlayLightningSound' = 0
+  -- Invokes: DMAudio.CreateEntity, DMAudio.SetEntityStatus
+  true
+end
+
+schema CWeather_Update
+  ΔCWeather
+where
+  -- State update: fNewInterpolation' = (CClock::GetMinutes() + CClock::GetSeconds()/60.0f)/60.0f
+  -- State update: OldWeatherType' = NewWeatherType
+  -- State update: NewWeatherType' = ForcedWeatherType
+  -- State update: WeatherTypeInList' = (WeatherTypeInList + 1) % ARRAY_SIZE(WeatherTypesList)
+  -- State update: InterpolationValue' = fNewInterpolation
+  -- State update: NewWeatherType' = (NewWeatherType + 1) % WEATHER_TOTAL
+  -- Invokes: CReplay::IsPlayingBack, CClock::GetMinutes, CClock::GetSeconds, CPad::GetPad, CGeneral::GetRandomNumber
+  true
+end
+
+schema CWeather_AddHeatHaze
+  ΔCWeather
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CWeather_AddBeastie
+  ΔCWeather
+where
+  -- State update: pos' = TheCamera.GetPosition()
+  -- State update: dist' = CGeneral::GetRandomNumberInRange(90.0f, 60.0f)
+  -- State update: angle' = CGeneral::GetRandomNumber() % CParticle::SIN_COS_TABLE_SIZE
+  -- State update: c' = CParticle::m_CosTable[angle]
+  -- State update: s' = CParticle::m_SinTable[angle]
+  -- Invokes: CTimer::GetFrameCounter, CGeneral::GetRandomNumber, TheCamera.GetPosition, CGeneral::GetRandomNumberInRange, CParticle::AddParticle
+  true
+end
+
+schema CWeather_ForceWeather
+  ΔCWeather
+  weather? : ℤ
+where
+  -- State update: ForcedWeatherType' = weather
+  true
+end
+
+schema CWeather_ForceWeatherNow
+  ΔCWeather
+  weather? : ℤ
+where
+  -- State update: OldWeatherType' = weather
+  -- State update: NewWeatherType' = weather
+  -- State update: ForcedWeatherType' = weather
+  true
+end
+
+schema CWeather_ReleaseWeather
+  ΔCWeather
+where
+  -- State update: ForcedWeatherType' = -1
+  true
+end
+
+schema CWeather_AddSplashesDuringHurricane
+  ΔCWeather
+where
+  -- State update: colour' = { 255, 255, 255, 32 }
+  -- State update: groundZ' = pos.z + 0.5f
+  -- State update: rnd' = CGeneral::GetRandomNumber()
+  -- State update: angle' = (CGeneral::GetRandomNumber()&0x7F)/128.0f * TWOPI
+  -- State update: angle' = TheCamera.Orientation + (rnd-128)/160.0f
+  -- State update: pos.x' = TheCamera.GetPosition().x + dist*Sin(angle)
+  -- Invokes: pTargetEntity->GetPosition, TheCamera.GetPosition, CWorld::FindGroundZFor3DCoord, CGeneral::GetRandomNumber, CGeneral::GetRandomNumberInRange
+  true
+end
+
+schema CWeather_AddStreamAfterRain
+  ΔCWeather
+where
+  -- State update: colour' = { 255, 255, 255, 24 }
+  -- State update: groundZ' = pos.z + 0.75f
+  -- State update: rnd' = CGeneral::GetRandomNumber()
+  -- State update: angle' = (CGeneral::GetRandomNumber()&0x7F)/128.0f * TWOPI
+  -- State update: angle' = TheCamera.Orientation + (rnd-128)/160.0f
+  -- State update: pos.x' = TheCamera.GetPosition().x + dist*Sin(angle)
+  -- Invokes: CClock::GetHours, pTargetEntity->GetPosition, TheCamera.GetPosition, CWorld::FindGroundZFor3DCoord, CGeneral::GetRandomNumber
+  true
+end
+
+schema CWeather_AddRain
+  ΔCWeather
+where
+  -- State update: pVehicle' = FindPlayerVehicle()
+  -- State update: screen_width' = SCREEN_WIDTH
+  -- State update: screen_height' = SCREEN_HEIGHT
+  -- State update: cur_frame' = (int)(3 * Rain) & 3
+  -- State update: num_drops' = (int)(2 * Rain) + 2
+  -- State update: STATIC_RAIN_ANGLE' = -45
+  -- Invokes: CCullZones::CamNoRain, CCullZones::PlayerNoRain, TheCamera.GetLookingLRBFirstPerson, pVehicle->CarHasRoof, CParticle::RemovePSystem
+  true
+end
+
+schema Weather_RenderOneRainStreak
+  ΔWeatherModuleState
+  pos? : CVector
+  unused? : CVector
+  intensity? : ℤ
+  scale? : 𝔹
+  distance? : ℝ
+where
+  -- State update: u' = STREAK_U
+  -- State update: v' = STREAK_V
+  -- State update: distance_coefficient' = 1.0f
+  -- State update: distance_coefficient' = 0.5f
+  -- State update: RandomTex' = ((CGeneral::GetRandomNumber() & 255) - 128) * 0.01f
+  -- State update: RandomTexX' = (CGeneral::GetRandomNumber() & 127) * 0.01f
+  -- Invokes: TheCamera.GetUp, TheCamera.GetRight, CTimer::GetIsPaused, CGeneral::GetRandomNumber
+  true
+end
+
+schema CWeather_RenderRainStreaks
+  ΔCWeather
+where
+  -- State update: TempBufferIndicesStored' = 0
+  -- State update: TempBufferVerticesStored' = 0
+  -- State update: timer' = 0
+  -- State update: intensity' = base_intensity * 0.25f
+  -- State update: dir' = Streaks[i].direction
+  -- State update: pos' = Streaks[i].position + secondsElapsed * Streaks[i].direction
+  -- Invokes: CTimer::GetIsCodePaused, CTimeCycle::GetFogReduction, CTimer::GetTimeInMilliseconds, dir.Normalise, TheCamera.GetPosition
+  true
+end
+
+schema CWeather_StoreWeatherState
+  ΔCWeather
+where
+  -- State update: Stored_StateStored' = true
+  -- State update: Stored_InterpolationValue' = InterpolationValue
+  -- State update: Stored_Rain' = Rain
+  -- State update: Stored_NewWeatherType' = NewWeatherType
+  -- State update: Stored_OldWeatherType' = OldWeatherType
+  true
+end
+
+schema CWeather_RestoreWeatherState
+  ΔCWeather
+where
+  -- State update: Stored_StateStored' = false
+  -- State update: InterpolationValue' = Stored_InterpolationValue
+  -- State update: Rain' = Stored_Rain
+  -- State update: NewWeatherType' = Stored_NewWeatherType
+  -- State update: OldWeatherType' = Stored_OldWeatherType
+  true
+end
+
+schema CWeather_ForceHurricaneWeather
+  ΔCWeather
+where
+  -- State update: OldWeatherType' = WEATHER_HURRICANE
+  -- State update: NewWeatherType' = WEATHER_HURRICANE
+  -- State update: ForcedWeatherType' = WEATHER_HURRICANE
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema WeatherModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 970
+end

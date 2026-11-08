@@ -1,0 +1,91 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: rwcore (fakerw)
+-- Source File(s): fakerw/rwcore.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include rw.zpp  (from "rw.h")
+-- include rwplcore.zpp  (from "rwplcore.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RwIm3DTransformFlags ::= rwIM3D_VERTEXUV | rwIM3D_ALLOPAQUE | rwIM3D_NOCLIP | rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA
+  -- val(rwIM3D_VERTEXUV) = rw::im3d::VERTEXUV
+  -- val(rwIM3D_ALLOPAQUE) = rw::im3d::ALLOPAQUE
+  -- val(rwIM3D_NOCLIP) = rw::im3d::NOCLIP
+  -- val(rwIM3D_VERTEXXYZ) = rw::im3d::VERTEXXYZ
+  -- val(rwIM3D_VERTEXRGBA) = rw::im3d::VERTEXRGBA
+
+RwRasterType ::= rwRASTERTYPENORMAL | rwRASTERTYPEZBUFFER | rwRASTERTYPECAMERA | rwRASTERTYPETEXTURE | rwRASTERTYPECAMERATEXTURE | rwRASTERTYPEMASK | rwRASTERDONTALLOCATE
+  -- val(rwRASTERTYPENORMAL) = rw::Raster::NORMAL
+  -- val(rwRASTERTYPEZBUFFER) = rw::Raster::ZBUFFER
+  -- val(rwRASTERTYPECAMERA) = rw::Raster::CAMERA
+  -- val(rwRASTERTYPETEXTURE) = rw::Raster::TEXTURE
+  -- val(rwRASTERTYPECAMERATEXTURE) = rw::Raster::CAMERATEXTURE
+  -- val(rwRASTERTYPEMASK) = 0x07
+  -- val(rwRASTERDONTALLOCATE) = rw::Raster::DONTALLOCATE
+
+RwRasterFormat ::= rwRASTERFORMATDEFAULT | rwRASTERFORMAT1555 | rwRASTERFORMAT565 | rwRASTERFORMAT4444 | rwRASTERFORMATLUM8 | rwRASTERFORMAT8888 | rwRASTERFORMAT888 | rwRASTERFORMAT16 | rwRASTERFORMAT24 | rwRASTERFORMAT32 | rwRASTERFORMAT555 | rwRASTERFORMATAUTOMIPMAP | rwRASTERFORMATPAL8 | rwRASTERFORMATPAL4 | rwRASTERFORMATMIPMAP | rwRASTERFORMATPIXELFORMATMASK | rwRASTERFORMATMASK
+  -- val(rwRASTERFORMATDEFAULT) = rw::Raster::DEFAULT
+  -- val(rwRASTERFORMAT1555) = rw::Raster::C1555
+  -- val(rwRASTERFORMAT565) = rw::Raster::C565
+  -- val(rwRASTERFORMAT4444) = rw::Raster::C4444
+  -- val(rwRASTERFORMATLUM8) = rw::Raster::LUM8
+  -- val(rwRASTERFORMAT8888) = rw::Raster::C8888
+  -- val(rwRASTERFORMAT888) = rw::Raster::C888
+  -- val(rwRASTERFORMAT16) = rw::Raster::D16
+  -- val(rwRASTERFORMAT24) = rw::Raster::D24
+  -- val(rwRASTERFORMAT32) = rw::Raster::D32
+  -- val(rwRASTERFORMAT555) = rw::Raster::C555
+  -- val(rwRASTERFORMATAUTOMIPMAP) = rw::Raster::AUTOMIPMAP
+  -- val(rwRASTERFORMATPAL8) = rw::Raster::PAL8
+  -- val(rwRASTERFORMATPAL4) = rw::Raster::PAL4
+  -- val(rwRASTERFORMATMIPMAP) = rw::Raster::MIPMAP
+  -- val(rwRASTERFORMATPIXELFORMATMASK) = 0x0f00
+  -- val(rwRASTERFORMATMASK) = 0xff00
+
+RwRasterLockMode ::= rwRASTERLOCKWRITE | rwRASTERLOCKREAD | rwRASTERLOCKNOFETCH | rwRASTERLOCKRAW
+  -- val(rwRASTERLOCKWRITE) = rw::Raster::LOCKWRITE
+  -- val(rwRASTERLOCKREAD) = rw::Raster::LOCKREAD
+  -- val(rwRASTERLOCKNOFETCH) = rw::Raster::LOCKNOFETCH
+  -- val(rwRASTERLOCKRAW) = rw::Raster::LOCKRAW
+
+RwRasterFlipMode ::= rwRASTERFLIPDONTWAIT | rwRASTERFLIPWAITVSYNC
+  -- val(rwRASTERFLIPDONTWAIT) = 0
+  -- val(rwRASTERFLIPWAITVSYNC) = 1
+
+RwCameraClearMode ::= rwCAMERACLEARIMAGE | rwCAMERACLEARZ | rwCAMERACLEARSTENCIL
+  -- val(rwCAMERACLEARIMAGE) = 0x1
+  -- val(rwCAMERACLEARZ) = 0x2
+  -- val(rwCAMERACLEARSTENCIL) = 0x4
+
+RwCameraProjection ::= rwNACAMERAPROJECTION | rwPERSPECTIVE | rwPARALLEL
+  -- val(rwNACAMERAPROJECTION) = 0
+  -- val(rwPERSPECTIVE) = 1
+  -- val(rwPARALLEL) = 2
+
+RwFrustumTestResult ::= rwSPHEREOUTSIDE | rwSPHEREBOUNDARY | rwSPHEREINSIDE
+  -- val(rwSPHEREOUTSIDE) = 0
+  -- val(rwSPHEREBOUNDARY) = 1
+  -- val(rwSPHEREINSIDE) = 2
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema rwcoreModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 684
+end

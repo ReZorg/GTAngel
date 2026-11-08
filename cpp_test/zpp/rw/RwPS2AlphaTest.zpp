@@ -1,0 +1,59 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RwPS2AlphaTest (rw)
+-- Source File(s): rw/RwPS2AlphaTest.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rwcore.zpp  (from "rwcore.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+WITHD3D : seq CHAR  -- #define WITHD3D #include "common.h"
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema RwPS2AlphaTest_rxD3D8DualPassRenderCallback
+  ΔRwPS2AlphaTestModuleState
+  repEntry? : Ref[RwResEntry]
+  object? : ADDRESS
+  type? : ℕ
+  flags? : ℕ
+where
+  -- State update: forceBlack' = FALSE
+  -- State update: forceBlack' = TRUE
+  -- State update: atomic' = (RpAtomic *)object
+  -- State update: cam' = RwCameraGetCurrentCamera()
+  -- State update: worldSector' = (RpWorldSector *)object
+  -- State update: cam' = RwCameraGetCurrentCamera()
+  true
+end
+
+schema RwPS2AlphaTest_ReplaceAtomicPipeCallback
+  ΔRwPS2AlphaTestModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RwPS2AlphaTestModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 247
+end

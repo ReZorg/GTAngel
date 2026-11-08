@@ -1,0 +1,132 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script6 (control)
+-- Source File(s): control/Script6.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Cranes.zpp  (from "Cranes.h")
+-- include Credits.zpp  (from "Credits.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Garages.zpp  (from "Garages.h")
+-- include General.zpp  (from "General.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Phones.zpp  (from "Phones.h")
+-- include Population.zpp  (from "Population.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Record.zpp  (from "Record.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include Restart.zpp  (from "Restart.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include main.zpp  (from "main.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include Sprite.zpp  (from "Sprite.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include CustomSoundTrack.zpp  (from "CustomSoundTrack.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRunningScript_ThisIsAValidRandomCop
+  ΔCRunningScript
+  mi? : ℕ
+  cop? : ℤ
+  swat? : ℤ
+  fbi? : ℤ
+  army? : ℤ
+  miami? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CRunningScript_ThisIsAValidRandomPed
+  ΔCRunningScript
+  pedtype? : ℕ
+  civ? : ℤ
+  gang? : ℤ
+  criminal? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = civ
+  -- Return postcondition: result! = gang
+  -- Return postcondition: result! = criminal
+  true
+end
+
+schema CRunningScript_ProcessCommands1000To1099
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPlayerPed' = CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed
+  -- State update: pPlayerInfo' = &CWorld::Players[GET_INTEGER_PARAM(0)]
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CPools::GetPedPool, pPed->IsPedInControl, CMessages::ClearSmallMessagesOnly, CCranes::HaveAllCarsBeenCollectedByMilitaryCrane, CPools::GetVehiclePool
+  true
+end
+
+schema CRunningScript_ProcessCommands1100To1199
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pObject' = CPools::GetObjectPool().GetAt(GET_INTEGER_PARAM(0))
+  -- State update: pPed' = CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed
+  -- State update: pTestedPed' = CPools::GetPedPool().GetAt(GET_INTEGER_PARAM(1))
+  -- State update: pTarget' = pPed.m_pPointGunAt
+  -- State update: nCounter' = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTheScripts::ReadTextLabelFromScript, CPools::GetVehiclePool, CCarCtrl::JoinCarWithRoadSystemGotoCoors, CPad::GetPad, CPools::GetObjectPool
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema Script6ModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1910
+end

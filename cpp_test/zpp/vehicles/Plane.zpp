@@ -1,0 +1,503 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Plane (vehicles)
+-- Source File(s): vehicles/Plane.cpp, vehicles/Plane.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include General.zpp  (from "General.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include Explosion.zpp  (from "Explosion.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include World.zpp  (from "World.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Plane.zpp  (from "Plane.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+CRUISE_SPEED : ℝ  -- #define CRUISE_SPEED (50.0f)
+TAXI_SPEED : ℝ  -- #define TAXI_SPEED (5.0f)
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Plane_Enum_1 ::= CESNA_STATUS_NONE | CESNA_STATUS_FLYING | CESNA_STATUS_DESTROYED | CESNA_STATUS_LANDED
+
+ePlaneNodes ::= PLANE_BACKROTOR | PLANE_WHEEL_READ | NUM_PLANE_NODES
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CPlaneNode
+  p : CVector
+  t : ℝ
+  bOnGround : 𝔹
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CPlaneInterpolationLine
+  type : ℕ
+  time : ℝ
+  position : ℝ
+  speed : ℝ
+  acceleration : ℝ
+where
+  type ≥ 0
+end
+
+schema CPlane
+  CVehicle  -- inherits base schema
+  m_fRotorRotation : ℝ
+  m_isFarAway : ℤ
+  m_nCurPathNode : ℤ
+  m_fSpeed : ℝ
+  m_nFrameWhenHit : ℕ
+  m_bHasBeenHit : 𝔹
+  m_bIsDrugRunCesna : 𝔹
+  m_bIsDropOffCesna : 𝔹
+  m_bTempPlane : 𝔹
+where
+  m_nFrameWhenHit ≥ 0
+end
+
+schema CPlane_CPlane
+  ΔCPlane
+  id? : ℤ
+  CreatedBy? : ℕ
+where
+  -- Declared member operation CPlane::CPlane(int32 id, uint8 CreatedBy)
+  true
+end
+
+schema CPlane_CPlane_2
+  ΔCPlane
+  result! : ANY
+where
+  -- Declared member operation CPlane::CPlane(void)
+  true
+end
+
+schema CPlane_SetModelIndex_3
+  ΔCPlane
+  id? : ℕ
+where
+  -- Declared member operation CPlane::SetModelIndex(uint32 id)
+  true
+end
+
+schema CPlane_DeleteRwObject_4
+  ΔCPlane
+where
+  -- Declared member operation CPlane::DeleteRwObject(void)
+  true
+end
+
+schema CPlane_ProcessControl_5
+  ΔCPlane
+where
+  -- Declared member operation CPlane::ProcessControl(void)
+  true
+end
+
+schema CPlane_PreRender_6
+  ΔCPlane
+where
+  -- Declared member operation CPlane::PreRender(void)
+  true
+end
+
+schema CPlane_Render_7
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Render(void)
+  true
+end
+
+schema CPlane_FlagToDestroyWhenNextProcessed_8
+  ΔCPlane
+where
+  -- Declared member operation CPlane::FlagToDestroyWhenNextProcessed()
+  true
+end
+
+schema CPlane_RenderAllRemaning_9
+  ΔCPlane
+  result! : void
+where
+  -- Declared member operation CPlane::RenderAllRemaning(void)
+  true
+end
+
+schema CPlane_InitPlanes_10
+  ΔCPlane
+where
+  -- Declared member operation CPlane::InitPlanes(void)
+  true
+end
+
+schema CPlane_Shutdown_11
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Shutdown(void)
+  true
+end
+
+schema CPlane_LoadPath_12
+  ΔCPlane
+  filename? : seq CHAR
+  numNodes? : ℤ
+  totalLength? : ℝ
+  loop? : 𝔹
+  result! : Ref[CPlaneNode]
+where
+  -- Declared member operation CPlane::LoadPath(char const *filename, int32 &numNodes, float &totalLength, bool loop)
+  true
+end
+
+schema CPlane_RemoveTemporaryPlanes_13
+  ΔCPlane
+where
+  -- Declared member operation CPlane::RemoveTemporaryPlanes(void)
+  true
+end
+
+schema CPlane_UpdatePlanes_14
+  ΔCPlane
+where
+  -- Declared member operation CPlane::UpdatePlanes(void)
+  true
+end
+
+schema CPlane_TestRocketCollision_15
+  ΔCPlane
+  rocketPos? : Ref[CVector]
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::TestRocketCollision(CVector *rocketPos)
+  true
+end
+
+schema CPlane_CreateIncomingCesna_16
+  ΔCPlane
+where
+  -- Declared member operation CPlane::CreateIncomingCesna(void)
+  true
+end
+
+schema CPlane_CreateDropOffCesna_17
+  ΔCPlane
+where
+  -- Declared member operation CPlane::CreateDropOffCesna(void)
+  true
+end
+
+schema CPlane_FindDrugPlaneCoordinates_18
+  ΔCPlane
+  result! : CVector
+where
+  -- Declared member operation CPlane::FindDrugPlaneCoordinates(void)
+  true
+end
+
+schema CPlane_FindDropOffCesnaCoordinates_19
+  ΔCPlane
+  result! : CVector
+where
+  -- Declared member operation CPlane::FindDropOffCesnaCoordinates(void)
+  true
+end
+
+schema CPlane_HasCesnaLanded_20
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::HasCesnaLanded(void)
+  true
+end
+
+schema CPlane_HasCesnaBeenDestroyed_21
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::HasCesnaBeenDestroyed(void)
+  true
+end
+
+schema CPlane_HasDropOffCesnaBeenShotDown_22
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Declared member operation CPlane::HasDropOffCesnaBeenShotDown(void)
+  true
+end
+
+schema CPlane_Load_23
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Load(void)
+  true
+end
+
+schema CPlane_Save_24
+  ΔCPlane
+where
+  -- Declared member operation CPlane::Save(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPlane_CPlane
+  ΔCPlane
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlane_SetModelIndex
+  ΔCPlane
+  id? : ℕ
+where
+  -- Invokes: CVehicle::SetModelIndex, CClumpModelInfo::FillFrameArray
+  true
+end
+
+schema CPlane_DeleteRwObject
+  ΔCPlane
+where
+  -- State update: f' = RpAtomicGetFrame((RpAtomic*)m_rwObject)
+  -- State update: m_rwObject' = ∅
+  -- Invokes: CEntity::DeleteRwObject
+  true
+end
+
+schema CPlane_ProcessControl
+  ΔCPlane
+where
+  -- State update: frm' = CTimer::GetFrameCounter() - m_nFrameWhenHit
+  -- State update: dir.x' = CGeneral::GetRandomNumberInRange(-2.0f, 2.0f)
+  -- State update: dir.y' = CGeneral::GetRandomNumberInRange(-2.0f, 2.0f)
+  -- State update: dir.z' = CGeneral::GetRandomNumberInRange(0.0f, 2.0f)
+  -- State update: rotSpeed' = CGeneral::GetRandomNumberInRange(10, 30)
+  -- State update: rotSpeed' = -rotSpeed
+  -- Invokes: CTimer::GetFrameCounter, CExplosion::AddExplosion, CGeneral::GetRandomNumberInRange, CGeneral::GetRandomNumber, CParticle::AddParticle
+  true
+end
+
+schema CPlane_PreRender
+  ΔCPlane
+where
+  -- State update: lookVector' = GetPosition() - TheCamera.GetPosition()
+  -- State update: camDist' = lookVector.Magnitude()
+  -- State update: lookVector' = CVector(1.0f, 0.0f, 0.0f)
+  -- State update: behindness' = DotProduct(lookVector, GetForward())
+  -- State update: lightPos' = mi.m_positions[PLANE_POS_LIGHT_RIGHT]
+  -- State update: lightR' = GetMatrix() * lightPos
+  -- Invokes: CModelInfo::GetModelInfo, TheCamera.GetPosition, lookVector.Magnitude, CCoronas::RegisterCorona, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPlane_Render
+  ΔCPlane
+where
+  -- Invokes: CCutsceneMgr::IsRunning, CEntity::Render
+  true
+end
+
+schema CPlane_RenderAllRemaning
+  ΔCPlane
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlane_InitPlanes
+  ΔCPlane
+where
+  -- State update: CesnaMissionStatus' = CESNA_STATUS_NONE
+  -- State update: p.z' = colpoint.point.z
+  -- State update: bOnGround' = true
+  -- State update: bOnGround' = false
+  -- State update: LandingPoint' = -1.0f
+  -- State update: TakeOffPoint' = -1.0f
+  -- Invokes: CWorld::ProcessVerticalLine, CStreaming::LoadAllRequestedModels, CStreaming::RequestModel, plane->GetMatrix, plane->SetStatus
+  true
+end
+
+schema CPlane_Shutdown
+  ΔCPlane
+where
+  -- State update: pPathNodes' = ∅
+  -- State update: pPath2Nodes' = ∅
+  -- State update: pPath3Nodes' = ∅
+  -- State update: pPath4Nodes' = ∅
+  true
+end
+
+schema CPlane_LoadPath
+  ΔCPlane
+  filename? : seq CHAR
+  numNodes? : ℤ
+  totalLength? : ℝ
+  loop? : 𝔹
+where
+  -- State update: gString' = '\0'
+  -- State update: lp' = 0
+  -- State update: nodes' = new CPlaneNode[numNodes]
+  -- State update: lp' = 0
+  -- State update: totalLength' = 0.0f
+  -- State update: t' = totalLength
+  -- Return postcondition: result! = nodes
+  -- Invokes: CFileMgr::LoadFile
+  true
+end
+
+schema CPlane_UpdatePlanes
+  ΔCPlane
+where
+  -- State update: time' = CTimer::GetTimeInMilliseconds()
+  -- State update: t' = TotalDurationOfFlightPath * (float)(time & 0x7FFFF)/0x80000
+  -- State update: deltaT' = t - aPlaneLineBits[j].time
+  -- State update: time' = CTimer::GetTimeInMilliseconds()
+  -- State update: t' = TotalDurationOfFlightPath2/0x80000
+  -- State update: t' = TotalDurationOfFlightPath3/0x80000
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetTimeInMilliseconds, CStreaming::HasModelLoaded, plane->GetMatrix, plane->SetStatus
+  true
+end
+
+schema CPlane_RemoveTemporaryPlanes
+  ΔCPlane
+where
+  -- State update: plane' = (CPlane*)CPools::GetVehiclePool().GetSlot(i)
+  -- State update: bCesnasActivated' = false
+  -- State update: bHelisActivated' = false
+  -- Invokes: CPools::GetVehiclePool, plane->IsPlane, CWorld::Remove
+  true
+end
+
+schema CPlane_TestRocketCollision
+  ΔCPlane
+  rocketPos? : Ref[CVector]
+where
+  -- State update: plane' = (CPlane*)CPools::GetVehiclePool().GetSlot(i)
+  -- State update: plane.m_nFrameWhenHit' = CTimer::GetFrameCounter()
+  -- State update: plane.m_bHasBeenHit' = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CPools::GetVehiclePool, plane->GetModelIndex, plane->GetPosition, CTimer::GetFrameCounter, m_pWanted->RegisterCrime_Immediately
+  true
+end
+
+schema CPlane_CreateIncomingCesna
+  ΔCPlane
+where
+  -- State update: pDrugRunCesna' = ∅
+  -- State update: pDrugRunCesna' = new CPlane(MI_DEADDODO, PERMANENT_VEHICLE)
+  -- State update: pDrugRunCesna.bIsLocked' = true
+  -- State update: pDrugRunCesna.m_nPlaneId' = 0
+  -- State update: pDrugRunCesna.m_nCurPathNode' = 0
+  -- State update: pDrugRunCesna.m_bIsDrugRunCesna' = true
+  -- Invokes: CWorld::Remove, pDrugRunCesna->GetMatrix, pDrugRunCesna->SetStatus, CWorld::Add, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPlane_CreateDropOffCesna
+  ΔCPlane
+where
+  -- State update: pDropOffCesna' = ∅
+  -- State update: pDropOffCesna' = new CPlane(MI_DEADDODO, PERMANENT_VEHICLE)
+  -- State update: pDropOffCesna.bIsLocked' = true
+  -- State update: pDropOffCesna.m_nPlaneId' = 0
+  -- State update: pDropOffCesna.m_nCurPathNode' = 0
+  -- State update: pDropOffCesna.m_bIsDropOffCesna' = true
+  -- Invokes: CWorld::Remove, pDropOffCesna->GetMatrix, pDropOffCesna->SetStatus, CWorld::Add, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPlane_FindDrugPlaneCoordinates
+  ΔCPlane
+  result! : CVector
+where
+  -- Return postcondition: result! = pDrugRunCesna->GetPosition()
+  -- Invokes: pDrugRunCesna->GetPosition
+  true
+end
+
+schema CPlane_FindDropOffCesnaCoordinates
+  ΔCPlane
+  result! : CVector
+where
+  -- Return postcondition: result! = pDropOffCesna->GetPosition()
+  -- Invokes: pDropOffCesna->GetPosition
+  true
+end
+
+schema CPlane_HasCesnaLanded
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Return postcondition: result! = CesnaMissionStatus == CESNA_STATUS_LANDED
+  true
+end
+
+schema CPlane_HasCesnaBeenDestroyed
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Return postcondition: result! = CesnaMissionStatus == CESNA_STATUS_DESTROYED
+  true
+end
+
+schema CPlane_HasDropOffCesnaBeenShotDown
+  ΔCPlane
+  result! : 𝔹
+where
+  -- Return postcondition: result! = DropOffCesnaMissionStatus == CESNA_STATUS_DESTROYED
+  true
+end
+
+schema CPlane_Load
+  ΔCPlane
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlane_Save
+  ΔCPlane
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Plane_FlagToDestroyWhenNextProcessed
+  ΔPlaneModuleState
+where
+  -- State update: bRemoveFromWorld' = true
+  true
+end

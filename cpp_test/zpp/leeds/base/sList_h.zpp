@@ -1,0 +1,97 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: sList (leeds)
+-- Source File(s): leeds/base/sList.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema cSList
+  item : T
+  first : Ref[tSItem]
+where
+  #first ≤ 1
+end
+
+schema cSList_cSList
+  ΔcSList
+where
+  -- Declared member operation cSList::cSList()
+  true
+end
+
+schema cSList_Insert_2
+  ΔcSList
+  item? : Ref[tSItem]
+  result! : void
+where
+  -- Declared member operation cSList::Insert(tSItem* item)
+  true
+end
+
+schema cSList_Remove_3
+  ΔcSList
+  item? : Ref[tSItem]
+  result! : void
+where
+  -- Declared member operation cSList::Remove(tSItem* item)
+  true
+end
+
+schema cSList_while_4
+  ΔcSList
+  arg_1? : i__i__next
+where
+  -- Declared member operation cSList::while(i && i->next != item)
+  true
+end
+
+schema cSList_assert_5
+  ΔcSList
+  arg_1? : i
+where
+  -- Declared member operation cSList::assert(i)
+  true
+end
+
+schema tSItem
+  next : Ref[tSItem]
+  item : T
+where
+  #next ≤ 1
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema sList_cSList
+  ΔsListModuleState
+where
+  -- State update: first' = ∅
+  true
+end
+
+schema sList_Insert
+  ΔsListModuleState
+  item? : Ref[tSItem]
+where
+  -- State update: first' = item
+  -- State update: item.next' = n
+  true
+end
+
+schema sList_Remove
+  ΔsListModuleState
+  item? : Ref[tSItem]
+where
+  -- State update: first' = item.next
+  -- State update: i.next' = item.next
+  true
+end

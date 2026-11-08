@@ -1,0 +1,248 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: DamageManager (vehicles)
+-- Source File(s): vehicles/DamageManager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+eEngineStatus ::= ENGINE_STATUS_STEAM1 | ENGINE_STATUS_STEAM2 | ENGINE_STATUS_SMOKE | ENGINE_STATUS_ON_FIRE
+  -- val(ENGINE_STATUS_STEAM1) = 100
+  -- val(ENGINE_STATUS_STEAM2) = 150
+  -- val(ENGINE_STATUS_SMOKE) = 200
+  -- val(ENGINE_STATUS_ON_FIRE) = 225
+
+eDoorStatus ::= DOOR_STATUS_OK | DOOR_STATUS_SMASHED | DOOR_STATUS_SWINGING | DOOR_STATUS_MISSING
+
+ePanelStatus ::= PANEL_STATUS_OK | PANEL_STATUS_SMASHED1 | PANEL_STATUS_SMASHED2 | PANEL_STATUS_MISSING
+
+eWheelStatus ::= WHEEL_STATUS_OK | WHEEL_STATUS_BURST | WHEEL_STATUS_MISSING
+
+eLightStatus ::= LIGHT_STATUS_OK | LIGHT_STATUS_BROKEN
+
+tComponent ::= COMPONENT_DEFAULT | COMPONENT_WHEEL_FRONT_LEFT | COMPONENT_WHEEL_FRONT_RIGHT | COMPONENT_WHEEL_REAR_LEFT | COMPONENT_WHEEL_REAR_RIGHT | COMPONENT_DOOR_BONNET | COMPONENT_DOOR_BOOT | COMPONENT_DOOR_FRONT_LEFT | COMPONENT_DOOR_FRONT_RIGHT | COMPONENT_DOOR_REAR_LEFT | COMPONENT_DOOR_REAR_RIGHT | COMPONENT_PANEL_FRONT_LEFT | COMPONENT_PANEL_FRONT_RIGHT | COMPONENT_PANEL_REAR_LEFT | COMPONENT_PANEL_REAR_RIGHT | COMPONENT_PANEL_WINDSCREEN | COMPONENT_BUMPER_FRONT | COMPONENT_BUMPER_REAR
+
+tComponentGroup ::= COMPGROUP_BUMPER | COMPGROUP_WHEEL | COMPGROUP_DOOR | COMPGROUP_BONNET | COMPGROUP_BOOT | COMPGROUP_PANEL | COMPGROUP_DEFAULT
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CDamageManager
+  m_fWheelDamageEffect : ℝ
+  m_bSmashedDoorDoesntClose : 𝔹
+  m_engineStatus : ℕ
+  m_wheelStatus : seq ℕ  -- bounded array [4]
+  m_doorStatus : seq ℕ  -- bounded array [6]
+  m_lightStatus : ℕ
+  m_panelStatus : ℕ
+  field_18 : ℕ
+where
+  m_engineStatus ≥ 0
+  #m_wheelStatus = 4
+  #m_doorStatus = 6
+  m_lightStatus ≥ 0
+  m_panelStatus ≥ 0
+  field_18 ≥ 0
+end
+
+schema CDamageManager_CDamageManager
+  ΔCDamageManager
+where
+  -- Declared member operation CDamageManager::CDamageManager(void)
+  true
+end
+
+schema CDamageManager_ResetDamageStatus_2
+  ΔCDamageManager
+where
+  -- Declared member operation CDamageManager::ResetDamageStatus(void)
+  true
+end
+
+schema CDamageManager_FuckCarCompletely_3
+  ΔCDamageManager
+where
+  -- Declared member operation CDamageManager::FuckCarCompletely(void)
+  true
+end
+
+schema CDamageManager_ApplyDamage_4
+  ΔCDamageManager
+  component? : tComponent
+  damage? : ℝ
+  unused? : ℝ
+  result! : 𝔹
+where
+  -- Declared member operation CDamageManager::ApplyDamage(tComponent component, float damage, float unused)
+  true
+end
+
+schema CDamageManager_GetComponentGroup_5
+  ΔCDamageManager
+  component? : tComponent
+  componentGroup? : Ref[tComponentGroup]
+  foo? : ℙ ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CDamageManager::GetComponentGroup(tComponent component, tComponentGroup *componentGroup, uint8 *foo)
+  true
+end
+
+schema CDamageManager_SetDoorStatus_6
+  ΔCDamageManager
+  door? : ℤ
+  status? : ℕ
+where
+  -- Declared member operation CDamageManager::SetDoorStatus(int32 door, uint32 status)
+  true
+end
+
+schema CDamageManager_GetDoorStatus_7
+  ΔCDamageManager
+  door? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CDamageManager::GetDoorStatus(int32 door)
+  true
+end
+
+schema CDamageManager_ProgressDoorDamage_8
+  ΔCDamageManager
+  door? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CDamageManager::ProgressDoorDamage(uint8 door)
+  true
+end
+
+schema CDamageManager_SetPanelStatus_9
+  ΔCDamageManager
+  panel? : ℤ
+  status? : ℕ
+where
+  -- Declared member operation CDamageManager::SetPanelStatus(int32 panel, uint32 status)
+  true
+end
+
+schema CDamageManager_GetPanelStatus_10
+  ΔCDamageManager
+  panel? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CDamageManager::GetPanelStatus(int32 panel)
+  true
+end
+
+schema CDamageManager_ProgressPanelDamage_11
+  ΔCDamageManager
+  panel? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CDamageManager::ProgressPanelDamage(uint8 panel)
+  true
+end
+
+schema CDamageManager_GetPanelStatus_12
+  ΔCDamageManager
+  panelstatus? : ℕ
+  panel? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CDamageManager::GetPanelStatus(uint32 panelstatus, int32 panel)
+  true
+end
+
+schema CDamageManager_SetLightStatus_13
+  ΔCDamageManager
+  light? : eLights
+  status? : ℕ
+  result! : void
+where
+  -- Declared member operation CDamageManager::SetLightStatus(eLights light, uint32 status)
+  true
+end
+
+schema CDamageManager_GetLightStatus_14
+  ΔCDamageManager
+  light? : eLights
+  result! : ℤ
+where
+  -- Declared member operation CDamageManager::GetLightStatus(eLights light)
+  true
+end
+
+schema CDamageManager_SetWheelStatus_15
+  ΔCDamageManager
+  wheel? : ℤ
+  status? : ℕ
+where
+  -- Declared member operation CDamageManager::SetWheelStatus(int32 wheel, uint32 status)
+  true
+end
+
+schema CDamageManager_GetWheelStatus_16
+  ΔCDamageManager
+  wheel? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CDamageManager::GetWheelStatus(int32 wheel)
+  true
+end
+
+schema CDamageManager_ProgressWheelDamage_17
+  ΔCDamageManager
+  wheel? : ℕ
+  result! : 𝔹
+where
+  -- Declared member operation CDamageManager::ProgressWheelDamage(uint8 wheel)
+  true
+end
+
+schema CDamageManager_SetEngineStatus_18
+  ΔCDamageManager
+  status? : ℕ
+where
+  -- Declared member operation CDamageManager::SetEngineStatus(uint32 status)
+  true
+end
+
+schema CDamageManager_GetEngineStatus_19
+  ΔCDamageManager
+  result! : ℤ
+where
+  -- Declared member operation CDamageManager::GetEngineStatus(void)
+  true
+end
+
+schema CDamageManager_ProgressEngineDamage_20
+  ΔCDamageManager
+  result! : 𝔹
+where
+  -- Declared member operation CDamageManager::ProgressEngineDamage(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema DamageManager_GetPanelStatus
+  ΔDamageManagerModuleState
+  panelstatus? : ℕ
+  panel? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = ldb(panel*4, 4, panelstatus)
+  true
+end

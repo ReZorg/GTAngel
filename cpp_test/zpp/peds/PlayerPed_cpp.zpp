@@ -1,0 +1,306 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PlayerPed (peds)
+-- Source File(s): peds/PlayerPed.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Fire.zpp  (from "Fire.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include WeaponEffects.zpp  (from "WeaponEffects.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include World.zpp  (from "World.h")
+-- include RpAnimBlend.zpp  (from "RpAnimBlend.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include General.zpp  (from "General.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Darkel.zpp  (from "Darkel.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Population.zpp  (from "Population.h")
+-- include Script.zpp  (from "Script.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PAD_MOVE_TO_GAME_WORLD_MOVE : ℝ  -- #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema animAndGroup
+  animId : AnimationId
+  groupId : AssocGroupId
+where
+  instance_addr ∈ ADDRESS
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema PlayerPed_GetPadFromPlayer
+  ΔPlayerPedModuleState
+  arg_1? : Ref[CPlayerPed]
+where
+  -- Return postcondition: result! = CPad::GetPad(0)
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema CPlayerPed_CPlayerPed
+  ΔCPlayerPed
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlayerPed_ClearWeaponTarget
+  ΔCPlayerPed
+where
+  -- Invokes: TheCamera.ClearPlayerWeaponMode, CWeaponEffects::ClearCrossHair
+  true
+end
+
+schema CPlayerPed_SetWantedLevel
+  ΔCPlayerPed
+  level? : ℤ
+where
+  -- Invokes: m_pWanted->SetWantedLevel
+  true
+end
+
+schema CPlayerPed_SetWantedLevelNoDrop
+  ΔCPlayerPed
+  level? : ℤ
+where
+  -- Invokes: m_pWanted->SetWantedLevelNoDrop
+  true
+end
+
+schema CPlayerPed_MakeObjectTargettable
+  ΔCPlayerPed
+  handle? : ℤ
+where
+  -- Invokes: CPools::GetObjectPool
+  true
+end
+
+schema CPlayerPed_AnnoyPlayerPed
+  ΔCPlayerPed
+  annoyedByPassingEntity? : 𝔹
+where
+  -- State update: m_pedStats.m_temper' = 46
+  true
+end
+
+schema CPlayerPed_ClearAdrenaline
+  ΔCPlayerPed
+where
+  -- State update: m_nAdrenalineTime' = 0
+  -- Invokes: CTimer::SetTimeScale
+  true
+end
+
+schema CPlayerPed_GetPlayerInfoForThisPlayerPed
+  ΔCPlayerPed
+where
+  -- Return postcondition: result! = &CWorld::Players[0]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CPlayerPed_SetupPlayerPed
+  ΔCPlayerPed
+  index? : ℤ
+where
+  -- State update: player' = new CPlayerPed()
+  -- State update: m_pPed' = player
+  -- State update: player.m_wepAccuracy' = 100
+  -- Invokes: player->RegisterReference, player->SetOrientation, CWorld::Add, VarConsole.Add
+  true
+end
+
+schema CPlayerPed_DeactivatePlayerPed
+  ΔCPlayerPed
+  index? : ℤ
+where
+  -- Invokes: CWorld::Remove
+  true
+end
+
+schema CPlayerPed_ReactivatePlayerPed
+  ΔCPlayerPed
+  index? : ℤ
+where
+  -- Invokes: CWorld::Add
+  true
+end
+
+schema CPlayerPed_UseSprintEnergy
+  ΔCPlayerPed
+where
+  -- State update: m_fCurrentStamina' = m_fCurrentStamina - CTimer::GetTimeStep()
+  -- State update: m_fStaminaProgress' = m_fStaminaProgress + CTimer::GetTimeStep()
+  -- State update: m_fStaminaProgress' = 0
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CPlayerPed_MakeChangesForNewWeapon
+  ΔCPlayerPed
+  weapon? : eWeaponType
+where
+  -- State update: m_nSelectedWepSlot' = m_currentWeapon
+  -- Invokes: TheCamera.ClearPlayerWeaponMode, CWeaponInfo::GetWeaponInfo, weaponAnim->SetRun
+  true
+end
+
+schema CPlayerPed_MakeChangesForNewWeapon_2
+  ΔCPlayerPed
+  slot? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPlayerPed_ReApplyMoveAnims
+  ΔCPlayerPed
+where
+  -- State update: curMoveAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), moveAnims[i])
+  -- State update: newMoveAssoc.blendDelta' = curMoveAssoc.blendDelta
+  -- State update: newMoveAssoc.blendAmount' = curMoveAssoc.blendAmount
+  -- State update: curMoveAssoc.blendDelta' = -1000.0f
+  -- Invokes: CGeneral::faststrcmp, CAnimManager::GetAnimAssociation, CAnimManager::AddAnimation
+  true
+end
+
+schema CPlayerPed_SetInitialState
+  ΔCPlayerPed
+where
+  -- State update: m_nDrunkenness' = 0
+  -- State update: m_nFadeDrunkenness' = 0
+  -- State update: m_nDrunkCountdown' = 0
+  -- State update: m_bAdrenalineActive' = false
+  -- State update: m_nAdrenalineTime' = 0
+  -- State update: m_pSeekTarget' = ∅
+  -- Invokes: CMBlur::ClearDrunkBlur, CTimer::SetTimeScale, m_pFire->Extinguish
+  true
+end
+
+schema CPlayerPed_SetRealMoveAnim
+  ΔCPlayerPed
+where
+  -- State update: curWalkAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_WALK)
+  -- State update: curRunAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_RUN)
+  -- State update: curIdleAssoc' = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE)
+  -- State update: bResetWalkAnims' = false
+  -- State update: curRunStopAssoc.blendAmount' = 1.0f
+  -- State update: curRunStopAssoc.blendDelta' = -8.0f
+  -- Invokes: curWalkAssoc->SetCurrentTime, curRunAssoc->SetCurrentTime, curSprintAssoc->SetCurrentTime, curRunStopAssoc->IsRunning, curRunStopRAssoc->IsRunning
+  true
+end
+
+schema CPlayerPed_RestoreSprintEnergy
+  ΔCPlayerPed
+  restoreSpeed? : ℝ
+where
+  -- Invokes: CTimer::GetTimeStep
+  true
+end
+
+schema CPlayerPed_DoWeaponSmoothSpray
+  ΔCPlayerPed
+where
+  -- State update: weaponInfo' = CWeaponInfo::GetWeaponInfo(GetWeapon().m_eWeaponType)
+  -- Return postcondition: result! = PI / 176.f
+  -- Return postcondition: result! = -1.0f
+  -- Return postcondition: result! = -1.0f
+  -- Invokes: CWeaponInfo::GetWeaponInfo
+  true
+end
+
+schema CPlayerPed_DoStuffToGoOnFire
+  ΔCPlayerPed
+where
+  -- Invokes: TheCamera.ClearPlayerWeaponMode
+  true
+end
+
+schema CPlayerPed_DoesTargetHaveToBeBroken
+  ΔCPlayerPed
+  target? : CVector
+  weaponUsed? : Ref[CWeapon]
+where
+  -- State update: distVec' = target - GetPosition()
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: distVec.Magnitude, CWeaponInfo::GetWeaponInfo, distVec.Normalise
+  true
+end
+
+schema CPlayerPed_RunningLand
+  ΔCPlayerPed
+  padUsed? : Ref[CPad]
+where
+  -- State update: landAssoc.blendDelta' = -1000.0f
+  -- Invokes: padUsed->GetPedWalkLeftRight, padUsed->GetPedWalkUpDown, CAnimManager::AddAnimation
+  true
+end
+
+schema CPlayerPed_IsThisPedAnAimingPriority
+  ΔCPlayerPed
+  suspect? : Ref[CPed]
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CPlayerPed_PlayerControlSniper
+  ΔCPlayerPed
+  padUsed? : Ref[CPad]
+where
+  -- State update: bCrouchWhenShooting' = true
+  -- State update: bCrouchWhenShooting' = false
+  -- State update: firePos' = GetMatrix() * firePos
+  -- State update: m_nPadDownPressedInMilliseconds' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: padUsed->DuckJustDown, padUsed->GetTarget, TheCamera.ClearPlayerWeaponMode, padUsed->WeaponJustDown, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CPlayerPed_ProcessWeaponSwitch
+  ΔCPlayerPed
+  padUsed? : Ref[CPad]
+where
+  -- State update: m_nSelectedWepSlot' = m_currentWeapon + 1
+  -- State update: m_nSelectedWepSlot' = 0
+  -- State update: m_nSelectedWepSlot' = m_currentWeapon - 1
+  -- State update: m_nSelectedWepSlot' = TOTAL_WEAPON_SLOTS - 1
+  -- State update: m_nSelectedWepSlot' = WEAPONSLOT_PROJECTILE
+  -- State update: m_nSelectedWepSlot' = m_currentWeapon - 1
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Invokes: CDarkel::FrenzyOnGoing, padUsed->CycleWeaponRightJustDown, padUsed->CycleWeaponLeftJustDown, CWeaponInfo::GetWeaponInfo, padUsed->GetWeapon
+  true
+end

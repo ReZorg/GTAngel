@@ -1,0 +1,932 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PathFind (control)
+-- Source File(s): control/PathFind.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include World.zpp  (from "World.h")
+-- include Lines.zpp  (from "Lines.h")
+-- include PathFind.zpp  (from "PathFind.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+MAX_DIST : seq CHAR  -- #define MAX_DIST INT16_MAX-1
+MIN_PED_ROUTE_DISTANCE : ℝ  -- #define MIN_PED_ROUTE_DISTANCE 23.8f
+NUMTEMPNODES : ℕ  -- #define NUMTEMPNODES 5000
+NUMDETACHED_CARS : ℕ  -- #define NUMDETACHED_CARS 1024
+NUMDETACHED_PEDS : ℕ  -- #define NUMDETACHED_PEDS 1214
+NUMTEMPEXTERNALNODES : ℕ  -- #define NUMTEMPEXTERNALNODES 4600
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPedPath_CalcPedRoute
+  ΔCPedPath
+  pathType? : ℤ
+  position? : CVector
+  destination? : CVector
+  pointPoses? : Ref[CVector]
+  pointsFound? : ℙ ℤ
+  maxPoints? : ℤ
+where
+  -- State update: pointsFound' = 0
+  -- State update: vecDistance' = destination - position
+  -- State update: vecPos' = (position + destination) * 0.5f
+  -- State update: nodeStartX' = (position.x - vecSectorStartPos.x) / 0.7f
+  -- State update: nodeStartY' = (position.y - vecSectorStartPos.y) / 0.7f
+  -- State update: nodeEndX' = (destination.x - vecSectorStartPos.x) / 0.7f
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CWorld::AdvanceCurrentScanCode, CWorld::GetSectorIndexX, CWorld::GetSectorIndexY, CWorld::GetSector
+  true
+end
+
+schema CPedPath_AddNodeToPathList
+  ΔCPedPath
+  pNodeToAdd? : Ref[CPedPathNode]
+  id? : ℤ
+  pNodeList? : Ref[CPedPathNode]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedPath_RemoveNodeFromList
+  ΔCPedPath
+  pNode? : Ref[CPedPathNode]
+where
+  -- State update: pNode.next.prev' = pNode.prev
+  -- State update: pNode.prev.next' = pNode.next
+  true
+end
+
+schema CPedPath_AddNodeToList
+  ΔCPedPath
+  pNode? : Ref[CPedPathNode]
+  index? : ℤ
+  pList? : Ref[CPedPathNode]
+where
+  -- State update: pNode.prev' = pList[index].prev
+  -- State update: pNode.next' = &pList[index]
+  -- State update: prev.next' = pNode
+  -- State update: prev' = pNode
+  -- State update: pNode.id' = index
+  true
+end
+
+schema CPathInfoForObject_SwapConnectionsToBeRightWayRound
+  ΔCPathInfoForObject
+where
+  -- State update: tile' = this
+  -- State update: e' = 0
+  -- State update: next' = i
+  -- State update: next' = -1
+  -- State update: tmp' = !!tile[e].crossing
+  -- State update: crossing' = tile[i].crossing
+  true
+end
+
+schema CPathFind_Init
+  ΔCPathFind
+where
+  -- State update: m_numPathNodes' = 0
+  -- State update: m_numMapObjects' = 0
+  -- State update: m_numConnections' = 0
+  -- State update: m_numCarPathLinks' = 0
+  -- State update: unk' = 0
+  -- State update: NumTempExternalNodes' = 0
+  true
+end
+
+schema CPathFind_AllocatePathFindInfoMem
+  ΔCPathFind
+  numPathGroups? : ℤ
+where
+  -- State update: InfoForTileCars' = ∅
+  -- State update: InfoForTilePeds' = ∅
+  -- State update: InfoForTileCars' = new CPathInfoForObject[12*PATHNODESIZE]
+  -- State update: InfoForTilePeds' = new CPathInfoForObject[12*PATHNODESIZE]
+  -- State update: DetachedInfoForTileCars' = ∅
+  -- State update: DetachedInfoForTilePeds' = ∅
+  true
+end
+
+schema CPathFind_RegisterMapObject
+  ΔCPathFind
+  mapObject? : Ref[CTreadable]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPathFind_StoreNodeInfoPed
+  ΔCPathFind
+  id? : ℤ
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  width? : ℝ
+  crossing? : 𝔹
+  spawnRate? : ℕ
+where
+  -- State update: type' = type
+  -- State update: next' = next
+  -- State update: x' = x/16.0f
+  -- State update: y' = y/16.0f
+  -- State update: z' = z/16.0f
+  -- State update: width' = 8.0f*Min(width, 15.0f)
+  true
+end
+
+schema CPathFind_StoreNodeInfoCar
+  ΔCPathFind
+  id? : ℤ
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  width? : ℝ
+  numLeft? : ℤ
+  numRight? : ℤ
+  disabled? : 𝔹
+  betweenLevels? : 𝔹
+  speedLimit? : ℕ
+  roadBlock? : 𝔹
+  waterPath? : 𝔹
+  spawnRate? : ℕ
+where
+  -- State update: type' = type
+  -- State update: next' = next
+  -- State update: x' = x/16.0f
+  -- State update: y' = y/16.0f
+  -- State update: z' = z/16.0f
+  -- State update: width' = 8.0f*Min(width, 15.0f)
+  true
+end
+
+schema CPathFind_StoreDetachedNodeInfoPed
+  ΔCPathFind
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  crossing? : 𝔹
+  disabled? : 𝔹
+  betweenLevels? : 𝔹
+  spawnRate? : ℕ
+where
+  -- State update: type' = type
+  -- State update: next' = next
+  -- State update: x' = x/16.0f
+  -- State update: y' = y/16.0f
+  -- State update: z' = z/16.0f
+  -- State update: width' = 8.0f*Min(width, 31.0f)
+  true
+end
+
+schema CPathFind_StoreDetachedNodeInfoCar
+  ΔCPathFind
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  width? : ℝ
+  numLeft? : ℤ
+  numRight? : ℤ
+  disabled? : 𝔹
+  betweenLevels? : 𝔹
+  speedLimit? : ℕ
+  roadBlock? : 𝔹
+  waterPath? : 𝔹
+  spawnRate? : ℕ
+  onlySmallBoats? : 𝔹
+where
+  -- State update: type' = type
+  -- State update: next' = next
+  -- State update: x' = x/16.0f
+  -- State update: y' = y/16.0f
+  -- State update: z' = z/16.0f
+  -- State update: width' = 8.0f*Min(width, 15.0f)
+  true
+end
+
+schema CPathFind_CalcNodeCoors
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  id? : ℤ
+  out? : Ref[CVector]
+where
+  -- State update: pos.x' = x
+  -- State update: pos.y' = y
+  -- State update: pos.z' = z
+  -- State update: out' = m_mapObjects[id].GetMatrix() * pos
+  true
+end
+
+schema CPathFind_LoadPathFindData
+  ΔCPathFind
+where
+  -- Return postcondition: result! = false
+  -- Invokes: CFileMgr::SetDir
+  true
+end
+
+schema CPathFind_PreparePathData
+  ΔCPathFind
+where
+  -- State update: tempNodes' = new CTempNode[NUMTEMPNODES]
+  -- State update: m_numConnections' = 0
+  -- State update: unkBits' = 0
+  -- State update: numExtern' = 0
+  -- State update: numIntern' = 0
+  -- State update: m_numPathNodes' = 0
+  -- Invokes: CPathFind::LoadPathFindData
+  true
+end
+
+schema CPathFind_CountFloodFillGroups
+  ΔCPathFind
+  type? : ℕ
+where
+  -- State update: start' = 0
+  -- State update: end' = m_numCarPathNodes
+  -- State update: start' = m_numCarPathNodes
+  -- State update: end' = start + m_numPedPathNodes
+  -- State update: group' = 0
+  -- State update: node' = &m_pathNodes[i]
+  -- Invokes: node->SetNext, node->GetX, node->GetY, node->GetZ, node->GetNext
+  true
+end
+
+schema CPathFind_PreparePathDataForType
+  ΔCPathFind
+  type? : ℕ
+  tempnodes? : Ref[CTempNode]
+  objectpathinfo? : Ref[CPathInfoForObject]
+  maxdist? : ℝ
+  detachednodes? : Ref[CPathInfoForObject]
+  numDetached? : ℤ
+where
+  -- State update: oldNumPathNodes' = m_numPathNodes
+  -- State update: oldNumLinks' = m_numConnections
+  -- State update: mapObjIndices' = new int16[NUM_PATHNODES]
+  -- State update: NumTempExternalNodes' = 0
+  -- State update: tileStart' = m_numPathNodes
+  -- State update: start' = 12 * m_mapObjects[i].GetModelIndex()
+  true
+end
+
+schema CPathFind_CalcRoadDensity
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+where
+  -- State update: density' = 0.0f
+  -- State update: next' = ConnectedNode(m_pathNodes[i].firstLink + j)
+  -- State update: next' = m_carPathConnections[m_pathNodes[i].firstLink + j]
+  -- Return postcondition: result! = density/2500.0f
+  true
+end
+
+schema CPathFind_TestForPedTrafficLight
+  ΔCPathFind
+  n1? : Ref[CPathNode]
+  n2? : Ref[CPathNode]
+where
+  -- Return postcondition: result! = ConnectionHasTrafficLight(n1->firstLink + i)
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPathFind_TestCrossesRoad
+  ΔCPathFind
+  n1? : Ref[CPathNode]
+  n2? : Ref[CPathNode]
+where
+  -- Return postcondition: result! = ConnectionCrossesRoad(n1->firstLink + i)
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CPathFind_AddNodeToList
+  ΔCPathFind
+  node? : Ref[CPathNode]
+  listId? : ℤ
+where
+  -- State update: node.distance' = listId
+  -- Invokes: node->SetNext, node->SetPrev
+  true
+end
+
+schema CPathFind_RemoveNodeFromList
+  ΔCPathFind
+  node? : Ref[CPathNode]
+where
+  -- Invokes: node->GetPrev, node->GetNext
+  true
+end
+
+schema CPathFind_RemoveBadStartNode
+  ΔCPathFind
+  pos? : CVector
+  nodes? : Ref[CPathNode]
+  n? : ℙ ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPathFind_SetLinksBridgeLights
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  enable? : 𝔹
+where
+  -- State update: pos' = m_carPathLinks[i].GetPosition()
+  -- State update: bBridgeLights' = enable
+  true
+end
+
+schema CPathFind_SwitchOffNodeAndNeighbours
+  ΔCPathFind
+  nodeId? : ℤ
+  disable? : 𝔹
+where
+  -- State update: bDisabled' = disable
+  -- State update: next' = ConnectedNode(m_pathNodes[nodeId].firstLink + i)
+  true
+end
+
+schema CPathFind_SwitchRoadsOffInArea
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  disable? : 𝔹
+where
+  -- State update: pos' = m_pathNodes[i].GetPosition()
+  true
+end
+
+schema CPathFind_SwitchPedRoadsOffInArea
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+  disable? : 𝔹
+where
+  -- State update: pos' = m_pathNodes[i].GetPosition()
+  true
+end
+
+schema CPathFind_SwitchRoadsInAngledArea
+  ΔCPathFind
+  x1? : ℝ
+  y1? : ℝ
+  z1? : ℝ
+  x2? : ℝ
+  y2? : ℝ
+  z2? : ℝ
+  length? : ℝ
+  type? : ℕ
+  mode? : ℕ
+where
+  -- State update: firstNode' = 0
+  -- State update: lastNode' = m_numCarPathNodes
+  -- State update: firstNode' = m_numCarPathNodes
+  -- State update: lastNode' = m_numPathNodes
+  -- State update: tmp' = z2
+  -- State update: z2' = z1
+  -- Invokes: CGeneral::GetRadianAngleBetweenPoints, v12.Magnitude, v23.Magnitude
+  true
+end
+
+schema CPathFind_MarkRoadsBetweenLevelsNodeAndNeighbours
+  ΔCPathFind
+  nodeId? : ℤ
+where
+  -- State update: bBetweenLevels' = true
+  -- State update: next' = ConnectedNode(m_pathNodes[nodeId].firstLink + i)
+  true
+end
+
+schema CPathFind_MarkRoadsBetweenLevelsInArea
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+where
+  -- State update: pos' = m_pathNodes[i].GetPosition()
+  true
+end
+
+schema CPathFind_PedMarkRoadsBetweenLevelsInArea
+  ΔCPathFind
+  x1? : ℝ
+  x2? : ℝ
+  y1? : ℝ
+  y2? : ℝ
+  z1? : ℝ
+  z2? : ℝ
+where
+  -- State update: pos' = m_pathNodes[i].GetPosition()
+  true
+end
+
+schema CPathFind_FindNodeClosestToCoors
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  distLimit? : ℝ
+  ignoreDisabled? : 𝔹
+  ignoreBetweenLevels? : 𝔹
+  ignoreSelected? : 𝔹
+  bWaterPath? : 𝔹
+where
+  -- State update: closestDist' = 10000.0f
+  -- State update: closestNode' = 0
+  -- State update: firstNode' = 0
+  -- State update: lastNode' = m_numCarPathNodes
+  -- State update: firstNode' = m_numCarPathNodes
+  -- State update: lastNode' = m_numPathNodes
+  -- Return postcondition: result! = closestDist < distLimit ? closestNode : -1
+  true
+end
+
+schema CPathFind_FindNodeClosestToCoorsFavourDirection
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  dirX? : ℝ
+  dirY? : ℝ
+where
+  -- State update: closestDist' = 10000.0f
+  -- State update: closestNode' = 0
+  -- State update: firstNode' = 0
+  -- State update: lastNode' = m_numCarPathNodes
+  -- State update: firstNode' = m_numCarPathNodes
+  -- State update: lastNode' = m_numPathNodes
+  -- Return postcondition: result! = closestNode
+  true
+end
+
+schema CPathFind_FindNodePairClosestToCoors
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  node1? : ℙ ℤ
+  node2? : ℙ ℤ
+  angle? : ℙ ℝ
+  minDist? : ℝ
+  maxDist? : ℝ
+  ignoreDisabled? : 𝔹
+  ignoreBetweenLevels? : 𝔹
+  bWaterPath? : 𝔹
+where
+  -- State update: closestDist' = 10000.0f
+  -- State update: closestConnectedNode' = 0
+  -- State update: firstNode' = 0
+  -- State update: lastNode' = m_numCarPathNodes
+  -- State update: firstNode' = m_numCarPathNodes
+  -- State update: lastNode' = m_numPathNodes
+  -- Invokes: dir.Normalise
+  true
+end
+
+schema CPathFind_FindNthNodeClosestToCoors
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  distLimit? : ℝ
+  ignoreDisabled? : 𝔹
+  ignoreBetweenLevels? : 𝔹
+  N? : ℤ
+  bWaterPath? : 𝔹
+where
+  -- State update: firstNode' = 0
+  -- State update: lastNode' = m_numCarPathNodes
+  -- State update: firstNode' = m_numCarPathNodes
+  -- State update: lastNode' = m_numPathNodes
+  -- State update: bSelected' = false
+  -- State update: bSelected' = true
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CPathFind_FindNodeCoorsForScript
+  ΔCPathFind
+  id? : ℤ
+where
+  -- State update: dir' = -dir
+  -- Return postcondition: result! = m_pathNodes[id].GetPosition()
+  -- Invokes: dir.Normalise
+  true
+end
+
+schema CPathFind_FindNodeOrientationForCarPlacement
+  ΔCPathFind
+  nodeId? : ℤ
+where
+  -- State update: dir.z' = 0.0f
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = RADTODEG(dir.Heading())
+  -- Invokes: dir.Normalise, dir.Heading
+  true
+end
+
+schema CPathFind_FindNodeOrientationForCarPlacementFacingDestination
+  ΔCPathFind
+  nodeId? : ℤ
+  x? : ℝ
+  y? : ℝ
+  towards? : 𝔹
+where
+  -- State update: bestNode' = ConnectedNode(m_pathNodes[nodeId].firstLink)
+  -- State update: bestDot' = towards ? -2.0f : 2.0f
+  -- State update: bestDot' = towards ? -2 : 2
+  -- State update: dir.z' = 0.0f
+  -- State update: angle' = DotProduct2D(dir, targetDir)
+  -- State update: bestDot' = angle
+  -- Return postcondition: result! = 0.0f
+  -- Return postcondition: result! = RADTODEG(dir.Heading())
+  -- Invokes: targetDir.Normalise, dir.Normalise, dir.Heading
+  true
+end
+
+schema CPathFind_GenerateCarCreationCoors
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+  dirX? : ℝ
+  dirY? : ℝ
+  spawnDist? : ℝ
+  angleLimit? : ℝ
+  forward? : 𝔹
+  pPosition? : Ref[CVector]
+  pNode1? : ℙ ℤ
+  pNode2? : ℙ ℤ
+  pPositionBetweenNodes? : ℙ ℝ
+  ignoreDisabled? : 𝔹
+where
+  -- State update: node1' = (CGeneral::GetRandomNumber()>>3) % m_numCarPathNodes
+  -- State update: dist1' = Distance2D(m_pathNodes[node1].GetPosition(), x, y)
+  -- State update: node2' = ConnectedNode(m_pathNodes[node1].firstLink + j)
+  -- State update: dist2' = Distance2D(m_pathNodes[node2].GetPosition(), x, y)
+  -- State update: f2' = Abs(d1)/(Abs(d1) + Abs(d2))
+  -- State update: f1' = 1.0f - f2
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CGeneral::GetRandomNumber, dist2d.Normalise
+  true
+end
+
+schema CPathFind_GeneratePedCreationCoors
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+  minDist? : ℝ
+  maxDist? : ℝ
+  minDistOffScreen? : ℝ
+  maxDistOffScreen? : ℝ
+  pPosition? : Ref[CVector]
+  pNode1? : ℙ ℤ
+  pNode2? : ℙ ℤ
+  pPositionBetweenNodes? : ℙ ℝ
+  camMatrix? : Ref[CMatrix]
+where
+  -- State update: node_cnt' = 0
+  -- State update: node1' = node_cnt + m_numCarPathNodes
+  -- State update: node1_dist' = Distance2D(m_pathNodes[node1].GetPosition(), x, y)
+  -- State update: link' = m_pathNodes[node1].firstLink + i
+  -- State update: node2' = ConnectedNode(link)
+  -- State update: node2_dist' = Distance2D(m_pathNodes[node2].GetPosition(), x, y)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Invokes: CGeneral::GetRandomNumber, TheCamera.IsSphereVisible, CWorld::FindGroundZFor3DCoord
+  true
+end
+
+schema CPathFind_FindNextNodeWandering
+  ΔCPathFind
+  type? : ℕ
+  coors? : CVector
+  lastNode? : Ref[CPathNode]
+  nextNode? : Ref[CPathNode]
+  curDir? : ℕ
+  nextDir? : ℙ ℕ
+where
+  -- State update: node' = ∅
+  -- State update: obj' = FindRoadObjectClosestToCoors(coors, type)
+  -- State update: nodeDist' = 1000000000.0f
+  -- State update: nodeDist' = dist
+  -- State update: node' = &m_pathNodes[obj.m_nodeIndices[type][i]]
+  -- State update: nextNode' = 0
+  -- Invokes: CWorld::GetIsLineOfSightClear, node->GetPosition, nodeDir.Normalise
+  true
+end
+
+schema CPathFind_DoPathSearch
+  ΔCPathFind
+  type? : ℕ
+  start? : CVector
+  startNodeId? : ℤ
+  target? : CVector
+  nodes? : Ref[CPathNode]
+  pNumNodes? : ℙ ℤ
+  maxNumNodes? : ℤ
+  vehicle? : Ref[CVehicle]
+  pDist? : ℙ ℝ
+  distLimit? : ℝ
+  targetNodeId? : ℤ
+where
+  -- State update: targetNodeId' = FindNodeClosestToCoors(target, type, distLimit)
+  -- State update: pNumNodes' = 0
+  -- State update: pDist' = 100000.0f
+  -- State update: startObj' = FindRoadObjectClosestToCoors(start, type)
+  -- State update: numPathsToTry' = 0
+  -- State update: numPathsToTry' = 1
+  -- Invokes: node->GetNext
+  true
+end
+
+schema CPathFind_TestCoorsCloseness
+  ΔCPathFind
+  target? : CVector
+  type? : ℕ
+  start? : CVector
+where
+  -- Return postcondition: result! = dist < 150.0f*TheCamera.GenerationDistMultiplier
+  -- Return postcondition: result! = dist < 100.0f*TheCamera.GenerationDistMultiplier
+  -- Return postcondition: result! = dist < 150.0f
+  true
+end
+
+schema CPathFind_Save
+  ΔCPathFind
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = 2*n
+  true
+end
+
+schema CPathFind_Load
+  ΔCPathFind
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: bDisabled' = true
+  -- State update: bDisabled' = false
+  -- State update: bBetweenLevels' = true
+  -- State update: bBetweenLevels' = false
+  -- State update: bDisabled' = true
+  true
+end
+
+schema CPathFind_DisplayPathData
+  ΔCPathFind
+where
+  -- State update: pos' = TheCamera.GetPosition()
+  -- State update: maxDist' = 50.0f
+  -- State update: n1' = m_pathNodes[i].GetPosition()
+  -- State update: n2' = m_pathNodes[k].GetPosition()
+  -- State update: n1_2d' = m_carPathLinks[i].GetPosition()
+  -- State update: ni' = m_carPathLinks[i].pathNodeIndex
+  -- Invokes: TheCamera.GetPosition, CLines::RenderLineWithClipping
+  true
+end
+
+schema CPathFind_TakeWidthIntoAccountForWandering
+  ΔCPathFind
+  nextNode? : Ref[CPathNode]
+  random? : ℕ
+where
+  -- State update: pos' = nextNode.GetPosition()
+  -- State update: newX' = (nextNode.GetPedNodeWidth() * ((random % 16) - 7)) + pos.x
+  -- Return postcondition: result! = CVector(newX, newY, pos.z)
+  -- Invokes: nextNode->GetPosition, nextNode->GetPedNodeWidth
+  true
+end
+
+schema CPathFind_TakeWidthIntoAccountForCoors
+  ΔCPathFind
+  node1? : Ref[CPathNode]
+  node2? : Ref[CPathNode]
+  random? : ℕ
+  x? : ℙ ℝ
+  y? : ℙ ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPathFind_GetNode
+  ΔCPathFind
+  index? : ℤ
+where
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = &ThePaths.m_searchNodes[index]
+  -- Return postcondition: result! = &ThePaths.m_pathNodes[index - ARRAY_SIZE(ThePaths.m_searchNodes)]
+  true
+end
+
+schema CPathFind_GetIndex
+  ΔCPathFind
+  node? : Ref[CPathNode]
+where
+  -- Return postcondition: result! = -1
+  -- Return postcondition: result! = node - ThePaths.m_searchNodes
+  -- Return postcondition: result! = (node - ThePaths.m_pathNodes) + ARRAY_SIZE(ThePaths.m_searchNodes)
+  true
+end
+
+schema CPathFind_StoreNodeInfoPed_2
+  ΔCPathFind
+  id? : ℤ
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  width? : ℤ
+  crossing? : 𝔹
+where
+  -- State update: type' = type
+  -- State update: next' = next
+  -- State update: x' = x
+  -- State update: y' = y
+  -- State update: z' = z
+  -- State update: numLeftLanes' = 0
+  true
+end
+
+schema CPathFind_StoreNodeInfoCar_2
+  ΔCPathFind
+  id? : ℤ
+  node? : ℤ
+  type? : ℤ
+  next? : ℤ
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  width? : ℤ
+  numLeft? : ℤ
+  numRight? : ℤ
+where
+  -- State update: type' = type
+  -- State update: next' = next
+  -- State update: x' = x
+  -- State update: y' = y
+  -- State update: z' = z
+  -- State update: numLeftLanes' = numLeft
+  true
+end
+
+schema CPathFind_CalcNodeCoors_2
+  ΔCPathFind
+  x? : ℤ
+  y? : ℤ
+  z? : ℤ
+  id? : ℤ
+  out? : Ref[CVector]
+where
+  -- State update: pos.x' = x / 16.0f
+  -- State update: pos.y' = y / 16.0f
+  -- State update: pos.z' = z / 16.0f
+  -- State update: out' = m_mapObjects[id].GetMatrix() * pos
+  true
+end
+
+schema CPathFind_PreparePathDataForType_2
+  ΔCPathFind
+  type? : ℕ
+  tempnodes? : Ref[CTempNode]
+  objectpathinfo? : Ref[CPathInfoForObject]
+  maxdist? : ℝ
+  detachednodes? : Ref[CTempDetachedNode]
+  numDetached? : ℤ
+where
+  -- State update: obj1' = m_mapObjects[i]
+  -- State update: obj2' = m_mapObjects[j]
+  -- State update: oldNumPathNodes' = m_numPathNodes
+  -- State update: oldNumLinks' = m_numConnections
+  -- State update: tileStart' = m_numPathNodes
+  -- State update: start' = 12 * m_mapObjects[i].GetModelIndex()
+  -- Invokes: obj1->GetModelIndex, obj2->GetModelIndex, obj1->GetPosition, obj2->GetPosition, obj1->GetRight
+  true
+end
+
+schema CPathFind_FindNodeClosestToCoors_2
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+  distLimit? : ℝ
+  ignoreDisabled? : 𝔹
+  ignoreBetweenLevels? : 𝔹
+where
+  -- State update: closestDist' = 10000.0f
+  -- State update: closestNode' = 0
+  -- State update: firstNode' = 0
+  -- State update: lastNode' = m_numCarPathNodes
+  -- State update: firstNode' = m_numCarPathNodes
+  -- State update: lastNode' = m_numPathNodes
+  -- Return postcondition: result! = closestDist < distLimit ? closestNode : -1
+  true
+end
+
+schema CPathFind_NewGenerateCarCreationCoors
+  ΔCPathFind
+  x? : ℝ
+  y? : ℝ
+  dirX? : ℝ
+  dirY? : ℝ
+  spawnDist? : ℝ
+  angleLimit? : ℝ
+  forward? : 𝔹
+  pPosition? : Ref[CVector]
+  pNode1? : ℙ ℤ
+  pNode2? : ℙ ℤ
+  pPositionBetweenNodes? : ℙ ℝ
+  ignoreDisabled? : 𝔹
+where
+  -- State update: node1' = (CGeneral::GetRandomNumber()>>3) % m_numCarPathNodes
+  -- State update: dist1' = Distance2D(m_pathNodes[node1].GetPosition(), x, y)
+  -- State update: d1' = dist1 - spawnDist
+  -- State update: node2' = ConnectedNode(m_pathNodes[node1].firstLink + j)
+  -- State update: dist2' = Distance2D(m_pathNodes[node2].GetPosition(), x, y)
+  -- State update: d2' = dist2 - spawnDist
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Invokes: CGeneral::GetRandomNumber, dist2d.Normalise
+  true
+end
+
+schema CPathFind_FindRoadObjectClosestToCoors
+  ΔCPathFind
+  coors? : CVector
+  type? : ℕ
+where
+  -- State update: closestMapObj' = ∅
+  -- State update: closestDist' = 10000.0f
+  -- State update: mapObj' = m_mapObjects[i]
+  -- State update: vDist' = mapObj.GetPosition() - coors
+  -- State update: fDist' = Abs(vDist.x) + Abs(vDist.y) + Abs(vDist.z)
+  -- State update: node1' = mapObj.m_nodeIndices[type][j]
+  -- Return postcondition: result! = closestMapObj
+  -- Invokes: mapObj->GetPosition, CCollision::DistToLine
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PathFindModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2797
+end

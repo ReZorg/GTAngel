@@ -1,0 +1,244 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: ClumpModelInfo (modelinfo)
+-- Source File(s): modelinfo/ClumpModelInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include General.zpp  (from "General.h")
+-- include NodeName.zpp  (from "NodeName.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Leeds.zpp  (from "Leeds.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CClumpModelInfo_DeleteRwObject
+  ΔCClumpModelInfo
+where
+  -- State update: m_clump' = ∅
+  -- Invokes: CStreaming::UnregisterClump, CStreaming::UnregisterPointer, CAnimManager::RemoveAnimBlockRef
+  true
+end
+
+schema ClumpModelInfo_SetHierarchyForSkinAtomic
+  ΔClumpModelInfoModuleState
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema CClumpModelInfo_CreateInstance
+  ΔCClumpModelInfo
+where
+  -- State update: clone' = RpClumpClone(m_clump)
+  -- State update: hier' = GetAnimHierarchyFromClump(clone)
+  -- State update: anim' = HAnimAnimationCreateForHierarchy(hier)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = (RwObject*)clone
+  true
+end
+
+schema CClumpModelInfo_CreateInstance_2
+  ΔCClumpModelInfo
+  m? : Ref[RwMatrix]
+where
+  -- State update: clump' = (RpClump*)CreateInstance()
+  -- Return postcondition: result! = (RwObject*)clump
+  -- Return postcondition: result! = nil
+  -- Invokes: CStreaming::RegisterInstance
+  true
+end
+
+schema CClumpModelInfo_SetAtomicRendererCB
+  ΔCClumpModelInfo
+  atomic? : Ref[RpAtomic]
+  data? : ADDRESS
+where
+  -- Return postcondition: result! = atomic
+  -- Invokes: CVisibilityPlugins::SetAtomicRenderCallback
+  true
+end
+
+schema CClumpModelInfo_SetClump
+  ΔCClumpModelInfo
+  clump? : Ref[RpClump]
+where
+  -- State update: m_clump' = clump
+  -- State update: hier' = GetAnimHierarchyFromClump(clump)
+  -- State update: skinAtomic' = IsClumpSkinned(clump)
+  -- State update: skin' = RpSkinGeometryGetSkin(RpAtomicGetGeometry(skinAtomic))
+  -- State update: weights' = (RwMatrixWeights*)&RpSkinGetVertexBoneWeights(skin)[i]
+  -- State update: sum' = weights.w0 + weights.w1 + weights.w2 + weights.w3
+  -- Invokes: CVisibilityPlugins::SetClumpModelInfo, CModelInfo::GetModelInfo
+  true
+end
+
+schema CClumpModelInfo_SetAnimFile
+  ΔCClumpModelInfo
+  file? : seq CHAR
+where
+  -- State update: m_animFileName' = new char[strlen(file)+1]
+  true
+end
+
+schema CClumpModelInfo_ConvertAnimFileIndex
+  ΔCClumpModelInfo
+where
+  -- State update: index' = CAnimManager::GetAnimationBlockIndex(m_animFileName)
+  -- State update: m_animFileIndex' = index
+  -- Invokes: CAnimManager::GetAnimationBlockIndex
+  true
+end
+
+schema CClumpModelInfo_SetFrameIds
+  ΔCClumpModelInfo
+  assocs? : Ref[RwObjectNameIdAssocation]
+where
+  -- State update: objname.frame' = ∅
+  -- State update: objname.name' = assocs[i].name
+  -- Invokes: CVisibilityPlugins::SetFrameHierarchyId
+  true
+end
+
+schema CClumpModelInfo_FindFrameFromIdCB
+  ΔCClumpModelInfo
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: assoc' = (RwObjectIdAssociation*)data
+  -- State update: assoc.frame' = frame
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc->frame ? nil : frame
+  -- Invokes: CVisibilityPlugins::GetFrameHierarchyId
+  true
+end
+
+schema CClumpModelInfo_FindFrameFromNameCB
+  ΔCClumpModelInfo
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: assoc' = (RwObjectNameAssociation*)data
+  -- State update: assoc.frame' = frame
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc->frame ? nil : frame
+  -- Invokes: CGeneral::faststricmp
+  true
+end
+
+schema CClumpModelInfo_FindFrameFromNameWithoutIdCB
+  ΔCClumpModelInfo
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: assoc' = (RwObjectNameAssociation*)data
+  -- State update: assoc.frame' = frame
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = assoc->frame ? nil : frame
+  -- Invokes: CVisibilityPlugins::GetFrameHierarchyId, CGeneral::faststricmp
+  true
+end
+
+schema CClumpModelInfo_FillFrameArrayCB
+  ΔCClumpModelInfo
+  frame? : Ref[RwFrame]
+  data? : ADDRESS
+where
+  -- State update: frames' = (RwFrame**)data
+  -- State update: id' = CVisibilityPlugins::GetFrameHierarchyId(frame)
+  -- Return postcondition: result! = frame
+  -- Invokes: CVisibilityPlugins::GetFrameHierarchyId
+  true
+end
+
+schema CClumpModelInfo_FillFrameArray
+  ΔCClumpModelInfo
+  clump? : Ref[RpClump]
+  frames? : Ref[RwFrame]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CClumpModelInfo_GetFrameFromId
+  ΔCClumpModelInfo
+  clump? : Ref[RpClump]
+  id? : ℤ
+where
+  -- State update: assoc.id' = id
+  -- State update: assoc.frame' = ∅
+  -- Return postcondition: result! = assoc.frame
+  true
+end
+
+schema CClumpModelInfo_LoadModel
+  ΔCClumpModelInfo
+  clump? : ADDRESS
+  chunk? : ADDRESS
+where
+  -- State update: m_chunk' = (void*)chunk
+  -- State update: m_clump' = (RpClump*)clump
+  -- Invokes: CStreaming::RegisterPointer, CStreaming::RegisterClump
+  true
+end
+
+schema CClumpModelInfo_Write
+  ΔCClumpModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: CBaseModelInfo::Write, writer.AddPatch
+  true
+end
+
+schema CClumpModelInfo_WriteModel
+  ΔCClumpModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Return postcondition: result! = m_clump
+  true
+end
+
+schema CClumpModelInfo_RcWriteThis
+  ΔCClumpModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+schema CClumpModelInfo_RcWriteEmpty
+  ΔCClumpModelInfo
+  writer? : base__cRelocatableChunkWriter
+where
+  -- Invokes: writer.AllocateRaw, writer.Class
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ClumpModelInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 328
+end

@@ -1,0 +1,97 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WeaponInfo (weapons)
+-- Source File(s): weapons/WeaponInfo.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include WeaponInfo.zpp  (from "WeaponInfo.h")
+-- include AnimManager.zpp  (from "AnimManager.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include Weapon.zpp  (from "Weapon.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CWeaponInfo_GetWeaponInfo
+  ΔCWeaponInfo
+  weaponType? : eWeaponType
+where
+  -- Return postcondition: result! = &aWeaponInfo[weaponType]
+  true
+end
+
+schema CWeaponInfo_Initialise
+  ΔCWeaponInfo
+where
+  -- State update: m_eWeaponFire' = WEAPON_FIRE_INSTANT_HIT
+  -- State update: m_fRange' = 0.0f
+  -- State update: m_nFiringRate' = 0
+  -- State update: m_nReload' = 0
+  -- State update: m_nAmountofAmmunition' = 0
+  -- State update: m_nDamage' = 0
+  true
+end
+
+schema CWeaponInfo_LoadWeaponData
+  ΔCWeaponInfo
+where
+  -- State update: bp' = 0
+  -- State update: linelen' = 0
+  -- State update: lp' = 0
+  -- State update: spread' = 0.0f
+  -- State update: flags' = 0
+  -- State update: speed' = 0.0f
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile, CWeapon::IsShotgun, CModelInfo::GetModelInfo, CAnimManager::GetAnimGroupName
+  true
+end
+
+schema CWeaponInfo_FindWeaponType
+  ΔCWeaponInfo
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = static_cast<eWeaponType>(i)
+  -- Return postcondition: result! = WEAPONTYPE_UNARMED
+  true
+end
+
+schema CWeaponInfo_FindWeaponFireType
+  ΔCWeaponInfo
+  name? : seq CHAR
+where
+  -- Return postcondition: result! = WEAPON_FIRE_MELEE
+  -- Return postcondition: result! = WEAPON_FIRE_INSTANT_HIT
+  -- Return postcondition: result! = WEAPON_FIRE_PROJECTILE
+  true
+end
+
+schema CWeaponInfo_Shutdown
+  ΔCWeaponInfo
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema WeaponInfoModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 334
+end

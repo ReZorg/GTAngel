@@ -1,0 +1,114 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: References (core)
+-- Source File(s): core/References.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include World.zpp  (from "World.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include References.zpp  (from "References.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CReferences_Init
+  ΔCReferences
+where
+  -- State update: pEmptyList' = &aRefs[0]
+  -- State update: pentity' = ∅
+  -- State update: next' = &aRefs[i+1]
+  -- State update: next' = ∅
+  true
+end
+
+schema CEntity_RegisterReference
+  ΔCEntity
+  pent? : Ref[CEntity]
+where
+  -- State update: ref' = m_pFirstReference
+  -- State update: ref' = CReferences::pEmptyList
+  -- State update: pEmptyList' = ref.next
+  -- State update: ref.pentity' = pent
+  -- State update: ref.next' = m_pFirstReference
+  -- State update: m_pFirstReference' = ref
+  true
+end
+
+schema CEntity_CleanUpOldReference
+  ΔCEntity
+  pent? : Ref[CEntity]
+where
+  -- State update: lastnextp' = &m_pFirstReference
+  -- State update: ref' = m_pFirstReference
+  -- State update: lastnextp' = ref.next
+  -- State update: ref.next' = CReferences::pEmptyList
+  -- State update: pEmptyList' = ref
+  -- State update: lastnextp' = &ref.next
+  true
+end
+
+schema CEntity_ResolveReferences
+  ΔCEntity
+where
+  -- State update: ref' = m_pFirstReference
+  -- State update: ref.pentity' = ∅
+  -- State update: ref' = m_pFirstReference
+  -- State update: ref.next' = CReferences::pEmptyList
+  -- State update: pEmptyList' = m_pFirstReference
+  -- State update: m_pFirstReference' = ∅
+  true
+end
+
+schema CEntity_PruneReferences
+  ΔCEntity
+where
+  -- State update: lastnextp' = &m_pFirstReference
+  -- State update: ref' = m_pFirstReference
+  -- State update: next' = ref.next
+  -- State update: lastnextp' = &ref.next
+  -- State update: lastnextp' = ref.next
+  -- State update: ref.next' = CReferences::pEmptyList
+  true
+end
+
+schema CReferences_RemoveReferencesToPlayer
+  ΔCReferences
+where
+  -- State update: pPlayerPed' = FindPlayerPed()
+  -- State update: m_pPed' = pPlayerPed
+  -- Invokes: pPlayerPed->RegisterReference
+  true
+end
+
+schema CReferences_PruneAllReferencesInWorld
+  ΔCReferences
+where
+  -- State update: e' = CPools::GetPedPool().GetSlot(i)
+  -- State update: e' = CPools::GetVehiclePool().GetSlot(i)
+  -- State update: e' = CPools::GetObjectPool().GetSlot(i)
+  -- Invokes: CPools::GetPedPool, e->PruneReferences, CPools::GetVehiclePool, CPools::GetObjectPool
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ReferencesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 157
+end

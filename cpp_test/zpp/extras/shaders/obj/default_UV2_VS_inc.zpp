@@ -1,0 +1,22 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: default_UV2_VS (extras)
+-- Source File(s): extras/shaders/obj/default_UV2_VS.inc
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema default_UV2_VSModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 55
+end

@@ -1,0 +1,43 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Solid (buildings)
+-- Source File(s): buildings/Solid.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Entity.zpp  (from "Entity.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CSolid
+  CEntity  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CSolid_CSolid
+  ΔCSolid
+where
+  -- Declared member operation CSolid::CSolid(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Solid_CSolid
+  ΔSolidModuleState
+where
+  -- State update: m_type' = ENTITY_TYPE_BUILDING
+  -- State update: bUsesCollision' = true
+  true
+end

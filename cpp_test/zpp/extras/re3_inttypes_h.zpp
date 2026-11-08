@@ -1,0 +1,66 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: re3_inttypes (extras)
+-- Source File(s): extras/re3_inttypes.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+PRId8 : seq CHAR  -- #define PRId8 "hhd"
+PRId16 : seq CHAR  -- #define PRId16 "hd"
+PRId32 : seq CHAR  -- #define PRId32 "ld"
+PRId64 : seq CHAR  -- #define PRId64 "lld"
+PRIdFAST8 : seq CHAR  -- #define PRIdFAST8 "hhd"
+PRIdFAST16 : seq CHAR  -- #define PRIdFAST16 "hd"
+PRIdFAST32 : seq CHAR  -- #define PRIdFAST32 "ld"
+PRIdFAST64 : seq CHAR  -- #define PRIdFAST64 "lld"
+PRIdLEAST8 : seq CHAR  -- #define PRIdLEAST8 "hhd"
+PRIdLEAST16 : seq CHAR  -- #define PRIdLEAST16 "hd"
+PRIdLEAST32 : seq CHAR  -- #define PRIdLEAST32 "ld"
+PRIdLEAST64 : seq CHAR  -- #define PRIdLEAST64 "lld"
+PRIdMAX : seq CHAR  -- #define PRIdMAX "lld"
+PRIdPTR : seq CHAR  -- #define PRIdPTR "lld"
+PRIi8 : seq CHAR  -- #define PRIi8 "hhi"
+PRIi16 : seq CHAR  -- #define PRIi16 "hi"
+PRIi32 : seq CHAR  -- #define PRIi32 "li"
+PRIi64 : seq CHAR  -- #define PRIi64 "lli"
+PRIiFAST8 : seq CHAR  -- #define PRIiFAST8 "hhi"
+PRIiFAST16 : seq CHAR  -- #define PRIiFAST16 "hi"
+PRIiFAST32 : seq CHAR  -- #define PRIiFAST32 "li"
+PRIiFAST64 : seq CHAR  -- #define PRIiFAST64 "lli"
+PRIiLEAST8 : seq CHAR  -- #define PRIiLEAST8 "hhi"
+PRIiLEAST16 : seq CHAR  -- #define PRIiLEAST16 "hi"
+PRIiLEAST32 : seq CHAR  -- #define PRIiLEAST32 "li"
+PRIiLEAST64 : seq CHAR  -- #define PRIiLEAST64 "lli"
+PRIiMAX : seq CHAR  -- #define PRIiMAX "lli"
+PRIiPTR : seq CHAR  -- #define PRIiPTR "lli"
+PRIo8 : seq CHAR  -- #define PRIo8 "hho"
+PRIo16 : seq CHAR  -- #define PRIo16 "ho"
+PRIo32 : seq CHAR  -- #define PRIo32 "lo"
+PRIo64 : seq CHAR  -- #define PRIo64 "llo"
+PRIoFAST8 : seq CHAR  -- #define PRIoFAST8 "hho"
+PRIoFAST16 : seq CHAR  -- #define PRIoFAST16 "ho"
+PRIoFAST32 : seq CHAR  -- #define PRIoFAST32 "lo"
+PRIoFAST64 : seq CHAR  -- #define PRIoFAST64 "llo"
+PRIoLEAST8 : seq CHAR  -- #define PRIoLEAST8 "hho"
+PRIoLEAST16 : seq CHAR  -- #define PRIoLEAST16 "ho"
+PRIoLEAST32 : seq CHAR  -- #define PRIoLEAST32 "lo"
+PRIoLEAST64 : seq CHAR  -- #define PRIoLEAST64 "llo"
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema re3_inttypesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 216
+end

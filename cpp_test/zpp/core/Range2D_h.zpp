@@ -1,0 +1,55 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Range2D (core)
+-- Source File(s): core/Range2D.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRange2D
+  max : CVector2D_min
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRange2D_CRange2D
+  ΔCRange2D
+  _min? : CVector2D
+  _max? : CVector2D
+where
+  -- Declared member operation CRange2D::CRange2D(CVector2D _min, CVector2D _max)
+  true
+end
+
+schema CRange2D_IsInRange_2
+  ΔCRange2D
+  vec? : CVector2D
+  result! : 𝔹
+where
+  -- Declared member operation CRange2D::IsInRange(CVector2D vec)
+  true
+end
+
+schema CRange2D_DebugShowRange_3
+  ΔCRange2D
+  arg_1? : ℝ
+  arg_2? : ℤ
+where
+  -- Declared member operation CRange2D::DebugShowRange(float, int)
+  true
+end
+
+schema CRange2D_GetRandomPointInRange_4
+  ΔCRange2D
+  result! : CVector2D
+where
+  -- Declared member operation CRange2D::GetRandomPointInRange()
+  true
+end

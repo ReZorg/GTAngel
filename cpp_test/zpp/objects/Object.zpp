@@ -1,0 +1,471 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Object (objects)
+-- Source File(s): objects/Object.cpp, objects/Object.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Radar.zpp  (from "Radar.h")
+-- include Object.zpp  (from "Object.h")
+-- include DummyObject.zpp  (from "DummyObject.h")
+-- include Particle.zpp  (from "Particle.h")
+-- include General.zpp  (from "General.h")
+-- include ObjectData.zpp  (from "ObjectData.h")
+-- include World.zpp  (from "World.h")
+-- include Floater.zpp  (from "Floater.h")
+-- include soundlist.zpp  (from "soundlist.h")
+-- include WaterLevel.zpp  (from "WaterLevel.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Physical.zpp  (from "Physical.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+BEACHBALL_MAX_SCORE : ℕ  -- #define BEACHBALL_MAX_SCORE 250
+BEACHBALL_SPEED_PROPORTION : ℝ  -- #define BEACHBALL_SPEED_PROPORTION 0.4f
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+Object_Enum_1 ::= UNKNOWN_OBJECT | GAME_OBJECT | MISSION_OBJECT | TEMP_OBJECT | CUTSCENE_OBJECT | CONTROLLED_SUB_OBJECT
+  -- val(UNKNOWN_OBJECT) = 0
+  -- val(GAME_OBJECT) = 1
+  -- val(MISSION_OBJECT) = 2
+  -- val(TEMP_OBJECT) = 3
+  -- val(CUTSCENE_OBJECT) = 4
+  -- val(CONTROLLED_SUB_OBJECT) = 5
+
+CollisionSpecialResponseCase ::= COLLRESPONSE_NONE | COLLRESPONSE_LAMPOST | COLLRESPONSE_SMALLBOX | COLLRESPONSE_BIGBOX | COLLRESPONSE_FENCEPART | COLLRESPONSE_UNKNOWN5
+
+CollisionDamageEffect ::= DAMAGE_EFFECT_NONE | DAMAGE_EFFECT_CHANGE_MODEL | DAMAGE_EFFECT_SPLIT_MODEL | DAMAGE_EFFECT_SMASH_AND_DAMAGE_TRAFFICLIGHTS | DAMAGE_EFFECT_SMASH_COMPLETELY | DAMAGE_EFFECT_CHANGE_THEN_SMASH | DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY | DAMAGE_EFFECT_SMASH_YELLOW_TARGET_COMPLETELY | DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY | DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY | DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY | DAMAGE_EFFECT_SMASH_NEWSTANDNEW1 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW2 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW3 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW4 | DAMAGE_EFFECT_SMASH_NEWSTANDNEW5 | DAMAGE_EFFECT_SMASH_BLACKBAG | DAMAGE_EFFECT_SMASH_VEGPALM | DAMAGE_EFFECT_BURST_BEACHBALL | DAMAGE_EFFECT_SMASH_BEACHLOUNGE_WOOD | DAMAGE_EFFECT_SMASH_BEACHLOUNGE_TOWEL
+  -- val(DAMAGE_EFFECT_SMASH_COMPLETELY) = 20
+  -- val(DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY) = 50
+  -- val(DAMAGE_EFFECT_SMASH_YELLOW_TARGET_COMPLETELY) = 51
+  -- val(DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY) = 60
+  -- val(DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY) = 70
+  -- val(DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY) = 80
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW1) = 91
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW2) = 92
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW3) = 93
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW4) = 94
+  -- val(DAMAGE_EFFECT_SMASH_NEWSTANDNEW5) = 95
+  -- val(DAMAGE_EFFECT_SMASH_BLACKBAG) = 100
+  -- val(DAMAGE_EFFECT_SMASH_VEGPALM) = 110
+  -- val(DAMAGE_EFFECT_BURST_BEACHBALL) = 120
+  -- val(DAMAGE_EFFECT_SMASH_BEACHLOUNGE_WOOD) = 131
+  -- val(DAMAGE_EFFECT_SMASH_BEACHLOUNGE_TOWEL) = 132
+
+Object_Enum_4 ::= UNKNOWN_OBJECT | GAME_OBJECT | MISSION_OBJECT | TEMP_OBJECT | CUTSCENE_OBJECT
+  -- val(UNKNOWN_OBJECT) = 0
+  -- val(GAME_OBJECT) = 1
+  -- val(MISSION_OBJECT) = 2
+  -- val(TEMP_OBJECT) = 3
+  -- val(CUTSCENE_OBJECT) = 4
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CObject
+  CPhysical  -- inherits base schema
+  m_objectMatrix : CMatrix
+  m_fUprootLimit : ℝ
+  ObjectCreatedBy : ℤ
+  bIsPickup : 𝔹
+  bAmmoCollected : 𝔹
+  bPickupObjWithMessage : 𝔹
+  bOutOfStock : 𝔹
+  bGlassCracked : 𝔹
+  bGlassBroken : 𝔹
+  bHasBeenDamaged : 𝔹
+  bUseVehicleColours : 𝔹
+  bIsWeapon : 𝔹
+  bIsStreetLight : 𝔹
+  m_nBonusValue : ℤ
+  m_nLastWeaponToDamage : ℤ
+  m_nCostValue : ℕ
+  m_fCollisionDamageMultiplier : ℝ
+  m_nCollisionDamageEffect : ℕ
+  m_nSpecialCollisionResponseCases : ℕ
+  m_bCameraToAvoidThisObject : 𝔹
+  m_nBeachballBounces : ℕ
+  m_obj_unused1 : ℕ
+  m_nEndOfLifeTime : ℕ
+  m_nRefModelIndex : ℤ
+  m_pCurSurface : Ref[CEntity]
+  m_pCollidingEntity : Ref[CEntity]
+  m_colour2 : ℤ
+  nNoTempObjects : ℤ
+  fDistToNearestTree : ℝ
+  nBodyCastHealth : ℤ
+where
+  #bIsPickup = 1
+  #bAmmoCollected = 1
+  #bPickupObjWithMessage = 1
+  #bOutOfStock = 1
+  #bGlassCracked = 1
+  #bGlassBroken = 1
+  #bHasBeenDamaged = 1
+  #bUseVehicleColours = 1
+  #bIsWeapon = 1
+  #bIsStreetLight = 1
+  m_nCostValue ≥ 0
+  m_nCollisionDamageEffect ≥ 0
+  m_nSpecialCollisionResponseCases ≥ 0
+  m_nBeachballBounces ≥ 0
+  m_obj_unused1 ≥ 0
+  m_nEndOfLifeTime ≥ 0
+end
+
+schema CObject_operator_new
+  ΔCObject
+  arg_1? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CObject::operator new(size_t)
+  true
+end
+
+schema CObject_operator_new_2
+  ΔCObject
+  arg_1? : ℕ
+  arg_2? : ℤ
+  result! : ADDRESS
+where
+  -- Declared member operation CObject::operator new(size_t, int)
+  true
+end
+
+schema CObject_operator_delete_3
+  ΔCObject
+  arg_1? : ADDRESS
+  arg_2? : ℕ
+where
+  -- Declared member operation CObject::operator delete(void*, size_t)
+  true
+end
+
+schema CObject_operator_delete_4
+  ΔCObject
+  arg_1? : ADDRESS
+  arg_2? : ℤ
+where
+  -- Declared member operation CObject::operator delete(void*, int)
+  true
+end
+
+schema CObject_CObject_5
+  ΔCObject
+where
+  -- Declared member operation CObject::CObject(void)
+  true
+end
+
+schema CObject_CObject_6
+  ΔCObject
+  arg_1? : ℤ
+  arg_2? : 𝔹
+where
+  -- Declared member operation CObject::CObject(int32, bool)
+  true
+end
+
+schema CObject_CObject_7
+  ΔCObject
+  arg_1? : Ref[CDummyObject]
+where
+  -- Declared member operation CObject::CObject(CDummyObject*)
+  true
+end
+
+schema CObject_CObject_8
+  ΔCObject
+  result! : ANY
+where
+  -- Declared member operation CObject::CObject(void)
+  true
+end
+
+schema CObject_ProcessControl_9
+  ΔCObject
+where
+  -- Declared member operation CObject::ProcessControl(void)
+  true
+end
+
+schema CObject_Teleport_10
+  ΔCObject
+  vecPos? : CVector
+where
+  -- Declared member operation CObject::Teleport(CVector vecPos)
+  true
+end
+
+schema CObject_Render_11
+  ΔCObject
+where
+  -- Declared member operation CObject::Render(void)
+  true
+end
+
+schema CObject_SetupLighting_12
+  ΔCObject
+  result! : 𝔹
+where
+  -- Declared member operation CObject::SetupLighting(void)
+  true
+end
+
+schema CObject_RemoveLighting_13
+  ΔCObject
+  reset? : 𝔹
+where
+  -- Declared member operation CObject::RemoveLighting(bool reset)
+  true
+end
+
+schema CObject_ObjectDamage_14
+  ΔCObject
+  amount? : ℝ
+where
+  -- Declared member operation CObject::ObjectDamage(float amount)
+  true
+end
+
+schema CObject_RefModelInfo_15
+  ΔCObject
+  modelId? : ℤ
+where
+  -- Declared member operation CObject::RefModelInfo(int32 modelId)
+  true
+end
+
+schema CObject_Init_16
+  ΔCObject
+where
+  -- Declared member operation CObject::Init(void)
+  true
+end
+
+schema CObject_CanBeDeleted_17
+  ΔCObject
+  result! : 𝔹
+where
+  -- Declared member operation CObject::CanBeDeleted(void)
+  true
+end
+
+schema CObject_DeleteAllMissionObjects_18
+  ΔCObject
+where
+  -- Declared member operation CObject::DeleteAllMissionObjects()
+  true
+end
+
+schema CObject_DeleteAllTempObjects_19
+  ΔCObject
+where
+  -- Declared member operation CObject::DeleteAllTempObjects()
+  true
+end
+
+schema CObject_DeleteAllTempObjectsInArea_20
+  ΔCObject
+  point? : CVector
+  fRadius? : ℝ
+where
+  -- Declared member operation CObject::DeleteAllTempObjectsInArea(CVector point, float fRadius)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CObject_CObject
+  ΔCObject
+where
+  -- State update: m_type' = ENTITY_TYPE_OBJECT
+  -- State update: m_fUprootLimit' = 0.0f
+  -- State update: m_nCollisionDamageEffect' = 0
+  -- State update: m_nSpecialCollisionResponseCases' = COLLRESPONSE_NONE
+  -- State update: m_bCameraToAvoidThisObject' = false
+  -- State update: ObjectCreatedBy' = UNKNOWN_OBJECT
+  true
+end
+
+schema CObject_CObject_2
+  ΔCObject
+  mi? : ℤ
+  createRW? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CObject_CObject_3
+  ΔCObject
+  dummy? : Ref[CDummyObject]
+where
+  -- State update: m_objectMatrix' = dummy.GetMatrix()
+  -- State update: m_level' = dummy.m_level
+  -- State update: m_area' = dummy.m_area
+  -- Invokes: dummy->GetModelIndex, dummy->GetMatrix, dummy->DetachFromRwObject
+  true
+end
+
+schema CObject_CObject_4
+  ΔCObject
+where
+  -- Invokes: CRadar::ClearBlipForEntity, CPools::GetObjectPool, CModelInfo::GetModelInfo
+  true
+end
+
+schema CObject_ProcessControl
+  ΔCObject
+where
+  -- State update: bIsInWater' = true
+  -- State update: fTimeStep' = Pow(0.97f, CTimer::GetTimeStep())
+  -- State update: mi' = GetModelIndex()
+  -- State update: bExplosionProof' = true
+  -- State update: bIsVisible' = false
+  -- State update: bUsesCollision' = false
+  -- Invokes: CPhysical::ProcessControl, mod_Buoyancy.ProcessBuoyancy, CTimer::GetTimeStep, CGeneral::GetRandomNumber, CPhysical::ApplyTurnForce
+  true
+end
+
+schema CObject_Teleport
+  ΔCObject
+  vecPos? : CVector
+where
+  -- Invokes: CWorld::Remove, CWorld::Add
+  true
+end
+
+schema CObject_Render
+  ΔCObject
+where
+  -- State update: red' = Clamp(red, 0.0f, 255.0f)
+  -- State update: green' = Clamp(green, 0.0f, 255.0f)
+  -- State update: blue' = Clamp(blue, 0.0f, 255.0f)
+  -- State update: alpha' = CGeneral::GetRandomNumberInRange(196, 225)
+  -- State update: color' = { (uint8)red, (uint8)green, (uint8)blue, (uint8)alpha }
+  -- State update: moveSpeedMagnitude' = this.GetMoveSpeed().Magnitude()
+  -- Invokes: CModelInfo::GetModelInfo, mi->GetModelType, mi->SetVehicleColour, CTimeCycle::GetDirectionalRed, CTimeCycle::GetAmbientRed_Obj
+  true
+end
+
+schema CObject_SetupLighting
+  ΔCObject
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CObject_RemoveLighting
+  ΔCObject
+  reset? : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CObject_ObjectDamage
+  ΔCObject
+  amount? : ℝ
+where
+  -- State update: nFrameGen' = 0
+  -- State update: bBodyCastDamageEffect' = false
+  -- State update: nBodyCastHealth' = (int16)(nBodyCastHealth - 0.5f * amount)
+  -- State update: nBodyCastHealth' = 0
+  -- State update: bBodyCastDamageEffect' = true
+  -- State update: amount' = 0.0f
+  -- Invokes: CGeneral::GetRandomNumberInRange, CParticle::AddParticle
+  true
+end
+
+schema CObject_RefModelInfo
+  ΔCObject
+  modelId? : ℤ
+where
+  -- State update: m_nRefModelIndex' = modelId
+  -- Invokes: CModelInfo::GetModelInfo
+  true
+end
+
+schema CObject_Init
+  ΔCObject
+where
+  -- State update: m_type' = ENTITY_TYPE_OBJECT
+  -- State update: m_nEndOfLifeTime' = 0
+  -- State update: ObjectCreatedBy' = GAME_OBJECT
+  -- State update: bIsPickup' = false
+  -- State update: bPickupObjWithMessage' = false
+  -- State update: bOutOfStock' = false
+  -- Invokes: CObjectData::SetObjectData, CWorld::ProcessVerticalLine, CModelInfo::GetModelInfo
+  true
+end
+
+schema CObject_CanBeDeleted
+  ΔCObject
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  true
+end
+
+schema CObject_DeleteAllMissionObjects
+  ΔCObject
+where
+  -- State update: objectPool' = CPools::GetObjectPool()
+  -- State update: pObject' = objectPool.GetSlot(i)
+  -- Invokes: CPools::GetObjectPool, objectPool->GetSize, objectPool->GetSlot, CWorld::Remove
+  true
+end
+
+schema CObject_DeleteAllTempObjects
+  ΔCObject
+where
+  -- State update: objectPool' = CPools::GetObjectPool()
+  -- State update: pObject' = objectPool.GetSlot(i)
+  -- Invokes: CPools::GetObjectPool, objectPool->GetSize, objectPool->GetSlot, CWorld::Remove
+  true
+end
+
+schema CObject_DeleteAllTempObjectsInArea
+  ΔCObject
+  point? : CVector
+  fRadius? : ℝ
+where
+  -- State update: objectPool' = CPools::GetObjectPool()
+  -- State update: pObject' = objectPool.GetSlot(i)
+  -- Invokes: CPools::GetObjectPool, objectPool->GetSize, objectPool->GetSlot, pObject->GetPosition, CWorld::Remove
+  true
+end
+
+schema Object_IsObjectPointerValid
+  ΔObjectModuleState
+  pObject? : Ref[CObject]
+where
+  -- State update: index' = CPools::GetObjectPool().GetJustIndex_NoFreeAssert(pObject)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = pObject->bIsBIGBuilding || pObject->m_entryInfoList.first
+  -- Invokes: CPools::GetObjectPool
+  true
+end

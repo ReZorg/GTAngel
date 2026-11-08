@@ -1,0 +1,86 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: WeaponEffects (weapons)
+-- Source File(s): weapons/WeaponEffects.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CWeaponEffects
+  m_bActive : 𝔹
+  m_vecPos : CVector
+  m_nRed : ℕ
+  m_nGreen : ℕ
+  m_nBlue : ℕ
+  m_nAlpha : ℕ
+  m_fSize : ℝ
+  m_fRotation : ℝ
+where
+  m_nRed ≥ 0
+  m_nGreen ≥ 0
+  m_nBlue ≥ 0
+  m_nAlpha ≥ 0
+end
+
+schema CWeaponEffects_CWeaponEffects
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::CWeaponEffects()
+  true
+end
+
+schema CWeaponEffects_CWeaponEffects_2
+  ΔCWeaponEffects
+  result! : ANY
+where
+  -- Declared member operation CWeaponEffects::CWeaponEffects()
+  true
+end
+
+schema CWeaponEffects_Init_3
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::Init(void)
+  true
+end
+
+schema CWeaponEffects_Shutdown_4
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::Shutdown(void)
+  true
+end
+
+schema CWeaponEffects_MarkTarget_5
+  ΔCWeaponEffects
+  pos? : CVector
+  red? : ℕ
+  green? : ℕ
+  blue? : ℕ
+  alpha? : ℕ
+  size? : ℝ
+where
+  -- Declared member operation CWeaponEffects::MarkTarget(CVector pos, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size)
+  true
+end
+
+schema CWeaponEffects_ClearCrossHair_6
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::ClearCrossHair(void)
+  true
+end
+
+schema CWeaponEffects_Render_7
+  ΔCWeaponEffects
+where
+  -- Declared member operation CWeaponEffects::Render(void)
+  true
+end

@@ -1,0 +1,763 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MemoryHeap (rw)
+-- Source File(s): rw/MemoryHeap.cpp, rw/MemoryHeap.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include MemoryHeap.zpp  (from "MemoryHeap.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+MemoryHeap_Enum_1 ::= MEMID_FREE | MEMID_GAME | MEMID_WORLD | MEMID_ANIMATION | MEMID_POOLS | MEMID_DEF_MODELS | MEMID_STREAM | MEMID_STREAM_MODELS | MEMID_STREAM_LODS | MEMID_STREAM_TEXUTRES | MEMID_STREAM_COLLISION | MEMID_STREAM_ANIMATION | MEMID_TEXTURES | MEMID_COLLISION | MEMID_PRE_ALLOC | MEMID_GAME_PROCESS | MEMID_SCRIPT | MEMID_CARS | MEMID_RENDER | MEMID_PED_ATTR | NUM_MEMIDS | NUM_FIXED_MEMBLOCKS
+  -- val(MEMID_GAME) = 1
+  -- val(MEMID_WORLD) = 2
+  -- val(MEMID_ANIMATION) = 3
+  -- val(MEMID_POOLS) = 4
+  -- val(MEMID_DEF_MODELS) = 5
+  -- val(MEMID_STREAM) = 6
+  -- val(MEMID_STREAM_MODELS) = 7
+  -- val(MEMID_STREAM_LODS) = 8
+  -- val(MEMID_STREAM_TEXUTRES) = 9
+  -- val(MEMID_STREAM_COLLISION) = 10
+  -- val(MEMID_STREAM_ANIMATION) = 11
+  -- val(MEMID_TEXTURES) = 12
+  -- val(MEMID_COLLISION) = 13
+  -- val(MEMID_PRE_ALLOC) = 14
+  -- val(MEMID_GAME_PROCESS) = 15
+  -- val(MEMID_SCRIPT) = 16
+  -- val(MEMID_CARS) = 17
+  -- val(MEMID_RENDER) = 18
+  -- val(MEMID_PED_ATTR) = 19
+  -- val(NUM_FIXED_MEMBLOCKS) = 6
+
+MemoryHeap_Enum_2 ::= MEMID_FREE | MEMID_GAME | MEMID_WORLD | MEMID_ANIMATION | MEMID_POOLS | MEMID_DEF_MODELS | MEMID_STREAM | MEMID_STREAM_MODELS | MEMID_STREAM_TEXUTRES | MEMID_TEXTURES | MEMID_COLLISION | MEMID_RENDERLIST | MEMID_GAME_PROCESS | MEMID_SCRIPT | MEMID_CARS | MEMID_RENDER | MEMID_FRONTEND | NUM_MEMIDS | NUM_FIXED_MEMBLOCKS
+  -- val(MEMID_GAME) = 1
+  -- val(MEMID_WORLD) = 2
+  -- val(MEMID_ANIMATION) = 3
+  -- val(MEMID_POOLS) = 4
+  -- val(MEMID_DEF_MODELS) = 5
+  -- val(MEMID_STREAM) = 6
+  -- val(MEMID_STREAM_MODELS) = 7
+  -- val(MEMID_STREAM_TEXUTRES) = 8
+  -- val(MEMID_TEXTURES) = 9
+  -- val(MEMID_COLLISION) = 10
+  -- val(MEMID_RENDERLIST) = 11
+  -- val(MEMID_GAME_PROCESS) = 12
+  -- val(MEMID_SCRIPT) = 13
+  -- val(MEMID_CARS) = 14
+  -- val(MEMID_RENDER) = 15
+  -- val(MEMID_FRONTEND) = 17
+  -- val(NUM_FIXED_MEMBLOCKS) = 6
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CStack
+  values : seq T  -- bounded array [N]
+  sp : ℕ
+where
+  sp ≥ 0
+end
+
+schema CStack_CStack
+  ΔCStack
+where
+  -- Declared member operation CStack::CStack()
+  true
+end
+
+schema CStack_pop_2
+  ΔCStack
+  result! : T
+where
+  -- Declared member operation CStack::pop()
+  true
+end
+
+schema HeapBlockDesc
+  m_size : ℕ
+  m_memId : ℤ
+  m_ptrListIndex : ℤ
+  m_next : Ref[HeapBlockDesc]
+  m_prev : Ref[HeapBlockDesc]
+  b : return
+where
+  m_size ≥ 0
+  #m_next ≤ 1
+  #m_prev ≤ 1
+end
+
+schema HeapBlockDesc_GetNextConsecutive
+  ΔHeapBlockDesc
+  result! : Ref[HeapBlockDesc]
+where
+  -- Declared member operation HeapBlockDesc::GetNextConsecutive(void)
+  true
+end
+
+schema HeapBlockDesc_GetDataPointer_2
+  ΔHeapBlockDesc
+  result! : Ref[void]
+where
+  -- Declared member operation HeapBlockDesc::GetDataPointer(void)
+  true
+end
+
+schema HeapBlockDesc_RemoveHeapFreeBlock_3
+  ΔHeapBlockDesc
+  result! : void
+where
+  -- Declared member operation HeapBlockDesc::RemoveHeapFreeBlock(void)
+  true
+end
+
+schema HeapBlockDesc_InsertHeapFreeBlock_4
+  ΔHeapBlockDesc
+  node? : Ref[HeapBlockDesc]
+  result! : void
+where
+  -- Declared member operation HeapBlockDesc::InsertHeapFreeBlock(HeapBlockDesc *node)
+  true
+end
+
+schema HeapBlockDesc_FindSmallestFreeBlock_5
+  ΔHeapBlockDesc
+  size? : ℕ
+  result! : Ref[HeapBlockDesc]
+where
+  -- Declared member operation HeapBlockDesc::FindSmallestFreeBlock(uint32 size)
+  true
+end
+
+schema HeapBlockList
+  m_first : HeapBlockDesc
+  m_last : HeapBlockDesc
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema HeapBlockList_Init
+  ΔHeapBlockList
+where
+  -- Declared member operation HeapBlockList::Init(void)
+  true
+end
+
+schema HeapBlockList_Insert_2
+  ΔHeapBlockList
+  node? : Ref[HeapBlockDesc]
+  result! : void
+where
+  -- Declared member operation HeapBlockList::Insert(HeapBlockDesc *node)
+  true
+end
+
+schema CommonSize
+  m_freeList : HeapBlockList
+  m_size : ℕ
+  m_failed : ℕ
+  m_remaining : ℕ
+  nil : return
+  block : return
+where
+  m_size ≥ 0
+  m_failed ≥ 0
+  m_remaining ≥ 0
+end
+
+schema CommonSize_Init
+  ΔCommonSize
+  size? : ℕ
+where
+  -- Declared member operation CommonSize::Init(uint32 size)
+  true
+end
+
+schema CommonSize_Free_2
+  ΔCommonSize
+  node? : Ref[HeapBlockDesc]
+where
+  -- Declared member operation CommonSize::Free(HeapBlockDesc *node)
+  true
+end
+
+schema CommonSize_Malloc_3
+  ΔCommonSize
+  result! : Ref[HeapBlockDesc]
+where
+  -- Declared member operation CommonSize::Malloc(void)
+  true
+end
+
+schema CommonSize_RemoveHeapFreeBlock_4
+  ΔCommonSize
+  result! : block
+where
+  -- Declared member operation CommonSize::RemoveHeapFreeBlock()
+  true
+end
+
+schema CMemoryHeap
+  m_start : Ref[HeapBlockDesc]
+  m_end : Ref[HeapBlockDesc]
+  m_freeList : HeapBlockList
+  m_fixedSize : seq CommonSize  -- bounded array [NUM_FIXED_MEMBLOCKS]
+  m_totalMemUsed : ℕ
+  m_idStack : ℤ
+  m_currentMemID : ℕ
+  m_memUsed : ℙ ℕ
+  m_totalBlocksUsed : ℕ
+  m_blocksUsed : ℙ ℕ
+  m_unkMemId : ℕ
+  NUM_FIXED_MEMBLOCKS : i
+where
+  #m_start ≤ 1
+  #m_end ≤ 1
+  m_totalMemUsed ≥ 0
+  m_currentMemID ≥ 0
+  #m_memUsed ≤ 1
+  m_totalBlocksUsed ≥ 0
+  #m_blocksUsed ≤ 1
+  m_unkMemId ≥ 0
+end
+
+schema CMemoryHeap_CMemoryHeap
+  ΔCMemoryHeap
+where
+  -- Declared member operation CMemoryHeap::CMemoryHeap(void)
+  true
+end
+
+schema CMemoryHeap_RegisterMalloc_2
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+where
+  -- Declared member operation CMemoryHeap::RegisterMalloc(HeapBlockDesc *block)
+  true
+end
+
+schema CMemoryHeap_RegisterFree_3
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+where
+  -- Declared member operation CMemoryHeap::RegisterFree(HeapBlockDesc *block)
+  true
+end
+
+schema CMemoryHeap_Malloc_4
+  ΔCMemoryHeap
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CMemoryHeap::Malloc(uint32 size)
+  true
+end
+
+schema CMemoryHeap_Realloc_5
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+  size? : ℕ
+  result! : ADDRESS
+where
+  -- Declared member operation CMemoryHeap::Realloc(void *ptr, uint32 size)
+  true
+end
+
+schema CMemoryHeap_Free_6
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+where
+  -- Declared member operation CMemoryHeap::Free(void *ptr)
+  true
+end
+
+schema CMemoryHeap_FillInBlockData_7
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+  end? : Ref[HeapBlockDesc]
+  size? : ℕ
+where
+  -- Declared member operation CMemoryHeap::FillInBlockData(HeapBlockDesc *block, HeapBlockDesc *end, uint32 size)
+  true
+end
+
+schema CMemoryHeap_CombineFreeBlocks_8
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+  result! : ℕ
+where
+  -- Declared member operation CMemoryHeap::CombineFreeBlocks(HeapBlockDesc *block)
+  true
+end
+
+schema CMemoryHeap_MoveMemory_9
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+  result! : ADDRESS
+where
+  -- Declared member operation CMemoryHeap::MoveMemory(void *ptr)
+  true
+end
+
+schema CMemoryHeap_WhereShouldMemoryMove_10
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+  result! : Ref[HeapBlockDesc]
+where
+  -- Declared member operation CMemoryHeap::WhereShouldMemoryMove(void *ptr)
+  true
+end
+
+schema CMemoryHeap_MoveHeapBlock_11
+  ΔCMemoryHeap
+  dst? : Ref[HeapBlockDesc]
+  src? : Ref[HeapBlockDesc]
+  result! : ADDRESS
+where
+  -- Declared member operation CMemoryHeap::MoveHeapBlock(HeapBlockDesc *dst, HeapBlockDesc *src)
+  true
+end
+
+schema CMemoryHeap_PopMemId_12
+  ΔCMemoryHeap
+where
+  -- Declared member operation CMemoryHeap::PopMemId(void)
+  true
+end
+
+schema CMemoryHeap_PushMemId_13
+  ΔCMemoryHeap
+  id? : ℤ
+where
+  -- Declared member operation CMemoryHeap::PushMemId(int32 id)
+  true
+end
+
+schema CMemoryHeap_RegisterMemPointer_14
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+where
+  -- Declared member operation CMemoryHeap::RegisterMemPointer(void *ptr)
+  true
+end
+
+schema CMemoryHeap_TidyHeap_15
+  ΔCMemoryHeap
+where
+  -- Declared member operation CMemoryHeap::TidyHeap(void)
+  true
+end
+
+schema CMemoryHeap_GetMemoryUsed_16
+  ΔCMemoryHeap
+  id? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CMemoryHeap::GetMemoryUsed(int32 id)
+  true
+end
+
+schema CMemoryHeap_GetBlocksUsed_17
+  ΔCMemoryHeap
+  id? : ℤ
+  result! : ℕ
+where
+  -- Declared member operation CMemoryHeap::GetBlocksUsed(int32 id)
+  true
+end
+
+schema CMemoryHeap_GetLargestFreeBlock_18
+  ΔCMemoryHeap
+  result! : ℤ
+where
+  -- Declared member operation CMemoryHeap::GetLargestFreeBlock(void)
+  true
+end
+
+schema CMemoryHeap_ParseHeap_19
+  ΔCMemoryHeap
+  result! : void
+where
+  -- Declared member operation CMemoryHeap::ParseHeap(void)
+  true
+end
+
+schema CMemoryHeap_GetDescFromHeapPointer_20
+  ΔCMemoryHeap
+  block? : ADDRESS
+  result! : Ref[HeapBlockDesc]
+where
+  -- Declared member operation CMemoryHeap::GetDescFromHeapPointer(void *block)
+  true
+end
+
+schema CMemoryHeap_GetSizeBetweenBlocks_21
+  ΔCMemoryHeap
+  first? : Ref[HeapBlockDesc]
+  second? : Ref[HeapBlockDesc]
+  result! : ℕ
+where
+  -- Declared member operation CMemoryHeap::GetSizeBetweenBlocks(HeapBlockDesc *first, HeapBlockDesc *second)
+  true
+end
+
+schema CMemoryHeap_FreeBlock_22
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+  result! : void
+where
+  -- Declared member operation CMemoryHeap::FreeBlock(HeapBlockDesc *block)
+  true
+end
+
+schema CMemoryHeap_if_23
+  ΔCMemoryHeap
+  m_size? : m_fixedSize_i
+  result! : i
+where
+  -- Declared member operation CMemoryHeap::if(m_fixedSize[i].m_size == block->m_size)
+  true
+end
+
+schema CMemoryHeap_FindSmallestFreeBlock_24
+  ΔCMemoryHeap
+  m_size? : block
+  result! : Ref[HeapBlockDesc_b___m_freeList_m_first]
+where
+  -- Declared member operation CMemoryHeap::FindSmallestFreeBlock(block->m_size)
+  true
+end
+
+schema CMemoryHeap_InsertHeapFreeBlock_25
+  ΔCMemoryHeap
+  m_prev? : b
+  result! : block
+where
+  -- Declared member operation CMemoryHeap::InsertHeapFreeBlock(b->m_prev)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMemoryHeap_Init
+  ΔCMemoryHeap
+  total? : ℕ
+where
+  -- State update: m_totalMemUsed' = 0
+  -- State update: m_memUsed' = ∅
+  -- State update: m_currentMemID' = MEMID_FREE
+  -- State update: m_blocksUsed' = ∅
+  -- State update: m_totalBlocksUsed' = 0
+  -- State update: m_unkMemId' = -1
+  -- Invokes: m_freeList.Init, m_freeList.Insert
+  true
+end
+
+schema CMemoryHeap_RegisterMalloc
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+where
+  -- State update: block.m_memId' = m_currentMemID
+  true
+end
+
+schema CMemoryHeap_RegisterFree
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMemoryHeap_Malloc
+  ΔCMemoryHeap
+  size? : ℕ
+where
+  -- State update: recursion' = 0
+  -- State update: size' = (size&~0xF) + 0x10
+  -- State update: list' = &m_fixedSize[i]
+  -- State update: block' = list.Malloc()
+  -- State update: block' = m_freeList.m_first.m_next
+  -- State update: initialsize' = block.m_size
+  -- Return postcondition: result! = block->GetDataPointer()
+  -- Return postcondition: result! = block->GetDataPointer()
+  -- Return postcondition: result! = mem
+  -- Invokes: list->Malloc, block->GetDataPointer, block->RemoveHeapFreeBlock, m_prev->FindSmallestFreeBlock, block->InsertHeapFreeBlock
+  true
+end
+
+schema CMemoryHeap_Realloc
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+  size? : ℕ
+where
+  -- State update: size' = (size&~0xF) + 0x10
+  -- State update: block' = GetDescFromHeapPointer(ptr)
+  -- State update: next' = block.GetNextConsecutive()
+  -- State update: freespace' = CombineFreeBlocks(next)
+  -- State update: end' = next.GetNextConsecutive()
+  -- State update: dst' = Malloc(size)
+  -- Return postcondition: result! = Malloc(size)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = ptr
+  -- Invokes: block->GetNextConsecutive, next->GetNextConsecutive, next->RemoveHeapFreeBlock
+  true
+end
+
+schema CMemoryHeap_Free
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+where
+  -- State update: block' = GetDescFromHeapPointer(ptr)
+  -- State update: block.m_memId' = MEMID_FREE
+  -- State update: idx' = block.m_ptrListIndex
+  -- State update: block.m_ptrListIndex' = -1
+  -- Invokes: m_ptrListIndexStack.push
+  true
+end
+
+schema CMemoryHeap_FillInBlockData
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+  end? : Ref[HeapBlockDesc]
+  size? : ℕ
+where
+  -- State update: block.m_size' = size
+  -- State update: block.m_ptrListIndex' = -1
+  -- State update: remainder' = block.GetNextConsecutive()
+  -- State update: remainder.m_size' = GetSizeBetweenBlocks(remainder, end)
+  -- State update: remainder.m_memId' = MEMID_FREE
+  -- State update: block.m_size' = GetSizeBetweenBlocks(block, end)
+  -- Invokes: block->GetNextConsecutive
+  true
+end
+
+schema CMemoryHeap_CombineFreeBlocks
+  ΔCMemoryHeap
+  block? : Ref[HeapBlockDesc]
+where
+  -- State update: next' = block.GetNextConsecutive()
+  -- State update: block.m_size' = GetSizeBetweenBlocks(block, next)
+  -- Return postcondition: result! = block->m_size
+  -- Return postcondition: result! = block->m_size
+  -- Invokes: block->GetNextConsecutive, next->GetNextConsecutive, next->RemoveHeapFreeBlock
+  true
+end
+
+schema CMemoryHeap_TidyHeap
+  ΔCMemoryHeap
+where
+  -- State update: newblock' = WhereShouldMemoryMove(*gPtrList[i])
+  true
+end
+
+schema CMemoryHeap_RegisterMemPointer
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+where
+  -- State update: block' = GetDescFromHeapPointer(*(void**)ptr)
+  -- State update: index' = m_ptrListIndexStack.pop()
+  -- State update: index' = gPosnInList
+  -- State update: pp' = gPtrList[index]
+  -- State update: m_ptrListIndex' = -1
+  -- State update: gPosnInList' = 0
+  -- Invokes: m_ptrListIndexStack.pop
+  true
+end
+
+schema CMemoryHeap_MoveMemory
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+where
+  -- State update: newblock' = WhereShouldMemoryMove(ptr)
+  -- Return postcondition: result! = MoveHeapBlock(newblock, GetDescFromHeapPointer(ptr))
+  -- Return postcondition: result! = ptr
+  true
+end
+
+schema CMemoryHeap_WhereShouldMemoryMove
+  ΔCMemoryHeap
+  ptr? : ADDRESS
+where
+  -- State update: block' = GetDescFromHeapPointer(ptr)
+  -- State update: next' = block.GetNextConsecutive()
+  -- State update: newblock' = m_freeList.m_first.FindSmallestFreeBlock(block.m_size)
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = nil
+  -- Invokes: block->GetNextConsecutive, m_first.FindSmallestFreeBlock
+  true
+end
+
+schema CMemoryHeap_MoveHeapBlock
+  ΔCMemoryHeap
+  dst? : Ref[HeapBlockDesc]
+  src? : Ref[HeapBlockDesc]
+where
+  -- State update: dst.m_ptrListIndex' = src.m_ptrListIndex
+  -- State update: src.m_ptrListIndex' = -1
+  -- Return postcondition: result! = dst->GetDataPointer()
+  -- Invokes: dst->RemoveHeapFreeBlock, dst->GetNextConsecutive, dst->GetDataPointer, src->GetDataPointer
+  true
+end
+
+schema CMemoryHeap_GetMemoryUsed
+  ΔCMemoryHeap
+  id? : ℤ
+where
+  -- Return postcondition: result! = m_memUsed[id]
+  true
+end
+
+schema CMemoryHeap_GetBlocksUsed
+  ΔCMemoryHeap
+  id? : ℤ
+where
+  -- Return postcondition: result! = m_blocksUsed[id]
+  true
+end
+
+schema CMemoryHeap_PopMemId
+  ΔCMemoryHeap
+where
+  -- State update: m_currentMemID' = m_idStack.pop()
+  -- Invokes: m_idStack.pop
+  true
+end
+
+schema CMemoryHeap_PushMemId
+  ΔCMemoryHeap
+  id? : ℤ
+where
+  -- State update: m_currentMemID' = id
+  -- Invokes: m_idStack.push
+  true
+end
+
+schema CMemoryHeap_ParseHeap
+  ΔCMemoryHeap
+where
+  -- State update: fd' = CFileMgr::OpenFileForWriting("heap.txt")
+  -- State update: addrQW' = 0
+  -- State update: block' = m_start
+  -- State update: chr' = '*'
+  -- State update: chr' = block.m_memId-1 + 'A'
+  -- State update: numQW' = block.m_size>>4
+  -- Invokes: CFileMgr::OpenFileForWriting, CTimer::Stop, block->GetNextConsecutive, CFileMgr::Write, CTimer::Update
+  true
+end
+
+schema CommonSize_Init
+  ΔCommonSize
+  size? : ℕ
+where
+  -- State update: m_size' = size
+  -- State update: m_failed' = 0
+  -- State update: m_remaining' = 0
+  -- Invokes: m_freeList.Init
+  true
+end
+
+schema MemoryHeap_push
+  ΔMemoryHeapModuleState
+  val? : T
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema MemoryHeap_pop
+  ΔMemoryHeapModuleState
+  result! : T
+where
+  -- Return postcondition: result! = values[--sp]
+  true
+end
+
+schema MemoryHeap_RemoveHeapFreeBlock
+  ΔMemoryHeapModuleState
+where
+  -- State update: m_next.m_prev' = m_prev
+  -- State update: m_prev.m_next' = m_next
+  true
+end
+
+schema MemoryHeap_InsertHeapFreeBlock
+  ΔMemoryHeapModuleState
+  node? : Ref[HeapBlockDesc]
+where
+  -- State update: m_next' = node.m_next
+  -- State update: node.m_next.m_prev' = this
+  -- State update: m_prev' = node
+  -- State update: node.m_next' = this
+  true
+end
+
+schema MemoryHeap_Init
+  ΔMemoryHeapModuleState
+where
+  -- State update: m_first.m_next' = &m_last
+  -- State update: m_last.m_prev' = &m_first
+  true
+end
+
+schema MemoryHeap_Insert
+  ΔMemoryHeapModuleState
+  node? : Ref[HeapBlockDesc]
+where
+  -- Invokes: node->InsertHeapFreeBlock
+  true
+end
+
+schema MemoryHeap_Free
+  ΔMemoryHeapModuleState
+  node? : Ref[HeapBlockDesc]
+where
+  -- Invokes: m_freeList.Insert
+  true
+end
+
+schema MemoryHeap_GetLargestFreeBlock
+  ΔMemoryHeapModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = m_freeList.m_last.m_prev->m_size
+  true
+end
+
+schema MemoryHeap_GetSizeBetweenBlocks
+  ΔMemoryHeapModuleState
+  first? : Ref[HeapBlockDesc]
+  second? : Ref[HeapBlockDesc]
+  result! : ℕ
+where
+  -- Return postcondition: result! = (uintptr)second - (uintptr)first - sizeof(HeapBlockDesc)
+  true
+end
+
+schema MemoryHeap_FreeBlock
+  ΔMemoryHeapModuleState
+  block? : Ref[HeapBlockDesc]
+where
+  -- State update: b' = m_freeList.m_first.FindSmallestFreeBlock(block.m_size)
+  -- Invokes: m_first.FindSmallestFreeBlock, block->InsertHeapFreeBlock
+  true
+end

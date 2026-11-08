@@ -1,0 +1,142 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: SetPieces (control)
+-- Source File(s): control/SetPieces.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include SetPieces.zpp  (from "SetPieces.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include CarAI.zpp  (from "CarAI.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include World.zpp  (from "World.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+TIME_BETWEEN_SETPIECE_SPAWNS : ℕ  -- #define TIME_BETWEEN_SETPIECE_SPAWNS 20000
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CSetPieces_Init
+  ΔCSetPieces
+where
+  -- State update: bDebug' = false
+  -- State update: NumSetPieces' = 0
+  -- Invokes: VarConsole.Add
+  true
+end
+
+schema CSetPieces_AddOne
+  ΔCSetPieces
+  type? : ℕ
+  vTriggerInf? : CVector2D
+  vTriggerSup? : CVector2D
+  vSpawn1? : CVector2D
+  vTarget1? : CVector2D
+  vSpawn2? : CVector2D
+  vTarget2? : CVector2D
+where
+  -- State update: m_nType' = type
+  -- State update: m_vTriggerInf.x' = Min(vTriggerInf.x, vTriggerSup.x)
+  -- State update: m_vTriggerInf.y' = Min(vTriggerInf.y, vTriggerSup.y)
+  -- State update: m_vTriggerSup.x' = Max(vTriggerInf.x, vTriggerSup.x)
+  -- State update: m_vTriggerSup.y' = Max(vTriggerInf.y, vTriggerSup.y)
+  -- State update: m_vSpawn1' = vSpawn1
+  true
+end
+
+schema CSetPieces_Update
+  ΔCSetPieces
+where
+  -- State update: nFirst' = NumSetPieces * (CTimer::GetFrameCounter() % 8) / 8
+  -- State update: nLast' = NumSetPieces * (CTimer::GetFrameCounter() % 8 + 1) / 8
+  -- Invokes: CTimer::GetFrameCounter
+  true
+end
+
+schema CSetPieces_Save
+  ΔCSetPieces
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = sizeof(NumSetPieces) + NUM_SETPIECES * sizeof(CSetPiece)
+  true
+end
+
+schema CSetPieces_Load
+  ΔCSetPieces
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CSetPiece_Update
+  ΔCSetPiece
+where
+  -- State update: pos' = FindPlayerCoors()
+  -- State update: pVehicle1' = TryToGenerateCopCar(m_vSpawn1, m_vTarget1)
+  -- State update: pVehicle2' = TryToGenerateCopCar(m_vSpawn2, m_vTarget2)
+  -- State update: pVehicle1.AutoPilot.m_nCruiseSpeed' = 4
+  -- State update: pVehicle1.AutoPilot.m_nDrivingStyle' = DRIVINGSTYLE_SLOW_DOWN_FOR_CARS
+  -- State update: pVehicle1.AutoPilot.m_nCarMission' = MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pWanted->GetWantedLevel, CWorld::Remove, pVehicle1->SetStatus, CCarAI::AddPoliceCarOccupants
+  true
+end
+
+schema CSetPiece_TryToGenerateCopCar
+  ΔCSetPiece
+  vSpawn? : CVector2D
+  vTarget? : CVector2D
+  result! : Ref[CVehicle]
+where
+  -- State update: pVehicle' = new CAutomobile(MI_POLICE, RANDOM_VEHICLE)
+  -- State update: pos.z' = point.point.z + pVehicle.GetHeightAboveRoad()
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pVehicle
+  -- Invokes: CWorld::ProcessVerticalLine, pVehicle->GetHeightAboveRoad, vDirection.Normalise, pVehicle->GetForward, pVehicle->GetRight
+  true
+end
+
+schema CSetPiece_TryToGenerateCopPed
+  ΔCSetPiece
+  vSpawn? : CVector2D
+  result! : Ref[CCopPed]
+where
+  -- State update: pCop' = new CCopPed(COP_STREET)
+  -- State update: pos.z' = point.point.z + 0.9f
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = pCop
+  -- Invokes: CWorld::ProcessVerticalLine, pCop->SetPosition, CWorld::FindObjectsKindaColliding, pCop->GetColModel, CWorld::Add
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema SetPiecesModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 325
+end

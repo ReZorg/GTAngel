@@ -1,0 +1,659 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Script (control)
+-- Source File(s): control/Script.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Script.zpp  (from "Script.h")
+-- include ScriptCommands.zpp  (from "ScriptCommands.h")
+-- include AnimBlendAssociation.zpp  (from "AnimBlendAssociation.h")
+-- include AudioManager.zpp  (from "AudioManager.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CivilianPed.zpp  (from "CivilianPed.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Debug.zpp  (from "Debug.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include EmergencyPed.zpp  (from "EmergencyPed.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include General.zpp  (from "General.h")
+-- include GenericGameStorage.zpp  (from "GenericGameStorage.h")
+-- include HandlingMgr.zpp  (from "HandlingMgr.h")
+-- include Heli.zpp  (from "Heli.h")
+-- include Hud.zpp  (from "Hud.h")
+-- include Lines.zpp  (from "Lines.h")
+-- include Messages.zpp  (from "Messages.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Pickups.zpp  (from "Pickups.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Population.zpp  (from "Population.h")
+-- include Remote.zpp  (from "Remote.h")
+-- include Replay.zpp  (from "Replay.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include User.zpp  (from "User.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include main.zpp  (from "main.h")
+-- include Ropes.zpp  (from "Ropes.h")
+-- include ColStore.zpp  (from "ColStore.h")
+-- include Fluff.zpp  (from "Fluff.h")
+-- include GameLogic.zpp  (from "GameLogic.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include PedRoutes.zpp  (from "PedRoutes.h")
+-- include RoadBlocks.zpp  (from "RoadBlocks.h")
+-- include SpecialFX.zpp  (from "SpecialFX.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include TxdStore.zpp  (from "TxdStore.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include smallHeap.zpp  (from "smallHeap.h")
+-- include stdarg.zpp  (from "stdarg.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CMissionCleanup_CMissionCleanup
+  ΔCMissionCleanup
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CMissionCleanup_Init
+  ΔCMissionCleanup
+where
+  -- State update: m_nCount' = 0
+  -- State update: type' = CLEANUP_UNUSED
+  -- State update: id' = 0
+  true
+end
+
+schema CMissionCleanup_FindFree
+  ΔCMissionCleanup
+  result! : Ref[cleanup_entity_struct]
+where
+  -- Return postcondition: result! = &m_sEntities[i]
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema Script_SleepThisPed
+  ΔScriptModuleState
+  pCleanup? : Ref[cleanup_entity_struct]
+  pPed? : Ref[CPed]
+where
+  -- State update: pPed.bIsStaticWaitingForCollision' = true
+  -- Invokes: pPed->GetModelIndex, pPed->GetIsStatic, pPed->RemoveFromMovingList
+  true
+end
+
+schema Script_WakeThisPed
+  ΔScriptModuleState
+  pCleanup? : Ref[cleanup_entity_struct]
+  pPed? : Ref[CPed]
+where
+  -- State update: pPed.bIsStaticWaitingForCollision' = false
+  -- Invokes: pPed->GetModelIndex, pPed->AddToMovingList
+  true
+end
+
+schema CMissionCleanup_AddEntityToList
+  ΔCMissionCleanup
+  id? : ℤ
+  type? : ℕ
+where
+  -- State update: pNew' = FindFree()
+  -- State update: pNew.id' = id
+  -- State update: pNew.type' = type
+  true
+end
+
+schema CMissionCleanup_RemoveEntityFromList
+  ΔCMissionCleanup
+  id? : ℤ
+  type? : ℕ
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(m_sEntities[i].id)
+  -- State update: pVehicle.bIsStaticWaitingForCollision' = false
+  -- State update: pPed' = CPools::GetPedPool().GetAt(m_sEntities[i].id)
+  -- State update: pPed.bIsStaticWaitingForCollision' = false
+  -- State update: pObject' = CPools::GetObjectPool().GetAt(m_sEntities[i].id)
+  -- State update: pObject.bIsStaticWaitingForCollision' = false
+  -- Invokes: CPools::GetVehiclePool, pVehicle->GetIsStatic, pVehicle->AddToMovingList, CPools::GetPedPool, pPed->GetIsStatic
+  true
+end
+
+schema CMissionCleanup_CheckIfCollisionHasLoadedForMissionObjects
+  ΔCMissionCleanup
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(m_sEntities[i].id)
+  -- State update: level' = CTheZones::GetLevelFromPosition(&pVehicle.GetPosition())
+  -- State update: level' = CGame::currLevel
+  -- State update: pVehicle.bIsStaticWaitingForCollision' = true
+  -- State update: pVehicle.bIsStaticWaitingForCollision' = false
+  -- State update: pObject' = CPools::GetObjectPool().GetAt(m_sEntities[i].id)
+  -- Invokes: CPools::GetVehiclePool, CTheZones::GetLevelFromPosition, pVehicle->GetPosition, CColStore::HasCollisionLoaded, pVehicle->IsHeli
+  true
+end
+
+schema CMissionCleanup_Process
+  ΔCMissionCleanup
+where
+  -- State update: m_AllRandomPedsThisType' = -1
+  -- State update: PedDensityMultiplier' = 1.0f
+  -- State update: CarDensityMultiplier' = 1.0f
+  -- State update: nThreatReactionRangeMultiplier' = 1
+  -- State update: nEnterCarRangeMultiplier' = 1
+  -- State update: m_pWanted.m_fCrimeSensitivity' = 1.0f
+  -- Invokes: CRoadBlocks::ClearScriptRoadBlocks, CRouteNode::Initialise, TheCamera.Restore, TheCamera.SetWideScreenOff, CTimeCycle::StopExtraColour
+  true
+end
+
+schema CUpsideDownCarCheck_Init
+  ΔCUpsideDownCarCheck
+where
+  -- State update: m_nVehicleIndex' = -1
+  -- State update: m_nUpsideDownTimer' = 0
+  true
+end
+
+schema CUpsideDownCarCheck_IsCarUpsideDown
+  ΔCUpsideDownCarCheck
+  id? : ℤ
+  result! : 𝔹
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(id)
+  -- Return postcondition: result! = IsCarUpsideDown(pVehicle)
+  -- Invokes: CPools::GetVehiclePool
+  true
+end
+
+schema CUpsideDownCarCheck_IsCarUpsideDown_2
+  ΔCUpsideDownCarCheck
+  pVehicle? : Ref[CVehicle]
+  result! : 𝔹
+where
+  -- Invokes: pVehicle->GetUp, pVehicle->GetMoveSpeed, pVehicle->GetTurnSpeed
+  true
+end
+
+schema CUpsideDownCarCheck_UpdateTimers
+  ΔCUpsideDownCarCheck
+where
+  -- State update: timeStep' = CTimer::GetTimeStepInMilliseconds()
+  -- State update: v' = CPools::GetVehiclePool().GetAt(m_sCars[i].m_nVehicleIndex)
+  -- State update: m_nUpsideDownTimer' = 0
+  -- State update: m_nVehicleIndex' = -1
+  -- State update: m_nUpsideDownTimer' = 0
+  -- Invokes: CTimer::GetTimeStepInMilliseconds, CPools::GetVehiclePool
+  true
+end
+
+schema CUpsideDownCarCheck_AreAnyCarsUpsideDown
+  ΔCUpsideDownCarCheck
+  result! : 𝔹
+where
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CUpsideDownCarCheck_AddCarToCheck
+  ΔCUpsideDownCarCheck
+  id? : ℤ
+where
+  -- State update: index' = 0
+  -- State update: m_nVehicleIndex' = id
+  -- State update: m_nUpsideDownTimer' = 0
+  true
+end
+
+schema CUpsideDownCarCheck_RemoveCarFromCheck
+  ΔCUpsideDownCarCheck
+  id? : ℤ
+where
+  -- State update: m_nVehicleIndex' = -1
+  -- State update: m_nUpsideDownTimer' = 0
+  true
+end
+
+schema CUpsideDownCarCheck_HasCarBeenUpsideDownForAWhile
+  ΔCUpsideDownCarCheck
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_sCars[i].m_nUpsideDownTimer > UPSIDEDOWN_TIMER_THRESHOLD
+  -- Return postcondition: result! = false
+  true
+end
+
+schema stuck_car_data_Reset
+  Δstuck_car_data
+where
+  -- State update: m_nVehicleIndex' = -1
+  -- State update: m_vecPos' = CVector(-5000.0f, -5000.0f, -5000.0f)
+  -- State update: m_nLastCheck' = -1
+  -- State update: m_fRadius' = 0.0f
+  -- State update: m_nStuckTime' = 0
+  -- State update: m_bStuck' = false
+  true
+end
+
+schema CStuckCarCheck_Init
+  ΔCStuckCarCheck
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStuckCarCheck_Process
+  ΔCStuckCarCheck
+where
+  -- State update: timer' = CTimer::GetTimeInMilliseconds()
+  -- State update: pv' = CPools::GetVehiclePool().GetAt(m_sCars[i].m_nVehicleIndex)
+  -- State update: distance' = (pv.GetPosition() - m_sCars[i].m_vecPos).Magnitude()
+  -- State update: m_bStuck' = distance < m_sCars[i].m_fRadius
+  -- State update: m_vecPos' = pv.GetPosition()
+  -- State update: m_nLastCheck' = timer
+  -- Invokes: CTimer::GetTimeInMilliseconds, CPools::GetVehiclePool, pv->GetPosition
+  true
+end
+
+schema CStuckCarCheck_AddCarToCheck
+  ΔCStuckCarCheck
+  id? : ℤ
+  radius? : ℝ
+  time? : ℕ
+where
+  -- State update: pv' = CPools::GetVehiclePool().GetAt(id)
+  -- State update: index' = 0
+  -- State update: m_nVehicleIndex' = id
+  -- State update: m_vecPos' = pv.GetPosition()
+  -- State update: m_nLastCheck' = CTimer::GetTimeInMilliseconds()
+  -- State update: m_fRadius' = radius
+  -- Invokes: CPools::GetVehiclePool, pv->GetPosition, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CStuckCarCheck_RemoveCarFromCheck
+  ΔCStuckCarCheck
+  id? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CStuckCarCheck_HasCarBeenStuckForAWhile
+  ΔCStuckCarCheck
+  id? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = m_sCars[i].m_bStuck
+  -- Return postcondition: result! = false
+  true
+end
+
+schema CRunningScript_CollectParameters
+  ΔCRunningScript
+  pIp? : ℙ ℕ
+  total? : ℤ
+  pParameters? : ℙ ℤ
+where
+  -- State update: pParameters' = 0
+  -- State update: pParameters' = 0
+  -- State update: pParameters' = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 24
+  -- State update: pParameters' = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 8
+  -- State update: pParameters' = CTheScripts::Read4BytesFromScript(pIp)
+  -- State update: pParameters' = CTheScripts::Read1ByteFromScript(pIp)
+  -- Invokes: CTheScripts::Read1ByteFromScript, CTheScripts::Read2BytesFromScript, CTheScripts::Read4BytesFromScript
+  true
+end
+
+schema CRunningScript_CollectNextParameterWithoutIncreasingPC
+  ΔCRunningScript
+  ip? : ℕ
+  result! : ℤ
+where
+  -- State update: pIp' = &ip
+  -- State update: tmp' = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 8
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTheScripts::Read1ByteFromScript, CTheScripts::Read2BytesFromScript, CTheScripts::Read4BytesFromScript
+  true
+end
+
+schema CRunningScript_StoreParameters
+  ΔCRunningScript
+  pIp? : ℙ ℕ
+  number? : ℤ
+where
+  -- Invokes: CTheScripts::Read1ByteFromScript, CTheScripts::Read2BytesFromScript
+  true
+end
+
+schema Script_GetPointerToScriptVariable
+  ΔScriptModuleState
+  pScript? : Ref[CRunningScript]
+  pIp? : ℙ ℕ
+  result! : ℙ ℤ
+where
+  -- State update: type' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_in_block' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_id' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: size' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_in_block' = CTheScripts::Read1ByteFromScript(pIp)
+  -- State update: index_id' = CTheScripts::Read1ByteFromScript(pIp)
+  -- Invokes: CTheScripts::Read1ByteFromScript
+  true
+end
+
+schema CTheScripts_GetSaveVarIndex
+  ΔCTheScripts
+  var? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CRunningScript_Init
+  ΔCRunningScript
+where
+  -- State update: prev' = ∅
+  -- State update: m_nStackPointer' = 0
+  -- State update: m_nWakeTime' = 0
+  -- State update: m_bIsActive' = false
+  -- State update: m_bCondResult' = false
+  -- State update: m_bIsMissionScript' = false
+  true
+end
+
+schema CTheScripts_Shutdown
+  ΔCTheScripts
+where
+  -- State update: gScriptsFile' = -1
+  -- State update: ScriptSpace' = ∅
+  -- State update: FSDestroyedFlag' = false
+  -- State update: OnAMissionFlag' = 0
+  -- Invokes: CFileMgr::CloseFile, cMainMemoryManager::Instance
+  true
+end
+
+schema CTheScripts_OpenScript
+  ΔCTheScripts
+  result! : ℤ
+where
+  -- Return postcondition: result! = CFileMgr::OpenFile("data\\main.scm", "rb")
+  -- Return postcondition: result! = CFileMgr::OpenFile("data\\freeroam_miami.scm", "rb")
+  -- Return postcondition: result! = CFileMgr::OpenFile("data\\main_d.scm", "rb")
+  -- Invokes: CFileMgr::ChangeDir, CFileMgr::OpenFile
+  true
+end
+
+schema CTheScripts_Init
+  ΔCTheScripts
+  loaddata? : 𝔹
+  result! : 𝔹
+where
+  -- State update: retval' = false
+  -- State update: pIdleScripts' = ∅
+  -- State update: StoreVehicleIndex' = -1
+  -- State update: StoreVehicleWasRandom' = true
+  -- State update: OnAMissionFlag' = 0
+  -- State update: LastMissionPassedTime' = (uint32)-1
+  -- Return postcondition: result! = retval
+  -- Invokes: MissionCleanUp.Init, UpsideDownCars.Init, StuckCars.Init, CPad::UpdatePads, CPad::GetPad
+  true
+end
+
+schema CRunningScript_RemoveScriptFromList
+  ΔCRunningScript
+  ppScript? : Ref[CRunningScript]
+where
+  -- State update: prev.next' = next
+  -- State update: ppScript' = next
+  -- State update: next.prev' = prev
+  true
+end
+
+schema CRunningScript_AddScriptToList
+  ΔCRunningScript
+  ppScript? : Ref[CRunningScript]
+where
+  -- State update: next' = *ppScript
+  -- State update: prev' = ∅
+  -- State update: prev' = this
+  -- State update: ppScript' = this
+  true
+end
+
+schema CTheScripts_StartNewScript
+  ΔCTheScripts
+  ip? : ℕ
+  result! : Ref[CRunningScript]
+where
+  -- State update: pNew' = pIdleScripts
+  -- State update: pNew.m_nId' = NextProcessId++
+  -- State update: pNew.m_bIsActive' = true
+  -- Return postcondition: result! = pNew
+  -- Invokes: pNew->RemoveScriptFromList, pNew->Init, pNew->SetIP, pNew->AddScriptToList
+  true
+end
+
+schema CTheScripts_Process
+  ΔCTheScripts
+where
+  -- State update: CommandsExecuted' = 0
+  -- State update: ScriptsUpdated' = 0
+  -- State update: timeStep' = CTimer::GetTimeStepInMilliseconds()
+  -- State update: NumberOfIntroTextLinesThisFrame' = 0
+  -- State update: m_bIsUsed' = false
+  -- State update: m_bBeforeFade' = false
+  -- Invokes: CReplay::IsPlayingBack, CTimer::GetTimeStepInMilliseconds, UpsideDownCars.UpdateTimers, StuckCars.Process, MissionCleanUp.CheckIfCollisionHasLoadedForMissionObjects
+  true
+end
+
+schema CTheScripts_StartTestScript
+  ΔCTheScripts
+  result! : Ref[CRunningScript]
+where
+  -- Return postcondition: result! = StartNewScript(0)
+  true
+end
+
+schema CTheScripts_IsPlayerOnAMission
+  ΔCTheScripts
+  result! : 𝔹
+where
+  -- Return postcondition: result! = OnAMissionFlag && *(int32*)&ScriptSpace[OnAMissionFlag] == 1
+  true
+end
+
+schema CRunningScript_Process
+  ΔCRunningScript
+where
+  -- State update: pCurrent' = this
+  -- State update: m_nWakeTime' = 0
+  -- State update: m_nStartTime' = 0
+  -- State update: m_nStartTime' = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds, CPad::GetPad
+  true
+end
+
+schema CRunningScript_ProcessOneCommand
+  ΔCRunningScript
+  result! : ℤ
+where
+  -- State update: retval' = -1
+  -- State update: command' = (uint16)CTheScripts::Read2BytesFromScript(&m_nIp)
+  -- State update: m_bNotFlag' = (command & 0x8000)
+  -- State update: retval' = ProcessCommands0To99(command)
+  -- State update: retval' = ProcessCommands100To199(command)
+  -- State update: retval' = ProcessCommands200To299(command)
+  -- Return postcondition: result! = retval
+  -- Invokes: CTheScripts::Read2BytesFromScript, CDebug::DebugAddText
+  true
+end
+
+schema CRunningScript_ProcessCommands0To99
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: m_nWakeTime' = CTimer::GetTimeInMilliseconds() + ScriptParams[0]
+  -- State update: m_bSkipWakeTime' = false
+  -- State update: ptr' = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL)
+  -- State update: ptr' = ScriptParams[0]
+  -- State update: ptr' = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL)
+  -- State update: ptr' = *(float*)&ScriptParams[0]
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 1
+  -- Return postcondition: result! = 0
+  -- Invokes: CTimer::GetTimeInMilliseconds, m_pPed->GetPedState, CTheScripts::StartNewScript, CTheScripts::Read1ByteFromScript, CTheScripts::Read4BytesFromScript
+  true
+end
+
+schema CRunningScript_ProcessCommands100To199
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: nScriptVar1' = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL)
+  -- State update: nScriptVar1' = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL)
+  -- State update: fScriptVar1' = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL)
+  -- State update: fScriptVar1' = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL)
+  -- State update: nScriptVar1' = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL)
+  -- State update: nScriptVar1' = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL)
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTimer::GetTimeStep, CGeneral::GetRandomNumber, CGeneral::GetRandomNumberInRange, CWorld::FindGroundZForCoord, ped->SetPosition
+  true
+end
+
+schema CRunningScript_ProcessCommands200To299
+  ΔCRunningScript
+  command? : ℤ
+  result! : ℤ
+where
+  -- State update: m_nAndOrState' = GET_INTEGER_PARAM(0)
+  -- State update: m_bCondResult' = false
+  -- State update: m_bCondResult' = true
+  -- State update: m_bCondResult' = false
+  -- State update: pNew' = CTheScripts::StartNewScript(GET_INTEGER_PARAM(0))
+  -- State update: pNew.m_bIsMissionScript' = true
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: CTheScripts::StartNewScript, MissionCleanUp.Process, CPools::GetPedPool, CPools::GetVehiclePool, CCarCtrl::RemoveFromInterestingVehicleList
+  true
+end
+
+schema CRunningScript_ReturnFromGosubOrFunction
+  ΔCRunningScript
+where
+  -- State update: m_nIp' = m_anStack[--m_nStackPointer]
+  -- State update: m_bCondResult' = !m_bCondResult
+  -- State update: m_nIp' = m_nIp & STACKVALUE_IP_MASK
+  -- State update: nInputParameters' = CTheScripts::Read1ByteFromScript(&m_nIp)
+  -- State update: nOutputParameters' = CTheScripts::Read1ByteFromScript(&m_nIp)
+  -- State update: nLocalsOffset' = CTheScripts::Read1ByteFromScript(&m_nIp)
+  -- Invokes: CTheScripts::Read1ByteFromScript
+  true
+end
+
+schema CRunningScript_CanAllowMissionReplay
+  ΔCRunningScript
+  result! : 𝔹
+where
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema Script_AddExtraDeathDelay
+  ΔScriptModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = 7000
+  -- Return postcondition: result! = 4000
+  -- Return postcondition: result! = 1000
+  true
+end
+
+schema Script_RetryMission
+  ΔScriptModuleState
+  type? : ℤ
+  unk? : ℤ
+where
+  -- State update: doingMissionRetry' = true
+  -- State update: FrontEndMenuManager.m_nCurrScreen' = MENUPAGE_MISSION_RETRY
+  -- State update: doingMissionRetry' = false
+  -- State update: AllowMissionReplay' = MISSION_RETRY_STAGE_START_RESTARTING
+  -- Invokes: FrontEndMenuManager.RequestFrontEndStartUp, MissionCleanUp.Process
+  true
+end
+
+schema CRunningScript_CollectParameters_2
+  ΔCRunningScript
+  pIp? : ℙ ℕ
+  total? : ℤ
+where
+  -- State update: varIndex' = CTheScripts::Read2BytesFromScript(pIp)
+  -- State update: varIndex' = CTheScripts::Read2BytesFromScript(pIp)
+  -- State update: tmp' = CTheScripts::ReadFloatFromScript(pIp)
+  -- Invokes: CTheScripts::Read1ByteFromScript, CTheScripts::Read4BytesFromScript, CTheScripts::Read2BytesFromScript, CTheScripts::GetSizeOfVariableSpace, CTheScripts::ReadFloatFromScript
+  true
+end
+
+schema CTheScripts_Init_2
+  ΔCTheScripts
+where
+  -- State update: pIdleScripts' = ∅
+  -- State update: ScriptToLoad' = 0
+  -- State update: ScriptToLoad' = 1
+  -- State update: ScriptToLoad' = 2
+  -- State update: mainf' = OpenScript()
+  -- State update: mainf' = CFileMgr::OpenFile("main.scm", "rb")
+  -- Invokes: MissionCleanUp.Init, UpsideDownCars.Init, StuckCars.Init, CPad::UpdatePads, CPad::GetPad
+  true
+end
+
+schema CRunningScript_RemoveScriptFromList_2
+  ΔCRunningScript
+  ppScript? : Ref[CRunningScript]
+where
+  -- State update: prev.next' = next
+  -- State update: ppScript' = next
+  -- State update: next.prev' = prev
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ScriptModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 3944
+end

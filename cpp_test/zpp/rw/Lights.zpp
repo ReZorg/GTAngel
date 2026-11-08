@@ -1,0 +1,241 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Lights (rw)
+-- Source File(s): rw/Lights.cpp, rw/Lights.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include rpworld.zpp  (from "rpworld.h")
+-- include Lights.zpp  (from "Lights.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Timecycle.zpp  (from "Timecycle.h")
+-- include Coronas.zpp  (from "Coronas.h")
+-- include Weather.zpp  (from "Weather.h")
+-- include ZoneCull.zpp  (from "ZoneCull.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include postfx.zpp  (from "postfx.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+USEBLURCOLORS : seq CHAR  -- #define USEBLURCOLORS CPostFX::UseBlurColours()
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema Lights_SetLightsWithTimeOfDayColour
+  ΔLightsModuleState
+  arg_1? : Ref[RpWorld]
+where
+  -- State update: AmbientLightColourForFrame.red' = CTimeCycle::GetAmbientRed_Bl() * CCoronas::LightsMult
+  -- State update: AmbientLightColourForFrame.green' = CTimeCycle::GetAmbientGreen_Bl() * CCoronas::LightsMult
+  -- State update: AmbientLightColourForFrame.blue' = CTimeCycle::GetAmbientBlue_Bl() * CCoronas::LightsMult
+  -- State update: AmbientLightColourForFrame.red' = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult
+  -- State update: AmbientLightColourForFrame.green' = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult
+  -- State update: AmbientLightColourForFrame.blue' = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult
+  -- Invokes: CTimeCycle::GetAmbientRed_Bl, CTimeCycle::GetAmbientGreen_Bl, CTimeCycle::GetAmbientBlue_Bl, CTimeCycle::GetAmbientRed, CTimeCycle::GetAmbientGreen
+  true
+end
+
+schema Lights_LightsCreate
+  ΔLightsModuleState
+  world? : Ref[RpWorld]
+where
+  -- State update: pAmbient' = RpLightCreate(rpLIGHTAMBIENT)
+  -- State update: color.red' = 0.25f
+  -- State update: color.green' = 0.25f
+  -- State update: color.blue' = 0.2f
+  -- State update: pDirect' = RpLightCreate(rpLIGHTDIRECTIONAL)
+  -- State update: color.red' = 1.0f
+  -- Return postcondition: result! = nil
+  -- Return postcondition: result! = world
+  true
+end
+
+schema Lights_LightsDestroy
+  ΔLightsModuleState
+  world? : Ref[RpWorld]
+where
+  -- State update: pAmbient' = ∅
+  -- State update: pDirect' = ∅
+  true
+end
+
+schema Lights_WorldReplaceNormalLightsWithScorched
+  ΔLightsModuleState
+  world? : Ref[RpWorld]
+  l? : ℝ
+where
+  -- State update: color.red' = l
+  -- State update: color.green' = l
+  -- State update: color.blue' = l
+  true
+end
+
+schema Lights_WorldReplaceScorchedLightsWithNormal
+  ΔLightsModuleState
+  world? : Ref[RpWorld]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_AddAnExtraDirectionalLight
+  ΔLightsModuleState
+  world? : Ref[RpWorld]
+  dirx? : ℝ
+  diry? : ℝ
+  dirz? : ℝ
+  red? : ℝ
+  green? : ℝ
+  blue? : ℝ
+where
+  -- State update: strength' = Max(Max(red, green), blue)
+  -- State update: weakest' = strength
+  -- State update: weakest' = LightStrengths[i]
+  -- State update: color.red' = red
+  -- State update: color.green' = green
+  -- State update: color.blue' = blue
+  true
+end
+
+schema Lights_RemoveExtraDirectionalLights
+  ΔLightsModuleState
+  world? : Ref[RpWorld]
+where
+  -- State update: NumExtraDirLightsInWorld' = 0
+  true
+end
+
+schema Lights_SetAmbientAndDirectionalColours
+  ΔLightsModuleState
+  f? : ℝ
+where
+  -- State update: AmbientLightColour.red' = AmbientLightColourForFrame.red * f
+  -- State update: AmbientLightColour.green' = AmbientLightColourForFrame.green * f
+  -- State update: AmbientLightColour.blue' = AmbientLightColourForFrame.blue * f
+  -- State update: DirectionalLightColour.red' = DirectionalLightColourForFrame.red * f
+  -- State update: DirectionalLightColour.green' = DirectionalLightColourForFrame.green * f
+  -- State update: DirectionalLightColour.blue' = DirectionalLightColourForFrame.blue * f
+  true
+end
+
+schema Lights_SetFlashyColours
+  ΔLightsModuleState
+  f? : ℝ
+where
+  -- State update: AmbientLightColour.red' = 1.0f
+  -- State update: AmbientLightColour.green' = 1.0f
+  -- State update: AmbientLightColour.blue' = 1.0f
+  -- State update: DirectionalLightColour.red' = DirectionalLightColourForFrame.red
+  -- State update: DirectionalLightColour.green' = DirectionalLightColourForFrame.green
+  -- State update: DirectionalLightColour.blue' = DirectionalLightColourForFrame.blue
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema Lights_SetFlashyColours_Mild
+  ΔLightsModuleState
+  f? : ℝ
+where
+  -- State update: AmbientLightColour.red' = 0.65f
+  -- State update: AmbientLightColour.green' = 0.65f
+  -- State update: AmbientLightColour.blue' = 0.65f
+  -- State update: DirectionalLightColour.red' = DirectionalLightColourForFrame.red
+  -- State update: DirectionalLightColour.green' = DirectionalLightColourForFrame.green
+  -- State update: DirectionalLightColour.blue' = DirectionalLightColourForFrame.blue
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema Lights_SetBrightMarkerColours
+  ΔLightsModuleState
+  f? : ℝ
+where
+  -- State update: AmbientLightColour.red' = 0.6f
+  -- State update: AmbientLightColour.green' = 0.6f
+  -- State update: AmbientLightColour.blue' = 0.6f
+  true
+end
+
+schema Lights_ReSetAmbientAndDirectionalColours
+  ΔLightsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_DeActivateDirectional
+  ΔLightsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_ActivateDirectional
+  ΔLightsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_SetFullAmbient
+  ΔLightsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_SetAmbientColours
+  ΔLightsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_SetAmbientColoursForPedsCarsAndObjects
+  ΔLightsModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema Lights_SetAmbientColoursToIndicateRoadGroup
+  ΔLightsModuleState
+  i? : ℤ
+where
+  -- State update: AmbientLightColour.red' = IndicateR[i%7]/255.0f
+  -- State update: AmbientLightColour.green' = IndicateG[i%7]/255.0f
+  -- State update: AmbientLightColour.blue' = IndicateB[i%7]/255.0f
+  true
+end
+
+schema Lights_SetAmbientColours_2
+  ΔLightsModuleState
+  color? : Ref[RwRGBAReal]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema LightsModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 492
+end

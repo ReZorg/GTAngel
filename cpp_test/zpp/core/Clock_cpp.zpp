@@ -1,0 +1,123 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Clock (core)
+-- Source File(s): core/Clock.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Clock.zpp  (from "Clock.h")
+-- include Stats.zpp  (from "Stats.h")
+-- include VarConsole.zpp  (from "VarConsole.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CClock_Initialise
+  ΔCClock
+  scale? : ℕ
+where
+  -- State update: ms_nGameClockHours' = 12
+  -- State update: ms_nGameClockMinutes' = 0
+  -- State update: ms_nGameClockSeconds' = 0
+  -- State update: ms_nMillisecondsPerGameMinute' = scale
+  -- State update: ms_nLastClockTick' = CTimer::GetTimeInMilliseconds()
+  -- State update: ms_bClockHasBeenStored' = false
+  -- Invokes: CTimer::GetTimeInMilliseconds, VarConsole.Add
+  true
+end
+
+schema CClock_Update
+  ΔCClock
+where
+  -- State update: ms_nLastClockTick' = CTimer::GetTimeInMilliseconds()
+  -- State update: ms_nGameClockMinutes' = 0
+  -- State update: ms_nGameClockHours' = 0
+  -- State update: ms_nLastClockTick' = CTimer::GetTimeInMilliseconds()
+  -- State update: ms_nLastClockTick' = CTimer::GetTimeInMilliseconds()
+  -- State update: ms_nGameClockMinutes' = 0
+  -- Invokes: CPad::GetPad, CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CClock_SetGameClock
+  ΔCClock
+  h? : ℕ
+  m? : ℕ
+where
+  -- State update: ms_nGameClockMinutes' = m
+  -- State update: ms_nGameClockHours' = h
+  -- State update: ms_nGameClockSeconds' = 0
+  -- State update: ms_nLastClockTick' = CTimer::GetTimeInMilliseconds()
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CClock_GetGameClockMinutesUntil
+  ΔCClock
+  h? : ℕ
+  m? : ℕ
+where
+  -- State update: now' = ms_nGameClockHours*60 + ms_nGameClockMinutes
+  -- State update: then' = h*60 + m
+  -- Return postcondition: result! = then-now
+  true
+end
+
+schema CClock_GetIsTimeInRange
+  ΔCClock
+  h1? : ℕ
+  h2? : ℕ
+where
+  -- Return postcondition: result! = ms_nGameClockHours >= h1 || ms_nGameClockHours < h2
+  -- Return postcondition: result! = ms_nGameClockHours >= h1 && ms_nGameClockHours < h2
+  true
+end
+
+schema CClock_StoreClock
+  ΔCClock
+where
+  -- State update: ms_Stored_nGameClockHours' = ms_nGameClockHours
+  -- State update: ms_Stored_nGameClockMinutes' = ms_nGameClockMinutes
+  -- State update: ms_Stored_nGameClockSeconds' = ms_nGameClockSeconds
+  -- State update: ms_bClockHasBeenStored' = true
+  true
+end
+
+schema CClock_RestoreClock
+  ΔCClock
+where
+  -- State update: ms_nGameClockHours' = ms_Stored_nGameClockHours
+  -- State update: ms_nGameClockMinutes' = ms_Stored_nGameClockMinutes
+  -- State update: ms_nGameClockSeconds' = ms_Stored_nGameClockSeconds
+  true
+end
+
+schema CClock_CalcEnvMapTimeMultiplicator
+  ΔCClock
+where
+  -- State update: nightness' = Abs(ms_nGameClockHours/24.0f - 0.5f)
+  -- State update: ms_EnvMapTimeMultiplicator' = SQR(1.0f - nightness)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ClockModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 173
+end

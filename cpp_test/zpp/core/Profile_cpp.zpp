@@ -1,0 +1,53 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Profile (core)
+-- Source File(s): core/Profile.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include Profile.zpp  (from "Profile.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CProfile_Initialise
+  ΔCProfile
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CProfile_SuspendProfile
+  ΔCProfile
+  profile? : eProfile
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CProfile_ShowResults
+  ΔCProfile
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema ProfileModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 71
+end

@@ -1,0 +1,202 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MenuScreensCustom (core)
+-- Source File(s): core/MenuScreensCustom.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include windows.zpp  (from "windows.h")
+-- include xinput.zpp  (from "xinput.h")
+-- include platform.zpp  (from "platform.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include Renderer.zpp  (from "Renderer.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Font.zpp  (from "Font.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include main.zpp  (from "main.h")
+-- include MBlur.zpp  (from "MBlur.h")
+-- include postfx.zpp  (from "postfx.h")
+-- include custompipes.zpp  (from "custompipes.h")
+-- include RwHelper.zpp  (from "RwHelper.h")
+-- include Text.zpp  (from "Text.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include FileLoader.zpp  (from "FileLoader.h")
+-- include Collision.zpp  (from "Collision.h")
+-- include ModelInfo.zpp  (from "ModelInfo.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include IniFile.zpp  (from "IniFile.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include Population.zpp  (from "Population.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+VIDEOMODE_SELECTOR : seq CHAR  -- #define VIDEOMODE_SELECTOR #ifdef MULTISAMPLING
+MULTISAMPLING_SELECTOR : seq CHAR  -- #define MULTISAMPLING_SELECTOR #ifdef CUTSCENE_BORDERS_SWITCH
+CUTSCENE_BORDERS_TOGGLE : seq CHAR  -- #define CUTSCENE_BORDERS_TOGGLE #ifdef FREE_CAM
+FREE_CAM_TOGGLE : seq CHAR  -- #define FREE_CAM_TOGGLE #ifdef PS2_ALPHA_TEST
+DUALPASS_SELECTOR : seq CHAR  -- #define DUALPASS_SELECTOR #ifdef PED_CAR_DENSITY_SLIDERS
+DENSITY_SLIDERS : seq CHAR  -- #define DENSITY_SLIDERS #ifdef NO_ISLAND_LOADING
+ISLAND_LOADING_SELECTOR : seq CHAR  -- #define ISLAND_LOADING_SELECTOR #ifdef EXTENDED_COLOURFILTER
+POSTFX_SELECTORS : seq CHAR  -- #define POSTFX_SELECTORS #ifdef INVERT_LOOK_FOR_PAD
+INVERT_PAD_SELECTOR : seq CHAR  -- #define INVERT_PAD_SELECTOR #ifdef GAMEPAD_MENU
+SELECT_CONTROLLER_TYPE : seq CHAR  -- #define SELECT_CONTROLLER_TYPE const char *filterNames[] = { "FEM_NON", "FEM_SIM", "FEM_NRM", "FEM_MOB" };
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema MenuScreensCustom_RestoreDefGraphics
+  ΔMenuScreensCustomModuleState
+  action? : ℤ
+where
+  -- State update: gPS2alphaTest' = false
+  -- State update: FrontEndMenuManager.m_nDisplayMSAALevel' = 0
+  -- State update: bAlreadyLoaded' = false
+  -- State update: m_PrefsFrameLimiter' = true
+  -- State update: m_PrefsVsyncDisp' = true
+  -- State update: m_PrefsVsync' = true
+  -- Invokes: CModelInfo::RemoveColModelsFromOtherLevels, CStreaming::RemoveUnusedBigBuildings, CStreaming::RemoveUnusedBuildings, CStreaming::RequestIslands, CStreaming::LoadAllRequestedModels
+  true
+end
+
+schema MenuScreensCustom_RestoreDefDisplay
+  ΔMenuScreensCustomModuleState
+  action? : ℤ
+where
+  -- State update: TheCamera.bFreeCam' = false
+  -- State update: FrontEndMenuManager.m_PrefsBrightness' = 256
+  -- State update: FrontEndMenuManager.m_PrefsLOD' = 1.2f
+  -- State update: ms_lodDistScale' = 1.2f
+  -- State update: FrontEndMenuManager.m_PrefsShowLegends' = true
+  -- State update: FrontEndMenuManager.m_PrefsRadarMode' = 0
+  -- Invokes: CIniFile::LoadIniFile, FrontEndMenuManager.SaveSettings
+  true
+end
+
+schema MenuScreensCustom_IslandLoadingAfterChange
+  ΔMenuScreensCustomModuleState
+  before? : ℤ
+  after? : ℤ
+where
+  -- State update: bAlreadyLoaded' = true
+  -- State update: bAlreadyLoaded' = false
+  -- Invokes: CStreaming::RemoveIslandsNotUsed, CFileLoader::LoadCollisionFromDatFile, CStreaming::RequestBigBuildings, CStreaming::RequestIslands, CModelInfo::RemoveColModelsFromOtherLevels
+  true
+end
+
+schema MenuScreensCustom_PedDensityChange
+  ΔMenuScreensCustomModuleState
+  before? : ℝ
+  after? : ℝ
+where
+  -- State update: MaxNumberOfPedsInUse' = DEFAULT_MAX_NUMBER_OF_PEDS * after
+  -- State update: MaxNumberOfPedsInUseInterior' = DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR * after
+  true
+end
+
+schema MenuScreensCustom_CarDensityChange
+  ΔMenuScreensCustomModuleState
+  before? : ℝ
+  after? : ℝ
+where
+  -- State update: MaxNumberOfCarsInUse' = DEFAULT_MAX_NUMBER_OF_CARS * after
+  true
+end
+
+schema MenuScreensCustom_GraphicsGoBack
+  ΔMenuScreensCustomModuleState
+where
+  -- State update: FrontEndMenuManager.m_nDisplayMSAALevel' = FrontEndMenuManager.m_nPrefsMSAALevel
+  true
+end
+
+schema MenuScreensCustom_MultiSamplingButtonPress
+  ΔMenuScreensCustomModuleState
+  action? : ℤ
+where
+  -- State update: FrontEndMenuManager.m_nPrefsMSAALevel' = FrontEndMenuManager.m_nDisplayMSAALevel
+  -- State update: maxAA' = RwD3D8EngineGetMaxMultiSamplingLevels()
+  -- State update: FrontEndMenuManager.m_nDisplayMSAALevel' = i
+  -- State update: FrontEndMenuManager.m_nDisplayMSAALevel' = 0
+  -- State update: FrontEndMenuManager.m_nDisplayMSAALevel' = FrontEndMenuManager.m_nPrefsMSAALevel
+  -- Invokes: DMAudio.ChangeMusicMode, DMAudio.Service, FrontEndMenuManager.SetHelperText, FrontEndMenuManager.SaveSettings
+  true
+end
+
+schema MenuScreensCustom_MultiSamplingDraw
+  ΔMenuScreensCustomModuleState
+  disabled? : ℙ 𝔹
+  userHovering? : 𝔹
+  result! : seq CHAR
+where
+  -- State update: FrontEndMenuManager.m_nDisplayMSAALevel' = FrontEndMenuManager.m_nPrefsMSAALevel
+  -- State update: disabled' = true
+  -- Return postcondition: result! = TheText.Get("FEM_OFF")
+  -- Return postcondition: result! = unicodeTemp
+  -- Invokes: FrontEndMenuManager.ResetHelperText, FrontEndMenuManager.SetHelperText, TheText.Get
+  true
+end
+
+schema MenuScreensCustom_ScreenModeAfterChange
+  ΔMenuScreensCustomModuleState
+  before? : ℤ
+  after? : ℤ
+where
+  -- Invokes: DMAudio.ChangeMusicMode, DMAudio.Service, FrontEndMenuManager.SetHelperText
+  true
+end
+
+schema MenuScreensCustom_DetectJoystickDraw
+  ΔMenuScreensCustomModuleState
+  disabled? : ℙ 𝔹
+  userHovering? : 𝔹
+  result! : seq CHAR
+where
+  -- State update: found' = -1
+  -- State update: buttons' = glfwGetJoystickButtons(i, &numButtons)
+  -- State update: found' = i
+  -- State update: cachedButtonNum' = numButtons
+  -- State update: found' = -1
+  -- State update: found' = i
+  -- Return postcondition: result! = selectedJoystickUnicode
+  true
+end
+
+schema MenuScreensCustom_DetectJoystickGoBack
+  ΔMenuScreensCustomModuleState
+where
+  -- State update: cachedButtonNum' = -1
+  -- Invokes: ControlsManager.InitDefaultControlConfigJoyPad
+  true
+end
+
+schema MenuScreensCustom_ControllerTypeAfterChange
+  ΔMenuScreensCustomModuleState
+  before? : ℤ
+  after? : ℤ
+where
+  -- Invokes: FrontEndMenuManager.LoadController
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema MenuScreensCustomModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 1457
+end

@@ -1,0 +1,368 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: MusicManager (audio)
+-- Source File(s): audio/MusicManager.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include audio_enums.zpp  (from "audio_enums.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tStreamedSample
+  m_nLength : ℕ
+  m_nPosition : ℕ
+  m_nLastPosCheckTimer : ℕ
+where
+  m_nLength ≥ 0
+  m_nPosition ≥ 0
+  m_nLastPosCheckTimer ≥ 0
+end
+
+schema cMusicManager
+  m_bIsInitialised : bool8
+  m_bDisabled : bool8
+  m_bSetNextStation : bool8
+  m_nVolumeLatency : ℕ
+  m_nCurrentVolume : ℕ
+  m_nMaxVolume : ℕ
+  m_nAnnouncement : ℕ
+  m_bAnnouncementInProgress : bool8
+  m_aTracks : seq tStreamedSample  -- bounded array [TOTAL_STREAMED_SOUNDS]
+  m_bResetTimers : bool8
+  m_nResetTime : ℕ
+  m_bRadioSetByScript : bool8
+  m_nRadioStationScript : ℕ
+  m_nRadioPosition : ℤ
+  m_nRadioInCar : ℕ
+  m_nFrontendTrack : ℕ
+  m_nPlayingTrack : ℕ
+  m_nUpcomingMusicMode : ℕ
+  m_nMusicMode : ℕ
+  m_FrontendLoopFlag : bool8
+  m_bTrackChangeStarted : bool8
+  m_nNextTrack : ℕ
+  m_nNextLoopFlag : bool8
+  m_bVerifyNextTrackStartedToPlay : bool8
+  m_bGameplayAllowsRadio : bool8
+  m_bRadioStreamReady : bool8
+  nFramesSinceCutsceneEnded : ℤ
+  m_bUserResumedGame : bool8
+  m_bMusicModeChangeStarted : bool8
+  m_nMusicModeToBeSet : ℕ
+  m_bEarlyFrontendTrack : bool8
+  aListenTimeArray : seq ℝ  -- bounded array [NUM_RADIOS]
+  m_nLastTrackServiceTime : ℝ
+  m_bFrontendTrackFinished : bool8
+  m_bPlayInFrontend : bool8
+  m_bPreviousPlayerInCar : bool8
+  m_bPlayerInCar : bool8
+  m_nTimer : ℕ
+  m_bDoTrackService : bool8
+  m_bIgnoreTimeDelay : bool8
+  m_bVerifyAmbienceTrackStartedToPlay : bool8
+where
+  m_nVolumeLatency ≥ 0
+  m_nCurrentVolume ≥ 0
+  m_nMaxVolume ≥ 0
+  m_nAnnouncement ≥ 0
+  m_nResetTime ≥ 0
+  m_nRadioStationScript ≥ 0
+  m_nRadioInCar ≥ 0
+  m_nFrontendTrack ≥ 0
+  m_nPlayingTrack ≥ 0
+  m_nUpcomingMusicMode ≥ 0
+  m_nMusicMode ≥ 0
+  m_nNextTrack ≥ 0
+  m_nMusicModeToBeSet ≥ 0
+  m_nTimer ≥ 0
+end
+
+schema cMusicManager_cMusicManager
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::cMusicManager()
+  true
+end
+
+schema cMusicManager_IsInitialised_2
+  ΔcMusicManager
+  result! : bool8
+where
+  -- Declared member operation cMusicManager::IsInitialised()
+  true
+end
+
+schema cMusicManager_GetMusicMode_3
+  ΔcMusicManager
+  result! : ℕ
+where
+  -- Declared member operation cMusicManager::GetMusicMode()
+  true
+end
+
+schema cMusicManager_GetCurrentTrack_4
+  ΔcMusicManager
+  result! : ℕ
+where
+  -- Declared member operation cMusicManager::GetCurrentTrack()
+  true
+end
+
+schema cMusicManager_ResetMusicAfterReload_5
+  ΔcMusicManager
+  result! : void
+where
+  -- Declared member operation cMusicManager::ResetMusicAfterReload()
+  true
+end
+
+schema cMusicManager_SetStartingTrackPositions_6
+  ΔcMusicManager
+  isNewGameTimer? : bool8
+where
+  -- Declared member operation cMusicManager::SetStartingTrackPositions(bool8 isNewGameTimer)
+  true
+end
+
+schema cMusicManager_Initialise_7
+  ΔcMusicManager
+  result! : bool8
+where
+  -- Declared member operation cMusicManager::Initialise()
+  true
+end
+
+schema cMusicManager_Terminate_8
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::Terminate()
+  true
+end
+
+schema cMusicManager_ChangeMusicMode_9
+  ΔcMusicManager
+  mode? : ℕ
+where
+  -- Declared member operation cMusicManager::ChangeMusicMode(uint8 mode)
+  true
+end
+
+schema cMusicManager_StopFrontEndTrack_10
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::StopFrontEndTrack()
+  true
+end
+
+schema cMusicManager_PlayerInCar_11
+  ΔcMusicManager
+  result! : bool8
+where
+  -- Declared member operation cMusicManager::PlayerInCar()
+  true
+end
+
+schema cMusicManager_DisplayRadioStationName_12
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::DisplayRadioStationName()
+  true
+end
+
+schema cMusicManager_PlayAnnouncement_13
+  ΔcMusicManager
+  arg_1? : ℕ
+where
+  -- Declared member operation cMusicManager::PlayAnnouncement(uint32)
+  true
+end
+
+schema cMusicManager_PlayFrontEndTrack_14
+  ΔcMusicManager
+  arg_1? : ℕ
+  arg_2? : bool8
+where
+  -- Declared member operation cMusicManager::PlayFrontEndTrack(uint32, bool8)
+  true
+end
+
+schema cMusicManager_PreloadCutSceneMusic_15
+  ΔcMusicManager
+  arg_1? : ℕ
+where
+  -- Declared member operation cMusicManager::PreloadCutSceneMusic(uint32)
+  true
+end
+
+schema cMusicManager_PlayPreloadedCutSceneMusic_16
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::PlayPreloadedCutSceneMusic(void)
+  true
+end
+
+schema cMusicManager_StopCutSceneMusic_17
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::StopCutSceneMusic(void)
+  true
+end
+
+schema cMusicManager_GetRadioInCar_18
+  ΔcMusicManager
+  result! : ℕ
+where
+  -- Declared member operation cMusicManager::GetRadioInCar(void)
+  true
+end
+
+schema cMusicManager_SetRadioInCar_19
+  ΔcMusicManager
+  arg_1? : ℕ
+where
+  -- Declared member operation cMusicManager::SetRadioInCar(uint32)
+  true
+end
+
+schema cMusicManager_SetRadioChannelByScript_20
+  ΔcMusicManager
+  arg_1? : ℕ
+  arg_2? : ℤ
+where
+  -- Declared member operation cMusicManager::SetRadioChannelByScript(uint32, int32)
+  true
+end
+
+schema cMusicManager_ResetTimers_21
+  ΔcMusicManager
+  arg_1? : ℕ
+where
+  -- Declared member operation cMusicManager::ResetTimers(uint32)
+  true
+end
+
+schema cMusicManager_Service_22
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::Service()
+  true
+end
+
+schema cMusicManager_ServiceFrontEndMode_23
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::ServiceFrontEndMode()
+  true
+end
+
+schema cMusicManager_ServiceGameMode_24
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::ServiceGameMode()
+  true
+end
+
+schema cMusicManager_ServiceAmbience_25
+  ΔcMusicManager
+where
+  -- Declared member operation cMusicManager::ServiceAmbience()
+  true
+end
+
+schema cMusicManager_ServiceTrack_26
+  ΔcMusicManager
+  veh? : Ref[CVehicle]
+  ped? : Ref[CPed]
+where
+  -- Declared member operation cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
+  true
+end
+
+schema cMusicManager_UsesPoliceRadio_27
+  ΔcMusicManager
+  veh? : Ref[CVehicle]
+  result! : bool8
+where
+  -- Declared member operation cMusicManager::UsesPoliceRadio(CVehicle *veh)
+  true
+end
+
+schema cMusicManager_UsesTaxiRadio_28
+  ΔcMusicManager
+  veh? : Ref[CVehicle]
+  result! : bool8
+where
+  -- Declared member operation cMusicManager::UsesTaxiRadio(CVehicle *veh)
+  true
+end
+
+schema cMusicManager_GetTrackStartPos_29
+  ΔcMusicManager
+  track? : ℕ
+  result! : ℕ
+where
+  -- Declared member operation cMusicManager::GetTrackStartPos(uint32 track)
+  true
+end
+
+schema cMusicManager_ComputeAmbienceVol_30
+  ΔcMusicManager
+  reset? : bool8
+  outVolume? : ℕ
+where
+  -- Declared member operation cMusicManager::ComputeAmbienceVol(bool8 reset, uint8& outVolume)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema MusicManager_IsInitialised
+  ΔMusicManagerModuleState
+  result! : bool8
+where
+  -- Return postcondition: result! = m_bIsInitialised
+  true
+end
+
+schema MusicManager_GetMusicMode
+  ΔMusicManagerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nMusicMode
+  true
+end
+
+schema MusicManager_GetCurrentTrack
+  ΔMusicManagerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nPlayingTrack
+  true
+end
+
+schema MusicManager_GetMusicMode_2
+  ΔMusicManagerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nMusicMode
+  true
+end
+
+schema MusicManager_GetNextTrack
+  ΔMusicManagerModuleState
+  result! : ℕ
+where
+  -- Return postcondition: result! = m_nNextTrack
+  true
+end

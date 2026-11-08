@@ -1,0 +1,169 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: aldlist (audio)
+-- Source File(s): audio/oal/aldlist.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include aldlist.zpp  (from "aldlist.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema ALDeviceList_ALDeviceList
+  ΔALDeviceList
+where
+  -- State update: nNumOfDevices' = 0
+  -- State update: defaultDeviceIndex' = 0
+  -- State update: devices' = (char *)alcGetString(∅, ALC_ALL_DEVICES_SPECIFIER)
+  -- State update: devices' = (char *)alcGetString(∅, ALC_DEFAULT_DEVICE_SPECIFIER)
+  -- State update: defaultDeviceName' = (char *)alcGetString(∅, ALC_DEFAULT_DEVICE_SPECIFIER)
+  -- State update: index' = 0
+  -- Invokes: ALDeviceInfo.SetName
+  true
+end
+
+schema ALDeviceList_ALDeviceList_2
+  ΔALDeviceList
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema ALDeviceList_GetNumDevices
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Return postcondition: result! = nNumOfDevices
+  true
+end
+
+schema ALDeviceList_GetDeviceName
+  ΔALDeviceList
+  index? : ℤ
+  result! : seq CHAR
+where
+  -- Return postcondition: result! = aDeviceInfo[index].strDeviceName
+  -- Return postcondition: result! = NULL
+  true
+end
+
+schema ALDeviceList_GetDeviceVersion
+  ΔALDeviceList
+  index? : ℤ
+  major? : ℙ ℤ
+  minor? : ℙ ℤ
+where
+  -- State update: major' = aDeviceInfo[index].iMajorVersion
+  -- State update: minor' = aDeviceInfo[index].iMinorVersion
+  true
+end
+
+schema ALDeviceList_GetMaxNumSources
+  ΔALDeviceList
+  index? : ℤ
+  result! : ℤ
+where
+  -- Return postcondition: result! = aDeviceInfo[index].uiSourceCount
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema ALDeviceList_IsExtensionSupported
+  ΔALDeviceList
+  index? : ℤ
+  ext? : ℤ
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!(aDeviceInfo[index].Extensions & ext)
+  true
+end
+
+schema ALDeviceList_GetDefaultDevice
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- Return postcondition: result! = defaultDeviceIndex
+  true
+end
+
+schema ALDeviceList_FilterDevicesMinVer
+  ΔALDeviceList
+  major? : ℤ
+  minor? : ℤ
+where
+  -- State update: bSelected' = false
+  true
+end
+
+schema ALDeviceList_FilterDevicesMaxVer
+  ΔALDeviceList
+  major? : ℤ
+  minor? : ℤ
+where
+  -- State update: bSelected' = false
+  true
+end
+
+schema ALDeviceList_FilterDevicesExtension
+  ΔALDeviceList
+  ext? : ℤ
+where
+  -- State update: bSelected' = false
+  true
+end
+
+schema ALDeviceList_ResetFilters
+  ΔALDeviceList
+where
+  -- State update: bSelected' = true
+  -- State update: filterIndex' = 0
+  true
+end
+
+schema ALDeviceList_GetFirstFilteredDevice
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- State update: filterIndex' = i + 1
+  -- Return postcondition: result! = i
+  true
+end
+
+schema ALDeviceList_GetNextFilteredDevice
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- State update: filterIndex' = i + 1
+  -- Return postcondition: result! = i
+  true
+end
+
+schema ALDeviceList_GetMaxNumSources_2
+  ΔALDeviceList
+  result! : ℤ
+where
+  -- State update: iSourceCount' = 0
+  -- State update: iSourceCount' = 0
+  -- Return postcondition: result! = iSourceCount
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema aldlistModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 318
+end

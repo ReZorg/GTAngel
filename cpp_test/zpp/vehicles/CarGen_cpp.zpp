@@ -1,0 +1,235 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: CarGen (vehicles)
+-- Source File(s): vehicles/CarGen.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include CarGen.zpp  (from "CarGen.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include Bike.zpp  (from "Bike.h")
+-- include Boat.zpp  (from "Boat.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include CutsceneMgr.zpp  (from "CutsceneMgr.h")
+-- include General.zpp  (from "General.h")
+-- include Pools.zpp  (from "Pools.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include Vehicle.zpp  (from "Vehicle.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include World.zpp  (from "World.h")
+-- include Zones.zpp  (from "Zones.h")
+-- include Occlusion.zpp  (from "Occlusion.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CCarGenerator_SwitchOff
+  ΔCCarGenerator
+where
+  -- State update: m_nUsesRemaining' = 0
+  true
+end
+
+schema CCarGenerator_SwitchOn
+  ΔCCarGenerator
+where
+  -- State update: m_nUsesRemaining' = UINT16_MAX
+  -- State update: m_nTimer' = CalcNextGen()
+  true
+end
+
+schema CCarGenerator_CalcNextGen
+  ΔCCarGenerator
+  result! : ℕ
+where
+  -- Return postcondition: result! = CTimer::GetTimeInMilliseconds() + 4
+  -- Invokes: CTimer::GetTimeInMilliseconds
+  true
+end
+
+schema CCarGenerator_DoInternalProcessing
+  ΔCCarGenerator
+where
+  -- State update: mi' = m_nModelIndex
+  -- State update: mi' = -m_nModelIndex
+  -- State update: pos' = FindPlayerCoors()
+  -- State update: mi' = CCarCtrl::ChooseCarModel(CCarCtrl::ChooseCarRating(&pZone))
+  -- State update: m_nModelIndex' = -mi
+  -- State update: m_nColor1' = -1
+  -- Invokes: CStreaming::RequestModel, CStreaming::HasModelLoaded, CTheZones::GetZoneInfoForTimeOfDay, CCarCtrl::ChooseCarModel, CCarCtrl::ChooseCarRating
+  true
+end
+
+schema CCarGenerator_Process
+  ΔCCarGenerator
+where
+  -- State update: pVehicle' = CPools::GetVehiclePool().GetAt(m_nVehicleHandle)
+  -- State update: m_nVehicleHandle' = -1
+  -- State update: m_nVehicleHandle' = -1
+  -- State update: m_bIsBlocking' = true
+  -- State update: pVehicle.bExtendedRange' = false
+  -- State update: m_nModelIndex' = -1
+  -- Invokes: CTimer::GetTimeInMilliseconds, CPools::GetVehiclePool, pVehicle->GetStatus
+  true
+end
+
+schema CCarGenerator_Setup
+  ΔCCarGenerator
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  angle? : ℝ
+  mi? : ℤ
+  color1? : ℤ
+  color2? : ℤ
+  force? : ℕ
+  alarm? : ℕ
+  lock? : ℕ
+  min_delay? : ℕ
+  max_delay? : ℕ
+where
+  -- State update: m_vecPos' = CVector(x, y, z)
+  -- State update: m_fAngle' = angle
+  -- State update: m_nModelIndex' = mi
+  -- State update: m_nColor1' = color1
+  -- State update: m_nColor2' = color2
+  -- State update: m_bForceSpawn' = force
+  -- Invokes: CTimer::GetTimeInMilliseconds, CModelInfo::GetColModel, m_vecInf.Magnitude, m_vecSup.Magnitude
+  true
+end
+
+schema CCarGenerator_CheckForBlockage
+  ΔCCarGenerator
+  mi? : ℤ
+  result! : 𝔹
+where
+  -- State update: pColModel' = CModelInfo::GetColModel(mi)
+  -- State update: m_bIsBlocking' = true
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: CModelInfo::GetColModel, CWorld::FindObjectsKindaColliding
+  true
+end
+
+schema CCarGenerator_CheckIfWithinRangeOfAnyPlayers
+  ΔCCarGenerator
+  result! : 𝔹
+where
+  -- State update: direction' = FindPlayerCentreOfWorld(CWorld::PlayerInFocus) - m_vecPos
+  -- State update: distance' = direction.Magnitude()
+  -- State update: farclip' = 110.0f * TheCamera.GenerationDistMultiplier
+  -- State update: nearclip' = farclip - 20.0f
+  -- State update: m_bIsBlocking' = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: direction.Magnitude, CModelInfo::IsBoatModel, TheCamera.IsSphereVisible, COcclusion::IsPositionOccluded
+  true
+end
+
+schema CTheCarGenerators_Process
+  ΔCTheCarGenerators
+where
+  -- State update: ProcessCounter' = 0
+  -- Invokes: CCutsceneMgr::IsCutsceneProcessing
+  true
+end
+
+schema CTheCarGenerators_CreateCarGenerator
+  ΔCTheCarGenerators
+  x? : ℝ
+  y? : ℝ
+  z? : ℝ
+  angle? : ℝ
+  mi? : ℤ
+  color1? : ℤ
+  color2? : ℤ
+  force? : ℕ
+  alarm? : ℕ
+  lock? : ℕ
+  min_delay? : ℕ
+  max_delay? : ℕ
+  result! : ℤ
+where
+  -- Return postcondition: result! = NumOfCarGenerators - 1
+  true
+end
+
+schema CTheCarGenerators_Init
+  ΔCTheCarGenerators
+where
+  -- State update: GenerateEvenIfPlayerIsCloseCounter' = 0
+  -- State update: NumOfCarGenerators' = 0
+  -- State update: ProcessCounter' = 0
+  -- State update: CurrentActiveCount' = 0
+  true
+end
+
+schema CTheCarGenerators_SaveAllCarGenerators
+  ΔCTheCarGenerators
+  buffer? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CTheCarGenerators_LoadAllCarGenerators
+  ΔCTheCarGenerators
+  buffer? : ℙ ℕ
+  size? : ℕ
+where
+  -- State update: NumOfCarGenerators' = 0
+  -- State update: GenerateEvenIfPlayerIsCloseCounter' = 0
+  -- State update: CurrentActiveCount' = 0
+  -- State update: ProcessCounter' = 0
+  true
+end
+
+schema CCarGenerator_CheckForBlockage_2
+  ΔCCarGenerator
+  result! : 𝔹
+where
+  -- Return postcondition: result! = entities > 0
+  -- Invokes: CWorld::FindObjectsKindaColliding
+  true
+end
+
+schema CCarGenerator_CheckIfWithinRangeOfAnyPlayer
+  ΔCCarGenerator
+  result! : 𝔹
+where
+  -- State update: direction' = FindPlayerCentreOfWorld(CWorld::PlayerInFocus) - m_vecPos
+  -- State update: distance' = direction.Magnitude()
+  -- State update: farclip' = 120.0f * TheCamera.GenerationDistMultiplier
+  -- State update: nearclip' = farclip - 20.0f
+  -- State update: m_bIsBlocking' = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = true
+  -- Return postcondition: result! = false
+  -- Invokes: direction.Magnitude
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema CarGenModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 376
+end

@@ -1,0 +1,135 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: RoadBlocks (control)
+-- Source File(s): control/RoadBlocks.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include RoadBlocks.zpp  (from "RoadBlocks.h")
+-- include PathFind.zpp  (from "PathFind.h")
+-- include ModelIndices.zpp  (from "ModelIndices.h")
+-- include Streaming.zpp  (from "Streaming.h")
+-- include World.zpp  (from "World.h")
+-- include PedPlacement.zpp  (from "PedPlacement.h")
+-- include Automobile.zpp  (from "Automobile.h")
+-- include CopPed.zpp  (from "CopPed.h")
+-- include VisibilityPlugins.zpp  (from "VisibilityPlugins.h")
+-- include PlayerPed.zpp  (from "PlayerPed.h")
+-- include Wanted.zpp  (from "Wanted.h")
+-- include Camera.zpp  (from "Camera.h")
+-- include CarCtrl.zpp  (from "CarCtrl.h")
+-- include General.zpp  (from "General.h")
+-- include Object.zpp  (from "Object.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+ROADBLOCKDIST : ℝ  -- #define ROADBLOCKDIST (90.0f)
+ROADBLOCK_OBJECT_WIDTH : ℝ  -- #define ROADBLOCK_OBJECT_WIDTH (4.0f)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRoadBlocks_Init
+  ΔCRoadBlocks
+where
+  -- State update: NumRoadBlocks' = 0
+  true
+end
+
+schema CRoadBlocks_GenerateRoadBlockCopsForCar
+  ΔCRoadBlocks
+  pVehicle? : Ref[CVehicle]
+  roadBlockType? : ℤ
+where
+  -- State update: pEntityToAttack' = (CEntity*)FindPlayerVehicle()
+  -- State update: pEntityToAttack' = (CEntity*)FindPlayerPed()
+  -- State update: pPoliceColModel' = CModelInfo::GetColModel(MI_POLICE)
+  -- State update: roadBlockIndex' = i + 2 * roadBlockType
+  -- State update: modelInfoId' = MI_COP
+  -- State update: copType' = COP_STREET
+  -- Invokes: CModelInfo::GetColModel, pVehicle->GetBoundRadius, pVehicle->GetMatrix, pVehicle->GetModelIndex, CStreaming::HasModelLoaded
+  true
+end
+
+schema CRoadBlocks_GenerateRoadBlocks
+  ΔCRoadBlocks
+where
+  -- State update: frame' = CTimer::GetFrameCounter() & 0xF
+  -- State update: nRoadblockNode' = (int16)(NUMROADBLOCKS * frame) / 16
+  -- State update: maxRoadBlocks' = (int16)(NUMROADBLOCKS * (frame + 1)) / 16
+  -- State update: mapObject' = ThePaths.m_mapObjects[RoadBlockObjects[nRoadblockNode]]
+  -- State update: vecDistance' = FindPlayerCoors() - mapObject.GetPosition()
+  -- State update: pPlayerWanted' = FindPlayerPed().m_pWanted
+  -- Invokes: CTimer::GetFrameCounter, mapObject->GetPosition, vecDistance.Magnitude, CGeneral::GetRandomNumber, mapObject->GetColModel
+  true
+end
+
+schema CRoadBlocks_ClearScriptRoadBlocks
+  ΔCRoadBlocks
+where
+  -- State update: m_bInUse' = false
+  true
+end
+
+schema CRoadBlocks_RegisterScriptRoadBlock
+  ΔCRoadBlocks
+  vInf? : CVector
+  vSup? : CVector
+where
+  -- State update: m_bInUse' = true
+  -- State update: m_vInf' = vInf
+  -- State update: m_vSup' = vSup
+  true
+end
+
+schema CRoadBlocks_CreateRoadBlockBetween2Points
+  ΔCRoadBlocks
+  point1? : CVector
+  point2? : CVector
+where
+  -- State update: roadBlocksPirateCheck' = 2
+  -- State update: forward' = (point2 - point1)
+  -- State update: distBetween' = forward.Magnitude()
+  -- State update: pos' = (point1 + point2) / 2
+  -- State update: vehicleId' = MI_POLICE
+  -- State update: vehicleId' = MI_BARRACKS
+  -- Invokes: forward.Magnitude, forward.Normalise, right.Normalise, m_pWanted->AreArmyRequired, m_pWanted->AreFbiRequired
+  true
+end
+
+schema CRoadBlocks_GenerateRoadBlockCopsForCar_2
+  ΔCRoadBlocks
+  pVehicle? : Ref[CVehicle]
+  roadBlockType? : ℤ
+  roadBlockNode? : ℤ
+where
+  -- State update: pEntityToAttack' = (CEntity*)FindPlayerVehicle()
+  -- State update: pEntityToAttack' = (CEntity*)FindPlayerPed()
+  -- State update: pPoliceColModel' = CModelInfo::GetColModel(MI_POLICE)
+  -- State update: roadBlockIndex' = i + 2 * roadBlockType
+  -- State update: modelInfoId' = MI_COP
+  -- State update: copType' = COP_STREET
+  -- Invokes: CModelInfo::GetColModel, pVehicle->GetBoundRadius, pVehicle->GetMatrix, pVehicle->GetModelIndex, CStreaming::HasModelLoaded
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema RoadBlocksModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 431
+end

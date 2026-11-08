@@ -1,0 +1,498 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: glfw (skel)
+-- Source File(s): skel/glfw/glfw.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include shlobj.zpp  (from "shlobj.h")
+-- include basetsd.zpp  (from "basetsd.h")
+-- include mmsystem.zpp  (from "mmsystem.h")
+-- include regstr.zpp  (from "regstr.h")
+-- include shellapi.zpp  (from "shellapi.h")
+-- include windowsx.zpp  (from "windowsx.h")
+-- include resource.zpp  (from "resource.h")
+-- include emscripten.zpp  (from "emscripten.h")
+-- include sysinfo.zpp  (from "sys/sysinfo.h")
+-- include mach_host.zpp  (from "mach/mach_host.h")
+-- include sysctl.zpp  (from "sys/sysctl.h")
+-- include errno.zpp  (from "errno.h")
+-- include locale.zpp  (from "locale.h")
+-- include signal.zpp  (from "signal.h")
+-- include stddef.zpp  (from "stddef.h")
+-- include common.zpp  (from "common.h")
+-- include tchar.zpp  (from "tchar.h")
+-- include stdio.zpp  (from "stdio.h")
+-- include rwcore.zpp  (from "rwcore.h")
+-- include skeleton.zpp  (from "skeleton.h")
+-- include platform.zpp  (from "platform.h")
+-- include crossplatform.zpp  (from "crossplatform.h")
+-- include main.zpp  (from "main.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include Text.zpp  (from "Text.h")
+-- include Pad.zpp  (from "Pad.h")
+-- include Timer.zpp  (from "Timer.h")
+-- include DMAudio.zpp  (from "DMAudio.h")
+-- include ControllerConfig.zpp  (from "ControllerConfig.h")
+-- include Frontend.zpp  (from "Frontend.h")
+-- include Game.zpp  (from "Game.h")
+-- include PCSave.zpp  (from "PCSave.h")
+-- include MemoryCard.zpp  (from "MemoryCard.h")
+-- include Sprite2d.zpp  (from "Sprite2d.h")
+-- include AnimViewer.zpp  (from "AnimViewer.h")
+-- include Font.zpp  (from "Font.h")
+-- include MemoryMgr.zpp  (from "MemoryMgr.h")
+-- include Xlib.zpp  (from "X11/Xlib.h")
+-- include XKBlib.zpp  (from "X11/XKBlib.h")
+-- include glfw3native.zpp  (from "GLFW/glfw3native.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- AXIOMATIC CONSTANTS & MACROS
+--------------------------------------------------------------------------------
+GLFW_EXPOSE_NATIVE_X11 : ℝ  -- #define GLFW_EXPOSE_NATIVE_X11 #include <GLFW/glfw3native.h>
+GLFW_EXPOSE_NATIVE_WIN32 : seq CHAR  -- #define GLFW_EXPOSE_NATIVE_WIN32 #define MAX_SUBSYSTEMS		(16)
+CMDSTR : seq CHAR  -- #define CMDSTR LPWSTR
+SDL_GAMEPAD_DB_PATH : seq CHAR  -- #define SDL_GAMEPAD_DB_PATH "gamecontrollerdb.txt"
+KEY_MAP_OFFSET : seq CHAR  -- #define KEY_MAP_OFFSET (0xff00 - 256)
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema glfw_psCreateFolder
+  ΔglfwModuleState
+  path? : seq CHAR
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_psCameraBeginUpdate
+  ΔglfwModuleState
+  camera? : Ref[RwCamera]
+where
+  -- State update: ForegroundApp' = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema glfw_psCameraShowRaster
+  ΔglfwModuleState
+  camera? : Ref[RwCamera]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_psGrabScreen
+  ΔglfwModuleState
+  pCamera? : Ref[RwCamera]
+where
+  -- State update: pRaster' = RwCameraGetRaster(pCamera)
+  -- State update: image' = RwCameraGetRaster(pCamera).toImage()
+  -- Return postcondition: result! = pImage
+  -- Return postcondition: result! = image
+  -- Return postcondition: result! = nil
+  -- Invokes: image->removeMask
+  true
+end
+
+schema glfw_psTimer
+  ΔglfwModuleState
+where
+  -- Return postcondition: result! = emscripten_get_now()
+  -- Return postcondition: result! = start.tv_sec * 1000.0 + start.tv_nsec/1000000.0
+  true
+end
+
+schema glfw_psMouseSetPos
+  ΔglfwModuleState
+  pos? : Ref[RwV2d]
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_psGetMemoryFunctions
+  ΔglfwModuleState
+where
+  -- Return postcondition: result! = &memFuncs
+  -- Return postcondition: result! = nil
+  true
+end
+
+schema glfw_psInstallFileSystem
+  ΔglfwModuleState
+where
+  -- Return postcondition: result! = (TRUE)
+  true
+end
+
+schema glfw_psNativeTextureSupport
+  ΔglfwModuleState
+where
+  -- Return postcondition: result! = true
+  true
+end
+
+schema glfw_psInitializeVibration
+  ΔglfwModuleState
+where
+  -- State update: freq_low' = 160.0f
+  -- State update: freq_high' = 320.0f
+  true
+end
+
+schema glfw_psHandleVibration
+  ΔglfwModuleState
+where
+  -- State update: target_device' = padIsHandheld(&SwitchPad) ? 0 : 1
+  -- State update: pad' = CPad::GetPad(0)
+  -- State update: pad.ShakeDur' = 0
+  -- State update: pad.ShakeFreq' = 0
+  -- Invokes: CPad::GetPad, CTimer::GetTimeStepInMilliseconds
+  true
+end
+
+schema glfw_psInitialize
+  ΔglfwModuleState
+where
+  -- State update: PsGlobal.lastMousePos.y' = 0.0f
+  -- State update: RsGlobal.ps' = &PsGlobal
+  -- State update: PsGlobal.fullScreen' = FALSE
+  -- State update: PsGlobal.cursorIsInWindow' = FALSE
+  -- State update: WindowFocused' = TRUE
+  -- State update: WindowIconified' = FALSE
+  -- Return postcondition: result! = TRUE
+  -- Invokes: CFileMgr::Initialise, CPad::Initialise, CPad::GetPad, FrontEndMenuManager.InitialiseMenuContentsAfterLoadingGame, TheMemoryCard.Init
+  true
+end
+
+schema glfw_psTerminate
+  ΔglfwModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_psGetNumVideModes
+  ΔglfwModuleState
+  result! : ℤ
+where
+  -- Return postcondition: result! = RwEngineGetNumVideoModes()
+  true
+end
+
+schema glfw_psFreeVideoModeList
+  ΔglfwModuleState
+  result! : 𝔹
+where
+  -- State update: numModes' = _psGetNumVideModes()
+  -- State update: _VMList' = ∅
+  -- Return postcondition: result! = TRUE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema glfw_psSelectScreenVM
+  ΔglfwModuleState
+  videoMode? : ℤ
+where
+  -- State update: RsGlobal.quit' = TRUE
+  -- Invokes: FrontEndMenuManager.UnloadTextures, FrontEndMenuManager.LoadAllTextures
+  true
+end
+
+schema glfw_IsForegroundApp
+  ΔglfwModuleState
+  result! : 𝔹
+where
+  -- Return postcondition: result! = !!ForegroundApp
+  true
+end
+
+schema glfw_psSelectDevice
+  ΔglfwModuleState
+where
+  -- State update: AutoRenderer' = 0
+  -- State update: modeFound' = FALSE
+  -- State update: GnumSubSystems' = RwEngineGetNumSubSystems()
+  -- State update: subSysNum' = 0
+  -- State update: GcurSel' = RwEngineGetCurrentSubSystem()
+  -- State update: GcurSel' = FrontEndMenuManager.m_nPrefsSubsystem
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = FALSE
+  true
+end
+
+schema glfw_IsThisJoystickBlacklisted
+  ΔglfwModuleState
+  i? : ℤ
+  result! : 𝔹
+where
+  -- State update: joyname' = glfwGetJoystickName(i)
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  -- Return postcondition: result! = false
+  true
+end
+
+schema glfw_InputInitialiseJoys
+  ΔglfwModuleState
+where
+  -- State update: f' = fopen(SDL_GAMEPAD_DB_PATH, "rb")
+  -- State update: fsize' = ftell(f)
+  -- State update: db' = (char*)malloc(fsize + 1)
+  -- State update: EnvControlConfig' = getenv("SDL_GAMECONTROLLERCONFIG")
+  -- Invokes: ControlsManager.InitDefaultControlConfigJoyPad
+  true
+end
+
+schema glfw_InputInitialiseMouse
+  ΔglfwModuleState
+  exclusive? : 𝔹
+  result! : ℤ
+where
+  -- State update: lastCursorMode' = exclusive ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN
+  -- Return postcondition: result! = 0
+  true
+end
+
+schema glfw_InputShutdownMouse
+  ΔglfwModuleState
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_InputMouseNeedsExclusive
+  ΔglfwModuleState
+  result! : 𝔹
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_psPostRWinit
+  ΔglfwModuleState
+where
+  -- Invokes: CPad::GetPad
+  true
+end
+
+schema glfw_psSetVideoMode
+  ΔglfwModuleState
+  subSystem? : ℤ
+  videoMode? : ℤ
+  result! : 𝔹
+where
+  -- State update: RwInitialised' = FALSE
+  -- State update: GcurSel' = subSystem
+  -- State update: GcurSelVM' = videoMode
+  -- State update: useDefault' = TRUE
+  -- State update: RwInitialised' = TRUE
+  -- State update: useDefault' = FALSE
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = TRUE
+  true
+end
+
+schema glfw_CommandLineToArgv
+  ΔglfwModuleState
+  cmdLine? : seq CHAR
+  argCount? : ℙ ℤ
+where
+  -- State update: numArgs' = 0
+  -- State update: len' = strlen(cmdLine)
+  -- State update: inString' = FALSE
+  -- State update: inArg' = FALSE
+  -- State update: inString' = !inString
+  -- State update: inArg' = FALSE
+  -- Return postcondition: result! = (RwChar **)res
+  true
+end
+
+schema glfw_InitialiseLanguage
+  ΔglfwModuleState
+where
+  -- State update: systemLang' = setlocale (LC_ALL, ∅)
+  -- State update: keyboardLang' = setlocale (LC_CTYPE, ∅)
+  -- State update: primUserLCID' = PRIMARYLANGID(GetSystemDefaultLCID())
+  -- State update: primSystemLCID' = PRIMARYLANGID(GetUserDefaultLCID())
+  -- State update: primLayout' = PRIMARYLANGID((DWORD)GetKeyboardLayout(0))
+  -- State update: subUserLCID' = SUBLANGID(GetSystemDefaultLCID())
+  -- Invokes: TheText.Unload, TheText.Load
+  true
+end
+
+schema glfw_HandleExit
+  ΔglfwModuleState
+where
+  -- State update: RsGlobal.quit' = TRUE
+  true
+end
+
+schema glfw_terminateHandler
+  ΔglfwModuleState
+  sig? : ℤ
+  info? : Ref[siginfo_t]
+  ucontext? : ADDRESS
+where
+  -- State update: RsGlobal.quit' = TRUE
+  true
+end
+
+schema glfw_dummyHandler
+  ΔglfwModuleState
+  sig? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_resizeCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  width? : ℤ
+  height? : ℤ
+where
+  -- State update: RsGlobal.maximumHeight' = height
+  -- State update: RsGlobal.maximumWidth' = width
+  -- State update: r.x' = 0
+  -- State update: r.y' = 0
+  -- State update: r.w' = width
+  -- State update: r.h' = height
+  true
+end
+
+schema glfw_scrollCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  xoffset? : ℝ
+  yoffset? : ℝ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_initkeymap
+  ΔglfwModuleState
+where
+  -- State update: display' = glfwGetX11Display()
+  -- State update: keyboardLang' = setlocale (LC_CTYPE, ∅)
+  -- State update: keymap' = origkeymap
+  -- State update: lastKeysym' = keysyms_per_keycode - 1
+  -- State update: ks' = keymap[j]
+  true
+end
+
+schema glfw_keypressCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  key? : ℤ
+  scancode? : ℤ
+  action? : ℤ
+  mods? : ℤ
+where
+  -- State update: ks' = (RsKeyCodes)keymap[key]
+  true
+end
+
+schema glfw_checkKeyPresses
+  ΔglfwModuleState
+where
+  -- State update: display' = glfwGetX11Display()
+  -- State update: keycode' = 8 * i + j
+  -- State update: keymapIndex' = keyCodeToKeymapIndex[keycode]
+  -- State update: rsCode' = keymap[keymapIndex]
+  -- State update: pressed' = WindowFocused && !!(keys[i] & (1 << j))
+  -- State update: lshiftStatus' = pressed
+  true
+end
+
+schema glfw_InputTranslateShiftKeyUpDown
+  ΔglfwModuleState
+  rs? : Ref[RsKeyCodes]
+where
+  -- State update: rs' = rsLSHIFT))
+  -- State update: rs' = rsRSHIFT))
+  true
+end
+
+schema glfw_cursorCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  xpos? : ℝ
+  ypos? : ℝ
+where
+  -- State update: FrontEndMenuManager.m_nMouseTempPosX' = xpos * (RsGlobal.maximumWidth / winw)
+  -- State update: FrontEndMenuManager.m_nMouseTempPosY' = ypos * (RsGlobal.maximumHeight / winh)
+  true
+end
+
+schema glfw_cursorEnterCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  entered? : ℤ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema glfw_windowFocusCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  focused? : ℤ
+where
+  -- State update: WindowFocused' = !!focused
+  true
+end
+
+schema glfw_windowIconifyCB
+  ΔglfwModuleState
+  window? : Ref[GLFWwindow]
+  iconified? : ℤ
+where
+  -- State update: WindowIconified' = !!iconified
+  true
+end
+
+schema glfw_WinMain
+  ΔglfwModuleState
+  instance? : HINSTANCE
+  __RWUNUSED__? : HINSTANCE_prevInstance
+  cmdLine? : CMDSTR
+  cmdShow? : ℤ
+where
+  -- State update: act.sa_sigaction' = terminateHandler
+  -- State update: act.sa_flags' = SA_SIGINFO
+  -- State update: sa.sa_handler' = dummyHandler
+  -- State update: sa.sa_flags' = 0
+  -- State update: cmdLine' = GetCommandLine()
+  -- State update: argv' = CommandLineToArgv(cmdLine, &argc)
+  -- Return postcondition: result! = FALSE
+  -- Return postcondition: result! = 0
+  -- Return postcondition: result! = 0
+  -- Invokes: ControlsManager.MakeControllerActionsBlank, ControlsManager.InitDefaultControlConfiguration, ControlsManager.InitDefaultControlConfigMouse, MousePointerStateHelper.GetMouseSetUp, CFileMgr::SetDirMyDocuments
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema glfwModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 2602
+end

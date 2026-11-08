@@ -1,0 +1,33 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: rpmatfx (fakerw)
+-- Source File(s): fakerw/rpmatfx.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+RpMatFXMaterialFlags ::= rpMATFXEFFECTNULL | rpMATFXEFFECTBUMPMAP | rpMATFXEFFECTENVMAP | rpMATFXEFFECTBUMPENVMAP | rpMATFXEFFECTDUAL | rpMATFXEFFECTMAX | rpMATFXNUMEFFECTS
+  -- val(rpMATFXEFFECTNULL) = rw::MatFX::NOTHING
+  -- val(rpMATFXEFFECTBUMPMAP) = rw::MatFX::BUMPMAP
+  -- val(rpMATFXEFFECTENVMAP) = rw::MatFX::ENVMAP
+  -- val(rpMATFXEFFECTBUMPENVMAP) = rw::MatFX::BUMPENVMAP
+  -- val(rpMATFXEFFECTDUAL) = rw::MatFX::DUAL
+  -- val(rpMATFXNUMEFFECTS) = rpMATFXEFFECTMAX - 1
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema rpmatfxModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 43
+end

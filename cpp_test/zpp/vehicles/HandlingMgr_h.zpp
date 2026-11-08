@@ -1,0 +1,436 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: HandlingMgr (vehicles)
+-- Source File(s): vehicles/HandlingMgr.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Transmission.zpp  (from "Transmission.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- FREE TYPES & ENUMERATIONS
+--------------------------------------------------------------------------------
+tVehicleType ::= HANDLING_LANDSTAL | HANDLING_IDAHO | HANDLING_STINGER | HANDLING_LINERUN | HANDLING_PEREN | HANDLING_SENTINEL | HANDLING_PATRIOT | HANDLING_FIRETRUK | HANDLING_TRASH | HANDLING_STRETCH | HANDLING_MANANA | HANDLING_INFERNUS | HANDLING_PONY | HANDLING_MULE | HANDLING_CHEETAH | HANDLING_AMBULAN | HANDLING_FBICAR | HANDLING_MOONBEAM | HANDLING_ESPERANT | HANDLING_TAXI | HANDLING_KURUMA | HANDLING_BOBCAT | HANDLING_MRWHOOP | HANDLING_BFINJECT | HANDLING_POLICE | HANDLING_ENFORCER | HANDLING_SECURICA | HANDLING_BANSHEE | HANDLING_BUS | HANDLING_RHINO | HANDLING_BARRACKS | HANDLING_TRAIN | HANDLING_HELI | HANDLING_DODO | HANDLING_COACH | HANDLING_CABBIE | HANDLING_STALLION | HANDLING_RUMPO | HANDLING_RCBANDIT | HANDLING_MAFIA | HANDLING_AIRTRAIN | HANDLING_DEADDODO | HANDLING_FLATBED | HANDLING_YANKEE | HANDLING_GOLFCART | HANDLING_VOODOO | HANDLING_WASHING | HANDLING_CUBAN | ... (133 total branches)
+
+HandlingMgr_Enum_3 ::= HANDLING_1G_BOOST | HANDLING_2G_BOOST | HANDLING_REV_BONNET | HANDLING_HANGING_BOOT | HANDLING_NO_DOORS | HANDLING_IS_VAN | HANDLING_IS_BUS | HANDLING_IS_LOW | HANDLING_DBL_EXHAUST | HANDLING_TAILGATE_BOOT | HANDLING_NOSWING_BOOT | HANDLING_NONPLAYER_STABILISER | HANDLING_NEUTRALHANDLING | HANDLING_HAS_NO_ROOF | HANDLING_IS_BIG | HANDLING_HALOGEN_LIGHTS | HANDLING_IS_BIKE | HANDLING_IS_HELI | HANDLING_IS_PLANE | HANDLING_IS_BOAT | HANDLING_NO_EXHAUST | HANDLING_REARWHEEL_1ST | HANDLING_HANDBRAKE_TYRE | HANDLING_SIT_IN_BOAT | HANDLING_FAT_REARW | HANDLING_NARROW_FRONTW | HANDLING_GOOD_INSAND | HANDLING_UNKNOWN
+  -- val(HANDLING_1G_BOOST) = 1
+  -- val(HANDLING_2G_BOOST) = 2
+  -- val(HANDLING_REV_BONNET) = 4
+  -- val(HANDLING_HANGING_BOOT) = 8
+  -- val(HANDLING_NO_DOORS) = 0x10
+  -- val(HANDLING_IS_VAN) = 0x20
+  -- val(HANDLING_IS_BUS) = 0x40
+  -- val(HANDLING_IS_LOW) = 0x80
+  -- val(HANDLING_DBL_EXHAUST) = 0x100
+  -- val(HANDLING_TAILGATE_BOOT) = 0x200
+  -- val(HANDLING_NOSWING_BOOT) = 0x400
+  -- val(HANDLING_NONPLAYER_STABILISER) = 0x800
+  -- val(HANDLING_NEUTRALHANDLING) = 0x1000
+  -- val(HANDLING_HAS_NO_ROOF) = 0x2000
+  -- val(HANDLING_IS_BIG) = 0x4000
+  -- val(HANDLING_HALOGEN_LIGHTS) = 0x8000
+  -- val(HANDLING_IS_BIKE) = 0x10000
+  -- val(HANDLING_IS_HELI) = 0x20000
+  -- val(HANDLING_IS_PLANE) = 0x40000
+  -- val(HANDLING_IS_BOAT) = 0x80000
+  -- val(HANDLING_NO_EXHAUST) = 0x100000
+  -- val(HANDLING_REARWHEEL_1ST) = 0x200000
+  -- val(HANDLING_HANDBRAKE_TYRE) = 0x400000
+  -- val(HANDLING_SIT_IN_BOAT) = 0x800000
+
+HandlingMgr_Enum_4 ::= HANDLING_1G_BOOST | HANDLING_2G_BOOST | HANDLING_REV_BONNET | HANDLING_HANGING_BOOT | HANDLING_NO_DOORS | HANDLING_IS_VAN | HANDLING_IS_BUS | HANDLING_IS_LOW | HANDLING_DBL_EXHAUST | HANDLING_TAILGATE_BOOT | HANDLING_NOSWING_BOOT | HANDLING_NONPLAYER_STABILISER | HANDLING_NEUTRALHANDLING | HANDLING_HAS_NO_ROOF | HANDLING_IS_BIG | HANDLING_HALOGEN_LIGHTS | HANDLING_IS_BIKE | HANDLING_IS_HELI | HANDLING_IS_PLANE | HANDLING_IS_BOAT | HANDLING_NO_EXHAUST | HANDLING_REARWHEEL_1ST | HANDLING_HANDBRAKE_TYRE | HANDLING_SIT_IN_BOAT | HANDLING_FAT_REARW | HANDLING_NARROW_FRONTW | HANDLING_GOOD_INSAND | HANDLING_UNKNOWN | HANDLING_FORCE_GRND_CLR
+  -- val(HANDLING_1G_BOOST) = 1
+  -- val(HANDLING_2G_BOOST) = 2
+  -- val(HANDLING_REV_BONNET) = 4
+  -- val(HANDLING_HANGING_BOOT) = 8
+  -- val(HANDLING_NO_DOORS) = 0x10
+  -- val(HANDLING_IS_VAN) = 0x20
+  -- val(HANDLING_IS_BUS) = 0x40
+  -- val(HANDLING_IS_LOW) = 0x80
+  -- val(HANDLING_DBL_EXHAUST) = 0x100
+  -- val(HANDLING_TAILGATE_BOOT) = 0x200
+  -- val(HANDLING_NOSWING_BOOT) = 0x400
+  -- val(HANDLING_NONPLAYER_STABILISER) = 0x800
+  -- val(HANDLING_NEUTRALHANDLING) = 0x1000
+  -- val(HANDLING_HAS_NO_ROOF) = 0x2000
+  -- val(HANDLING_IS_BIG) = 0x4000
+  -- val(HANDLING_HALOGEN_LIGHTS) = 0x8000
+  -- val(HANDLING_IS_BIKE) = 0x10000
+  -- val(HANDLING_IS_HELI) = 0x20000
+  -- val(HANDLING_IS_PLANE) = 0x40000
+  -- val(HANDLING_IS_BOAT) = 0x80000
+  -- val(HANDLING_NO_EXHAUST) = 0x100000
+  -- val(HANDLING_REARWHEEL_1ST) = 0x200000
+  -- val(HANDLING_HANDBRAKE_TYRE) = 0x400000
+  -- val(HANDLING_SIT_IN_BOAT) = 0x800000
+
+HandlingMgr_Enum_5 ::= HANDLING_1G_BOOST | HANDLING_2G_BOOST | HANDLING_REV_BONNET | HANDLING_HANGING_BOOT | HANDLING_NO_DOORS | HANDLING_IS_VAN | HANDLING_IS_BUS | HANDLING_IS_LOW | HANDLING_DBL_EXHAUST | HANDLING_TAILGATE_BOOT | HANDLING_NOSWING_BOOT | HANDLING_NONPLAYER_STABILISER | HANDLING_NEUTRALHANDLING | HANDLING_HAS_NO_ROOF | HANDLING_IS_BIG | HANDLING_HALOGEN_LIGHTS
+  -- val(HANDLING_1G_BOOST) = 1
+  -- val(HANDLING_2G_BOOST) = 2
+  -- val(HANDLING_REV_BONNET) = 4
+  -- val(HANDLING_HANGING_BOOT) = 8
+  -- val(HANDLING_NO_DOORS) = 0x10
+  -- val(HANDLING_IS_VAN) = 0x20
+  -- val(HANDLING_IS_BUS) = 0x40
+  -- val(HANDLING_IS_LOW) = 0x80
+  -- val(HANDLING_DBL_EXHAUST) = 0x100
+  -- val(HANDLING_TAILGATE_BOOT) = 0x200
+  -- val(HANDLING_NOSWING_BOOT) = 0x400
+  -- val(HANDLING_NONPLAYER_STABILISER) = 0x800
+  -- val(HANDLING_NEUTRALHANDLING) = 0x1000
+  -- val(HANDLING_HAS_NO_ROOF) = 0x2000
+  -- val(HANDLING_IS_BIG) = 0x4000
+  -- val(HANDLING_HALOGEN_LIGHTS) = 0x8000
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema tHandlingData
+  fMass : ℝ
+  fTurnMass : ℝ
+  fTractionMultiplier : ℝ
+  fCollisionDamageMultiplier : ℝ
+  nIdentifier : tVehicleType
+  fInvMass : ℝ
+  fDragMult : ℝ
+  CentreOfMass : CVector
+  nPercentSubmerged : ℤ
+  fBuoyancy : ℝ
+  Transmission : cTransmission
+  fBrakeDeceleration : ℝ
+  fBrakeBias : ℝ
+  bABS : ℤ
+  fSteeringLock : ℝ
+  fTractionLoss : ℝ
+  fTractionBias : ℝ
+  fUnused : ℝ
+  fSuspensionForceLevel : ℝ
+  fSuspensionDampingLevel : ℝ
+  fSuspensionUpperLimit : ℝ
+  fSuspensionLowerLimit : ℝ
+  fSuspensionBias : ℝ
+  fSuspensionAntidiveMultiplier : ℝ
+  Flags : ℕ
+  fSeatOffsetDistance : ℝ
+  nMonetaryValue : ℤ
+  FrontLights : ℤ
+  RearLights : ℤ
+  unk : seq ℤ  -- bounded array [4]
+where
+  Flags ≥ 0
+  #unk = 4
+end
+
+schema tHandlingData_GetMass
+  ΞtHandlingData
+  result! : ℝ
+where
+  -- Declared member operation tHandlingData::GetMass(void)
+  true
+end
+
+schema tHandlingData_GetTurnMass_2
+  ΞtHandlingData
+  result! : ℝ
+where
+  -- Declared member operation tHandlingData::GetTurnMass(void)
+  true
+end
+
+schema tHandlingData_GetTractionMultiplier_3
+  ΞtHandlingData
+  result! : ℝ
+where
+  -- Declared member operation tHandlingData::GetTractionMultiplier(void)
+  true
+end
+
+schema tHandlingData_GetCollisionDamageMultiplier_4
+  ΞtHandlingData
+  result! : ℝ
+where
+  -- Declared member operation tHandlingData::GetCollisionDamageMultiplier(void)
+  true
+end
+
+schema tBikeHandlingData
+  nIdentifier : tVehicleType
+  fLeanFwdCOM : ℝ
+  fLeanFwdForce : ℝ
+  fLeanBakCOM : ℝ
+  fLeanBackForce : ℝ
+  fMaxLean : ℝ
+  fFullAnimLean : ℝ
+  fDesLean : ℝ
+  fSpeedSteer : ℝ
+  fSlipSteer : ℝ
+  fNoPlayerCOMz : ℝ
+  fWheelieAng : ℝ
+  fStoppieAng : ℝ
+  fWheelieSteer : ℝ
+  fWheelieStabMult : ℝ
+  fStoppieStabMult : ℝ
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tBoatHandlingData
+  nIdentifier : tVehicleType
+  fThrustY : ℝ
+  fThrustZ : ℝ
+  fThrustAppZ : ℝ
+  fAqPlaneForce : ℝ
+  fAqPlaneLimit : ℝ
+  fAqPlaneOffset : ℝ
+  fWaveAudioMult : ℝ
+  fLook_L_R_BehindCamHeight : ℝ
+  vecMoveRes : CVector
+  vecTurnRes : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema tFlyingHandlingData
+  nIdentifier : tVehicleType
+  fThrust : ℝ
+  fThrustFallOff : ℝ
+  fYaw : ℝ
+  fYawStab : ℝ
+  fSideSlip : ℝ
+  fRoll : ℝ
+  fRollStab : ℝ
+  fPitch : ℝ
+  fPitchStab : ℝ
+  fFormLift : ℝ
+  fAttackLift : ℝ
+  fMoveRes : ℝ
+  vecTurnRes : CVector
+  vecSpeedRes : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cHandlingDataMgr
+  field_0 : ℝ
+  fWheelFriction : ℝ
+  field_8 : ℝ
+  field_C : ℝ
+  field_10 : ℝ
+  HandlingData : seq tHandlingData  -- bounded array [NUMHANDLINGS]
+  BikeHandlingData : seq tBikeHandlingData  -- bounded array [NUMBIKEHANDLINGS]
+  FlyingHandlingData : seq tFlyingHandlingData  -- bounded array [NUMFLYINGHANDLINGS]
+  BoatHandlingData : seq tBoatHandlingData  -- bounded array [NUMBOATHANDLINGS]
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema cHandlingDataMgr_cHandlingDataMgr
+  ΔcHandlingDataMgr
+where
+  -- Declared member operation cHandlingDataMgr::cHandlingDataMgr(void)
+  true
+end
+
+schema cHandlingDataMgr_Initialise_2
+  ΔcHandlingDataMgr
+where
+  -- Declared member operation cHandlingDataMgr::Initialise(void)
+  true
+end
+
+schema cHandlingDataMgr_LoadHandlingData_3
+  ΔcHandlingDataMgr
+where
+  -- Declared member operation cHandlingDataMgr::LoadHandlingData(void)
+  true
+end
+
+schema cHandlingDataMgr_FindExactWord_4
+  ΔcHandlingDataMgr
+  word? : seq CHAR
+  words? : seq CHAR
+  wordLen? : ℤ
+  numWords? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation cHandlingDataMgr::FindExactWord(const char *word, const char *words, int wordLen, int numWords)
+  true
+end
+
+schema cHandlingDataMgr_ConvertDataToWorldUnits_5
+  ΔcHandlingDataMgr
+  handling? : Ref[tHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::ConvertDataToWorldUnits(tHandlingData *handling)
+  true
+end
+
+schema cHandlingDataMgr_ConvertDataToGameUnits_6
+  ΔcHandlingDataMgr
+  handling? : Ref[tHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
+  true
+end
+
+schema cHandlingDataMgr_ConvertBikeDataToGameUnits_7
+  ΔcHandlingDataMgr
+  handling? : Ref[tBikeHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::ConvertBikeDataToGameUnits(tBikeHandlingData *handling)
+  true
+end
+
+schema cHandlingDataMgr_GetHandlingId_8
+  ΔcHandlingDataMgr
+  name? : seq CHAR
+  result! : ℤ
+where
+  -- Declared member operation cHandlingDataMgr::GetHandlingId(const char *name)
+  true
+end
+
+schema cHandlingDataMgr_GetHandlingData_9
+  ΔcHandlingDataMgr
+  id? : tVehicleType
+  result! : Ref[tHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::GetHandlingData(tVehicleType id)
+  true
+end
+
+schema cHandlingDataMgr_GetBikePointer_10
+  ΔcHandlingDataMgr
+  id? : ℕ
+  result! : Ref[tBikeHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::GetBikePointer(uint8 id)
+  true
+end
+
+schema cHandlingDataMgr_GetFlyingPointer_11
+  ΔcHandlingDataMgr
+  id? : ℕ
+  result! : Ref[tFlyingHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::GetFlyingPointer(uint8 id)
+  true
+end
+
+schema cHandlingDataMgr_GetBoatPointer_12
+  ΔcHandlingDataMgr
+  id? : ℕ
+  result! : Ref[tBoatHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::GetBoatPointer(uint8 id)
+  true
+end
+
+schema cHandlingDataMgr_HasRearWheelDrive_13
+  ΔcHandlingDataMgr
+  id? : tVehicleType
+  result! : 𝔹
+where
+  -- Declared member operation cHandlingDataMgr::HasRearWheelDrive(tVehicleType id)
+  true
+end
+
+schema cHandlingDataMgr_HasFrontWheelDrive_14
+  ΔcHandlingDataMgr
+  id? : tVehicleType
+  result! : bool
+where
+  -- Declared member operation cHandlingDataMgr::HasFrontWheelDrive(tVehicleType id)
+  true
+end
+
+schema cHandlingDataMgr_RangeCheck_15
+  ΔcHandlingDataMgr
+  handling? : Ref[tHandlingData]
+where
+  -- Declared member operation cHandlingDataMgr::RangeCheck(tHandlingData *handling)
+  true
+end
+
+schema cHandlingDataMgr_ModifyHandlingValue_16
+  ΔcHandlingDataMgr
+  arg_1? : Ref[CVehicle]
+  arg_2? : tVehicleType
+  arg_3? : tField
+  arg_4? : 𝔹
+where
+  -- Declared member operation cHandlingDataMgr::ModifyHandlingValue(CVehicle *, const tVehicleType &, const tField &, const bool &)
+  true
+end
+
+schema cHandlingDataMgr_DisplayHandlingData_17
+  ΔcHandlingDataMgr
+  arg_1? : Ref[CVehicle]
+  arg_2? : Ref[tHandlingData]
+  arg_3? : ℕ
+  arg_4? : 𝔹
+where
+  -- Declared member operation cHandlingDataMgr::DisplayHandlingData(CVehicle *, tHandlingData *, uint8, bool)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema HandlingMgr_GetMass
+  ΞHandlingMgrModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = fMass
+  true
+end
+
+schema HandlingMgr_GetTurnMass
+  ΞHandlingMgrModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = fTurnMass
+  true
+end
+
+schema HandlingMgr_GetTractionMultiplier
+  ΞHandlingMgrModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = fTractionMultiplier
+  true
+end
+
+schema HandlingMgr_GetCollisionDamageMultiplier
+  ΞHandlingMgrModuleState
+  result! : ℝ
+where
+  -- Return postcondition: result! = fCollisionDamageMultiplier
+  true
+end
+
+schema HandlingMgr_HasRearWheelDrive
+  ΔHandlingMgrModuleState
+  id? : tVehicleType
+  result! : 𝔹
+where
+  -- Return postcondition: result! = HandlingData[id].Transmission.nDriveType != 'F'
+  true
+end
+
+schema HandlingMgr_HasFrontWheelDrive
+  ΔHandlingMgrModuleState
+  id? : tVehicleType
+  result! : 𝔹
+where
+  -- Return postcondition: result! = HandlingData[id].Transmission.nDriveType != 'R'
+  true
+end

@@ -1,0 +1,148 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedType (peds)
+-- Source File(s): peds/PedType.cpp
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include General.zpp  (from "General.h")
+-- include FileMgr.zpp  (from "FileMgr.h")
+-- include PedType.zpp  (from "PedType.h")
+-- include SaveBuf.zpp  (from "SaveBuf.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CPedType_Initialise
+  ΔCPedType
+where
+  -- State update: m_flag' = PED_FLAG_PLAYER1
+  -- State update: unknown1' = 0.0f
+  -- State update: unknown2' = 0.0f
+  -- State update: unknown4' = 0.0f
+  -- State update: unknown5' = 0.0f
+  -- State update: m_threats' = 0
+  true
+end
+
+schema CPedType_Shutdown
+  ΔCPedType
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedType_LoadPedData
+  ΔCPedType
+where
+  -- State update: type' = NUM_PEDTYPES
+  -- State update: buf' = new char[16 * 1024]
+  -- State update: buflen' = CFileMgr::LoadFile("PED.DAT", (uint8*)buf, 16 * 1024, "r")
+  -- State update: bp' = 0
+  -- State update: linelen' = 0
+  -- State update: lp' = 0
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema CPedType_FindPedType
+  ΔCPedType
+  type? : seq CHAR
+where
+  -- Return postcondition: result! = PEDTYPE_PLAYER1
+  -- Return postcondition: result! = PEDTYPE_PLAYER2
+  -- Return postcondition: result! = PEDTYPE_PLAYER3
+  true
+end
+
+schema CPedType_FindPedFlag
+  ΔCPedType
+  type? : seq CHAR
+where
+  -- Return postcondition: result! = PED_FLAG_PLAYER1
+  -- Return postcondition: result! = PED_FLAG_PLAYER2
+  -- Return postcondition: result! = PED_FLAG_PLAYER3
+  true
+end
+
+schema CPedType_Save
+  ΔCPedType
+  buf? : ℙ ℕ
+  size? : ℙ ℕ
+where
+  -- State update: size' = sizeof(CPedType) * NUM_PEDTYPES + SAVE_HEADER_SIZE
+  true
+end
+
+schema CPedType_Load
+  ΔCPedType
+  buf? : ℙ ℕ
+  size? : ℕ
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedStats_Initialise
+  ΔCPedStats
+where
+  -- State update: m_type' = PEDSTAT_PLAYER
+  -- State update: m_fleeDistance' = 20.0f
+  -- State update: m_headingChangeRate' = 15.0f
+  -- State update: m_fear' = 50
+  -- State update: m_temper' = 50
+  -- State update: m_lawfulness' = 50
+  -- Invokes: CPedStats::LoadPedStats
+  true
+end
+
+schema CPedStats_Shutdown
+  ΔCPedStats
+where
+  -- Deterministic transition preserving module invariants
+  true
+end
+
+schema CPedStats_LoadPedStats
+  ΔCPedStats
+where
+  -- State update: type' = 0
+  -- State update: buf' = new char[16 * 1024]
+  -- State update: bp' = 0
+  -- State update: linelen' = 0
+  -- State update: lp' = 0
+  -- State update: m_type' = (ePedStats)type
+  -- Invokes: CFileMgr::SetDir, CFileMgr::LoadFile
+  true
+end
+
+schema CPedStats_GetPedStatType
+  ΔCPedStats
+  name? : seq CHAR
+where
+  -- State update: type' = 0
+  -- Return postcondition: result! = (ePedStats) type
+  -- Return postcondition: result! = NUM_PEDSTATS
+  -- Invokes: CGeneral::faststrcmp
+  true
+end
+
+--------------------------------------------------------------------------------
+-- MODULE STATE SCHEMA
+--------------------------------------------------------------------------------
+schema PedTypeModuleState
+  module_loaded : 𝔹
+  source_lines : ℕ
+where
+  module_loaded = true ∧
+  source_lines = 317
+end

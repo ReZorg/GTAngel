@@ -1,0 +1,33 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: Projectile (objects)
+-- Source File(s): objects/Projectile.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include Object.zpp  (from "Object.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CProjectile
+  CObject  -- inherits base schema
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CProjectile_CProjectile
+  ΔCProjectile
+  arg_1? : ℤ
+where
+  -- Declared member operation CProjectile::CProjectile(int32)
+  true
+end

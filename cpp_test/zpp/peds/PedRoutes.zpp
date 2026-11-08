@@ -1,0 +1,137 @@
+--------------------------------------------------------------------------------
+-- GTAngel Z++ Formal Specification: PedRoutes (peds)
+-- Source File(s): peds/PedRoutes.cpp, peds/PedRoutes.h
+-- Specification Language: Z++ / Object-Z
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- IMPORTED MODULE SPECIFICATIONS
+--------------------------------------------------------------------------------
+-- include common.zpp  (from "common.h")
+-- include main.zpp  (from "main.h")
+-- include PedRoutes.zpp  (from "PedRoutes.h")
+
+--------------------------------------------------------------------------------
+-- BASE GIVEN TYPES
+--------------------------------------------------------------------------------
+[ADDRESS, HANDLE, ENTITY_REF, UNIT]
+Ref[X] == ℙ X
+
+--------------------------------------------------------------------------------
+-- STATE SCHEMAS (CLASSES & STRUCTS)
+--------------------------------------------------------------------------------
+schema CRouteNode
+  m_route : ℤ
+  m_pos : CVector
+where
+  instance_addr ∈ ADDRESS
+end
+
+schema CRouteNode_GetRouteThisPointIsOn
+  ΔCRouteNode
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRouteNode::GetRouteThisPointIsOn(int16)
+  true
+end
+
+schema CRouteNode_GetPointPosition_2
+  ΔCRouteNode
+  arg_1? : ℤ
+  result! : CVector
+where
+  -- Declared member operation CRouteNode::GetPointPosition(int16)
+  true
+end
+
+schema CRouteNode_GetRouteStart_3
+  ΔCRouteNode
+  arg_1? : ℤ
+  result! : ℤ
+where
+  -- Declared member operation CRouteNode::GetRouteStart(int16)
+  true
+end
+
+schema CRouteNode_AddRoutePoint_4
+  ΔCRouteNode
+  arg_1? : ℤ
+  arg_2? : CVector
+where
+  -- Declared member operation CRouteNode::AddRoutePoint(int16, CVector)
+  true
+end
+
+schema CRouteNode_RemoveRoute_5
+  ΔCRouteNode
+  arg_1? : ℤ
+where
+  -- Declared member operation CRouteNode::RemoveRoute(int16)
+  true
+end
+
+schema CRouteNode_Initialise_6
+  ΔCRouteNode
+where
+  -- Declared member operation CRouteNode::Initialise(void)
+  true
+end
+
+--------------------------------------------------------------------------------
+-- OPERATION SCHEMAS (FUNCTION & METHOD DEFINITIONS)
+--------------------------------------------------------------------------------
+schema CRouteNode_Initialise
+  ΔCRouteNode
+where
+  -- State update: m_route' = -1
+  -- State update: m_pos' = CVector(0.0f, 0.0f, 0.0f)
+  true
+end
+
+schema CRouteNode_GetRouteThisPointIsOn
+  ΔCRouteNode
+  point? : ℤ
+where
+  -- Return postcondition: result! = gaRoutes[point].m_route
+  true
+end
+
+schema CRouteNode_GetRouteStart
+  ΔCRouteNode
+  route? : ℤ
+where
+  -- Return postcondition: result! = i
+  -- Return postcondition: result! = -1
+  true
+end
+
+schema CRouteNode_GetPointPosition
+  ΔCRouteNode
+  point? : ℤ
+where
+  -- Return postcondition: result! = gaRoutes[point].m_pos
+  true
+end
+
+schema CRouteNode_AddRoutePoint
+  ΔCRouteNode
+  route? : ℤ
+  pos? : CVector
+where
+  -- State update: point' = 0
+  -- State update: m_route' = route
+  -- State update: m_pos' = pos
+  true
+end
+
+schema CRouteNode_RemoveRoute
+  ΔCRouteNode
+  route? : ℤ
+where
+  -- State update: first_point' = 0
+  -- State update: last_point' = first_point
+  -- State update: diff' = last_point - first_point
+  -- State update: m_route' = -1
+  true
+end
