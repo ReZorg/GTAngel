@@ -1,3 +1,6 @@
+    // ── Z++ Formal Spec Contract (buildings): 3 modules, 18 schemas, 0 enums (Building.zpp, Solid.zpp, Treadable.zpp) ──
+    static constexpr int zpp_buildings_modules() { return 3; }
+    static constexpr int zpp_buildings_schemas() { return 18; }
     void buildBuildings(const avatar3d::GameWorld& world) {
         // LW34: architectural night-city buildings with multi-column x multi-floor
         // exterior window grids on all 4 facades (placed OUTSIDE the walls so

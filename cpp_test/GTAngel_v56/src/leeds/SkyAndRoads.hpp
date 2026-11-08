@@ -1,3 +1,6 @@
+    // ── Z++ Formal Spec Contract (leeds): 2 modules, 13 schemas, 0 enums (CustomSoundTrack.zpp, smallHeap.zpp) ──
+    static constexpr int zpp_leeds_modules() { return 2; }
+    static constexpr int zpp_leeds_schemas() { return 13; }
     void buildSun() {
         const Vec3 light = normalize3({-0.35f, 0.82f, -0.44f});
         const Vec3 centre = {eye_.x + light.x * 260.0f, eye_.y + light.y * 260.0f, eye_.z + light.z * 260.0f};

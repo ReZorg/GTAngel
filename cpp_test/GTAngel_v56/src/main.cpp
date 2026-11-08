@@ -1,5 +1,6 @@
 // GTAngel v56 — Modular 22-Folder Source Entry Point (src/main.cpp)
 #include "core/PlatformPreamble.hpp"
+#include "docs/DocsZppSpec.hpp"
 #include "math/Vec3.hpp"
 #include "animation/AvatarSkeleton.hpp"
 #include "collision/WorldCollision.hpp"

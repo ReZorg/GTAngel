@@ -13,6 +13,9 @@
             addTaperedBone(base + Vec3{0, 2.75f, 0}, head, 0.042f, 0.032f, poleCol, ObjectProp);
             addTaperedBone(head + Vec3{-armDir*0.18f, 0.04f, 0}, head + Vec3{armDir*0.18f, 0.02f, 0}, 0.085f, 0.065f, baseCol, ObjectProp);
             addJoint(head + Vec3{0, -0.04f, 0}, 0.095f, Colour{150, 235, 255, 255}, ObjectProp);
+            // LW52 (Coronas.zpp TYPE_STAR & Timecycle.zpp): 4-point star corona around streetlamp core
+            addTriangle(head + Vec3{-0.38f, -0.04f, 0.0f}, head + Vec3{0.38f, -0.04f, 0.0f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);
+            addTriangle(head + Vec3{0.0f, -0.04f, -0.38f}, head + Vec3{0.0f, -0.04f, 0.38f}, head + Vec3{0.0f, 0.06f, 0.0f}, Colour{195, 242, 255, 255}, ObjectProp);
             const Vec3 pool{head.x, 0.019f, head.z};
             for (int i = 0; i < 10; ++i) {
                 const float a0 = 6.2831853f * i / 10.0f, a1 = 6.2831853f * (i + 1) / 10.0f;

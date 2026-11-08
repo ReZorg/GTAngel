@@ -1,3 +1,6 @@
+    // ── Z++ Formal Spec Contract (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
+    static constexpr int zpp_vehicles_modules() { return 15; }
+    static constexpr int zpp_vehicles_schemas() { return 700; }
     void drawSculptedCoupe(Vec3 centre, float ch, float sh, float wheelPhase,
                           Colour body, Colour cab, uint16_t id) {
         // LW34: true 3D fastback coupe — sloped front hood, angled windshield,
@@ -145,6 +148,17 @@
         for (float sx : {-0.65f, 0.65f})
             addQuad(local(sx, 0.70f, -1.15f), local(sx, 0.70f, -0.92f),
                     local(sx, 0.84f, -0.94f), local(sx, 0.84f, -1.15f), cab, id);
+        // LW52 (Antennas.zpp & Skidmarks.zpp from Automobile.zpp): rear quarter whip antenna + twin tire tracks
+        {
+            const float sway = 0.06f * sinf(wheelPhase * 0.5f);
+            addTaperedBone(local(-0.56f, 0.62f, -0.88f), local(-0.56f + sway, 1.32f, -1.02f), 0.012f, 0.006f, Colour{195, 205, 220, 255}, id);
+            addJoint(local(-0.56f + sway, 1.32f, -1.02f), 0.020f, Colour{65, 75, 250, 255}, id);
+            for (float tx : {-0.68f, 0.68f}) {
+                addQuad(local(tx - 0.07f, 0.018f, -2.15f), local(tx + 0.07f, 0.018f, -2.15f),
+                        local(tx + 0.07f, 0.018f, -0.85f), local(tx - 0.07f, 0.018f, -0.85f),
+                        Colour{34, 34, 40, 255}, ObjectGround);
+            }
+        }
         // Headlights (+z) and full-width taillight bar (-z)
         for (float x : {-0.48f, 0.34f}) {
             addQuad(local(x, 0.38f, 1.15f), local(x + 0.16f, 0.38f, 1.15f),
