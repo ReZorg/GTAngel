@@ -500,6 +500,6 @@ static Vec3 norm(Vec3 a) { float l = len(a); return l > 1e-6f ? a*(1.0f/l) : Vec
 constexpr zpp_math_spec::ZppVec3 toZppVec3(Vec3 v) { return {v.x, v.y, v.z}; }
 constexpr Vec3 fromZppVec3(zpp_math_spec::ZppVec3 v) { return {v.x, v.y, v.z}; }
 constexpr zpp_math_spec::CRect_ZppContract makeWorldBoundsZppRect(float halfExtent) {
-    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, halfExtent, halfExtent, -halfExtent);
+    return zpp_math_spec::apply_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, -halfExtent, -halfExtent, halfExtent, halfExtent);
 }
 static_assert(zpp_math_spec::op_CRect_CRect_2(zpp_math_spec::CRect_ZppContract{}, makeWorldBoundsZppRect(64.0f), -64.0f, 64.0f, 64.0f, -64.0f), "World bounds CRect Z++ contract must hold");
