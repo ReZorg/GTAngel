@@ -47,7 +47,9 @@ const folders = [
 
 const globalSymValues = new Map();
 const conflictingSyms = new Set();
-const globalRawSchemas = new Map();
+const globalRawSchemas = new Map([
+  ['RwV3d', { decls: ['  x : ℝ', '  y : ℝ', '  z : ℝ'], whereLines: [] }]
+]);
 
 function recordSymbolValue(map, conflicts, name, val) {
   if (!(val > 0 && val <= 4096)) return;
@@ -137,13 +139,20 @@ function expandInheritedSchema(sname, decls, whereLines, visited = new Set()) {
   for (const d of decls) {
     const bm = d.match(/^\s+([A-Za-z_]\w*)\s+--\s*inherits base schema$/);
     if (bm) {
-      const baseName = bm[1].replace(/[^A-Za-z0-9_]/g, '_');
+      const rawBase = bm[1].replace(/[^A-Za-z0-9_]/g, '_');
+      const strippedBase = rawBase.replace(/^base__/, '');
+      const baseName = globalRawSchemas.has(rawBase) ? rawBase : strippedBase;
       const baseRaw = globalRawSchemas.get(baseName);
-      if (!baseRaw) return { decls: [], whereLines: [], ok: false };
-      const exp = expandInheritedSchema(baseName, baseRaw.decls, baseRaw.whereLines, visited);
-      if (!exp.ok) return { decls: [], whereLines: [], ok: false };
-      allDecls.push(...exp.decls);
-      allWheres.push(...exp.whereLines);
+      if (baseRaw) {
+        const exp = expandInheritedSchema(baseName, baseRaw.decls, baseRaw.whereLines, visited);
+        if (!exp.ok) return { decls: [], whereLines: [], ok: false };
+        allDecls.push(...exp.decls);
+        allWheres.push(...exp.whereLines);
+      } else {
+        // External/unmodeled base class: only allow if child declares its own fields
+        const hasChildFields = decls.some(cd => /^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/.test(cd));
+        if (!hasChildFields) return { decls: [], whereLines: [], ok: false };
+      }
     } else {
       allDecls.push(d);
     }
@@ -463,7 +472,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         if (!fm) continue;
         const rawName = fm[1];
         const fname = safeFieldName(rawName);
-        if (fields.has(rawName) || fields.size >= 64) continue;
+        if (fields.has(rawName) || fields.size >= 1024) continue;
         const zt = fm[2].trim();
 
         const arrMatch = zt.match(/^seq\s+(\S+)\s+--\s*bounded array\s*\[([^\]]+)\]/);
@@ -514,9 +523,9 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_float', ct: 'float', defVal: '0.0f', zt });
         } else if (zt.startsWith('𝔹')) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_bool', ct: 'bool', defVal: 'false', zt });
-        } else if (zt.startsWith('ℕ')) {
+        } else if (zt.startsWith('ℕ') || zt === 'ADDRESS' || zt === 'HANDLE') {
           fields.set(rawName, { rawName, fname, kind: 'scalar_int', ct: 'int64_t', defVal: '0', zt });
-        } else if (zt.startsWith('ℤ') || zt === 'ADDRESS' || zt === 'HANDLE' || fileEnumNames.has(zt)) {
+        } else if (zt.startsWith('ℤ') || fileEnumNames.has(zt)) {
           fields.set(rawName, { rawName, fname, kind: 'scalar_int', ct: 'int32_t', defVal: '0', zt });
         } else {
           // Non-primitive aggregate/opaque type: keep field for schema layout, but mark kind='opaque'

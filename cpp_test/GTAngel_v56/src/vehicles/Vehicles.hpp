@@ -2,7 +2,7 @@
     static constexpr int zpp_vehicles_modules() { return zpp_vehicles_spec::kZppModuleCount; }
     static constexpr int zpp_vehicles_schemas() { return zpp_vehicles_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_vehicles_zpp() {
-        return zpp_vehicles_spec::verify_vehicles_zpp_invariants() && (zpp_vehicles_spec::CCarGenerator_ZppContract{}.checkInvariant()) && (zpp_vehicles_spec::op_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{}, zpp_vehicles_spec::apply_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{})));
+        return zpp_vehicles_spec::verify_vehicles_zpp_invariants() && (zpp_vehicles_spec::CAutomobile_ZppContract{}.checkInvariant()) && (zpp_vehicles_spec::op_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{}, zpp_vehicles_spec::apply_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{})));
     }
     bool verifyLiveWorld_vehicles_zpp(const avatar3d::GameWorld& world) const {
         return ((int64_t)world.traffic.size() >= 0) && verifyComponent_vehicles_zpp();

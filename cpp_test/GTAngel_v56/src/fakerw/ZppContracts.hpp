@@ -146,7 +146,7 @@ struct rwcoreModuleState_ZppContract {
 };
 // State Schema Contract from zpp/fakerw/rwplcore.zpp
 struct RwMemoryFunctions_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -162,7 +162,7 @@ struct RwMemory_ZppContract {
 };
 // State Schema Contract from zpp/fakerw/rwplcore.zpp
 struct RwEngineOpenParams_ZppContract {
-    int32_t displayID{0}; // Z++: ADDRESS
+    int64_t displayID{0}; // Z++: ADDRESS
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);

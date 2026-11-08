@@ -88,7 +88,7 @@ struct RsGlobalType_ZppContract {
     int32_t maximumHeight{0}; // Z++: ℤ
     int32_t maxFPS{0}; // Z++: ℤ
     bool quit{false}; // Z++: 𝔹
-    int32_t ps{0}; // Z++: ADDRESS
+    int64_t ps{0}; // Z++: ADDRESS
     int32_t keyboard{0}; // Z++: RsInputDevice
     int32_t mouse{0}; // Z++: RsInputDevice
     int32_t pad{0}; // Z++: RsInputDevice

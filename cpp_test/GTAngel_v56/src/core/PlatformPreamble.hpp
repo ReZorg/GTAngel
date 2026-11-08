@@ -121,6 +121,111 @@ struct CamModuleState_ZppContract {
     }
 };
 // State Schema Contract from zpp/core/Camera.zpp
+struct CCam_ZppContract {
+    bool bBelowMinDist{false}; // Z++: 𝔹
+    bool bBehindPlayerDesired{false}; // Z++: 𝔹
+    bool m_bCamLookingAtVector{false}; // Z++: 𝔹
+    bool m_bCollisionChecksOn{false}; // Z++: 𝔹
+    bool m_bFixingBeta{false}; // Z++: 𝔹
+    bool m_bTheHeightFixerVehicleIsATrain{false}; // Z++: 𝔹
+    bool LookBehindCamWasInFront{false}; // Z++: 𝔹
+    bool LookingBehind{false}; // Z++: 𝔹
+    bool LookingLeft{false}; // Z++: 𝔹
+    bool LookingRight{false}; // Z++: 𝔹
+    bool ResetStatics{false}; // Z++: 𝔹
+    bool Rotating{false}; // Z++: 𝔹
+    int32_t Mode{0}; // Z++: ℤ
+    int64_t m_uiFinishTime{0}; // Z++: ℕ
+    int32_t m_iDoCollisionChecksOnFrameNum{0}; // Z++: ℤ
+    int32_t m_iDoCollisionCheckEveryNumOfFrames{0}; // Z++: ℤ
+    int32_t m_iFrameNumWereAt{0}; // Z++: ℤ
+    int32_t m_iRunningVectorArrayPos{0}; // Z++: ℤ
+    int32_t m_iRunningVectorCounter{0}; // Z++: ℤ
+    int32_t DirectionWasLooking{0}; // Z++: ℤ
+    float f_max_role_angle{0.0f}; // Z++: ℝ
+    float f_Roll{0.0f}; // Z++: ℝ
+    float f_rollSpeed{0.0f}; // Z++: ℝ
+    float m_fSyphonModeTargetZOffSet{0.0f}; // Z++: ℝ
+    float m_fRoadOffSet{0.0f}; // Z++: ℝ
+    float m_fAmountFractionObscured{0.0f}; // Z++: ℝ
+    float m_fAlphaSpeedOverOneFrame{0.0f}; // Z++: ℝ
+    float m_fBetaSpeedOverOneFrame{0.0f}; // Z++: ℝ
+    float m_fBufferedTargetBeta{0.0f}; // Z++: ℝ
+    float m_fBufferedTargetOrientation{0.0f}; // Z++: ℝ
+    float m_fBufferedTargetOrientationSpeed{0.0f}; // Z++: ℝ
+    float m_fCamBufferedHeight{0.0f}; // Z++: ℝ
+    float m_fCamBufferedHeightSpeed{0.0f}; // Z++: ℝ
+    float m_fCloseInPedHeightOffset{0.0f}; // Z++: ℝ
+    float m_fCloseInPedHeightOffsetSpeed{0.0f}; // Z++: ℝ
+    float m_fCloseInCarHeightOffset{0.0f}; // Z++: ℝ
+    float m_fCloseInCarHeightOffsetSpeed{0.0f}; // Z++: ℝ
+    float m_fDimensionOfHighestNearCar{0.0f}; // Z++: ℝ
+    float m_fDistanceBeforeChanges{0.0f}; // Z++: ℝ
+    float m_fFovSpeedOverOneFrame{0.0f}; // Z++: ℝ
+    float m_fMinDistAwayFromCamWhenInterPolating{0.0f}; // Z++: ℝ
+    float m_fPedBetweenCameraHeightOffset{0.0f}; // Z++: ℝ
+    float m_fPlayerInFrontSyphonAngleOffSet{0.0f}; // Z++: ℝ
+    float m_fRadiusForDead{0.0f}; // Z++: ℝ
+    float m_fRealGroundDist{0.0f}; // Z++: ℝ
+    float m_fTargetBeta{0.0f}; // Z++: ℝ
+    float m_fTimeElapsedFloat{0.0f}; // Z++: ℝ
+    float m_fTransitionBeta{0.0f}; // Z++: ℝ
+    float m_fTrueBeta{0.0f}; // Z++: ℝ
+    float m_fTrueAlpha{0.0f}; // Z++: ℝ
+    float m_fInitialPlayerOrientation{0.0f}; // Z++: ℝ
+    float Alpha{0.0f}; // Z++: ℝ
+    float AlphaSpeed{0.0f}; // Z++: ℝ
+    float FOV{0.0f}; // Z++: ℝ
+    float FOVSpeed{0.0f}; // Z++: ℝ
+    float Beta{0.0f}; // Z++: ℝ
+    float BetaSpeed{0.0f}; // Z++: ℝ
+    float Distance{0.0f}; // Z++: ℝ
+    float DistanceSpeed{0.0f}; // Z++: ℝ
+    float CA_MIN_DISTANCE{0.0f}; // Z++: ℝ
+    float CA_MAX_DISTANCE{0.0f}; // Z++: ℝ
+    float SpeedVar{0.0f}; // Z++: ℝ
+    ZppVec3 m_cvecSourceSpeedOverOneFrame{}; // Z++: CVector
+    ZppVec3 m_cvecTargetSpeedOverOneFrame{}; // Z++: CVector
+    ZppVec3 m_cvecUpOverOneFrame{}; // Z++: CVector
+    ZppVec3 m_cvecTargetCoorsForFudgeInter{}; // Z++: CVector
+    ZppVec3 m_cvecCamFixedModeVector{}; // Z++: CVector
+    ZppVec3 m_cvecCamFixedModeSource{}; // Z++: CVector
+    ZppVec3 m_cvecCamFixedModeUpOffSet{}; // Z++: CVector
+    ZppVec3 m_vecLastAboveWaterCamPosition{}; // Z++: CVector
+    ZppVec3 m_vecBufferedPlayerBodyOffset{}; // Z++: CVector
+    ZppVec3 Front{}; // Z++: CVector
+    ZppVec3 Source{}; // Z++: CVector
+    ZppVec3 SourceBeforeLookBehind{}; // Z++: CVector
+    ZppVec3 Up{}; // Z++: CVector
+    std::array<ZppVec3, 2> m_arrPreviousVectors{}; // Z++: seq CVector  -- bounded array [NUMBER_OF_VECTORS_FOR_AVERAGE]
+    size_t m_arrPreviousVectors_len{2u}; // Z++ cardinality #m_arrPreviousVectors
+    uint8_t CamTargetEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fCameraDistance{0.0f}; // Z++: ℝ
+    float m_fIdealAlpha{0.0f}; // Z++: ℝ
+    float m_fPlayerVelocity{0.0f}; // Z++: ℝ
+    uint8_t m_pLastCarEntered_card{0u}; // Z++: Ref[CAutomobile]
+    uint8_t m_pLastPedLookedAt_card{0u}; // Z++: Ref[CPed]
+    bool m_bFirstPersonRunAboutActive{false}; // Z++: 𝔹
+    float m_fTilt{0.0f}; // Z++: ℝ
+    float m_fTiltSpeed{0.0f}; // Z++: ℝ
+    float m_fTargetZoomGroundOne{0.0f}; // Z++: ℝ
+    float m_fTargetZoomGroundTwo{0.0f}; // Z++: ℝ
+    float m_fTargetZoomGroundThree{0.0f}; // Z++: ℝ
+    float m_fTargetZoomOneZExtra{0.0f}; // Z++: ℝ
+    float m_fTargetZoomTwoZExtra{0.0f}; // Z++: ℝ
+    float m_fTargetZoomThreeZExtra{0.0f}; // Z++: ℝ
+    float m_fTargetZoomZCloseIn{0.0f}; // Z++: ℝ
+    float m_fMinRealGroundDist{0.0f}; // Z++: ℝ
+    float m_fTargetCloseInDist{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (m_arrPreviousVectors_len == 2u && m_arrPreviousVectors.size() == 2u)
+            && (m_uiFinishTime >= 0)
+            && (CamTargetEntity_card <= 1u)
+            && (m_pLastCarEntered_card <= 1u)
+            && (m_pLastPedLookedAt_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/core/Camera.zpp
 struct CCamPathSplines_ZppContract {
     uint8_t m_arr_PathData_card{0u}; // Z++: ℙ ℝ
     constexpr bool checkInvariant() const {
@@ -151,17 +256,227 @@ struct CQueuedMode_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/core/Camera.zpp
+struct CCamera_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    bool m_bAboveGroundTrainNodesLoaded{false}; // Z++: 𝔹
+    bool m_bBelowGroundTrainNodesLoaded{false}; // Z++: 𝔹
+    bool m_bCamDirectlyBehind{false}; // Z++: 𝔹
+    bool m_bCamDirectlyInFront{false}; // Z++: 𝔹
+    bool m_bCameraJustRestored{false}; // Z++: 𝔹
+    bool m_bcutsceneFinished{false}; // Z++: 𝔹
+    bool m_bCullZoneChecksOn{false}; // Z++: 𝔹
+    bool m_bFirstPersonBeingUsed{false}; // Z++: 𝔹
+    bool m_bJustJumpedOutOf1stPersonBecauseOfTarget{false}; // Z++: 𝔹
+    bool m_bIdleOn{false}; // Z++: 𝔹
+    bool m_bInATunnelAndABigVehicle{false}; // Z++: 𝔹
+    bool m_bInitialNodeFound{false}; // Z++: 𝔹
+    bool m_bInitialNoNodeStaticsSet{false}; // Z++: 𝔹
+    bool m_bIgnoreFadingStuffForMusic{false}; // Z++: 𝔹
+    bool m_bPlayerIsInGarage{false}; // Z++: 𝔹
+    bool m_bPlayerWasOnBike{false}; // Z++: 𝔹
+    bool m_bJustCameOutOfGarage{false}; // Z++: 𝔹
+    bool m_bJustInitalised{false}; // Z++: 𝔹
+    bool m_bJust_Switched{false}; // Z++: 𝔹
+    bool m_bLookingAtPlayer{false}; // Z++: 𝔹
+    bool m_bLookingAtVector{false}; // Z++: 𝔹
+    bool m_bMoveCamToAvoidGeom{false}; // Z++: 𝔹
+    bool m_bObbeCinematicPedCamOn{false}; // Z++: 𝔹
+    bool m_bObbeCinematicCarCamOn{false}; // Z++: 𝔹
+    bool m_bRestoreByJumpCut{false}; // Z++: 𝔹
+    bool m_bUseNearClipScript{false}; // Z++: 𝔹
+    bool m_bStartInterScript{false}; // Z++: 𝔹
+    bool m_bStartingSpline{false}; // Z++: 𝔹
+    bool m_bTargetJustBeenOnTrain{false}; // Z++: 𝔹
+    bool m_bTargetJustCameOffTrain{false}; // Z++: 𝔹
+    bool m_bUseSpecialFovTrain{false}; // Z++: 𝔹
+    bool m_bUseTransitionBeta{false}; // Z++: 𝔹
+    bool m_bUseScriptZoomValuePed{false}; // Z++: 𝔹
+    bool m_bUseScriptZoomValueCar{false}; // Z++: 𝔹
+    bool m_bWaitForInterpolToFinish{false}; // Z++: 𝔹
+    bool m_bItsOkToLookJustAtThePlayer{false}; // Z++: 𝔹
+    bool m_bWantsToSwitchWidescreenOff{false}; // Z++: 𝔹
+    bool m_WideScreenOn{false}; // Z++: 𝔹
+    bool m_1rstPersonRunCloseToAWall{false}; // Z++: 𝔹
+    bool m_bHeadBob{false}; // Z++: 𝔹
+    bool m_bVehicleSuspenHigh{false}; // Z++: 𝔹
+    bool m_bEnable1rstPersonCamCntrlsScript{false}; // Z++: 𝔹
+    bool m_bAllow1rstPersonWeaponsCamera{false}; // Z++: 𝔹
+    bool m_bFreezePedZoomSwitch{false}; // Z++: 𝔹
+    bool m_bFailedCullZoneTestPreviously{false}; // Z++: 𝔹
+    bool m_FadeTargetIsSplashScreen{false}; // Z++: 𝔹
+    bool WorldViewerBeingUsed{false}; // Z++: 𝔹
+    int64_t ActiveCam{0}; // Z++: ℕ
+    int64_t m_uiCamShakeStart{0}; // Z++: ℕ
+    int64_t m_uiFirstPersonCamLastInputTime{0}; // Z++: ℕ
+    int64_t m_uiLongestTimeInMill{0}; // Z++: ℕ
+    int64_t m_uiNumberOfTrainCamNodes{0}; // Z++: ℕ
+    int64_t m_uiTransitionJUSTStarted{0}; // Z++: ℕ
+    int64_t m_uiTransitionState{0}; // Z++: ℕ
+    int64_t m_uiTimeLastChange{0}; // Z++: ℕ
+    int64_t m_uiTimeWeLeftIdle_StillNoInput{0}; // Z++: ℕ
+    int64_t m_uiTimeWeEnteredIdle{0}; // Z++: ℕ
+    int64_t m_uiTimeTransitionStart{0}; // Z++: ℕ
+    int64_t m_uiTransitionDuration{0}; // Z++: ℕ
+    int64_t m_uiTransitionDurationTargetCoors{0}; // Z++: ℕ
+    int32_t m_BlurBlue{0}; // Z++: ℤ
+    int32_t m_BlurGreen{0}; // Z++: ℤ
+    int32_t m_BlurRed{0}; // Z++: ℤ
+    int32_t m_BlurType{0}; // Z++: ℤ
+    int32_t m_iWorkOutSpeedThisNumFrames{0}; // Z++: ℤ
+    int32_t m_iNumFramesSoFar{0}; // Z++: ℤ
+    int32_t m_iCurrentTrainCamNode{0}; // Z++: ℤ
+    int32_t m_motionBlur{0}; // Z++: ℤ
+    int32_t m_imotionBlurAddAlpha{0}; // Z++: ℤ
+    int32_t m_iCheckCullZoneThisNumFrames{0}; // Z++: ℤ
+    int32_t m_iZoneCullFrameNumWereAt{0}; // Z++: ℤ
+    int32_t WhoIsInControlOfTheCamera{0}; // Z++: ℤ
+    float CamFrontXNorm{0.0f}; // Z++: ℝ
+    float CamFrontYNorm{0.0f}; // Z++: ℝ
+    float CarZoomValueSmooth{0.0f}; // Z++: ℝ
+    float DistanceToWater{0.0f}; // Z++: ℝ
+    float FOVDuringInter{0.0f}; // Z++: ℝ
+    float LODDistMultiplier{0.0f}; // Z++: ℝ
+    float GenerationDistMultiplier{0.0f}; // Z++: ℝ
+    float m_fAlphaSpeedAtStartInter{0.0f}; // Z++: ℝ
+    float m_fAlphaWhenInterPol{0.0f}; // Z++: ℝ
+    float m_fAlphaDuringInterPol{0.0f}; // Z++: ℝ
+    float m_fBetaDuringInterPol{0.0f}; // Z++: ℝ
+    float m_fBetaSpeedAtStartInter{0.0f}; // Z++: ℝ
+    float m_fBetaWhenInterPol{0.0f}; // Z++: ℝ
+    float m_fFOVWhenInterPol{0.0f}; // Z++: ℝ
+    float m_fFOVSpeedAtStartInter{0.0f}; // Z++: ℝ
+    float m_fStartingBetaForInterPol{0.0f}; // Z++: ℝ
+    float m_fStartingAlphaForInterPol{0.0f}; // Z++: ℝ
+    float m_PedOrientForBehindOrInFront{0.0f}; // Z++: ℝ
+    float m_CameraAverageSpeed{0.0f}; // Z++: ℝ
+    float m_CameraSpeedSoFar{0.0f}; // Z++: ℝ
+    float m_fCamShakeForce{0.0f}; // Z++: ℝ
+    float m_fCarZoomValueScript{0.0f}; // Z++: ℝ
+    float m_fFovForTrain{0.0f}; // Z++: ℝ
+    float m_fFOV_Wide_Screen{0.0f}; // Z++: ℝ
+    float m_fNearClipScript{0.0f}; // Z++: ℝ
+    float m_fOldBetaDiff{0.0f}; // Z++: ℝ
+    float m_fPedZoomValue{0.0f}; // Z++: ℝ
+    float m_fPedZoomValueScript{0.0f}; // Z++: ℝ
+    float m_fPedZoomValueSmooth{0.0f}; // Z++: ℝ
+    float m_fPositionAlongSpline{0.0f}; // Z++: ℝ
+    float m_ScreenReductionPercentage{0.0f}; // Z++: ℝ
+    float m_ScreenReductionSpeed{0.0f}; // Z++: ℝ
+    float m_AlphaForPlayerAnim1rstPerson{0.0f}; // Z++: ℝ
+    float Orientation{0.0f}; // Z++: ℝ
+    float SoundDistUp{0.0f}; // Z++: ℝ
+    float SoundDistUpAsRead{0.0f}; // Z++: ℝ
+    float SoundDistUpAsReadOld{0.0f}; // Z++: ℝ
+    float m_fAvoidTheGeometryProbsTimer{0.0f}; // Z++: ℝ
+    int32_t m_nAvoidTheGeometryProbsDirn{0}; // Z++: ℤ
+    float m_fWideScreenReductionAmount{0.0f}; // Z++: ℝ
+    float m_fStartingFOVForInterPol{0.0f}; // Z++: ℝ
+    float m_fMouseAccelHorzntl{0.0f}; // Z++: ℝ
+    float m_fMouseAccelVertical{0.0f}; // Z++: ℝ
+    float m_f3rdPersonCHairMultX{0.0f}; // Z++: ℝ
+    float m_f3rdPersonCHairMultY{0.0f}; // Z++: ℝ
+    std::array<int32_t, 3> Cams{}; // Z++: seq CCam  -- bounded array [3]
+    size_t Cams_len{3u}; // Z++ cardinality #Cams
+    uint8_t pToGarageWeAreIn_card{0u}; // Z++: Ref[CGarage]
+    uint8_t pToGarageWeAreInForHackAvoidFirstPerson_card{0u}; // Z++: Ref[CGarage]
+    int32_t m_PlayerMode{0}; // Z++: CQueuedMode
+    int32_t PlayerWeaponMode{0}; // Z++: CQueuedMode
+    ZppVec3 m_PreviousCameraPosition{}; // Z++: CVector
+    ZppVec3 m_RealPreviousCameraPosition{}; // Z++: CVector
+    ZppVec3 m_cvecAimingTargetCoors{}; // Z++: CVector
+    ZppVec3 m_vecFixedModeVector{}; // Z++: CVector
+    ZppVec3 m_vecFixedModeSource{}; // Z++: CVector
+    ZppVec3 m_vecFixedModeUpOffSet{}; // Z++: CVector
+    ZppVec3 m_vecCutSceneOffset{}; // Z++: CVector
+    ZppVec3 m_cvecStartingSourceForInterPol{}; // Z++: CVector
+    ZppVec3 m_cvecStartingTargetForInterPol{}; // Z++: CVector
+    ZppVec3 m_cvecStartingUpForInterPol{}; // Z++: CVector
+    ZppVec3 m_cvecSourceSpeedAtStartInter{}; // Z++: CVector
+    ZppVec3 m_cvecTargetSpeedAtStartInter{}; // Z++: CVector
+    ZppVec3 m_cvecUpSpeedAtStartInter{}; // Z++: CVector
+    ZppVec3 m_vecSourceWhenInterPol{}; // Z++: CVector
+    ZppVec3 m_vecTargetWhenInterPol{}; // Z++: CVector
+    ZppVec3 m_vecUpWhenInterPol{}; // Z++: CVector
+    ZppVec3 m_vecClearGeometryVec{}; // Z++: CVector
+    ZppVec3 m_vecGameCamPos{}; // Z++: CVector
+    ZppVec3 SourceDuringInter{}; // Z++: CVector
+    ZppVec3 TargetDuringInter{}; // Z++: CVector
+    ZppVec3 UpDuringInter{}; // Z++: CVector
+    uint8_t m_pRwCamera_card{0u}; // Z++: Ref[RwCamera]
+    uint8_t pTargetEntity_card{0u}; // Z++: Ref[CEntity]
+    std::array<int32_t, 4> m_arrPathArray{}; // Z++: seq CCamPathSplines  -- bounded array [MAX_NUM_OF_SPLINETYPES]
+    size_t m_arrPathArray_len{4u}; // Z++ cardinality #m_arrPathArray
+    bool m_bGarageFixedCamPositionSet{false}; // Z++: 𝔹
+    bool m_vecDoingSpecialInterPolation{false}; // Z++: 𝔹
+    bool m_bScriptParametersSetForInterPol{false}; // Z++: 𝔹
+    bool m_bFading{false}; // Z++: 𝔹
+    bool m_bMusicFading{false}; // Z++: 𝔹
+    int32_t m_viewMatrix{0}; // Z++: CMatrix
+    std::array<ZppVec3, 4> m_vecFrustumNormals{}; // Z++: seq CVector  -- bounded array [4]
+    size_t m_vecFrustumNormals_len{4u}; // Z++ cardinality #m_vecFrustumNormals
+    ZppVec3 m_vecOldSourceForInter{}; // Z++: CVector
+    ZppVec3 m_vecOldFrontForInter{}; // Z++: CVector
+    ZppVec3 m_vecOldUpForInter{}; // Z++: CVector
+    float m_vecOldFOVForInter{0.0f}; // Z++: ℝ
+    float m_fFLOATingFade{0.0f}; // Z++: ℝ
+    float m_fFLOATingFadeMusic{0.0f}; // Z++: ℝ
+    float m_fTimeToFadeOut{0.0f}; // Z++: ℝ
+    float m_fTimeToFadeMusic{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopMoving{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopCatchUp{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopMovingTarget{0.0f}; // Z++: ℝ
+    float m_fFractionInterToStopCatchUpTarget{0.0f}; // Z++: ℝ
+    float m_fGaitSwayBuffer{0.0f}; // Z++: ℝ
+    float m_fScriptPercentageInterToStopMoving{0.0f}; // Z++: ℝ
+    float m_fScriptPercentageInterToCatchUp{0.0f}; // Z++: ℝ
+    int64_t m_fScriptTimeForInterPolation{0}; // Z++: ℕ
+    int32_t m_iFadingDirection{0}; // Z++: ℤ
+    int32_t m_iModeObbeCamIsInForCar{0}; // Z++: ℤ
+    int32_t m_iModeToGoTo{0}; // Z++: ℤ
+    int32_t m_iMusicFadingDirection{0}; // Z++: ℤ
+    int32_t m_iTypeOfSwitch{0}; // Z++: ℤ
+    int64_t m_uiFadeTimeStarted{0}; // Z++: ℕ
+    int64_t m_uiFadeTimeStartedMusic{0}; // Z++: ℕ
+    bool m_bUseMouse3rdPerson{false}; // Z++: 𝔹
+    bool m_bUnknown{false}; // Z++: 𝔹
+    int64_t unknown{0}; // Z++: ℕ
+    float SoundDistRightAsRead{0.0f}; // Z++: ℝ
+    float SoundDistRightAsReadOld{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (Cams_len == 3u && Cams.size() == 3u)
+            && (m_arrPathArray_len == 4u && m_arrPathArray.size() == 4u)
+            && (m_vecFrustumNormals_len == 4u && m_vecFrustumNormals.size() == 4u)
+            && (instance_addr >= 0)
+            && (ActiveCam >= 0)
+            && (m_uiCamShakeStart >= 0)
+            && (m_uiFirstPersonCamLastInputTime >= 0)
+            && (m_uiLongestTimeInMill >= 0)
+            && (m_uiNumberOfTrainCamNodes >= 0)
+            && (m_uiTransitionJUSTStarted >= 0)
+            && (m_uiTransitionState >= 0)
+            && (m_uiTimeLastChange >= 0)
+            && (m_uiTimeWeLeftIdle_StillNoInput >= 0)
+            && (m_uiTimeWeEnteredIdle >= 0)
+            && (m_uiTimeTransitionStart >= 0)
+            && (m_uiTransitionDuration >= 0)
+            && (m_uiTransitionDurationTargetCoors >= 0)
+            && (pToGarageWeAreIn_card <= 1u)
+            && (pToGarageWeAreInForHackAvoidFirstPerson_card <= 1u);
+    }
+};
 // State Schema Contract from zpp/core/CdStream.zpp
 struct CdReadInfo_ZppContract {
     int64_t nSectorOffset{0}; // Z++: ℕ
     int64_t nSectorsToRead{0}; // Z++: ℕ
-    int32_t pBuffer{0}; // Z++: ADDRESS
+    int64_t pBuffer{0}; // Z++: ADDRESS
     int32_t field_C{0}; // Z++: seq CHAR
     bool bLocked{false}; // Z++: 𝔹
     bool bReading{false}; // Z++: 𝔹
     int32_t nStatus{0}; // Z++: ℤ
-    int32_t pDoneSemaphore{0}; // Z++: HANDLE
-    int32_t hFile{0}; // Z++: HANDLE
+    int64_t pDoneSemaphore{0}; // Z++: HANDLE
+    int64_t hFile{0}; // Z++: HANDLE
     int32_t Overlapped{0}; // Z++: OVERLAPPED
     constexpr bool checkInvariant() const {
         return (nSectorOffset >= 0)
@@ -312,7 +627,7 @@ struct CFire_ZppContract {
 // State Schema Contract from zpp/core/FrontEndControls.zpp
 struct CTriggerCaller_ZppContract {
     bool bHasTrigger{false}; // Z++: 𝔹
-    int32_t pTrigger{0}; // Z++: ADDRESS
+    int64_t pTrigger{0}; // Z++: ADDRESS
     int32_t field_C{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
@@ -840,7 +1155,7 @@ struct CCustomScreenLayout_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFO_ZppContract {
-    int32_t value{0}; // Z++: ADDRESS
+    int64_t value{0}; // Z++: ADDRESS
     int32_t saveCat{0}; // Z++: seq CHAR
     int32_t save{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
@@ -850,7 +1165,7 @@ struct CCFO_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFOSelect_ZppContract {
-    int32_t value{0}; // Z++: ADDRESS
+    int64_t value{0}; // Z++: ADDRESS
     int32_t saveCat{0}; // Z++: seq CHAR
     int32_t save{0}; // Z++: seq CHAR
     int32_t rightTexts{0}; // Z++: seq CHAR
@@ -868,7 +1183,7 @@ struct CCFOSelect_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFOSlider_ZppContract {
-    int32_t value{0}; // Z++: ADDRESS
+    int64_t value{0}; // Z++: ADDRESS
     int32_t saveCat{0}; // Z++: seq CHAR
     int32_t save{0}; // Z++: seq CHAR
     float changeFunc{0.0f}; // Z++: ℝ
@@ -882,7 +1197,7 @@ struct CCFOSlider_ZppContract {
 };
 // State Schema Contract from zpp/core/Frontend.zpp
 struct CCFODynamic_ZppContract {
-    int32_t value{0}; // Z++: ADDRESS
+    int64_t value{0}; // Z++: ADDRESS
     int32_t saveCat{0}; // Z++: seq CHAR
     int32_t save{0}; // Z++: seq CHAR
     int32_t drawFunc{0}; // Z++: DrawFunc
@@ -1002,7 +1317,7 @@ struct LeedsModuleState_ZppContract {
 };
 // State Schema Contract from zpp/core/Lists.zpp
 struct CPtrNode_ZppContract {
-    int32_t item{0}; // Z++: ADDRESS
+    int64_t item{0}; // Z++: ADDRESS
     uint8_t prev_card{0u}; // Z++: Ref[CPtrNode]
     uint8_t next_card{0u}; // Z++: Ref[CPtrNode]
     constexpr bool checkInvariant() const {
@@ -1361,7 +1676,7 @@ struct CStreamingChannel_ZppContract {
 };
 // State Schema Contract from zpp/core/SurfaceTable.zpp
 struct CSurfaceTable_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -1598,6 +1913,16 @@ constexpr bool op_CPool_GetIsFree_5(const CPool_ZppContract& state) {
 constexpr bool op_CPool_GetSize_10(const CPool_ZppContract& state) {
     return state.checkInvariant();
 }
+// Delta Operation Schema Contract (ΔCCamera) from zpp/core/Camera.zpp
+constexpr bool op_CCamera_CCamera(const CCamera_ZppContract& pre, const CCamera_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_fMouseAccelHorzntl == 0.0025f) && (post.m_fMouseAccelVertical == 0.003f);
+}
+constexpr CCamera_ZppContract apply_CCamera_CCamera(const CCamera_ZppContract& pre) {
+    CCamera_ZppContract post = pre;
+    post.m_fMouseAccelHorzntl = 0.0025f;
+    post.m_fMouseAccelVertical = 0.003f;
+    return post;
+}
 // Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
 constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post, int64_t scale_in = 25, int64_t CTimer__GetTimeInMilliseconds_in = 25) {
     return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == 12) && (post.ms_nGameClockMinutes == 0) && (post.ms_nGameClockSeconds == 0) && (post.ms_nMillisecondsPerGameMinute == (int64_t)scale_in) && (post.ms_nLastClockTick == (int64_t)CTimer__GetTimeInMilliseconds_in) && (post.ms_bClockHasBeenStored == false);
@@ -1784,6 +2109,13 @@ constexpr bool verify_core_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CCam_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCam_ZppContract bad{};
+        bad.m_arrPreviousVectors_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CCamPathSplines_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CCamPathSplines_ZppContract bad{};
@@ -1802,6 +2134,13 @@ constexpr bool verify_core_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CQueuedMode_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CCamera_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCamera_ZppContract bad{};
+        bad.Cams_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -2463,6 +2802,23 @@ constexpr bool verify_core_zpp_invariants() {
     {
         const CPool_ZppContract st{};
         if (!op_CPool_GetSize_10(st)) return false;
+    }
+    {
+        CCamera_ZppContract pre{};
+        pre.m_fMouseAccelHorzntl = 0.0f;
+        pre.m_fMouseAccelVertical = 0.0f;
+        const auto post = apply_CCamera_CCamera(pre);
+        if (!op_CCamera_CCamera(pre, post)) return false;
+        {
+            CCamera_ZppContract badPost = post;
+            badPost.m_fMouseAccelHorzntl = 0.0f;
+            if (op_CCamera_CCamera(pre, badPost)) return false;
+        }
+        {
+            CCamera_ZppContract badPost = post;
+            badPost.m_fMouseAccelVertical = 0.0f;
+            if (op_CCamera_CCamera(pre, badPost)) return false;
+        }
     }
     {
         CClock_ZppContract pre{};

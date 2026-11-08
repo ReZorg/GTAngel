@@ -57,7 +57,7 @@ struct CAnimBlendAssociation_ZppContract {
     int32_t animId{0}; // Z++: ℤ
     int32_t flags{0}; // Z++: ℤ
     int32_t callbackType{0}; // Z++: ℤ
-    int32_t callbackArg{0}; // Z++: ADDRESS
+    int64_t callbackArg{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (nodes_card <= 1u)
             && (hierarchy_card <= 1u);

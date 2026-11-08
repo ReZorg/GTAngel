@@ -193,7 +193,7 @@ struct cAudioScriptObject_ZppContract {
 };
 // State Schema Contract from zpp/audio/DMAudio.zpp
 struct cDMAudio_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }

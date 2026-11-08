@@ -75,14 +75,14 @@ struct Color_ZppContract {
 };
 // State Schema Contract from zpp/extras/custompipes.zpp
 struct InterpolatedValue_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/custompipes.zpp
 struct InterpolatedFloat_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     float curInterpolator{0.0f}; // Z++: ℝ
     float curVal{0.0f}; // Z++: ℝ
     constexpr bool checkInvariant() const {
@@ -92,7 +92,7 @@ struct InterpolatedFloat_ZppContract {
 };
 // State Schema Contract from zpp/extras/custompipes.zpp
 struct InterpolatedColor_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     float curInterpolator{0.0f}; // Z++: ℝ
     int32_t curVal{0}; // Z++: Color
     constexpr bool checkInvariant() const {
@@ -102,7 +102,7 @@ struct InterpolatedColor_ZppContract {
 };
 // State Schema Contract from zpp/extras/custompipes.zpp
 struct InterpolatedLight_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     float curInterpolator{0.0f}; // Z++: ℝ
     int32_t curVal{0}; // Z++: Color
     constexpr bool checkInvariant() const {
@@ -162,21 +162,21 @@ struct Menu_ZppContract {
 };
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakVar_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakVars_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakFunc_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     int32_t m_pVarName{0}; // Z++: seq CHAR
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
@@ -185,7 +185,7 @@ struct CTweakFunc_ZppContract {
 };
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakBool_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     int32_t m_pVarName{0}; // Z++: seq CHAR
     uint8_t m_pBoolVar_card{0u}; // Z++: ℙ 𝔹
     constexpr bool checkInvariant() const {
@@ -195,9 +195,9 @@ struct CTweakBool_ZppContract {
 };
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakSwitch_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     int32_t m_pVarName{0}; // Z++: seq CHAR
-    int32_t m_pIntVar{0}; // Z++: ADDRESS
+    int64_t m_pIntVar{0}; // Z++: ADDRESS
     int32_t m_nMax{0}; // Z++: ℤ
     int32_t m_aStr{0}; // Z++: seq CHAR
     constexpr bool checkInvariant() const {
@@ -232,6 +232,14 @@ struct INIMap_ZppContract {
     int32_t data{0}; // Z++: T_DataContainer
     int32_t index{0}; // Z++: return
     int32_t data_size{0}; // Z++: i
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/ini.zpp
+struct PDataType_ZppContract {
+    int32_t PDATA_UNKNOWN{0}; // Z++: PDATA_NONE__PDATA_COMMENT__PDATA_SECTION__PDATA_KEYVALUE
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -293,6 +301,14 @@ struct CPostFX_ZppContract {
     constexpr bool checkInvariant() const {
         return (pFrontBuffer_card <= 1u)
             && (pBackBuffer_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/extras/screendroplets.zpp
+struct Im2DVertexUV2_ZppContract {
+    float v2{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/screendroplets.zpp
@@ -527,6 +543,13 @@ constexpr bool verify_extras_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        PDataType_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        PDataType_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         INIReader_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         INIReader_ZppContract bad{};
@@ -559,6 +582,13 @@ constexpr bool verify_extras_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CPostFX_ZppContract bad{};
         bad.pFrontBuffer_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        Im2DVertexUV2_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Im2DVertexUV2_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {

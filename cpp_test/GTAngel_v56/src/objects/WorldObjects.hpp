@@ -2,7 +2,7 @@
     static constexpr int zpp_objects_modules() { return zpp_objects_spec::kZppModuleCount; }
     static constexpr int zpp_objects_schemas() { return zpp_objects_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_objects_zpp() {
-        return zpp_objects_spec::verify_objects_zpp_invariants() && (zpp_objects_spec::CDummyObject_ZppContract{}.checkInvariant()) && (zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, zpp_objects_spec::apply_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{})));
+        return zpp_objects_spec::verify_objects_zpp_invariants() && (zpp_objects_spec::CCutsceneHead_ZppContract{}.checkInvariant()) && (zpp_objects_spec::op_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{}, zpp_objects_spec::apply_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{})));
     }
     bool verifyLiveWorld_objects_zpp(const avatar3d::GameWorld& world) const {
         return ((int64_t)world.pickups.size() >= 0) && verifyComponent_objects_zpp();

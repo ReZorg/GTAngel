@@ -30,6 +30,1128 @@ enum class Automobile_Enum_4 : int32_t { CAR_DOOR_FLAG_UNKNOWN_v = 0, CAR_DOOR_F
 enum class eBikeNodes : int32_t { BIKE_NODE_NONE_v = 0, BIKE_CHASSIS_v = 1, BIKE_FORKS_FRONT_v = 2, BIKE_FORKS_REAR_v = 3, BIKE_WHEEL_FRONT_v = 4, BIKE_WHEEL_REAR_v = 5, BIKE_MUDGUARD_v = 6, BIKE_HANDLEBARS_v = 7, BIKE_NUM_NODES_v = 8 };
 // Free Type from zpp/vehicles/Bike.zpp
 enum class Bike_Enum_2 : int32_t { BIKEWHEEL_FRONT_v = 0, BIKEWHEEL_REAR_v = 1 };
+// State Schema Contract from zpp/vehicles/Automobile.zpp
+struct CAutomobile_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    uint32_t bDriverLastFrame{0u}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    int32_t Damage{0}; // Z++: CDamageManager
+    std::array<int32_t, 6> Doors{}; // Z++: seq CDoor  -- bounded array [6]
+    size_t Doors_len{6u}; // Z++ cardinality #Doors
+    std::array<int32_t, 20> m_aCarNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_CAR_NODES]
+    size_t m_aCarNodes_len{20u}; // Z++ cardinality #m_aCarNodes
+    std::array<int32_t, 4> m_aWheelColPoints{}; // Z++: seq ℤ  -- bounded array [4]
+    size_t m_aWheelColPoints_len{4u}; // Z++ cardinality #m_aWheelColPoints
+    std::array<float, 4> m_aSuspensionSpringRatio{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionSpringRatio_len{4u}; // Z++ cardinality #m_aSuspensionSpringRatio
+    std::array<float, 4> m_aSuspensionSpringRatioPrev{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionSpringRatioPrev_len{4u}; // Z++ cardinality #m_aSuspensionSpringRatioPrev
+    std::array<float, 4> m_aWheelTimer{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aWheelTimer_len{4u}; // Z++ cardinality #m_aWheelTimer
+    float m_auto_unused1{0.0f}; // Z++: ℝ
+    float m_fEngineInertiaVar1{0.0f}; // Z++: ℝ
+    float m_fEngineInertiaVar2{0.0f}; // Z++: ℝ
+    std::array<int32_t, 4> m_aWheelSkidmarkType{}; // Z++: seq eSkidmarkType  -- bounded array [4]
+    size_t m_aWheelSkidmarkType_len{4u}; // Z++ cardinality #m_aWheelSkidmarkType
+    std::array<bool, 4> m_aWheelSkidmarkBloody{}; // Z++: seq 𝔹  -- bounded array [4]
+    size_t m_aWheelSkidmarkBloody_len{4u}; // Z++ cardinality #m_aWheelSkidmarkBloody
+    std::array<bool, 4> m_aWheelSkidmarkUnk{}; // Z++: seq 𝔹  -- bounded array [4]
+    size_t m_aWheelSkidmarkUnk_len{4u}; // Z++ cardinality #m_aWheelSkidmarkUnk
+    std::array<float, 4> m_aWheelRotation{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aWheelRotation_len{4u}; // Z++ cardinality #m_aWheelRotation
+    std::array<float, 4> m_aWheelPosition{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aWheelPosition_len{4u}; // Z++ cardinality #m_aWheelPosition
+    std::array<float, 4> m_aWheelSpeed{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aWheelSpeed_len{4u}; // Z++ cardinality #m_aWheelSpeed
+    int64_t m_auto_unused2{0}; // Z++: ℕ
+    uint32_t m_bombType{0u}; // Z++: 𝔹
+    uint32_t bTaxiLight{0u}; // Z++: 𝔹
+    uint32_t bFixedColour{0u}; // Z++: 𝔹
+    bool bBigWheels{false}; // Z++: 𝔹
+    bool bWaterTight{false}; // Z++: 𝔹
+    bool bNotDamagedUpsideDown{false}; // Z++: 𝔹
+    bool bMoreResistantToDamage{false}; // Z++: 𝔹
+    bool bTankDetonateCars{false}; // Z++: 𝔹
+    bool bStuckInSand{false}; // Z++: 𝔹
+    bool bHeliDestroyed{false}; // Z++: 𝔹
+    int32_t m_doingBurnout{0}; // Z++: ℤ
+    int64_t m_hydraulicState{0}; // Z++: ℕ
+    int64_t m_nBusDoorTimerEnd{0}; // Z++: ℕ
+    int64_t m_nBusDoorTimerStart{0}; // Z++: ℕ
+    std::array<float, 4> m_aSuspensionSpringLength{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionSpringLength_len{4u}; // Z++ cardinality #m_aSuspensionSpringLength
+    std::array<float, 4> m_aSuspensionLineLength{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionLineLength_len{4u}; // Z++ cardinality #m_aSuspensionLineLength
+    float m_fHeightAboveRoad{0.0f}; // Z++: ℝ
+    float m_fTraction{0.0f}; // Z++: ℝ
+    float m_fTireTemperature{0.0f}; // Z++: ℝ
+    float m_fOrientation{0.0f}; // Z++: ℝ
+    float m_fPlaneSteer{0.0f}; // Z++: ℝ
+    float m_fVelocityChangeForAudio{0.0f}; // Z++: ℝ
+    std::array<float, 6> m_randomValues{}; // Z++: seq ℝ  -- bounded array [6]
+    size_t m_randomValues_len{6u}; // Z++ cardinality #m_randomValues
+    float m_fFireBlowUpTimer{0.0f}; // Z++: ℝ
+    std::array<int32_t, 4> m_aGroundPhysical{}; // Z++: seq Ref[CPhysical]  -- bounded array [4]
+    size_t m_aGroundPhysical_len{4u}; // Z++ cardinality #m_aGroundPhysical
+    std::array<ZppVec3, 4> m_aGroundOffset{}; // Z++: seq CVector  -- bounded array [4]
+    size_t m_aGroundOffset_len{4u}; // Z++ cardinality #m_aGroundOffset
+    uint8_t m_pSetOnFireEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_weaponDoorTimerLeft{0.0f}; // Z++: ℝ
+    float m_weaponDoorTimerRight{0.0f}; // Z++: ℝ
+    float m_fCarGunLR{0.0f}; // Z++: ℝ
+    float m_fCarGunUD{0.0f}; // Z++: ℝ
+    float m_fHeliOrientation{0.0f}; // Z++: ℝ
+    float m_fPropellerRotation{0.0f}; // Z++: ℝ
+    std::array<uint32_t, 4> stuff4{}; // Z++: seq ℕ  -- bounded array [4]
+    size_t stuff4_len{4u}; // Z++ cardinality #stuff4
+    int64_t m_nWheelsOnGround{0}; // Z++: ℕ
+    int64_t m_nDriveWheelsOnGround{0}; // Z++: ℕ
+    int64_t m_nDriveWheelsOnGroundPrev{0}; // Z++: ℕ
+    float m_fGasPedalAudio{0.0f}; // Z++: ℝ
+    std::array<int32_t, 4> m_aWheelState{}; // Z++: seq tWheelState  -- bounded array [4]
+    size_t m_aWheelState_len{4u}; // Z++ cardinality #m_aWheelState
+    bool m_sAllTaxiLights{false}; // Z++: 𝔹
+    int32_t m_auto_unk1{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (Doors_len == 6u && Doors.size() == 6u)
+            && (m_aCarNodes_len == 20u && m_aCarNodes.size() == 20u)
+            && (m_aWheelColPoints_len == 4u && m_aWheelColPoints.size() == 4u)
+            && (m_aSuspensionSpringRatio_len == 4u && m_aSuspensionSpringRatio.size() == 4u)
+            && (m_aSuspensionSpringRatioPrev_len == 4u && m_aSuspensionSpringRatioPrev.size() == 4u)
+            && (m_aWheelTimer_len == 4u && m_aWheelTimer.size() == 4u)
+            && (m_aWheelSkidmarkType_len == 4u && m_aWheelSkidmarkType.size() == 4u)
+            && (m_aWheelSkidmarkBloody_len == 4u && m_aWheelSkidmarkBloody.size() == 4u)
+            && (m_aWheelSkidmarkUnk_len == 4u && m_aWheelSkidmarkUnk.size() == 4u)
+            && (m_aWheelRotation_len == 4u && m_aWheelRotation.size() == 4u)
+            && (m_aWheelPosition_len == 4u && m_aWheelPosition.size() == 4u)
+            && (m_aWheelSpeed_len == 4u && m_aWheelSpeed.size() == 4u)
+            && (m_aSuspensionSpringLength_len == 4u && m_aSuspensionSpringLength.size() == 4u)
+            && (m_aSuspensionLineLength_len == 4u && m_aSuspensionLineLength.size() == 4u)
+            && (m_randomValues_len == 6u && m_randomValues.size() == 6u)
+            && (m_aGroundPhysical_len == 4u && m_aGroundPhysical.size() == 4u)
+            && (m_aGroundOffset_len == 4u && m_aGroundOffset.size() == 4u)
+            && (stuff4_len == 4u && stuff4.size() == 4u)
+            && (m_aWheelState_len == 4u && m_aWheelState.size() == 4u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (m_auto_unused2 >= 0)
+            && (m_bombType <= 7u)
+            && (bTaxiLight <= 1u)
+            && (bDriverLastFrame <= 1u)
+            && (bFixedColour <= 1u);
+    }
+};
+// State Schema Contract from zpp/vehicles/Bike.zpp
+struct CBike_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    std::array<int32_t, 8> m_aBikeNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [BIKE_NUM_NODES]
+    size_t m_aBikeNodes_len{8u}; // Z++ cardinality #m_aBikeNodes
+    bool bLeanMatrixClean{false}; // Z++: 𝔹
+    int32_t m_leanMatrix{0}; // Z++: CMatrix
+    ZppVec3 m_vecAvgSurfaceNormal{}; // Z++: CVector
+    ZppVec3 m_vecAvgSurfaceRight{}; // Z++: CVector
+    uint8_t pBikeHandling_card{0u}; // Z++: Ref[tBikeHandlingData]
+    int32_t m_bikeAnimType{0}; // Z++: AssocGroupId
+    std::array<uint32_t, 2> m_wheelStatus{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t m_wheelStatus_len{2u}; // Z++ cardinality #m_wheelStatus
+    std::array<int32_t, 4> m_aWheelColPoints{}; // Z++: seq ℤ  -- bounded array [4]
+    size_t m_aWheelColPoints_len{4u}; // Z++ cardinality #m_aWheelColPoints
+    std::array<float, 4> m_aSuspensionSpringRatio{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionSpringRatio_len{4u}; // Z++ cardinality #m_aSuspensionSpringRatio
+    std::array<float, 4> m_aSuspensionSpringRatioPrev{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionSpringRatioPrev_len{4u}; // Z++ cardinality #m_aSuspensionSpringRatioPrev
+    std::array<float, 4> m_aWheelTimer{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aWheelTimer_len{4u}; // Z++ cardinality #m_aWheelTimer
+    float m_bike_unused1{0.0f}; // Z++: ℝ
+    std::array<int32_t, 2> m_aWheelSkidmarkType{}; // Z++: seq eSkidmarkType  -- bounded array [2]
+    size_t m_aWheelSkidmarkType_len{2u}; // Z++ cardinality #m_aWheelSkidmarkType
+    std::array<bool, 2> m_aWheelSkidmarkBloody{}; // Z++: seq 𝔹  -- bounded array [2]
+    size_t m_aWheelSkidmarkBloody_len{2u}; // Z++ cardinality #m_aWheelSkidmarkBloody
+    std::array<bool, 2> m_aWheelSkidmarkUnk{}; // Z++: seq 𝔹  -- bounded array [2]
+    size_t m_aWheelSkidmarkUnk_len{2u}; // Z++ cardinality #m_aWheelSkidmarkUnk
+    std::array<float, 2> m_aWheelRotation{}; // Z++: seq ℝ  -- bounded array [2]
+    size_t m_aWheelRotation_len{2u}; // Z++ cardinality #m_aWheelRotation
+    std::array<float, 2> m_aWheelSpeed{}; // Z++: seq ℝ  -- bounded array [2]
+    size_t m_aWheelSpeed_len{2u}; // Z++ cardinality #m_aWheelSpeed
+    std::array<float, 2> m_aWheelPosition{}; // Z++: seq ℝ  -- bounded array [2]
+    size_t m_aWheelPosition_len{2u}; // Z++ cardinality #m_aWheelPosition
+    std::array<float, 2> m_aWheelBasePosition{}; // Z++: seq ℝ  -- bounded array [2]
+    size_t m_aWheelBasePosition_len{2u}; // Z++ cardinality #m_aWheelBasePosition
+    std::array<float, 4> m_aSuspensionSpringLength{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionSpringLength_len{4u}; // Z++ cardinality #m_aSuspensionSpringLength
+    std::array<float, 4> m_aSuspensionLineLength{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t m_aSuspensionLineLength_len{4u}; // Z++ cardinality #m_aSuspensionLineLength
+    float m_fHeightAboveRoad{0.0f}; // Z++: ℝ
+    float m_fTraction{0.0f}; // Z++: ℝ
+    float m_fRearForkLength{0.0f}; // Z++: ℝ
+    float m_fFrontForkY{0.0f}; // Z++: ℝ
+    float m_fFrontForkZ{0.0f}; // Z++: ℝ
+    float m_fFrontForkSlope{0.0f}; // Z++: ℝ
+    float m_fWheelAngle{0.0f}; // Z++: ℝ
+    float m_fLeanLRAngle{0.0f}; // Z++: ℝ
+    float m_fLeanLRAngle2{0.0f}; // Z++: ℝ
+    float m_fLeanInput{0.0f}; // Z++: ℝ
+    float m_fPedLeanAmountLR{0.0f}; // Z++: ℝ
+    float m_fPedLeanAmountUD{0.0f}; // Z++: ℝ
+    int64_t m_bike_unused2{0}; // Z++: ℕ
+    std::array<uint32_t, 3> unused{}; // Z++: seq ℕ  -- bounded array [3]
+    size_t unused_len{3u}; // Z++ cardinality #unused
+    bool m_bombType{false}; // Z++: 𝔹
+    bool m_bike_flag01{false}; // Z++: 𝔹
+    bool m_bike_flag02{false}; // Z++: 𝔹
+    bool bWaterTight{false}; // Z++: 𝔹
+    bool bIsBeingPickedUp{false}; // Z++: 𝔹
+    bool bIsStanding{false}; // Z++: 𝔹
+    bool bExtraSpeed{false}; // Z++: 𝔹
+    bool bIsOnFire{false}; // Z++: 𝔹
+    bool bWheelieCam{false}; // Z++: 𝔹
+    bool bFixedColour{false}; // Z++: 𝔹
+    int32_t m_doingBurnout{0}; // Z++: ℤ
+    float m_fTireTemperature{0.0f}; // Z++: ℝ
+    float m_fBrakeDestabilization{0.0f}; // Z++: ℝ
+    float m_fVelocityChangeForAudio{0.0f}; // Z++: ℝ
+    float m_fFireBlowUpTimer{0.0f}; // Z++: ℝ
+    std::array<int32_t, 4> m_aGroundPhysical{}; // Z++: seq Ref[CPhysical]  -- bounded array [4]
+    size_t m_aGroundPhysical_len{4u}; // Z++ cardinality #m_aGroundPhysical
+    std::array<ZppVec3, 4> m_aGroundOffset{}; // Z++: seq CVector  -- bounded array [4]
+    size_t m_aGroundOffset_len{4u}; // Z++ cardinality #m_aGroundOffset
+    uint8_t m_pSetOnFireEntity_card{0u}; // Z++: Ref[CEntity]
+    int64_t m_nWheelsOnGround{0}; // Z++: ℕ
+    int64_t m_nDriveWheelsOnGround{0}; // Z++: ℕ
+    int64_t m_nDriveWheelsOnGroundPrev{0}; // Z++: ℕ
+    float m_fGasPedalAudio{0.0f}; // Z++: ℝ
+    std::array<int32_t, 2> m_aWheelState{}; // Z++: seq tWheelState  -- bounded array [2]
+    size_t m_aWheelState_len{2u}; // Z++ cardinality #m_aWheelState
+    std::array<uint32_t, 96> unk1{}; // Z++: seq ℕ  -- bounded array [96]
+    size_t unk1_len{96u}; // Z++ cardinality #unk1
+    int32_t m_bikeSitAnimation{0}; // Z++: AnimationId
+    std::array<uint32_t, 180> unk2{}; // Z++: seq ℕ  -- bounded array [180]
+    size_t unk2_len{180u}; // Z++ cardinality #unk2
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (m_aBikeNodes_len == 8u && m_aBikeNodes.size() == 8u)
+            && (m_wheelStatus_len == 2u && m_wheelStatus.size() == 2u)
+            && (m_aWheelColPoints_len == 4u && m_aWheelColPoints.size() == 4u)
+            && (m_aSuspensionSpringRatio_len == 4u && m_aSuspensionSpringRatio.size() == 4u)
+            && (m_aSuspensionSpringRatioPrev_len == 4u && m_aSuspensionSpringRatioPrev.size() == 4u)
+            && (m_aWheelTimer_len == 4u && m_aWheelTimer.size() == 4u)
+            && (m_aWheelSkidmarkType_len == 2u && m_aWheelSkidmarkType.size() == 2u)
+            && (m_aWheelSkidmarkBloody_len == 2u && m_aWheelSkidmarkBloody.size() == 2u)
+            && (m_aWheelSkidmarkUnk_len == 2u && m_aWheelSkidmarkUnk.size() == 2u)
+            && (m_aWheelRotation_len == 2u && m_aWheelRotation.size() == 2u)
+            && (m_aWheelSpeed_len == 2u && m_aWheelSpeed.size() == 2u)
+            && (m_aWheelPosition_len == 2u && m_aWheelPosition.size() == 2u)
+            && (m_aWheelBasePosition_len == 2u && m_aWheelBasePosition.size() == 2u)
+            && (m_aSuspensionSpringLength_len == 4u && m_aSuspensionSpringLength.size() == 4u)
+            && (m_aSuspensionLineLength_len == 4u && m_aSuspensionLineLength.size() == 4u)
+            && (unused_len == 3u && unused.size() == 3u)
+            && (m_aGroundPhysical_len == 4u && m_aGroundPhysical.size() == 4u)
+            && (m_aGroundOffset_len == 4u && m_aGroundOffset.size() == 4u)
+            && (m_aWheelState_len == 2u && m_aWheelState.size() == 2u)
+            && (unk1_len == 96u && unk1.size() == 96u)
+            && (unk2_len == 180u && unk2.size() == 180u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (pBikeHandling_card <= 1u)
+            && (m_bike_unused2 >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Boat.zpp
+struct CBoat_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    float m_fMovingRotation{0.0f}; // Z++: ℝ
+    float m_fMovingSpeed{0.0f}; // Z++: ℝ
+    int32_t m_boat_unused1{0}; // Z++: ℤ
+    std::array<int32_t, 8> m_aBoatNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_BOAT_NODES]
+    size_t m_aBoatNodes_len{8u}; // Z++ cardinality #m_aBoatNodes
+    int32_t m_boom{0}; // Z++: CDoor
+    uint8_t pBoatHandling_card{0u}; // Z++: Ref[tBoatHandlingData]
+    uint32_t bBoatInWater{0u}; // Z++: 𝔹
+    uint32_t bPropellerInWater{0u}; // Z++: 𝔹
+    bool m_bIsAnchored{false}; // Z++: 𝔹
+    float m_fOrientation{0.0f}; // Z++: ℝ
+    int64_t m_nPoliceShoutTimer{0}; // Z++: ℕ
+    int32_t m_boat_unused2{0}; // Z++: ℤ
+    float m_fDamage{0.0f}; // Z++: ℝ
+    uint8_t m_pSetOnFireEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_skimmerThingTimer{0.0f}; // Z++: ℝ
+    bool m_boat_unused3{false}; // Z++: 𝔹
+    float m_fAccelerate{0.0f}; // Z++: ℝ
+    float m_fBrake{0.0f}; // Z++: ℝ
+    float m_fSteeringLeftRight{0.0f}; // Z++: ℝ
+    int64_t m_nPadID{0}; // Z++: ℕ
+    int32_t m_boat_unused4{0}; // Z++: ℤ
+    float m_fVolumeUnderWater{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecBuoyancePoint{}; // Z++: CVector
+    float m_fPrevVolumeUnderWater{0.0f}; // Z++: ℝ
+    int32_t m_nDeltaVolumeUnderWater{0}; // Z++: ℤ
+    int64_t m_nNumWakePoints{0}; // Z++: ℕ
+    std::array<int32_t, 32> m_avec2dWakePoints{}; // Z++: seq CVector2D  -- bounded array [32]
+    size_t m_avec2dWakePoints_len{32u}; // Z++ cardinality #m_avec2dWakePoints
+    std::array<float, 32> m_afWakePointLifeTime{}; // Z++: seq ℝ  -- bounded array [32]
+    size_t m_afWakePointLifeTime_len{32u}; // Z++ cardinality #m_afWakePointLifeTime
+    float MAX_WAKE_LENGTH{0.0f}; // Z++: ℝ
+    float MIN_WAKE_INTERVAL{0.0f}; // Z++: ℝ
+    float WAKE_LIFETIME{0.0f}; // Z++: ℝ
+    std::array<int32_t, 4> apFrameWakeGeneratingBoats{}; // Z++: seq Ref[CBoat]  -- bounded array [4]
+    size_t apFrameWakeGeneratingBoats_len{4u}; // Z++ cardinality #apFrameWakeGeneratingBoats
+    float m_fThrustZ{0.0f}; // Z++: ℝ
+    float m_fThrustY{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecMoveRes{}; // Z++: CVector
+    ZppVec3 m_vecTurnRes{}; // Z++: CVector
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (m_aBoatNodes_len == 8u && m_aBoatNodes.size() == 8u)
+            && (m_avec2dWakePoints_len == 32u && m_avec2dWakePoints.size() == 32u)
+            && (m_afWakePointLifeTime_len == 32u && m_afWakePointLifeTime.size() == 32u)
+            && (apFrameWakeGeneratingBoats_len == 4u && apFrameWakeGeneratingBoats.size() == 4u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (pBoatHandling_card <= 1u)
+            && (bBoatInWater <= 1u)
+            && (bPropellerInWater <= 1u)
+            && (m_nPoliceShoutTimer >= 0)
+            && (m_pSetOnFireEntity_card <= 1u)
+            && (m_nPadID >= 0)
+            && (m_nNumWakePoints >= 0);
+    }
+};
 // State Schema Contract from zpp/vehicles/CarGen.zpp
 struct CCarGenerator_ZppContract {
     int32_t m_nModelIndex{0}; // Z++: ℤ
@@ -199,6 +1321,327 @@ struct CFerryPath_ZppContract {
             && (aLineBits_card <= 1u);
     }
 };
+// State Schema Contract from zpp/vehicles/Ferry.zpp
+struct CFerry_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    int32_t m_nFerryId{0}; // Z++: ℤ
+    int64_t m_isFarAway{0}; // Z++: ℕ
+    int64_t m_nCurTrackNode{0}; // Z++: ℕ
+    float m_fSpeed{0.0f}; // Z++: ℝ
+    bool m_bFerryDocked{false}; // Z++: 𝔹
+    int64_t m_nDoorTimer{0}; // Z++: ℕ
+    int64_t m_nTimeLeftStation{0}; // Z++: ℕ
+    int32_t m_nDoorState{0}; // Z++: ℤ
+    bool m_bApproachingDock{false}; // Z++: 𝔹
+    int64_t m_nSkipFerryStatus{0}; // Z++: ℕ
+    int64_t m_nTimeAlongPath{0}; // Z++: ℕ
+    bool m_bUseFrontDoor{false}; // Z++: 𝔹
+    ZppVec3 m_vecForwardSpeed{}; // Z++: CVector
+    uint8_t m_pDefaultColModel_card{0u}; // Z++: Ref[CColModel]
+    int64_t m_nCollision{0}; // Z++: ℕ
+    std::array<int32_t, 4> m_doors{}; // Z++: seq CDoor  -- bounded array [4]
+    size_t m_doors_len{4u}; // Z++ cardinality #m_doors
+    std::array<int32_t, 5> m_aFerryNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_FERRY_NODES]
+    size_t m_aFerryNodes_len{5u}; // Z++ cardinality #m_aFerryNodes
+    bool m_bAlreadyRendered{false}; // Z++: 𝔹
+    bool m_bPlayerArrivedHorn{false}; // Z++: 𝔹
+    uint8_t mspInst_card{0u}; // Z++: Ref[CFerryInst]
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (m_doors_len == 4u && m_doors.size() == 4u)
+            && (m_aFerryNodes_len == 5u && m_aFerryNodes.size() == 5u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (m_isFarAway >= 0)
+            && (m_nCurTrackNode >= 0)
+            && (m_nDoorTimer >= 0)
+            && (m_nTimeLeftStation >= 0)
+            && (m_nSkipFerryStatus >= 0)
+            && (m_nTimeAlongPath >= 0)
+            && (m_pDefaultColModel_card <= 1u)
+            && (m_nCollision >= 0)
+            && (mspInst_card <= 1u);
+    }
+};
 // State Schema Contract from zpp/vehicles/Floater.zpp
 struct cBuoyancy_ZppContract {
     ZppVec3 m_position{}; // Z++: CVector
@@ -329,6 +1772,345 @@ struct tFlyingHandlingData_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/vehicles/Heli.zpp
+struct CHeli_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    std::array<int32_t, 8> m_aHeliNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_HELI_NODES]
+    size_t m_aHeliNodes_len{8u}; // Z++ cardinality #m_aHeliNodes
+    int32_t m_heliStatus{0}; // Z++: ℤ
+    float m_fSearchLightX{0.0f}; // Z++: ℝ
+    float m_fSearchLightY{0.0f}; // Z++: ℝ
+    int64_t m_nExplosionTimer{0}; // Z++: ℕ
+    float m_fRotation{0.0f}; // Z++: ℝ
+    float m_fAngularSpeed{0.0f}; // Z++: ℝ
+    float m_fTargetZ{0.0f}; // Z++: ℝ
+    float m_fSearchLightIntensity{0.0f}; // Z++: ℝ
+    int32_t m_nHeliId{0}; // Z++: ℤ
+    int32_t m_heliType{0}; // Z++: ℤ
+    int32_t m_pathState{0}; // Z++: ℤ
+    int32_t m_numSwat{0}; // Z++: ℤ
+    std::array<uint32_t, 4> m_aSwatState{}; // Z++: seq ℕ  -- bounded array [4]
+    size_t m_aSwatState_len{4u}; // Z++ cardinality #m_aSwatState
+    std::array<float, 6> m_aSearchLightHistoryX{}; // Z++: seq ℝ  -- bounded array [6]
+    size_t m_aSearchLightHistoryX_len{6u}; // Z++ cardinality #m_aSearchLightHistoryX
+    std::array<float, 6> m_aSearchLightHistoryY{}; // Z++: seq ℝ  -- bounded array [6]
+    size_t m_aSearchLightHistoryY_len{6u}; // Z++ cardinality #m_aSearchLightHistoryY
+    int64_t m_nSearchLightTimer{0}; // Z++: ℕ
+    int64_t m_nShootTimer{0}; // Z++: ℕ
+    int64_t m_nLastShotTime{0}; // Z++: ℕ
+    int64_t m_nBulletDamage{0}; // Z++: ℕ
+    float m_fRotorRotation{0.0f}; // Z++: ℝ
+    std::array<float, 8> m_fHeliDustZ{}; // Z++: seq ℝ  -- bounded array [8]
+    size_t m_fHeliDustZ_len{8u}; // Z++ cardinality #m_fHeliDustZ
+    int64_t m_nPoliceShoutTimer{0}; // Z++: ℕ
+    float m_fTargetOffset{0.0f}; // Z++: ℝ
+    bool m_bTestRight{false}; // Z++: 𝔹
+    std::array<int32_t, 4> pHelis{}; // Z++: seq Ref[CHeli]  -- bounded array [NUM_HELIS]
+    size_t pHelis_len{4u}; // Z++ cardinality #pHelis
+    int32_t NumRandomHelis{0}; // Z++: ℤ
+    int64_t TestForNewRandomHelisTimer{0}; // Z++: ℕ
+    bool CatalinaHeliOn{false}; // Z++: 𝔹
+    bool CatalinaHasBeenShotDown{false}; // Z++: 𝔹
+    bool ScriptHeliOn{false}; // Z++: 𝔹
+    int32_t NumScriptHelis{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (m_aHeliNodes_len == 8u && m_aHeliNodes.size() == 8u)
+            && (m_aSwatState_len == 4u && m_aSwatState.size() == 4u)
+            && (m_aSearchLightHistoryX_len == 6u && m_aSearchLightHistoryX.size() == 6u)
+            && (m_aSearchLightHistoryY_len == 6u && m_aSearchLightHistoryY.size() == 6u)
+            && (m_fHeliDustZ_len == 8u && m_fHeliDustZ.size() == 8u)
+            && (pHelis_len == 4u && pHelis.size() == 4u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (m_nExplosionTimer >= 0)
+            && (m_nSearchLightTimer >= 0)
+            && (m_nShootTimer >= 0)
+            && (m_nLastShotTime >= 0)
+            && (m_nBulletDamage >= 0)
+            && (m_nPoliceShoutTimer >= 0)
+            && (TestForNewRandomHelisTimer >= 0);
+    }
+};
 // State Schema Contract from zpp/vehicles/Plane.zpp
 struct CPlaneNode_ZppContract {
     ZppVec3 p{}; // Z++: CVector
@@ -350,6 +2132,304 @@ struct CPlaneInterpolationLine_ZppContract {
         return (type >= 0);
     }
 };
+// State Schema Contract from zpp/vehicles/Plane.zpp
+struct CPlane_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    float m_fRotorRotation{0.0f}; // Z++: ℝ
+    int32_t m_isFarAway{0}; // Z++: ℤ
+    int32_t m_nCurPathNode{0}; // Z++: ℤ
+    float m_fSpeed{0.0f}; // Z++: ℝ
+    int64_t m_nFrameWhenHit{0}; // Z++: ℕ
+    bool m_bHasBeenHit{false}; // Z++: 𝔹
+    bool m_bIsDrugRunCesna{false}; // Z++: 𝔹
+    bool m_bIsDropOffCesna{false}; // Z++: 𝔹
+    bool m_bTempPlane{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (m_nFrameWhenHit >= 0);
+    }
+};
 // State Schema Contract from zpp/vehicles/Train.zpp
 struct CTrainNode_ZppContract {
     ZppVec3 p{}; // Z++: CVector
@@ -368,6 +2448,321 @@ struct CTrainInterpolationLine_ZppContract {
     float acceleration{0.0f}; // Z++: ℝ
     constexpr bool checkInvariant() const {
         return (type >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Train.zpp
+struct CTrain_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    float m_fWagonPosition{0.0f}; // Z++: ℝ
+    int32_t m_nWagonId{0}; // Z++: ℤ
+    int32_t m_isFarAway{0}; // Z++: ℤ
+    int32_t m_nCurTrackNode{0}; // Z++: ℤ
+    int32_t m_nWagonGroup{0}; // Z++: ℤ
+    float m_fSpeed{0.0f}; // Z++: ℝ
+    bool m_bProcessDoor{false}; // Z++: 𝔹
+    bool m_bTrainStopping{false}; // Z++: 𝔹
+    bool m_bIsFirstWagon{false}; // Z++: 𝔹
+    bool m_bIsLastWagon{false}; // Z++: 𝔹
+    int64_t m_nTrackId{0}; // Z++: ℕ
+    int64_t m_nDoorTimer{0}; // Z++: ℕ
+    int32_t m_nDoorState{0}; // Z++: ℤ
+    std::array<int32_t, 2> Doors{}; // Z++: seq CTrainDoor  -- bounded array [2]
+    size_t Doors_len{2u}; // Z++ cardinality #Doors
+    std::array<int32_t, 3> m_aTrainNodes{}; // Z++: seq Ref[RwFrame]  -- bounded array [NUM_TRAIN_NODES]
+    size_t m_aTrainNodes_len{3u}; // Z++ cardinality #m_aTrainNodes
+    std::array<ZppVec3, 3> aStationCoors{}; // Z++: seq CVector  -- bounded array [3]
+    size_t aStationCoors_len{3u}; // Z++ cardinality #aStationCoors
+    std::array<ZppVec3, 4> aStationCoors_S{}; // Z++: seq CVector  -- bounded array [4]
+    size_t aStationCoors_S_len{4u}; // Z++ cardinality #aStationCoors_S
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (Doors_len == 2u && Doors.size() == 2u)
+            && (m_aTrainNodes_len == 3u && m_aTrainNodes.size() == 3u)
+            && (aStationCoors_len == 3u && aStationCoors.size() == 3u)
+            && (aStationCoors_S_len == 4u && aStationCoors_S.size() == 4u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u)
+            && (m_nTrackId >= 0)
+            && (m_nDoorTimer >= 0);
     }
 };
 // State Schema Contract from zpp/vehicles/Transmission.zpp
@@ -397,6 +2792,294 @@ struct cTransmission_ZppContract {
     constexpr bool checkInvariant() const {
         return (Gears_len == 6u && Gears.size() == 6u)
             && (Flags >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Vehicle.zpp
+struct CVehicle_ZppContract {
+    int32_t m_matrix{0}; // Z++: CMatrix
+    uint8_t m_rwObject_card{0u}; // Z++: Ref[RwObject]
+    uint32_t m_type{0u}; // Z++: 𝔹
+    uint32_t m_status{0u}; // Z++: 𝔹
+    uint32_t bUsesCollision{0u}; // Z++: 𝔹
+    uint32_t bCollisionProcessed{0u}; // Z++: 𝔹
+    uint32_t bIsStatic{0u}; // Z++: 𝔹
+    uint32_t bHasContacted{0u}; // Z++: 𝔹
+    uint32_t bPedPhysics{0u}; // Z++: 𝔹
+    uint32_t bIsStuck{0u}; // Z++: 𝔹
+    uint32_t bIsInSafePosition{0u}; // Z++: 𝔹
+    uint32_t bUseCollisionRecords{0u}; // Z++: 𝔹
+    uint32_t bWasPostponed{0u}; // Z++: 𝔹
+    uint32_t bExplosionProof{0u}; // Z++: 𝔹
+    uint32_t bIsVisible{0u}; // Z++: 𝔹
+    uint32_t bHasCollided{0u}; // Z++: 𝔹
+    uint32_t bRenderScorched{0u}; // Z++: 𝔹
+    bool bHasBlip{false}; // Z++: 𝔹
+    bool bIsBIGBuilding{false}; // Z++: 𝔹
+    bool bStreamBIGBuilding{false}; // Z++: 𝔹
+    bool bRenderDamaged{false}; // Z++: 𝔹
+    bool bBulletProof{false}; // Z++: 𝔹
+    bool bFireProof{false}; // Z++: 𝔹
+    bool bCollisionProof{false}; // Z++: 𝔹
+    bool bMeleeProof{false}; // Z++: 𝔹
+    bool bOnlyDamagedByPlayer{false}; // Z++: 𝔹
+    bool bStreamingDontDelete{false}; // Z++: 𝔹
+    bool bRemoveFromWorld{false}; // Z++: 𝔹
+    bool bHasHitWall{false}; // Z++: 𝔹
+    bool bImBeingRendered{false}; // Z++: 𝔹
+    bool bTouchingWater{false}; // Z++: 𝔹
+    bool bIsSubway{false}; // Z++: 𝔹
+    bool bDrawLast{false}; // Z++: 𝔹
+    bool bNoBrightHeadLights{false}; // Z++: 𝔹
+    bool bDoNotRender{false}; // Z++: 𝔹
+    bool bDistanceFade{false}; // Z++: 𝔹
+    bool m_flagE1{false}; // Z++: 𝔹
+    bool bDontCastShadowsOn{false}; // Z++: 𝔹
+    bool bOffscreen{false}; // Z++: 𝔹
+    bool bIsStaticWaitingForCollision{false}; // Z++: 𝔹
+    bool bDontStream{false}; // Z++: 𝔹
+    bool bUnderwater{false}; // Z++: 𝔹
+    bool bHasPreRenderEffects{false}; // Z++: 𝔹
+    bool bIsTreeModel{false}; // Z++: 𝔹
+    bool bIsVehicle{false}; // Z++: 𝔹
+    bool bIsPed{false}; // Z++: 𝔹
+    bool bMakeVisible{false}; // Z++: 𝔹
+    int64_t m_scanCode{0}; // Z++: ℕ
+    int64_t m_randomSeed{0}; // Z++: ℕ
+    int32_t m_modelIndex{0}; // Z++: ℤ
+    int32_t m_level{0}; // Z++: ℤ
+    int32_t m_area{0}; // Z++: ℤ
+    uint8_t m_pFirstReference_card{0u}; // Z++: Ref[CReference]
+    bool bZoneCulled{false}; // Z++: 𝔹
+    bool bZoneCulled2{false}; // Z++: 𝔹
+    bool m_flagE2{false}; // Z++: 𝔹
+    int32_t m_audioEntityId{0}; // Z++: ℤ
+    float m_phys_unused1{0.0f}; // Z++: ℝ
+    int64_t m_nLastTimeCollided{0}; // Z++: ℕ
+    ZppVec3 m_vecMoveSpeed{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeed{}; // Z++: CVector
+    ZppVec3 m_vecMoveFriction{}; // Z++: CVector
+    ZppVec3 m_vecTurnFriction{}; // Z++: CVector
+    ZppVec3 m_vecMoveSpeedAvg{}; // Z++: CVector
+    ZppVec3 m_vecTurnSpeedAvg{}; // Z++: CVector
+    float m_fMass{0.0f}; // Z++: ℝ
+    float m_fTurnMass{0.0f}; // Z++: ℝ
+    float m_fForceMultiplier{0.0f}; // Z++: ℝ
+    float m_fAirResistance{0.0f}; // Z++: ℝ
+    float m_fElasticity{0.0f}; // Z++: ℝ
+    float m_fBuoyancy{0.0f}; // Z++: ℝ
+    ZppVec3 m_vecCentreOfMass{}; // Z++: CVector
+    int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
+    uint8_t m_movingListNode_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t m_phys_unused2{0}; // Z++: ℤ
+    int64_t m_nStaticFrames{0}; // Z++: ℕ
+    int64_t m_nCollisionRecords{0}; // Z++: ℕ
+    std::array<int32_t, 6> m_aCollisionRecords{}; // Z++: seq Ref[CEntity]  -- bounded array [PHYSICAL_MAX_COLLISIONRECORDS]
+    size_t m_aCollisionRecords_len{6u}; // Z++ cardinality #m_aCollisionRecords
+    float m_fDistanceTravelled{0.0f}; // Z++: ℝ
+    float m_fDamageImpulse{0.0f}; // Z++: ℝ
+    uint8_t m_pDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    ZppVec3 m_vecDamageNormal{}; // Z++: CVector
+    int32_t m_nDamagePieceType{0}; // Z++: ℤ
+    uint32_t bIsHeavy{0u}; // Z++: 𝔹
+    uint32_t bAffectedByGravity{0u}; // Z++: 𝔹
+    uint32_t bInfiniteMass{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA08{0u}; // Z++: 𝔹
+    uint32_t bIsInWater{0u}; // Z++: 𝔹
+    uint32_t m_phy_flagA20{0u}; // Z++: 𝔹
+    uint32_t bHitByTrain{0u}; // Z++: 𝔹
+    uint32_t bSkipLineCol{0u}; // Z++: 𝔹
+    uint32_t bIsFrozen{0u}; // Z++: 𝔹
+    uint32_t bDontLoadCollision{0u}; // Z++: 𝔹
+    uint32_t m_bIsVehicleBeingShifted{0u}; // Z++: 𝔹
+    bool bJustCheckCollision{false}; // Z++: 𝔹
+    bool phys_lcs_unk1{false}; // Z++: 𝔹
+    int64_t m_nSurfaceTouched{0}; // Z++: ℕ
+    int32_t m_nZoneLevel{0}; // Z++: ℤ
+    int32_t phys_lcs_unk2{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_treadable{}; // Z++: seq Ref[CTreadable]  -- bounded array [2]
+    size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
+    bool m_phy_flagA10{false}; // Z++: 𝔹
+    uint8_t pHandling_card{0u}; // Z++: Ref[tHandlingData]
+    uint8_t pFlyingHandling_card{0u}; // Z++: Ref[tFlyingHandlingData]
+    int32_t AutoPilot{0}; // Z++: CAutoPilot
+    int64_t m_currentColour1{0}; // Z++: ℕ
+    int64_t m_currentColour2{0}; // Z++: ℕ
+    std::array<int32_t, 2> m_aExtras{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t m_aExtras_len{2u}; // Z++ cardinality #m_aExtras
+    int32_t m_nAlarmState{0}; // Z++: ℤ
+    int32_t m_nRouteSeed{0}; // Z++: ℤ
+    uint8_t pDriver_card{0u}; // Z++: Ref[CPed]
+    std::array<int32_t, 8> pPassengers{}; // Z++: seq Ref[CPed]  -- bounded array [8]
+    size_t pPassengers_len{8u}; // Z++ cardinality #pPassengers
+    int64_t m_nNumPassengers{0}; // Z++: ℕ
+    int32_t m_nNumGettingIn{0}; // Z++: ℤ
+    int32_t m_nGettingInFlags{0}; // Z++: ℤ
+    int32_t m_nGettingOutFlags{0}; // Z++: ℤ
+    int64_t m_nNumMaxPassengers{0}; // Z++: ℕ
+    ZppVec3 m_vehLCS_230{}; // Z++: CVector
+    uint8_t m_pCurGroundEntity_card{0u}; // Z++: Ref[CEntity]
+    uint8_t m_pCarFire_card{0u}; // Z++: Ref[CFire]
+    float m_fSteerAngle{0.0f}; // Z++: ℝ
+    float m_fGasPedal{0.0f}; // Z++: ℝ
+    float m_fBrakePedal{0.0f}; // Z++: ℝ
+    int64_t VehicleCreatedBy{0}; // Z++: ℕ
+    uint32_t bIsLawEnforcer{0u}; // Z++: 𝔹
+    uint32_t bIsAmbulanceOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsFireTruckOnDuty{0u}; // Z++: 𝔹
+    uint32_t bIsLocked{0u}; // Z++: 𝔹
+    bool bEngineOn{false}; // Z++: 𝔹
+    bool bIsHandbrakeOn{false}; // Z++: 𝔹
+    bool bLightsOn{false}; // Z++: 𝔹
+    bool bFreebies{false}; // Z++: 𝔹
+    bool bIsVan{false}; // Z++: 𝔹
+    bool bIsBus{false}; // Z++: 𝔹
+    bool bIsBig{false}; // Z++: 𝔹
+    bool bLowVehicle{false}; // Z++: 𝔹
+    bool bComedyControls{false}; // Z++: 𝔹
+    bool bWarnedPeds{false}; // Z++: 𝔹
+    bool bCraneMessageDone{false}; // Z++: 𝔹
+    bool bExtendedRange{false}; // Z++: 𝔹
+    bool bTakeLessDamage{false}; // Z++: 𝔹
+    bool bIsDamaged{false}; // Z++: 𝔹
+    bool bHasBeenOwnedByPlayer{false}; // Z++: 𝔹
+    bool bFadeOut{false}; // Z++: 𝔹
+    bool bIsBeingCarJacked{false}; // Z++: 𝔹
+    bool bCreateRoadBlockPeds{false}; // Z++: 𝔹
+    bool bCanBeDamaged{false}; // Z++: 𝔹
+    bool bUsingSpecialColModel{false}; // Z++: 𝔹
+    bool m_vehLCS_258{false}; // Z++: 𝔹
+    int32_t m_vehLCS_259{0}; // Z++: ℤ
+    bool bOccupantsHaveBeenGenerated{false}; // Z++: 𝔹
+    bool bGunSwitchedOff{false}; // Z++: 𝔹
+    bool bVehicleColProcessed{false}; // Z++: 𝔹
+    bool bIsCarParkVehicle{false}; // Z++: 𝔹
+    bool bHasAlreadyBeenRecorded{false}; // Z++: 𝔹
+    bool bPartOfConvoy{false}; // Z++: 𝔹
+    bool bHeliMinimumTilt{false}; // Z++: 𝔹
+    bool bAudioChangingGear{false}; // Z++: 𝔹
+    bool bIsDrowning{false}; // Z++: 𝔹
+    bool bTyresDontBurst{false}; // Z++: 𝔹
+    bool bCreatedAsPoliceVehicle{false}; // Z++: 𝔹
+    bool bRestingOnPhysical{false}; // Z++: 𝔹
+    bool bParking{false}; // Z++: 𝔹
+    bool bCanPark{false}; // Z++: 𝔹
+    bool bRewardVehicle{false}; // Z++: 𝔹
+    int32_t m_numPedsUseItAsCover{0}; // Z++: ℤ
+    int64_t m_nAmmoInClip{0}; // Z++: ℕ
+    int32_t m_nPacManPickupsCarried{0}; // Z++: ℤ
+    int64_t m_nRoadblockType{0}; // Z++: ℕ
+    int64_t m_bGarageTurnedLightsOff{0}; // Z++: ℕ
+    float m_fWheelSpin{0.0f}; // Z++: ℝ
+    float m_fHealth{0.0f}; // Z++: ℝ
+    float m_fEngineEnergy{0.0f}; // Z++: ℝ
+    int64_t m_nCurrentGear{0}; // Z++: ℕ
+    float m_fChangeGearTime{0.0f}; // Z++: ℝ
+    int64_t m_nSetPieceExtendedRangeTime{0}; // Z++: ℕ
+    int64_t m_nGunFiringTime{0}; // Z++: ℕ
+    int64_t m_nTimeOfDeath{0}; // Z++: ℕ
+    int64_t m_nTimeBlocked{0}; // Z++: ℕ
+    int32_t m_nBombTimer{0}; // Z++: ℤ
+    uint8_t m_pBlowUpEntity_card{0u}; // Z++: Ref[CEntity]
+    float m_fMapObjectHeightAhead{0.0f}; // Z++: ℝ
+    float m_fMapObjectHeightBehind{0.0f}; // Z++: ℝ
+    int32_t m_nDoorLock{0}; // Z++: eCarLock
+    uint8_t m_pLastDamageEntity_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_vehLCS_29C{0}; // Z++: ℤ
+    int32_t m_vehLCS_29E{0}; // Z++: ℤ
+    int32_t m_nLastWeaponDamage{0}; // Z++: ℤ
+    int64_t m_nRadioStation{0}; // Z++: ℕ
+    int64_t m_bRainAudioCounter{0}; // Z++: ℕ
+    int64_t m_bRainSamplesCounter{0}; // Z++: ℕ
+    int32_t m_vehLCS_2A3{0}; // Z++: ℤ
+    int64_t m_vehLCS_2A4{0}; // Z++: ℕ
+    int64_t m_nCarHornTimer{0}; // Z++: ℕ
+    int64_t m_nCarHornPattern{0}; // Z++: ℕ
+    bool m_bSirenOrAlarm{false}; // Z++: 𝔹
+    int64_t m_nCarHornDelay{0}; // Z++: ℕ
+    int32_t m_comedyControlState{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B0{0}; // Z++: ℤ
+    int32_t m_vehLCS_2B4{0}; // Z++: ℤ
+    std::array<int32_t, 2> m_aCollPolys{}; // Z++: seq CStoredCollPoly  -- bounded array [2]
+    size_t m_aCollPolys_len{2u}; // Z++ cardinality #m_aCollPolys
+    float m_fSteerInput{0.0f}; // Z++: ℝ
+    int32_t m_vehType{0}; // Z++: eVehicleType
+    bool m_bSuperBrake{false}; // Z++: 𝔹
+    bool bAllDodosCheat{false}; // Z++: 𝔹
+    bool bCheat3{false}; // Z++: 𝔹
+    bool bCheat4{false}; // Z++: 𝔹
+    bool bCheat5{false}; // Z++: 𝔹
+    bool bCheat8{false}; // Z++: 𝔹
+    bool bCheat9{false}; // Z++: 𝔹
+    bool bCheat10{false}; // Z++: 𝔹
+    bool bHoverCheat{false}; // Z++: 𝔹
+    bool bAllTaxisHaveNitro{false}; // Z++: 𝔹
+    bool m_bDisableMouseSteering{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonation{false}; // Z++: 𝔹
+    bool bDisableRemoteDetonationOnContact{false}; // Z++: 𝔹
+    float WHEELSPIN_FALL_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_RISE_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_INAIR_TARGET_RATE{0.0f}; // Z++: ℝ
+    float WHEELSPIN_TARGET_RATE{0.0f}; // Z++: ℝ
+    std::array<float, 4> field_1D0{}; // Z++: seq ℝ  -- bounded array [4]
+    size_t field_1D0_len{4u}; // Z++ cardinality #field_1D0
+    bool bDriverLastFrame{false}; // Z++: 𝔹
+    uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
+    int32_t m_nRoadblockNode{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
+            && (m_treadable_len == 2u && m_treadable.size() == 2u)
+            && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
+            && (pPassengers_len == 8u && pPassengers.size() == 8u)
+            && (m_aCollPolys_len == 2u && m_aCollPolys.size() == 2u)
+            && (field_1D0_len == 4u && field_1D0.size() == 4u)
+            && (instance_addr >= 0)
+            && (m_rwObject_card <= 1u)
+            && (m_type <= 7u)
+            && (m_status <= 31u)
+            && (bUsesCollision <= 1u)
+            && (bCollisionProcessed <= 1u)
+            && (bIsStatic <= 1u)
+            && (bHasContacted <= 1u)
+            && (bPedPhysics <= 1u)
+            && (bIsStuck <= 1u)
+            && (bIsInSafePosition <= 1u)
+            && (bUseCollisionRecords <= 1u)
+            && (bWasPostponed <= 1u)
+            && (bExplosionProof <= 1u)
+            && (bIsVisible <= 1u)
+            && (bHasCollided <= 1u)
+            && (bRenderScorched <= 1u)
+            && (m_nLastTimeCollided >= 0)
+            && (m_movingListNode_card <= 1u)
+            && (m_nStaticFrames >= 0)
+            && (m_nCollisionRecords >= 0)
+            && (m_pDamageEntity_card <= 1u)
+            && (bIsHeavy <= 1u)
+            && (bAffectedByGravity <= 1u)
+            && (bInfiniteMass <= 1u)
+            && (m_phy_flagA08 <= 1u)
+            && (bIsInWater <= 1u)
+            && (m_phy_flagA20 <= 1u)
+            && (bHitByTrain <= 1u)
+            && (bSkipLineCol <= 1u)
+            && (bIsFrozen <= 1u)
+            && (bDontLoadCollision <= 1u)
+            && (m_bIsVehicleBeingShifted <= 1u)
+            && (pHandling_card <= 1u)
+            && (pFlyingHandling_card <= 1u)
+            && (m_currentColour1 >= 0)
+            && (m_currentColour2 >= 0)
+            && (pDriver_card <= 1u)
+            && (m_nNumPassengers >= 0)
+            && (m_nNumMaxPassengers >= 0)
+            && (m_pCurGroundEntity_card <= 1u)
+            && (m_pCarFire_card <= 1u)
+            && (VehicleCreatedBy >= 0)
+            && (bIsLawEnforcer <= 1u)
+            && (bIsAmbulanceOnDuty <= 1u)
+            && (bIsFireTruckOnDuty <= 1u)
+            && (bIsLocked <= 1u);
     }
 };
 // Query Operation Schema Contract (ΞtHandlingData) from zpp/vehicles/HandlingMgr.zpp
@@ -467,7 +3150,128 @@ constexpr CDamageManager_ZppContract apply_CDamageManager_FuckCarCompletely(cons
     post.m_panelStatus = 0;
     return post;
 }
+// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
+constexpr bool op_CFerry_Render(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_bAlreadyRendered == true);
+}
+constexpr CFerry_ZppContract apply_CFerry_Render(const CFerry_ZppContract& pre) {
+    CFerry_ZppContract post = pre;
+    post.m_bAlreadyRendered = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
+constexpr bool op_CFerry_CompleteDorrMovement(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nDoorTimer == 0);
+}
+constexpr CFerry_ZppContract apply_CFerry_CompleteDorrMovement(const CFerry_ZppContract& pre) {
+    CFerry_ZppContract post = pre;
+    post.m_nDoorTimer = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCFerry) from zpp/vehicles/Ferry.zpp
+constexpr bool op_CFerry_SkipFerryToNextDock(const CFerry_ZppContract& pre, const CFerry_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nSkipFerryStatus == 1);
+}
+constexpr CFerry_ZppContract apply_CFerry_SkipFerryToNextDock(const CFerry_ZppContract& pre) {
+    CFerry_ZppContract post = pre;
+    post.m_nSkipFerryStatus = 1;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
+constexpr bool op_CHeli_InitHelis(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.NumRandomHelis == 0) && (post.TestForNewRandomHelisTimer == 0) && (post.NumScriptHelis == 0) && (post.CatalinaHeliOn == false) && (post.ScriptHeliOn == false);
+}
+constexpr CHeli_ZppContract apply_CHeli_InitHelis(const CHeli_ZppContract& pre) {
+    CHeli_ZppContract post = pre;
+    post.NumRandomHelis = 0;
+    post.TestForNewRandomHelisTimer = 0;
+    post.NumScriptHelis = 0;
+    post.CatalinaHeliOn = false;
+    post.ScriptHeliOn = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
+constexpr bool op_CHeli_StartCatalinaFlyBy(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.CatalinaHeliOn == true) && (post.CatalinaHasBeenShotDown == false);
+}
+constexpr CHeli_ZppContract apply_CHeli_StartCatalinaFlyBy(const CHeli_ZppContract& pre) {
+    CHeli_ZppContract post = pre;
+    post.CatalinaHeliOn = true;
+    post.CatalinaHasBeenShotDown = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
+constexpr bool op_CHeli_RemoveCatalinaHeli(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.CatalinaHeliOn == false);
+}
+constexpr CHeli_ZppContract apply_CHeli_RemoveCatalinaHeli(const CHeli_ZppContract& pre) {
+    CHeli_ZppContract post = pre;
+    post.CatalinaHeliOn = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
+constexpr bool op_CHeli_CatalinaTakeOff(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_pathState == 8);
+}
+constexpr CHeli_ZppContract apply_CHeli_CatalinaTakeOff(const CHeli_ZppContract& pre) {
+    CHeli_ZppContract post = pre;
+    post.m_pathState = 8;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
+constexpr bool op_CHeli_MakeCatalinaHeliFlyAway(const CHeli_ZppContract& pre, const CHeli_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_pathState == 12);
+}
+constexpr CHeli_ZppContract apply_CHeli_MakeCatalinaHeliFlyAway(const CHeli_ZppContract& pre) {
+    CHeli_ZppContract post = pre;
+    post.m_pathState = 12;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCHeli) from zpp/vehicles/Heli.zpp
+constexpr bool op_CHeli_ActivateHeli(const CHeli_ZppContract& pre, const CHeli_ZppContract& post, bool activate_in = true) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ScriptHeliOn == activate_in);
+}
+constexpr CHeli_ZppContract apply_CHeli_ActivateHeli(const CHeli_ZppContract& pre, bool activate_in = true) {
+    CHeli_ZppContract post = pre;
+    post.ScriptHeliOn = activate_in;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCVehicle) from zpp/vehicles/Vehicle.zpp
+constexpr bool op_CVehicle_CVehicle(const CVehicle_ZppContract& pre, const CVehicle_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_fGasPedal == 0.0f) && (post.m_fBrakePedal == 0.0f) && (post.m_fWheelSpin == 0.0f) && (post.bRewardVehicle == false) && (post.m_vehLCS_29E == 0) && (post.m_vehLCS_29C == 0);
+}
+constexpr CVehicle_ZppContract apply_CVehicle_CVehicle(const CVehicle_ZppContract& pre) {
+    CVehicle_ZppContract post = pre;
+    post.m_fGasPedal = 0.0f;
+    post.m_fBrakePedal = 0.0f;
+    post.m_fWheelSpin = 0.0f;
+    post.bRewardVehicle = false;
+    post.m_vehLCS_29E = 0;
+    post.m_vehLCS_29C = 0;
+    return post;
+}
 constexpr bool verify_vehicles_zpp_invariants() {
+    {
+        CAutomobile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CAutomobile_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CBike_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CBike_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CBoat_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CBoat_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
     {
         CCarGenerator_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
@@ -532,6 +3336,13 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CFerry_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CFerry_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         cBuoyancy_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         cBuoyancy_ZppContract bad{};
@@ -567,6 +3378,13 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CHeli_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CHeli_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CPlaneNode_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CPlaneNode_ZppContract bad{};
@@ -578,6 +3396,13 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CPlaneInterpolationLine_ZppContract bad{};
         bad.type = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CPlane_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlane_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -595,6 +3420,13 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CTrain_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTrain_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         tGear_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         tGear_ZppContract bad{};
@@ -606,6 +3438,13 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         cTransmission_ZppContract bad{};
         bad.Gears_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CVehicle_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CVehicle_ZppContract bad{};
+        bad.m_aCollisionRecords_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -720,6 +3559,177 @@ constexpr bool verify_vehicles_zpp_invariants() {
             CDamageManager_ZppContract badPost = post;
             badPost.m_panelStatus = 1;
             if (op_CDamageManager_FuckCarCompletely(pre, badPost)) return false;
+        }
+    }
+    {
+        CFerry_ZppContract pre{};
+        pre.m_bAlreadyRendered = false;
+        const auto post = apply_CFerry_Render(pre);
+        if (!op_CFerry_Render(pre, post)) return false;
+        {
+            CFerry_ZppContract badPost = post;
+            badPost.m_bAlreadyRendered = false;
+            if (op_CFerry_Render(pre, badPost)) return false;
+        }
+    }
+    {
+        CFerry_ZppContract pre{};
+        pre.m_nDoorTimer = 1;
+        const auto post = apply_CFerry_CompleteDorrMovement(pre);
+        if (!op_CFerry_CompleteDorrMovement(pre, post)) return false;
+        {
+            CFerry_ZppContract badPost = post;
+            badPost.m_nDoorTimer = 1;
+            if (op_CFerry_CompleteDorrMovement(pre, badPost)) return false;
+        }
+    }
+    {
+        CFerry_ZppContract pre{};
+        pre.m_nSkipFerryStatus = 0;
+        const auto post = apply_CFerry_SkipFerryToNextDock(pre);
+        if (!op_CFerry_SkipFerryToNextDock(pre, post)) return false;
+        {
+            CFerry_ZppContract badPost = post;
+            badPost.m_nSkipFerryStatus = 0;
+            if (op_CFerry_SkipFerryToNextDock(pre, badPost)) return false;
+        }
+    }
+    {
+        CHeli_ZppContract pre{};
+        pre.NumRandomHelis = 1;
+        pre.TestForNewRandomHelisTimer = 1;
+        pre.NumScriptHelis = 1;
+        pre.CatalinaHeliOn = true;
+        pre.ScriptHeliOn = true;
+        const auto post = apply_CHeli_InitHelis(pre);
+        if (!op_CHeli_InitHelis(pre, post)) return false;
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.NumRandomHelis = 1;
+            if (op_CHeli_InitHelis(pre, badPost)) return false;
+        }
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.TestForNewRandomHelisTimer = 1;
+            if (op_CHeli_InitHelis(pre, badPost)) return false;
+        }
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.NumScriptHelis = 1;
+            if (op_CHeli_InitHelis(pre, badPost)) return false;
+        }
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.CatalinaHeliOn = true;
+            if (op_CHeli_InitHelis(pre, badPost)) return false;
+        }
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.ScriptHeliOn = true;
+            if (op_CHeli_InitHelis(pre, badPost)) return false;
+        }
+    }
+    {
+        CHeli_ZppContract pre{};
+        pre.CatalinaHeliOn = false;
+        pre.CatalinaHasBeenShotDown = true;
+        const auto post = apply_CHeli_StartCatalinaFlyBy(pre);
+        if (!op_CHeli_StartCatalinaFlyBy(pre, post)) return false;
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.CatalinaHeliOn = false;
+            if (op_CHeli_StartCatalinaFlyBy(pre, badPost)) return false;
+        }
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.CatalinaHasBeenShotDown = true;
+            if (op_CHeli_StartCatalinaFlyBy(pre, badPost)) return false;
+        }
+    }
+    {
+        CHeli_ZppContract pre{};
+        pre.CatalinaHeliOn = true;
+        const auto post = apply_CHeli_RemoveCatalinaHeli(pre);
+        if (!op_CHeli_RemoveCatalinaHeli(pre, post)) return false;
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.CatalinaHeliOn = true;
+            if (op_CHeli_RemoveCatalinaHeli(pre, badPost)) return false;
+        }
+    }
+    {
+        CHeli_ZppContract pre{};
+        pre.m_pathState = 0;
+        const auto post = apply_CHeli_CatalinaTakeOff(pre);
+        if (!op_CHeli_CatalinaTakeOff(pre, post)) return false;
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.m_pathState = 0;
+            if (op_CHeli_CatalinaTakeOff(pre, badPost)) return false;
+        }
+    }
+    {
+        CHeli_ZppContract pre{};
+        pre.m_pathState = 0;
+        const auto post = apply_CHeli_MakeCatalinaHeliFlyAway(pre);
+        if (!op_CHeli_MakeCatalinaHeliFlyAway(pre, post)) return false;
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.m_pathState = 0;
+            if (op_CHeli_MakeCatalinaHeliFlyAway(pre, badPost)) return false;
+        }
+    }
+    {
+        CHeli_ZppContract pre{};
+        const bool activate_in = true;
+        pre.ScriptHeliOn = false;
+        const auto post = apply_CHeli_ActivateHeli(pre, activate_in);
+        if (!op_CHeli_ActivateHeli(pre, post, activate_in)) return false;
+        {
+            CHeli_ZppContract badPost = post;
+            badPost.ScriptHeliOn = !activate_in;
+            if (op_CHeli_ActivateHeli(pre, badPost, activate_in)) return false;
+        }
+    }
+    {
+        CVehicle_ZppContract pre{};
+        pre.m_fGasPedal = 1.0f;
+        pre.m_fBrakePedal = 1.0f;
+        pre.m_fWheelSpin = 1.0f;
+        pre.bRewardVehicle = true;
+        pre.m_vehLCS_29E = 1;
+        pre.m_vehLCS_29C = 1;
+        const auto post = apply_CVehicle_CVehicle(pre);
+        if (!op_CVehicle_CVehicle(pre, post)) return false;
+        {
+            CVehicle_ZppContract badPost = post;
+            badPost.m_fGasPedal = 1.0f;
+            if (op_CVehicle_CVehicle(pre, badPost)) return false;
+        }
+        {
+            CVehicle_ZppContract badPost = post;
+            badPost.m_fBrakePedal = 1.0f;
+            if (op_CVehicle_CVehicle(pre, badPost)) return false;
+        }
+        {
+            CVehicle_ZppContract badPost = post;
+            badPost.m_fWheelSpin = 1.0f;
+            if (op_CVehicle_CVehicle(pre, badPost)) return false;
+        }
+        {
+            CVehicle_ZppContract badPost = post;
+            badPost.bRewardVehicle = true;
+            if (op_CVehicle_CVehicle(pre, badPost)) return false;
+        }
+        {
+            CVehicle_ZppContract badPost = post;
+            badPost.m_vehLCS_29E = 1;
+            if (op_CVehicle_CVehicle(pre, badPost)) return false;
+        }
+        {
+            CVehicle_ZppContract badPost = post;
+            badPost.m_vehLCS_29C = 1;
+            if (op_CVehicle_CVehicle(pre, badPost)) return false;
         }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

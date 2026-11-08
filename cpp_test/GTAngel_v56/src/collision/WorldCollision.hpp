@@ -173,7 +173,7 @@ struct CColTrianglePlane_ZppContract {
 };
 // State Schema Contract from zpp/collision/Collision.zpp
 struct CStoredCollPoly_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -188,7 +188,7 @@ struct CCollision_ZppContract {
 };
 // State Schema Contract from zpp/collision/CompressedVector.zpp
 struct CompressedVector_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }

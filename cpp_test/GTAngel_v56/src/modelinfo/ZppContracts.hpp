@@ -35,7 +35,7 @@ struct CBaseModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -87,7 +87,7 @@ struct CClumpModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -119,7 +119,7 @@ struct CMloModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -217,6 +217,227 @@ struct CModelIndices_ZppContract {
     int32_t MONEY{0}; // Z++: ℤ
     int32_t CARMINE{0}; // Z++: ℤ
     int32_t GARAGEDOOR1{0}; // Z++: ℤ
+    int32_t GARAGEDOOR2{0}; // Z++: ℤ
+    int32_t GARAGEDOOR3{0}; // Z++: ℤ
+    int32_t GARAGEDOOR4{0}; // Z++: ℤ
+    int32_t GARAGEDOOR5{0}; // Z++: ℤ
+    int32_t GARAGEDOOR6{0}; // Z++: ℤ
+    int32_t GARAGEDOOR7{0}; // Z++: ℤ
+    int32_t GARAGEDOOR9{0}; // Z++: ℤ
+    int32_t GARAGEDOOR10{0}; // Z++: ℤ
+    int32_t GARAGEDOOR11{0}; // Z++: ℤ
+    int32_t GARAGEDOOR12{0}; // Z++: ℤ
+    int32_t GARAGEDOOR13{0}; // Z++: ℤ
+    int32_t GARAGEDOOR14{0}; // Z++: ℤ
+    int32_t GARAGEDOOR15{0}; // Z++: ℤ
+    int32_t GARAGEDOOR16{0}; // Z++: ℤ
+    int32_t GARAGEDOOR17{0}; // Z++: ℤ
+    int32_t GARAGEDOOR18{0}; // Z++: ℤ
+    int32_t GARAGEDOOR19{0}; // Z++: ℤ
+    int32_t GARAGEDOOR20{0}; // Z++: ℤ
+    int32_t GARAGEDOOR21{0}; // Z++: ℤ
+    int32_t GARAGEDOOR22{0}; // Z++: ℤ
+    int32_t GARAGEDOOR23{0}; // Z++: ℤ
+    int32_t GARAGEDOOR24{0}; // Z++: ℤ
+    int32_t GARAGEDOOR25{0}; // Z++: ℤ
+    int32_t GARAGEDOOR26{0}; // Z++: ℤ
+    int32_t GARAGEDOOR27{0}; // Z++: ℤ
+    int32_t GARAGEDOOR28{0}; // Z++: ℤ
+    int32_t GARAGEDOOR29{0}; // Z++: ℤ
+    int32_t GARAGEDOOR30{0}; // Z++: ℤ
+    int32_t GARAGEDOOR31{0}; // Z++: ℤ
+    int32_t GARAGEDOOR32{0}; // Z++: ℤ
+    int32_t GARAGEDOOR33{0}; // Z++: ℤ
+    int32_t GARAGEDOOR34{0}; // Z++: ℤ
+    int32_t GARAGEDOOR35{0}; // Z++: ℤ
+    int32_t GARAGEDOOR36{0}; // Z++: ℤ
+    int32_t GARAGEDOOR37{0}; // Z++: ℤ
+    int32_t GARAGEDOOR38{0}; // Z++: ℤ
+    int32_t GARAGEDOOR39{0}; // Z++: ℤ
+    int32_t TESTRAMP1{0}; // Z++: ℤ
+    int32_t TESTRAMP2{0}; // Z++: ℤ
+    int32_t NAUTICALMINE{0}; // Z++: ℤ
+    int32_t CRUSHERBODY{0}; // Z++: ℤ
+    int32_t CRUSHERLID{0}; // Z++: ℤ
+    int32_t DONKEYMAG{0}; // Z++: ℤ
+    int32_t BULLION{0}; // Z++: ℤ
+    int32_t FLOATPACKAGE1{0}; // Z++: ℤ
+    int32_t BRIEFCASE{0}; // Z++: ℤ
+    int32_t CHINABANNER1{0}; // Z++: ℤ
+    int32_t CHINABANNER2{0}; // Z++: ℤ
+    int32_t CHINABANNER3{0}; // Z++: ℤ
+    int32_t CHINABANNER4{0}; // Z++: ℤ
+    int32_t CHINABANNER5{0}; // Z++: ℤ
+    int32_t CHINABANNER6{0}; // Z++: ℤ
+    int32_t CHINABANNER7{0}; // Z++: ℤ
+    int32_t CHINABANNER8{0}; // Z++: ℤ
+    int32_t CHINABANNER9{0}; // Z++: ℤ
+    int32_t CHINABANNER10{0}; // Z++: ℤ
+    int32_t CHINABANNER11{0}; // Z++: ℤ
+    int32_t CHINABANNER12{0}; // Z++: ℤ
+    int32_t CHINALANTERN{0}; // Z++: ℤ
+    int32_t GLASS1{0}; // Z++: ℤ
+    int32_t GLASS2{0}; // Z++: ℤ
+    int32_t GLASS3{0}; // Z++: ℤ
+    int32_t GLASS4{0}; // Z++: ℤ
+    int32_t GLASS5{0}; // Z++: ℤ
+    int32_t GLASS6{0}; // Z++: ℤ
+    int32_t GLASS7{0}; // Z++: ℤ
+    int32_t GLASS8{0}; // Z++: ℤ
+    int32_t BRIDGELIFT{0}; // Z++: ℤ
+    int32_t BRIDGEWEIGHT{0}; // Z++: ℤ
+    int32_t BRIDGEROADSEGMENT{0}; // Z++: ℤ
+    int32_t EXPLODINGBARREL{0}; // Z++: ℤ
+    int32_t ITALYBANNER1{0}; // Z++: ℤ
+    int32_t MEGADAMAGE{0}; // Z++: ℤ
+    int32_t REGENERATOR{0}; // Z++: ℤ
+    int32_t INVISIBLE{0}; // Z++: ℤ
+    int32_t GOOD_CAR{0}; // Z++: ℤ
+    int32_t BAD_CAR{0}; // Z++: ℤ
+    int32_t PICKUP_ADRENALINE{0}; // Z++: ℤ
+    int32_t PICKUP_BODYARMOUR{0}; // Z++: ℤ
+    int32_t PICKUP_INFO{0}; // Z++: ℤ
+    int32_t PICKUP_HEALTH{0}; // Z++: ℤ
+    int32_t PICKUP_BONUS{0}; // Z++: ℤ
+    int32_t PICKUP_BRIBE{0}; // Z++: ℤ
+    int32_t PICKUP_KILLFRENZY{0}; // Z++: ℤ
+    int32_t PICKUP_CAMERA{0}; // Z++: ℤ
+    int32_t PICKUP_REVENUE{0}; // Z++: ℤ
+    int32_t PICKUP_SAVEGAME{0}; // Z++: ℤ
+    int32_t PICKUP_PROPERTY{0}; // Z++: ℤ
+    int32_t PICKUP_PROPERTY_FORSALE{0}; // Z++: ℤ
+    int32_t PICKUP_CLOTHES{0}; // Z++: ℤ
+    int32_t BOLLARDLIGHT{0}; // Z++: ℤ
+    int32_t CA_SP1{0}; // Z++: ℤ
+    int32_t CA_SP2{0}; // Z++: ℤ
+    int32_t CA_SP3{0}; // Z++: ℤ
+    int32_t CA_SP4{0}; // Z++: ℤ
+    int32_t PACKAGE1IZZY{0}; // Z++: ℤ
+    int32_t MAGNET{0}; // Z++: ℤ
+    int32_t RAILTRACKS{0}; // Z++: ℤ
+    int32_t FENCE{0}; // Z++: ℤ
+    int32_t FENCE2{0}; // Z++: ℤ
+    int32_t PETROLPUMP{0}; // Z++: ℤ
+    int32_t PETROLPUMP2{0}; // Z++: ℤ
+    int32_t BODYCAST{0}; // Z++: ℤ
+    int32_t IZZY_CONFDOOR{0}; // Z++: ℤ
+    int32_t SHIPDOOR{0}; // Z++: ℤ
+    int32_t IZZY_JDDOOR{0}; // Z++: ℤ
+    int32_t IZZY_JDDOOR_SLIDER{0}; // Z++: ℤ
+    int32_t LITEHOUSE_GATE{0}; // Z++: ℤ
+    int32_t COFFEE{0}; // Z++: ℤ
+    int32_t BUOY{0}; // Z++: ℤ
+    int32_t PARKTABLE{0}; // Z++: ℤ
+    int32_t SUBWAY1{0}; // Z++: ℤ
+    int32_t SUBWAY2{0}; // Z++: ℤ
+    int32_t SUBWAY3{0}; // Z++: ℤ
+    int32_t SUBWAY4{0}; // Z++: ℤ
+    int32_t SUBWAY5{0}; // Z++: ℤ
+    int32_t SUBWAY6{0}; // Z++: ℤ
+    int32_t SUBWAY7{0}; // Z++: ℤ
+    int32_t SUBWAY8{0}; // Z++: ℤ
+    int32_t SUBWAY9{0}; // Z++: ℤ
+    int32_t SUBWAY10{0}; // Z++: ℤ
+    int32_t SUBWAY11{0}; // Z++: ℤ
+    int32_t SUBWAY12{0}; // Z++: ℤ
+    int32_t SUBWAY13{0}; // Z++: ℤ
+    int32_t SUBWAY14{0}; // Z++: ℤ
+    int32_t SUBWAY15{0}; // Z++: ℤ
+    int32_t SUBWAY16{0}; // Z++: ℤ
+    int32_t SUBWAY17{0}; // Z++: ℤ
+    int32_t SUBWAY18{0}; // Z++: ℤ
+    int32_t SUBPLATFORM_IND{0}; // Z++: ℤ
+    int32_t SUBPLATFORM_COMS{0}; // Z++: ℤ
+    int32_t SUBPLATFORM_COMS2{0}; // Z++: ℤ
+    int32_t SUBPLATFORM_COMN{0}; // Z++: ℤ
+    int32_t SUBPLATFORM_SUB{0}; // Z++: ℤ
+    int32_t SUBPLATFORM_SUB2{0}; // Z++: ℤ
+    int32_t FILES{0}; // Z++: ℤ
+    int32_t LAMPPOST1{0}; // Z++: ℤ
+    int32_t VEG_PALM01{0}; // Z++: ℤ
+    int32_t VEG_PALM02{0}; // Z++: ℤ
+    int32_t VEG_PALM03{0}; // Z++: ℤ
+    int32_t VEG_PALM04{0}; // Z++: ℤ
+    int32_t VEG_PALM05{0}; // Z++: ℤ
+    int32_t VEG_PALM06{0}; // Z++: ℤ
+    int32_t VEG_PALM07{0}; // Z++: ℤ
+    int32_t VEG_PALM08{0}; // Z++: ℤ
+    int32_t MLAMPPOST{0}; // Z++: ℤ
+    int32_t BARRIER1{0}; // Z++: ℤ
+    int32_t LITTLEHA_POLICE{0}; // Z++: ℤ
+    int32_t TELPOLE02{0}; // Z++: ℤ
+    int32_t TRAFFICLIGHT01{0}; // Z++: ℤ
+    int32_t PARKBENCH{0}; // Z++: ℤ
+    int32_t PLC_STINGER{0}; // Z++: ℤ
+    int32_t LIGHTBEAM{0}; // Z++: ℤ
+    int32_t AIRPORTRADAR{0}; // Z++: ℤ
+    int32_t RCBOMB{0}; // Z++: ℤ
+    int32_t JM_SALRADIO{0}; // Z++: ℤ
+    int32_t BEACHBALL{0}; // Z++: ℤ
+    int32_t SANDCASTLE1{0}; // Z++: ℤ
+    int32_t SANDCASTLE2{0}; // Z++: ℤ
+    int32_t JELLYFISH{0}; // Z++: ℤ
+    int32_t JELLYFISH01{0}; // Z++: ℤ
+    int32_t FISH1SINGLE{0}; // Z++: ℤ
+    int32_t FISH1S{0}; // Z++: ℤ
+    int32_t FISH2SINGLE{0}; // Z++: ℤ
+    int32_t FISH2S{0}; // Z++: ℤ
+    int32_t FISH3SINGLE{0}; // Z++: ℤ
+    int32_t FISH3S{0}; // Z++: ℤ
+    int32_t TURTLE{0}; // Z++: ℤ
+    int32_t DOLPHIN{0}; // Z++: ℤ
+    int32_t SHARK{0}; // Z++: ℤ
+    int32_t SUBMARINE{0}; // Z++: ℤ
+    int32_t ESCALATORSTEP{0}; // Z++: ℤ
+    int32_t LOUNGE_WOOD_UP{0}; // Z++: ℤ
+    int32_t LOUNGE_TOWEL_UP{0}; // Z++: ℤ
+    int32_t LOUNGE_WOOD_DN{0}; // Z++: ℤ
+    int32_t LOTION{0}; // Z++: ℤ
+    int32_t BEACHTOWEL01{0}; // Z++: ℤ
+    int32_t BEACHTOWEL02{0}; // Z++: ℤ
+    int32_t BEACHTOWEL03{0}; // Z++: ℤ
+    int32_t BEACHTOWEL04{0}; // Z++: ℤ
+    int32_t BLIMP_NIGHT{0}; // Z++: ℤ
+    int32_t BLIMP_DAY{0}; // Z++: ℤ
+    int32_t YT_MAIN_BODY{0}; // Z++: ℤ
+    int32_t YT_MAIN_BODY2{0}; // Z++: ℤ
+    int32_t SMALL_HELIX{0}; // Z++: ℤ
+    int32_t PT_BARRIER{0}; // Z++: ℤ
+    int32_t SUBWAYGATE{0}; // Z++: ℤ
+    int32_t IN_PMBRIDRAMP3{0}; // Z++: ℤ
+    int32_t IN_PMBRIDG2_UPGS{0}; // Z++: ℤ
+    int32_t IN_PMBRIDGE2{0}; // Z++: ℤ
+    int32_t IN_PMBRIDG1_UPGS{0}; // Z++: ℤ
+    int32_t PM_LIGHTRIG3{0}; // Z++: ℤ
+    int32_t PM_LIGHTRIG1{0}; // Z++: ℤ
+    int32_t IN_PMSCAFF_UPS{0}; // Z++: ℤ
+    int32_t IN_PM_CONCBLOK2{0}; // Z++: ℤ
+    int32_t IN_PMSCAFFH_NS{0}; // Z++: ℤ
+    int32_t IN_PM_GRAVL_JMP{0}; // Z++: ℤ
+    int32_t IN_PM_SCAFFCOVR{0}; // Z++: ℤ
+    int32_t IN_PM_GIRDER2{0}; // Z++: ℤ
+    int32_t IN_PM_SCAFFH_WE{0}; // Z++: ℤ
+    int32_t IN_PM_SIXCONC2{0}; // Z++: ℤ
+    int32_t IN_BMBRIDRAMP3{0}; // Z++: ℤ
+    int32_t IN_BMBRIDG2_UPGS{0}; // Z++: ℤ
+    int32_t IN_BMBRIDGE2{0}; // Z++: ℤ
+    int32_t IN_BMBRIDG1_UPGS{0}; // Z++: ℤ
+    int32_t BM_LIGHTRIG3{0}; // Z++: ℤ
+    int32_t BM_LIGHTRIG1{0}; // Z++: ℤ
+    int32_t IN_BMSCAFF_UPS{0}; // Z++: ℤ
+    int32_t IN_BM_CONCBLOK2{0}; // Z++: ℤ
+    int32_t IN_BMSCAFFH_NS{0}; // Z++: ℤ
+    int32_t IN_BM_GRAVL_JMP{0}; // Z++: ℤ
+    int32_t IN_BM_SCAFFCOVR{0}; // Z++: ℤ
+    int32_t IN_BM_GIRDER2{0}; // Z++: ℤ
+    int32_t IN_BM_SCAFFH_WE{0}; // Z++: ℤ
+    int32_t IN_BM_SIXCONC2{0}; // Z++: ℤ
+    int32_t CRATE_SJL{0}; // Z++: ℤ
+    int32_t DOOR1_SJL{0}; // Z++: ℤ
+    int32_t DOOR2_SJL{0}; // Z++: ℤ
+    int32_t SJL_PORTACABIN{0}; // Z++: ℤ
+    int32_t SJL_PORTACABINRED{0}; // Z++: ℤ
+    int32_t advert_test{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
@@ -281,7 +502,7 @@ struct CPedModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -325,7 +546,7 @@ struct CSimpleModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -391,7 +612,7 @@ struct CTimeModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -468,7 +689,7 @@ struct editableMatCBData_ZppContract {
 };
 // State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
 struct Statics_ZppContract {
-    int32_t unknown{0}; // Z++: ADDRESS
+    int64_t unknown{0}; // Z++: ADDRESS
     std::array<int32_t, 256> ms_vehicleColourTable{}; // Z++: seq RwRGBA  -- bounded array [256]
     size_t ms_vehicleColourTable_len{256u}; // Z++ cardinality #ms_vehicleColourTable
     std::array<int32_t, 2> ms_compsUsed{}; // Z++: seq ℤ  -- bounded array [2]
@@ -486,7 +707,7 @@ struct CWeaponModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹
@@ -555,7 +776,7 @@ struct CXtraCompsModelInfo_ZppContract {
     std::array<uint32_t, 2> m_unk{}; // Z++: seq ℕ  -- bounded array [2]
     size_t m_unk_len{2u}; // Z++ cardinality #m_unk
     int64_t m_nameKey{0}; // Z++: ℕ
-    int32_t m_chunk{0}; // Z++: ADDRESS
+    int64_t m_chunk{0}; // Z++: ADDRESS
     int64_t m_type{0}; // Z++: ℕ
     int64_t m_num2dEffects{0}; // Z++: ℕ
     bool m_bOwnsColModel{false}; // Z++: 𝔹

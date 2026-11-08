@@ -44,7 +44,7 @@ struct CBridge_ZppContract {
 };
 // State Schema Contract from zpp/control/CarAI.zpp
 struct CCarAI_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -90,7 +90,7 @@ struct CCarCtrl_ZppContract {
 };
 // State Schema Contract from zpp/control/Curves.zpp
 struct CCurves_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -174,7 +174,7 @@ struct CGarage_ZppContract {
     float m_fY2{0.0f}; // Z++: ℝ
     float m_fZ1{0.0f}; // Z++: ℝ
     float m_fZ2{0.0f}; // Z++: ℝ
-    int32_t field_96{0}; // Z++: ADDRESS
+    int64_t field_96{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (m_eGarageType >= 0)
             && (m_eGarageState >= 0)
@@ -207,7 +207,7 @@ struct CPedPathNode_ZppContract {
 };
 // State Schema Contract from zpp/control/PathFind.zpp
 struct CPedPath_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -422,14 +422,14 @@ struct CPacManPickup_ZppContract {
 };
 // State Schema Contract from zpp/control/PowerPoints.zpp
 struct CPowerPoint_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/control/PowerPoints.zpp
 struct CPowerPoints_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -513,7 +513,7 @@ struct CRecordDataForGame_ZppContract {
 };
 // State Schema Contract from zpp/control/Remote.zpp
 struct CRemote_ZppContract {
-    int32_t instance_addr{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -686,10 +686,93 @@ struct CReplay_ZppContract {
     int32_t Playback{0}; // Z++: CAddressInReplayBuffer
     uint8_t pBuf0_card{0u}; // Z++: ℙ ℕ
     uint8_t pBuf1_card{0u}; // Z++: Ref[CAutomobile]
+    uint8_t pBuf2_card{0u}; // Z++: ℙ ℕ
+    uint8_t pBuf3_card{0u}; // Z++: Ref[CPlayerPed]
+    uint8_t pBuf4_card{0u}; // Z++: ℙ ℕ
+    uint8_t pBuf5_card{0u}; // Z++: Ref[CCutsceneObject]
+    uint8_t pBuf6_card{0u}; // Z++: ℙ ℕ
+    uint8_t pBuf7_card{0u}; // Z++: Ref[CPtrNode]
+    uint8_t pBuf8_card{0u}; // Z++: ℙ ℕ
+    uint8_t pBuf9_card{0u}; // Z++: Ref[CEntryInfoNode]
+    uint8_t pBuf10_card{0u}; // Z++: ℙ ℕ
+    uint8_t pBuf11_card{0u}; // Z++: Ref[CDummyPed]
+    uint8_t pRadarBlips_card{0u}; // Z++: ℙ ℕ
+    uint8_t pStoredCam_card{0u}; // Z++: ℙ ℕ
+    uint8_t pWorld1_card{0u}; // Z++: ℙ ℕ
+    uint8_t pEmptyReferences_card{0u}; // Z++: Ref[CReference]
+    uint8_t pPedAnims_card{0u}; // Z++: Ref[CStoredDetailedAnimationState]
+    uint8_t pPickups_card{0u}; // Z++: ℙ ℕ
+    uint8_t pReferences_card{0u}; // Z++: ℙ ℕ
+    std::array<uint32_t, 8> BufferStatus{}; // Z++: seq ℕ  -- bounded array [NUM_REPLAYBUFFERS]
+    size_t BufferStatus_len{8u}; // Z++ cardinality #BufferStatus
+    bool bPlayingBackFromFile{false}; // Z++: 𝔹
+    bool bReplayEnabled{false}; // Z++: 𝔹
+    int64_t SlowMotion{0}; // Z++: ℕ
+    int64_t FramesActiveLookAroundCam{0}; // Z++: ℕ
+    bool bDoLoadSceneWhenDone{false}; // Z++: 𝔹
+    uint8_t WorldPtrList_card{0u}; // Z++: Ref[CPtrNode]
+    uint8_t BigBuildingPtrList_card{0u}; // Z++: Ref[CPtrNode]
+    int32_t PlayerWanted{0}; // Z++: CWanted
+    int32_t PlayerInfo{0}; // Z++: CPlayerInfo
+    int64_t Time1{0}; // Z++: ℕ
+    int64_t Time2{0}; // Z++: ℕ
+    int64_t Time3{0}; // Z++: ℕ
+    int64_t Time4{0}; // Z++: ℕ
+    int64_t Frame{0}; // Z++: ℕ
+    int64_t ClockHours{0}; // Z++: ℕ
+    int64_t ClockMinutes{0}; // Z++: ℕ
+    int64_t OldWeatherType{0}; // Z++: ℕ
+    int64_t NewWeatherType{0}; // Z++: ℕ
+    float WeatherInterpolationValue{0.0f}; // Z++: ℝ
+    float TimeStepNonClipped{0.0f}; // Z++: ℝ
+    float TimeStep{0.0f}; // Z++: ℝ
+    float TimeScale{0.0f}; // Z++: ℝ
+    float CameraFixedX{0.0f}; // Z++: ℝ
+    float CameraFixedY{0.0f}; // Z++: ℝ
+    float CameraFixedZ{0.0f}; // Z++: ℝ
+    int32_t OldRadioStation{0}; // Z++: ℤ
+    int32_t CameraMode{0}; // Z++: ℤ
+    bool bAllowLookAroundCam{false}; // Z++: 𝔹
+    float LoadSceneX{0.0f}; // Z++: ℝ
+    float LoadSceneY{0.0f}; // Z++: ℝ
+    float LoadSceneZ{0.0f}; // Z++: ℝ
+    float CameraFocusX{0.0f}; // Z++: ℝ
+    float CameraFocusY{0.0f}; // Z++: ℝ
+    float CameraFocusZ{0.0f}; // Z++: ℝ
+    bool bPlayerInRCBuggy{false}; // Z++: 𝔹
+    float fDistanceLookAroundCam{0.0f}; // Z++: ℝ
+    float fAlphaAngleLookAroundCam{0.0f}; // Z++: ℝ
+    float fBetaAngleLookAroundCam{0.0f}; // Z++: ℝ
+    int32_t ms_nNumCivMale_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumCivFemale_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumCop_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumEmergency_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang1_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang2_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang3_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang4_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang5_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang6_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang7_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang8_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumGang9_Stored{0}; // Z++: ℤ
+    int32_t ms_nNumDummy_Stored{0}; // Z++: ℤ
+    int32_t ms_nTotalCarPassengerPeds_Stored{0}; // Z++: ℤ
+    int32_t ms_nTotalCivPeds_Stored{0}; // Z++: ℤ
+    int32_t ms_nTotalGangPeds_Stored{0}; // Z++: ℤ
+    int32_t ms_nTotalPeds_Stored{0}; // Z++: ℤ
+    int32_t ms_nTotalMissionPeds_Stored{0}; // Z++: ℤ
+    uint8_t pGarages_card{0u}; // Z++: ℙ ℕ
+    uint8_t FireArray_card{0u}; // Z++: Ref[CFire]
+    int64_t NumOfFires{0}; // Z++: ℕ
+    uint8_t paProjectileInfo_card{0u}; // Z++: ℙ ℕ
+    uint8_t paProjectiles_card{0u}; // Z++: ℙ ℕ
+    int64_t CurrArea{0}; // Z++: ℕ
     constexpr bool checkInvariant() const {
         return (door_angles_len == 2u && door_angles.size() == 2u)
             && (wheel_susp_dist_len == 4u && wheel_susp_dist.size() == 4u)
             && (wheel_rotation_len == 4u && wheel_rotation.size() == 4u)
+            && (BufferStatus_len == 8u && BufferStatus.size() == 8u)
             && (hours >= 0)
             && (minutes >= 0)
             && (__align >= 0)
@@ -1241,12 +1324,58 @@ constexpr CCarCtrl_ZppContract apply_CCarCtrl_ToggleScriptControlsMpCarLimit(con
     return post;
 }
 // Delta Operation Schema Contract (ΔCReplay) from zpp/control/Replay.zpp
+constexpr bool op_CReplay_Init(const CReplay_ZppContract& pre, const CReplay_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.pBuf0_card == 0u) && (post.pBuf1_card == 0u) && (post.pBuf2_card == 0u) && (post.pBuf3_card == 0u) && (post.pBuf4_card == 0u) && (post.pBuf5_card == 0u);
+}
+constexpr CReplay_ZppContract apply_CReplay_Init(const CReplay_ZppContract& pre) {
+    CReplay_ZppContract post = pre;
+    post.pBuf0_card = 0u;
+    post.pBuf1_card = 0u;
+    post.pBuf2_card = 0u;
+    post.pBuf3_card = 0u;
+    post.pBuf4_card = 0u;
+    post.pBuf5_card = 0u;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCReplay) from zpp/control/Replay.zpp
+constexpr bool op_CReplay_DisableReplays(const CReplay_ZppContract& pre, const CReplay_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bReplayEnabled == false);
+}
+constexpr CReplay_ZppContract apply_CReplay_DisableReplays(const CReplay_ZppContract& pre) {
+    CReplay_ZppContract post = pre;
+    post.bReplayEnabled = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCReplay) from zpp/control/Replay.zpp
+constexpr bool op_CReplay_EnableReplays(const CReplay_ZppContract& pre, const CReplay_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bReplayEnabled == true);
+}
+constexpr CReplay_ZppContract apply_CReplay_EnableReplays(const CReplay_ZppContract& pre) {
+    CReplay_ZppContract post = pre;
+    post.bReplayEnabled = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCReplay) from zpp/control/Replay.zpp
 constexpr bool op_CReplay_FastForwardToTime(const CReplay_ZppContract& pre, const CReplay_ZppContract& post) {
     return pre.checkInvariant() && post.checkInvariant() && (post.timer == 0);
 }
 constexpr CReplay_ZppContract apply_CReplay_FastForwardToTime(const CReplay_ZppContract& pre) {
     CReplay_ZppContract post = pre;
     post.timer = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCReplay) from zpp/control/Replay.zpp
+constexpr bool op_CReplay_TriggerPlayback(const CReplay_ZppContract& pre, const CReplay_ZppContract& post, float cam_x_in = 2.5f, float cam_y_in = 2.5f, float cam_z_in = 2.5f, int32_t cam_mode_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.CameraFixedX == cam_x_in) && (post.CameraFixedY == cam_y_in) && (post.CameraFixedZ == cam_z_in) && (post.Mode == 1) && (post.FramesActiveLookAroundCam == 0) && (post.CameraMode == (int32_t)cam_mode_in);
+}
+constexpr CReplay_ZppContract apply_CReplay_TriggerPlayback(const CReplay_ZppContract& pre, float cam_x_in = 2.5f, float cam_y_in = 2.5f, float cam_z_in = 2.5f, int32_t cam_mode_in = 25) {
+    CReplay_ZppContract post = pre;
+    post.CameraFixedX = cam_x_in;
+    post.CameraFixedY = cam_y_in;
+    post.CameraFixedZ = cam_z_in;
+    post.Mode = 1;
+    post.FramesActiveLookAroundCam = 0;
+    post.CameraMode = (int32_t)cam_mode_in;
     return post;
 }
 // Delta Operation Schema Contract (ΔCRestart) from zpp/control/Restart.zpp
@@ -1849,6 +1978,69 @@ constexpr bool verify_control_zpp_invariants() {
     }
     {
         CReplay_ZppContract pre{};
+        pre.pBuf0_card = 1u;
+        pre.pBuf1_card = 1u;
+        pre.pBuf2_card = 1u;
+        pre.pBuf3_card = 1u;
+        pre.pBuf4_card = 1u;
+        pre.pBuf5_card = 1u;
+        const auto post = apply_CReplay_Init(pre);
+        if (!op_CReplay_Init(pre, post)) return false;
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.pBuf0_card = 1u;
+            if (op_CReplay_Init(pre, badPost)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.pBuf1_card = 1u;
+            if (op_CReplay_Init(pre, badPost)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.pBuf2_card = 1u;
+            if (op_CReplay_Init(pre, badPost)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.pBuf3_card = 1u;
+            if (op_CReplay_Init(pre, badPost)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.pBuf4_card = 1u;
+            if (op_CReplay_Init(pre, badPost)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.pBuf5_card = 1u;
+            if (op_CReplay_Init(pre, badPost)) return false;
+        }
+    }
+    {
+        CReplay_ZppContract pre{};
+        pre.bReplayEnabled = true;
+        const auto post = apply_CReplay_DisableReplays(pre);
+        if (!op_CReplay_DisableReplays(pre, post)) return false;
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.bReplayEnabled = true;
+            if (op_CReplay_DisableReplays(pre, badPost)) return false;
+        }
+    }
+    {
+        CReplay_ZppContract pre{};
+        pre.bReplayEnabled = false;
+        const auto post = apply_CReplay_EnableReplays(pre);
+        if (!op_CReplay_EnableReplays(pre, post)) return false;
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.bReplayEnabled = false;
+            if (op_CReplay_EnableReplays(pre, badPost)) return false;
+        }
+    }
+    {
+        CReplay_ZppContract pre{};
         pre.timer = 1;
         const auto post = apply_CReplay_FastForwardToTime(pre);
         if (!op_CReplay_FastForwardToTime(pre, post)) return false;
@@ -1856,6 +2048,51 @@ constexpr bool verify_control_zpp_invariants() {
             CReplay_ZppContract badPost = post;
             badPost.timer = 1;
             if (op_CReplay_FastForwardToTime(pre, badPost)) return false;
+        }
+    }
+    {
+        CReplay_ZppContract pre{};
+        const float cam_x_in = 2.5f;
+        const float cam_y_in = 2.5f;
+        const float cam_z_in = 2.5f;
+        const int32_t cam_mode_in = 25;
+        pre.CameraFixedX = 0.0f;
+        pre.CameraFixedY = 0.0f;
+        pre.CameraFixedZ = 0.0f;
+        pre.Mode = 0;
+        pre.FramesActiveLookAroundCam = 1;
+        pre.CameraMode = 0;
+        const auto post = apply_CReplay_TriggerPlayback(pre, cam_x_in, cam_y_in, cam_z_in, cam_mode_in);
+        if (!op_CReplay_TriggerPlayback(pre, post, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.CameraFixedX = cam_x_in + 1.0f;
+            if (op_CReplay_TriggerPlayback(pre, badPost, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.CameraFixedY = cam_y_in + 1.0f;
+            if (op_CReplay_TriggerPlayback(pre, badPost, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.CameraFixedZ = cam_z_in + 1.0f;
+            if (op_CReplay_TriggerPlayback(pre, badPost, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.Mode = 0;
+            if (op_CReplay_TriggerPlayback(pre, badPost, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.FramesActiveLookAroundCam = 1;
+            if (op_CReplay_TriggerPlayback(pre, badPost, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
+        }
+        {
+            CReplay_ZppContract badPost = post;
+            badPost.CameraMode = (int32_t)(cam_mode_in + 1);
+            if (op_CReplay_TriggerPlayback(pre, badPost, cam_x_in, cam_y_in, cam_z_in, cam_mode_in)) return false;
         }
     }
     {
