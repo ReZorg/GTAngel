@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GTANGEL_ZPP_RW_SPEC_GUARD
 #define GTANGEL_ZPP_RW_SPEC_GUARD
 #include <array>
@@ -12,11 +13,11 @@ namespace zpp_rw_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 395;
 static constexpr int kZppEnumCount   = 4;
-// From zpp/rw/MemoryHeap.zpp
+// Free Type from zpp/rw/MemoryHeap.zpp
 enum class MemoryHeap_Enum_1 : int32_t { MEMID_FREE_v = 0, MEMID_GAME_v = 1, MEMID_WORLD_v = 2, MEMID_ANIMATION_v = 3, MEMID_POOLS_v = 4, MEMID_DEF_MODELS_v = 5, MEMID_STREAM_v = 6, MEMID_STREAM_MODELS_v = 7, MEMID_STREAM_LODS_v = 8, MEMID_STREAM_TEXUTRES_v = 9, MEMID_STREAM_COLLISION_v = 10, MEMID_STREAM_ANIMATION_v = 11, MEMID_TEXTURES_v = 12, MEMID_COLLISION_v = 13, MEMID_PRE_ALLOC_v = 14, MEMID_GAME_PROCESS_v = 15, MEMID_SCRIPT_v = 16, MEMID_CARS_v = 17, MEMID_RENDER_v = 18, MEMID_PED_ATTR_v = 19, NUM_MEMIDS_v = 20, NUM_FIXED_MEMBLOCKS_v = 6 };
-// From zpp/rw/MemoryHeap.zpp
+// Free Type from zpp/rw/MemoryHeap.zpp
 enum class MemoryHeap_Enum_2 : int32_t { MEMID_FREE_v = 0, MEMID_GAME_v = 1, MEMID_WORLD_v = 2, MEMID_ANIMATION_v = 3, MEMID_POOLS_v = 4, MEMID_DEF_MODELS_v = 5, MEMID_STREAM_v = 6, MEMID_STREAM_MODELS_v = 7, MEMID_STREAM_TEXUTRES_v = 8, MEMID_TEXTURES_v = 9, MEMID_COLLISION_v = 10, MEMID_RENDERLIST_v = 11, MEMID_GAME_PROCESS_v = 12, MEMID_SCRIPT_v = 13, MEMID_CARS_v = 14, MEMID_RENDER_v = 15, MEMID_FRONTEND_v = 17, NUM_MEMIDS_v = 18, NUM_FIXED_MEMBLOCKS_v = 6 };
-// From zpp/rw/VisibilityPlugins.zpp
+// Free Type from zpp/rw/VisibilityPlugins.zpp
 enum class VisibilityPlugins_Enum_1 : int32_t { ID_VISIBILITYATOMIC_v = 0, ID_VISIBILITYCLUMP_v = 1, ID_VISIBILITYFRAME_v = 2 };
 // State Schema Contract from zpp/rw/ClumpRead.zpp
 struct rpGeometryList_ZppContract {
@@ -37,10 +38,12 @@ struct LightsModuleState_ZppContract {
 };
 // State Schema Contract from zpp/rw/MemoryHeap.zpp
 struct CStack_ZppContract {
-    int32_t values{0}; // Z++: seq T  -- bounded array [N]
+    std::array<int32_t, 8> values{}; // Z++: seq T  -- bounded array [N]
+    size_t values_len{8u}; // Z++ cardinality #values
     int64_t sp{0}; // Z++: ℕ
     constexpr bool checkInvariant() const {
-        return (sp >= 0);
+        return (values_len == 8u && values.size() == 8u)
+            && (sp >= 0);
     }
 };
 // State Schema Contract from zpp/rw/MemoryHeap.zpp
@@ -80,13 +83,103 @@ struct MemoryMgrModuleState_ZppContract {
             && (source_lines == 142);
     }
 };
+// Operation Schema Contract (ΔCStack) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_CStack_CStack(CStack_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCStack) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_CStack_pop_2(CStack_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_HeapBlockDesc_GetNextConsecutive(HeapBlockDesc_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_HeapBlockDesc_GetDataPointer_2(HeapBlockDesc_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_HeapBlockDesc_RemoveHeapFreeBlock_3(HeapBlockDesc_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_HeapBlockDesc_InsertHeapFreeBlock_4(HeapBlockDesc_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
 constexpr bool verify_rw_zpp_invariants() {
-    if (!rpGeometryList_ZppContract{}.checkInvariant()) return false;
-    if (!LightsModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!CStack_ZppContract{}.checkInvariant()) return false;
-    if (!HeapBlockDesc_ZppContract{}.checkInvariant()) return false;
-    if (!CommonSize_ZppContract{}.checkInvariant()) return false;
-    if (!MemoryMgrModuleState_ZppContract{}.checkInvariant()) return false;
+    {
+        rpGeometryList_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        rpGeometryList_ZppContract bad{};
+        bad.geometries_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        LightsModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        LightsModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CStack_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CStack_ZppContract bad{};
+        bad.values_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        HeapBlockDesc_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        HeapBlockDesc_ZppContract bad{};
+        bad.m_size = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CommonSize_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CommonSize_ZppContract bad{};
+        bad.m_size = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        MemoryMgrModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        MemoryMgrModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CStack_ZppContract st{};
+        if (!op_CStack_CStack(st)) return false;
+    }
+    {
+        CStack_ZppContract st{};
+        if (!op_CStack_pop_2(st)) return false;
+    }
+    {
+        HeapBlockDesc_ZppContract st{};
+        if (!op_HeapBlockDesc_GetNextConsecutive(st)) return false;
+    }
+    {
+        HeapBlockDesc_ZppContract st{};
+        if (!op_HeapBlockDesc_GetDataPointer_2(st)) return false;
+    }
+    {
+        HeapBlockDesc_ZppContract st{};
+        if (!op_HeapBlockDesc_RemoveHeapFreeBlock_3(st)) return false;
+    }
+    {
+        HeapBlockDesc_ZppContract st{};
+        if (!op_HeapBlockDesc_InsertHeapFreeBlock_4(st)) return false;
+    }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_rw_zpp_invariants(), "Z++ formal contract invariant failed for rw");

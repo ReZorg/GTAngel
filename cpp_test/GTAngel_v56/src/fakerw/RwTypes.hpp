@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GTANGEL_ZPP_FAKERW_SPEC_GUARD
 #define GTANGEL_ZPP_FAKERW_SPEC_GUARD
 #include <array>
@@ -12,14 +13,18 @@ namespace zpp_fakerw_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 146;
 static constexpr int kZppEnumCount   = 31;
-// From zpp/fakerw/rphanim.zpp
+// Free Type from zpp/fakerw/rphanim.zpp
 enum class RpHAnimHierarchyFlag : int32_t { rpHANIMHIERARCHYSUBHIERARCHY_v = 0, rpHANIMHIERARCHYNOMATRICES_v = 1, rpHANIMHIERARCHYUPDATEMODELLINGMATRICES_v = 2, rpHANIMHIERARCHYUPDATELTMS_v = 3, rpHANIMHIERARCHYLOCALSPACEMATRICES_v = 4 };
-// From zpp/fakerw/rpmatfx.zpp
+// Free Type from zpp/fakerw/rpmatfx.zpp
 enum class RpMatFXMaterialFlags : int32_t { rpMATFXEFFECTNULL_v = 0, rpMATFXEFFECTBUMPMAP_v = 1, rpMATFXEFFECTENVMAP_v = 2, rpMATFXEFFECTBUMPENVMAP_v = 3, rpMATFXEFFECTDUAL_v = 4, rpMATFXEFFECTMAX_v = 5, rpMATFXNUMEFFECTS_v = 6 };
-// From zpp/fakerw/rpworld.zpp
+// Free Type from zpp/fakerw/rpworld.zpp
 enum class RpLightType : int32_t { rpNALIGHTTYPE_v = 0, rpLIGHTDIRECTIONAL_v = 1, rpLIGHTAMBIENT_v = 2, rpLIGHTPOINT_v = 128, rpLIGHTSPOT_v = 129, rpLIGHTSPOTSOFT_v = 130 };
-// From zpp/fakerw/rpworld.zpp
+// Free Type from zpp/fakerw/rpworld.zpp
 enum class RpLightFlag : int32_t { rpLIGHTLIGHTATOMICS_v = 1, rpLIGHTLIGHTWORLD_v = 2 };
+// Free Type from zpp/fakerw/rpworld.zpp
+enum class RpGeometryFlag : int32_t { rpGEOMETRYTRISTRIP_v = 0, rpGEOMETRYPOSITIONS_v = 1, rpGEOMETRYTEXTURED_v = 2, rpGEOMETRYPRELIT_v = 3, rpGEOMETRYNORMALS_v = 4, rpGEOMETRYLIGHT_v = 5, rpGEOMETRYMODULATEMATERIALCOLOR_v = 6, rpGEOMETRYTEXTURED2_v = 7, rpGEOMETRYNATIVE_v = 8, rpGEOMETRYNATIVEINSTANCE_v = 9, rpGEOMETRYFLAGSMASK_v = 255, rpGEOMETRYNATIVEFLAGSMASK_v = 251658240 };
+// Free Type from zpp/fakerw/rpworld.zpp
+enum class RpGeometryLockMode : int32_t { rpGEOMETRYLOCKPOLYGONS_v = 0, rpGEOMETRYLOCKVERTICES_v = 1, rpGEOMETRYLOCKNORMALS_v = 2, rpGEOMETRYLOCKPRELIGHT_v = 3, rpGEOMETRYLOCKTEXCOORDS_v = 4, rpGEOMETRYLOCKTEXCOORDS1_v = 5, rpGEOMETRYLOCKTEXCOORDS2_v = 6, rpGEOMETRYLOCKTEXCOORDS3_v = 7, rpGEOMETRYLOCKTEXCOORDS4_v = 8, rpGEOMETRYLOCKTEXCOORDS5_v = 9, rpGEOMETRYLOCKTEXCOORDS6_v = 10, rpGEOMETRYLOCKTEXCOORDS7_v = 11, rpGEOMETRYLOCKTEXCOORDS8_v = 12, rpGEOMETRYLOCKTEXCOORDSALL_v = 13, rpGEOMETRYLOCKALL_v = 14 };
 // State Schema Contract from zpp/fakerw/fake.zpp
 struct fakeModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -78,12 +83,48 @@ struct rtbmpModuleState_ZppContract {
     }
 };
 constexpr bool verify_fakerw_zpp_invariants() {
-    if (!fakeModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!rpanisotModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!RpHAnimStdKeyFrame_ZppContract{}.checkInvariant()) return false;
-    if (!RpHAnimStdInterpFrame_ZppContract{}.checkInvariant()) return false;
-    if (!rpmatfxModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!rtbmpModuleState_ZppContract{}.checkInvariant()) return false;
+    {
+        fakeModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        fakeModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        rpanisotModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        rpanisotModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RpHAnimStdKeyFrame_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RpHAnimStdKeyFrame_ZppContract bad{};
+        bad.prevFrame_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RpHAnimStdInterpFrame_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RpHAnimStdInterpFrame_ZppContract bad{};
+        bad.keyFrame1_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        rpmatfxModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        rpmatfxModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        rtbmpModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        rtbmpModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_fakerw_zpp_invariants(), "Z++ formal contract invariant failed for fakerw");

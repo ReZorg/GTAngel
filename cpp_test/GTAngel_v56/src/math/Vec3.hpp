@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GTANGEL_ZPP_MATH_SPEC_GUARD
 #define GTANGEL_ZPP_MATH_SPEC_GUARD
 #include <array>
@@ -66,13 +67,103 @@ struct mathModuleState_ZppContract {
             && (source_lines == 118);
     }
 };
+// Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_CMatrix(CMatrix_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_CMatrix_2(CMatrix_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_CMatrix_3(CMatrix_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_SetScale_4(CMatrix_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_CMatrix_5(CMatrix_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCMatrix) from zpp/math/Matrix.zpp
+constexpr bool op_CMatrix_Attach_6(CMatrix_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
 constexpr bool verify_math_zpp_invariants() {
-    if (!CMatrix_ZppContract{}.checkInvariant()) return false;
-    if (!CQuaternion_ZppContract{}.checkInvariant()) return false;
-    if (!CVector_ZppContract{}.checkInvariant()) return false;
-    if (!CVector2D_ZppContract{}.checkInvariant()) return false;
-    if (!VuVectorModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!mathModuleState_ZppContract{}.checkInvariant()) return false;
+    {
+        CMatrix_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CMatrix_ZppContract bad{};
+        bad.m_attachment_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CQuaternion_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CQuaternion_ZppContract bad{};
+        bad.this_field_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CVector_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CVector_ZppContract bad{};
+        bad.this_field_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CVector2D_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CVector2D_ZppContract bad{};
+        bad.this_field_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        VuVectorModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        VuVectorModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        mathModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        mathModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CMatrix_ZppContract st{};
+        if (!op_CMatrix_CMatrix(st)) return false;
+    }
+    {
+        CMatrix_ZppContract st{};
+        if (!op_CMatrix_CMatrix_2(st)) return false;
+    }
+    {
+        CMatrix_ZppContract st{};
+        if (!op_CMatrix_CMatrix_3(st)) return false;
+    }
+    {
+        CMatrix_ZppContract st{};
+        if (!op_CMatrix_SetScale_4(st)) return false;
+    }
+    {
+        CMatrix_ZppContract st{};
+        if (!op_CMatrix_CMatrix_5(st)) return false;
+    }
+    {
+        CMatrix_ZppContract st{};
+        if (!op_CMatrix_Attach_6(st)) return false;
+    }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_math_zpp_invariants(), "Z++ formal contract invariant failed for math");

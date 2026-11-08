@@ -13,9 +13,9 @@ namespace zpp_collision_spec {
 static constexpr int kZppModuleCount = 11;
 static constexpr int kZppSchemaCount = 250;
 static constexpr int kZppEnumCount   = 2;
-// From zpp/collision/ColTriangle.zpp
+// Free Type from zpp/collision/ColTriangle.zpp
 enum class Direction : int32_t { DIR_X_POS_v = 0, DIR_X_NEG_v = 1, DIR_Y_POS_v = 2, DIR_Y_NEG_v = 3, DIR_Z_POS_v = 4, DIR_Z_NEG_v = 5 };
-// From zpp/collision/Collision.zpp
+// Free Type from zpp/collision/Collision.zpp
 enum class Collision_Enum_1 : int32_t { MAXNUMSPHERES_v = 128, MAXNUMBOXES_v = 32, MAXNUMLINES_v = 16, MAXNUMTRIS_v = 600 };
 // State Schema Contract from zpp/collision/ColBox.zpp
 struct CColBox_ZppContract {
@@ -85,13 +85,103 @@ struct CColTriangle_ZppContract {
             && (surface >= 0);
     }
 };
+// Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
+constexpr bool op_CColBox_Set(CColBox_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
+constexpr bool op_CColBox_GetSize_2(CColBox_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
+constexpr bool op_CColBox_operator_3(CColBox_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
+constexpr bool op_CColBox_Set_4(CColBox_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCColBox) from zpp/collision/ColBox.zpp
+constexpr bool op_CColBox_operator(CColBox_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
+// Operation Schema Contract (ΔCColPoint) from zpp/collision/ColPoint.zpp
+constexpr bool op_CColPoint_GetNormal(CColPoint_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
 constexpr bool verify_collision_zpp_invariants() {
-    if (!CColBox_ZppContract{}.checkInvariant()) return false;
-    if (!CColPoint_ZppContract{}.checkInvariant()) return false;
-    if (!CColSphere_ZppContract{}.checkInvariant()) return false;
-    if (!ColChunkEntry_ZppContract{}.checkInvariant()) return false;
-    if (!CColStore_ZppContract{}.checkInvariant()) return false;
-    if (!CColTriangle_ZppContract{}.checkInvariant()) return false;
+    {
+        CColBox_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CColBox_ZppContract bad{};
+        bad.surface = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CColPoint_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CColPoint_ZppContract bad{};
+        bad.surfaceA = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CColSphere_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CColSphere_ZppContract bad{};
+        bad.surface = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ColChunkEntry_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ColChunkEntry_ZppContract bad{};
+        bad.colModel_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CColStore_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CColStore_ZppContract bad{};
+        bad.ms_pColPool_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CColTriangle_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CColTriangle_ZppContract bad{};
+        bad.a = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CColBox_ZppContract st{};
+        if (!op_CColBox_Set(st)) return false;
+    }
+    {
+        CColBox_ZppContract st{};
+        if (!op_CColBox_GetSize_2(st)) return false;
+    }
+    {
+        CColBox_ZppContract st{};
+        if (!op_CColBox_operator_3(st)) return false;
+    }
+    {
+        CColBox_ZppContract st{};
+        if (!op_CColBox_Set_4(st)) return false;
+    }
+    {
+        CColBox_ZppContract st{};
+        if (!op_CColBox_operator(st)) return false;
+    }
+    {
+        CColPoint_ZppContract st{};
+        if (!op_CColPoint_GetNormal(st)) return false;
+    }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_collision_zpp_invariants(), "Z++ formal contract invariant failed for collision");

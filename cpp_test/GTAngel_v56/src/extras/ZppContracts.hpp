@@ -13,14 +13,18 @@ namespace zpp_extras_spec {
 static constexpr int kZppModuleCount = 12;
 static constexpr int kZppSchemaCount = 568;
 static constexpr int kZppEnumCount   = 11;
-// From zpp/extras/custompipes.zpp
+// Free Type from zpp/extras/custompipes.zpp
 enum class custompipes_Enum_1 : int32_t { VEHICLEPIPE_PSP_v = 0, VEHICLEPIPE_PS2_v = 1, VEHICLEPIPE_MOBILE_v = 2, VEHICLEPIPE_NEO_v = -1 };
-// From zpp/extras/custompipes.zpp
+// Free Type from zpp/extras/custompipes.zpp
 enum class custompipes_Enum_2 : int32_t { WORLDPIPE_PSP_v = 0, WORLDPIPE_PS2_v = 1, WORLDPIPE_MOBILE_v = 2 };
-// From zpp/extras/custompipes.zpp
+// Free Type from zpp/extras/custompipes.zpp
 enum class custompipes_Enum_3 : int32_t { VEHICLEPIPE_MATFX_v = 0, VEHICLEPIPE_NEO_v = 1 };
-// From zpp/extras/custompipes_d3d9.zpp
+// Free Type from zpp/extras/custompipes_d3d9.zpp
 enum class custompipes_d3d9_Enum_1 : int32_t { VSLOC_boneMatrices_v = 0, VSLOC_viewVec_v = 1, VSLOC_rampStart_v = 2, VSLOC_rampEnd_v = 3, VSLOC_rimData_v = 4, VSLOC_eye_v = 5, VSLOC_reflProps_v = 6, VSLOC_specLights_v = 7, VSLOC_emissive_v = 8, VSLOC_ambient_v = 9, VSLOC_viewMat_v = 10, VSLOC_texMat_v = 11, PSLOC_colorscale_v = 1, PSLOC_shininess_v = 2, PSLOC_skyTop_v = 3, PSLOC_skyBot_v = 4 };
+// Free Type from zpp/extras/custompipes_d3d9.zpp
+enum class custompipes_d3d9_Enum_2 : int32_t { VSLOC_boneMatrices_v = 0, VSLOC_viewVec_v = 1, VSLOC_rampStart_v = 2, VSLOC_rampEnd_v = 3, VSLOC_rimData_v = 4, VSLOC_eye_v = 5, VSLOC_reflProps_v = 6, VSLOC_specLights_v = 7 };
+// Free Type from zpp/extras/custompipes_d3d9.zpp
+enum class custompipes_d3d9_Enum_3 : int32_t { VSLOC_boneMatrices_v = 0, VSLOC_viewVec_v = 1, VSLOC_rampStart_v = 2, VSLOC_rampEnd_v = 3, VSLOC_rimData_v = 4, VSLOC_eye_v = 5, VSLOC_reflProps_v = 6, VSLOC_specLights_v = 7 };
 // State Schema Contract from zpp/extras/GitSHA1.zpp
 struct GitSHA1ModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -74,13 +78,58 @@ struct VsLight_ZppContract {
         return (pos_len == 4u && pos.size() == 4u);
     }
 };
+// Operation Schema Contract (ΔInterpolatedValue) from zpp/extras/custompipes.zpp
+constexpr bool op_InterpolatedValue_Read(InterpolatedValue_ZppContract& state) {
+    if (!state.checkInvariant()) return false;
+    return state.checkInvariant();
+}
 constexpr bool verify_extras_zpp_invariants() {
-    if (!GitSHA1ModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!arrowModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!cursorModuleState_ZppContract{}.checkInvariant()) return false;
-    if (!CustomMatExt_ZppContract{}.checkInvariant()) return false;
-    if (!InterpolatedValue_ZppContract{}.checkInvariant()) return false;
-    if (!VsLight_ZppContract{}.checkInvariant()) return false;
+    {
+        GitSHA1ModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        GitSHA1ModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        arrowModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        arrowModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cursorModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cursorModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CustomMatExt_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CustomMatExt_ZppContract bad{};
+        bad.glossTex_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        InterpolatedValue_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        InterpolatedValue_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        VsLight_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        VsLight_ZppContract bad{};
+        bad.pos_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        InterpolatedValue_ZppContract st{};
+        if (!op_InterpolatedValue_Read(st)) return false;
+    }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
 static_assert(verify_extras_zpp_invariants(), "Z++ formal contract invariant failed for extras");

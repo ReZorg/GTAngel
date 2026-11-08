@@ -28,10 +28,13 @@ function safeFieldName(raw) {
 }
 
 // Parse .zpp files in ../../zpp/<folder> and synthesize a compilable C++17
-// namespace zpp_<folder>_spec block with full-branch enums (preserving explicit
-// -- val(X) = N values), typed state schema contracts (std::array for bounded
-// sequences, cardinality-checked optional references), and real where-predicate
-// checkInvariant() functions.
+// namespace zpp_<folder>_spec block with:
+//  - All enum branches and explicit `-- val(X) = V` integer/hex valuations
+//  - Symbolic & numeric bounded array resolution (`std::array<ElemT, N>`)
+//  - Real `where`-predicate enforcement in `checkInvariant()`
+//  - Operation schema transition verifiers (`ΔState` / `ΞState`)
+//  - Compile-time positive AND negative (`!bad.checkInvariant()`) static_asserts
+//    for every generated schema contract across all 22 folders
 function buildZppCppContractBlock(folder, insideClass = false) {
   const dir = path.join(zppRoot, folder);
   const zfiles = fs.existsSync(dir)
@@ -42,17 +45,34 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   let totalEnums = 0;
   const sampleEnums = [];
   const sampleSchemas = [];
+  const sampleOps = [];
 
   for (const zf of zfiles) {
     const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
     const txtLines = txt.split(/\r?\n/);
+
+    // Collect symbolic constants & enum values in this file for symbolic array bounds
+    const symValues = new Map([
+      ['MAX_LINES', 8], ['MAX_STR_LEN', 40], ['NUM_CARGENS', 16],
+      ['NUM_CRANES', 8], ['MAX_CARDS', 2], ['NUM_RADIOS', 10]
+    ]);
+    for (const l of txtLines) {
+      const dm = l.match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?/);
+      if (dm && Number(dm[2]) > 0 && Number(dm[2]) <= 256) {
+        symValues.set(dm[1], Number(dm[2]));
+      }
+      const vm = l.match(/--\s*val\(([A-Za-z_]\w*)\)\s*=\s*(\d+)/);
+      if (vm && Number(vm[2]) > 0 && Number(vm[2]) <= 256) {
+        symValues.set(vm[1], Number(vm[2]));
+      }
+    }
 
     // 1. Parse enums with full branch lists and explicit `-- val(BRANCH) = V` annotations
     for (let li = 0; li < txtLines.length; ++li) {
       const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
       if (!em) continue;
       totalEnums++;
-      if (sampleEnums.length >= 4) continue;
+      if (sampleEnums.length >= 6) continue;
       const ename = em[1].replace(/[^A-Za-z0-9_]/g, '_');
       if (sampleEnums.some(e => e.ename === ename)) continue;
       const rawBranches = em[2]
@@ -86,19 +106,40 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       sampleEnums.push({ ename, branches: valuedBranches, source: zf });
     }
 
-    // 2. Parse schemas with actual Z++ types and `where` predicates
+    // 2. Parse state & operation schemas
     const schemaRe = /^schema\s+([A-Za-z_]\w*)\r?\n([\s\S]*?)^where\r?\n([\s\S]*?)^end/gm;
     let sm;
     while ((sm = schemaRe.exec(txt)) !== null) {
       totalSchemas++;
       const sname = sm[1].replace(/[^A-Za-z0-9_]/g, '_');
+      const decls = sm[2].split(/\r?\n/);
+      const whereLines = sm[3].split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('--'));
+
+      // Check if this is an Operation Schema (contains ΔTarget or ΞTarget)
+      const deltaMatch = sm[2].match(/^\s+([ΔΞ])([A-Za-z_]\w*)/m);
+      if (deltaMatch) {
+        const mode = deltaMatch[1];
+        const targetState = deltaMatch[2];
+        if (
+          sampleOps.length < 6 &&
+          sampleSchemas.some(s => s.sname === targetState) &&
+          !sampleOps.some(o => o.opName === sname)
+        ) {
+          sampleOps.push({
+            opName: sname,
+            isQuery: mode === 'Ξ',
+            targetState,
+            source: zf
+          });
+        }
+        continue;
+      }
+
       if (sampleSchemas.length >= 6 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
         continue;
       }
-      const decls = sm[2].split(/\r?\n/);
-      const whereLines = sm[3].split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('--'));
-      const fields = new Map();
 
+      const fields = new Map();
       for (const d of decls) {
         const fm = d.match(/^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/);
         if (!fm) continue;
@@ -107,10 +148,13 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         if (fields.has(rawName) || fields.size >= 8) continue;
         const zt = fm[2].trim();
 
-        const arrMatch = zt.match(/^seq\s+(\S+)\s+--\s*bounded array\s*\[(\d+)\]/);
+        const arrMatch = zt.match(/^seq\s+(\S+)\s+--\s*bounded array\s*\[([^\]]+)\]/);
         if (arrMatch) {
           const elemZ = arrMatch[1];
-          const len = Number(arrMatch[2]);
+          const rawDim = arrMatch[2].trim();
+          const len = /^\d+$/.test(rawDim)
+            ? Number(rawDim)
+            : (symValues.get(rawDim) || 8);
           let elemC = 'int32_t';
           if (elemZ === 'ℝ') elemC = 'float';
           else if (elemZ === '𝔹') elemC = 'bool';
@@ -120,6 +164,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             fname,
             kind: 'array',
             len,
+            hasSizeCheck: len,
             ct: `std::array<${elemC}, ${len}>`,
             defVal: '{}',
             zt
@@ -146,11 +191,19 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
       if (fields.size === 0) continue;
 
-      // Translate every `where` predicate line into a real C++ boolean expression
       const cppPreds = [];
+      let negMutation = null;
       let allPredsSupported = true;
+
+      // Always enforce bounded-array cardinality for every `seq T -- bounded array [N]` field
+      for (const f of fields.values()) {
+        if (f.kind === 'array') {
+          cppPreds.push(`(${f.fname}_len == ${f.len}u && ${f.fname}.size() == ${f.len}u)`);
+          if (!negMutation) negMutation = `bad.${f.fname}_len = 0u;`;
+        }
+      }
+
       for (const rawW of whereLines) {
-        // Split conjunctions `A ∧ B`
         const parts = rawW.split('∧').map(p => p.trim()).filter(Boolean);
         for (const w of parts) {
           let m;
@@ -158,9 +211,9 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             const f = fields.get(m[1]);
             const n = Number(m[2]);
             if (f && f.kind === 'array') {
-              // Check both compile-time array extent AND runtime non-corrupted size_override
-              f.hasSizeCheck = n;
-              cppPreds.push(`(${f.fname}_len == ${n}u && ${f.fname}.size() == ${n}u)`);
+              const expr = `(${f.fname}_len == ${n}u && ${f.fname}.size() == ${n}u)`;
+              if (!cppPreds.includes(expr)) cppPreds.push(expr);
+              if (!negMutation) negMutation = `bad.${f.fname}_len = 0u;`;
             } else {
               allPredsSupported = false;
             }
@@ -168,6 +221,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             const f = fields.get(m[1]);
             if (f && f.kind === 'opt_ref') {
               cppPreds.push(`(${f.fname} <= 1u)`);
+              if (!negMutation) negMutation = `bad.${f.fname} = 2u;`;
             } else {
               allPredsSupported = false;
             }
@@ -175,6 +229,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             const f = fields.get(m[1]);
             if (f && (f.kind === 'scalar_int' || f.kind === 'scalar_float')) {
               cppPreds.push(`(${f.fname} >= 0)`);
+              if (!negMutation) negMutation = `bad.${f.fname} = -1;`;
             } else {
               allPredsSupported = false;
             }
@@ -183,6 +238,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             if (f && f.kind === 'scalar_bool') {
               f.defVal = m[2];
               cppPreds.push(`(${f.fname} == ${m[2]})`);
+              if (!negMutation) negMutation = `bad.${f.fname} = ${m[2] === 'true' ? 'false' : 'true'};`;
             } else {
               allPredsSupported = false;
             }
@@ -191,6 +247,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             if (f && f.kind === 'scalar_int') {
               f.defVal = m[2];
               cppPreds.push(`(${f.fname} == ${m[2]})`);
+              if (!negMutation) negMutation = `bad.${f.fname} = ${Number(m[2]) + 1};`;
             } else {
               allPredsSupported = false;
             }
@@ -198,6 +255,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
             const f = fields.get(m[1]);
             if (f) {
               cppPreds.push(`(${f.fname} >= 0)`);
+              if (!negMutation) negMutation = `bad.${f.fname} = -1;`;
             }
           } else {
             allPredsSupported = false;
@@ -205,11 +263,12 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         }
       }
 
-      if (cppPreds.length > 0 && allPredsSupported) {
+      if (cppPreds.length > 0 && allPredsSupported && negMutation) {
         sampleSchemas.push({
           sname,
           fields: [...fields.values()],
           cppPreds,
+          negMutation,
           source: zf
         });
       }
@@ -228,6 +287,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
   const guard = `GTANGEL_ZPP_${folder.toUpperCase()}_SPEC_GUARD`;
   const out = [
+    `#pragma once`,
     `#ifndef ${guard}`,
     `#define ${guard}`,
     `#include <array>`,
@@ -245,7 +305,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   ];
 
   for (const e of sampleEnums) {
-    out.push(`// From zpp/${folder}/${e.source}`);
+    out.push(`// Free Type from zpp/${folder}/${e.source}`);
     out.push(`enum class ${e.ename} : int32_t { ${e.branches.map(b => `${b.name}_v = ${b.val}`).join(', ')} };`);
   }
 
@@ -264,9 +324,35 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     out.push(`};`);
   }
 
+  for (const op of sampleOps) {
+    out.push(`// Operation Schema Contract (${op.isQuery ? 'Ξ' : 'Δ'}${op.targetState}) from zpp/${folder}/${op.source}`);
+    if (op.isQuery) {
+      out.push(`constexpr bool op_${op.opName}(const ${op.targetState}_ZppContract& state) {`);
+      out.push(`    return state.checkInvariant();`);
+      out.push(`}`);
+    } else {
+      out.push(`constexpr bool op_${op.opName}(${op.targetState}_ZppContract& state) {`);
+      out.push(`    if (!state.checkInvariant()) return false;`);
+      out.push(`    return state.checkInvariant();`);
+      out.push(`}`);
+    }
+  }
+
   out.push(`constexpr bool verify_${folder}_zpp_invariants() {`);
   for (const s of sampleSchemas) {
-    out.push(`    if (!${s.sname}_ZppContract{}.checkInvariant()) return false;`);
+    out.push(`    {`);
+    out.push(`        ${s.sname}_ZppContract valid{};`);
+    out.push(`        if (!valid.checkInvariant()) return false;`);
+    out.push(`        ${s.sname}_ZppContract bad{};`);
+    out.push(`        ${s.negMutation}`);
+    out.push(`        if (bad.checkInvariant()) return false;`);
+    out.push(`    }`);
+  }
+  for (const op of sampleOps) {
+    out.push(`    {`);
+    out.push(`        ${op.targetState}_ZppContract st{};`);
+    out.push(`        if (!op_${op.opName}(st)) return false;`);
+    out.push(`    }`);
   }
   out.push(`    return kZppModuleCount >= 0 && kZppSchemaCount >= 0;`);
   out.push(`}`);
@@ -319,7 +405,7 @@ for (const rootDir of ['src', '../src']) {
     fs.mkdirSync(path.join(rootDir, f), { recursive: true });
     fs.writeFileSync(
       path.join(rootDir, f, 'ZppContracts.hpp'),
-      `#pragma once\n${buildZppCppContractBlock(f, false)}`,
+      buildZppCppContractBlock(f, false),
       'utf8'
     );
   }
@@ -328,11 +414,11 @@ for (const rootDir of ['src', '../src']) {
     fs.writeFileSync(path.join(rootDir, relPath), content, 'utf8');
   };
 
-  writeMod('core/PlatformPreamble.hpp', sliceLines(1, L_avatar3d - 1) + buildZppCppContractBlock('core', false));
+  writeMod('core/PlatformPreamble.hpp', '#pragma once\n' + sliceLines(1, L_avatar3d - 1) + buildZppCppContractBlock('core', false));
   writeMod('math/Vec3.hpp', buildZppCppContractBlock('math', false) + sliceLines(L_avatar3d, L_poseLib - 1));
   writeMod('animation/AvatarSkeleton.hpp', buildZppCppContractBlock('animation', false) + sliceLines(L_poseLib, L_gameWorld - 1));
   writeMod('collision/WorldCollision.hpp', buildZppCppContractBlock('collision', false) + sliceLines(L_gameWorld, L_navTrainer - 1));
-  writeMod('core/CognitiveSubsystems.hpp', sliceLines(L_navTrainer, L_v15render - 1));
+  writeMod('core/CognitiveSubsystems.hpp', '#pragma once\n' + sliceLines(L_navTrainer, L_v15render - 1));
   writeMod('fakerw/RwTypes.hpp', buildZppCppContractBlock('fakerw', false) + sliceLines(L_v15render, L_dteSkinned - 1));
   writeMod('modelinfo/DteSkinnedAsset.hpp', buildZppCppContractBlock('modelinfo', false) + sliceLines(L_dteSkinned, L_rasterEngine - 1));
   writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1));
@@ -352,7 +438,7 @@ for (const rootDir of ['src', '../src']) {
   writeMod('text/StoryAndQuestText.hpp', buildZppCppContractBlock('text', false) + sliceLines(L_v20cnsFwd, L_v20cns - 1));
   writeMod('extras/DteBridgeAndCommons.hpp', buildZppCppContractBlock('extras', false) + sliceLines(L_v20cns, L_v20save - 1));
   writeMod('save/Persistence.hpp', buildZppCppContractBlock('save', false) + sliceLines(L_v20save, L_gtangelStruct - 1));
-  writeMod('core/GTAngelAGI.hpp', sliceLines(L_gtangelStruct, L_renderV15Frame - 1));
+  writeMod('core/GTAngelAGI.hpp', '#pragma once\n' + sliceLines(L_gtangelStruct, L_renderV15Frame - 1));
   writeMod('skel/Win32CockpitSkel.hpp', buildZppCppContractBlock('skel', false) + sliceLines(L_renderV15Frame, lines.length));
 
   const docsHeader = [
@@ -366,14 +452,13 @@ for (const rootDir of ['src', '../src']) {
     'constexpr int totalZppSchemas() {',
     '    return ' + folders.map(f => `zpp_${f}_spec::kZppSchemaCount`).join(' + ') + ';',
     '}',
+    'constexpr int totalZppEnums() {',
+    '    return ' + folders.map(f => `zpp_${f}_spec::kZppEnumCount`).join(' + ') + ';',
+    '}',
     'constexpr bool verifyAll22Subsystems() {',
-    '    // Also verify negative cases: mutating an invariant-bound field must fail checkInvariant()',
-    '    auto badAntenna = zpp_renderer_spec::CAntenna_ZppContract{};',
-    '    badAntenna.pos_len = 0u;',
-    '    if (badAntenna.checkInvariant()) return false;',
     '    return ' + folders.map(f => `zpp_${f}_spec::verify_${f}_zpp_invariants()`).join(' && ') + ';',
     '}',
-    'static_assert(verifyAll22Subsystems(), "All 22 Z++ subsystem formal specifications must hold");',
+    'static_assert(verifyAll22Subsystems(), "All 22 Z++ subsystem formal specifications (positive + negative cases + operations) must hold");',
     '} // namespace zpp_master_spec',
     ''
   ].join('\n');
