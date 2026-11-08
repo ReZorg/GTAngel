@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const full = fs.readFileSync('gtangel_agi_v56_full.cpp', 'utf8');
 const lines = full.split(/\r?\n/);
-const zppRoot = path.resolve('../../zpp');
+const zppRoot = path.resolve('../zpp');
 
 function sliceLines(start1, end1) {
   return lines.slice(start1 - 1, end1).join('\n') + '\n';
