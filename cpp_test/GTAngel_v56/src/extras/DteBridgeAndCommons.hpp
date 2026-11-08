@@ -238,6 +238,15 @@ struct INIMap_ZppContract {
     }
 };
 // State Schema Contract from zpp/extras/ini.zpp
+struct PDataType_ZppContract {
+    int32_t underlying_char{0}; // Z++: ℤ
+    int32_t PDATA_UNKNOWN{0}; // Z++: PDATA_NONE__PDATA_COMMENT__PDATA_SECTION__PDATA_KEYVALUE
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/ini.zpp
 struct INIReader_ZppContract {
     int32_t fileReadStream{0}; // Z++: std__ifstream
     int32_t lineData{0}; // Z++: T_LineDataPtr
@@ -293,6 +302,29 @@ struct CPostFX_ZppContract {
     constexpr bool checkInvariant() const {
         return (pFrontBuffer_card <= 1u)
             && (pBackBuffer_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/extras/screendroplets.zpp
+struct Im2DVertexUV2_ZppContract {
+    float x{0.0f}; // Z++: ℝ
+    float y{0.0f}; // Z++: ℝ
+    float z{0.0f}; // Z++: ℝ
+    float q{0.0f}; // Z++: ℝ
+    int64_t r{0}; // Z++: ℕ
+    int64_t g{0}; // Z++: ℕ
+    int64_t b{0}; // Z++: ℕ
+    int64_t a{0}; // Z++: ℕ
+    float u{0.0f}; // Z++: ℝ
+    float v{0.0f}; // Z++: ℝ
+    float u1{0.0f}; // Z++: ℝ
+    float v2{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (r >= 0)
+            && (g >= 0)
+            && (b >= 0)
+            && (a >= 0)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/screendroplets.zpp
@@ -699,6 +731,13 @@ constexpr bool verify_extras_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        PDataType_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        PDataType_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         INIReader_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         INIReader_ZppContract bad{};
@@ -731,6 +770,13 @@ constexpr bool verify_extras_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CPostFX_ZppContract bad{};
         bad.pFrontBuffer_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        Im2DVertexUV2_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Im2DVertexUV2_ZppContract bad{};
+        bad.r = -1;
         if (bad.checkInvariant()) return false;
     }
     {

@@ -18,6 +18,16 @@ struct ZppVec3 {
     constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
     constexpr bool operator!=(const ZppVec3& o) const { return !(*this == o); }
 };
+// State Schema Contract from zpp/leeds/CustomSoundTrack.zpp
+struct cCustomSoundTrack_ZppContract {
+    uint8_t m_pSingleton_card{0u}; // Z++: Ref[cCustomSoundTrack]
+    bool m_bIsPlaying{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_pSingleton_card <= 1u)
+            && (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/leeds/base/memoryManager.zpp
 struct cMemoryManager_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
@@ -128,6 +138,13 @@ constexpr cSmallHeap_ZppContract apply_cSmallHeap_cSmallHeap(const cSmallHeap_Zp
     return post;
 }
 constexpr bool verify_leeds_zpp_invariants() {
+    {
+        cCustomSoundTrack_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cCustomSoundTrack_ZppContract bad{};
+        bad.m_pSingleton_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
     {
         cMemoryManager_ZppContract valid{};
         if (!valid.checkInvariant()) return false;

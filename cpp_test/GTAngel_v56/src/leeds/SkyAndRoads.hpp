@@ -2,7 +2,7 @@
     static constexpr int zpp_leeds_modules() { return zpp_leeds_spec::kZppModuleCount; }
     static constexpr int zpp_leeds_schemas() { return zpp_leeds_spec::kZppSchemaCount; }
     static constexpr bool verifyComponent_leeds_zpp() {
-        return zpp_leeds_spec::verify_leeds_zpp_invariants() && (zpp_leeds_spec::cMemoryManager_ZppContract{}.checkInvariant()) && (zpp_leeds_spec::op_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{}, zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{})));
+        return zpp_leeds_spec::verify_leeds_zpp_invariants() && (zpp_leeds_spec::cCustomSoundTrack_ZppContract{}.checkInvariant()) && (zpp_leeds_spec::op_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{}, zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{})));
     }
     bool verifyLiveWorld_leeds_zpp(const avatar3d::GameWorld& world) const {
         auto h = zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{});
@@ -88,7 +88,7 @@
     }
 
     void buildRoads(const avatar3d::GameWorld& world) {
-        (void)verifyLiveWorld_leeds_zpp(world);
+        if (!verifyLiveWorld_leeds_zpp(world)) return;
         // LW52 (Skidmarks.zpp CSkidmarks): stationary world-space braking tire marks on intersection approaches
         for (float laneZ : {-1.4f, 1.4f}) {
             for (float trackOff : {-0.62f, 0.62f}) {

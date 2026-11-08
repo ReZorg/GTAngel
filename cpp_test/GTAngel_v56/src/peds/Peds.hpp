@@ -15,7 +15,7 @@
     }
     static_assert(verifyComponent_peds_zpp(), "RasterEngine component Z++ binding failed for peds");
     void buildWalkers(const avatar3d::GameWorld& world) {
-        (void)verifyLiveWorld_peds_zpp(world);
+        if (!verifyLiveWorld_peds_zpp(world)) return;
         // Population rendering: compact humanoids (torso + head + legs) so
         // the retina sees real social entities, not empty pillars.
         for (const auto& w : world.walkers) {

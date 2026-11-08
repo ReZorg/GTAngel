@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const full = fs.readFileSync('gtangel_agi_v56_full.cpp', 'utf8');
 const lines = full.split(/\r?\n/);
-const zppRoot = path.resolve('../../zpp');
+const zppRoot = fs.existsSync(path.resolve('../zpp')) ? path.resolve('../zpp') : path.resolve('../../zpp');
 
 function sliceLines(start1, end1) {
   return lines.slice(start1 - 1, end1).join('\n') + '\n';
@@ -48,7 +48,19 @@ const folders = [
 const globalSymValues = new Map();
 const conflictingSyms = new Set();
 const globalRawSchemas = new Map([
-  ['RwV3d', { decls: ['  x : ℝ', '  y : ℝ', '  z : ℝ'], whereLines: [] }]
+  ['RwV3d', { decls: ['  x : ℝ', '  y : ℝ', '  z : ℝ'], whereLines: [] }],
+  ['rw__RWDEVICE__Im2DVertex', {
+    decls: ['  x : ℝ', '  y : ℝ', '  z : ℝ', '  q : ℝ', '  r : ℕ', '  g : ℕ', '  b : ℕ', '  a : ℕ', '  u : ℝ', '  v : ℝ', '  u1 : ℝ'],
+    whereLines: ['r ≥ 0', 'g ≥ 0', 'b ≥ 0', 'a ≥ 0']
+  }],
+  ['base__cSingleton_cCustomSoundTrack_', {
+    decls: ['  m_pSingleton : Ref[cCustomSoundTrack]'],
+    whereLines: ['#m_pSingleton ≤ 1']
+  }],
+  ['char', {
+    decls: ['  underlying_char : ℤ'],
+    whereLines: []
+  }]
 ]);
 
 function recordSymbolValue(map, conflicts, name, val) {
@@ -62,7 +74,7 @@ function recordSymbolValue(map, conflicts, name, val) {
   map.set(name, val);
 }
 
-const srcRefRoot = path.resolve('../../src');
+const srcRefRoot = fs.existsSync(path.resolve('../src')) ? path.resolve('../src') : path.resolve('../../src');
 if (fs.existsSync(srcRefRoot)) {
   const walkSrc = (d) => {
     for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
@@ -664,7 +676,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     const liveWorldLines = [];
     if (folder === 'buildings') {
       liveWorldLines.push(
-        `        if (world.buildings.empty()) return false;`,
         `        for (size_t i = 0; i < world.buildings.size(); ++i) {`,
         `            const auto& b = world.buildings[i];`,
         `            zpp_buildings_spec::CBuilding_ZppContract c{};`,
@@ -678,7 +689,6 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       );
     } else if (folder === 'entities') {
       liveWorldLines.push(
-        `        if (world.pillars.empty()) return false;`,
         `        for (size_t i = 0; i < world.pillars.size(); ++i) {`,
         `            const auto& p = world.pillars[i];`,
         `            zpp_entities_spec::CDummy_ZppContract c{};`,
@@ -923,7 +933,7 @@ const L_v20save        = findLine(l => l === 'namespace v20save {', L_v20cns);
 const L_gtangelStruct  = findLine(l => l === 'struct GTAngelAGI {', L_v20save);
 const L_renderV15Frame = findLine(l => l.startsWith('static void RenderV15Frame('), L_gtangelStruct);
 
-for (const rootDir of ['src', '../src']) {
+for (const rootDir of ['src']) {
   for (const f of folders) {
     fs.mkdirSync(path.join(rootDir, f), { recursive: true });
     fs.writeFileSync(
@@ -986,7 +996,7 @@ for (const rootDir of ['src', '../src']) {
   ].join('\n'));
   writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1) + buildZppCppContractBlock('rw', true));
   const injectLiveCheck = (code, fnDecl, folder) =>
-    code.replace(fnDecl, `${fnDecl}\n        (void)verifyLiveWorld_${folder}_zpp(world);`);
+    code.replace(fnDecl, `${fnDecl}\n        if (!verifyLiveWorld_${folder}_zpp(world)) return;`);
 
   writeMod('leeds/SkyAndRoads.hpp', buildZppCppContractBlock('leeds', true) + injectLiveCheck(sliceLines(L_buildSun, L_buildBuildings - 1), '    void buildRoads(const avatar3d::GameWorld& world) {', 'leeds'));
   writeMod('buildings/Buildings.hpp', buildZppCppContractBlock('buildings', true) + injectLiveCheck(sliceLines(L_buildBuildings, L_buildPillars - 1), '    void buildBuildings(const avatar3d::GameWorld& world) {', 'buildings'));

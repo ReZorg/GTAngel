@@ -14,7 +14,7 @@
     }
     static_assert(verifyComponent_objects_zpp(), "RasterEngine component Z++ binding failed for objects");
     void buildGoal(const avatar3d::GameWorld& world) {
-        (void)verifyLiveWorld_objects_zpp(world);
+        if (!verifyLiveWorld_objects_zpp(world)) return;
         static constexpr int Segments = 16;
         const auto pulseTicks = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();

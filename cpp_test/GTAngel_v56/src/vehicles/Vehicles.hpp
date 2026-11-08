@@ -230,7 +230,7 @@
     // re3 CVehicle family: lane traffic rendered as compact vehicles with
     // spinning wheels, train as linked boxes, heli with rotor disc.
     void buildTraffic(const avatar3d::GameWorld& world) {
-        (void)verifyLiveWorld_vehicles_zpp(world);
+        if (!verifyLiveWorld_vehicles_zpp(world)) return;
         int trafficIndex = 0;
         for (const auto& v : world.traffic) {
             addBlobShadow(v.pos, v.orbitR > 0.0f ? 0.68f : 0.55f); // LW32: ground traffic (heli casts wide)
