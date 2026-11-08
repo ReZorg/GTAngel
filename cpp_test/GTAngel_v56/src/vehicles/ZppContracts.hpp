@@ -25,33 +25,6 @@ enum class Automobile_Enum_4 : int32_t { CAR_DOOR_FLAG_UNKNOWN_v = 0, CAR_DOOR_F
 enum class eBikeNodes : int32_t { BIKE_NODE_NONE_v = 0, BIKE_CHASSIS_v = 1, BIKE_FORKS_FRONT_v = 2, BIKE_FORKS_REAR_v = 3, BIKE_WHEEL_FRONT_v = 4, BIKE_WHEEL_REAR_v = 5, BIKE_MUDGUARD_v = 6, BIKE_HANDLEBARS_v = 7, BIKE_NUM_NODES_v = 8 };
 // Free Type from zpp/vehicles/Bike.zpp
 enum class Bike_Enum_2 : int32_t { BIKEWHEEL_FRONT_v = 0, BIKEWHEEL_REAR_v = 1 };
-// State Schema Contract from zpp/vehicles/CarGen.zpp
-struct CTheCarGenerators_ZppContract {
-    int64_t ProcessCounter{0}; // Z++: ℕ
-    int64_t NumOfCarGenerators{0}; // Z++: ℕ
-    std::array<int32_t, 16> CarGeneratorArray{}; // Z++: seq CCarGenerator  -- bounded array [NUM_CARGENS]
-    size_t CarGeneratorArray_len{16u}; // Z++ cardinality #CarGeneratorArray
-    int64_t GenerateEvenIfPlayerIsCloseCounter{0}; // Z++: ℕ
-    int64_t CurrentActiveCount{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
-        return (CarGeneratorArray_len == 16u && CarGeneratorArray.size() == 16u)
-            && (ProcessCounter >= 0)
-            && (NumOfCarGenerators >= 0)
-            && (GenerateEvenIfPlayerIsCloseCounter >= 0)
-            && (CurrentActiveCount >= 0);
-    }
-};
-// State Schema Contract from zpp/vehicles/Cranes.zpp
-struct CCranes_ZppContract {
-    int64_t CarsCollectedMilitaryCrane{0}; // Z++: ℕ
-    int32_t NumCranes{0}; // Z++: ℤ
-    std::array<int32_t, 8> aCranes{}; // Z++: seq CCrane  -- bounded array [NUM_CRANES]
-    size_t aCranes_len{8u}; // Z++ cardinality #aCranes
-    constexpr bool checkInvariant() const {
-        return (aCranes_len == 8u && aCranes.size() == 8u)
-            && (CarsCollectedMilitaryCrane >= 0);
-    }
-};
 // State Schema Contract from zpp/vehicles/DamageManager.zpp
 struct CDamageManager_ZppContract {
     float m_fWheelDamageEffect{0.0f}; // Z++: ℝ
@@ -71,6 +44,61 @@ struct CDamageManager_ZppContract {
             && (m_lightStatus >= 0)
             && (m_panelStatus >= 0)
             && (field_18 >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Door.zpp
+struct CDoor_ZppContract {
+    float m_fMaxAngle{0.0f}; // Z++: ℝ
+    float m_fMinAngle{0.0f}; // Z++: ℝ
+    int32_t m_nDirn{0}; // Z++: ℤ
+    int32_t m_nAxis{0}; // Z++: ℤ
+    int32_t m_nDoorState{0}; // Z++: ℤ
+    float m_fAngle{0.0f}; // Z++: ℝ
+    float m_fPrevAngle{0.0f}; // Z++: ℝ
+    float m_fAngVel{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Door.zpp
+struct CTrainDoor_ZppContract {
+    float m_fClosedPosn{0.0f}; // Z++: ℝ
+    float m_fOpenPosn{0.0f}; // Z++: ℝ
+    int32_t m_nDirn{0}; // Z++: ℤ
+    int32_t m_nDoorState{0}; // Z++: ℤ
+    int32_t m_nAxis{0}; // Z++: ℤ
+    float m_fPosn{0.0f}; // Z++: ℝ
+    float m_fPrevPosn{0.0f}; // Z++: ℝ
+    int32_t field_14{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Door.zpp
+struct CFerryDoor_ZppContract {
+    float m_fClosedPosn{0.0f}; // Z++: ℝ
+    float m_fOpenPosn{0.0f}; // Z++: ℝ
+    int32_t m_nDirn{0}; // Z++: ℤ
+    int32_t m_nAxis{0}; // Z++: ℤ
+    int32_t m_nDoorState{0}; // Z++: ℤ
+    float m_fPosn{0.0f}; // Z++: ℝ
+    float m_fPrevPosn{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Ferry.zpp
+struct CFerryNode_ZppContract {
+    float x{0.0f}; // Z++: ℝ
+    float y{0.0f}; // Z++: ℝ
+    float z{0.0f}; // Z++: ℝ
+    float t{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/vehicles/Ferry.zpp
@@ -96,77 +124,191 @@ struct CFerryPath_ZppContract {
             && (aLineBits_card <= 1u);
     }
 };
-// State Schema Contract from zpp/vehicles/Ferry.zpp
-struct CFerryInst_ZppContract {
-    std::array<int32_t, 8> pPathData{}; // Z++: seq Ref[CFerryPath]  -- bounded array [NUM_FERRY_PATHS]
-    size_t pPathData_len{8u}; // Z++ cardinality #pPathData
-    std::array<float, 8> m_afPositions{}; // Z++: seq ℝ  -- bounded array [NUM_FERRIES]
-    size_t m_afPositions_len{8u}; // Z++ cardinality #m_afPositions
-    std::array<float, 8> m_afSpeeds{}; // Z++: seq ℝ  -- bounded array [NUM_FERRIES]
-    size_t m_afSpeeds_len{8u}; // Z++ cardinality #m_afSpeeds
-    std::array<int32_t, 8> m_apFerries{}; // Z++: seq Ref[CFerry]  -- bounded array [NUM_FERRIES]
-    size_t m_apFerries_len{8u}; // Z++ cardinality #m_apFerries
-    bool m_bFerriesDisabled{false}; // Z++: 𝔹
-    std::array<uint32_t, 8> m_anNumWakePoints{}; // Z++: seq ℕ  -- bounded array [NUM_FERRIES]
-    size_t m_anNumWakePoints_len{8u}; // Z++ cardinality #m_anNumWakePoints
+// State Schema Contract from zpp/vehicles/Floater.zpp
+struct cBuoyancy_ZppContract {
+    int32_t m_position{0}; // Z++: CVector
+    int32_t m_matrix{0}; // Z++: CMatrix
+    int32_t m_field_54{0}; // Z++: ℤ
+    int32_t m_positionZ{0}; // Z++: CVector
+    float m_waterlevel{0.0f}; // Z++: ℝ
+    float m_waterLevelInc{0.0f}; // Z++: ℝ
+    float m_buoyancy{0.0f}; // Z++: ℝ
+    int32_t m_dimMax{0}; // Z++: CVector
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (pPathData_len == 8u && pPathData.size() == 8u)
-            && (m_afPositions_len == 8u && m_afPositions.size() == 8u)
-            && (m_afSpeeds_len == 8u && m_afSpeeds.size() == 8u)
-            && (m_apFerries_len == 8u && m_apFerries.size() == 8u)
-            && (m_anNumWakePoints_len == 8u && m_anNumWakePoints.size() == 8u);
+        return (instance_addr >= 0);
     }
 };
-// Operation Schema Contract (ΔCTheCarGenerators) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CTheCarGenerators_Process(CTheCarGenerators_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// State Schema Contract from zpp/vehicles/HandlingMgr.zpp
+struct tBikeHandlingData_ZppContract {
+    int32_t nIdentifier{0}; // Z++: tVehicleType
+    float fLeanFwdCOM{0.0f}; // Z++: ℝ
+    float fLeanFwdForce{0.0f}; // Z++: ℝ
+    float fLeanBakCOM{0.0f}; // Z++: ℝ
+    float fLeanBackForce{0.0f}; // Z++: ℝ
+    float fMaxLean{0.0f}; // Z++: ℝ
+    float fFullAnimLean{0.0f}; // Z++: ℝ
+    float fDesLean{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/HandlingMgr.zpp
+struct tBoatHandlingData_ZppContract {
+    int32_t nIdentifier{0}; // Z++: tVehicleType
+    float fThrustY{0.0f}; // Z++: ℝ
+    float fThrustZ{0.0f}; // Z++: ℝ
+    float fThrustAppZ{0.0f}; // Z++: ℝ
+    float fAqPlaneForce{0.0f}; // Z++: ℝ
+    float fAqPlaneLimit{0.0f}; // Z++: ℝ
+    float fAqPlaneOffset{0.0f}; // Z++: ℝ
+    float fWaveAudioMult{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/HandlingMgr.zpp
+struct tFlyingHandlingData_ZppContract {
+    int32_t nIdentifier{0}; // Z++: tVehicleType
+    float fThrust{0.0f}; // Z++: ℝ
+    float fThrustFallOff{0.0f}; // Z++: ℝ
+    float fYaw{0.0f}; // Z++: ℝ
+    float fYawStab{0.0f}; // Z++: ℝ
+    float fSideSlip{0.0f}; // Z++: ℝ
+    float fRoll{0.0f}; // Z++: ℝ
+    float fRollStab{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Plane.zpp
+struct CPlaneNode_ZppContract {
+    int32_t p{0}; // Z++: CVector
+    float t{0.0f}; // Z++: ℝ
+    bool bOnGround{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Plane.zpp
+struct CPlaneInterpolationLine_ZppContract {
+    int64_t type{0}; // Z++: ℕ
+    float time{0.0f}; // Z++: ℝ
+    float position{0.0f}; // Z++: ℝ
+    float speed{0.0f}; // Z++: ℝ
+    float acceleration{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (type >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Plane.zpp
+struct CPlane_ZppContract {
+    float m_fRotorRotation{0.0f}; // Z++: ℝ
+    int32_t m_isFarAway{0}; // Z++: ℤ
+    int32_t m_nCurPathNode{0}; // Z++: ℤ
+    float m_fSpeed{0.0f}; // Z++: ℝ
+    int64_t m_nFrameWhenHit{0}; // Z++: ℕ
+    bool m_bHasBeenHit{false}; // Z++: 𝔹
+    bool m_bIsDrugRunCesna{false}; // Z++: 𝔹
+    bool m_bIsDropOffCesna{false}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (m_nFrameWhenHit >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Train.zpp
+struct CTrainNode_ZppContract {
+    int32_t p{0}; // Z++: CVector
+    float t{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/vehicles/Train.zpp
+struct CTrainInterpolationLine_ZppContract {
+    int64_t type{0}; // Z++: ℕ
+    float time{0.0f}; // Z++: ℝ
+    float position{0.0f}; // Z++: ℝ
+    float speed{0.0f}; // Z++: ℝ
+    float acceleration{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (type >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
+constexpr bool op_CDamageManager_CDamageManager(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_bSmashedDoorDoesntClose == false);
 }
-// Operation Schema Contract (ΔCTheCarGenerators) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CTheCarGenerators_CreateCarGenerator_2(CTheCarGenerators_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CDamageManager_ZppContract apply_CDamageManager_CDamageManager(const CDamageManager_ZppContract& pre) {
+    CDamageManager_ZppContract post = pre;
+    post.m_bSmashedDoorDoesntClose = false;
+    return post;
 }
-// Operation Schema Contract (ΔCTheCarGenerators) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CTheCarGenerators_Init_3(CTheCarGenerators_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
+constexpr bool op_CDamageManager_ResetDamageStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_engineStatus == 0);
 }
-// Operation Schema Contract (ΔCTheCarGenerators) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CTheCarGenerators_SaveAllCarGenerators_4(CTheCarGenerators_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CDamageManager_ZppContract apply_CDamageManager_ResetDamageStatus(const CDamageManager_ZppContract& pre) {
+    CDamageManager_ZppContract post = pre;
+    post.m_engineStatus = 0;
+    return post;
 }
-// Operation Schema Contract (ΔCTheCarGenerators) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CTheCarGenerators_LoadAllCarGenerators_5(CTheCarGenerators_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
+constexpr bool op_CDamageManager_FuckCarCompletely(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_lightStatus == 0);
 }
-// Operation Schema Contract (ΔCTheCarGenerators) from zpp/vehicles/CarGen.zpp
-constexpr bool op_CTheCarGenerators_CreateCarGenerator(CTheCarGenerators_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CDamageManager_ZppContract apply_CDamageManager_FuckCarCompletely(const CDamageManager_ZppContract& pre) {
+    CDamageManager_ZppContract post = pre;
+    post.m_lightStatus = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCDamageManager) from zpp/vehicles/DamageManager.zpp
+constexpr bool op_CDamageManager_SetEngineStatus(const CDamageManager_ZppContract& pre, const CDamageManager_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_engineStatus == 250);
+}
+constexpr CDamageManager_ZppContract apply_CDamageManager_SetEngineStatus(const CDamageManager_ZppContract& pre) {
+    CDamageManager_ZppContract post = pre;
+    post.m_engineStatus = 250;
+    return post;
 }
 constexpr bool verify_vehicles_zpp_invariants() {
-    {
-        CTheCarGenerators_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CTheCarGenerators_ZppContract bad{};
-        bad.CarGeneratorArray_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CCranes_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CCranes_ZppContract bad{};
-        bad.aCranes_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
     {
         CDamageManager_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CDamageManager_ZppContract bad{};
         bad.m_wheelStatus_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CDoor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CDoor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTrainDoor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTrainDoor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CFerryDoor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CFerryDoor_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CFerryNode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CFerryNode_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -184,35 +326,103 @@ constexpr bool verify_vehicles_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CFerryInst_ZppContract valid{};
+        cBuoyancy_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
-        CFerryInst_ZppContract bad{};
-        bad.pPathData_len = 0u;
+        cBuoyancy_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {
-        CTheCarGenerators_ZppContract st{};
-        if (!op_CTheCarGenerators_Process(st)) return false;
+        tBikeHandlingData_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tBikeHandlingData_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CTheCarGenerators_ZppContract st{};
-        if (!op_CTheCarGenerators_CreateCarGenerator_2(st)) return false;
+        tBoatHandlingData_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tBoatHandlingData_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CTheCarGenerators_ZppContract st{};
-        if (!op_CTheCarGenerators_Init_3(st)) return false;
+        tFlyingHandlingData_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tFlyingHandlingData_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CTheCarGenerators_ZppContract st{};
-        if (!op_CTheCarGenerators_SaveAllCarGenerators_4(st)) return false;
+        CPlaneNode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaneNode_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CTheCarGenerators_ZppContract st{};
-        if (!op_CTheCarGenerators_LoadAllCarGenerators_5(st)) return false;
+        CPlaneInterpolationLine_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlaneInterpolationLine_ZppContract bad{};
+        bad.type = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CTheCarGenerators_ZppContract st{};
-        if (!op_CTheCarGenerators_CreateCarGenerator(st)) return false;
+        CPlane_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPlane_ZppContract bad{};
+        bad.m_nFrameWhenHit = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTrainNode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTrainNode_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTrainInterpolationLine_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTrainInterpolationLine_ZppContract bad{};
+        bad.type = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CDamageManager_ZppContract pre{};
+        pre.m_bSmashedDoorDoesntClose = true;
+        const auto post = apply_CDamageManager_CDamageManager(pre);
+        if (!op_CDamageManager_CDamageManager(pre, post)) return false;
+        CDamageManager_ZppContract badPost = post;
+        badPost.m_bSmashedDoorDoesntClose = true;
+        if (op_CDamageManager_CDamageManager(pre, badPost)) return false;
+    }
+    {
+        CDamageManager_ZppContract pre{};
+        pre.m_engineStatus = 1;
+        const auto post = apply_CDamageManager_ResetDamageStatus(pre);
+        if (!op_CDamageManager_ResetDamageStatus(pre, post)) return false;
+        CDamageManager_ZppContract badPost = post;
+        badPost.m_engineStatus = 1;
+        if (op_CDamageManager_ResetDamageStatus(pre, badPost)) return false;
+    }
+    {
+        CDamageManager_ZppContract pre{};
+        pre.m_lightStatus = 1;
+        const auto post = apply_CDamageManager_FuckCarCompletely(pre);
+        if (!op_CDamageManager_FuckCarCompletely(pre, post)) return false;
+        CDamageManager_ZppContract badPost = post;
+        badPost.m_lightStatus = 1;
+        if (op_CDamageManager_FuckCarCompletely(pre, badPost)) return false;
+    }
+    {
+        CDamageManager_ZppContract pre{};
+        pre.m_engineStatus = 0;
+        const auto post = apply_CDamageManager_SetEngineStatus(pre);
+        if (!op_CDamageManager_SetEngineStatus(pre, post)) return false;
+        CDamageManager_ZppContract badPost = post;
+        badPost.m_engineStatus = 0;
+        if (op_CDamageManager_SetEngineStatus(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

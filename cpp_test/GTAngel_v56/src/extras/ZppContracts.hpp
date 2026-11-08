@@ -61,8 +61,34 @@ struct CustomMatExt_ZppContract {
     }
 };
 // State Schema Contract from zpp/extras/custompipes.zpp
+struct Color_ZppContract {
+    float a{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/custompipes.zpp
 struct InterpolatedValue_ZppContract {
     int32_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/custompipes.zpp
+struct InterpolatedFloat_ZppContract {
+    float curInterpolator{0.0f}; // Z++: ℝ
+    float curVal{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/custompipes.zpp
+struct InterpolatedColor_ZppContract {
+    float curInterpolator{0.0f}; // Z++: ℝ
+    int32_t curVal{0}; // Z++: Color
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
@@ -78,11 +104,66 @@ struct VsLight_ZppContract {
         return (pos_len == 4u && pos.size() == 4u);
     }
 };
-// Operation Schema Contract (ΔInterpolatedValue) from zpp/extras/custompipes.zpp
-constexpr bool op_InterpolatedValue_Read(InterpolatedValue_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
+// State Schema Contract from zpp/extras/custompipes_d3d9.zpp
+struct BuildingInst_ZppContract {
+    int32_t combinedMat{0}; // Z++: rw__RawMatrix
+    uint8_t instHeader_card{0u}; // Z++: Ref[rw__d3d9__InstanceDataHeader]
+    int64_t fadeAlpha{0}; // Z++: ℕ
+    bool lighting{false}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (instHeader_card <= 1u)
+            && (fadeAlpha >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct Pt_ZppContract {
+    int32_t y{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct CTweakVar_ZppContract {
+    int32_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct CTweakVars_ZppContract {
+    int32_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct CTweakFunc_ZppContract {
+    int32_t m_pVarName{0}; // Z++: seq CHAR
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct CTweakBool_ZppContract {
+    int32_t m_pVarName{0}; // Z++: seq CHAR
+    uint8_t m_pBoolVar_card{0u}; // Z++: ℙ 𝔹
+    constexpr bool checkInvariant() const {
+        return (m_pBoolVar_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/extras/debugmenu.zpp
+struct CTweakSwitch_ZppContract {
+    int32_t m_pVarName{0}; // Z++: seq CHAR
+    int32_t m_pIntVar{0}; // Z++: ADDRESS
+    int32_t m_nMax{0}; // Z++: ℤ
+    int32_t m_aStr{0}; // Z++: seq CHAR
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 constexpr bool verify_extras_zpp_invariants() {
     {
         GitSHA1ModuleState_ZppContract valid{};
@@ -113,9 +194,30 @@ constexpr bool verify_extras_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        Color_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Color_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         InterpolatedValue_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         InterpolatedValue_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        InterpolatedFloat_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        InterpolatedFloat_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        InterpolatedColor_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        InterpolatedColor_ZppContract bad{};
         bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
@@ -127,8 +229,53 @@ constexpr bool verify_extras_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        InterpolatedValue_ZppContract st{};
-        if (!op_InterpolatedValue_Read(st)) return false;
+        BuildingInst_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        BuildingInst_ZppContract bad{};
+        bad.instHeader_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        Pt_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Pt_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTweakVar_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTweakVar_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTweakVars_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTweakVars_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTweakFunc_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTweakFunc_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTweakBool_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTweakBool_ZppContract bad{};
+        bad.m_pBoolVar_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CTweakSwitch_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTweakSwitch_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -98,14 +98,6 @@ struct CAccident_ZppContract {
             && (m_nMedicsPerformingCPR >= 0);
     }
 };
-// State Schema Contract from zpp/core/Accident.zpp
-struct CAccidentManager_ZppContract {
-    std::array<int32_t, 8> m_aAccidents{}; // Z++: seq CAccident  -- bounded array [NUM_ACCIDENTS]
-    size_t m_aAccidents_len{8u}; // Z++ cardinality #m_aAccidents
-    constexpr bool checkInvariant() const {
-        return (m_aAccidents_len == 8u && m_aAccidents.size() == 8u);
-    }
-};
 // State Schema Contract from zpp/core/AnimViewer.zpp
 struct CAnimViewer_ZppContract {
     int32_t animTxdSlot{0}; // Z++: ℤ
@@ -130,6 +122,30 @@ struct CCamPathSplines_ZppContract {
         return (m_arr_PathData_card <= 1u);
     }
 };
+// State Schema Contract from zpp/core/Camera.zpp
+struct CTrainCamNode_ZppContract {
+    int32_t m_cvecCamPosition{0}; // Z++: CVector
+    int32_t m_cvecPointToLookAt{0}; // Z++: CVector
+    int32_t m_cvecMinPointInRange{0}; // Z++: CVector
+    int32_t m_cvecMaxPointInRange{0}; // Z++: CVector
+    float m_fDesiredFOV{0.0f}; // Z++: ℝ
+    float m_fNearClip{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/Camera.zpp
+struct CQueuedMode_ZppContract {
+    int32_t Mode{0}; // Z++: ℤ
+    float Duration{0.0f}; // Z++: ℝ
+    int32_t MinZoom{0}; // Z++: ℤ
+    int32_t MaxZoom{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/core/CdStream.zpp
 struct CdReadInfo_ZppContract {
     int64_t nSectorOffset{0}; // Z++: ℕ
@@ -145,35 +161,146 @@ struct CdReadInfo_ZppContract {
             && (nSectorsToRead >= 0);
     }
 };
-// Operation Schema Contract (ΔCAccident) from zpp/core/Accident.zpp
-constexpr bool op_CAccident_CAccident(CAccident_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// State Schema Contract from zpp/core/CdStream.zpp
+struct Queue_ZppContract {
+    uint8_t items_card{0u}; // Z++: ℙ ℤ
+    int32_t head{0}; // Z++: ℤ
+    int32_t tail{0}; // Z++: ℤ
+    int32_t size{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (items_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/core/Clock.zpp
+struct CClock_ZppContract {
+    int64_t ms_nGameClockHours{0}; // Z++: ℕ
+    int64_t ms_nGameClockMinutes{0}; // Z++: ℕ
+    int64_t ms_nGameClockSeconds{0}; // Z++: ℕ
+    int64_t ms_Stored_nGameClockHours{0}; // Z++: ℕ
+    int64_t ms_Stored_nGameClockMinutes{0}; // Z++: ℕ
+    int64_t ms_Stored_nGameClockSeconds{0}; // Z++: ℕ
+    int64_t ms_nMillisecondsPerGameMinute{0}; // Z++: ℕ
+    int64_t ms_nLastClockTick{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (ms_nGameClockHours >= 0)
+            && (ms_nGameClockMinutes >= 0)
+            && (ms_nGameClockSeconds >= 0)
+            && (ms_Stored_nGameClockHours >= 0)
+            && (ms_Stored_nGameClockMinutes >= 0)
+            && (ms_Stored_nGameClockSeconds >= 0)
+            && (ms_nMillisecondsPerGameMinute >= 0)
+            && (ms_nLastClockTick >= 0);
+    }
+};
+// State Schema Contract from zpp/core/ControllerConfig.zpp
+struct GlfwJoyState_ZppContract {
+    int32_t id{0}; // Z++: ℤ
+    bool isGamepad{false}; // Z++: 𝔹
+    int64_t numButtons{0}; // Z++: ℕ
+    uint8_t buttons_card{0u}; // Z++: ℙ ℕ
+    std::array<bool, 17> mappedButtons{}; // Z++: seq 𝔹  -- bounded array [17]
+    size_t mappedButtons_len{17u}; // Z++ cardinality #mappedButtons
+    constexpr bool checkInvariant() const {
+        return (mappedButtons_len == 17u && mappedButtons.size() == 17u)
+            && (numButtons >= 0)
+            && (buttons_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/core/ControllerConfig.zpp
+struct tControllerConfigBind_ZppContract {
+    int32_t m_Key{0}; // Z++: ℤ
+    int32_t m_ContSetOrder{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/Crime.zpp
+struct CCrimeBeingQd_ZppContract {
+    int32_t m_nType{0}; // Z++: eCrimeType
+    int32_t m_nId{0}; // Z++: ℤ
+    int64_t m_nTime{0}; // Z++: ℕ
+    int32_t m_vecPosn{0}; // Z++: CVector
+    bool m_bReported{false}; // Z++: 𝔹
+    bool m_bPoliceDoesntCare{false}; // Z++: 𝔹
+    constexpr bool checkInvariant() const {
+        return (m_nTime >= 0);
+    }
+};
+// State Schema Contract from zpp/core/Debug.zpp
+struct Line_ZppContract {
+    int32_t p2{0}; // Z++: CVector_p1
+    int64_t c2{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (c2 >= 0);
+    }
+};
+// State Schema Contract from zpp/core/EventList.zpp
+struct CEvent_ZppContract {
+    int32_t type{0}; // Z++: eEventType
+    int32_t entityType{0}; // Z++: eEventEntity
+    int32_t entityRef{0}; // Z++: ℤ
+    uint8_t criminal_card{0u}; // Z++: Ref[CPed]
+    int32_t posn{0}; // Z++: CVector
+    int64_t timeout{0}; // Z++: ℕ
+    int32_t state{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (criminal_card <= 1u)
+            && (timeout >= 0);
+    }
+};
+// State Schema Contract from zpp/core/EventList.zpp
+struct CEventList_ZppContract {
+    int32_t ms_nFirstFreeSlotIndex{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/core/FileLoader.zpp
+struct ColHeader_ZppContract {
+    int64_t ident{0}; // Z++: ℕ
+    int64_t size{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (ident >= 0)
+            && (size >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_Initialise(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockHours == 12);
 }
-// Operation Schema Contract (ΔCAccidentManager) from zpp/core/Accident.zpp
-constexpr bool op_CAccidentManager_GetNextFreeAccident(CAccidentManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CClock_ZppContract apply_CClock_Initialise(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nGameClockHours = 12;
+    return post;
 }
-// Operation Schema Contract (ΔCAccidentManager) from zpp/core/Accident.zpp
-constexpr bool op_CAccidentManager_ReportAccident_2(CAccidentManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_Update(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockMinutes == 0);
 }
-// Operation Schema Contract (ΔCAccidentManager) from zpp/core/Accident.zpp
-constexpr bool op_CAccidentManager_Update_3(CAccidentManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CClock_ZppContract apply_CClock_Update(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nGameClockMinutes = 0;
+    return post;
 }
-// Operation Schema Contract (ΔCAccidentManager) from zpp/core/Accident.zpp
-constexpr bool op_CAccidentManager_FindNearestAccident_4(CAccidentManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCClock) from zpp/core/Clock.zpp
+constexpr bool op_CClock_SetGameClock(const CClock_ZppContract& pre, const CClock_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nGameClockSeconds == 0);
 }
-// Operation Schema Contract (ΔCAccidentManager) from zpp/core/Accident.zpp
-constexpr bool op_CAccidentManager_CountActiveAccidents_5(CAccidentManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CClock_ZppContract apply_CClock_SetGameClock(const CClock_ZppContract& pre) {
+    CClock_ZppContract post = pre;
+    post.ms_nGameClockSeconds = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCEventList) from zpp/core/EventList.zpp
+constexpr bool op_CEventList_Update(const CEventList_ZppContract& pre, const CEventList_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.ms_nFirstFreeSlotIndex == 0);
+}
+constexpr CEventList_ZppContract apply_CEventList_Update(const CEventList_ZppContract& pre) {
+    CEventList_ZppContract post = pre;
+    post.ms_nFirstFreeSlotIndex = 0;
+    return post;
 }
 constexpr bool verify_core_zpp_invariants() {
     {
@@ -181,13 +308,6 @@ constexpr bool verify_core_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CAccident_ZppContract bad{};
         bad.m_pVictim_card = 2u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CAccidentManager_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CAccidentManager_ZppContract bad{};
-        bad.m_aAccidents_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -212,6 +332,20 @@ constexpr bool verify_core_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CTrainCamNode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTrainCamNode_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CQueuedMode_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CQueuedMode_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         CdReadInfo_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         CdReadInfo_ZppContract bad{};
@@ -219,28 +353,103 @@ constexpr bool verify_core_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CAccident_ZppContract st{};
-        if (!op_CAccident_CAccident(st)) return false;
+        Queue_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Queue_ZppContract bad{};
+        bad.items_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAccidentManager_ZppContract st{};
-        if (!op_CAccidentManager_GetNextFreeAccident(st)) return false;
+        CClock_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CClock_ZppContract bad{};
+        bad.ms_nGameClockHours = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAccidentManager_ZppContract st{};
-        if (!op_CAccidentManager_ReportAccident_2(st)) return false;
+        GlfwJoyState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        GlfwJoyState_ZppContract bad{};
+        bad.mappedButtons_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAccidentManager_ZppContract st{};
-        if (!op_CAccidentManager_Update_3(st)) return false;
+        tControllerConfigBind_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tControllerConfigBind_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAccidentManager_ZppContract st{};
-        if (!op_CAccidentManager_FindNearestAccident_4(st)) return false;
+        CCrimeBeingQd_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CCrimeBeingQd_ZppContract bad{};
+        bad.m_nTime = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAccidentManager_ZppContract st{};
-        if (!op_CAccidentManager_CountActiveAccidents_5(st)) return false;
+        Line_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Line_ZppContract bad{};
+        bad.c2 = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CEvent_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CEvent_ZppContract bad{};
+        bad.criminal_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CEventList_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CEventList_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ColHeader_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ColHeader_ZppContract bad{};
+        bad.ident = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nGameClockHours = 0;
+        const auto post = apply_CClock_Initialise(pre);
+        if (!op_CClock_Initialise(pre, post)) return false;
+        CClock_ZppContract badPost = post;
+        badPost.ms_nGameClockHours = 0;
+        if (op_CClock_Initialise(pre, badPost)) return false;
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nGameClockMinutes = 1;
+        const auto post = apply_CClock_Update(pre);
+        if (!op_CClock_Update(pre, post)) return false;
+        CClock_ZppContract badPost = post;
+        badPost.ms_nGameClockMinutes = 1;
+        if (op_CClock_Update(pre, badPost)) return false;
+    }
+    {
+        CClock_ZppContract pre{};
+        pre.ms_nGameClockSeconds = 1;
+        const auto post = apply_CClock_SetGameClock(pre);
+        if (!op_CClock_SetGameClock(pre, post)) return false;
+        CClock_ZppContract badPost = post;
+        badPost.ms_nGameClockSeconds = 1;
+        if (op_CClock_SetGameClock(pre, badPost)) return false;
+    }
+    {
+        CEventList_ZppContract pre{};
+        pre.ms_nFirstFreeSlotIndex = 1;
+        const auto post = apply_CEventList_Update(pre);
+        if (!op_CEventList_Update(pre, post)) return false;
+        CEventList_ZppContract badPost = post;
+        badPost.ms_nFirstFreeSlotIndex = 1;
+        if (op_CEventList_Update(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

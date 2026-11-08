@@ -50,10 +50,12 @@ struct CCutsceneObject_ZppContract {
 };
 // State Schema Contract from zpp/objects/ObjectData.zpp
 struct CObjectData_ZppContract {
-    std::array<int32_t, 8> ms_aObjectInfo{}; // Z++: seq CObjectInfo  -- bounded array [NUMOBJECTINFO]
-    size_t ms_aObjectInfo_len{8u}; // Z++ cardinality #ms_aObjectInfo
+    std::array<int32_t, 210> ms_aObjectInfo{}; // Z++: seq CObjectInfo  -- bounded array [NUMOBJECTINFO]
+    size_t ms_aObjectInfo_len{210u}; // Z++ cardinality #ms_aObjectInfo
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (ms_aObjectInfo_len == 8u && ms_aObjectInfo.size() == 8u);
+        return (ms_aObjectInfo_len == 210u && ms_aObjectInfo.size() == 210u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/objects/ParticleObject.zpp
@@ -83,35 +85,50 @@ struct CStinger_ZppContract {
             && (m_nSpikeState >= 0);
     }
 };
-// Operation Schema Contract (ΔCCutsceneHead) from zpp/objects/CutsceneHead.zpp
-constexpr bool op_CCutsceneHead_CreateRwObject(CCutsceneHead_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCCutsceneObject) from zpp/objects/CutsceneObject.zpp
+constexpr bool op_CCutsceneObject_CCutsceneObject_2(const CCutsceneObject_ZppContract& pre, const CCutsceneObject_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_pShadow_card == 0u);
 }
-// Operation Schema Contract (ΔCCutsceneHead) from zpp/objects/CutsceneHead.zpp
-constexpr bool op_CCutsceneHead_DeleteRwObject_2(CCutsceneHead_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CCutsceneObject_ZppContract apply_CCutsceneObject_CCutsceneObject_2(const CCutsceneObject_ZppContract& pre) {
+    CCutsceneObject_ZppContract post = pre;
+    post.m_pShadow_card = 0u;
+    return post;
 }
-// Operation Schema Contract (ΔCCutsceneHead) from zpp/objects/CutsceneHead.zpp
-constexpr bool op_CCutsceneHead_ProcessControl_3(CCutsceneHead_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCAudioHydrant) from zpp/objects/ParticleObject.zpp
+constexpr bool op_CAudioHydrant_Remove(const CAudioHydrant_ZppContract& pre, const CAudioHydrant_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.pParticleObject_card == 0u);
 }
-// Operation Schema Contract (ΔCCutsceneHead) from zpp/objects/CutsceneHead.zpp
-constexpr bool op_CCutsceneHead_Render_4(CCutsceneHead_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CAudioHydrant_ZppContract apply_CAudioHydrant_Remove(const CAudioHydrant_ZppContract& pre) {
+    CAudioHydrant_ZppContract post = pre;
+    post.pParticleObject_card = 0u;
+    return post;
 }
-// Operation Schema Contract (ΔCCutsceneHead) from zpp/objects/CutsceneHead.zpp
-constexpr bool op_CCutsceneHead_RenderLimb_5(CCutsceneHead_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
+constexpr bool op_CStinger_CStinger(const CStinger_ZppContract& pre, const CStinger_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bIsDeployed == false);
 }
-// Operation Schema Contract (ΔCCutsceneHead) from zpp/objects/CutsceneHead.zpp
-constexpr bool op_CCutsceneHead_PlayAnimation_6(CCutsceneHead_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CStinger_ZppContract apply_CStinger_CStinger(const CStinger_ZppContract& pre) {
+    CStinger_ZppContract post = pre;
+    post.bIsDeployed = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
+constexpr bool op_CStinger_Init(const CStinger_ZppContract& pre, const CStinger_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bIsDeployed == true);
+}
+constexpr CStinger_ZppContract apply_CStinger_Init(const CStinger_ZppContract& pre) {
+    CStinger_ZppContract post = pre;
+    post.bIsDeployed = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCStinger) from zpp/objects/Stinger.zpp
+constexpr bool op_CStinger_Remove(const CStinger_ZppContract& pre, const CStinger_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bIsDeployed == false);
+}
+constexpr CStinger_ZppContract apply_CStinger_Remove(const CStinger_ZppContract& pre) {
+    CStinger_ZppContract post = pre;
+    post.bIsDeployed = false;
+    return post;
 }
 constexpr bool verify_objects_zpp_invariants() {
     {
@@ -150,28 +167,49 @@ constexpr bool verify_objects_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CCutsceneHead_ZppContract st{};
-        if (!op_CCutsceneHead_CreateRwObject(st)) return false;
+        CCutsceneObject_ZppContract pre{};
+        pre.m_pShadow_card = 1u;
+        const auto post = apply_CCutsceneObject_CCutsceneObject_2(pre);
+        if (!op_CCutsceneObject_CCutsceneObject_2(pre, post)) return false;
+        CCutsceneObject_ZppContract badPost = post;
+        badPost.m_pShadow_card = 1u;
+        if (op_CCutsceneObject_CCutsceneObject_2(pre, badPost)) return false;
     }
     {
-        CCutsceneHead_ZppContract st{};
-        if (!op_CCutsceneHead_DeleteRwObject_2(st)) return false;
+        CAudioHydrant_ZppContract pre{};
+        pre.pParticleObject_card = 1u;
+        const auto post = apply_CAudioHydrant_Remove(pre);
+        if (!op_CAudioHydrant_Remove(pre, post)) return false;
+        CAudioHydrant_ZppContract badPost = post;
+        badPost.pParticleObject_card = 1u;
+        if (op_CAudioHydrant_Remove(pre, badPost)) return false;
     }
     {
-        CCutsceneHead_ZppContract st{};
-        if (!op_CCutsceneHead_ProcessControl_3(st)) return false;
+        CStinger_ZppContract pre{};
+        pre.bIsDeployed = true;
+        const auto post = apply_CStinger_CStinger(pre);
+        if (!op_CStinger_CStinger(pre, post)) return false;
+        CStinger_ZppContract badPost = post;
+        badPost.bIsDeployed = true;
+        if (op_CStinger_CStinger(pre, badPost)) return false;
     }
     {
-        CCutsceneHead_ZppContract st{};
-        if (!op_CCutsceneHead_Render_4(st)) return false;
+        CStinger_ZppContract pre{};
+        pre.bIsDeployed = false;
+        const auto post = apply_CStinger_Init(pre);
+        if (!op_CStinger_Init(pre, post)) return false;
+        CStinger_ZppContract badPost = post;
+        badPost.bIsDeployed = false;
+        if (op_CStinger_Init(pre, badPost)) return false;
     }
     {
-        CCutsceneHead_ZppContract st{};
-        if (!op_CCutsceneHead_RenderLimb_5(st)) return false;
-    }
-    {
-        CCutsceneHead_ZppContract st{};
-        if (!op_CCutsceneHead_PlayAnimation_6(st)) return false;
+        CStinger_ZppContract pre{};
+        pre.bIsDeployed = true;
+        const auto post = apply_CStinger_Remove(pre);
+        if (!op_CStinger_Remove(pre, post)) return false;
+        CStinger_ZppContract badPost = post;
+        badPost.bIsDeployed = true;
+        if (op_CStinger_Remove(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

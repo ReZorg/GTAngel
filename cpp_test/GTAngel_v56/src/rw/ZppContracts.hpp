@@ -27,6 +27,17 @@ struct rpGeometryList_ZppContract {
         return (geometries_card <= 1u);
     }
 };
+// State Schema Contract from zpp/rw/ClumpRead.zpp
+struct rpAtomicBinary_ZppContract {
+    int32_t frameIndex{0}; // Z++: ℤ
+    int32_t geomIndex{0}; // Z++: ℤ
+    int32_t flags{0}; // Z++: ℤ
+    int32_t unused{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/rw/Lights.zpp
 struct LightsModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
@@ -34,16 +45,6 @@ struct LightsModuleState_ZppContract {
     constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 492);
-    }
-};
-// State Schema Contract from zpp/rw/MemoryHeap.zpp
-struct CStack_ZppContract {
-    std::array<int32_t, 8> values{}; // Z++: seq T  -- bounded array [N]
-    size_t values_len{8u}; // Z++ cardinality #values
-    int64_t sp{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
-        return (values_len == 8u && values.size() == 8u)
-            && (sp >= 0);
     }
 };
 // State Schema Contract from zpp/rw/MemoryHeap.zpp
@@ -58,6 +59,15 @@ struct HeapBlockDesc_ZppContract {
         return (m_size >= 0)
             && (m_next_card <= 1u)
             && (m_prev_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/MemoryHeap.zpp
+struct HeapBlockList_ZppContract {
+    int32_t m_first{0}; // Z++: HeapBlockDesc
+    int32_t m_last{0}; // Z++: HeapBlockDesc
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/rw/MemoryHeap.zpp
@@ -83,35 +93,110 @@ struct MemoryMgrModuleState_ZppContract {
             && (source_lines == 142);
     }
 };
-// Operation Schema Contract (ΔCStack) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CStack_CStack(CStack_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// State Schema Contract from zpp/rw/NodeName.zpp
+struct NodeNameModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{81}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 81);
+    }
+};
+// State Schema Contract from zpp/rw/RwHelper.zpp
+struct RwHelperModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{1035}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 1035);
+    }
+};
+// State Schema Contract from zpp/rw/RwMatFX.zpp
+struct MatFXNothing_ZppContract {
+    std::array<int32_t, 5> pad{}; // Z++: seq ℤ  -- bounded array [5]
+    size_t pad_len{5u}; // Z++ cardinality #pad
+    int32_t effect{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (pad_len == 5u && pad.size() == 5u);
+    }
+};
+// State Schema Contract from zpp/rw/RwMatFX.zpp
+struct MatFXBump_ZppContract {
+    uint8_t bumpFrame_card{0u}; // Z++: Ref[RwFrame]
+    uint8_t bumpedTex_card{0u}; // Z++: Ref[RwTexture]
+    uint8_t bumpTex_card{0u}; // Z++: Ref[RwTexture]
+    float negBumpCoefficient{0.0f}; // Z++: ℝ
+    int32_t pad{0}; // Z++: ℤ
+    int32_t effect{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (bumpFrame_card <= 1u)
+            && (bumpedTex_card <= 1u)
+            && (bumpTex_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/RwMatFX.zpp
+struct MatFXEnv_ZppContract {
+    uint8_t envFrame_card{0u}; // Z++: Ref[RwFrame]
+    uint8_t envTex_card{0u}; // Z++: Ref[RwTexture]
+    float envCoeff{0.0f}; // Z++: ℝ
+    int32_t envFBalpha{0}; // Z++: ℤ
+    int32_t pad{0}; // Z++: ℤ
+    int32_t effect{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (envFrame_card <= 1u)
+            && (envTex_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/RwMatFX.zpp
+struct MatFXDual_ZppContract {
+    uint8_t dualTex_card{0u}; // Z++: Ref[RwTexture]
+    int32_t srcBlend{0}; // Z++: ℤ
+    int32_t dstBlend{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (dualTex_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/rw/RwMatFX.zpp
+struct MatFX_ZppContract {
+    int32_t b{0}; // Z++: MatFXBump
+    int32_t e{0}; // Z++: MatFXEnv
+    int32_t d{0}; // Z++: MatFXDual
+    int32_t effects{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/rw/RwPS2AlphaTest.zpp
+struct RwPS2AlphaTestModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{247}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 247);
+    }
+};
+// State Schema Contract from zpp/rw/TexRead.zpp
+struct GPUcaps_ZppContract {
+    int64_t version{0}; // Z++: ℕ
+    int64_t platform{0}; // Z++: ℕ
+    int64_t subplatform{0}; // Z++: ℕ
+    int64_t dxtSupport{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (version >= 0)
+            && (platform >= 0)
+            && (subplatform >= 0)
+            && (dxtSupport >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCommonSize) from zpp/rw/MemoryHeap.zpp
+constexpr bool op_CommonSize_Init(const CommonSize_ZppContract& pre, const CommonSize_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_failed == 0);
 }
-// Operation Schema Contract (ΔCStack) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_CStack_pop_2(CStack_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_HeapBlockDesc_GetNextConsecutive(HeapBlockDesc_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_HeapBlockDesc_GetDataPointer_2(HeapBlockDesc_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_HeapBlockDesc_RemoveHeapFreeBlock_3(HeapBlockDesc_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔHeapBlockDesc) from zpp/rw/MemoryHeap.zpp
-constexpr bool op_HeapBlockDesc_InsertHeapFreeBlock_4(HeapBlockDesc_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CommonSize_ZppContract apply_CommonSize_Init(const CommonSize_ZppContract& pre) {
+    CommonSize_ZppContract post = pre;
+    post.m_failed = 0;
+    return post;
 }
 constexpr bool verify_rw_zpp_invariants() {
     {
@@ -122,6 +207,13 @@ constexpr bool verify_rw_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        rpAtomicBinary_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        rpAtomicBinary_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         LightsModuleState_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         LightsModuleState_ZppContract bad{};
@@ -129,17 +221,17 @@ constexpr bool verify_rw_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CStack_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CStack_ZppContract bad{};
-        bad.values_len = 0u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
         HeapBlockDesc_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         HeapBlockDesc_ZppContract bad{};
         bad.m_size = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        HeapBlockList_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        HeapBlockList_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -157,28 +249,76 @@ constexpr bool verify_rw_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CStack_ZppContract st{};
-        if (!op_CStack_CStack(st)) return false;
+        NodeNameModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        NodeNameModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CStack_ZppContract st{};
-        if (!op_CStack_pop_2(st)) return false;
+        RwHelperModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RwHelperModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
     }
     {
-        HeapBlockDesc_ZppContract st{};
-        if (!op_HeapBlockDesc_GetNextConsecutive(st)) return false;
+        MatFXNothing_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        MatFXNothing_ZppContract bad{};
+        bad.pad_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        HeapBlockDesc_ZppContract st{};
-        if (!op_HeapBlockDesc_GetDataPointer_2(st)) return false;
+        MatFXBump_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        MatFXBump_ZppContract bad{};
+        bad.bumpFrame_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        HeapBlockDesc_ZppContract st{};
-        if (!op_HeapBlockDesc_RemoveHeapFreeBlock_3(st)) return false;
+        MatFXEnv_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        MatFXEnv_ZppContract bad{};
+        bad.envFrame_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        HeapBlockDesc_ZppContract st{};
-        if (!op_HeapBlockDesc_InsertHeapFreeBlock_4(st)) return false;
+        MatFXDual_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        MatFXDual_ZppContract bad{};
+        bad.dualTex_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        MatFX_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        MatFX_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RwPS2AlphaTestModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RwPS2AlphaTestModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        GPUcaps_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        GPUcaps_ZppContract bad{};
+        bad.version = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CommonSize_ZppContract pre{};
+        pre.m_failed = 1;
+        const auto post = apply_CommonSize_Init(pre);
+        if (!op_CommonSize_Init(pre, post)) return false;
+        CommonSize_ZppContract badPost = post;
+        badPost.m_failed = 1;
+        if (op_CommonSize_Init(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

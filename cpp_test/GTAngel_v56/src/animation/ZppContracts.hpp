@@ -97,35 +97,153 @@ struct CAnimBlendNode_ZppContract {
             && (association_card <= 1u);
     }
 };
-// Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
-constexpr bool op_CAnimBlendAssocGroup_CAnimBlendAssocGroup(CAnimBlendAssocGroup_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// State Schema Contract from zpp/animation/AnimBlendSequence.zpp
+struct KeyFrame_ZppContract {
+    int32_t rotation{0}; // Z++: CQuaternion
+    float deltaTime{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/animation/AnimBlendSequence.zpp
+struct KeyFrameTrans_ZppContract {
+    int32_t translation{0}; // Z++: CVector
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/animation/AnimBlendSequence.zpp
+struct KeyFrameCompressed_ZppContract {
+    std::array<int32_t, 4> rot{}; // Z++: seq ℤ  -- bounded array [4]
+    size_t rot_len{4u}; // Z++ cardinality #rot
+    int32_t deltaTime{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (rot_len == 4u && rot.size() == 4u);
+    }
+};
+// State Schema Contract from zpp/animation/AnimBlendSequence.zpp
+struct KeyFrameTransCompressed_ZppContract {
+    std::array<int32_t, 3> trans{}; // Z++: seq ℤ  -- bounded array [3]
+    size_t trans_len{3u}; // Z++ cardinality #trans
+    constexpr bool checkInvariant() const {
+        return (trans_len == 3u && trans.size() == 3u);
+    }
+};
+// State Schema Contract from zpp/animation/AnimManager.zpp
+struct CAnimBlock_ZppContract {
+    int32_t name{0}; // Z++: seq CHAR
+    bool isLoaded{false}; // Z++: 𝔹
+    int32_t refCount{0}; // Z++: ℤ
+    int32_t firstIndex{0}; // Z++: ℤ
+    int32_t numAnims{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/animation/AnimManager.zpp
+struct AnimAssocDesc_ZppContract {
+    int32_t animId{0}; // Z++: ℤ
+    int32_t flags{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/animation/AnimManager.zpp
+struct AnimAssocDefinition_ZppContract {
+    int32_t name{0}; // Z++: seq CHAR
+    int32_t blockName{0}; // Z++: seq CHAR
+    int32_t modelIndex{0}; // Z++: ℤ
+    int32_t numAnims{0}; // Z++: ℤ
+    int32_t animNames{0}; // Z++: seq CHAR
+    uint8_t animDescs_card{0u}; // Z++: Ref[AnimAssocDesc]
+    constexpr bool checkInvariant() const {
+        return (animDescs_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/animation/AnimationId.zpp
+struct AnimationIdModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{343}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 343);
+    }
+};
+// State Schema Contract from zpp/animation/Bones.zpp
+struct BonesModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{118}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 118);
+    }
+};
+// State Schema Contract from zpp/animation/CutsceneMgr.zpp
+struct sToHideItem_ZppContract {
+    float z{0.0f}; // Z++: ℝ
+    int32_t name{0}; // Z++: seq CHAR
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
+constexpr bool op_CAnimBlendAssocGroup_CAnimBlendAssocGroup(const CAnimBlendAssocGroup_ZppContract& pre, const CAnimBlendAssocGroup_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.animBlock_card == 0u);
 }
-// Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
-constexpr bool op_CAnimBlendAssocGroup_CAnimBlendAssocGroup_2(CAnimBlendAssocGroup_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CAnimBlendAssocGroup_ZppContract apply_CAnimBlendAssocGroup_CAnimBlendAssocGroup(const CAnimBlendAssocGroup_ZppContract& pre) {
+    CAnimBlendAssocGroup_ZppContract post = pre;
+    post.animBlock_card = 0u;
+    return post;
 }
-// Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
-constexpr bool op_CAnimBlendAssocGroup_DestroyAssociations_3(CAnimBlendAssocGroup_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
+constexpr bool op_CAnimBlendAssocGroup_DestroyAssociations(const CAnimBlendAssocGroup_ZppContract& pre, const CAnimBlendAssocGroup_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.assocList_card == 0u);
 }
-// Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
-constexpr bool op_CAnimBlendAssocGroup_GetAnimation_4(CAnimBlendAssocGroup_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CAnimBlendAssocGroup_ZppContract apply_CAnimBlendAssocGroup_DestroyAssociations(const CAnimBlendAssocGroup_ZppContract& pre) {
+    CAnimBlendAssocGroup_ZppContract post = pre;
+    post.assocList_card = 0u;
+    return post;
 }
-// Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
-constexpr bool op_CAnimBlendAssocGroup_GetAnimation_5(CAnimBlendAssocGroup_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
+constexpr bool op_CAnimBlendAssocGroup_CreateAssociations(const CAnimBlendAssocGroup_ZppContract& pre, const CAnimBlendAssocGroup_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.numAssociations == 0);
 }
-// Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
-constexpr bool op_CAnimBlendAssocGroup_CopyAnimation_6(CAnimBlendAssocGroup_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CAnimBlendAssocGroup_ZppContract apply_CAnimBlendAssocGroup_CreateAssociations(const CAnimBlendAssocGroup_ZppContract& pre) {
+    CAnimBlendAssocGroup_ZppContract post = pre;
+    post.numAssociations = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
+constexpr bool op_CAnimBlendAssocGroup_CreateAssociations_2(const CAnimBlendAssocGroup_ZppContract& pre, const CAnimBlendAssocGroup_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.numAssociations == 0);
+}
+constexpr CAnimBlendAssocGroup_ZppContract apply_CAnimBlendAssocGroup_CreateAssociations_2(const CAnimBlendAssocGroup_ZppContract& pre) {
+    CAnimBlendAssocGroup_ZppContract post = pre;
+    post.numAssociations = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCAnimBlendAssocGroup) from zpp/animation/AnimBlendAssocGroup.zpp
+constexpr bool op_CAnimBlendAssocGroup_CreateAssociations_3(const CAnimBlendAssocGroup_ZppContract& pre, const CAnimBlendAssocGroup_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.numAssociations == 0);
+}
+constexpr CAnimBlendAssocGroup_ZppContract apply_CAnimBlendAssocGroup_CreateAssociations_3(const CAnimBlendAssocGroup_ZppContract& pre) {
+    CAnimBlendAssocGroup_ZppContract post = pre;
+    post.numAssociations = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCAnimBlendAssociation) from zpp/animation/AnimBlendAssociation.zpp
+constexpr bool op_CAnimBlendAssociation_CAnimBlendAssociation(const CAnimBlendAssociation_ZppContract& pre, const CAnimBlendAssociation_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.nodes_card == 0u);
+}
+constexpr CAnimBlendAssociation_ZppContract apply_CAnimBlendAssociation_CAnimBlendAssociation(const CAnimBlendAssociation_ZppContract& pre) {
+    CAnimBlendAssociation_ZppContract post = pre;
+    post.nodes_card = 0u;
+    return post;
 }
 constexpr bool verify_animation_zpp_invariants() {
     {
@@ -171,28 +289,128 @@ constexpr bool verify_animation_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CAnimBlendAssocGroup_ZppContract st{};
-        if (!op_CAnimBlendAssocGroup_CAnimBlendAssocGroup(st)) return false;
+        KeyFrame_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        KeyFrame_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAnimBlendAssocGroup_ZppContract st{};
-        if (!op_CAnimBlendAssocGroup_CAnimBlendAssocGroup_2(st)) return false;
+        KeyFrameTrans_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        KeyFrameTrans_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAnimBlendAssocGroup_ZppContract st{};
-        if (!op_CAnimBlendAssocGroup_DestroyAssociations_3(st)) return false;
+        KeyFrameCompressed_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        KeyFrameCompressed_ZppContract bad{};
+        bad.rot_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAnimBlendAssocGroup_ZppContract st{};
-        if (!op_CAnimBlendAssocGroup_GetAnimation_4(st)) return false;
+        KeyFrameTransCompressed_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        KeyFrameTransCompressed_ZppContract bad{};
+        bad.trans_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAnimBlendAssocGroup_ZppContract st{};
-        if (!op_CAnimBlendAssocGroup_GetAnimation_5(st)) return false;
+        CAnimBlock_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CAnimBlock_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CAnimBlendAssocGroup_ZppContract st{};
-        if (!op_CAnimBlendAssocGroup_CopyAnimation_6(st)) return false;
+        AnimAssocDesc_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        AnimAssocDesc_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        AnimAssocDefinition_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        AnimAssocDefinition_ZppContract bad{};
+        bad.animDescs_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        AnimationIdModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        AnimationIdModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        BonesModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        BonesModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        sToHideItem_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        sToHideItem_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CAnimBlendAssocGroup_ZppContract pre{};
+        pre.animBlock_card = 1u;
+        const auto post = apply_CAnimBlendAssocGroup_CAnimBlendAssocGroup(pre);
+        if (!op_CAnimBlendAssocGroup_CAnimBlendAssocGroup(pre, post)) return false;
+        CAnimBlendAssocGroup_ZppContract badPost = post;
+        badPost.animBlock_card = 1u;
+        if (op_CAnimBlendAssocGroup_CAnimBlendAssocGroup(pre, badPost)) return false;
+    }
+    {
+        CAnimBlendAssocGroup_ZppContract pre{};
+        pre.assocList_card = 1u;
+        const auto post = apply_CAnimBlendAssocGroup_DestroyAssociations(pre);
+        if (!op_CAnimBlendAssocGroup_DestroyAssociations(pre, post)) return false;
+        CAnimBlendAssocGroup_ZppContract badPost = post;
+        badPost.assocList_card = 1u;
+        if (op_CAnimBlendAssocGroup_DestroyAssociations(pre, badPost)) return false;
+    }
+    {
+        CAnimBlendAssocGroup_ZppContract pre{};
+        pre.numAssociations = 1;
+        const auto post = apply_CAnimBlendAssocGroup_CreateAssociations(pre);
+        if (!op_CAnimBlendAssocGroup_CreateAssociations(pre, post)) return false;
+        CAnimBlendAssocGroup_ZppContract badPost = post;
+        badPost.numAssociations = 1;
+        if (op_CAnimBlendAssocGroup_CreateAssociations(pre, badPost)) return false;
+    }
+    {
+        CAnimBlendAssocGroup_ZppContract pre{};
+        pre.numAssociations = 1;
+        const auto post = apply_CAnimBlendAssocGroup_CreateAssociations_2(pre);
+        if (!op_CAnimBlendAssocGroup_CreateAssociations_2(pre, post)) return false;
+        CAnimBlendAssocGroup_ZppContract badPost = post;
+        badPost.numAssociations = 1;
+        if (op_CAnimBlendAssocGroup_CreateAssociations_2(pre, badPost)) return false;
+    }
+    {
+        CAnimBlendAssocGroup_ZppContract pre{};
+        pre.numAssociations = 1;
+        const auto post = apply_CAnimBlendAssocGroup_CreateAssociations_3(pre);
+        if (!op_CAnimBlendAssocGroup_CreateAssociations_3(pre, post)) return false;
+        CAnimBlendAssocGroup_ZppContract badPost = post;
+        badPost.numAssociations = 1;
+        if (op_CAnimBlendAssocGroup_CreateAssociations_3(pre, badPost)) return false;
+    }
+    {
+        CAnimBlendAssociation_ZppContract pre{};
+        pre.nodes_card = 1u;
+        const auto post = apply_CAnimBlendAssociation_CAnimBlendAssociation(pre);
+        if (!op_CAnimBlendAssociation_CAnimBlendAssociation(pre, post)) return false;
+        CAnimBlendAssociation_ZppContract badPost = post;
+        badPost.nodes_card = 1u;
+        if (op_CAnimBlendAssociation_CAnimBlendAssociation(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

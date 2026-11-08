@@ -20,21 +20,89 @@ const CPP_KEYWORDS = new Set([
   'this','return','default','class','struct','union','operator','delete','new',
   'case','switch','if','else','for','while','do','int','float','bool','void',
   'char','short','long','unsigned','signed','const','static','virtual','inline',
-  'public','private','protected'
+  'public','private','protected','TRUE','FALSE','NULL','near','far','min','max',
+  'IN','OUT','ERROR','small','hyper'
 ]);
 
 function safeFieldName(raw) {
   return CPP_KEYWORDS.has(raw) ? `${raw}_field` : raw;
 }
 
-// Parse .zpp files in ../../zpp/<folder> and synthesize a compilable C++17
-// namespace zpp_<folder>_spec block with:
-//  - All enum branches and explicit `-- val(X) = V` integer/hex valuations
-//  - Symbolic & numeric bounded array resolution (`std::array<ElemT, N>`)
-//  - Real `where`-predicate enforcement in `checkInvariant()`
-//  - Operation schema transition verifiers (`ΔState` / `ΞState`)
-//  - Compile-time positive AND negative (`!bad.checkInvariant()`) static_asserts
-//    for every generated schema contract across all 22 folders
+const folders = [
+  'animation', 'audio', 'buildings', 'collision', 'control', 'core',
+  'docs', 'entities', 'extras', 'fakerw', 'leeds', 'math',
+  'modelinfo', 'objects', 'peds', 'renderer', 'rw', 'save',
+  'skel', 'text', 'vehicles', 'weapons'
+];
+
+// Pass 1: Build a global symbol table of resolved integer constants and enum
+// branch valuations across all .zpp files (and C++ headers in ../../src)
+// so imported symbolic bounds are resolved accurately without inventing a fallback.
+const globalSymValues = new Map();
+const srcRefRoot = path.resolve('../../src');
+if (fs.existsSync(srcRefRoot)) {
+  const walkSrc = (d) => {
+    for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, ent.name);
+      if (ent.isDirectory()) walkSrc(p);
+      else if (/\.(h|hpp|cpp)$/i.test(ent.name)) {
+        const txt = fs.readFileSync(p, 'utf8');
+        const defRe = /^\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/gm;
+        let dm;
+        while ((dm = defRe.exec(txt)) !== null) {
+          const v = Number(dm[2]);
+          if (v > 0 && v <= 4096 && !globalSymValues.has(dm[1])) {
+            globalSymValues.set(dm[1], v);
+          }
+        }
+      }
+    }
+  };
+  walkSrc(srcRefRoot);
+}
+
+for (const folder of folders) {
+  const dir = path.join(zppRoot, folder);
+  if (!fs.existsSync(dir)) continue;
+  const zfiles = fs.readdirSync(dir).filter(f => f.endsWith('.zpp')).sort();
+  for (const zf of zfiles) {
+    const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
+    const txtLines = txt.split(/\r?\n/);
+    for (let li = 0; li < txtLines.length; ++li) {
+      const dm = txtLines[li].match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/);
+      if (dm) {
+        const v = Number(dm[2]);
+        if (v > 0 && v <= 4096) globalSymValues.set(dm[1], v);
+      }
+      const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
+      if (em) {
+        const rawBranches = em[2]
+          .split('|')
+          .map(s => s.trim())
+          .filter(s => s && !s.startsWith('...'))
+          .map(s => s.replace(/[^A-Za-z0-9_]/g, '_'))
+          .filter(s => s && /^[A-Za-z_]/.test(s));
+        const uniq = [...new Set(rawBranches)];
+        const explicitVals = new Map();
+        let vj = li + 1;
+        while (vj < txtLines.length && txtLines[vj].trim().startsWith('-- val(')) {
+          const vm = txtLines[vj].match(/--\s*val\(([A-Za-z_]\w*)\)\s*=\s*(-?(?:0x[0-9a-fA-F]+|\d+))/);
+          if (vm) explicitVals.set(vm[1], Number(vm[2]));
+          vj++;
+        }
+        let nextVal = 0;
+        for (const b of uniq) {
+          if (explicitVals.has(b)) nextVal = explicitVals.get(b);
+          if (nextVal > 0 && nextVal <= 4096 && !globalSymValues.has(b)) {
+            globalSymValues.set(b, nextVal);
+          }
+          nextVal++;
+        }
+      }
+    }
+  }
+}
+
 function buildZppCppContractBlock(folder, insideClass = false) {
   const dir = path.join(zppRoot, folder);
   const zfiles = fs.existsSync(dir)
@@ -45,36 +113,26 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   let totalEnums = 0;
   const sampleEnums = [];
   const sampleSchemas = [];
-  const sampleOps = [];
+  const queryOps = [];
+  const deltaOps = [];
+
+  // Local per-folder symbol table overrides (so module-local enums like NUM_GANGS = 9 take precedence)
+  const localSymValues = new Map(globalSymValues);
 
   for (const zf of zfiles) {
     const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
     const txtLines = txt.split(/\r?\n/);
 
-    // Collect symbolic constants & enum values in this file for symbolic array bounds
-    const symValues = new Map([
-      ['MAX_LINES', 8], ['MAX_STR_LEN', 40], ['NUM_CARGENS', 16],
-      ['NUM_CRANES', 8], ['MAX_CARDS', 2], ['NUM_RADIOS', 10]
-    ]);
-    for (const l of txtLines) {
-      const dm = l.match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?/);
-      if (dm && Number(dm[2]) > 0 && Number(dm[2]) <= 256) {
-        symValues.set(dm[1], Number(dm[2]));
-      }
-      const vm = l.match(/--\s*val\(([A-Za-z_]\w*)\)\s*=\s*(\d+)/);
-      if (vm && Number(vm[2]) > 0 && Number(vm[2]) <= 256) {
-        symValues.set(vm[1], Number(vm[2]));
-      }
-    }
-
     // 1. Parse enums with full branch lists and explicit `-- val(BRANCH) = V` annotations
     for (let li = 0; li < txtLines.length; ++li) {
+      const dm = txtLines[li].match(/--\s*#define\s+([A-Za-z_]\w*)\s+\(?(\d+)\)?\b/);
+      if (dm && Number(dm[2]) > 0 && Number(dm[2]) <= 4096) {
+        localSymValues.set(dm[1], Number(dm[2]));
+      }
       const em = txtLines[li].match(/^([A-Za-z_]\w*)\s*::=\s*(.+)$/);
       if (!em) continue;
       totalEnums++;
-      if (sampleEnums.length >= 6) continue;
       const ename = em[1].replace(/[^A-Za-z0-9_]/g, '_');
-      if (sampleEnums.some(e => e.ename === ename)) continue;
       const rawBranches = em[2]
         .split('|')
         .map(s => s.trim())
@@ -88,22 +146,22 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       let vj = li + 1;
       while (vj < txtLines.length && txtLines[vj].trim().startsWith('-- val(')) {
         const vm = txtLines[vj].match(/--\s*val\(([A-Za-z_]\w*)\)\s*=\s*(-?(?:0x[0-9a-fA-F]+|\d+))/);
-        if (vm) {
-          explicitVals.set(vm[1], Number(vm[2]));
-        }
+        if (vm) explicitVals.set(vm[1], Number(vm[2]));
         vj++;
       }
 
       let nextVal = 0;
       const valuedBranches = uniq.map(b => {
-        if (explicitVals.has(b)) {
-          nextVal = explicitVals.get(b);
-        }
+        if (explicitVals.has(b)) nextVal = explicitVals.get(b);
         const cur = nextVal;
+        if (cur > 0 && cur <= 4096) localSymValues.set(b, cur);
         nextVal = cur + 1;
         return { name: b, val: cur };
       });
-      sampleEnums.push({ ename, branches: valuedBranches, source: zf });
+
+      if (sampleEnums.length < 6 && !sampleEnums.some(e => e.ename === ename)) {
+        sampleEnums.push({ ename, branches: valuedBranches, source: zf });
+      }
     }
 
     // 2. Parse state & operation schemas
@@ -113,33 +171,93 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       totalSchemas++;
       const sname = sm[1].replace(/[^A-Za-z0-9_]/g, '_');
       const decls = sm[2].split(/\r?\n/);
-      const whereLines = sm[3].split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('--'));
+      const rawWhereLines = sm[3].split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const whereLines = rawWhereLines.filter(l => !l.startsWith('--'));
 
       // Check if this is an Operation Schema (contains ΔTarget or ΞTarget)
       const deltaMatch = sm[2].match(/^\s+([ΔΞ])([A-Za-z_]\w*)/m);
       if (deltaMatch) {
         const mode = deltaMatch[1];
-        const targetState = deltaMatch[2];
-        if (
-          sampleOps.length < 6 &&
-          sampleSchemas.some(s => s.sname === targetState) &&
-          !sampleOps.some(o => o.opName === sname)
-        ) {
-          sampleOps.push({
-            opName: sname,
-            isQuery: mode === 'Ξ',
-            targetState,
-            source: zf
-          });
+        const targetSchema = sampleSchemas.find(s => s.sname === deltaMatch[2]);
+        if (!targetSchema) continue;
+
+        if (mode === 'Ξ') {
+          if (queryOps.length < 24 && !queryOps.some(o => o.opName === sname)) {
+            queryOps.push({
+              opName: sname,
+              targetState: targetSchema.sname,
+              source: zf
+            });
+          }
+        } else {
+          // For ΔState operations, require a concrete `-- State update: field' = val`
+          // on a field that exists in targetSchema so the pre->post transition is genuinely verified!
+          for (const wl of rawWhereLines) {
+            const um = wl.match(/^--\s*State update:\s*([A-Za-z_]\w*)'\s*=\s*(.+)$/);
+            if (!um) continue;
+            const lhsRaw = um[1];
+            const rhsRaw = um[2].trim();
+            const f = targetSchema.fields.find(fl => fl.rawName === lhsRaw);
+            if (!f) continue;
+
+            if (f.kind === 'opt_ref' && rhsRaw === '∅') {
+              if (deltaOps.length < 6 && !deltaOps.some(o => o.opName === sname)) {
+                deltaOps.push({
+                  opName: sname,
+                  targetState: targetSchema.sname,
+                  field: f.fname,
+                  preInit: `pre.${f.fname} = 1u;`,
+                  applyExpr: `post.${f.fname} = 0u;`,
+                  postCond: `(post.${f.fname} == 0u)`,
+                  badPostMut: `badPost.${f.fname} = 1u;`,
+                  source: zf
+                });
+              }
+              break;
+            } else if (f.kind === 'scalar_int' && /^-?\d+$/.test(rhsRaw) && Number(rhsRaw) >= 0) {
+              const nv = Number(rhsRaw);
+              const altVal = nv === 0 ? 1 : 0;
+              if (deltaOps.length < 6 && !deltaOps.some(o => o.opName === sname)) {
+                deltaOps.push({
+                  opName: sname,
+                  targetState: targetSchema.sname,
+                  field: f.fname,
+                  preInit: `pre.${f.fname} = ${altVal};`,
+                  applyExpr: `post.${f.fname} = ${nv};`,
+                  postCond: `(post.${f.fname} == ${nv})`,
+                  badPostMut: `badPost.${f.fname} = ${altVal};`,
+                  source: zf
+                });
+              }
+              break;
+            } else if (f.kind === 'scalar_bool' && (rhsRaw === 'true' || rhsRaw === 'false')) {
+              const altBool = rhsRaw === 'true' ? 'false' : 'true';
+              if (deltaOps.length < 6 && !deltaOps.some(o => o.opName === sname)) {
+                deltaOps.push({
+                  opName: sname,
+                  targetState: targetSchema.sname,
+                  field: f.fname,
+                  preInit: `pre.${f.fname} = ${altBool};`,
+                  applyExpr: `post.${f.fname} = ${rhsRaw};`,
+                  postCond: `(post.${f.fname} == ${rhsRaw})`,
+                  badPostMut: `badPost.${f.fname} = ${altBool};`,
+                  source: zf
+                });
+              }
+              break;
+            }
+          }
         }
         continue;
       }
 
-      if (sampleSchemas.length >= 6 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
+      if (sampleSchemas.length >= 16 || sname.includes('_') || sampleSchemas.some(s => s.sname === sname)) {
         continue;
       }
 
       const fields = new Map();
+      let hasUnresolvedField = false;
+
       for (const d of decls) {
         const fm = d.match(/^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/);
         if (!fm) continue;
@@ -152,9 +270,16 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         if (arrMatch) {
           const elemZ = arrMatch[1];
           const rawDim = arrMatch[2].trim();
-          const len = /^\d+$/.test(rawDim)
-            ? Number(rawDim)
-            : (symValues.get(rawDim) || 8);
+          let len = null;
+          if (/^\d+$/.test(rawDim)) {
+            len = Number(rawDim);
+          } else if (localSymValues.has(rawDim)) {
+            len = localSymValues.get(rawDim);
+          } else {
+            // Never invent a fallback capacity when a symbolic dimension cannot be resolved
+            hasUnresolvedField = true;
+            break;
+          }
           let elemC = 'int32_t';
           if (elemZ === 'ℝ') elemC = 'float';
           else if (elemZ === '𝔹') elemC = 'bool';
@@ -189,13 +314,12 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         }
       }
 
-      if (fields.size === 0) continue;
+      if (hasUnresolvedField || fields.size === 0) continue;
 
       const cppPreds = [];
       let negMutation = null;
       let allPredsSupported = true;
 
-      // Always enforce bounded-array cardinality for every `seq T -- bounded array [N]` field
       for (const f of fields.values()) {
         if (f.kind === 'array') {
           cppPreds.push(`(${f.fname}_len == ${f.len}u && ${f.fname}.size() == ${f.len}u)`);
@@ -210,7 +334,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
           if ((m = w.match(/^#([A-Za-z_]\w*)\s*=\s*(\d+)$/))) {
             const f = fields.get(m[1]);
             const n = Number(m[2]);
-            if (f && f.kind === 'array') {
+            if (f && f.kind === 'array' && f.len === n) {
               const expr = `(${f.fname}_len == ${n}u && ${f.fname}.size() == ${n}u)`;
               if (!cppPreds.includes(expr)) cppPreds.push(expr);
               if (!negMutation) negMutation = `bad.${f.fname}_len = 0u;`;
@@ -252,11 +376,16 @@ function buildZppCppContractBlock(folder, insideClass = false) {
               allPredsSupported = false;
             }
           } else if ((m = w.match(/^([A-Za-z_]\w*)\s*∈\s*ADDRESS$/))) {
-            const f = fields.get(m[1]);
-            if (f) {
-              cppPreds.push(`(${f.fname} >= 0)`);
-              if (!negMutation) negMutation = `bad.${f.fname} = -1;`;
+            // Model `instance_addr ∈ ADDRESS` explicitly even when omitted from the field list
+            const addrName = m[1];
+            let f = fields.get(addrName);
+            if (!f) {
+              const safeAddr = safeFieldName(addrName);
+              f = { rawName: addrName, fname: safeAddr, kind: 'scalar_int', ct: 'int64_t', defVal: '0', zt: 'ADDRESS' };
+              fields.set(addrName, f);
             }
+            cppPreds.push(`(${f.fname} >= 0)`);
+            if (!negMutation) negMutation = `bad.${f.fname} = -1;`;
           } else {
             allPredsSupported = false;
           }
@@ -324,18 +453,23 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     out.push(`};`);
   }
 
-  for (const op of sampleOps) {
-    out.push(`// Operation Schema Contract (${op.isQuery ? 'Ξ' : 'Δ'}${op.targetState}) from zpp/${folder}/${op.source}`);
-    if (op.isQuery) {
-      out.push(`constexpr bool op_${op.opName}(const ${op.targetState}_ZppContract& state) {`);
-      out.push(`    return state.checkInvariant();`);
-      out.push(`}`);
-    } else {
-      out.push(`constexpr bool op_${op.opName}(${op.targetState}_ZppContract& state) {`);
-      out.push(`    if (!state.checkInvariant()) return false;`);
-      out.push(`    return state.checkInvariant();`);
-      out.push(`}`);
-    }
+  for (const qop of queryOps) {
+    out.push(`// Query Operation Schema Contract (Ξ${qop.targetState}) from zpp/${folder}/${qop.source}`);
+    out.push(`constexpr bool op_${qop.opName}(const ${qop.targetState}_ZppContract& state) {`);
+    out.push(`    return state.checkInvariant();`);
+    out.push(`}`);
+  }
+
+  for (const dop of deltaOps) {
+    out.push(`// Delta Operation Schema Contract (Δ${dop.targetState}) from zpp/${folder}/${dop.source}`);
+    out.push(`constexpr bool op_${dop.opName}(const ${dop.targetState}_ZppContract& pre, const ${dop.targetState}_ZppContract& post) {`);
+    out.push(`    return pre.checkInvariant() && post.checkInvariant() && ${dop.postCond};`);
+    out.push(`}`);
+    out.push(`constexpr ${dop.targetState}_ZppContract apply_${dop.opName}(const ${dop.targetState}_ZppContract& pre) {`);
+    out.push(`    ${dop.targetState}_ZppContract post = pre;`);
+    out.push(`    ${dop.applyExpr}`);
+    out.push(`    return post;`);
+    out.push(`}`);
   }
 
   out.push(`constexpr bool verify_${folder}_zpp_invariants() {`);
@@ -348,10 +482,21 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     out.push(`        if (bad.checkInvariant()) return false;`);
     out.push(`    }`);
   }
-  for (const op of sampleOps) {
+  for (const qop of queryOps) {
     out.push(`    {`);
-    out.push(`        ${op.targetState}_ZppContract st{};`);
-    out.push(`        if (!op_${op.opName}(st)) return false;`);
+    out.push(`        const ${qop.targetState}_ZppContract st{};`);
+    out.push(`        if (!op_${qop.opName}(st)) return false;`);
+    out.push(`    }`);
+  }
+  for (const dop of deltaOps) {
+    out.push(`    {`);
+    out.push(`        ${dop.targetState}_ZppContract pre{};`);
+    out.push(`        ${dop.preInit}`);
+    out.push(`        const auto post = apply_${dop.opName}(pre);`);
+    out.push(`        if (!op_${dop.opName}(pre, post)) return false;`);
+    out.push(`        ${dop.targetState}_ZppContract badPost = post;`);
+    out.push(`        ${dop.badPostMut}`);
+    out.push(`        if (op_${dop.opName}(pre, badPost)) return false;`);
     out.push(`    }`);
   }
   out.push(`    return kZppModuleCount >= 0 && kZppSchemaCount >= 0;`);
@@ -359,6 +504,12 @@ function buildZppCppContractBlock(folder, insideClass = false) {
   out.push(`static_assert(verify_${folder}_zpp_invariants(), "Z++ formal contract invariant failed for ${folder}");`);
   if (folder === 'vehicles' && sampleEnums.some(e => e.ename === 'eCarNodes')) {
     out.push(`static_assert(static_cast<int>(eCarNodes::CAR_WHEEL_RF_v) == 1 && static_cast<int>(eCarNodes::NUM_CAR_NODES_v) == 20, "eCarNodes Z++ valuation mismatch");`);
+  }
+  if (folder === 'peds' && sampleSchemas.some(s => s.sname === 'CGangs')) {
+    out.push(`static_assert(CGangs_ZppContract{}.GangAttackWithCops.size() == 9u, "CGangs NUM_GANGS must be 9");`);
+  }
+  if (folder === 'math' && queryOps.some(q => q.opName === 'CVector2D_Magnitude_2')) {
+    out.push(`static_assert(op_CVector2D_Magnitude_2(CVector2D_ZppContract{}), "CVector2D_Magnitude_2 query contract must hold");`);
   }
   out.push(`} // namespace zpp_${folder}_spec`);
   out.push(`#endif // ${guard}`);
@@ -392,13 +543,6 @@ const L_v20cns         = findLine(l => l === 'struct GTAngelAGI;', L_v20cnsFwd);
 const L_v20save        = findLine(l => l === 'namespace v20save {', L_v20cns);
 const L_gtangelStruct  = findLine(l => l === 'struct GTAngelAGI {', L_v20save);
 const L_renderV15Frame = findLine(l => l.startsWith('static void RenderV15Frame('), L_gtangelStruct);
-
-const folders = [
-  'animation', 'audio', 'buildings', 'collision', 'control', 'core',
-  'docs', 'entities', 'extras', 'fakerw', 'leeds', 'math',
-  'modelinfo', 'objects', 'peds', 'renderer', 'rw', 'save',
-  'skel', 'text', 'vehicles', 'weapons'
-];
 
 for (const rootDir of ['src', '../src']) {
   for (const f of folders) {

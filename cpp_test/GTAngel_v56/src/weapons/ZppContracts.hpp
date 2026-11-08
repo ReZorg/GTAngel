@@ -38,21 +38,6 @@ struct CBulletInfo_ZppContract {
         return (m_pSource_card <= 1u);
     }
 };
-// State Schema Contract from zpp/weapons/ProjectileInfo.zpp
-struct CProjectileInfo_ZppContract {
-    int32_t m_eWeaponType{0}; // Z++: eWeaponType
-    uint8_t m_pSource_card{0u}; // Z++: Ref[CEntity]
-    int64_t m_nExplosionTime{0}; // Z++: ℕ
-    bool m_bInUse{false}; // Z++: 𝔹
-    int32_t m_vecPos{0}; // Z++: CVector
-    std::array<int32_t, 8> ms_apProjectile{}; // Z++: seq Ref[CProjectile]  -- bounded array [NUM_PROJECTILES]
-    size_t ms_apProjectile_len{8u}; // Z++ cardinality #ms_apProjectile
-    constexpr bool checkInvariant() const {
-        return (ms_apProjectile_len == 8u && ms_apProjectile.size() == 8u)
-            && (m_pSource_card <= 1u)
-            && (m_nExplosionTime >= 0);
-    }
-};
 // State Schema Contract from zpp/weapons/ShotInfo.zpp
 struct CShotInfo_ZppContract {
     int32_t m_weapon{0}; // Z++: eWeaponType
@@ -108,35 +93,59 @@ struct WeaponTypeModuleState_ZppContract {
             && (source_lines == 99);
     }
 };
-// Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
-constexpr bool op_CBulletInfo_Initialise(CBulletInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
+constexpr bool op_CBulletInfo_Initialise(const CBulletInfo_ZppContract& pre, const CBulletInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_bInUse == false);
 }
-// Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
-constexpr bool op_CBulletInfo_Shutdown_2(CBulletInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CBulletInfo_ZppContract apply_CBulletInfo_Initialise(const CBulletInfo_ZppContract& pre) {
+    CBulletInfo_ZppContract post = pre;
+    post.m_bInUse = false;
+    return post;
 }
-// Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
-constexpr bool op_CBulletInfo_AddBullet_3(CBulletInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCShotInfo) from zpp/weapons/ShotInfo.zpp
+constexpr bool op_CShotInfo_Initialise(const CShotInfo_ZppContract& pre, const CShotInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_inUse == false);
 }
-// Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
-constexpr bool op_CBulletInfo_Update_4(CBulletInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CShotInfo_ZppContract apply_CShotInfo_Initialise(const CShotInfo_ZppContract& pre) {
+    CShotInfo_ZppContract post = pre;
+    post.m_inUse = false;
+    return post;
 }
-// Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
-constexpr bool op_CBulletInfo_TestForSniperBullet_5(CBulletInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCShotInfo) from zpp/weapons/ShotInfo.zpp
+constexpr bool op_CShotInfo_AddShot(const CShotInfo_ZppContract& pre, const CShotInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_inUse == true);
 }
-// Operation Schema Contract (ΔCBulletInfo) from zpp/weapons/BulletInfo.zpp
-constexpr bool op_CBulletInfo_Shutdown(CBulletInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CShotInfo_ZppContract apply_CShotInfo_AddShot(const CShotInfo_ZppContract& pre) {
+    CShotInfo_ZppContract post = pre;
+    post.m_inUse = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCWeapon) from zpp/weapons/Weapon.zpp
+constexpr bool op_CWeapon_CWeapon(const CWeapon_ZppContract& pre, const CWeapon_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nAmmoInClip == 0);
+}
+constexpr CWeapon_ZppContract apply_CWeapon_CWeapon(const CWeapon_ZppContract& pre) {
+    CWeapon_ZppContract post = pre;
+    post.m_nAmmoInClip = 0;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCWeapon) from zpp/weapons/Weapon.zpp
+constexpr bool op_CWeapon_InitialiseWeapons(const CWeapon_ZppContract& pre, const CWeapon_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.bPhotographHasBeenTaken == false);
+}
+constexpr CWeapon_ZppContract apply_CWeapon_InitialiseWeapons(const CWeapon_ZppContract& pre) {
+    CWeapon_ZppContract post = pre;
+    post.bPhotographHasBeenTaken = false;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCWeapon) from zpp/weapons/Weapon.zpp
+constexpr bool op_CWeapon_Initialise(const CWeapon_ZppContract& pre, const CWeapon_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nAmmoInClip == 0);
+}
+constexpr CWeapon_ZppContract apply_CWeapon_Initialise(const CWeapon_ZppContract& pre) {
+    CWeapon_ZppContract post = pre;
+    post.m_nAmmoInClip = 0;
+    return post;
 }
 constexpr bool verify_weapons_zpp_invariants() {
     {
@@ -144,13 +153,6 @@ constexpr bool verify_weapons_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         CBulletInfo_ZppContract bad{};
         bad.m_pSource_card = 2u;
-        if (bad.checkInvariant()) return false;
-    }
-    {
-        CProjectileInfo_ZppContract valid{};
-        if (!valid.checkInvariant()) return false;
-        CProjectileInfo_ZppContract bad{};
-        bad.ms_apProjectile_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -182,28 +184,58 @@ constexpr bool verify_weapons_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CBulletInfo_ZppContract st{};
-        if (!op_CBulletInfo_Initialise(st)) return false;
+        CBulletInfo_ZppContract pre{};
+        pre.m_bInUse = true;
+        const auto post = apply_CBulletInfo_Initialise(pre);
+        if (!op_CBulletInfo_Initialise(pre, post)) return false;
+        CBulletInfo_ZppContract badPost = post;
+        badPost.m_bInUse = true;
+        if (op_CBulletInfo_Initialise(pre, badPost)) return false;
     }
     {
-        CBulletInfo_ZppContract st{};
-        if (!op_CBulletInfo_Shutdown_2(st)) return false;
+        CShotInfo_ZppContract pre{};
+        pre.m_inUse = true;
+        const auto post = apply_CShotInfo_Initialise(pre);
+        if (!op_CShotInfo_Initialise(pre, post)) return false;
+        CShotInfo_ZppContract badPost = post;
+        badPost.m_inUse = true;
+        if (op_CShotInfo_Initialise(pre, badPost)) return false;
     }
     {
-        CBulletInfo_ZppContract st{};
-        if (!op_CBulletInfo_AddBullet_3(st)) return false;
+        CShotInfo_ZppContract pre{};
+        pre.m_inUse = false;
+        const auto post = apply_CShotInfo_AddShot(pre);
+        if (!op_CShotInfo_AddShot(pre, post)) return false;
+        CShotInfo_ZppContract badPost = post;
+        badPost.m_inUse = false;
+        if (op_CShotInfo_AddShot(pre, badPost)) return false;
     }
     {
-        CBulletInfo_ZppContract st{};
-        if (!op_CBulletInfo_Update_4(st)) return false;
+        CWeapon_ZppContract pre{};
+        pre.m_nAmmoInClip = 1;
+        const auto post = apply_CWeapon_CWeapon(pre);
+        if (!op_CWeapon_CWeapon(pre, post)) return false;
+        CWeapon_ZppContract badPost = post;
+        badPost.m_nAmmoInClip = 1;
+        if (op_CWeapon_CWeapon(pre, badPost)) return false;
     }
     {
-        CBulletInfo_ZppContract st{};
-        if (!op_CBulletInfo_TestForSniperBullet_5(st)) return false;
+        CWeapon_ZppContract pre{};
+        pre.bPhotographHasBeenTaken = true;
+        const auto post = apply_CWeapon_InitialiseWeapons(pre);
+        if (!op_CWeapon_InitialiseWeapons(pre, post)) return false;
+        CWeapon_ZppContract badPost = post;
+        badPost.bPhotographHasBeenTaken = true;
+        if (op_CWeapon_InitialiseWeapons(pre, badPost)) return false;
     }
     {
-        CBulletInfo_ZppContract st{};
-        if (!op_CBulletInfo_Shutdown(st)) return false;
+        CWeapon_ZppContract pre{};
+        pre.m_nAmmoInClip = 1;
+        const auto post = apply_CWeapon_Initialise(pre);
+        if (!op_CWeapon_Initialise(pre, post)) return false;
+        CWeapon_ZppContract badPost = post;
+        badPost.m_nAmmoInClip = 1;
+        if (op_CWeapon_Initialise(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

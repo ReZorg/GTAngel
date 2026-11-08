@@ -71,8 +71,10 @@ struct CPager_ZppContract {
     int32_t m_nNumDisplayLetters{0}; // Z++: ℤ
     std::array<int32_t, 8> m_messages{}; // Z++: seq PagerMessage  -- bounded array [NUMPAGERMESSAGES]
     size_t m_messages_len{8u}; // Z++ cardinality #m_messages
+    int64_t instance_addr{0}; // Z++: ADDRESS
     constexpr bool checkInvariant() const {
-        return (m_messages_len == 8u && m_messages.size() == 8u);
+        return (m_messages_len == 8u && m_messages.size() == 8u)
+            && (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/text/Text.zpp
@@ -82,35 +84,61 @@ struct CKeyEntry_ZppContract {
         return (instance_addr >= 0);
     }
 };
-// Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
-constexpr bool op_CPager_Init(CPager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// State Schema Contract from zpp/text/Text.zpp
+struct CKeyArray_ZppContract {
+    uint8_t entries_card{0u}; // Z++: Ref[CKeyEntry]
+    int32_t numEntries{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (entries_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/text/Text.zpp
+struct CData_ZppContract {
+    int32_t chars{0}; // Z++: seq CHAR
+    int32_t numChars{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/text/Text.zpp
+struct CMissionTextOffsets_ZppContract {
+    int64_t offset{0}; // Z++: ℕ
+    std::array<int32_t, 90> data{}; // Z++: seq Entry  -- bounded array [MAX_MISSION_TEXTS]
+    size_t data_len{90u}; // Z++ cardinality #data
+    int64_t size{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (data_len == 90u && data.size() == 90u)
+            && (offset >= 0)
+            && (size >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
+constexpr bool op_CPager_Init(const CPager_ZppContract& pre, const CPager_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_nNumDisplayLetters == 8);
 }
-// Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
-constexpr bool op_CPager_Process_2(CPager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CPager_ZppContract apply_CPager_Init(const CPager_ZppContract& pre) {
+    CPager_ZppContract post = pre;
+    post.m_nNumDisplayLetters = 8;
+    return post;
 }
-// Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
-constexpr bool op_CPager_Display_3(CPager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCKeyArray) from zpp/text/Text.zpp
+constexpr bool op_CKeyArray_Unload(const CKeyArray_ZppContract& pre, const CKeyArray_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.entries_card == 0u);
 }
-// Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
-constexpr bool op_CPager_AddMessage_4(CPager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CKeyArray_ZppContract apply_CKeyArray_Unload(const CKeyArray_ZppContract& pre) {
+    CKeyArray_ZppContract post = pre;
+    post.entries_card = 0u;
+    return post;
 }
-// Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
-constexpr bool op_CPager_AddMessageWithNumber_5(CPager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCData) from zpp/text/Text.zpp
+constexpr bool op_CData_Unload(const CData_ZppContract& pre, const CData_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.numChars == 0);
 }
-// Operation Schema Contract (ΔCPager) from zpp/text/Pager.zpp
-constexpr bool op_CPager_ClearMessages_6(CPager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CData_ZppContract apply_CData_Unload(const CData_ZppContract& pre) {
+    CData_ZppContract post = pre;
+    post.numChars = 0;
+    return post;
 }
 constexpr bool verify_text_zpp_invariants() {
     {
@@ -156,28 +184,52 @@ constexpr bool verify_text_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CPager_ZppContract st{};
-        if (!op_CPager_Init(st)) return false;
+        CKeyArray_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CKeyArray_ZppContract bad{};
+        bad.entries_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CPager_ZppContract st{};
-        if (!op_CPager_Process_2(st)) return false;
+        CData_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CData_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CPager_ZppContract st{};
-        if (!op_CPager_Display_3(st)) return false;
+        CMissionTextOffsets_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CMissionTextOffsets_ZppContract bad{};
+        bad.data_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CPager_ZppContract st{};
-        if (!op_CPager_AddMessage_4(st)) return false;
+        CPager_ZppContract pre{};
+        pre.m_nNumDisplayLetters = 0;
+        const auto post = apply_CPager_Init(pre);
+        if (!op_CPager_Init(pre, post)) return false;
+        CPager_ZppContract badPost = post;
+        badPost.m_nNumDisplayLetters = 0;
+        if (op_CPager_Init(pre, badPost)) return false;
     }
     {
-        CPager_ZppContract st{};
-        if (!op_CPager_AddMessageWithNumber_5(st)) return false;
+        CKeyArray_ZppContract pre{};
+        pre.entries_card = 1u;
+        const auto post = apply_CKeyArray_Unload(pre);
+        if (!op_CKeyArray_Unload(pre, post)) return false;
+        CKeyArray_ZppContract badPost = post;
+        badPost.entries_card = 1u;
+        if (op_CKeyArray_Unload(pre, badPost)) return false;
     }
     {
-        CPager_ZppContract st{};
-        if (!op_CPager_ClearMessages_6(st)) return false;
+        CData_ZppContract pre{};
+        pre.numChars = 1;
+        const auto post = apply_CData_Unload(pre);
+        if (!op_CData_Unload(pre, post)) return false;
+        CData_ZppContract badPost = post;
+        badPost.numChars = 1;
+        if (op_CData_Unload(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

@@ -103,36 +103,119 @@ struct tHelicopterSampleData_ZppContract {
         return (m_bBaseVolume >= 0);
     }
 };
-// Operation Schema Contract (ΔcAudioCollision) from zpp/audio/AudioCollision.zpp
-constexpr bool op_cAudioCollision_cAudioCollision(cAudioCollision_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔcAudioCollision) from zpp/audio/AudioCollision.zpp
-constexpr bool op_cAudioCollision_Reset_2(cAudioCollision_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔcAudioCollision) from zpp/audio/AudioCollision.zpp
-constexpr bool op_cAudioCollision_CVector_3(cAudioCollision_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔcAudioCollisionManager) from zpp/audio/AudioCollision.zpp
-constexpr bool op_cAudioCollisionManager_cAudioCollisionManager(cAudioCollisionManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔcAudioCollisionManager) from zpp/audio/AudioCollision.zpp
-constexpr bool op_cAudioCollisionManager_AddCollisionToRequestedQueue_2(cAudioCollisionManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔcAudioCollisionManager) from zpp/audio/AudioCollision.zpp
-constexpr bool op_cAudioCollisionManager_AddCollisionToRequestedQueue(cAudioCollisionManager_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
+// State Schema Contract from zpp/audio/AudioManager.zpp
+struct tPedComment_ZppContract {
+    int64_t m_nSampleIndex{0}; // Z++: ℕ
+    int32_t m_nEntityIndex{0}; // Z++: ℤ
+    int32_t m_vecPos{0}; // Z++: CVector
+    float m_fDistance{0.0f}; // Z++: ℝ
+    int64_t m_nVolume{0}; // Z++: ℕ
+    int32_t m_nLoadingTimeout{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (m_nSampleIndex >= 0)
+            && (m_nVolume >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/AudioManager.zpp
+struct cPedParams_ZppContract {
+    int32_t m_bDistanceCalculated{0}; // Z++: bool8
+    float m_fDistance{0.0f}; // Z++: ℝ
+    uint8_t m_pPed_card{0u}; // Z++: Ref[CPed]
+    constexpr bool checkInvariant() const {
+        return (m_pPed_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/audio/AudioManager.zpp
+struct cVehicleParams_ZppContract {
+    int32_t m_VehicleType{0}; // Z++: ℤ
+    int32_t m_bDistanceCalculated{0}; // Z++: bool8
+    float m_fDistance{0.0f}; // Z++: ℝ
+    uint8_t m_pVehicle_card{0u}; // Z++: Ref[CVehicle]
+    uint8_t m_pTransmission_card{0u}; // Z++: Ref[cTransmission]
+    int64_t m_nIndex{0}; // Z++: ℕ
+    float m_fVelocityChange{0.0f}; // Z++: ℝ
+    constexpr bool checkInvariant() const {
+        return (m_pVehicle_card <= 1u)
+            && (m_pTransmission_card <= 1u)
+            && (m_nIndex >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/AudioSamples.zpp
+struct AudioSamplesModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{17962}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 17962);
+    }
+};
+// State Schema Contract from zpp/audio/AudioScriptObject.zpp
+struct cAudioScriptObject_ZppContract {
+    int32_t AudioId{0}; // Z++: ℤ
+    int32_t Posn{0}; // Z++: CVector
+    int32_t AudioEntity{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/DMAudio.zpp
+struct cDMAudio_ZppContract {
+    int32_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/MusicManager.zpp
+struct tStreamedSample_ZppContract {
+    int64_t m_nLength{0}; // Z++: ℕ
+    int64_t m_nPosition{0}; // Z++: ℕ
+    int64_t m_nLastPosCheckTimer{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (m_nLength >= 0)
+            && (m_nPosition >= 0)
+            && (m_nLastPosCheckTimer >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/PolRadio.zpp
+struct cAMCrime_ZppContract {
+    int32_t type{0}; // Z++: ℤ
+    int32_t position{0}; // Z++: CVector
+    int64_t timer{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (timer >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/PolRadio.zpp
+struct cPoliceRadioQueue_ZppContract {
+    std::array<uint32_t, 60> m_aSamples{}; // Z++: seq ℕ  -- bounded array [POLICE_RADIO_QUEUE_MAX_SAMPLES]
+    size_t m_aSamples_len{60u}; // Z++ cardinality #m_aSamples
+    int64_t m_nSamplesInQueue{0}; // Z++: ℕ
+    int64_t m_nAddOffset{0}; // Z++: ℕ
+    int64_t m_nRemoveOffset{0}; // Z++: ℕ
+    int32_t TRUE_field{0}; // Z++: return
+    int32_t sample{0}; // Z++: return
+    constexpr bool checkInvariant() const {
+        return (m_aSamples_len == 60u && m_aSamples.size() == 60u)
+            && (m_nSamplesInQueue >= 0)
+            && (m_nAddOffset >= 0)
+            && (m_nRemoveOffset >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/sampman.zpp
+struct tSample_ZppContract {
+    int64_t nOffset{0}; // Z++: ℕ
+    int64_t nSize{0}; // Z++: ℕ
+    int64_t nFrequency{0}; // Z++: ℕ
+    int64_t nLoopStart{0}; // Z++: ℕ
+    int32_t nLoopEnd{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (nOffset >= 0)
+            && (nSize >= 0)
+            && (nFrequency >= 0)
+            && (nLoopStart >= 0);
+    }
+};
 constexpr bool verify_audio_zpp_invariants() {
     {
         cAudioCollision_ZppContract valid{};
@@ -177,28 +260,74 @@ constexpr bool verify_audio_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        cAudioCollision_ZppContract st{};
-        if (!op_cAudioCollision_cAudioCollision(st)) return false;
+        tPedComment_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tPedComment_ZppContract bad{};
+        bad.m_nSampleIndex = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        cAudioCollision_ZppContract st{};
-        if (!op_cAudioCollision_Reset_2(st)) return false;
+        cPedParams_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cPedParams_ZppContract bad{};
+        bad.m_pPed_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        cAudioCollision_ZppContract st{};
-        if (!op_cAudioCollision_CVector_3(st)) return false;
+        cVehicleParams_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cVehicleParams_ZppContract bad{};
+        bad.m_pVehicle_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        cAudioCollisionManager_ZppContract st{};
-        if (!op_cAudioCollisionManager_cAudioCollisionManager(st)) return false;
+        AudioSamplesModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        AudioSamplesModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
     }
     {
-        cAudioCollisionManager_ZppContract st{};
-        if (!op_cAudioCollisionManager_AddCollisionToRequestedQueue_2(st)) return false;
+        cAudioScriptObject_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cAudioScriptObject_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        cAudioCollisionManager_ZppContract st{};
-        if (!op_cAudioCollisionManager_AddCollisionToRequestedQueue(st)) return false;
+        cDMAudio_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cDMAudio_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tStreamedSample_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tStreamedSample_ZppContract bad{};
+        bad.m_nLength = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cAMCrime_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cAMCrime_ZppContract bad{};
+        bad.timer = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        cPoliceRadioQueue_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        cPoliceRadioQueue_ZppContract bad{};
+        bad.m_aSamples_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tSample_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tSample_ZppContract bad{};
+        bad.nOffset = -1;
+        if (bad.checkInvariant()) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

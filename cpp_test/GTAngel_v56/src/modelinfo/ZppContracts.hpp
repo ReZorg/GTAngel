@@ -60,6 +60,33 @@ struct CClumpModelInfo_ZppContract {
         return (m_clump_card <= 1u);
     }
 };
+// State Schema Contract from zpp/modelinfo/MloModelInfo.zpp
+struct CMloModelInfo_ZppContract {
+    float drawDist{0.0f}; // Z++: ℝ
+    int32_t firstInstance{0}; // Z++: ℤ
+    int32_t lastInstance{0}; // Z++: ℤ
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CMloModelInfo
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/modelinfo/ModelIndices.zpp
+struct CModelIndices_ZppContract {
+    int32_t TRAFFICLIGHTS{0}; // Z++: ℤ
+    int32_t TLIGHT_POST{0}; // Z++: ℤ
+    int32_t TLIGHT_WALK{0}; // Z++: ℤ
+    int32_t TLIGHT_BOX1{0}; // Z++: ℤ
+    int32_t TLIGHT_BOX2{0}; // Z++: ℤ
+    int32_t TRAFFICLIGHTS_VERTICAL{0}; // Z++: ℤ
+    int32_t TRAFFICLIGHTS_MIAMI{0}; // Z++: ℤ
+    int32_t TRAFFICLIGHTS_TWOVERTICAL{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/modelinfo/PedModelInfo.zpp
 struct LimbCBarg_ZppContract {
     uint8_t mi_card{0u}; // Z++: Ref[CPedModelInfo]
@@ -73,6 +100,18 @@ struct LimbCBarg_ZppContract {
     }
 };
 // State Schema Contract from zpp/modelinfo/PedModelInfo.zpp
+struct ColNodeInfo_ZppContract {
+    int32_t name{0}; // Z++: seq CHAR
+    int32_t pedNode{0}; // Z++: ℤ
+    int32_t pieceType{0}; // Z++: ℤ
+    float z{0.0f}; // Z++: ℝ
+    float radius{0.0f}; // Z++: ℝ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/modelinfo/PedModelInfo.zpp
 struct PedChunk_ZppContract {
     uint8_t colmodel_card{0u}; // Z++: Ref[CColModel]
     uint8_t clump_card{0u}; // Z++: Ref[RpClump]
@@ -81,35 +120,113 @@ struct PedChunk_ZppContract {
             && (clump_card <= 1u);
     }
 };
-// Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_CClumpModelInfo(CClumpModelInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// State Schema Contract from zpp/modelinfo/PedModelInfo.zpp
+struct CPedModelInfo_ZppContract {
+    int64_t m_animGroup{0}; // Z++: ℕ
+    int32_t m_pedType{0}; // Z++: ePedType
+    int32_t m_pedStatType{0}; // Z++: ePedStats
+    int64_t m_carsCanDrive{0}; // Z++: ℕ
+    uint8_t m_hitColModel_card{0u}; // Z++: Ref[CColModel]
+    uint8_t m_lhand_card{0u}; // Z++: Ref[RpAtomic]
+    uint8_t m_rhand_card{0u}; // Z++: Ref[RpAtomic]
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    constexpr bool checkInvariant() const {
+        return (m_animGroup >= 0)
+            && (m_carsCanDrive >= 0)
+            && (m_hitColModel_card <= 1u)
+            && (m_lhand_card <= 1u)
+            && (m_rhand_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/modelinfo/TimeModelInfo.zpp
+struct CTimeModelInfo_ZppContract {
+    int32_t m_timeOn{0}; // Z++: ℤ
+    int32_t m_timeOff{0}; // Z++: ℤ
+    int32_t m_otherTimeModelID{0}; // Z++: ℤ
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CTimeModelInfo
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
+struct editableMatCBData_ZppContract {
+    uint8_t vehicle_card{0u}; // Z++: Ref[CVehicleModelInfo]
+    int32_t numMats1{0}; // Z++: ℤ
+    int32_t numMats2{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (vehicle_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
+struct VehicleChunk_ZppContract {
+    uint8_t clump_card{0u}; // Z++: Ref[RpClump]
+    int32_t numComps{0}; // Z++: ℤ
+    uint8_t comp_card{0u}; // Z++: Ref[RpAtomic]
+    std::array<int32_t, 26> materials1{}; // Z++: seq Ref[RpMaterial]  -- bounded array [NUM_FIRST_MATERIALS]
+    size_t materials1_len{26u}; // Z++ cardinality #materials1
+    std::array<int32_t, 26> materials2{}; // Z++: seq Ref[RpMaterial]  -- bounded array [NUM_SECOND_MATERIALS]
+    size_t materials2_len{26u}; // Z++ cardinality #materials2
+    constexpr bool checkInvariant() const {
+        return (materials1_len == 26u && materials1.size() == 26u)
+            && (materials2_len == 26u && materials2.size() == 26u)
+            && (clump_card <= 1u)
+            && (comp_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/modelinfo/VehicleModelInfo.zpp
+struct Statics_ZppContract {
+    int32_t unknown{0}; // Z++: ADDRESS
+    std::array<int32_t, 256> ms_vehicleColourTable{}; // Z++: seq RwRGBA  -- bounded array [256]
+    size_t ms_vehicleColourTable_len{256u}; // Z++ cardinality #ms_vehicleColourTable
+    std::array<int32_t, 2> ms_compsUsed{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t ms_compsUsed_len{2u}; // Z++ cardinality #ms_compsUsed
+    std::array<int32_t, 2> ms_compsToUse{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t ms_compsToUse_len{2u}; // Z++ cardinality #ms_compsToUse
+    constexpr bool checkInvariant() const {
+        return (ms_vehicleColourTable_len == 256u && ms_vehicleColourTable.size() == 256u)
+            && (ms_compsUsed_len == 2u && ms_compsUsed.size() == 2u)
+            && (ms_compsToUse_len == 2u && ms_compsToUse.size() == 2u);
+    }
+};
+// State Schema Contract from zpp/modelinfo/WeaponModelInfo.zpp
+struct CWeaponModelInfo_ZppContract {
+    int32_t m_animFileName{0}; // Z++: seq CHAR
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CWeaponModelInfo
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/modelinfo/XtraCompsModelInfo.zpp
+struct CXtraCompsModelInfo_ZppContract {
+    int32_t field_34{0}; // Z++: ℤ
+    int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
+    int32_t msClassInstance{0}; // Z++: CXtraCompsModelInfo
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// Delta Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
+constexpr bool op_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContract& pre, const CClumpModelInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_clump_card == 0u);
 }
-// Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_CClumpModelInfo_2(CClumpModelInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CClumpModelInfo_ZppContract apply_CClumpModelInfo_DeleteRwObject(const CClumpModelInfo_ZppContract& pre) {
+    CClumpModelInfo_ZppContract post = pre;
+    post.m_clump_card = 0u;
+    return post;
 }
-// Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_CClumpModelInfo_3(CClumpModelInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+// Delta Operation Schema Contract (ΔCPedModelInfo) from zpp/modelinfo/PedModelInfo.zpp
+constexpr bool op_CPedModelInfo_DeleteRwObject(const CPedModelInfo_ZppContract& pre, const CPedModelInfo_ZppContract& post) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.m_hitColModel_card == 0u);
 }
-// Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_CreateInstance_4(CClumpModelInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_CreateInstance_5(CClumpModelInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
-}
-// Operation Schema Contract (ΔCClumpModelInfo) from zpp/modelinfo/ClumpModelInfo.zpp
-constexpr bool op_CClumpModelInfo_GetRwObject_6(CClumpModelInfo_ZppContract& state) {
-    if (!state.checkInvariant()) return false;
-    return state.checkInvariant();
+constexpr CPedModelInfo_ZppContract apply_CPedModelInfo_DeleteRwObject(const CPedModelInfo_ZppContract& pre) {
+    CPedModelInfo_ZppContract post = pre;
+    post.m_hitColModel_card = 0u;
+    return post;
 }
 constexpr bool verify_modelinfo_zpp_invariants() {
     {
@@ -141,10 +258,31 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        CMloModelInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CMloModelInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CModelIndices_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CModelIndices_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         LimbCBarg_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         LimbCBarg_ZppContract bad{};
         bad.frameIDs_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ColNodeInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ColNodeInfo_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     {
@@ -155,28 +293,71 @@ constexpr bool verify_modelinfo_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
-        CClumpModelInfo_ZppContract st{};
-        if (!op_CClumpModelInfo_CClumpModelInfo(st)) return false;
+        CPedModelInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CPedModelInfo_ZppContract bad{};
+        bad.m_animGroup = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CClumpModelInfo_ZppContract st{};
-        if (!op_CClumpModelInfo_CClumpModelInfo_2(st)) return false;
+        CTimeModelInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CTimeModelInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CClumpModelInfo_ZppContract st{};
-        if (!op_CClumpModelInfo_CClumpModelInfo_3(st)) return false;
+        editableMatCBData_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        editableMatCBData_ZppContract bad{};
+        bad.vehicle_card = 2u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CClumpModelInfo_ZppContract st{};
-        if (!op_CClumpModelInfo_CreateInstance_4(st)) return false;
+        VehicleChunk_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        VehicleChunk_ZppContract bad{};
+        bad.materials1_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CClumpModelInfo_ZppContract st{};
-        if (!op_CClumpModelInfo_CreateInstance_5(st)) return false;
+        Statics_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        Statics_ZppContract bad{};
+        bad.ms_vehicleColourTable_len = 0u;
+        if (bad.checkInvariant()) return false;
     }
     {
-        CClumpModelInfo_ZppContract st{};
-        if (!op_CClumpModelInfo_GetRwObject_6(st)) return false;
+        CWeaponModelInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CWeaponModelInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CXtraCompsModelInfo_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CXtraCompsModelInfo_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CClumpModelInfo_ZppContract pre{};
+        pre.m_clump_card = 1u;
+        const auto post = apply_CClumpModelInfo_DeleteRwObject(pre);
+        if (!op_CClumpModelInfo_DeleteRwObject(pre, post)) return false;
+        CClumpModelInfo_ZppContract badPost = post;
+        badPost.m_clump_card = 1u;
+        if (op_CClumpModelInfo_DeleteRwObject(pre, badPost)) return false;
+    }
+    {
+        CPedModelInfo_ZppContract pre{};
+        pre.m_hitColModel_card = 1u;
+        const auto post = apply_CPedModelInfo_DeleteRwObject(pre);
+        if (!op_CPedModelInfo_DeleteRwObject(pre, post)) return false;
+        CPedModelInfo_ZppContract badPost = post;
+        badPost.m_hitColModel_card = 1u;
+        if (op_CPedModelInfo_DeleteRwObject(pre, badPost)) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }

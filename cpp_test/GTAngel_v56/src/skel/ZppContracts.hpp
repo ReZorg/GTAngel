@@ -64,6 +64,47 @@ struct platformModuleState_ZppContract {
             && (source_lines == 116);
     }
 };
+// State Schema Contract from zpp/skel/skeleton.zpp
+struct RsInputDevice_ZppContract {
+    int32_t inputDeviceType{0}; // Z++: RsInputDeviceType
+    bool used{false}; // Z++: 𝔹
+    int32_t inputEventHandler{0}; // Z++: RsInputEventHandler
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/skel/skeleton.zpp
+struct RsGlobalType_ZppContract {
+    int32_t appName{0}; // Z++: seq CHAR
+    int32_t width{0}; // Z++: ℤ
+    int32_t height{0}; // Z++: ℤ
+    int32_t maximumWidth{0}; // Z++: ℤ
+    int32_t maximumHeight{0}; // Z++: ℤ
+    int32_t maxFPS{0}; // Z++: ℤ
+    bool quit{false}; // Z++: 𝔹
+    int32_t ps{0}; // Z++: ADDRESS
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/skel/skeleton.zpp
+struct RsKeyStatus_ZppContract {
+    int32_t keyCharCode{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/skel/skeleton.zpp
+struct RsPadButtonStatus_ZppContract {
+    int32_t padID{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 constexpr bool verify_skel_zpp_invariants() {
     {
         SYSTEMTIME_ZppContract valid{};
@@ -84,6 +125,34 @@ constexpr bool verify_skel_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         platformModuleState_ZppContract bad{};
         bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RsInputDevice_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RsInputDevice_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RsGlobalType_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RsGlobalType_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RsKeyStatus_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RsKeyStatus_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        RsPadButtonStatus_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        RsPadButtonStatus_ZppContract bad{};
+        bad.instance_addr = -1;
         if (bad.checkInvariant()) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
