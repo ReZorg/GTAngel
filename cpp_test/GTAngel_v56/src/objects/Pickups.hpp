@@ -4,6 +4,7 @@
     }
     static_assert(zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, makePickupParticleContract()), "Pickups CParticleObject Z++ contract must hold");
     void buildPickups(const avatar3d::GameWorld& world) {
+        (void)verifyLiveWorld_objects_zpp(world);
         for (const auto& pk : world.pickups) {
             if (pk.collected) continue;
             const Vec3 c = pk.pos;

@@ -5,7 +5,13 @@
         return zpp_vehicles_spec::verify_vehicles_zpp_invariants() && (zpp_vehicles_spec::CAutomobile_ZppContract{}.checkInvariant()) && (zpp_vehicles_spec::op_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{}, zpp_vehicles_spec::apply_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{})));
     }
     bool verifyLiveWorld_vehicles_zpp(const avatar3d::GameWorld& world) const {
-        return ((int64_t)world.traffic.size() >= 0) && verifyComponent_vehicles_zpp();
+        for (size_t i = 0; i < world.traffic.size(); ++i) {
+            const auto& v = world.traffic[i];
+            zpp_vehicles_spec::CDamageManager_ZppContract dmg{};
+            dmg.m_engineStatus = (v.speed >= 0.0f && v.orbitR >= 0.0f) ? (int64_t)i : -1;
+            if (!dmg.checkInvariant()) return false;
+        }
+        return true;
     }
     static_assert(verifyComponent_vehicles_zpp(), "RasterEngine component Z++ binding failed for vehicles");
     void drawSculptedCoupe(Vec3 centre, float ch, float sh, float wheelPhase,
@@ -224,6 +230,7 @@
     // re3 CVehicle family: lane traffic rendered as compact vehicles with
     // spinning wheels, train as linked boxes, heli with rotor disc.
     void buildTraffic(const avatar3d::GameWorld& world) {
+        (void)verifyLiveWorld_vehicles_zpp(world);
         int trafficIndex = 0;
         for (const auto& v : world.traffic) {
             addBlobShadow(v.pos, v.orbitR > 0.0f ? 0.68f : 0.55f); // LW32: ground traffic (heli casts wide)

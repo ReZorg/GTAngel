@@ -5,10 +5,16 @@
         return zpp_objects_spec::verify_objects_zpp_invariants() && (zpp_objects_spec::CCutsceneHead_ZppContract{}.checkInvariant()) && (zpp_objects_spec::op_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{}, zpp_objects_spec::apply_CCutsceneObject_CCutsceneObject_2(zpp_objects_spec::CCutsceneObject_ZppContract{})));
     }
     bool verifyLiveWorld_objects_zpp(const avatar3d::GameWorld& world) const {
-        return ((int64_t)world.pickups.size() >= 0) && verifyComponent_objects_zpp();
+        for (size_t i = 0; i < world.pickups.size(); ++i) {
+            zpp_objects_spec::CObjectInfo_ZppContract c{};
+            c.m_nCollisionDamageEffect = (world.pickups[i].phase >= 0.0f) ? (int64_t)i : -1;
+            if (!c.checkInvariant()) return false;
+        }
+        return true;
     }
     static_assert(verifyComponent_objects_zpp(), "RasterEngine component Z++ binding failed for objects");
     void buildGoal(const avatar3d::GameWorld& world) {
+        (void)verifyLiveWorld_objects_zpp(world);
         static constexpr int Segments = 16;
         const auto pulseTicks = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();

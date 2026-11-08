@@ -4,6 +4,7 @@
     }
     static_assert(makeQuestShardObjectContract().checkInvariant(), "QuestShard CObjectInfo Z++ contract must hold");
     void buildQuestShard(const avatar3d::GameWorld& world) {
+        (void)verifyLiveWorld_objects_zpp(world);
         if (!world.questShardVisible) return;
         const auto ticks = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();

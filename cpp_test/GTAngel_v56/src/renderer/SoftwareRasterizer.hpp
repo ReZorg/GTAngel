@@ -5,7 +5,8 @@
         return zpp_renderer_spec::verify_renderer_zpp_invariants() && (zpp_renderer_spec::C2dEffect_ZppContract{}.checkInvariant()) && (zpp_renderer_spec::op_CClouds_Init(zpp_renderer_spec::CClouds_ZppContract{}, zpp_renderer_spec::apply_CClouds_Init(zpp_renderer_spec::CClouds_ZppContract{})));
     }
     bool verifyLiveWorld_renderer_zpp(const avatar3d::GameWorld& world) const {
-        return ((int64_t)triangles_.size() >= 0) && verifyComponent_renderer_zpp();
+        zpp_renderer_spec::C2dEffect_ZppContract c{};
+        return (world.worldSize > 0.0f) && c.checkInvariant();
     }
     static_assert(verifyComponent_renderer_zpp(), "RasterEngine component Z++ binding failed for renderer");
     void buildAvatar(const avatar3d::AvatarSkeleton& avatar) {

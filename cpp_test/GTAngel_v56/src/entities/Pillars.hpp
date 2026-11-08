@@ -5,10 +5,20 @@
         return zpp_entities_spec::verify_entities_zpp_invariants() && (zpp_entities_spec::CDummy_ZppContract{}.checkInvariant()) && (zpp_entities_spec::op_CEntity_DetachFromRwObject(zpp_entities_spec::CEntity_ZppContract{}, zpp_entities_spec::apply_CEntity_DetachFromRwObject(zpp_entities_spec::CEntity_ZppContract{})));
     }
     bool verifyLiveWorld_entities_zpp(const avatar3d::GameWorld& world) const {
-        return ((int64_t)world.pillars.size() >= 0) && verifyComponent_entities_zpp();
+        if (world.pillars.empty()) return false;
+        for (size_t i = 0; i < world.pillars.size(); ++i) {
+            const auto& p = world.pillars[i];
+            zpp_entities_spec::CDummy_ZppContract c{};
+            c.instance_addr = (p.radius > 0.0f && p.height > 0.0f) ? (int64_t)(i + 1) : -1;
+            c.m_type = 5u;
+            c.bIsTreeModel = 1u;
+            if (!c.checkInvariant()) return false;
+        }
+        return true;
     }
     static_assert(verifyComponent_entities_zpp(), "RasterEngine component Z++ binding failed for entities");
     void buildPillars(const avatar3d::GameWorld& world) {
+        (void)verifyLiveWorld_entities_zpp(world);
         // LW34: landscaped urban street trees in stone planters + sleek
         // granite & cyan-lit cyber-columns (replaces brick-red pipes).
         static constexpr int Segments = 10;

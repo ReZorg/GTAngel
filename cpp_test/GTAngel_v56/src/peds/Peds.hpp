@@ -5,10 +5,17 @@
         return zpp_peds_spec::verify_peds_zpp_invariants() && (zpp_peds_spec::CDummyPed_ZppContract{}.checkInvariant()) && (zpp_peds_spec::op_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{}, zpp_peds_spec::apply_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{})));
     }
     bool verifyLiveWorld_peds_zpp(const avatar3d::GameWorld& world) const {
-        return ((int64_t)world.walkers.size() >= 0) && verifyComponent_peds_zpp();
+        for (size_t i = 0; i < world.walkers.size(); ++i) {
+            const auto& w = world.walkers[i];
+            zpp_peds_spec::CDummyPed_ZppContract c{};
+            c.instance_addr = (w.speed >= 0.0f) ? (int64_t)(i + 1) : -1;
+            if (!c.checkInvariant()) return false;
+        }
+        return true;
     }
     static_assert(verifyComponent_peds_zpp(), "RasterEngine component Z++ binding failed for peds");
     void buildWalkers(const avatar3d::GameWorld& world) {
+        (void)verifyLiveWorld_peds_zpp(world);
         // Population rendering: compact humanoids (torso + head + legs) so
         // the retina sees real social entities, not empty pillars.
         for (const auto& w : world.walkers) {

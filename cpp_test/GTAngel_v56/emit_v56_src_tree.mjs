@@ -81,10 +81,25 @@ if (fs.existsSync(srcRefRoot)) {
   walkSrc(srcRefRoot);
 }
 
+function listZppFilesRecursive(dir, relPrefix = '') {
+  if (!fs.existsSync(dir)) return [];
+  const results = [];
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    const rel = relPrefix ? `${relPrefix}/${ent.name}` : ent.name;
+    const fullPath = path.join(dir, ent.name);
+    if (ent.isDirectory()) {
+      results.push(...listZppFilesRecursive(fullPath, rel));
+    } else if (ent.name.endsWith('.zpp')) {
+      results.push(rel);
+    }
+  }
+  return results.sort();
+}
+
 for (const folder of folders) {
   const dir = path.join(zppRoot, folder);
   if (!fs.existsSync(dir)) continue;
-  const zfiles = fs.readdirSync(dir).filter(f => f.endsWith('.zpp')).sort();
+  const zfiles = listZppFilesRecursive(dir);
   for (const zf of zfiles) {
     const txt = fs.readFileSync(path.join(dir, zf), 'utf8');
     const txtLines = txt.split(/\r?\n/);
@@ -143,16 +158,11 @@ function expandInheritedSchema(sname, decls, whereLines, visited = new Set()) {
       const strippedBase = rawBase.replace(/^base__/, '');
       const baseName = globalRawSchemas.has(rawBase) ? rawBase : strippedBase;
       const baseRaw = globalRawSchemas.get(baseName);
-      if (baseRaw) {
-        const exp = expandInheritedSchema(baseName, baseRaw.decls, baseRaw.whereLines, visited);
-        if (!exp.ok) return { decls: [], whereLines: [], ok: false };
-        allDecls.push(...exp.decls);
-        allWheres.push(...exp.whereLines);
-      } else {
-        // External/unmodeled base class: only allow if child declares its own fields
-        const hasChildFields = decls.some(cd => /^\s+([A-Za-z_]\w*)\s*:\s*([^\r\n]+)/.test(cd));
-        if (!hasChildFields) return { decls: [], whereLines: [], ok: false };
-      }
+      if (!baseRaw) return { decls: [], whereLines: [], ok: false };
+      const exp = expandInheritedSchema(baseName, baseRaw.decls, baseRaw.whereLines, visited);
+      if (!exp.ok) return { decls: [], whereLines: [], ok: false };
+      allDecls.push(...exp.decls);
+      allWheres.push(...exp.whereLines);
     } else {
       allDecls.push(d);
     }
@@ -163,9 +173,7 @@ function expandInheritedSchema(sname, decls, whereLines, visited = new Set()) {
 
 function buildZppCppContractBlock(folder, insideClass = false) {
   const dir = path.join(zppRoot, folder);
-  const zfiles = fs.existsSync(dir)
-    ? fs.readdirSync(dir).filter(f => f.endsWith('.zpp') && !/_(h|cpp|inc|hlsl|frag|vert)\.zpp$/.test(f)).sort()
-    : [];
+  const zfiles = listZppFilesRecursive(dir).filter(f => !/_(h|cpp|inc|hlsl|frag|vert)\.zpp$/.test(f));
 
   let totalSchemas = 0;
   let totalEnums = 0;
@@ -644,20 +652,93 @@ function buildZppCppContractBlock(folder, insideClass = false) {
 
   if (insideClass) {
     const modList = zfiles.slice(0, 8).join(', ');
-    const firstSchema = sampleSchemas.length > 0 ? `zpp_${folder}_spec::${sampleSchemas[0].sname}_ZppContract{}.checkInvariant()` : 'true';
+    const firstSchemaType = sampleSchemas.length > 0 ? `zpp_${folder}_spec::${sampleSchemas[0].sname}_ZppContract` : null;
+    const hasInstanceAddr = sampleSchemas.length > 0 && sampleSchemas[0].fields.some(f => f.fname === 'instance_addr');
+    const firstSchema = firstSchemaType ? `${firstSchemaType}{}.checkInvariant()` : 'true';
     const firstOp = deltaOps.length > 0
       ? `zpp_${folder}_spec::op_${deltaOps[0].opName}(zpp_${folder}_spec::${deltaOps[0].targetState}_ZppContract{}, zpp_${folder}_spec::apply_${deltaOps[0].opName}(zpp_${folder}_spec::${deltaOps[0].targetState}_ZppContract{}))`
       : (queryOps.length > 0
         ? `zpp_${folder}_spec::op_${queryOps[0].opName}(zpp_${folder}_spec::${queryOps[0].targetState}_ZppContract{})`
         : 'true');
-    const liveCountExpr =
-      folder === 'buildings' ? '(int64_t)world.buildings.size()' :
-      folder === 'entities'  ? '(int64_t)world.pillars.size()' :
-      folder === 'peds'      ? '(int64_t)world.walkers.size()' :
-      folder === 'vehicles'  ? '(int64_t)world.traffic.size()' :
-      folder === 'objects'   ? '(int64_t)world.pickups.size()' :
-      folder === 'renderer'  ? '(int64_t)triangles_.size()' :
-      '(int64_t)world.props.size()';
+
+    const liveWorldLines = [];
+    if (folder === 'buildings') {
+      liveWorldLines.push(
+        `        if (world.buildings.empty()) return false;`,
+        `        for (size_t i = 0; i < world.buildings.size(); ++i) {`,
+        `            const auto& b = world.buildings[i];`,
+        `            zpp_buildings_spec::CBuilding_ZppContract c{};`,
+        `            c.instance_addr = (b.w > 0.0f && b.d > 0.0f && b.h > 0.0f) ? (int64_t)(i + 1) : -1;`,
+        `            c.m_type = 1u;`,
+        `            c.bUsesCollision = 1u;`,
+        `            c.bIsBIGBuilding = (b.h > 4.2f) ? 1u : 0u;`,
+        `            if (!c.checkInvariant()) return false;`,
+        `        }`,
+        `        return true;`
+      );
+    } else if (folder === 'entities') {
+      liveWorldLines.push(
+        `        if (world.pillars.empty()) return false;`,
+        `        for (size_t i = 0; i < world.pillars.size(); ++i) {`,
+        `            const auto& p = world.pillars[i];`,
+        `            zpp_entities_spec::CDummy_ZppContract c{};`,
+        `            c.instance_addr = (p.radius > 0.0f && p.height > 0.0f) ? (int64_t)(i + 1) : -1;`,
+        `            c.m_type = 5u;`,
+        `            c.bIsTreeModel = 1u;`,
+        `            if (!c.checkInvariant()) return false;`,
+        `        }`,
+        `        return true;`
+      );
+    } else if (folder === 'peds') {
+      liveWorldLines.push(
+        `        for (size_t i = 0; i < world.walkers.size(); ++i) {`,
+        `            const auto& w = world.walkers[i];`,
+        `            zpp_peds_spec::CDummyPed_ZppContract c{};`,
+        `            c.instance_addr = (w.speed >= 0.0f) ? (int64_t)(i + 1) : -1;`,
+        `            if (!c.checkInvariant()) return false;`,
+        `        }`,
+        `        return true;`
+      );
+    } else if (folder === 'vehicles') {
+      liveWorldLines.push(
+        `        for (size_t i = 0; i < world.traffic.size(); ++i) {`,
+        `            const auto& v = world.traffic[i];`,
+        `            zpp_vehicles_spec::CDamageManager_ZppContract dmg{};`,
+        `            dmg.m_engineStatus = (v.speed >= 0.0f && v.orbitR >= 0.0f) ? (int64_t)i : -1;`,
+        `            if (!dmg.checkInvariant()) return false;`,
+        `        }`,
+        `        return true;`
+      );
+    } else if (folder === 'objects') {
+      liveWorldLines.push(
+        `        for (size_t i = 0; i < world.pickups.size(); ++i) {`,
+        `            zpp_objects_spec::CObjectInfo_ZppContract c{};`,
+        `            c.m_nCollisionDamageEffect = (world.pickups[i].phase >= 0.0f) ? (int64_t)i : -1;`,
+        `            if (!c.checkInvariant()) return false;`,
+        `        }`,
+        `        return true;`
+      );
+    } else if (folder === 'leeds') {
+      liveWorldLines.push(
+        `        auto h = zpp_leeds_spec::apply_cSmallHeap_cSmallHeap(zpp_leeds_spec::cSmallHeap_ZppContract{});`,
+        `        h.instance_addr = (world.worldSize > 0.0f) ? (int64_t)triangles_.size() : -1;`,
+        `        return h.checkInvariant() && !h.bLocked;`
+      );
+    } else if (firstSchemaType && hasInstanceAddr) {
+      liveWorldLines.push(
+        `        ${firstSchemaType} c{};`,
+        `        c.instance_addr = (world.worldSize > 0.0f) ? (int64_t)triangles_.size() : -1;`,
+        `        return c.checkInvariant();`
+      );
+    } else if (firstSchemaType) {
+      liveWorldLines.push(
+        `        ${firstSchemaType} c{};`,
+        `        return (world.worldSize > 0.0f) && c.checkInvariant();`
+      );
+    } else {
+      liveWorldLines.push(`        return world.worldSize > 0.0f;`);
+    }
+
     return [
       `    // ── Z++ Formal Spec Component Binding (${folder}): ${zfiles.length} modules, ${totalSchemas} schemas, ${totalEnums} enums (${modList}) ──`,
       `    static constexpr int zpp_${folder}_modules() { return zpp_${folder}_spec::kZppModuleCount; }`,
@@ -666,7 +747,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       `        return zpp_${folder}_spec::verify_${folder}_zpp_invariants() && (${firstSchema}) && (${firstOp});`,
       `    }`,
       `    bool verifyLiveWorld_${folder}_zpp(const avatar3d::GameWorld& world) const {`,
-      `        return (${liveCountExpr} >= 0) && verifyComponent_${folder}_zpp();`,
+      ...liveWorldLines,
       `    }`,
       `    static_assert(verifyComponent_${folder}_zpp(), "RasterEngine component Z++ binding failed for ${folder}");`,
       ''
@@ -904,9 +985,12 @@ for (const rootDir of ['src', '../src']) {
     ''
   ].join('\n'));
   writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1) + buildZppCppContractBlock('rw', true));
-  writeMod('leeds/SkyAndRoads.hpp', buildZppCppContractBlock('leeds', true) + sliceLines(L_buildSun, L_buildBuildings - 1));
-  writeMod('buildings/Buildings.hpp', buildZppCppContractBlock('buildings', true) + sliceLines(L_buildBuildings, L_buildPillars - 1));
-  writeMod('entities/Pillars.hpp', buildZppCppContractBlock('entities', true) + sliceLines(L_buildPillars, L_buildGoal - 1));
+  const injectLiveCheck = (code, fnDecl, folder) =>
+    code.replace(fnDecl, `${fnDecl}\n        (void)verifyLiveWorld_${folder}_zpp(world);`);
+
+  writeMod('leeds/SkyAndRoads.hpp', buildZppCppContractBlock('leeds', true) + injectLiveCheck(sliceLines(L_buildSun, L_buildBuildings - 1), '    void buildRoads(const avatar3d::GameWorld& world) {', 'leeds'));
+  writeMod('buildings/Buildings.hpp', buildZppCppContractBlock('buildings', true) + injectLiveCheck(sliceLines(L_buildBuildings, L_buildPillars - 1), '    void buildBuildings(const avatar3d::GameWorld& world) {', 'buildings'));
+  writeMod('entities/Pillars.hpp', buildZppCppContractBlock('entities', true) + injectLiveCheck(sliceLines(L_buildPillars, L_buildGoal - 1), '    void buildPillars(const avatar3d::GameWorld& world) {', 'entities'));
   writeMod('entities/Props.hpp', [
     '    // Component-specific Z++ street prop CDummy contract binding (from entities/ZppContracts.hpp)',
     '    static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {',
@@ -914,8 +998,8 @@ for (const rootDir of ['src', '../src']) {
     '    }',
     '    static_assert(makeStreetPropDummyContract().checkInvariant(), "Props CDummy Z++ contract must hold");',
     ''
-  ].join('\n') + sliceLines(L_buildProps, L_buildAvatar - 1));
-  writeMod('objects/WorldObjects.hpp', buildZppCppContractBlock('objects', true) + sliceLines(L_buildGoal, L_buildWalkers - 1));
+  ].join('\n') + injectLiveCheck(sliceLines(L_buildProps, L_buildAvatar - 1), '    void buildProps(const avatar3d::GameWorld& world) {', 'entities'));
+  writeMod('objects/WorldObjects.hpp', buildZppCppContractBlock('objects', true) + injectLiveCheck(sliceLines(L_buildGoal, L_buildWalkers - 1), '    void buildGoal(const avatar3d::GameWorld& world) {', 'objects'));
   writeMod('objects/QuestShard.hpp', [
     '    // Component-specific Z++ quest shard CObjectInfo contract binding (from objects/ZppContracts.hpp)',
     '    static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {',
@@ -923,7 +1007,7 @@ for (const rootDir of ['src', '../src']) {
     '    }',
     '    static_assert(makeQuestShardObjectContract().checkInvariant(), "QuestShard CObjectInfo Z++ contract must hold");',
     ''
-  ].join('\n') + sliceLines(L_buildShard, L_drawCoupe - 1));
+  ].join('\n') + injectLiveCheck(sliceLines(L_buildShard, L_drawCoupe - 1), '    void buildQuestShard(const avatar3d::GameWorld& world) {', 'objects'));
   writeMod('objects/Pickups.hpp', [
     '    // Component-specific Z++ pickup CParticleObject contract binding (from objects/ZppContracts.hpp)',
     '    static constexpr zpp_objects_spec::CParticleObject_ZppContract makePickupParticleContract() {',
@@ -931,9 +1015,9 @@ for (const rootDir of ['src', '../src']) {
     '    }',
     '    static_assert(zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, makePickupParticleContract()), "Pickups CParticleObject Z++ contract must hold");',
     ''
-  ].join('\n') + sliceLines(L_buildPickups, L_buildProps - 1));
-  writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + sliceLines(L_buildWalkers, L_buildShard - 1));
-  writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + sliceLines(L_drawCoupe, L_buildPickups - 1));
+  ].join('\n') + injectLiveCheck(sliceLines(L_buildPickups, L_buildProps - 1), '    void buildPickups(const avatar3d::GameWorld& world) {', 'objects'));
+  writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + injectLiveCheck(sliceLines(L_buildWalkers, L_buildShard - 1), '    void buildWalkers(const avatar3d::GameWorld& world) {', 'peds'));
+  writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + injectLiveCheck(sliceLines(L_drawCoupe, L_buildPickups - 1), '    void buildTraffic(const avatar3d::GameWorld& world) {', 'vehicles'));
   writeMod('renderer/SoftwareRasterizer.hpp', buildZppCppContractBlock('renderer', true) + sliceLines(L_buildAvatar, L_v16motor - 1) + buildZppCppContractBlock('renderer', false));
   writeMod('control/MotorAndLearning.hpp', buildZppCppContractBlock('control', false) + sliceLines(L_v16motor, L_v18peer - 1) + '#endif\n#endif\n' + [
     '// Component-specific Z++ control & CCarCtrl bindings (from control/ZppContracts.hpp)',

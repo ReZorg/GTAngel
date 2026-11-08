@@ -7,12 +7,12 @@
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/skel
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/skel/*.zpp
-// Modules: 4 | Formal Schemas: 44 | Free Types: 9
+// Modules: 7 | Formal Schemas: 145 | Free Types: 11
 // ============================================================================
 namespace zpp_skel_spec {
-static constexpr int kZppModuleCount = 4;
-static constexpr int kZppSchemaCount = 44;
-static constexpr int kZppEnumCount   = 9;
+static constexpr int kZppModuleCount = 7;
+static constexpr int kZppSchemaCount = 145;
+static constexpr int kZppEnumCount   = 11;
 struct ZppVec3 {
     float x{0.0f}, y{0.0f}, z{0.0f};
     constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
@@ -58,6 +58,15 @@ struct eventsModuleState_ZppContract {
     constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 838);
+    }
+};
+// State Schema Contract from zpp/skel/glfw/glfw.zpp
+struct glfwModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{2602}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 2602);
     }
 };
 // State Schema Contract from zpp/skel/platform.zpp
@@ -113,6 +122,38 @@ struct RsPadButtonStatus_ZppContract {
         return (instance_addr >= 0);
     }
 };
+// State Schema Contract from zpp/skel/win/resource.zpp
+struct resourceModuleState_ZppContract {
+    bool module_loaded{true}; // Z++: 𝔹
+    int64_t source_lines{35}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (module_loaded == true)
+            && (source_lines == 35);
+    }
+};
+// State Schema Contract from zpp/skel/win/win.zpp
+struct tJoy_ZppContract {
+    int32_t m_State{0}; // Z++: eJoypadState
+    bool m_bInitialised{false}; // Z++: 𝔹
+    bool m_bHasAxisZ{false}; // Z++: 𝔹
+    bool m_bHasAxisR{false}; // Z++: 𝔹
+    int32_t m_nVendorID{0}; // Z++: ℤ
+    int32_t m_nProductID{0}; // Z++: ℤ
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/skel/win/win.zpp
+struct CJoySticks_ZppContract {
+    std::array<int32_t, 2> m_aJoys{}; // Z++: seq tJoy  -- bounded array [MAX_JOYSTICKS]
+    size_t m_aJoys_len{2u}; // Z++ cardinality #m_aJoys
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (m_aJoys_len == 2u && m_aJoys.size() == 2u)
+            && (instance_addr >= 0);
+    }
+};
 constexpr bool verify_skel_zpp_invariants() {
     {
         SYSTEMTIME_ZppContract valid{};
@@ -125,6 +166,13 @@ constexpr bool verify_skel_zpp_invariants() {
         eventsModuleState_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         eventsModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        glfwModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        glfwModuleState_ZppContract bad{};
         bad.module_loaded = false;
         if (bad.checkInvariant()) return false;
     }
@@ -161,6 +209,27 @@ constexpr bool verify_skel_zpp_invariants() {
         if (!valid.checkInvariant()) return false;
         RsPadButtonStatus_ZppContract bad{};
         bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        resourceModuleState_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        resourceModuleState_ZppContract bad{};
+        bad.module_loaded = false;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tJoy_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tJoy_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CJoySticks_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CJoySticks_ZppContract bad{};
+        bad.m_aJoys_len = 0u;
         if (bad.checkInvariant()) return false;
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;

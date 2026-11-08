@@ -7,12 +7,12 @@
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/audio
 // Derived from C:/ddd/GTAngel/cpp_test/zpp/audio/*.zpp
-// Modules: 14 | Formal Schemas: 598 | Free Types: 28
+// Modules: 20 | Formal Schemas: 1021 | Free Types: 33
 // ============================================================================
 namespace zpp_audio_spec {
-static constexpr int kZppModuleCount = 14;
-static constexpr int kZppSchemaCount = 598;
-static constexpr int kZppEnumCount   = 28;
+static constexpr int kZppModuleCount = 20;
+static constexpr int kZppSchemaCount = 1021;
+static constexpr int kZppEnumCount   = 33;
 struct ZppVec3 {
     float x{0.0f}, y{0.0f}, z{0.0f};
     constexpr bool operator==(const ZppVec3& o) const { return x == o.x && y == o.y && z == o.z; }
@@ -234,6 +234,266 @@ struct cPoliceRadioQueue_ZppContract {
             && (m_nRemoveOffset >= 0);
     }
 };
+// State Schema Contract from zpp/audio/oal/aldlist.zpp
+struct ALDEVICEINFO_ZppContract {
+    int32_t strDeviceName{0}; // Z++: seq CHAR
+    int32_t iMajorVersion{0}; // Z++: ℤ
+    int32_t iMinorVersion{0}; // Z++: ℤ
+    int32_t uiSourceCount{0}; // Z++: ℤ
+    int32_t Extensions{0}; // Z++: ℤ
+    bool bSelected{false}; // Z++: 𝔹
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/aldlist.zpp
+struct ALDeviceList_ZppContract {
+    std::array<int32_t, 64> aDeviceInfo{}; // Z++: seq ALDEVICEINFO  -- bounded array [64]
+    size_t aDeviceInfo_len{64u}; // Z++ cardinality #aDeviceInfo
+    int32_t nNumOfDevices{0}; // Z++: ℤ
+    int32_t defaultDeviceIndex{0}; // Z++: ℤ
+    int32_t filterIndex{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (aDeviceInfo_len == 64u && aDeviceInfo.size() == 64u);
+    }
+};
+// State Schema Contract from zpp/audio/oal/channel.zpp
+struct CChannel_ZppContract {
+    int64_t id{0}; // Z++: ℕ
+    float Gain{0.0f}; // Z++: ℝ
+    float Mix{0.0f}; // Z++: ℝ
+    int64_t Data{0}; // Z++: ADDRESS
+    int64_t DataSize{0}; // Z++: ℕ
+    int32_t Frequency{0}; // Z++: ℤ
+    std::array<float, 3> Position{}; // Z++: seq ℝ  -- bounded array [3]
+    size_t Position_len{3u}; // Z++ cardinality #Position
+    std::array<float, 2> Distances{}; // Z++: seq ℝ  -- bounded array [2]
+    size_t Distances_len{2u}; // Z++ cardinality #Distances
+    int32_t LoopCount{0}; // Z++: ℤ
+    std::array<int32_t, 2> LoopPoints{}; // Z++: seq ℤ  -- bounded array [2]
+    size_t LoopPoints_len{2u}; // Z++ cardinality #LoopPoints
+    int32_t LastProcessedOffset{0}; // Z++: ℤ
+    bool bIs2D{false}; // Z++: 𝔹
+    int32_t channelsThatNeedService{0}; // Z++: ℤ
+    constexpr bool checkInvariant() const {
+        return (Position_len == 3u && Position.size() == 3u)
+            && (Distances_len == 2u && Distances.size() == 2u)
+            && (LoopPoints_len == 2u && LoopPoints.size() == 2u)
+            && (id >= 0)
+            && (DataSize >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CSortStereoBuffer_ZppContract {
+    uint8_t PcmBuf_card{0u}; // Z++: ℙ ℕ
+    int64_t BufSize{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (PcmBuf_card <= 1u)
+            && (BufSize >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CImaADPCMDecoder_ZppContract {
+    int32_t StepIndex{0}; // Z++: ℤ
+    int32_t size{0}; // Z++: i
+    int32_t Sample{0}; // Z++: return
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CWavFile_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    int64_t Size{0}; // Z++: ℕ
+    int64_t NumChannels{0}; // Z++: ℕ
+    int64_t SampleRate{0}; // Z++: ℕ
+    int64_t ByteRate{0}; // Z++: ℕ
+    int64_t BlockAlign{0}; // Z++: ℕ
+    int64_t BitsPerSample{0}; // Z++: ℕ
+    std::array<uint32_t, 2> extra{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t extra_len{2u}; // Z++ cardinality #extra
+    uint8_t m_pFile_card{0u}; // Z++: Ref[FILE]
+    bool m_bIsOpen{false}; // Z++: 𝔹
+    int32_t m_FormatHeader{0}; // Z++: tFormatHeader
+    int64_t m_DataStartOffset{0}; // Z++: ℕ
+    int64_t m_nSampleCount{0}; // Z++: ℕ
+    int64_t m_nSamplesPerBlock{0}; // Z++: ℕ
+    uint8_t m_pAdpcmBuffer_card{0u}; // Z++: ℙ ℕ
+    uint8_t m_ppPcmBuffers_card{0u}; // Z++: ℙ ℤ
+    uint8_t m_pAdpcmDecoders_card{0u}; // Z++: Ref[CImaADPCMDecoder]
+    int32_t WAVE{0}; // Z++: ℤ
+    int32_t size{0}; // Z++: return
+    constexpr bool checkInvariant() const {
+        return (extra_len == 2u && extra.size() == 2u)
+            && (instance_addr >= 0)
+            && (Size >= 0)
+            && (NumChannels >= 0)
+            && (SampleRate >= 0)
+            && (ByteRate >= 0)
+            && (BlockAlign >= 0)
+            && (BitsPerSample >= 0)
+            && (m_pFile_card <= 1u)
+            && (m_DataStartOffset >= 0)
+            && (m_nSampleCount >= 0)
+            && (m_nSamplesPerBlock >= 0)
+            && (m_pAdpcmBuffer_card <= 1u)
+            && (m_ppPcmBuffers_card <= 1u)
+            && (m_pAdpcmDecoders_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct tDataHeader_ZppContract {
+    int64_t ID{0}; // Z++: ℕ
+    int64_t Size{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (ID >= 0)
+            && (Size >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct tFormatHeader_ZppContract {
+    int64_t AudioFormat{0}; // Z++: ℕ
+    int64_t NumChannels{0}; // Z++: ℕ
+    int64_t SampleRate{0}; // Z++: ℕ
+    int64_t ByteRate{0}; // Z++: ℕ
+    int64_t BlockAlign{0}; // Z++: ℕ
+    int64_t BitsPerSample{0}; // Z++: ℕ
+    std::array<uint32_t, 2> extra{}; // Z++: seq ℕ  -- bounded array [2]
+    size_t extra_len{2u}; // Z++ cardinality #extra
+    constexpr bool checkInvariant() const {
+        return (extra_len == 2u && extra.size() == 2u)
+            && (AudioFormat >= 0)
+            && (NumChannels >= 0)
+            && (SampleRate >= 0)
+            && (ByteRate >= 0)
+            && (BlockAlign >= 0)
+            && (BitsPerSample >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CSndFile_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    uint8_t m_pfSound_card{0u}; // Z++: Ref[SNDFILE]
+    int32_t m_soundInfo{0}; // Z++: SF_INFO
+    int32_t size{0}; // Z++: return
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (m_pfSound_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CMP3File_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    uint8_t m_pMH_card{0u}; // Z++: Ref[mpg123_handle]
+    bool m_bOpened{false}; // Z++: 𝔹
+    int64_t m_nRate{0}; // Z++: ℕ
+    int64_t m_nChannels{0}; // Z++: ℕ
+    int32_t m_pPath{0}; // Z++: seq CHAR
+    bool m_bFileNotOpenedYet{false}; // Z++: 𝔹
+    int64_t size{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (m_pMH_card <= 1u)
+            && (m_nRate >= 0)
+            && (m_nChannels >= 0)
+            && (size >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CADFFile_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    uint8_t m_pMH_card{0u}; // Z++: Ref[mpg123_handle]
+    bool m_bOpened{false}; // Z++: 𝔹
+    int64_t m_nRate{0}; // Z++: ℕ
+    int64_t m_nChannels{0}; // Z++: ℕ
+    int32_t m_pPath{0}; // Z++: seq CHAR
+    bool m_bFileNotOpenedYet{false}; // Z++: 𝔹
+    int64_t size{0}; // Z++: ℕ
+    int32_t bytesRead{0}; // Z++: return
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (m_pMH_card <= 1u)
+            && (m_nRate >= 0)
+            && (m_nChannels >= 0)
+            && (size >= 0)
+            && (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CVagDecoder_ZppContract {
+    float s_1{0.0f}; // Z++: ℝ
+    float s_2{0.0f}; // Z++: ℝ
+    int32_t flags{0}; // Z++: ℤ
+    int32_t VAG_SAMPLES_IN_LINE{0}; // Z++: i
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct CVbFile_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    uint8_t m_pFile_card{0u}; // Z++: Ref[FILE]
+    uint8_t m_pVagDecoders_card{0u}; // Z++: Ref[CVagDecoder]
+    int64_t m_FileSize{0}; // Z++: ℕ
+    int64_t m_nNumberOfBlocks{0}; // Z++: ℕ
+    int64_t m_nSampleRate{0}; // Z++: ℕ
+    int64_t m_nChannels{0}; // Z++: ℕ
+    bool m_bBlockRead{false}; // Z++: 𝔹
+    int64_t m_LineInBlock{0}; // Z++: ℕ
+    int64_t m_CurrentBlock{0}; // Z++: ℕ
+    uint8_t m_ppVagBuffers_card{0u}; // Z++: ℙ ℕ
+    uint8_t m_ppPcmBuffers_card{0u}; // Z++: ℙ ℤ
+    int32_t nChannels{0}; // Z++: i
+    uint8_t VAG_SAMPLES_IN_LINE_card{0u}; // Z++: Ref[return_m_nNumberOfBlocks__NUM_VAG_LINES_IN_BLOCK]
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (m_pFile_card <= 1u)
+            && (m_pVagDecoders_card <= 1u)
+            && (m_FileSize >= 0)
+            && (m_nNumberOfBlocks >= 0)
+            && (m_nSampleRate >= 0)
+            && (m_nChannels >= 0)
+            && (m_LineInBlock >= 0)
+            && (m_CurrentBlock >= 0)
+            && (m_ppVagBuffers_card <= 1u)
+            && (m_ppPcmBuffers_card <= 1u)
+            && (VAG_SAMPLES_IN_LINE_card <= 1u);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct COpusFile_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    uint8_t m_FileH_card{0u}; // Z++: Ref[OggOpusFile]
+    bool m_bOpened{false}; // Z++: 𝔹
+    int64_t m_nRate{0}; // Z++: ℕ
+    int64_t m_nChannels{0}; // Z++: ℕ
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0)
+            && (m_FileH_card <= 1u)
+            && (m_nRate >= 0)
+            && (m_nChannels >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct IDecoder_ZppContract {
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
+// State Schema Contract from zpp/audio/oal/stream.zpp
+struct tsQueue_ZppContract {
+    int32_t true_field{0}; // Z++: return
+    int32_t count{0}; // Z++: ℤ
+    int32_t m_mutex{0}; // Z++: std__mutex
+    int64_t instance_addr{0}; // Z++: ADDRESS
+    constexpr bool checkInvariant() const {
+        return (instance_addr >= 0);
+    }
+};
 // State Schema Contract from zpp/audio/sampman.zpp
 struct tSample_ZppContract {
     int64_t nOffset{0}; // Z++: ℕ
@@ -270,6 +530,49 @@ struct soundlistModuleState_ZppContract {
             && (source_lines == 433);
     }
 };
+// Query Operation Schema Contract (ΞCWavFile) from zpp/audio/oal/stream.zpp
+constexpr bool op_CWavFile_GetCurrentSample_3(const CWavFile_ZppContract& state) {
+    return state.checkInvariant();
+}
+// Delta Operation Schema Contract (ΔCChannel) from zpp/audio/oal/channel.zpp
+constexpr bool op_CChannel_Init(const CChannel_ZppContract& pre, const CChannel_ZppContract& post, int64_t _id_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.id == (int64_t)_id_in) && (post.bIs2D == true);
+}
+constexpr CChannel_ZppContract apply_CChannel_Init(const CChannel_ZppContract& pre, int64_t _id_in = 25) {
+    CChannel_ZppContract post = pre;
+    post.id = (int64_t)_id_in;
+    post.bIs2D = true;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCChannel) from zpp/audio/oal/channel.zpp
+constexpr bool op_CChannel_SetSampleData(const CChannel_ZppContract& pre, const CChannel_ZppContract& post, int64_t _data_in = 25, int64_t _DataSize_in = 25, int32_t freq_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Data == (int64_t)_data_in) && (post.DataSize == (int64_t)_DataSize_in) && (post.Frequency == (int32_t)freq_in);
+}
+constexpr CChannel_ZppContract apply_CChannel_SetSampleData(const CChannel_ZppContract& pre, int64_t _data_in = 25, int64_t _DataSize_in = 25, int32_t freq_in = 25) {
+    CChannel_ZppContract post = pre;
+    post.Data = (int64_t)_data_in;
+    post.DataSize = (int64_t)_DataSize_in;
+    post.Frequency = (int32_t)freq_in;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCChannel) from zpp/audio/oal/channel.zpp
+constexpr bool op_CChannel_SetLoopCount(const CChannel_ZppContract& pre, const CChannel_ZppContract& post, int32_t count_in = 25) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.LoopCount == (int32_t)count_in);
+}
+constexpr CChannel_ZppContract apply_CChannel_SetLoopCount(const CChannel_ZppContract& pre, int32_t count_in = 25) {
+    CChannel_ZppContract post = pre;
+    post.LoopCount = (int32_t)count_in;
+    return post;
+}
+// Delta Operation Schema Contract (ΔCChannel) from zpp/audio/oal/channel.zpp
+constexpr bool op_CChannel_SetReverbMix(const CChannel_ZppContract& pre, const CChannel_ZppContract& post, float mix_in = 2.5f) {
+    return pre.checkInvariant() && post.checkInvariant() && (post.Mix == mix_in);
+}
+constexpr CChannel_ZppContract apply_CChannel_SetReverbMix(const CChannel_ZppContract& pre, float mix_in = 2.5f) {
+    CChannel_ZppContract post = pre;
+    post.Mix = mix_in;
+    return post;
+}
 constexpr bool verify_audio_zpp_invariants() {
     {
         cAudioCollision_ZppContract valid{};
@@ -384,6 +687,118 @@ constexpr bool verify_audio_zpp_invariants() {
         if (bad.checkInvariant()) return false;
     }
     {
+        ALDEVICEINFO_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ALDEVICEINFO_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        ALDeviceList_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        ALDeviceList_ZppContract bad{};
+        bad.aDeviceInfo_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CChannel_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CChannel_ZppContract bad{};
+        bad.Position_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CSortStereoBuffer_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CSortStereoBuffer_ZppContract bad{};
+        bad.PcmBuf_card = 2u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CImaADPCMDecoder_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CImaADPCMDecoder_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CWavFile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CWavFile_ZppContract bad{};
+        bad.extra_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tDataHeader_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tDataHeader_ZppContract bad{};
+        bad.ID = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tFormatHeader_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tFormatHeader_ZppContract bad{};
+        bad.extra_len = 0u;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CSndFile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CSndFile_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CMP3File_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CMP3File_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CADFFile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CADFFile_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CVagDecoder_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CVagDecoder_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        CVbFile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        CVbFile_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        COpusFile_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        COpusFile_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        IDecoder_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        IDecoder_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
+        tsQueue_ZppContract valid{};
+        if (!valid.checkInvariant()) return false;
+        tsQueue_ZppContract bad{};
+        bad.instance_addr = -1;
+        if (bad.checkInvariant()) return false;
+    }
+    {
         tSample_ZppContract valid{};
         if (!valid.checkInvariant()) return false;
         tSample_ZppContract bad{};
@@ -403,6 +818,78 @@ constexpr bool verify_audio_zpp_invariants() {
         soundlistModuleState_ZppContract bad{};
         bad.module_loaded = false;
         if (bad.checkInvariant()) return false;
+    }
+    {
+        const CWavFile_ZppContract st{};
+        if (!op_CWavFile_GetCurrentSample_3(st)) return false;
+    }
+    {
+        CChannel_ZppContract pre{};
+        const int64_t _id_in = 25;
+        pre.id = 0;
+        pre.bIs2D = false;
+        const auto post = apply_CChannel_Init(pre, _id_in);
+        if (!op_CChannel_Init(pre, post, _id_in)) return false;
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.id = (int64_t)(_id_in + 1);
+            if (op_CChannel_Init(pre, badPost, _id_in)) return false;
+        }
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.bIs2D = false;
+            if (op_CChannel_Init(pre, badPost, _id_in)) return false;
+        }
+    }
+    {
+        CChannel_ZppContract pre{};
+        const int64_t _data_in = 25;
+        const int64_t _DataSize_in = 25;
+        const int32_t freq_in = 25;
+        pre.Data = 0;
+        pre.DataSize = 0;
+        pre.Frequency = 0;
+        const auto post = apply_CChannel_SetSampleData(pre, _data_in, _DataSize_in, freq_in);
+        if (!op_CChannel_SetSampleData(pre, post, _data_in, _DataSize_in, freq_in)) return false;
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.Data = (int64_t)(_data_in + 1);
+            if (op_CChannel_SetSampleData(pre, badPost, _data_in, _DataSize_in, freq_in)) return false;
+        }
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.DataSize = (int64_t)(_DataSize_in + 1);
+            if (op_CChannel_SetSampleData(pre, badPost, _data_in, _DataSize_in, freq_in)) return false;
+        }
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.Frequency = (int32_t)(freq_in + 1);
+            if (op_CChannel_SetSampleData(pre, badPost, _data_in, _DataSize_in, freq_in)) return false;
+        }
+    }
+    {
+        CChannel_ZppContract pre{};
+        const int32_t count_in = 25;
+        pre.LoopCount = 0;
+        const auto post = apply_CChannel_SetLoopCount(pre, count_in);
+        if (!op_CChannel_SetLoopCount(pre, post, count_in)) return false;
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.LoopCount = (int32_t)(count_in + 1);
+            if (op_CChannel_SetLoopCount(pre, badPost, count_in)) return false;
+        }
+    }
+    {
+        CChannel_ZppContract pre{};
+        const float mix_in = 2.5f;
+        pre.Mix = 0.0f;
+        const auto post = apply_CChannel_SetReverbMix(pre, mix_in);
+        if (!op_CChannel_SetReverbMix(pre, post, mix_in)) return false;
+        {
+            CChannel_ZppContract badPost = post;
+            badPost.Mix = mix_in + 1.0f;
+            if (op_CChannel_SetReverbMix(pre, badPost, mix_in)) return false;
+        }
     }
     return kZppModuleCount >= 0 && kZppSchemaCount >= 0;
 }
