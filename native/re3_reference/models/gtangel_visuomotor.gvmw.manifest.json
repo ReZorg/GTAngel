@@ -1,0 +1,190 @@
+{
+  "schema": "gtangel.visuomotor.weights.v1",
+  "createdAtMs": 1789214099470,
+  "dataset": {
+    "files": [
+      {
+        "name": "gtvm_episode_1_1789213503910.gtvm",
+        "sha256": "9204ab0500d821f78da2535c9191589394943cf20301d94a25d15d318871971c"
+      }
+    ],
+    "digest": "1fab360a775daf53f43f6166706bc33950a0429de336d5347f81ab5a96134352",
+    "records": 3118,
+    "trainingRecords": 2494,
+    "validationRecords": 624
+  },
+  "architecture": "conv3x96x96-gru64-multihead",
+  "seed": 1337,
+  "epochs": 30,
+  "sequenceLength": 16,
+  "sequenceStride": 8,
+  "trainingWindows": 310,
+  "validationWindows": 77,
+  "metrics": {
+    "loss": 0.07968311756849289,
+    "controller_mse": 0.06917677571376164,
+    "collision_bce": 0.006958551860104005,
+    "epoch": 30.0,
+    "train_loss": 0.0829493910074234
+  },
+  "weights": {
+    "file": "gtangel_visuomotor.gvmw",
+    "sha256": "8162a9deaebc2187556996ceca86434718419ed317d30e7ac373213a38d1fd61",
+    "tensors": [
+      {
+        "name": "cognition.bias",
+        "shape": [
+          288
+        ],
+        "elements": 288
+      },
+      {
+        "name": "cognition.weight",
+        "shape": [
+          288,
+          64
+        ],
+        "elements": 18432
+      },
+      {
+        "name": "collision.bias",
+        "shape": [
+          1
+        ],
+        "elements": 1
+      },
+      {
+        "name": "collision.weight",
+        "shape": [
+          1,
+          64
+        ],
+        "elements": 64
+      },
+      {
+        "name": "controller.bias",
+        "shape": [
+          6
+        ],
+        "elements": 6
+      },
+      {
+        "name": "controller.weight",
+        "shape": [
+          6,
+          64
+        ],
+        "elements": 384
+      },
+      {
+        "name": "ego_motion.bias",
+        "shape": [
+          3
+        ],
+        "elements": 3
+      },
+      {
+        "name": "ego_motion.weight",
+        "shape": [
+          3,
+          64
+        ],
+        "elements": 192
+      },
+      {
+        "name": "proprioception.0.bias",
+        "shape": [
+          32
+        ],
+        "elements": 32
+      },
+      {
+        "name": "proprioception.0.weight",
+        "shape": [
+          32,
+          16
+        ],
+        "elements": 512
+      },
+      {
+        "name": "recurrent.bias_hh",
+        "shape": [
+          192
+        ],
+        "elements": 192
+      },
+      {
+        "name": "recurrent.bias_ih",
+        "shape": [
+          192
+        ],
+        "elements": 192
+      },
+      {
+        "name": "recurrent.weight_hh",
+        "shape": [
+          192,
+          64
+        ],
+        "elements": 12288
+      },
+      {
+        "name": "recurrent.weight_ih",
+        "shape": [
+          192,
+          96
+        ],
+        "elements": 18432
+      },
+      {
+        "name": "visual.0.bias",
+        "shape": [
+          8
+        ],
+        "elements": 8
+      },
+      {
+        "name": "visual.0.weight",
+        "shape": [
+          8,
+          3,
+          5,
+          5
+        ],
+        "elements": 600
+      },
+      {
+        "name": "visual.2.bias",
+        "shape": [
+          16
+        ],
+        "elements": 16
+      },
+      {
+        "name": "visual.2.weight",
+        "shape": [
+          16,
+          8,
+          3,
+          3
+        ],
+        "elements": 1152
+      },
+      {
+        "name": "visual.6.bias",
+        "shape": [
+          64
+        ],
+        "elements": 64
+      },
+      {
+        "name": "visual.6.weight",
+        "shape": [
+          64,
+          144
+        ],
+        "elements": 9216
+      }
+    ]
+  }
+}

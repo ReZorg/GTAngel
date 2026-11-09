@@ -1,0 +1,102 @@
+{
+  "results": [
+    {
+      "input": "EchoStateNetwork and recurrent/reservoir state",
+      "output": {
+        "confidence": 0.95,
+        "current_behavior": "Implements a standard leaky integrator Echo State Network (ESN) with randomly initialized, sparsely connected recurrent weights scaled to a specified spectral radius. The `step` function updates the internal state using `tanh` activation and a leak rate, and computes the output via a linear combination of the state and output weights. It maintains a ring buffer of state history and calculates the root mean square energy of the state.",
+        "deficiencies": "W_out_ is initialized to zero with no training or weight update mechanism (e.g., ridge regression or FORCE learning) implemented; lacks explicit support for multi-modal (visual + proprioceptive) input structures; fixed dimensions without dynamic plasticity.",
+        "integration_anchors": "class EchoStateNetwork; std::vector\u003cdouble\u003e step(const std::vector\u003cdouble\u003e\u0026 input); dte::EchoStateNetwork esn{16, 96, 8, 0.95f, 0.3f, 42};",
+        "recommendation": "Implement an online learning algorithm (like FORCE or RLS) for W_out_ to enable the network to learn motor policies. Expand the input layer to explicitly handle concatenated visual feature vectors and proprioceptive state, and provide a training interface to update weights based on target motor commands.",
+        "reusable_elements": "Initialization logic (spectral radius scaling, sparse W_res_); leaky integration update rule; stateHistory_ ring buffer; stateEnergy calculation.",
+        "source_symbols": "EchoStateNetwork; step; stateEnergy; W_in_; W_res_; W_out_; state_; stateHistory_",
+        "subsystem": "EchoStateNetwork"
+      },
+      "error": ""
+    },
+    {
+      "input": "SimpleLanguageModel and existing neural network primitives",
+      "output": {
+        "confidence": 0.95,
+        "current_behavior": "The mech0 subsystem implements a basic text-based transformer-like language model, including an AttentionMechanism with query, key, and value weights, and a SimpleLanguageModel that predicts a predefined set of labels (greeting, farewell, question) from token embeddings using forward propagation with layer normalization and dropout. A TrainingPipeline updates the token embeddings based on prediction loss.",
+        "deficiencies": "Hardcoded to text classification labels (\"greeting\", \"farewell\", \"question\"); no support for continuous motor outputs or visual/proprioceptive inputs; uses a simple average of embeddings for classification rather than sequential/spatial reasoning suitable for visuomotor tasks; training pipeline only updates embeddings, not attention weights.",
+        "integration_anchors": "mech0::SimpleLanguageModel; mech0::AttentionMechanism; mech0::TrainingPipeline; struct GTAngelAGI { mech0::SimpleLanguageModel llm{1000, 64}; mech0::TrainingPipeline trainer{1000, 64}; }",
+        "recommendation": "Replace the text-specific labels with continuous action vectors (e.g., steering, throttle, braking) and adapt the forward pass to ingest both visual feature embeddings and proprioceptive state vectors instead of just token indices. The AttentionMechanism should be retained but updated to compute cross-attention between visual and proprioceptive inputs, and the TrainingPipeline must be modified to backpropagate gradients through the attention weights using a regression loss (like MSE) rather than cross-entropy.",
+        "reusable_elements": "AttentionMechanism; initializeWeight; applyAttention; layerNormalize; applyDropout",
+        "source_symbols": "mech0::AttentionMechanism; mech0::SimpleLanguageModel; mech0::TrainingPipeline; mech0::TrainingMetrics; mech0::SimpleLanguageModel::forward; mech0::SimpleLanguageModel::predict; mech0::TrainingPipeline::train",
+        "subsystem": "SimpleLanguageModel"
+      },
+      "error": ""
+    },
+    {
+      "input": "AttentionMechanism and attention allocation",
+      "output": {
+        "confidence": 0.9,
+        "current_behavior": "The AttentionMechanism class implements a basic single-head self-attention mechanism. It initializes Query, Key, and Value weight matrices using He initialization. It computes attention scores via dot products scaled by the square root of the embedding dimension, applies a softmax function to obtain attention weights, and computes context vectors as weighted sums of the Values. It also provides a basic weight update method using simple gradient descent.",
+        "deficiencies": "Only supports single-head attention; hardcoded for 1D sequence embeddings (not suitable for 2D spatial visual features or mixed modalities); lacks cross-attention capabilities for fusing visual and proprioceptive streams; weight update method assumes identical gradients for Q, K, and V weights which is mathematically incorrect; lacks causal masking or other advanced attention features.",
+        "integration_anchors": "mech0::AttentionMechanism; mech0::SimpleLanguageModel::attention_; mech0::SimpleLanguageModel::SimpleLanguageModel",
+        "recommendation": "Refactor the AttentionMechanism to support Multi-Head Attention (MHA) and Cross-Attention. Implement separate projection layers for visual features and proprioceptive state. Introduce proper backpropagation that computes correct gradients for Q, K, and V matrices independently. Add support for spatial attention maps to better handle visual inputs for the visuomotor policy.",
+        "reusable_elements": "Basic matrix multiplication and dot product utilities; softmax implementation; general Q/K/V projection structure; He initialization logic.",
+        "source_symbols": "mech0::AttentionMechanism; mech0::AttentionMechanism::AttentionOutput; mech0::AttentionMechanism::calculateAttentionScores; mech0::AttentionMechanism::applyAttention; mech0::AttentionMechanism::updateWeights; mech0::SimpleLanguageModel",
+        "subsystem": "AttentionMechanism"
+      },
+      "error": ""
+    },
+    {
+      "input": "TrainingPipeline and dataset or optimization facilities",
+      "output": {
+        "confidence": 0.95,
+        "current_behavior": "The `TrainingPipeline` subsystem provides a naive training loop for a `SimpleLanguageModel` (a minimal custom transformer-like architecture with embeddings and an `AttentionMechanism`). It takes token sequences and string labels, performs a forward pass, computes cross-entropy loss, and applies hardcoded manual gradient updates (e.g. `gradients[j] = output.embeddings[i][j] * 0.1`) to the model's embeddings and attention weights using a fixed learning rate. Currently, it is called every 20 ticks in the agent loop to train the LLM on 8-element proprioceptive token sequences labeled simply as \"greeting\", \"farewell\", or \"question\" based on hardcoded reward thresholds.",
+        "deficiencies": "Hardcoded manual gradients (no autograd/backprop engine); tightly coupled to a specific simplistic `SimpleLanguageModel` rather than a robust neural architecture; training data labels are naively generated from reward thresholds (\"greeting\", \"farewell\", \"question\"); no support for continuous state/action spaces required by a visuomotor policy; no batching, replay buffer, or optimization algorithm (like Adam) beyond simple SGD; hardcoded learning rates and fixed dimensions.",
+        "integration_anchors": "`mech0::TrainingPipeline`; `trainer.train(data, 1, 0.01);` in the main agent loop (`tickCount % 20 == 0`); `mech0::SimpleLanguageModel`; `mech0::AttentionMechanism`",
+        "recommendation": "Replace the naive `TrainingPipeline` and `SimpleLanguageModel` with a proper deep reinforcement learning training loop (e.g., PPO or SAC) using a lightweight tensor library (like GGML or libtorch). Implement an experience replay buffer to collect visual observations and proprioceptive states, and use a proper autograd-enabled optimizer to train a continuous-action actor-critic network rather than predicting discrete string labels.",
+        "reusable_elements": "The overall integration pattern in the agent loop (training every N ticks); the concept of collecting sensorimotor data into a training dataset; `TrainingMetrics` struct for tracking loss and accuracy.",
+        "source_symbols": "mech0::TrainingPipeline; mech0::SimpleLanguageModel; mech0::AttentionMechanism; mech0::TrainingMetrics; TrainingPipeline::train; SimpleLanguageModel::forward; SimpleLanguageModel::updateEmbedding; AttentionMechanism::updateWeights",
+        "subsystem": "TrainingPipeline"
+      },
+      "error": ""
+    },
+    {
+      "input": "NavTrainer action policy, Q-table, and update loop",
+      "output": {
+        "confidence": 0.95,
+        "current_behavior": "The NavTrainer subsystem implements a Q-learning tabular reinforcement learning agent for navigation. It discretizes continuous spatial information (relative goal bearing, distance to goal, and nearest obstacle bearing) into a small 3D state space. It selects discrete actions (FWD, FWD_L, FWD_R, TURN_L, TURN_R, BACK, WAIT, SPRINT) using an epsilon-greedy policy and updates its Q-table values based on rewards from environmental interactions (collisions yield negative rewards, reaching the goal yields positive rewards, and visual progress provides shaping). It executes synchronously in the main loop (`agentLoop.addStep(\"civic_angel_spine\")`).",
+        "deficiencies": "Uses a purely discrete tabular Q-learning approach (`float Q[BEARINGS][DISTS][OBST][COUNT]`) rather than continuous function approximation; relies on a hand-crafted 3D state space derived from geometric ground truth or simplified visual mapping rather than raw visual/proprioceptive inputs; actions are hard-coded discrete steps rather than continuous motor torques or velocities; lacks recurrent state or memory for partial observability.",
+        "integration_anchors": "`agentLoop.addStep(\"civic_angel_spine\", 2, [this]() { ... })`; `avatar3d::NavTrainer::Action a = navTraining ? navTrainer.choose(s) : avatar3d::NavTrainer::WAIT;`; `navTrainer.update(s, a, reward, visualAfter.state);`; `v15render::VisualNavEvidence visualBefore = visualNavEncoder.encode(perceptionPyramid.retina);`",
+        "recommendation": "Replace the tabular Q-learning `NavTrainer` with a continuous neural network policy (e.g., an Actor-Critic or PPO model). The new policy should accept the rich `VisualNavEvidence` (or raw `Retina64` / `perceptionPyramid` output) concatenated with proprioceptive state (e.g., current speed, heading) instead of the discretized 3D state. Output should be continuous motor commands mapped to the avatar's movement (`navSpeed`, `navHeading`). The integration should happen within the `civic_angel_spine` loop step, substituting `navTrainer.choose()` and `navTrainer.update()` with neural network forward and backward passes.",
+        "reusable_elements": "`VisualNavEvidence` structure; `v15render::VisualNavStateEncoder::encode` (for extracting visual features); the reward shaping logic (`visualNavEncoder.progressReward`); the discrete action space definitions (as a fallback or for a discrete action neural policy); the `civic_angel_spine` step scheduling and simulation interaction logic (e.g., collision checking, goal distance calculation, and updating avatar pose).",
+        "source_symbols": "`avatar3d::NavTrainer`; `avatar3d::NavTrainer::State`; `avatar3d::NavTrainer::Action`; `avatar3d::NavTrainer::choose`; `avatar3d::NavTrainer::update`; `avatar3d::NavTrainer::discretize`; `v15render::VisualNavStateEncoder`; `v15render::VisualNavEvidence`; `agentLoop.addStep(\"civic_angel_spine\")`",
+        "subsystem": "NavTrainer"
+      },
+      "error": ""
+    },
+    {
+      "input": "FrameBufferProbe, SensorimotorLoop, PerceptionPyramid, and VisualNavStateEncoder",
+      "output": {
+        "confidence": 0.9,
+        "current_behavior": "The subsystems process raw framebuffer pixels into semantic visual representations and attempt to close the sensorimotor loop. PerceptionPyramid downsamples a high-res buffer to a 64x64 retina, extracting luminance, depth, motion, and object semantics. VisualNavStateEncoder converts this retina into navigation evidence (goal/obstacle bearings and depth buckets). FrameBufferProbe performs grid-based luminance sampling and temporal differencing for motion energy. SensorimotorLoop calculates prediction errors between expected and observed flow, maintaining proprioceptive states and selecting random actions modulated by endocrine hormone levels.",
+        "deficiencies": "SensorimotorLoop uses hardcoded sine waves for frameBuffer instead of real visual data; action selection in SensorimotorLoop is purely random (rng) modulated by hormones rather than a trained policy; PerceptionPyramid relies on exact object IDs (1-5) which won't generalize to real-world rendering; SensorimotorLoop integrates prediction error but doesn't feed back into a learnable policy; the VisualNavStateEncoder discretization (4 depth buckets) is too coarse for fine motor control.",
+        "integration_anchors": "agentLoop.addStep(\"navigation\", ...); navTrainer.choose(s); sensorimotor.integrate(); perceptionPyramid.derive(highResRenderer.framebuffer); visualNavEncoder.encode(perceptionPyramid.retina);",
+        "recommendation": "Replace the sine-wave frameBuffer in SensorimotorLoop with the actual Retina64 output from PerceptionPyramid. Integrate the VisualNavStateEncoder's output (goal/obstacle bearings) with the SensorimotorLoop's proprioceptive state to form a unified state vector. Replace the random action selection in SensorimotorLoop with the NavTrainer's Q-learning policy (`navTrainer.choose(s)`), and use the SensorimotorLoop's prediction error as an auxiliary reward signal to guide the motor policy.",
+        "reusable_elements": "PerceptionPyramid::derive (downsampling and semantic extraction); VisualNavStateEncoder::encode (goal and obstacle tracking); FrameBufferProbe::sample (motion energy calculation); SensorimotorLoop::integrate (prediction error and agency calculation).",
+        "source_symbols": "FrameBufferProbe; SensorimotorLoop; PerceptionPyramid; VisualNavStateEncoder; Retina64; VisualNavEvidence; HighResFramebuffer; ProprioceptiveFrame; SensorimotorReading; MotorCommand",
+        "subsystem": "FrameBufferProbe, SensorimotorLoop, PerceptionPyramid, VisualNavStateEncoder"
+      },
+      "error": ""
+    },
+    {
+      "input": "AgentLoop scheduling, keyboard controls, embodied motion, and virtual-controller output",
+      "output": {
+        "confidence": 0.9,
+        "current_behavior": "The system schedules cognitive and sensorimotor processes via a priority-based AgentLoop. Virtual head and hand tracking (uechovr::Tracker6DOF) is generated procedurally using sinusoidal math rather than real VR hardware input. Navigation training relies on a tabular Q-learning NavTrainer over a discrete action space (MotorCommand), and keyboard controls in WndProc are limited to debugging and state toggles rather than direct avatar movement.",
+        "deficiencies": "Procedural sinusoidal tracking instead of real input; Tabular Q-learning does not scale to continuous spaces; MotorCommand action space is discrete; Keyboard controls only handle debug toggles, not actual motion control; Lack of continuous visual-to-motor mapping.",
+        "integration_anchors": "gtangel::GTAngelEnvironment::suggest; uechovr::Tracker6DOF::updateHMD; uechovr::Tracker6DOF::updateController; AgentLoop::addStep; WM_KEYDOWN in WndProc",
+        "recommendation": "Replace the procedural uechovr::Tracker6DOF with a continuous neural control policy that accepts actual egocentric vision and proprioception as inputs. Replace the tabular Q-learning NavTrainer with a continuous reinforcement learning algorithm (e.g., PPO or SAC) that outputs continuous MotorCommand values. Add direct keyboard/gamepad hooks in WndProc for manual policy override or data collection.",
+        "reusable_elements": "AgentLoop priority scheduler; MotorCommand struct; FrameBufferProbe; gtangel::WorldObservation; gtangel::GTAngelEnvironment step mechanics",
+        "source_symbols": "AgentLoop; LoopStep; uechovr::Tracker6DOF; gtangel::MotorCommand; avatar3d::NavTrainer; gtangel::GTAngelEnvironment; WM_KEYDOWN",
+        "subsystem": "AgentLoop, Keyboard, EmbodiedMotion, VirtualController"
+      },
+      "error": ""
+    }
+  ]
+}

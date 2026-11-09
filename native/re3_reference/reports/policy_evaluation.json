@@ -1,0 +1,33 @@
+{
+  "verification": "pass",
+  "records": 3118,
+  "validationRecords": 624,
+  "nativeParity": {
+    "controllerMaxAbsError": 3.8370490074157715e-07,
+    "collisionMaxAbsError": 1.7229467630386353e-08
+  },
+  "heldOut": {
+    "modelControllerMse": 0.06831745058298111,
+    "modelControllerMae": 0.1327085644006729,
+    "meanBaselineMse": 0.10095829516649246,
+    "zeroBaselineMse": 0.2433300018310547,
+    "nearestExpertTargetAccuracy": 0.3766025641025641,
+    "perAxisMse": [
+      0.19698378443717957,
+      0.0039000720717012882,
+      0.00016563075769226998,
+      0.09978853166103363,
+      7.385668868664652e-05,
+      0.10899289697408676
+    ],
+    "egoMotionMse": 0.02013421058654785,
+    "cognitiveFieldMse": 0.0011994225205853581
+  },
+  "limitations": {
+    "collisionPositiveRecords": 0,
+    "rewardUnique": [
+      -0.01
+    ],
+    "actuatorQualified": false
+  }
+}

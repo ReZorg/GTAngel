@@ -1,0 +1,196 @@
+{
+  "format": "dte-morph-rig-construction/v1",
+  "built": true,
+  "evaluatorTarget": "PurismCore v1.1.0 v5 via matching loadPurismRuntime",
+  "compiler": {
+    "writer": "/home/ubuntu/pure2d-skill-work/tools/purism-template/moc3-writer.mjs",
+    "mode": "restricted MOC3 3.0 direct-ArtMesh subset",
+    "nativeBoneTree": false
+  },
+  "modelKind": "Two separately textured 720×1280 user raster views, tiled direct ArtMeshes with manual weighted transforms; PoseBlend opacity crossfade.",
+  "limits": {
+    "parameters": 128,
+    "meshes": 1024,
+    "verticesPerMesh": 8192,
+    "bindingsPerMesh": 12,
+    "keyformsPerMesh": 65536,
+    "totalKeyforms": 131072,
+    "totalPositionScalars": 4000000,
+    "bytes": 67108864
+  },
+  "actual": {
+    "parameterCount": 27,
+    "meshCount": 192,
+    "vertexCount": 1728,
+    "triangleCount": 1536,
+    "explicitKeyforms": 123000,
+    "positionScalars": 2214000,
+    "writerLimits": {
+      "parameters": 128,
+      "meshes": 1024,
+      "verticesPerMesh": 8192,
+      "bindingsPerMesh": 12,
+      "keyformsPerMesh": 65536,
+      "totalKeyforms": 131072,
+      "totalPositionScalars": 4000000,
+      "bytes": 67108864
+    }
+  },
+  "sourceProvenance": "source-provenance.json",
+  "manualWeightManifest": "rig-weights.manifest.json",
+  "sourceSpec": "source.template.json",
+  "outputOwnership": "Only DTEMorphRig model artifacts and root parameters.json were created by this compiler.",
+  "warnings": [
+    "No native physics rig is authored; hair/breathing motion is parameter choreography.",
+    "Direct keyforms approximate continuous rotations with three keys per rotational parameter; bounded controls limit texture seam/twist artifacts.",
+    "No official Cubism Editor/Core compatibility is claimed."
+  ],
+  "filesBeforeInventory": {
+    "DTEMorphRig.moc3": {
+      "bytes": 10419648,
+      "sha256": "bcc107a70a165bb5f29d5dd40f3e0f51fc768fcfc866e44366d8dbac1a368fd0"
+    },
+    "DTEMorphRig.model3.json": {
+      "bytes": 628,
+      "sha256": "1d6a0565ef81303fd1a59f4483e6f70f521d475796befd7d6287c0bae184f8bf"
+    },
+    "explore-atlas.png": {
+      "bytes": 523365,
+      "sha256": "15e620f4cb558faae083c59bd6232b98e8949466f92ac21fa0176c09575f0cfd"
+    },
+    "neutral-atlas.png": {
+      "bytes": 452581,
+      "sha256": "fd94368b9a7d3163126f8e0e780277913bd3e870ebb160ba7f70b01148a90d72"
+    },
+    "rig-weights.manifest.json": {
+      "bytes": 1219131,
+      "sha256": "0138116cd766de747c64b01eec423ba9abf92e42be7474ea75beb2e306d4abdb"
+    },
+    "source-provenance.json": {
+      "bytes": 2145,
+      "sha256": "429fff9e04c5b910de6ea5bdda1ddc8b7573afe0930e0d7f3717a7db94d9bfdc"
+    },
+    "source.template.json": {
+      "bytes": 131327573,
+      "sha256": "5108a195d2c83052482570f1bcbfbc8dd12c73ddcfca3ad216cd04c91f8da585"
+    }
+  },
+  "motionExport": {
+    "clips": 9,
+    "poses": 12,
+    "interpolation": "10u³ − 15u⁴ + 6u⁵",
+    "fps": 30
+  },
+  "fileInventory": [
+    {
+      "file": ".native-runtime/live2d-core-runtime.json",
+      "bytes": 443,
+      "sha256": "b1ae4daf7167c4a0f12236aee701277a6117d94a1b4744217ff51a33385e3d7e"
+    },
+    {
+      "file": ".native-runtime/live2dcubismcore.min.js",
+      "bytes": 258331,
+      "sha256": "c61d8048bb8247a7a5473291cd14ddbe1c3dd95e55044a2cb9bd29f11c5bc42b"
+    },
+    {
+      "file": ".native-runtime/purism-core.LICENSE",
+      "bytes": 1103,
+      "sha256": "0c420f717a04a7bbc4cd3c652c83e77d0d7883a14b363d60af94ff6cdf3b7768"
+    },
+    {
+      "file": "DTEMorphRig.moc3",
+      "bytes": 10419648,
+      "sha256": "bcc107a70a165bb5f29d5dd40f3e0f51fc768fcfc866e44366d8dbac1a368fd0"
+    },
+    {
+      "file": "DTEMorphRig.model3.json",
+      "bytes": 1957,
+      "sha256": "648951170fa57e7d14755baffa58d22221e79f49f7b048980cada697bf109002"
+    },
+    {
+      "file": "explore-atlas.png",
+      "bytes": 523365,
+      "sha256": "15e620f4cb558faae083c59bd6232b98e8949466f92ac21fa0176c09575f0cfd"
+    },
+    {
+      "file": "gesture-library.json",
+      "bytes": 6454,
+      "sha256": "7a17d4016a5a3e87884abdd40bc6197985c93331985afc5ff9e59b257a3d37e2"
+    },
+    {
+      "file": "motion-inventory.json",
+      "bytes": 12585,
+      "sha256": "61b64fd735143b6658a0213e0880504d5e3f9d52596d0de8ad8d98116b928b98"
+    },
+    {
+      "file": "motions/idle.motion3.json",
+      "bytes": 231512,
+      "sha256": "603f477f3e6e9844158d35176318a47c6f87944e857571a72f8dae65e485628b"
+    },
+    {
+      "file": "motions/look.motion3.json",
+      "bytes": 197231,
+      "sha256": "b5cd889eafb943ce2498932f0fc3b784dcc81c1dfc0cd4bb194e0598a8f5a9c1"
+    },
+    {
+      "file": "motions/nod.motion3.json",
+      "bytes": 114042,
+      "sha256": "417000d35b1500cb47c2610316ea7efcb3954642d69d780e0b6d26c7bf4d5983"
+    },
+    {
+      "file": "motions/present.motion3.json",
+      "bytes": 157039,
+      "sha256": "b2491479c01b37b7178d01e2b9d1854f06e8dfc3a4f44e6d8a040ed38a0cc4e1"
+    },
+    {
+      "file": "motions/reach.motion3.json",
+      "bytes": 144294,
+      "sha256": "c9d12ab7640b6d1a85ef4072f39f8bbdabd7fbc6d5fa548f7db82d1aad5ff83f"
+    },
+    {
+      "file": "motions/sequence.motion3.json",
+      "bytes": 764675,
+      "sha256": "76056423584bf605c527315c58c872aef1e036fdd47804b7136fccb4351a8bba"
+    },
+    {
+      "file": "motions/step.motion3.json",
+      "bytes": 163045,
+      "sha256": "a022978e8eb79e58ea70718fdaa43e581515b265a1d4fd8308229c560e31d7ee"
+    },
+    {
+      "file": "motions/transition.motion3.json",
+      "bytes": 113781,
+      "sha256": "fc980974b4aecebbeee56d297c3c0a9318f11d4e1e83fd6c632ea530baddbddb"
+    },
+    {
+      "file": "motions/wave.motion3.json",
+      "bytes": 155465,
+      "sha256": "bc5e49edf7d3c494dbb930189233353574e02527daa5d1c698a59040f78baa2e"
+    },
+    {
+      "file": "native-test-results.json",
+      "bytes": 10514,
+      "sha256": "893b106af4974de3039b063671a579b8280636e5493b5cbbedbea06826f3d02b"
+    },
+    {
+      "file": "neutral-atlas.png",
+      "bytes": 452581,
+      "sha256": "fd94368b9a7d3163126f8e0e780277913bd3e870ebb160ba7f70b01148a90d72"
+    },
+    {
+      "file": "rig-weights.manifest.json",
+      "bytes": 1219131,
+      "sha256": "0138116cd766de747c64b01eec423ba9abf92e42be7474ea75beb2e306d4abdb"
+    },
+    {
+      "file": "source-provenance.json",
+      "bytes": 2145,
+      "sha256": "429fff9e04c5b910de6ea5bdda1ddc8b7573afe0930e0d7f3717a7db94d9bfdc"
+    },
+    {
+      "file": "source.template.json",
+      "bytes": 131327573,
+      "sha256": "5108a195d2c83052482570f1bcbfbc8dd12c73ddcfca3ad216cd04c91f8da585"
+    }
+  ]
+}

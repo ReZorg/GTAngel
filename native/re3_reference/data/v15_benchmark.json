@@ -1,0 +1,20 @@
+{
+  "valid": true,
+  "frames": 90,
+  "source_resolution": "768x768",
+  "retina_resolution": "64x64",
+  "cognitive_resolution": "12x12",
+  "average_render_ms": 28.1063,
+  "minimum_render_ms": 22.0918,
+  "maximum_render_ms": 57.4214,
+  "estimated_fps": 35.5792,
+  "triangles_submitted": 1788,
+  "average_triangles_rasterized": 815.489,
+  "finite_depth_pixels": 361330,
+  "semantic_pixels": 361330,
+  "mean_luminance": 0.083787,
+  "mean_motion": 0.0043141,
+  "mean_edge_energy": 0.0098281,
+  "mean_contradiction": 0.0617857,
+  "frame_artifacts": ["v15_frame.ppm", "v15_depth.ppm", "v15_object_id.ppm", "v15_luminance.ppm"]
+}

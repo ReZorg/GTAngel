@@ -1,0 +1,6 @@
+{
+  "verification": "pass",
+  "source": "gtangel_agi_v17_full.cpp",
+  "required": 14,
+  "forbidden": 3
+}

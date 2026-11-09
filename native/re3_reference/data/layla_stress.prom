@@ -1,0 +1,18 @@
+# HELP layla_bridge_requests_total Total inference requests completed
+# TYPE layla_bridge_requests_total counter
+layla_bridge_requests_total 0
+# HELP layla_bridge_failures_total Total failed requests
+# TYPE layla_bridge_failures_total counter
+layla_bridge_failures_total 0
+# HELP layla_bridge_queue_depth Current queue depth
+# TYPE layla_bridge_queue_depth gauge
+layla_bridge_queue_depth 0
+# HELP layla_bridge_last_latency_ms Last request latency
+# TYPE layla_bridge_last_latency_ms gauge
+layla_bridge_last_latency_ms 0
+# HELP layla_bridge_online Backend online flag
+# TYPE layla_bridge_online gauge
+layla_bridge_online 1
+# HELP layla_bridge_enqueue_rate Enqueues per second (concurrent test)
+# TYPE layla_bridge_enqueue_rate gauge
+layla_bridge_enqueue_rate 53552

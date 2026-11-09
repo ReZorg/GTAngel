@@ -1,0 +1,10 @@
+{
+  "backend": "purism",
+  "release": "v1.1.0",
+  "hostAbi": "v5",
+  "sourceRevision": "1069334965522df5d0b791e97f01e26b19c45456",
+  "upstreamCoreSha256": "3eec0b1e6cd20bab0773744228aac21f4c882dbef708c28379ba6315a11b15f4",
+  "packagedCoreSha256": "c61d8048bb8247a7a5473291cd14ddbe1c3dd95e55044a2cb9bd29f11c5bc42b",
+  "license": "MIT; see purism-core.LICENSE",
+  "modelRights": "Independent; runtime license is not character/export approval"
+}

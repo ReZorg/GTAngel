@@ -1,0 +1,113 @@
+{
+  "format": "dte-artwork-purism-mapping/v1",
+  "source": {
+    "filename": "dte-avatar-fullbody-nobck.png",
+    "sha256": "35e87896b5b28e19aa17d774bf44943a92fa6cf675925230f7e03284f6d8f51a",
+    "width": 720,
+    "height": 1280,
+    "alpha": "original RGBA; exact bytes retained"
+  },
+  "landmarks": {
+    "EyeL": {
+      "center": [
+        343,
+        157
+      ],
+      "radius": [
+        26,
+        17
+      ]
+    },
+    "EyeR": {
+      "center": [
+        396,
+        164
+      ],
+      "radius": [
+        24,
+        17
+      ]
+    },
+    "BrowL": {
+      "center": [
+        343,
+        139
+      ],
+      "radius": [
+        27,
+        10
+      ]
+    },
+    "BrowR": {
+      "center": [
+        396,
+        145
+      ],
+      "radius": [
+        26,
+        10
+      ]
+    },
+    "Mouth": {
+      "center": [
+        373,
+        207
+      ],
+      "radius": [
+        27,
+        18
+      ]
+    },
+    "Chest": {
+      "center": [
+        360,
+        388
+      ],
+      "radius": [
+        145,
+        140
+      ]
+    },
+    "HairL": {
+      "center": [
+        296,
+        270
+      ],
+      "radius": [
+        76,
+        215
+      ]
+    },
+    "HairR": {
+      "center": [
+        444,
+        275
+      ],
+      "radius": [
+        72,
+        215
+      ]
+    }
+  },
+  "landmarkStatus": "manually authored image-space anchors; not automatic landmark detection",
+  "parameterDefaults": {
+    "ParamAngleX": 0,
+    "ParamAngleY": 0,
+    "ParamAngleZ": 0,
+    "ParamBodyAngleZ": 0,
+    "ParamEyeLOpen": 1,
+    "ParamEyeROpen": 1,
+    "ParamEyeBallX": 0,
+    "ParamEyeBallY": 0,
+    "ParamBrowLY": 0,
+    "ParamBrowRY": 0,
+    "ParamMouthOpenY": 0.3,
+    "ParamMouthForm": 0,
+    "ParamBreath": 0.5,
+    "ParamHairSwing": 0
+  },
+  "representation": "single illustration sampled by continuous regional ArtMeshes; no independent part separation",
+  "uvConvention": "u=x/720, v=1-y/1280; actual Cubism host shader flips v",
+  "sourceRights": "unverified; private user-requested transformation, not approved redistribution",
+  "canonicalIdentityMutation": false
+}

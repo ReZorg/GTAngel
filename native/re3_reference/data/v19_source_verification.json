@@ -1,0 +1,7 @@
+{
+  "ok": true,
+  "sourcePath": "/home/ubuntu/gtangel-v19-work/gtangel_agi_v19_full.cpp",
+  "requiredChecks": 24,
+  "forbiddenChecks": 6,
+  "failures": []
+}

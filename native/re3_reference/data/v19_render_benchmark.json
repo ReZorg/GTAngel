@@ -1,0 +1,14 @@
+{
+  "valid": true,
+  "frames": 60,
+  "source_resolution": "768x768",
+  "client_canvas": "1024x768",
+  "average_render_ms": 29.7642,
+  "estimated_fps": 33.5974,
+  "npc_pixels_broken": 450,
+  "shard_pixels_broken": 263,
+  "goal_pixels_broken": 1000,
+  "npc_pixels_complete": 450,
+  "shard_pixels_complete": 0,
+  "goal_pixels_complete": 3792
+}

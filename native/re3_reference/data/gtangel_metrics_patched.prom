@@ -1,0 +1,9 @@
+# HELP gtangel_phasor_t8_coherence_patched T8 coherence with UT8R patch
+# TYPE gtangel_phasor_t8_coherence_patched gauge
+gtangel_phasor_t8_coherence_patched 36
+# HELP gtangel_phasor_t8_coherence_original T8 coherence original
+# TYPE gtangel_phasor_t8_coherence_original gauge
+gtangel_phasor_t8_coherence_original 27
+# HELP gtangel_phasor_patch_improvement T8 coherence improvement
+# TYPE gtangel_phasor_patch_improvement gauge
+gtangel_phasor_patch_improvement 9
