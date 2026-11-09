@@ -9952,18 +9952,7 @@ class BodyEffector {
             const float dx=p.x-lamp.pos.x, dz=p.z-lamp.pos.z;
             if (dx*dx+dz*dz<(radius+0.20f)*(radius+0.20f)) return false;
         }
-        if (std::fabs(p.x-w.vehiclePos.x)<radius+1.30f &&
-            std::fabs(p.z-w.vehiclePos.z)<radius+2.30f) return false;
-        for (const auto& v : w.traffic) {
-            if (v.orbitR>0.0f) continue;
-            const float hx=(v.axis=='x')?2.50f:1.25f, hz=(v.axis=='z')?2.50f:1.25f;
-            if (std::fabs(p.x-v.pos.x)<radius+hx && std::fabs(p.z-v.pos.z)<radius+hz) return false;
-        }
-        if (std::fabs(p.x-w.ambX)<radius+2.50f && std::fabs(p.z+1.4f)<radius+1.30f) return false;
-        if (std::fabs(p.x+1.4f)<radius+1.40f && std::fabs(p.z-w.busZ)<radius+3.10f) return false;
-        for (const auto& wk : w.walkers) {
-            if (distance2(p,wk.pos)<(radius+0.45f)*(radius+0.45f)) return false;
-        }
+        return false;
         if (distance2(p,w.npcPos)<(radius+0.55f)*(radius+0.55f)) return false;
         if (radius>0.5f &&
             (distance2(p,w.goal)<(radius+0.35f)*(radius+0.35f) ||
@@ -9976,6 +9965,23 @@ class BodyEffector {
         for (int i=1;i<=steps;++i) {
             float t=(float)i/(float)steps;
             if (!clear({a.x+(b.x-a.x)*t,0,a.z+(b.z-a.z)*t},radius,w)) return false;
+        }
+        // LW55: approach-only mutual barriers for dynamic bodies — motion INTO a
+        // vehicle/ped is vetoed, but any motion AWAY (escape when overlapping)
+        // is always allowed, so the avatar can never be caged by a barrier.
+        const float dB2 = distance2(b, w.vehiclePos), dA2 = distance2(a, w.vehiclePos);
+        if (dB2 < (radius+1.45f)*(radius+1.45f) && dB2 < dA2) return false;
+        for (const auto& v : w.traffic) {
+            if (v.orbitR>0.0f) continue;
+            const float dBt=distance2(b,v.pos), dAt=distance2(a,v.pos);
+            if (dBt < (radius+2.0f)*(radius+2.0f) && dBt < dAt) return false;
+        }
+        const Vec3 ambP{w.ambX,0.0f,-1.4f}, busP{-1.4f,0.0f,w.busZ};
+        if (distance2(b,ambP)<(radius+2.2f)*(radius+2.2f) && distance2(b,ambP)<distance2(a,ambP)) return false;
+        if (distance2(b,busP)<(radius+2.6f)*(radius+2.6f) && distance2(b,busP)<distance2(a,busP)) return false;
+        for (const auto& wk : w.walkers) {
+            if (distance2(b,wk.pos)<(radius+0.45f)*(radius+0.45f) &&
+                distance2(b,wk.pos)<distance2(a,wk.pos)) return false;
         }
         return true;
     }

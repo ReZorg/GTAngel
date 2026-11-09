@@ -7159,6 +7159,23 @@ class BodyEffector {
             float t=(float)i/(float)steps;
             if (!clear({a.x+(b.x-a.x)*t,0,a.z+(b.z-a.z)*t},radius,w)) return false;
         }
+        // LW55: approach-only mutual barriers for dynamic bodies — motion INTO a
+        // vehicle/ped is vetoed, but any motion AWAY (escape when overlapping)
+        // is always allowed, so the avatar can never be caged by a barrier.
+        const float dB2 = distance2(b, w.vehiclePos), dA2 = distance2(a, w.vehiclePos);
+        if (dB2 < (radius+1.45f)*(radius+1.45f) && dB2 < dA2) return false;
+        for (const auto& v : w.traffic) {
+            if (v.orbitR>0.0f) continue;
+            const float dBt=distance2(b,v.pos), dAt=distance2(a,v.pos);
+            if (dBt < (radius+2.0f)*(radius+2.0f) && dBt < dAt) return false;
+        }
+        const Vec3 ambP{w.ambX,0.0f,-1.4f}, busP{-1.4f,0.0f,w.busZ};
+        if (distance2(b,ambP)<(radius+2.2f)*(radius+2.2f) && distance2(b,ambP)<distance2(a,ambP)) return false;
+        if (distance2(b,busP)<(radius+2.6f)*(radius+2.6f) && distance2(b,busP)<distance2(a,busP)) return false;
+        for (const auto& wk : w.walkers) {
+            if (distance2(b,wk.pos)<(radius+0.45f)*(radius+0.45f) &&
+                distance2(b,wk.pos)<distance2(a,wk.pos)) return false;
+        }
         return true;
     }
     bool consume(const MotorCommit& c, const Context& ctx, const avatar3d::GameWorld& world) {
