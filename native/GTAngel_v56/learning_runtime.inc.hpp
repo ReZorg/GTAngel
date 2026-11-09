@@ -1,10 +1,13 @@
 // Canonical GTAngelAGI members, inlined by generate_v56.mjs.
     gtskill::Curriculum curriculum;
     gtskill::Selection selectedSkill;
+    gtskill::WalkingGuard walkingGuard;
+    bool walkingGuardActive{false};
     gtlearn::Autosave checkpointTimer;
     std::string checkpointId, checkpointStatus{"not saved"};
     bool learningDirty{false};
     bool evaluationMode{false};
+    bool practiceMode{false};
     bool evaluationUseGnn{true};
     gtskill::Skill evaluationSkill{gtskill::Skill::Walk};
     v27gnn::GneuralMotorPolicy gnnChampion;
@@ -25,6 +28,7 @@
         const std::string command=GetCommandLineA();
         return command.find("--selftest")!=std::string::npos ||
                command.find("--navdiag")!=std::string::npos ||
+               command.find("--practice-walking")!=std::string::npos ||
                command.find("--evaluate-skills")!=std::string::npos;
     }
     static std::string learningSessionRoot() {
@@ -194,6 +198,8 @@
                 if(!store.read(candidates[i],snapshot) || !motor.decode(snapshot.payload[1]) ||
                    !skills.decode(snapshot.payload[2]) || !restoreLearningState(snapshot.payload[0])) continue;
                 gnnMotor.swap(motor); curriculum=std::move(skills);
+                if(gnnMotor.adoptCurrentInputContract())
+                    addLog("GNN input contract upgraded: weights retained; incompatible replay retired");
                 neuralTrainingSteps=gnnMotor.trainingSteps(); neuralTrainingUpdates=gnnMotor.trainingUpdates();
                 lastNeuralTrainLoss=gnnMotor.lastLoss(); gnnMotorReady=true;
                 checkpointId=snapshot.id; checkpointStatus=i==0?"restored":"recovered older checkpoint";

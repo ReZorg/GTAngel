@@ -2885,7 +2885,7 @@ public:
     void reset(){*this=LocalNavigation{};}
     ControllerProposal propose(const v15render::VisualNavEvidence& v,
             const avatar3d::NavTrainer& q,const v27learn::OnlineNavigationObserver& learning,
-            bool contact,int questMode=0,float goalCompass=10.0f) {
+            bool contact,int questMode=0,float goalCompass=10.0f,bool bodyPathClear=false) {
         ControllerProposal p;
         if(v.sourceSequence==0 || !v27learn::OnlineNavigationObserver::valid(v.state))return p;
         ++proposals;
@@ -2902,7 +2902,10 @@ public:
             p.turn = avoidTurnDir_;
             return p;
         }
-        if(v.obstacleVisible && v.nearestObstacleDepth<2.4f) {
+        // A third-person camera can see a nearby obstacle behind the avatar.
+        // Confirmed foot clearance suppresses that advisory avoidance arc;
+        // the motor guard and spinal sweep still check every actual movement.
+        if(v.obstacleVisible && v.nearestObstacleDepth<2.4f && !bodyPathClear) {
             if (avoidHoldTicks_ == 0) {
                 avoidTurnDir_ = (v.state.obst < 4) ? 0.46f : -0.46f;
                 avoidHoldTicks_ = 12;
@@ -3046,9 +3049,10 @@ namespace v27gnn {
 static constexpr int FeatureSize = 20;
 static constexpr int HiddenSize = 16;
 static constexpr int OutputSize = 2; // [0]=turn (right+), [1]=forward
-static constexpr int MaxSamples = 256; // rolling demonstration buffer
-static constexpr int TrainBatch = 16;  // most recent samples per pass
+static constexpr int MaxSamples = 256;
+static constexpr int TrainBatch = 16;  // recent plus manoeuvre-balanced replay
 static constexpr int TrainEveryFrames = 20;
+static constexpr uint32_t InputContract = 2; // pre-action body state + intended goal
 
 class GneuralMotorPolicy {
 public:
@@ -3099,22 +3103,37 @@ public:
 
     // Forward pass: features in, (turn, forward) out.
     bool infer(const float* features, float& turnOut, float& forwardOut) const {
-        if (!net_) return false;
-        for (int i = 0; i < FeatureSize; ++i)
+        if (!net_ || !features) return false;
+        for (int i = 0; i < FeatureSize; ++i) {
+            if(!std::isfinite(features[i]) || std::fabs(features[i])>100) return false;
             net_->neurons[i].output = features[i];
+        }
         feedforward(net_);
         turnOut = (float)net_->neurons[FeatureSize + HiddenSize].output;
         forwardOut = (float)net_->neurons[FeatureSize + HiddenSize + 1].output;
-        return true;
+        return std::isfinite(turnOut)&&std::isfinite(forwardOut);
     }
 
     // Store one demonstration pair in the rolling buffer.
     void remember(const float* features, float turn, float forward) {
+        if(!features || !std::isfinite(turn)||!std::isfinite(forward)||
+           std::fabs(turn)>1 || std::fabs(forward)>1) { ++invalidSamples_; return; }
         Sample s;
-        for (int i = 0; i < FeatureSize; ++i) s.x[i] = features[i];
+        for (int i = 0; i < FeatureSize; ++i) {
+            if(!std::isfinite(features[i])||std::fabs(features[i])>100) {++invalidSamples_;return;}
+            s.x[i] = features[i];
+        }
         s.y[0] = turn;
         s.y[1] = forward;
-        if ((int)samples_.size() >= MaxSamples) samples_.erase(samples_.begin());
+        if ((int)samples_.size() >= MaxSamples) {
+            // Retire the oldest sample from the most represented manoeuvre.
+            // Straight cruising must not erase every turn/reverse/stop example.
+            auto counts=replayCounts(); ++counts[category(s)];
+            const int most=static_cast<int>(std::max_element(counts.begin(),counts.end())-counts.begin());
+            const auto oldest=std::find_if(samples_.begin(),samples_.end(),
+                [&](const Sample& sample){return category(sample)==most;});
+            samples_.erase(oldest==samples_.end()?samples_.begin():oldest);
+        }
         samples_.push_back(s);
         newSamples_=std::min(newSamples_+1,MaxSamples);
     }
@@ -3124,9 +3143,31 @@ public:
     uint64_t trainingUpdates() const { return trainingUpdates_; }
     uint64_t trainingSteps() const { return trainingSteps_; }
     float lastLoss() const { return lastLoss_; }
+    uint64_t rejectedUpdates() const {return rejectedUpdates_;}
+    uint64_t invalidSamples() const {return invalidSamples_;}
+    double learningRate() const {return gamma_;}
+    double lastBatchBefore() const {return lastBatchBefore_;}
+    double lastBatchAfter() const {return lastBatchAfter_;}
+    std::array<unsigned,5> replayCounts() const {
+        std::array<unsigned,5> counts{};
+        for(const auto& s:samples_) ++counts[category(s)];
+        return counts;
+    }
+    std::array<float,FeatureSize> latestTrainingInput() const {
+        std::array<float,FeatureSize> result{};
+        if(!samples_.empty()) std::copy(std::begin(samples_.back().x),std::end(samples_.back().x),result.begin());
+        return result;
+    }
+    bool adoptCurrentInputContract() {
+        if(inputContract_==InputContract) return false;
+        samples_.clear(); newSamples_=0; inputContract_=InputContract;
+        lastLoss_=-1; lastError_=1e9;
+        return true; // Weights, adaptive rate and lifetime steps are preserved.
+    }
     uint64_t policyRevision() const {
         if(!net_) return 0;
         gtlearn::Writer weights;
+        weights.put(inputContract_);
         for(unsigned i=0;i<net_->num_of_neurons;++i)
             for(unsigned j=0;j<net_->neurons[i].num_input;++j) weights.put(net_->neurons[i].w[j]);
         return gtlearn::checksum(weights.bytes);
@@ -3141,11 +3182,14 @@ public:
         swap(newSamples_,other.newSamples_); swap(trainingUpdates_,other.trainingUpdates_);
         swap(trainingSteps_,other.trainingSteps_); swap(lastLoss_,other.lastLoss_);
         swap(gamma_,other.gamma_); swap(lastError_,other.lastError_);
+        swap(inputContract_,other.inputContract_); swap(rejectedUpdates_,other.rejectedUpdates_);
+        swap(invalidSamples_,other.invalidSamples_);
+        swap(lastBatchBefore_,other.lastBatchBefore_); swap(lastBatchAfter_,other.lastBatchAfter_);
     }
     std::string encode() const {
         if(!net_) throw std::runtime_error("motor network unavailable");
         gtlearn::Writer w;
-        w.put<uint32_t>(1); w.put<uint32_t>(FeatureSize); w.put<uint32_t>(HiddenSize); w.put<uint32_t>(OutputSize);
+        w.put<uint32_t>(2); w.put<uint32_t>(FeatureSize); w.put<uint32_t>(HiddenSize); w.put<uint32_t>(OutputSize);
         w.put(trainingSteps_); w.put(trainingUpdates_); w.put(lastLoss_);
         w.put(gamma_); w.put(lastError_); w.put<int32_t>(newSamples_);
         for(unsigned i=0;i<net_->num_of_neurons;++i)
@@ -3155,12 +3199,14 @@ public:
             for(float x:sample.x) w.put(x);
             for(float y:sample.y) w.put(y);
         }
+        w.put(inputContract_); w.put(rejectedUpdates_); w.put(invalidSamples_);
         return w.bytes;
     }
     bool decode(const std::string& bytes) {
         try {
             gtlearn::Reader r{bytes};
-            if(r.get<uint32_t>()!=1||r.get<uint32_t>()!=FeatureSize||
+            const auto version=r.get<uint32_t>();
+            if((version!=1&&version!=2)||r.get<uint32_t>()!=FeatureSize||
                r.get<uint32_t>()!=HiddenSize||r.get<uint32_t>()!=OutputSize) return false;
             GneuralMotorPolicy trial; if(!trial.create()) return false;
             trial.trainingSteps_=r.get<uint64_t>(); trial.trainingUpdates_=r.get<uint64_t>();
@@ -3180,6 +3226,11 @@ public:
             for(auto& sample:trial.samples_) {
                 for(float& x:sample.x) { x=r.get<float>(); if(std::fabs(x)>100) return false; }
                 for(float& y:sample.y) { y=r.get<float>(); if(std::fabs(y)>1) return false; }
+            }
+            trial.inputContract_=version==1?1:r.get<uint32_t>();
+            if(trial.inputContract_<1||trial.inputContract_>InputContract) return false;
+            if(version==2) {
+                trial.rejectedUpdates_=r.get<uint64_t>(); trial.invalidSamples_=r.get<uint64_t>();
             }
             r.end(); swap(trial); return true;
         } catch(const std::exception&) { return false; }
@@ -3206,31 +3257,54 @@ public:
         cfg_->wmin = -1.0;
         cfg_->wmax = 1.0;
         cfg_->nxw = 1000;
-        // Train on the most recent TrainBatch samples: a full 256-point
-        // pass costs ~600ms (central-difference gradient_descent), while a
-        // 16-point single-iteration pass costs ~5ms - safe for the frame
-        // loop. Older samples still shape the network across passes.
+        // Keep the bounded 16-point budget, but train on both current experience
+        // and a rotating selection of older manoeuvres. Each point appears once.
         const int batch = n < TrainBatch ? n : TrainBatch;
+        std::vector<int> selected;
+        for(int i=std::max(0,n-batch/2);i<n;++i) selected.push_back(i);
+        for(int round=0;static_cast<int>(selected.size())<batch && round<n;++round)
+            for(int kind=0;kind<5 && static_cast<int>(selected.size())<batch;++kind) {
+                std::vector<int> group;
+                for(int i=0;i<n;++i) if(category(samples_[i])==kind) group.push_back(i);
+                if(group.empty()) continue;
+                const int i=group[(trainingSteps_+round)%group.size()];
+                if(std::find(selected.begin(),selected.end(),i)==selected.end()) selected.push_back(i);
+            }
         for (int p = 0; p < batch; ++p) {
-            const Sample& s = samples_[n - batch + p];
+            const Sample& s = samples_[selected[p]];
             for (int i = 0; i < FeatureSize; ++i)
                 NET_PX(cfg_, p, i, 0) = s.x[i];
             for (int o = 0; o < OutputSize; ++o)
                 NET_PY(cfg_, p, FeatureSize + HiddenSize + o) = s.y[o];
         }
         cfg_->num_points = batch; // training point count (error() reads this)
-        // Adaptive learning rate: sqrt-shaped L2 error gives an almost
-        // constant gradient magnitude near the optimum, so a fixed gamma
-        // oscillates forever. Halve gamma when a pass fails to improve,
-        // reset when it does - converges and stays responsive to new data.
+        // Compare the same batch before and after the step. Comparing different
+        // batches, or resetting gamma for every fresh sample, hid regressions.
+        std::vector<double> beforeWeights;
+        for(unsigned i=0;i<net_->num_of_neurons;++i)
+            for(unsigned j=0;j<net_->neurons[i].num_input;++j) beforeWeights.push_back(net_->neurons[i].w[j]);
+        const double before=error(net_,cfg_);
+        if(!std::isfinite(before)) return false;
+        // A genuine rise in error on new experience can reopen the rate after
+        // convergence; acceptance still depends on this exact batch improving.
+        if(newSamples_>0 && before>lastError_+.05) gamma_=std::max(gamma_,.001);
         cfg_->gamma = gamma_;
         gradient_descent(net_, cfg_);
         const double after = error(net_, cfg_);
-        if (after < lastError_ * 0.999 || newSamples_ > 0) gamma_ = 0.01; // fresh data re-explores
-        else gamma_ = (gamma_ > 2e-4) ? gamma_ * 0.5 : 1e-4; // floor keeps learning alive
+        ++trainingSteps_;
+        lastBatchBefore_=before; lastBatchAfter_=after;
+        if(!std::isfinite(after) || after>before+1e-9) {
+            size_t k=0;
+            for(unsigned i=0;i<net_->num_of_neurons;++i)
+                for(unsigned j=0;j<net_->neurons[i].num_input;++j) net_->neurons[i].w[j]=beforeWeights[k++];
+            gamma_=std::max(1e-6,gamma_*.5);
+            lastError_=before; lastLoss_=static_cast<float>(before);
+            ++rejectedUpdates_;
+            return false;
+        }
+        if(after<before-1e-10) gamma_=std::min(.01,gamma_*1.05);
         lastError_ = after;
         lastLoss_ = (float)after;
-        trainingSteps_ += (uint64_t)cfg_->maxiter;
         ++trainingUpdates_;
         newSamples_ = 0;
         return true;
@@ -3288,6 +3362,7 @@ public:
                 }
             }
             in>>std::ws; if(!in.eof()) return false;
+            trial.inputContract_=1;
             swap(trial); return true;
         } catch(const std::exception&) { return false; }
     }
@@ -3297,6 +3372,13 @@ private:
         float x[FeatureSize];
         float y[OutputSize];
     };
+    static int category(const Sample& s) {
+        if(s.y[1]<-.05f) return 3; // reverse
+        if(std::fabs(s.y[1])<.08f && std::fabs(s.y[0])<.15f) return 4; // stop
+        if(s.y[0]<-.15f) return 1;
+        if(s.y[0]>.15f) return 2;
+        return 0; // straight
+    }
 
     static char* dup_(const char* s) {
         char* d = (char*)malloc(strlen(s) + 1);
@@ -3318,6 +3400,9 @@ private:
     float lastLoss_{-1.0f};
     double gamma_{0.01};
     double lastError_{1e9};
+    uint32_t inputContract_{InputContract};
+    uint64_t rejectedUpdates_{0},invalidSamples_{0};
+    double lastBatchBefore_{0},lastBatchAfter_{0};
 };
 
 } // namespace v27gnn

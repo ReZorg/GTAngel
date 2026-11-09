@@ -15,8 +15,15 @@ static int checkpointChild(const std::string& directory) {
         const float expectedTurn=expected.get<float>(),expectedForward=expected.get<float>();
         if(!motor.infer(features,turn,forward)||turn!=expectedTurn||forward!=expectedForward) return 3;
         const auto steps=motor.trainingSteps();
-        motor.remember(features,-.4f,-.6f);
-        if(!motor.train()||motor.trainingSteps()<=steps) return 4;
+        // A converged learner should reject an unnecessary worsening step.
+        // Give it genuinely new feedback and measure changed predictions.
+        motor.remember(features,.4f,.6f);
+        bool accepted=false;
+        for(int i=0;i<16&&!accepted;++i) accepted=motor.train();
+        if(!accepted||motor.trainingSteps()<=steps) return 4;
+        float learnedTurn=0,learnedForward=0;
+        if(!motor.infer(features,learnedTurn,learnedForward) ||
+           std::hypot(learnedTurn-.4f,learnedForward-.6f)>=std::hypot(turn-.4f,forward-.6f)) return 5;
         return 0;
     }
     return 1;
@@ -33,11 +40,11 @@ int main(int argc,char** argv){
         for(int i=0;i<1000;++i) skills.observe(gtskill::Skill::Walk,.1f,false);
         check(!skills.ready(gtskill::Skill::Walk),"training alone never grants mastery");
         for(unsigned seed=0;seed<8;++seed) {
-            check(skills.assess(gtskill::Skill::Walk,123,1,{seed,true,0,0,8,10}),"valid walking assessment");
-            skills.assess(gtskill::Skill::Run,123,1,{seed,true,0,0,6,10});
+            check(skills.assess(gtskill::Skill::Walk,123,gtskill::EvaluationSuite,{seed,true,0,0,8,10}),"valid walking assessment");
+            skills.assess(gtskill::Skill::Run,123,gtskill::EvaluationSuite,{seed,true,0,0,6,10});
         }
         check(skills.ready(gtskill::Skill::Walk)&&skills.ready(gtskill::Skill::Run),"distinct successful assessments validate skills");
-        skills.assess(gtskill::Skill::Run,123,1,{7,true,0,0,6,10});
+        skills.assess(gtskill::Skill::Run,123,gtskill::EvaluationSuite,{7,true,0,0,6,10});
         check(skills.record(gtskill::Skill::Run).evaluations.size()==8,"duplicate seed does not inflate mastery");
         check(skills.select(false,false,10,10,{}).skill==gtskill::Skill::Walk,"saved scores cannot grant absent motor capability");
         check(skills.select(false,false,10,10,{true,false}).skill==gtskill::Skill::Run,"validated running selected in clear space");
@@ -47,10 +54,37 @@ int main(int argc,char** argv){
         check(restored.decode(snapshot)&&restored.encode()==snapshot,"skill evidence and lifetime observations persist");
         check(!restored.decode(snapshot.substr(0,snapshot.size()-1))&&restored.encode()==snapshot,
               "truncated skill state leaves incumbent intact");
-        restored.assess(gtskill::Skill::Run,123,1,{0,true,.5f,0,6,10});
+        restored.assess(gtskill::Skill::Run,123,gtskill::EvaluationSuite,{0,true,.5f,0,6,10});
         check(!restored.ready(gtskill::Skill::Run),"safety regression demotes skill");
-        restored.assess(gtskill::Skill::Walk,124,1,{0,true,0,0,8,10});
+        restored.assess(gtskill::Skill::Walk,124,gtskill::EvaluationSuite,{0,true,0,0,8,10});
         check(!restored.ready(gtskill::Skill::Walk),"new model requires fresh evaluation");
+        gtskill::Curriculum outdated;
+        for(unsigned seed=0;seed<8;++seed) outdated.assess(gtskill::Skill::Walk,123,1,{seed,true,0,0,8,10});
+        check(!outdated.readyFor(gtskill::Skill::Walk,123),"old straight-route suite cannot grant current mastery");
+        check(std::string(outdated.record(gtskill::Skill::Walk).status())=="needs current assessment",
+              "curriculum explains stale evaluation");
+        for(unsigned seed=0;seed<8;++seed) outdated.assess(gtskill::Skill::Walk,123,2,{seed,true,0,0,8,10});
+        check(!outdated.readyFor(gtskill::Skill::Walk,123),
+              "experimental assessments with inherited world state cannot qualify a controller");
+        bool separate=true; unsigned turns=0,obstacles=0;
+        for(unsigned i=0;i<gtskill::ScenarioCount;++i) {
+            const auto trial=gtskill::scenario(i);
+            turns+=std::fabs(trial.heading)>.1f; obstacles+=trial.obstacle;
+            for(unsigned j=0;j<gtskill::ScenarioCount;++j)
+                separate=separate&&trial.seed!=gtskill::scenario(j,true).seed;
+        }
+        check(separate&&turns>=4&&obstacles>=2,"practice and held-out suites are distinct and include turns/detours");
+        gtskill::WalkingGuard guard;
+        const auto pivot=guard.apply(0,0,2, -2,5,.46f,-.55f,[](float,float){return true;});
+        check(pivot.forward==0&&pivot.turn<0,"walking guard reorients before translating");
+        const auto blocked=guard.apply(0,0,0,0,5,.46f,0,[](float,float){return false;});
+        check(blocked.forward==0&&blocked.turn==0,"walking guard waits when no local path is clear");
+        const auto arrival=guard.apply(0,0,0,0,.5f,.46f,0,[](float,float){return true;});
+        check(arrival.forward==0&&arrival.turn==0,"walking guard stops at an interaction target");
+        guard.reset();
+        const auto shortStep=guard.apply(0,0,0,0,5,.46f,0,
+            [](float x,float z){return std::hypot(x,z)>.1f;});
+        check(shortStep.forward==0,"a clear long lookahead cannot override a blocked immediate step");
         gtlearn::Autosave schedule; schedule.attempted(100,true);
         check(!schedule.due(60099,true)&&schedule.due(60100,true),"autosave is elapsed-time based");
         schedule.attempted(60100,false);
@@ -77,6 +111,15 @@ int main(int argc,char** argv){
     v27learn::OnlineNavigationObserver o; N q;
     v15render::VisualNavEvidence a,b;
     a.sourceSequence=1;b.sourceSequence=2;a.state={4,2,4};b.state={3,1,4};
+    {
+        v27dte::LocalNavigation advisory,confirmed;
+        auto camera=a; camera.obstacleVisible=true; camera.nearestObstacleDepth=.8f;
+        const auto blocked=advisory.propose(camera,q,o,false,1,0,false);
+        const auto clear=confirmed.propose(camera,q,o,false,1,0,true);
+        check(blocked.forward<.2f&&std::fabs(blocked.turn)>.4f&&
+              clear.forward>.4f&&std::fabs(clear.turn)<.01f,
+              "verified foot clearance prevents avoidance of a camera-only obstacle");
+    }
     check(o.observe(q,a,b,1,0,.2f,true,false,true,true),"accepted local observed action");
     check(o.updates==1&&q.stepsTotal==1&&std::fabs(q.Q[4][2][4][N::FWD]-.03f)<1e-6f,"actual Bellman weight update");
     check(o.action(1,-.68f)==N::FWD_L&&o.action(1,.68f)==N::FWD_R,"forward turn mapping");
@@ -148,6 +191,30 @@ int main(int argc,char** argv){
         check(d2.accepted,"unlocked shield accepts agreeing NN action");
     }
     {
+        v27gnn::GneuralMotorPolicy replay;
+        check(replay.create(),"balanced replay network created");
+        float features[v27gnn::FeatureSize]{}; features[19]=1;
+        for(int kind=0;kind<5;++kind) for(int i=0;i<8;++i) {
+            features[6]=kind*.2f; features[0]=i*.1f;
+            replay.remember(features,kind==1?-.4f:kind==2?.4f:0,
+                            kind==3?-.3f:kind==4?0:.45f);
+        }
+        for(int i=0;i<500;++i) {
+            features[6]=0; features[0]=(i%10)*.1f;
+            replay.remember(features,0,.45f);
+        }
+        const auto counts=replay.replayCounts();
+        check(replay.totalSamples()==v27gnn::MaxSamples&&
+              std::all_of(counts.begin(),counts.end(),[](unsigned n){return n>0;}),
+              "long straight stretches preserve turns, reverse and stop examples");
+        const auto before=replay.totalSamples();
+        features[9]=std::numeric_limits<float>::quiet_NaN();
+        replay.remember(features,0,.45f);
+        float t=0,f=0;
+        check(replay.totalSamples()==before&&replay.invalidSamples()==1&&!replay.infer(features,t,f),
+              "nonfinite observations cannot poison replay or inference");
+    }
+    {
         // GNN motor convergence: the GNU GNeuralNet policy must actually learn.
         v27gnn::GneuralMotorPolicy gnn;
         check(gnn.create(),"GNN motor network created");
@@ -157,10 +224,18 @@ int main(int argc,char** argv){
         float t0=0,f0=0;
         check(gnn.infer(feat,t0,f0),"GNN inference before training");
         float firstLoss=-1,lastLoss=-1;
+        bool protectedSteps=true;
         for(int it=0;it<400;++it){
             gnn.remember(feat,0.4f,0.6f); // teach: turn 0.4, forward 0.6
-            if(gnn.train()){ const float L=gnn.lastLoss(); if(firstLoss<0)firstLoss=L; lastLoss=L; }
+            const auto revision=gnn.policyRevision();
+            if(gnn.train()){
+                const float L=gnn.lastLoss(); if(firstLoss<0)firstLoss=L; lastLoss=L;
+                protectedSteps=protectedSteps&&gnn.lastBatchAfter()<=gnn.lastBatchBefore()+1e-9;
+            } else protectedSteps=protectedSteps&&gnn.policyRevision()==revision;
         }
+        check(protectedSteps&&gnn.rejectedUpdates()>0,"harmful gradient steps roll back without replacing weights");
+        check(gnn.trainingSteps()==gnn.trainingUpdates()+gnn.rejectedUpdates(),
+              "attempted, retained and reverted gradient steps are distinct");
         check(firstLoss>=0&&lastLoss>=0&&lastLoss<=firstLoss,"GNN training loss non-increasing");
         float t1=0,f1=0;
         check(gnn.infer(feat,t1,f1),"GNN inference after training");
@@ -190,6 +265,18 @@ int main(int argc,char** argv){
               "replay samples and gradient counts survive reload");
         check(!resumed.decode(state.substr(0,state.size()/2))&&resumed.encode()==state,
               "invalid GNN checkpoint cannot partially replace learner");
+        auto oldFormat=state.substr(0,state.size()-20);
+        const uint32_t version=1; std::memcpy(oldFormat.data(),&version,sizeof(version));
+        v27gnn::GneuralMotorPolicy migrated;
+        check(migrated.decode(oldFormat),"previous motor checkpoint format remains readable");
+        float oldTurn=0,oldForward=0,newTurn=0,newForward=0;
+        migrated.infer(feat,oldTurn,oldForward);
+        const auto oldSteps=migrated.trainingSteps();
+        const bool changed=migrated.adoptCurrentInputContract();
+        migrated.infer(feat,newTurn,newForward);
+        check(changed&&migrated.totalSamples()==0&&migrated.trainingSteps()==oldSteps&&
+              oldTurn==newTurn&&oldForward==newForward,
+              "input migration retires incompatible replay while preserving learned weights and steps");
         const auto beforeBadLoad=resumed.encode();
         gtlearn::writeFile(testRoot/"bad.net","999999999\n");
         check(!resumed.load((testRoot/"bad.net").string())&&resumed.encode()==beforeBadLoad,

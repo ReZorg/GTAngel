@@ -38,6 +38,8 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
         std::filesystem::create_directories(localLearningDirectory+"/models");
         std::filesystem::create_directories(localLearningDirectory+"/datasets");
         checkpointTimer.attempted(GetTickCount64(),true);
+        walkingGuard.reset();
+        walkingGuardActive=false;
         trajectoryRecorder.stop(); trajectoryRecording=false;
         trajectoryRecorderReady=trajectoryRecorder.selfCheck(localLearningDirectory+"/datasets");
         previousControllerTarget=v16motor::ControllerTarget{};
@@ -62,6 +64,7 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
         } else {
             if(!gnnMotorReady) addLog("GNN motor: network creation failed, NN actuation degraded");
         }
+        gnnMotor.adoptCurrentInputContract();
         neuralTrainingSteps=gnnMotor.trainingSteps(); neuralTrainingUpdates=gnnMotor.trainingUpdates();
         lastNeuralTrainLoss=gnnMotor.lastLoss();
         addLog(neuralPolicyLoaded ? "v27 NN initialized: LEARNING inference active when running" :
@@ -314,7 +317,7 @@ once('    // Presentation-only GDI overlay; never written back to the 768 VRD.',
     }
     // Presentation-only GDI overlay; never written back to the 768 VRD.`, 'diagnostic panel');
 // Freeze the causal recorder/controller state against load/recovery discontinuities.
-once('                    g_agi.invalidateEcho();\n                    g_agi.syncBodyFromCns();','                    g_agi.invalidateEcho();\n                    g_agi.neuralPolicy.reset();\n                    g_agi.previousControllerTarget=v16motor::ControllerTarget{};\n                    g_agi.syncBodyFromCns();','load recurrent reset');
+once('                    g_agi.invalidateEcho();\n                    g_agi.syncBodyFromCns();','                    g_agi.invalidateEcho();\n                    g_agi.neuralPolicy.reset();\n                    g_agi.walkingGuard.reset();\n                    g_agi.previousControllerTarget=v16motor::ControllerTarget{};\n                    g_agi.syncBodyFromCns();','load recurrent reset');
 // DTE is the embodied operator. Only renderer-sealed on-foot demands enter SRD.
 once('namespace v20cns {\nusing avatar3d::Vec3', '#include <optional>\nstruct GTAngelAGI;\nnamespace v20cns {\nusing avatar3d::Vec3','owner forward declaration');
 once('enum class Source : uint8_t { HumanLocal, Neural, Route, Script, Replay, AgentZero, Remote };',
@@ -732,6 +735,36 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
                 ctx.worldVersion,.7f,0,true);
             ck(motor.motorDte(runSeal,.7f,0,.1f,0,ctx,fixture)==v20cns::SpinalReflex::Verdict::Accepted,
                "bounded local running seal moves through normal clearance");
+            fixture.walkers.clear();
+            fixture.pillars.push_back({{10,0,1.8f},.35f,2.5f});
+            ck(place({10,0,0},2.4f),"walking guard fixture restore");
+            const auto querySequence=motor.body().sequence;
+            ck(!motor.canWalkTo({10,0,3},fixture) && motor.body().sequence==querySequence,
+               "lookahead uses swept geometry without consuming a motor commit");
+            gtskill::WalkingGuard guard;
+            bool reached=false,noContact=true;
+            for(int i=0;i<240;++i) {
+                const auto p=motor.body().position; const float h=motor.body().heading;
+                const float distance=std::hypot(10-p.x,4.5f-p.z);
+                const float bearing=std::remainder(atan2f(10-p.x,4.5f-p.z)-h,6.2831853f);
+                if(distance<1.25f) {reached=true;break;}
+                const auto demand=guard.apply(p.x,p.z,h,bearing,distance,.46f,
+                    std::clamp(bearing*.9f,-.55f,.55f),
+                    [&](float x,float z){return motor.canWalkTo({x,0,z},fixture);});
+                ++ctx.frame;ctx.nowMs+=50;
+                motor.motor(v20cns::Source::HumanLocal,demand.forward,demand.turn,0,0,true,ctx,fixture);
+                noContact=noContact&&!motor.body().contact;
+            }
+            ck(reached&&noContact,"walking guard turns and detours through the real body without contact");
+            resetSkillWorld(fixture,91007);
+            const auto original=fixture;
+            fixture.tickTraffic(.5f); fixture.questShard={40,0,40}; fixture.npcPos={30,0,30};
+            resetSkillWorld(fixture,91007);
+            ck(fixture.trafficTime==0 && fixture.ambX==original.ambX && fixture.busZ==original.busZ &&
+               fixture.questShard.x==original.questShard.x && fixture.npcPos.x==original.npcPos.x &&
+               fixture.pillars.size()==original.pillars.size() &&
+               fixture.pillars.front().pos.x==original.pillars.front().pos.x,
+               "assessment world reset discards traffic and protected-position history");
         }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
@@ -747,7 +780,24 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
         running=false; const auto seq=highResRenderer.framebuffer.sequence; tick();
         ck(neuralFrames==0&&highResRenderer.framebuffer.sequence==seq,"stopped loop unchanged"); running=true;
         const auto start=navPos;
-        for(int i=0;i<12;++i)tick();
+        bool causalInput=true,changedSpeedSample=false;
+        for(int i=0;i<12;++i) {
+            const float speedBefore=navSpeed; const int pending=gnnMotor.pendingSamples();
+            tick();
+            if(gnnMotor.pendingSamples()>pending && std::fabs(navSpeed-speedBefore)>.01f) {
+                changedSpeedSample=true;
+                causalInput=causalInput && std::fabs(gnnMotor.latestTrainingInput()[9]-
+                    std::clamp(speedBefore,-1.0f,1.0f))<1e-6f;
+            }
+        }
+        ck(changedSpeedSample&&causalInput,"motor demonstrations retain pre-action body speed");
+        {
+            float left[v27gnn::FeatureSize]{},right[v27gnn::FeatureSize]{};
+            buildGnnFeatures(left,{},{},0,0,-1,3);
+            buildGnnFeatures(right,{},{},0,0,1,12);
+            ck(left[6]<0&&right[6]>0&&left[7]<right[7],
+               "motor inputs distinguish intended goals with identical retinal evidence");
+        }
         ck(neuralFrames==12&&neuralPrediction.valid,"actual loop NN inference");
         ck(navLearning.updates>0&&magnitude(navTrainer)>0,"DTE learns with NO keyboard or user");
         ck(avatar3d::len(navPos-start)>.01f&&dteNavigation.accepted>0,"sealed DTE SRD movement");
@@ -1229,15 +1279,17 @@ once(`    void addLog(const std::string& m) {`, `    // v27 GNN motor: feature v
     // 20 features, ad hoc normalized to roughly [-1,1].
     void buildGnnFeatures(float* f, const v15render::VisualNavEvidence& v,
                           const v16motor::ProprioceptiveVector& proprio,
-                          float speed, float heading) const {
+                          float speed, float heading, float targetBearing, float targetDistance) const {
         f[0]=v.goalVisible?1.0f:0.0f;
         f[1]=v.goalVisible?std::clamp(v.goalDepth/20.0f,0.0f,1.0f):1.0f;
         f[2]=std::clamp((float)v.goalPixels/200.0f,0.0f,1.0f);
         f[3]=v.obstacleVisible?1.0f:0.0f;
         f[4]=v.obstacleVisible?std::clamp(v.nearestObstacleDepth/10.0f,0.0f,1.0f):1.0f;
         f[5]=std::clamp((float)v.obstaclePixels/200.0f,0.0f,1.0f);
-        f[6]=(float)v.state.bearing/8.0f*2.0f-1.0f;
-        f[7]=(float)v.state.dist/4.0f*2.0f-1.0f;
+        // Contract 2: intended local goal, independently of the beacon visible
+        // in the retina. This keeps quest changes distinguishable to the learner.
+        f[6]=std::clamp(targetBearing/3.14159265f,-1.0f,1.0f);
+        f[7]=std::clamp(targetDistance/20.0f,0.0f,1.0f);
         f[8]=(float)v.state.obst/8.0f*2.0f-1.0f;
         f[9]=std::clamp(speed,-1.0f,1.0f);
         f[10]=std::clamp(proprio.values[1],-1.0f,1.0f); // sin heading
@@ -5304,12 +5356,8 @@ once(`        if(questMode==1&&v.shardVisible) {
             }
         }`, 'LW38 goal-conditioned propose + Q blending');
 
-// 2. Encode active quest target bearing into buildGnnFeatures (f[6]) when
-//    goalVisible is false so the GNN MLP sees the continuous target error.
-once(`        f[6]=(float)v.state.bearing/8.0f*2.0f-1.0f;`,
-`        f[6]=(std::fabs(navGoalCompass)<=3.1416f)
-            ? std::clamp(navGoalCompass/3.14159265f,-1.0f,1.0f)
-            : ((float)v.state.bearing/8.0f*2.0f-1.0f);`, 'LW38 GNN continuous target bearing');
+// The current feature builder receives explicit pre-action target bearing and
+// distance; it no longer depends on the mutable navGoalCompass member.
 
 // 3. Fix active quest target selection (include questShard in SeekShard and
 //    uncollected pickups after Complete), condition visualBefore.state on the
@@ -8614,6 +8662,7 @@ once('#include <windows.h>','#include <windows.h>\n#include <climits>\n#include 
      'checkpoint and curriculum dependencies');
 once(`    if (strstr(GetCommandLineA(),"--navdiag")) {`,
 `    if (strstr(GetCommandLineA(),"--evaluate-skills")) return g_agi.evaluateSkills();
+    if (strstr(GetCommandLineA(),"--practice-walking")) return g_agi.evaluateSkills(true);
     if (strstr(GetCommandLineA(),"--navdiag")) {`,'isolated skill assessment command');
 once(`            const auto dteProposal=dteNavigation.propose(visualActive,navTrainer,navLearning,cns.body().contact,questMode,goalCompass);`,
 `            const auto& availableSkills=gnnChampionReady?championCurriculum:curriculum;
@@ -8621,13 +8670,28 @@ once(`            const auto dteProposal=dteNavigation.propose(visualActive,navT
             selectedSkill=availableSkills.select(cns.body().occupied,cns.body().contact,
                 visualBefore.obstacleVisible?visualBefore.nearestObstacleDepth:100.0f,preTargetDist,{true,false},controlRevision);
             if(evaluationMode) selectedSkill={evaluationSkill,"isolated assessment"};
-            const auto dteProposal=dteNavigation.propose(visualActive,navTrainer,navLearning,cns.body().contact,questMode,goalCompass);`,
+            if(practiceMode) selectedSkill={gtskill::Skill::Walk,"isolated walking practice"};
+            float motorFeatures[v27gnn::FeatureSize]{};
+            buildGnnFeatures(motorFeatures,visualBefore,modelProprio,navSpeed,navHeading,goalCompass,preTargetDist);
+            const bool guardedPolicy=practiceMode || (evaluationMode?evaluationUseGnn:gnnChampionReady);
+            const bool bodyPathClear=guardedPolicy && navThirdPerson && cns.canWalkTo(
+                navPos+avatar3d::Vec3{sinf(navHeading)*.75f,0,cosf(navHeading)*.75f},navWorld);
+            const auto dteProposal=dteNavigation.propose(visualActive,navTrainer,navLearning,cns.body().contact,questMode,goalCompass,bodyPathClear);`,
 'governed skill selection');
+once('bool contact,int questMode=0,float goalCompass=10.0f) {',
+     'bool contact,int questMode=0,float goalCompass=10.0f,bool bodyPathClear=false) {',
+     'body clearance context for camera obstacles');
+once('if(v.obstacleVisible && v.nearestObstacleDepth<2.4f) {',
+`// A third-person camera can see a nearby obstacle behind the avatar.
+        // Confirmed foot clearance suppresses that advisory avoidance arc;
+        // the motor guard and spinal sweep still check every actual movement.
+        if(v.obstacleVisible && v.nearestObstacleDepth<2.4f && !bodyPathClear) {`,
+     'avoid camera-only obstacle loops');
 once('gnnValid=gnnMotor.infer(gnnFeatures, gnnTurn, gnnForward);',
      'gnnValid=(gnnChampionReady?gnnChampion:gnnMotor).infer(gnnFeatures, gnnTurn, gnnForward);',
      'validated champion motor inference');
 once('if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled) {',
-     'if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled && (evaluationMode?evaluationUseGnn:gnnChampionReady)) {',
+     'if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled && !practiceMode && (evaluationMode?evaluationUseGnn:gnnChampionReady)) {',
      'paired evaluation controller selection');
 once('            // Observational learning is NOT a route request. Non-human sources remain locked.',
 `            // A validated running gait scales the on-foot demand; it cannot
@@ -8636,6 +8700,17 @@ once('            // Observational learning is NOT a route request. Non-human so
                 !cns.body().occupied && !cns.body().contact && preTargetDist>1.5f &&
                 (!visualBefore.obstacleVisible||visualBefore.nearestObstacleDepth>5.0f);
             if(runningGait) forward=std::clamp(forward*1.6f,-.35f,.8f);
+            // The guarded candidate is practiced and assessed before it can
+            // replace the incumbent controller in a normal session.
+            walkingGuardActive=!manual.active && dteEmbodimentEnabled && onFoot &&
+                guardedPolicy;
+            if(walkingGuardActive) {
+                const auto demand=walkingGuard.apply(navPos.x,navPos.z,navHeading,goalCompass,
+                    preTargetDist,forward,turn,[&](float x,float z){
+                        return cns.canWalkTo({x,0,z},navWorld);
+                    });
+                forward=demand.forward; turn=demand.turn;
+            } else walkingGuard.reset();
             // Observational learning is NOT a route request. Non-human sources remain locked.`,
 'bounded running gait');
 once('context.nowMs,cns.body().sequence,cns.niche().worldVersion,forward,turn);',
@@ -8645,8 +8720,35 @@ once('const v19game::PlayerControls manual=testHeldKey?testControlsFromKey(testH
      'const v19game::PlayerControls manual=testHeldKey?testControlsFromKey(testHeldKey):isolatedLearningRun()?v19game::PlayerControls{}:gameplay.samplePlayerControls();',
      'isolated runs exclude host keyboard input');
 once('if (dteEmbodimentEnabled && !manual.active) {',
-     'if (!evaluationMode && dteEmbodimentEnabled && !manual.active) {',
+     'if (!evaluationMode && !practiceMode && dteEmbodimentEnabled && !manual.active) {',
      'evaluation excludes quest interactions');
+once(`                float gnnFeatures[v27gnn::FeatureSize];
+                buildGnnFeatures(gnnFeatures, visualBefore, modelProprio, navSpeed, navHeading);
+                gnnValid=(gnnChampionReady?gnnChampion:gnnMotor).infer(gnnFeatures, gnnTurn, gnnForward);`,
+`                gnnValid=(gnnChampionReady?gnnChampion:gnnMotor).infer(motorFeatures, gnnTurn, gnnForward);`,
+'use captured pre-action input for inference');
+once('gnnMotor.lastLoss()<0.0f?0.35f:gnnMotor.lastLoss()*0.5f',
+     '(gnnChampionReady?gnnChampion:gnnMotor).lastLoss()<0.0f?0.35f:(gnnChampionReady?gnnChampion:gnnMotor).lastLoss()*0.5f',
+     'confidence belongs to the controller making the proposal');
+once(`                float trainFeatures[v27gnn::FeatureSize];
+                buildGnnFeatures(trainFeatures, visualBefore, modelProprio, navSpeed, navHeading);
+                gnnMotor.remember(trainFeatures, -turn, forward);`,
+`                // Pair the executed demand with the exact input used BEFORE
+                // it moved the body; never rebuild it from post-action speed.
+                gnnMotor.remember(motorFeatures, -turn, forward);`,
+'causal motor demonstrations');
+once(`                    neuralTrainingSteps=gnnMotor.trainingSteps();
+                    neuralTrainingUpdates=gnnMotor.trainingUpdates();
+                    lastNeuralTrainLoss=gnnMotor.lastLoss();
+                }
+            }
+            if (trajectoryRecording`,
+`                }
+                neuralTrainingSteps=gnnMotor.trainingSteps();
+                neuralTrainingUpdates=gnnMotor.trainingUpdates();
+                lastNeuralTrainLoss=gnnMotor.lastLoss();
+            }
+            if (trajectoryRecording`,'report attempted and accepted training independently');
 once(`            motorTravelMetres+=travelled;`,
 `            motorTravelMetres+=travelled;
             if(!evaluationMode) {
@@ -8659,8 +8761,8 @@ once(`            previousControllerTarget=actualTarget;
             ++navEpisodeSteps;
             maybeCheckpoint();`,'elapsed-time checkpoint schedule');
 once(`            if (gnnMotorReady && onFoot && !collided && (humanAccepted || reward > 0.0f)) {`,
-`            if (!evaluationMode && gnnMotorReady && onFoot && !collided && (humanAccepted || reward > 0.0f)) {`,
-'evaluation excludes replay writes');
+`            if (!evaluationMode && gnnMotorReady && onFoot && !collided && humanAccepted) {`,
+'only executed local controls supply demonstrations; never evaluation or ambient rewards');
 once(`            if (gnnMotorReady && gnnFrameCounter>=v27gnn::TrainEveryFrames &&`,
 `            if (!evaluationMode && gnnMotorReady && gnnFrameCounter>=v27gnn::TrainEveryFrames &&`,
 'evaluation excludes gradient updates');
@@ -8679,7 +8781,30 @@ once(`        DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);`,
         DrawText(hdc,viewX+56,viewY+310,info,COL_TEXT,g_hFontSmall);
         snprintf(info,sizeof(info),"Controller: %s | candidate learning remains active",
             g_agi.gnnChampionReady?"validated GNN":"DTE baseline");
-        DrawText(hdc,viewX+56,viewY+334,info,COL_TEXT,g_hFontSmall);`,'learning checkpoint inspector');
+        DrawText(hdc,viewX+56,viewY+334,info,COL_TEXT,g_hFontSmall);
+        const auto& walking=g_agi.curriculum.record(gtskill::Skill::Walk);
+        snprintf(info,sizeof(info),"Last walking assessment: %s (%u/%u)",
+            walking.status(),walking.successes(),(unsigned)walking.evaluations.size());
+        DrawText(hdc,viewX+56,viewY+356,info,COL_TEXT,g_hFontSmall);
+        const auto replay=g_agi.gnnMotor.replayCounts();
+        snprintf(info,sizeof(info),"Replay F/L/R/back/stop: %u/%u/%u/%u/%u | reverted steps %llu",
+            replay[0],replay[1],replay[2],replay[3],replay[4],
+            (unsigned long long)g_agi.gnnMotor.rejectedUpdates());
+        DrawText(hdc,viewX+56,viewY+378,info,COL_TEXT,g_hFontSmall);`,'learning checkpoint inspector');
+once('        DrawText(hdc,viewX+56,viewY+378,info,COL_TEXT,g_hFontSmall);',
+`        DrawText(hdc,viewX+56,viewY+378,info,COL_TEXT,g_hFontSmall);
+        snprintf(info,sizeof(info),"Walking clearance: %s",g_agi.walkingGuardActive?
+            g_agi.walkingGuard.reason():"baseline; guarded candidate awaits validation");
+        DrawText(hdc,viewX+56,viewY+400,info,COL_TEXT,g_hFontSmall);`,'walking clearance diagnostic');
+once('DrawRect(hdc, viewX + 40, viewY + 52, 686, 320, RGB(13, 18, 32));',
+     'DrawRect(hdc, viewX + 40, viewY + 52, 686, 400, RGB(13, 18, 32));',
+     'fit expanded learning diagnostics');
+once('DrawText(hdc, viewX + 56, viewY + 348, info, RGB(238,130,238), g_hFontSmall);',
+     'DrawText(hdc, viewX + 56, viewY + 426, info, RGB(238,130,238), g_hFontSmall);',
+     'separate persona and assessment diagnostics');
+once('GNN train %llu / loss %.4f / accepted %llu',
+     'GNN retained batches %llu / loss %.4f / shield approvals %llu',
+     'distinguish retained gradient batches from shield approvals');
 
 fs.writeFileSync('gtangel_agi_v56_full.cpp',out);
 const a=out.indexOf('namespace v15render {'),b=out.indexOf('} // namespace v15render',a);

@@ -680,7 +680,7 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         if (!choices[2].empty()) DrawText(hdc, viewX + 58, viewY + 676, choices[2].c_str(), COL_TEXT2, g_hFont);
     }
     if(g_agi.learningInspectorOpen && !g_agi.gameplay.quest.dialogueOpen && !g_agi.lensInspectorOpen) {
-        DrawRect(hdc, viewX + 40, viewY + 52, 686, 320, RGB(13, 18, 32));
+        DrawRect(hdc, viewX + 40, viewY + 52, 686, 400, RGB(13, 18, 32));
         DrawText(hdc, viewX + 56, viewY + 66, "LOCAL LEARNING / F4 CLOSE", COL_CYAN, g_hFontLarge);
         char info[250];
         snprintf(info,sizeof(info),"Loop %s / tick %d / ESN %.3f",!g_agi.running?"STOPPED - SPACE TO START":g_agi.paused?"PAUSED":"RUNNING",g_agi.tickCount,g_agi.esnEnergy);
@@ -689,7 +689,7 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
             (g_agi.neuralShadowEnabled?"LEARNING INFERENCE":"DISABLED") : "MODEL MISSING",
             (unsigned long long)g_agi.neuralFrames,g_agi.neuralPrediction.latencyMs);
         DrawText(hdc, viewX + 56, viewY + 132, info, COL_GREEN, g_hFont);
-        snprintf(info,sizeof(info),"GNN train %llu / loss %.4f / accepted %llu",
+        snprintf(info,sizeof(info),"GNN retained batches %llu / loss %.4f / shield approvals %llu",
             (unsigned long long)g_agi.neuralTrainingUpdates,g_agi.lastNeuralTrainLoss,
             (unsigned long long)g_agi.neuralAccepted);
         DrawText(hdc, viewX + 56, viewY + 152, info, COL_GREEN, g_hFont);
@@ -712,10 +712,22 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         snprintf(info,sizeof(info),"Controller: %s | candidate learning remains active",
             g_agi.gnnChampionReady?"validated GNN":"DTE baseline");
         DrawText(hdc,viewX+56,viewY+334,info,COL_TEXT,g_hFontSmall);
+        const auto& walking=g_agi.curriculum.record(gtskill::Skill::Walk);
+        snprintf(info,sizeof(info),"Last walking assessment: %s (%u/%u)",
+            walking.status(),walking.successes(),(unsigned)walking.evaluations.size());
+        DrawText(hdc,viewX+56,viewY+356,info,COL_TEXT,g_hFontSmall);
+        const auto replay=g_agi.gnnMotor.replayCounts();
+        snprintf(info,sizeof(info),"Replay F/L/R/back/stop: %u/%u/%u/%u/%u | reverted steps %llu",
+            replay[0],replay[1],replay[2],replay[3],replay[4],
+            (unsigned long long)g_agi.gnnMotor.rejectedUpdates());
+        DrawText(hdc,viewX+56,viewY+378,info,COL_TEXT,g_hFontSmall);
+        snprintf(info,sizeof(info),"Walking clearance: %s",g_agi.walkingGuardActive?
+            g_agi.walkingGuard.reason():"baseline; guarded candidate awaits validation");
+        DrawText(hdc,viewX+56,viewY+400,info,COL_TEXT,g_hFontSmall);
         snprintf(info,sizeof(info),"Echo: %s / %s / spice %.2f / conf %.2f",
             g_agi.echoPersona.state().emotion,g_agi.echoPersona.state().facs,
             g_agi.echoPersona.state().spice,g_agi.echoPersona.state().confidence);
-        DrawText(hdc, viewX + 56, viewY + 348, info, RGB(238,130,238), g_hFontSmall);
+        DrawText(hdc, viewX + 56, viewY + 426, info, RGB(238,130,238), g_hFontSmall);
     }
     if(g_agi.lensInspectorOpen && !g_agi.gameplay.quest.dialogueOpen) {
         DrawRect(hdc, viewX + 40, viewY + 46, 686, 262, RGB(13, 18, 32));
@@ -1438,6 +1450,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 if (loaded) {
                     g_agi.invalidateEcho();
                     g_agi.neuralPolicy.reset();
+                    g_agi.walkingGuard.reset();
                     g_agi.previousControllerTarget=v16motor::ControllerTarget{};
                     g_agi.syncBodyFromCns();
                     g_agi.avatar.pose(g_agi.navPos,g_agi.navHeading,0.0f,0.0f);
@@ -1496,6 +1509,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
     if (strstr(GetCommandLineA(),"--evaluate-skills")) return g_agi.evaluateSkills();
+    if (strstr(GetCommandLineA(),"--practice-walking")) return g_agi.evaluateSkills(true);
     if (strstr(GetCommandLineA(),"--navdiag")) {
         // Headless navigation diagnostic: no window; 300 ticks; write
         // position, breaker state, and per-step failures to NAVDIAG.txt.

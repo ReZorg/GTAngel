@@ -1,8 +1,25 @@
 #pragma once
 #include "learning_checkpoint.hpp"
+#include "walking_guard.hpp"
 
 namespace gtskill {
+constexpr uint32_t EvaluationSuite = 3; // fresh worlds and the actual incumbent controller
+constexpr unsigned ScenarioCount = 8;
 enum class Skill:uint32_t { Walk, Run, Drive, Quest, Strategy, Count };
+struct Scenario {
+    uint32_t seed;
+    float heading, lateral;
+    bool obstacle;
+    const char* name;
+};
+inline Scenario scenario(unsigned index,bool practice=false) {
+    if(index>=ScenarioCount) throw std::out_of_range("skill scenario");
+    const unsigned kind=index/2;
+    const float angle=index%2?2.4f:1.0f;
+    return {(practice?71001u:91001u)+index,kind==1?angle:kind==2?-angle:0,
+            index%2?.6f:-.6f,kind==3,
+            kind==0?"straight":kind==1?"left turn":kind==2?"right turn":"detour"};
+}
 inline const char* name(Skill s) {
     constexpr const char* names[]={"walking","running","driving","quest execution","strategy"};
     return static_cast<size_t>(s)<5?names[static_cast<size_t>(s)]:"unknown";
@@ -18,16 +35,24 @@ struct Record {
     uint64_t modelRevision{0};
     uint32_t suite{0};
     std::vector<Evaluation> evaluations;
-    bool validated() const {
-        if(evaluations.size()<8) return false;
+    const char* status() const {
+        if(suite!=EvaluationSuite) return "needs current assessment";
+        if(evaluations.size()<ScenarioCount) return "more scenarios needed";
         unsigned successes=0;
         double cost=0, baseline=0;
         for(const auto& e:evaluations) {
             successes+=e.success;
-            if(e.contactsPerMetre>.02f || e.stuckFraction>.05f) return false;
+            if(e.contactsPerMetre>.02f) return "contacts above limit";
+            if(e.stuckFraction>.05f) return "too much blocked movement";
             cost+=e.cost; baseline+=e.referenceCost;
         }
-        return successes*10>=evaluations.size()*9 && cost<=baseline;
+        if(successes*10<evaluations.size()*9) return "completion rate too low";
+        if(cost>baseline) return "slower than reference";
+        return "validated";
+    }
+    bool validated() const {return std::string(status())=="validated";}
+    unsigned successes() const {
+        unsigned n=0; for(const auto& e:evaluations) n+=e.success; return n;
     }
 };
 struct Selection { Skill skill{Skill::Walk}; const char* reason{"walking baseline"}; };
@@ -68,13 +93,14 @@ public:
         return ready(Skill::Walk);
     }
     bool readyFor(Skill s,uint64_t revision) const {
-        return revision && ready(s) && record(s).modelRevision==revision &&
-            (s==Skill::Walk || record(Skill::Walk).modelRevision==revision);
+        if(!revision || !record(s).validated() || record(s).modelRevision!=revision) return false;
+        if(s==Skill::Walk) return true;
+        return readyFor(s==Skill::Strategy?Skill::Quest:Skill::Walk,revision);
     }
     Selection select(bool occupied,bool contact,float obstacleDepth,float targetDistance,
                      const Capabilities& capability,uint64_t revision=0) const {
         const auto qualified=[&](Skill s){return revision?readyFor(s,revision):ready(s);};
-        if(occupied) return {Skill::Drive,capability.driving&&ready(Skill::Drive)?
+        if(occupied) return {Skill::Drive,capability.driving&&qualified(Skill::Drive)?
             "validated driving":"manual driving; autonomous authority unavailable"};
         if(contact||!std::isfinite(obstacleDepth)||!std::isfinite(targetDistance)||
            obstacleDepth<5||targetDistance<4)

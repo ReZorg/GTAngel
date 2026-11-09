@@ -7260,6 +7260,9 @@ class BodyEffector {
     }
 public:
     const Body& state() const { return body_; }
+    bool canWalkTo(Vec3 target,const avatar3d::GameWorld& world) const {
+        return !body_.occupied && swept(body_.position,target,.25f,world);
+    }
     void reset() { body_=Body{}; nextNonce_=1; }
     // Only a bounded local enter/exit interaction can switch body mode.
     bool toggleCart(const avatar3d::GameWorld& world, Vec3 cartPosition) {
@@ -7429,6 +7432,9 @@ class Runtime {
     uint64_t sequence_{0};
 public:
     const Body& body() const { return plant_.state(); }
+    bool canWalkTo(Vec3 target,const avatar3d::GameWorld& world) const {
+        return plant_.canWalkTo(target,world);
+    }
     const NicheHistory& niche() const { return governance_.history(); }
     void reset() { spinal_.reset(); plant_.reset(); governance_.reset(); worldEffector_.reset(); sequence_=0; }
     SpinalReflex::Verdict motor(Source source,float forward,float turn,
