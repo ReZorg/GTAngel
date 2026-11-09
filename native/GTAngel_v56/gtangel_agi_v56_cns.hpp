@@ -101,10 +101,8 @@ class BodyEffector {
         const Vec3 ambP{w.ambX,0.0f,-1.4f}, busP{-1.4f,0.0f,w.busZ};
         if (distance2(b,ambP)<(radius+1.6f)*(radius+1.6f) && distance2(b,ambP)<distance2(a,ambP)) return false;
         if (distance2(b,busP)<(radius+1.8f)*(radius+1.8f) && distance2(b,busP)<distance2(a,busP)) return false;
-        for (const auto& wk : w.walkers) {
-            if (distance2(b,wk.pos)<(radius+0.32f)*(radius+0.32f) &&
-                distance2(b,wk.pos)<distance2(a,wk.pos)) return false;
-        }
+        // Ambient crowd walkers never cage the avatar — they yield via their
+        // own pedBlockedByBarrier steering instead.
         return true;
     }
     bool consume(const MotorCommit& c, const Context& ctx, const avatar3d::GameWorld& world) {
