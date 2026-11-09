@@ -915,21 +915,11 @@ struct GameWorld {
     // keep the last collision-free sample, so pillars never swallow the view.
     float ambX{-28.0f}, ambDir{1.0f};
     float busZ{10.0f},  busDir{-1.0f};
-    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
+    Vec3 collisionFreeEye(Vec3 /*body*/, Vec3 desired) const {
         // LW54: Camera & ray pass freely through all world objects (never
         // registering hard collision or snapping on trees, buildings, props,
         // vehicles, or peds). Obfuscation is rectified smoothly per-pixel in
         // RasterEngine::rasterize via continuous alpha blending.
-        // Only apply a local centre offset when a synthetic caller places
-        // desired directly inside a pillar core at low height (desired.y < 1.5f).
-        if (desired.y < 1.5f) {
-            for (const auto& pl : pillars) {
-                const float dx = desired.x - pl.pos.x, dz = desired.z - pl.pos.z;
-                if (dx * dx + dz * dz < (pl.radius + 0.25f) * (pl.radius + 0.25f)) {
-                    return desired + (body - desired) * 0.22f + Vec3{0.0f, 0.25f, 0.0f};
-                }
-            }
-        }
         return desired;
     }
     bool pedBlockedByBarrier(Vec3 cand, Vec3 cur, size_t selfIdx) const {

@@ -77,31 +77,47 @@ class BodyEffector {
              (w.questShardVisible && distance2(p,w.questShard)<(radius+0.35f)*(radius+0.35f)))) return false;
         return true;
     }
-    static bool swept(Vec3 a, Vec3 b, float radius, const avatar3d::GameWorld& w) {
+    static bool movingOut(float before, float after) {
+        // Outside bodies remain solid; an existing overlap may only stay
+        // level or become shallower, so recovery never drives deeper inside.
+        return after >= 0.0f || (before < 0.0f && after >= before - 1e-5f);
+    }
+    static float coupeClearance(Vec3 p, float radius, const avatar3d::GameWorld& w) {
+        const float dx=p.x-w.vehiclePos.x, dz=p.z-w.vehiclePos.z;
+        const float c=cosf(w.vehicleHeading), s=sinf(w.vehicleHeading);
+        return std::max(std::fabs(dx*c-dz*s)-(.72f+radius),
+                        std::fabs(dx*s+dz*c)-(1.20f+radius));
+    }
+    static bool dynamicStepClear(Vec3 a, Vec3 b, float radius,
+                                 const avatar3d::GameWorld& w, bool driving) {
+        if (!driving && !movingOut(coupeClearance(a,radius,w),coupeClearance(b,radius,w)))
+            return false;
+        const auto circleClear=[&](Vec3 centre,float obstacleRadius) {
+            return movingOut(sqrtf(distance2(a,centre))-radius-obstacleRadius,
+                             sqrtf(distance2(b,centre))-radius-obstacleRadius);
+        };
+        for (const auto& v:w.traffic)
+            if (v.orbitR<=0.0f && !circleClear(v.pos,1.45f)) return false;
+        if (!circleClear({w.ambX,0,-1.4f},1.6f) ||
+            !circleClear({-1.4f,0,w.busZ},1.8f)) return false;
+        for (const auto& walker:w.walkers)
+            if (!circleClear(walker.pos,.32f)) return false;
+        return true;
+    }
+    static bool swept(Vec3 a, Vec3 b, float radius, const avatar3d::GameWorld& w,
+                      bool driving=false) {
+        if (!finitePose(a)||!finitePose(b)||!finite(radius)||radius<0) return false;
         const float len = sqrtf(distance2(a,b));
+        if (!finite(len)||len>409.6f) return false;
         const int steps = std::max(1,(int)ceilf(len/0.10f));
+        Vec3 previous=a;
         for (int i=1;i<=steps;++i) {
             float t=(float)i/(float)steps;
-            if (!clear({a.x+(b.x-a.x)*t,0,a.z+(b.z-a.z)*t},radius,w)) return false;
+            const Vec3 sample{a.x+(b.x-a.x)*t,0,a.z+(b.z-a.z)*t};
+            if (!clear(sample,radius,w) ||
+                !dynamicStepClear(previous,sample,radius,w,driving)) return false;
+            previous=sample;
         }
-        // LW55: approach-only mutual barriers for dynamic bodies — motion INTO a
-        // vehicle/ped is vetoed, but any motion AWAY (escape when overlapping)
-        // is always allowed, so the avatar can never be caged by a barrier.
-        // Penetration-only (approach semantics): veto motion that CLOSES INTO a
-        // body core — never a wide standoff — so the avatar can still reach the
-        // coupe door, brush past traffic, and always escape an overlap.
-        // The parked coupe is the enterable player vehicle — never barrier it
-        // (approach is required to enter); moving traffic/peds still barrier.
-        for (const auto& v : w.traffic) {
-            if (v.orbitR>0.0f) continue;
-            const float dBt=distance2(b,v.pos), dAt=distance2(a,v.pos);
-            if (dBt < (radius+1.45f)*(radius+1.45f) && dBt < dAt) return false;
-        }
-        const Vec3 ambP{w.ambX,0.0f,-1.4f}, busP{-1.4f,0.0f,w.busZ};
-        if (distance2(b,ambP)<(radius+1.6f)*(radius+1.6f) && distance2(b,ambP)<distance2(a,ambP)) return false;
-        if (distance2(b,busP)<(radius+1.8f)*(radius+1.8f) && distance2(b,busP)<distance2(a,busP)) return false;
-        // Ambient crowd walkers never cage the avatar — they yield via their
-        // own pedBlockedByBarrier steering instead.
         return true;
     }
     bool consume(const MotorCommit& c, const Context& ctx, const avatar3d::GameWorld& world) {
@@ -130,7 +146,7 @@ class BodyEffector {
         }
         Vec3 target=next.position+Vec3{sinf(next.heading)*next.speed*ctx.dt,0,
                                          cosf(next.heading)*next.speed*ctx.dt};
-        if (!swept(next.position,target,next.occupied ? 0.76f : 0.25f,world)) {
+        if (!swept(next.position,target,next.occupied ? 0.76f : 0.25f,world,next.occupied)) {
             next.contact=true;
             if (!next.occupied) {
                 // After rejecting the full swept motion, try independently

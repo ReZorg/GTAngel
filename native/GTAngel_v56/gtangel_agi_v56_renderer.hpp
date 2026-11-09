@@ -23,6 +23,18 @@ struct CTimeCycleSpec {
     constexpr bool invariant() const { return m_fCurrentLightsOnGroundBrightness >= 0.0f; }
 };
 } // namespace zpp_spec
+// Continuous screen-space occlusion fade. Both depth boundaries approach
+// their neighbours smoothly, avoiding a pop as the camera crosses geometry.
+inline float occluderOpacity(float depth, float radiusSquared, bool avatarBehind) {
+    const auto smooth=[](float value) {
+        const float t=std::clamp(value,0.0f,1.0f);
+        return t*t*(3.0f-2.0f*t);
+    };
+    const float sightline=avatarBehind?.20f:(.24f+.76f*smooth(radiusSquared));
+    const float nearFade=smooth((depth-.35f)/2.65f);
+    const float opacity=.12f+(sightline-.12f)*nearFade;
+    return opacity+(1.0f-opacity)*smooth((depth-3.5f)/.75f);
+}
 
 using avatar3d::Vec3;
 
@@ -2420,9 +2432,7 @@ private:
                     const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
                     const float r2 = cx * cx + cy * cy;
                     if (prevId == ObjectAvatar || r2 < 1.0f || depth < 3.0f) {
-                        const float u = std::clamp(r2, 0.0f, 1.0f);
-                        const float alpha = (depth < 3.0f) ? 0.12f
-                            : ((prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u))));
+                        const float alpha = occluderOpacity(depth,r2,prevId==ObjectAvatar);
                         const uint32_t bg = framebuffer.colour[index];
                         const uint8_t bgB = (uint8_t)(bg & 0xFFu);
                         const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);

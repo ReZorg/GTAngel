@@ -493,11 +493,10 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         g_agi.avatar.wingDeploy>0.9f?"DTE WINGS: GUARD / B FOLD":"DTE WINGS: NEUTRAL / B GUARD",
         COL_CYAN, g_hFontSmall);
     DrawText(hdc, railX + 12, viewY + 590, g_agi.cns.body().occupied ? "CART OCCUPIED / Q EXIT" : "Q ENTER CART NEAR SPAWN", COL_CYAN, g_hFontSmall);
-    snprintf(line,sizeof(line),"NN %s / frames %llu / train %llu / loss %.3f",g_agi.neuralPolicyLoaded?
-        (g_agi.neuralShadowEnabled?"LEARNING":"OFF"):"MISSING",(unsigned long long)g_agi.neuralFrames,
-        (unsigned long long)g_agi.neuralTrainingUpdates,g_agi.lastNeuralTrainLoss);
+    snprintf(line,sizeof(line),"NN frames %llu | GNN steps %llu",
+        (unsigned long long)g_agi.neuralFrames,(unsigned long long)g_agi.neuralTrainingSteps);
     DrawText(hdc,railX+12,viewY + 610,line,g_agi.neuralPolicyLoaded?COL_GREEN:COL_RED,g_hFontSmall);
-    snprintf(line,sizeof(line),"GNN accepted %llu / Q %s (%llu)",
+    snprintf(line,sizeof(line),"GNN shield %llu / Q %s (%llu)",
         (unsigned long long)g_agi.neuralAccepted, g_agi.navTraining?"ON":"OFF",
         (unsigned long long)g_agi.navLearning.updates);
     DrawText(hdc,railX+12,viewY + 628,line,COL_GOLD,g_hFontSmall);
@@ -505,6 +504,8 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         g_agi.echoCommons.candidate().pattern==160 ? "DTE APL160: REPAIR IDEA / E CONFIRM" :
         "DTE APL253: ADVISORY / LOCAL VRD", COL_CYAN, g_hFontSmall);
     DrawText(hdc, railX + 12, viewY + 664, "SPACE pause / O DTE / F4 ML / F8 S7->8", COL_TEXT2, g_hFontSmall);
+    snprintf(line,sizeof(line),"Motion: %s | travelled %.1fm",g_agi.motorStatus(),g_agi.motorTravelMetres);
+    DrawText(hdc,railX+12,viewY+684,line,COL_TEXT,g_hFontSmall);
 
     // ═══ 5. BOTTOM F6 TELEMETRY DECK (y = 820..992): 3 Side-by-Side F6 Cards ═══
     // 5a. Bottom-Left Card (x = 6..518, y = 820..992): Sensorimotor + Proprioception + ESN Reservoir + VR/Bridge/LLM
@@ -692,6 +693,15 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         snprintf(info,sizeof(info),"Q observation %s / updates %llu / contacts %llu",g_agi.navTraining?"ON":"OFF",
             (unsigned long long)g_agi.navLearning.updates,(unsigned long long)g_agi.navLearning.collisions);
         DrawText(hdc, viewX + 56, viewY + 176, info, COL_GOLD, g_hFont);
+        snprintf(info,sizeof(info),"Motor: %s | moved %llu | contact %llu | gated %llu",
+            g_agi.motorStatus(),(unsigned long long)g_agi.motorMovedFrames,
+            (unsigned long long)g_agi.motorContactFrames,(unsigned long long)g_agi.motorRejectedFrames);
+        DrawText(hdc,viewX+56,viewY+204,info,COL_TEXT,g_hFont);
+        snprintf(info,sizeof(info),"GNN shield: %s",g_agi.lastGnnGate.c_str());
+        DrawText(hdc,viewX+56,viewY+232,info,COL_TEXT,g_hFont);
+        snprintf(info,sizeof(info),"Gradient steps %llu | samples %d | travel %.2fm",
+            (unsigned long long)g_agi.neuralTrainingSteps,g_agi.gnnMotor.totalSamples(),g_agi.motorTravelMetres);
+        DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);
         snprintf(info,sizeof(info),"Echo: %s / %s / spice %.2f / conf %.2f",
             g_agi.echoPersona.state().emotion,g_agi.echoPersona.state().facs,
             g_agi.echoPersona.state().spice,g_agi.echoPersona.state().confidence);

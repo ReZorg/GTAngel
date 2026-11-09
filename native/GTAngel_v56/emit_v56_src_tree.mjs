@@ -1,15 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+process.chdir(path.dirname(fileURLToPath(import.meta.url)));
 
 const full = fs.readFileSync('gtangel_agi_v56_full.cpp', 'utf8');
 const lines = full.split(/\r?\n/);
-const zppRoot = [
-  '../re3_reference/zpp',
-  '../zpp',
-  '../../re3_reference/zpp',
-  '../../cpp_test/zpp',
-  '../../zpp'
-].map(p => path.resolve(p)).find(p => fs.existsSync(p));
+const zppRoot = path.resolve('../re3_reference/zpp');
+if (!fs.existsSync(zppRoot) || !fs.statSync(zppRoot).isDirectory()) {
+  throw new Error(`Missing canonical Z++ specifications: ${zppRoot}`);
+}
 
 function sliceLines(start1, end1) {
   return lines.slice(start1 - 1, end1).join('\n') + '\n';

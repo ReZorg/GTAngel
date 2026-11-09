@@ -2,6 +2,23 @@
 static int checks=0,failures=0;
 static void check(bool ok,const char* label){++checks;if(!ok){++failures;std::cerr<<"FAIL "<<label<<'\n';}}
 int main(){
+    {
+        bool continuous=true, bounded=true;
+        for(bool avatarBehind:{false,true})
+            for(float r2:{0.0f,.5f,1.0f,2.0f}) {
+                float previous=v15render::occluderOpacity(0,r2,avatarBehind);
+                for(int i=1;i<=500;++i) {
+                    const float opacity=v15render::occluderOpacity(i*.01f,r2,avatarBehind);
+                    bounded=bounded && opacity>=.12f && opacity<=1.0f;
+                    continuous=continuous && std::fabs(opacity-previous)<.025f;
+                    previous=opacity;
+                }
+            }
+        check(bounded,"camera fade stays within opacity bounds");
+        check(continuous,"camera fade is continuous across depth thresholds");
+        check(v15render::occluderOpacity(4.25f,0,true)==1.0f,
+              "distant occluders return to full opacity");
+    }
     using N=avatar3d::NavTrainer;
     v27learn::OnlineNavigationObserver o; N q;
     v15render::VisualNavEvidence a,b;

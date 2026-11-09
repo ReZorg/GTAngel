@@ -1,5 +1,8 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+process.chdir(path.dirname(fileURLToPath(import.meta.url)));
 let out=fs.readFileSync('gtangel_agi_v26_base.cpp','utf8').replace(/\r\n/g, '\n');
 function once(a,b,label){const i=out.indexOf(a);if(i<0||out.indexOf(a,i+a.length)>=0)throw Error('missing/ambiguous '+label);out=out.slice(0,i)+b+out.slice(i+a.length);}
 once('} // namespace v17policy','} // namespace v17policy\n\n'+fs.readFileSync('nav_learning_observer.hpp','utf8').replace('#pragma once\n',''),'learning observer');
@@ -8,6 +11,21 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
     v27learn::OnlineNavigationObserver navLearning;
     bool learningInspectorOpen{false};
     v20cns::SpinalReflex::Verdict lastMotorVerdict{v20cns::SpinalReflex::Verdict::Invalid};
+    uint64_t motorMovedFrames{0}, motorContactFrames{0}, motorRejectedFrames{0};
+    float motorTravelMetres{0};
+    std::string lastGnnGate{"not evaluated"};
+    const char* motorStatus() const {
+        using V=v20cns::SpinalReflex::Verdict;
+        switch(lastMotorVerdict) {
+            case V::Accepted:return "accepted";
+            case V::Collision:return "contact";
+            case V::Stale:return "stale frame";
+            case V::Unsafe:return "safety gate";
+            case V::Untrusted:return "authority gate";
+            case V::Replay:return "replay";
+            default:return "invalid";
+        }
+    }
     std::string localLearningDirectory;
     static std::string executableDirectory() {
         char path[32768]{};
@@ -27,6 +45,8 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
         neuralActuationUnlocked=true;
         neuralEthicsApproved=true;
         neuralFrames=0; neuralAccepted=0;
+        motorMovedFrames=0; motorContactFrames=0; motorRejectedFrames=0; motorTravelMetres=0;
+        lastGnnGate="not evaluated";
         neuralTrainingSteps=0; neuralTrainingUpdates=0; lastNeuralTrainLoss=-1.0f;
         gnnMotorReady=gnnMotor.create();
         if (gnnMotorReady) {
@@ -100,6 +120,8 @@ once(`            if (neuralPolicyLoaded && neuralShadowEnabled) {
                     if (gnnDecision.accepted) ++neuralAccepted;
                 }
             }
+            lastGnnGate=!gnnMotorReady?"network unavailable":
+                !neuralShadowEnabled?"inference disabled":gnnDecision.reason;
             // v27 GNN actuation: when the shield accepts the GNN proposal and
             // no human input is active, the learned network steers THROUGH the
             // sealed DteLocal path (never a raw Source::Neural submit).
@@ -115,6 +137,11 @@ once(`            const v19game::PlayerControls manual=gameplay.samplePlayerCont
             const auto source=v20cns::MotorArbiter::choose(manual.active,false,false);`, 'learning/authority separation');
 once('            const bool collided=verdict==v20cns::SpinalReflex::Verdict::Collision;',`            lastMotorVerdict=verdict;
             const bool collided=verdict==v20cns::SpinalReflex::Verdict::Collision;
+            const float travelled=avatar3d::len(cns.body().position-navPos);
+            motorTravelMetres+=travelled;
+            if(travelled>1e-4f) ++motorMovedFrames;
+            if(collided) ++motorContactFrames;
+            else if(verdict!=v20cns::SpinalReflex::Verdict::Accepted) ++motorRejectedFrames;
             const bool humanAccepted=manual.active && source==v20cns::Source::HumanLocal &&
                 (verdict==v20cns::SpinalReflex::Verdict::Accepted || collided);`, 'commit outcome evidence');
 once(`            trajectoryVisual.derive(highResRenderer.framebuffer);
@@ -641,6 +668,54 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
                    v20cns::SpinalReflex::Verdict::Untrusted &&
                avatar3d::len(motor.body().position-before)<1e-5f,
                "raw neural proposals cannot bypass local motor authority");
+            fixture.pillars.clear();
+            fixture.vehiclePos={0,0,0};
+            fixture.vehicleHeading=0;
+            auto place=[&](avatar3d::Vec3 position,float heading) {
+                auto body=motor.body();
+                body.position=position; body.heading=heading; body.speed=0;
+                body.occupied=false; body.cartPosition=fixture.vehiclePos;
+                body.cartHeading=fixture.vehicleHeading;
+                return motor.restoreLocal(body,motor.niche(),gameplay,fixture);
+            };
+            auto drive=[&](int count) {
+                for(int i=0;i<count;++i) {
+                    ++ctx.frame; ++ctx.nowMs;
+                    motor.motor(v20cns::Source::HumanLocal,1,0,0,0,true,ctx,fixture);
+                }
+            };
+            ck(place({1.2f,0,0},-1.5707963f),"coupe side fixture restore");
+            drive(20);
+            ck(motor.body().contact && motor.body().position.x>=.97f-1e-4f,
+               "parked coupe blocks walking through its chassis");
+            ck(place({.8f,0,0},1.5707963f),"coupe overlap fixture restore");
+            drive(8);
+            ck(motor.body().position.x>1.4f,"existing coupe overlap permits outward escape");
+            fixture.vehicleHeading=1.5707963f;
+            ck(place({0,0,1.2f},3.14159265f),"rotated coupe fixture restore");
+            drive(20);
+            ck(motor.body().position.z>=.97f-1e-4f,
+               "coupe collision follows vehicle heading");
+            fixture.vehicleHeading=0;
+            ck(place({1.1f,0,0},0) && motor.toggleCart(fixture,fixture.vehiclePos),
+               "coupe remains enterable from outside chassis");
+            drive(10);
+            ck(motor.body().occupied && motor.body().position.z>.05f,
+               "driven coupe does not collide with itself");
+            fixture.vehiclePos={30,0,30};
+            fixture.walkers.push_back({{0,0,0},0,0,0});
+            ck(place({0,0,-1},0),"pedestrian barrier fixture restore");
+            bool pedContact=false, pedSeparated=true;
+            for(int i=0;i<20;++i) {
+                drive(1);
+                pedContact=pedContact||motor.body().contact;
+                pedSeparated=pedSeparated&&avatar3d::len(motor.body().position)>=.57f-1e-4f;
+            }
+            ck(pedContact && pedSeparated,
+               "walker body blocks penetration while allowing a slide around it");
+            ck(place({0,0,-.4f},3.14159265f),"pedestrian overlap fixture restore");
+            drive(8);
+            ck(motor.body().position.z<-.9f,"existing walker overlap permits escape");
         }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
@@ -660,6 +735,8 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
         ck(neuralFrames==12&&neuralPrediction.valid,"actual loop NN inference");
         ck(navLearning.updates>0&&magnitude(navTrainer)>0,"DTE learns with NO keyboard or user");
         ck(avatar3d::len(navPos-start)>.01f&&dteNavigation.accepted>0,"sealed DTE SRD movement");
+        ck(motorMovedFrames>0&&motorTravelMetres>.01f,
+           "motor telemetry measures translation rather than shield approvals");
         const auto updates=navLearning.updates; navTraining=false;
         for(int i=0;i<10;++i)tick();
         ck(navLearning.updates==updates&&neuralFrames==22,"N stops Q only; DTE and NN continue");
@@ -1781,25 +1858,16 @@ once(`        {
                     len(w.pos-navWorld.vehiclePos) < 3.0f ||
                     navWorld.collides(w.pos)) { walkersClear = false; break; }
             ck(walkersClear, "world walkers clear of protected zones");
-            // LW: camera anti-clip — desired eye inside a pillar pulls in.
+            // The camera is not a physical body, at any height.
             {
-                avatar3d::Vec3 body{0, 0, 0};
-                avatar3d::Vec3 desired = body;
-                bool fixtureFound = false;
-                for (const auto& p : navWorld.pillars) {
-                    const avatar3d::Vec3 centre{p.pos.x, 1.2f, p.pos.z};
-                    if (len(centre - body) > 2.0f && len(centre - body) < 8.0f) {
-                        desired = centre;
-                        fixtureFound = true;
-                        break;
-                    }
+                auto cameraWorld=navWorld;
+                cameraWorld.pillars.push_back({{2,0,2},1,5});
+                bool passed=true;
+                for(float height:{.1f,1.2f,1.6f,2.5f}) {
+                    const avatar3d::Vec3 desired{2,height,2};
+                    passed=passed && len(cameraWorld.collisionFreeEye({0,0,0},desired)-desired)<1e-6f;
                 }
-                if (fixtureFound) {
-                    const avatar3d::Vec3 eye = navWorld.collisionFreeEye(body, desired);
-                    ck(len(eye - desired) > 0.01f, "camera pulls in at pillars");
-                } else {
-                    ck(true, "camera pulls in at pillars"); // no fixture in seed
-                }
+                ck(passed,"camera passes through pillar cores at every height");
             }
             // LW: honest friends — familiarity only grows near the avatar.
             {
@@ -8221,21 +8289,11 @@ once(`    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
     }`,
 `    float ambX{-28.0f}, ambDir{1.0f};
     float busZ{10.0f},  busDir{-1.0f};
-    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
+    Vec3 collisionFreeEye(Vec3 /*body*/, Vec3 desired) const {
         // LW54: Camera & ray pass freely through all world objects (never
         // registering hard collision or snapping on trees, buildings, props,
         // vehicles, or peds). Obfuscation is rectified smoothly per-pixel in
         // RasterEngine::rasterize via continuous alpha blending.
-        // Only apply a local centre offset when a synthetic caller places
-        // desired directly inside a pillar core at low height (desired.y < 1.5f).
-        if (desired.y < 1.5f) {
-            for (const auto& pl : pillars) {
-                const float dx = desired.x - pl.pos.x, dz = desired.z - pl.pos.z;
-                if (dx * dx + dz * dz < (pl.radius + 0.25f) * (pl.radius + 0.25f)) {
-                    return desired + (body - desired) * 0.22f + Vec3{0.0f, 0.25f, 0.0f};
-                }
-            }
-        }
         return desired;
     }
     bool pedBlockedByBarrier(Vec3 cand, Vec3 cur, size_t selfIdx) const {
@@ -8454,9 +8512,7 @@ once(`                framebuffer.depth[index] = depth;
                     const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
                     const float r2 = cx * cx + cy * cy;
                     if (prevId == ObjectAvatar || r2 < 1.0f || depth < 3.0f) {
-                        const float u = std::clamp(r2, 0.0f, 1.0f);
-                        const float alpha = (depth < 3.0f) ? 0.12f
-                            : ((prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u))));
+                        const float alpha = occluderOpacity(depth,r2,prevId==ObjectAvatar);
                         const uint32_t bg = framebuffer.colour[index];
                         const uint8_t bgB = (uint8_t)(bg & 0xFFu);
                         const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);
@@ -8489,6 +8545,30 @@ once(`        snprintf(eb, sizeof(eb), "Echo KSM c=%d s=%d (%s) Mode=%s Load=%.2
             echo::ALEXANDER_15_PROPERTIES[stP].name, g_agi.echoField.propScore(stP),
             echo::ALEXANDER_15_PROPERTIES[wkP].name, g_agi.echoField.propScore(wkP),
             g_agi.echoLedger.keepCount(), g_agi.echoLedger.totalCount());`, 'LW53 cockpit Alexander 15 Properties HUD line');
+
+// Present shield decisions separately from movement actually committed by CNS.
+once(`    snprintf(line,sizeof(line),"NN %s / frames %llu / train %llu / loss %.3f",g_agi.neuralPolicyLoaded?
+        (g_agi.neuralShadowEnabled?"LEARNING":"OFF"):"MISSING",(unsigned long long)g_agi.neuralFrames,
+        (unsigned long long)g_agi.neuralTrainingUpdates,g_agi.lastNeuralTrainLoss);`,
+`    snprintf(line,sizeof(line),"NN frames %llu | GNN steps %llu",
+        (unsigned long long)g_agi.neuralFrames,(unsigned long long)g_agi.neuralTrainingSteps);`,
+'distinct inference and gradient counters');
+once('GNN accepted %llu / Q %s (%llu)','GNN shield %llu / Q %s (%llu)','label shield approvals');
+once(`    DrawText(hdc, railX + 12, viewY + 664, "SPACE pause / O DTE / F4 ML / F8 S7->8", COL_TEXT2, g_hFontSmall);`,
+`    DrawText(hdc, railX + 12, viewY + 664, "SPACE pause / O DTE / F4 ML / F8 S7->8", COL_TEXT2, g_hFontSmall);
+    snprintf(line,sizeof(line),"Motion: %s | travelled %.1fm",g_agi.motorStatus(),g_agi.motorTravelMetres);
+    DrawText(hdc,railX+12,viewY+684,line,COL_TEXT,g_hFontSmall);`,'live motion status');
+once(`        DrawText(hdc, viewX + 56, viewY + 176, info, COL_GOLD, g_hFont);`,
+`        DrawText(hdc, viewX + 56, viewY + 176, info, COL_GOLD, g_hFont);
+        snprintf(info,sizeof(info),"Motor: %s | moved %llu | contact %llu | gated %llu",
+            g_agi.motorStatus(),(unsigned long long)g_agi.motorMovedFrames,
+            (unsigned long long)g_agi.motorContactFrames,(unsigned long long)g_agi.motorRejectedFrames);
+        DrawText(hdc,viewX+56,viewY+204,info,COL_TEXT,g_hFont);
+        snprintf(info,sizeof(info),"GNN shield: %s",g_agi.lastGnnGate.c_str());
+        DrawText(hdc,viewX+56,viewY+232,info,COL_TEXT,g_hFont);
+        snprintf(info,sizeof(info),"Gradient steps %llu | samples %d | travel %.2fm",
+            (unsigned long long)g_agi.neuralTrainingSteps,g_agi.gnnMotor.totalSamples(),g_agi.motorTravelMetres);
+        DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);`,'learning decision diagnostics');
 
 fs.writeFileSync('gtangel_agi_v56_full.cpp',out);
 const a=out.indexOf('namespace v15render {'),b=out.indexOf('} // namespace v15render',a);

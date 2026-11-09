@@ -1,4 +1,7 @@
 import fs from 'node:fs';import assert from 'node:assert/strict';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+process.chdir(path.dirname(fileURLToPath(import.meta.url)));
 // v27 component EMITTER (emission-only; no locks, no forbidden strings, no byte-equality gates).
 // Replaces the deleted verify_v27_source.mjs gate script: it only extracts reusable
 // component headers so verify_v29_learning.cpp can compile against the real v27 code.

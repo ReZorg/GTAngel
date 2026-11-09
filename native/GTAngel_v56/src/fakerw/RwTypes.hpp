@@ -329,6 +329,18 @@ struct CTimeCycleSpec {
     constexpr bool invariant() const { return m_fCurrentLightsOnGroundBrightness >= 0.0f; }
 };
 } // namespace zpp_spec
+// Continuous screen-space occlusion fade. Both depth boundaries approach
+// their neighbours smoothly, avoiding a pop as the camera crosses geometry.
+inline float occluderOpacity(float depth, float radiusSquared, bool avatarBehind) {
+    const auto smooth=[](float value) {
+        const float t=std::clamp(value,0.0f,1.0f);
+        return t*t*(3.0f-2.0f*t);
+    };
+    const float sightline=avatarBehind?.20f:(.24f+.76f*smooth(radiusSquared));
+    const float nearFade=smooth((depth-.35f)/2.65f);
+    const float opacity=.12f+(sightline-.12f)*nearFade;
+    return opacity+(1.0f-opacity)*smooth((depth-3.5f)/.75f);
+}
 
 using avatar3d::Vec3;
 

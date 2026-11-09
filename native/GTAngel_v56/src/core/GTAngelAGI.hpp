@@ -106,6 +106,21 @@ struct GTAngelAGI {
     int gnnFrameCounter{0};
     bool learningInspectorOpen{false};
     v20cns::SpinalReflex::Verdict lastMotorVerdict{v20cns::SpinalReflex::Verdict::Invalid};
+    uint64_t motorMovedFrames{0}, motorContactFrames{0}, motorRejectedFrames{0};
+    float motorTravelMetres{0};
+    std::string lastGnnGate{"not evaluated"};
+    const char* motorStatus() const {
+        using V=v20cns::SpinalReflex::Verdict;
+        switch(lastMotorVerdict) {
+            case V::Accepted:return "accepted";
+            case V::Collision:return "contact";
+            case V::Stale:return "stale frame";
+            case V::Unsafe:return "safety gate";
+            case V::Untrusted:return "authority gate";
+            case V::Replay:return "replay";
+            default:return "invalid";
+        }
+    }
     std::string localLearningDirectory;
     static std::string executableDirectory() {
         char path[32768]{};
@@ -128,6 +143,8 @@ struct GTAngelAGI {
         if (groups.agents.size() < 20) groups.init(20);
         running=true;paused=false;dteEmbodimentEnabled=true;dteNavigation.reset();llmTrainingUpdates=0;
         gnnFrameCounter=0;
+        motorMovedFrames=0; motorContactFrames=0; motorRejectedFrames=0; motorTravelMetres=0;
+        lastGnnGate="not evaluated";
         neuralTrainingSteps=0; neuralTrainingUpdates=0; lastNeuralTrainLoss=-1.0f;
         gnnMotorReady=gnnMotor.create();
         if (gnnMotorReady) {
@@ -339,6 +356,54 @@ struct GTAngelAGI {
                    v20cns::SpinalReflex::Verdict::Untrusted &&
                avatar3d::len(motor.body().position-before)<1e-5f,
                "raw neural proposals cannot bypass local motor authority");
+            fixture.pillars.clear();
+            fixture.vehiclePos={0,0,0};
+            fixture.vehicleHeading=0;
+            auto place=[&](avatar3d::Vec3 position,float heading) {
+                auto body=motor.body();
+                body.position=position; body.heading=heading; body.speed=0;
+                body.occupied=false; body.cartPosition=fixture.vehiclePos;
+                body.cartHeading=fixture.vehicleHeading;
+                return motor.restoreLocal(body,motor.niche(),gameplay,fixture);
+            };
+            auto drive=[&](int count) {
+                for(int i=0;i<count;++i) {
+                    ++ctx.frame; ++ctx.nowMs;
+                    motor.motor(v20cns::Source::HumanLocal,1,0,0,0,true,ctx,fixture);
+                }
+            };
+            ck(place({1.2f,0,0},-1.5707963f),"coupe side fixture restore");
+            drive(20);
+            ck(motor.body().contact && motor.body().position.x>=.97f-1e-4f,
+               "parked coupe blocks walking through its chassis");
+            ck(place({.8f,0,0},1.5707963f),"coupe overlap fixture restore");
+            drive(8);
+            ck(motor.body().position.x>1.4f,"existing coupe overlap permits outward escape");
+            fixture.vehicleHeading=1.5707963f;
+            ck(place({0,0,1.2f},3.14159265f),"rotated coupe fixture restore");
+            drive(20);
+            ck(motor.body().position.z>=.97f-1e-4f,
+               "coupe collision follows vehicle heading");
+            fixture.vehicleHeading=0;
+            ck(place({1.1f,0,0},0) && motor.toggleCart(fixture,fixture.vehiclePos),
+               "coupe remains enterable from outside chassis");
+            drive(10);
+            ck(motor.body().occupied && motor.body().position.z>.05f,
+               "driven coupe does not collide with itself");
+            fixture.vehiclePos={30,0,30};
+            fixture.walkers.push_back({{0,0,0},0,0,0});
+            ck(place({0,0,-1},0),"pedestrian barrier fixture restore");
+            bool pedContact=false, pedSeparated=true;
+            for(int i=0;i<20;++i) {
+                drive(1);
+                pedContact=pedContact||motor.body().contact;
+                pedSeparated=pedSeparated&&avatar3d::len(motor.body().position)>=.57f-1e-4f;
+            }
+            ck(pedContact && pedSeparated,
+               "walker body blocks penetration while allowing a slide around it");
+            ck(place({0,0,-.4f},3.14159265f),"pedestrian overlap fixture restore");
+            drive(8);
+            ck(motor.body().position.z<-.9f,"existing walker overlap permits escape");
         }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
@@ -358,6 +423,8 @@ struct GTAngelAGI {
         ck(neuralFrames==12&&neuralPrediction.valid,"actual loop NN inference");
         ck(navLearning.updates>0&&magnitude(navTrainer)>0,"DTE learns with NO keyboard or user");
         ck(avatar3d::len(navPos-start)>.01f&&dteNavigation.accepted>0,"sealed DTE SRD movement");
+        ck(motorMovedFrames>0&&motorTravelMetres>.01f,
+           "motor telemetry measures translation rather than shield approvals");
         const auto updates=navLearning.updates; navTraining=false;
         for(int i=0;i<10;++i)tick();
         ck(navLearning.updates==updates&&neuralFrames==22,"N stops Q only; DTE and NN continue");
@@ -516,25 +583,16 @@ struct GTAngelAGI {
                     if (v.orbitR == 0.0f && sweepWorld.collides(v.pos)) { lanesClear = false; break; }
             }
             ck(lanesClear, "traffic lanes sweep clear");
-            // LW: camera anti-clip — desired eye inside a pillar pulls in.
+            // The camera is not a physical body, at any height.
             {
-                avatar3d::Vec3 body{0, 0, 0};
-                avatar3d::Vec3 desired = body;
-                bool fixtureFound = false;
-                for (const auto& p : navWorld.pillars) {
-                    const avatar3d::Vec3 centre{p.pos.x, 1.2f, p.pos.z};
-                    if (len(centre - body) > 2.0f && len(centre - body) < 8.0f) {
-                        desired = centre;
-                        fixtureFound = true;
-                        break;
-                    }
+                auto cameraWorld=navWorld;
+                cameraWorld.pillars.push_back({{2,0,2},1,5});
+                bool passed=true;
+                for(float height:{.1f,1.2f,1.6f,2.5f}) {
+                    const avatar3d::Vec3 desired{2,height,2};
+                    passed=passed && len(cameraWorld.collisionFreeEye({0,0,0},desired)-desired)<1e-6f;
                 }
-                if (fixtureFound) {
-                    const avatar3d::Vec3 eye = navWorld.collisionFreeEye(body, desired);
-                    ck(len(eye - desired) > 0.01f, "camera pulls in at pillars");
-                } else {
-                    ck(true, "camera pulls in at pillars"); // no fixture in seed
-                }
+                ck(passed,"camera passes through pillar cores at every height");
             }
             // LW: honest friends — familiarity only grows near the avatar.
             {
@@ -1113,6 +1171,8 @@ struct GTAngelAGI {
                     if (gnnDecision.accepted) ++neuralAccepted;
                 }
             }
+            lastGnnGate=!gnnMotorReady?"network unavailable":
+                !neuralShadowEnabled?"inference disabled":gnnDecision.reason;
             // v27 GNN actuation: when the shield accepts the GNN proposal and
             // no human input is active, the learned network steers THROUGH the
             // sealed DteLocal path (never a raw Source::Neural submit).
@@ -1144,6 +1204,11 @@ struct GTAngelAGI {
             } else verdict=cns.motor(source,forward,turn,0.0f,submittedRisk,true,context,navWorld);
             lastMotorVerdict=verdict;
             const bool collided=verdict==v20cns::SpinalReflex::Verdict::Collision;
+            const float travelled=avatar3d::len(cns.body().position-navPos);
+            motorTravelMetres+=travelled;
+            if(travelled>1e-4f) ++motorMovedFrames;
+            if(collided) ++motorContactFrames;
+            else if(verdict!=v20cns::SpinalReflex::Verdict::Accepted) ++motorRejectedFrames;
             const bool humanAccepted=(source==v20cns::Source::DteLocal || manual.active) &&
                 (verdict==v20cns::SpinalReflex::Verdict::Accepted || collided);
             if(source==v20cns::Source::DteLocal && humanAccepted)++dteNavigation.accepted;
