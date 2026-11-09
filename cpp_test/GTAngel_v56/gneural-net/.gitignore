@@ -1,0 +1,18 @@
+# build products (autotools, make, the oc lucyspace build)
+*.o
+*.so
+*.a
+.deps/
+.lucy/
+autom4te.cache/
+config.log
+config.status
+configure~
+configure.lineno
+/Makefile
+/src/Makefile
+/src/gneural_network
+/tests/unit/test_runner
+# Windows download markers
+*:Zone.Identifier
+final_results.dat

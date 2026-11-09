@@ -1,0 +1,16 @@
+{
+  "name": "gtangel-cloudflare-agent-zero",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "node -e \"console.error('BLOCKED: Cloudflare Workers AI deployment is intentionally disabled because of prior billing exposure.'); process.exit(1)\""
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260911.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.35.0"
+  }
+}

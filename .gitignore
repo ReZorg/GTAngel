@@ -110,4 +110,11 @@ cpp_test/vendor/
 cpp_test/GTAngel_v56/vendor/
 cpp_test/data/
 cpp_test/res/
+cpp_test/datasets/
+cpp_test/GTAngel_v56/datasets/
+cpp_test/assets/
+cpp_test/review/
+cpp_test/reports/
+cpp_test/GTAngel_v56/live2d/
+
 

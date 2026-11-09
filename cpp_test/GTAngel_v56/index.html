@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GTAngel v56 — DTE Purism Live2D Mirror</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body { margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: stretch; background: #0b0d16; }
+      #widget-shell { width: 100%; max-width: 560px; margin: 0 auto; }
+      #stage { min-height: 440px; }
+      #gtangel-hud {
+        padding: 6px 12px;
+        font: 12px/1.4 monospace;
+        color: #cfd6e4;
+        border-top: 2px solid #ff8c1a;
+        background: linear-gradient(90deg, rgba(255,140,26,0.14), rgba(0,255,255,0.08));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      #gtangel-hud .ok { color: #7ee2a8; font-weight: bold; }
+      #gtangel-hud .warn { color: #e2b57e; font-weight: bold; }
+      #gtangel-hud label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    </style>
+    <script>
+      // Browser host shim for window.widget + GTAngel V27_LIVE_TELEMETRY.csv bridge.
+      (function () {
+        const DEFINITIONS = [
+          { id: "ParamAngleX", min: -20, max: 20, default: 0 },
+          { id: "ParamAngleY", min: -15, max: 15, default: 0 },
+          { id: "ParamAngleZ", min: -10, max: 10, default: 0 },
+          { id: "ParamBodyAngleZ", min: -4, max: 4, default: 0 },
+          { id: "ParamEyeLOpen", min: 0, max: 1, default: 1 },
+          { id: "ParamEyeROpen", min: 0, max: 1, default: 1 },
+          { id: "ParamEyeBallX", min: -1, max: 1, default: 0 },
+          { id: "ParamEyeBallY", min: -1, max: 1, default: 0 },
+          { id: "ParamBrowLY", min: -1, max: 1, default: 0 },
+          { id: "ParamBrowRY", min: -1, max: 1, default: 0 },
+          { id: "ParamMouthOpenY", min: 0, max: 1, default: 0.3 },
+          { id: "ParamMouthForm", min: -1, max: 1, default: 0 },
+          { id: "ParamBreath", min: 0, max: 1, default: 0.5 },
+          { id: "ParamHairSwing", min: -1, max: 1, default: 0 },
+          { id: "ParamArmL", min: -4, max: 4, default: 0 },
+          { id: "ParamArmR", min: -4, max: 4, default: 0 },
+          { id: "ParamElbowL", min: -5, max: 5, default: 0 },
+          { id: "ParamElbowR", min: -5, max: 5, default: 0 },
+          { id: "ParamWristL", min: -6, max: 6, default: 0 },
+          { id: "ParamWristR", min: -6, max: 6, default: 0 },
+          { id: "ParamHipL", min: -2, max: 2, default: 0 },
+          { id: "ParamHipR", min: -2, max: 2, default: 0 },
+          { id: "ParamKneeL", min: -3, max: 3, default: 0 },
+          { id: "ParamKneeR", min: -3, max: 3, default: 0 },
+          { id: "ParamRootX", min: -6, max: 6, default: 0 },
+          { id: "ParamRootY", min: -4, max: 4, default: 0 },
+          { id: "ParamPoseBlend", min: 0, max: 1, default: 0 }
+        ];
+        const byId = Object.fromEntries(DEFINITIONS.map((d) => [d.id, d]));
+        const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, Number(v) || 0));
+        function defaultParams() {
+          const p = {};
+          for (const d of DEFINITIONS) p[d.id] = d.default;
+          return p;
+        }
+        let settings = {
+          version: 1,
+          mode: "idle",
+          paused: false,
+          alwaysOnTop: true,
+          zoom: 1,
+          background: "studio",
+          params: defaultParams(),
+          bounds: null
+        };
+        let presetsCache = null;
+        async function loadPresets() {
+          if (presetsCache) return presetsCache;
+          try {
+            const r = await fetch("gesture-library.json");
+            const j = await r.json();
+            presetsCache = j.poses || {};
+          } catch (e) {
+            presetsCache = {};
+          }
+          return presetsCache;
+        }
+        window.widget = {
+          async getState() {
+            await loadPresets();
+            return {
+              settings: JSON.parse(JSON.stringify(settings)),
+              definitions: DEFINITIONS,
+              qa: true,
+              appVersion: "1.1.0-gtangel-v56",
+              runtime: "PurismCore v1.1.0 v5",
+              platform: "win32"
+            };
+          },
+          async updateSettings(patch) {
+            if (patch && typeof patch === "object") {
+              if (typeof patch.mode === "string") settings.mode = patch.mode;
+              if (typeof patch.paused === "boolean") settings.paused = patch.paused;
+              if (typeof patch.alwaysOnTop === "boolean") settings.alwaysOnTop = patch.alwaysOnTop;
+              if (typeof patch.zoom === "number") settings.zoom = clamp(patch.zoom, 0.5, 1.4);
+              if (typeof patch.background === "string") settings.background = patch.background;
+              if (patch.params && typeof patch.params === "object") {
+                for (const [k, v] of Object.entries(patch.params)) {
+                  if (byId[k]) settings.params[k] = clamp(v, byId[k].min, byId[k].max);
+                }
+                if (!("mode" in patch)) settings.mode = "manual";
+              }
+            }
+            return JSON.parse(JSON.stringify(settings));
+          },
+          async selectPreset(name) {
+            const poses = await loadPresets();
+            const p = poses[name]?.values || {};
+            settings.params = defaultParams();
+            for (const [k, v] of Object.entries(p)) {
+              if (byId[k]) settings.params[k] = clamp(v, byId[k].min, byId[k].max);
+            }
+            settings.mode = "manual";
+            return JSON.parse(JSON.stringify(settings));
+          },
+          async minimize() {},
+          async close() {},
+          async reportError(msg) {
+            console.error("[DTE widget report]", msg);
+          }
+        };
+      })();
+    </script>
+    <script defer src="vendor/live2dcubismcore.min.js"></script>
+    <script defer src="vendor/cubism-release-guard.js"></script>
+    <script defer src="widget.js"></script>
+  </head>
+  <body class="studio">
+    <main id="widget-shell">
+      <header id="drag-handle">
+        <div class="identity">
+          <span class="status-light"></span>
+          <div><strong>DTE</strong><small>PURISM · ARTICULATED 2D · GTANGEL v56</small></div>
+        </div>
+        <nav aria-label="Window controls">
+          <button id="pin" aria-label="Toggle always on top">Pin</button
+          ><button id="minimize" aria-label="Minimize widget">−</button
+          ><button id="close" aria-label="Close widget">×</button>
+        </nav>
+      </header>
+      <section id="stage" aria-label="Actual native Purism skinned character">
+        <canvas id="avatar"></canvas>
+        <div id="loading" role="status">Loading native rig…</div>
+        <div id="error" hidden role="alert"></div>
+      </section>
+      <div id="gtangel-hud">
+        <span id="telemetry-text"><span class="ok">PURISM RIG</span> · connecting telemetry…</span>
+        <label><input id="telemetry-sync" type="checkbox" checked /> Live CNS sync</label>
+      </div>
+      <section
+        id="inspector"
+        hidden
+        aria-label="Manual joint and facial controls"
+      >
+        <div class="inspector-title">
+          <strong>Native rig parameters</strong
+          ><span>Joint-weighted image rig · 27 articulated controls</span>
+        </div>
+        <div id="sliders"></div>
+      </section>
+      <footer>
+        <div class="transport">
+          <button id="idle">Idle</button><button id="pause">Pause</button
+          ><button id="controls" aria-expanded="false">Rig</button
+          ><button id="background">Backdrop</button>
+        </div>
+        <div class="selection-line">
+          <label for="pose-select">Pose</label
+          ><select id="pose-select" aria-label="Authored pose"></select
+          ><button id="pose-apply">Blend to pose</button>
+        </div>
+        <div class="selection-line">
+          <label for="gesture-select">Motif</label
+          ><select
+            id="gesture-select"
+            aria-label="Authored gesture motif"
+          ></select
+          ><button id="play">Play</button><button id="stop">Hold</button>
+        </div>
+        <div class="playback-options">
+          <label><input id="loop" type="checkbox" /> Loop</label
+          ><label for="speed">Speed</label
+          ><select id="speed">
+            <option value="0.5">½×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.5">1½×</option>
+            <option value="2">2×</option></select
+          ><button id="sequence">Gesture sequence</button>
+        </div>
+        <div class="timeline-line">
+          <input
+            id="timeline"
+            type="range"
+            min="0"
+            max="1"
+            step="0.001"
+            value="0"
+            aria-label="Motion time scrubbing"
+          /><output id="motion-time">0.00 s</output>
+        </div>
+        <div class="motion-info">
+          <span id="motion-status">Authored motion pending</span
+          ><span id="view-status">Front view</span>
+        </div>
+        <div class="blend-line">
+          <label for="view-blend">Views</label><span>Front</span
+          ><input
+            id="view-blend"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0"
+          /><span>Explore</span>
+        </div>
+        <div class="qualification">
+          View blend is a crossfade; joints deform real native meshes.
+        </div>
+        <div class="zoom-line">
+          <label for="zoom">Size</label
+          ><input
+            id="zoom"
+            type="range"
+            min="0.5"
+            max="1.4"
+            step="0.01"
+            value="1"
+          /><button id="reload">Reload</button>
+        </div>
+        <div class="readout">
+          <span id="runtime-status">Native readback pending</span
+          ><span class="private-note">Offline · authored motion</span>
+        </div>
+      </footer>
+    </main>
+    <script>
+      // Poll GTAngel V27_LIVE_TELEMETRY.csv and drive motif selection + HUD readout.
+      (function () {
+        const textEl = document.getElementById("telemetry-text");
+        const syncEl = document.getElementById("telemetry-sync");
+        let lastTick = "";
+        let lastMotif = "";
+        function parseLastRow(csv) {
+          const lines = csv.trim().split(/\r?\n/);
+          if (lines.length < 2) return null;
+          const cols = lines[0].split(",");
+          const vals = lines[lines.length - 1].split(",");
+          const row = {};
+          cols.forEach((c, i) => (row[c] = vals[i]));
+          return row;
+        }
+        async function poll() {
+          try {
+            const r = await fetch("datasets/V27_LIVE_TELEMETRY.csv?t=" + Date.now());
+            if (!r.ok) throw new Error(r.status);
+            const d = parseLastRow(await r.text());
+            if (!d) return;
+            const coh = parseFloat(d.coherence) || 0;
+            const rew = parseFloat(d.total_reward) || 0;
+            const props = parseInt(d.learned_props || "0", 10);
+            textEl.innerHTML =
+              '<span class="ok">CNS LIVE</span> tick=' + d.tick +
+              " · " + (d.mode || "EXPLORE") + "/" + (d.phase || "RESONATE") +
+              " · coh=" + coh.toFixed(2) + " · rew=" + rew.toFixed(1) +
+              " · learned=" + props;
+            if (syncEl && syncEl.checked && d.tick !== lastTick && window.__widgetQA) {
+              lastTick = d.tick;
+              const motif =
+                d.phase === "CONSOLIDATE" ? "nod" :
+                rew > 0 ? "wave" :
+                coh > 0.8 ? "step" :
+                props > 50 ? "look" : "idle";
+              if (motif !== lastMotif) {
+                lastMotif = motif;
+                const sel = document.getElementById("gesture-select");
+                const playBtn = document.getElementById("play");
+                if (sel && playBtn && motif !== "idle") {
+                  sel.value = motif;
+                  playBtn.click();
+                }
+              }
+            }
+          } catch (e) {
+            textEl.innerHTML = '<span class="warn">AUTONOMOUS</span> Purism rig active (telemetry idle)';
+          }
+        }
+        setInterval(poll, 2500);
+        setTimeout(poll, 1200);
+      })();
+    </script>
+  </body>
+</html>

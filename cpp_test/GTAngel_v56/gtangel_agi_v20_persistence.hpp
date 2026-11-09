@@ -1,0 +1,164 @@
+// Single-file v20 atomic JSON save. Strict bounded primitive parser; no external JSON library.
+namespace v20save {
+static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v20_save.json)";
+static bool number(const std::string& text,const char* key,double& result) {
+    const std::string needle=std::string("\"")+key+"\"";
+    size_t pos=text.find(needle);
+    if (pos==std::string::npos||text.find(needle,pos+needle.size())!=std::string::npos) return false;
+    pos=text.find(':',pos+needle.size());
+    if (pos==std::string::npos) return false;
+    const char* begin=text.c_str()+pos+1;
+    while (*begin==' '||*begin=='\n'||*begin=='\t') ++begin;
+    if (!((*begin>='0'&&*begin<='9')||*begin=='-'||*begin=='+')) return false;
+    char* end=nullptr;
+    result=strtod(begin,&end);
+    if (end==begin||!std::isfinite(result)||(*end!=','&&*end!='}'&&*end!=' '&&*end!='\n')) return false;
+    return true;
+}
+static bool integral(const std::string& t,const char* k,int lo,int hi,int& out) {
+    double value=0;
+    if (!number(t,k,value)||value<lo||value>hi||floor(value)!=value) return false;
+    out=(int)value; return true;
+}
+static bool scalar(const std::string& t,const char* k,float lo,float hi,float& out) {
+    double value=0;
+    if (!number(t,k,value)||value<lo||value>hi) return false;
+    out=(float)value; return true;
+}
+static bool decode(const std::string& text,int version, v19game::GameplayLoop& game,
+                   avatar3d::GameWorld& world, v20cns::Body& body,
+                   v20cns::NicheHistory& niche) {
+    if (text.size()>8192||text.empty()||text.front()!='{'||text.find_last_of('}')==std::string::npos) return false;
+    int v=0,stage=0,shard=0,sigil=0,visible=0,beacon=0,events=0,declined=0,accepted=0,restored=0;
+    float disposition=0;
+    if (!integral(text,"version",version,version,v) ||
+        !integral(text,"questStage",0,5,stage) ||
+        !integral(text,"hasSignalShard",0,1,shard) ||
+        !integral(text,"hasResonanceSigil",0,1,sigil) ||
+        !integral(text,"shardVisible",0,1,visible) ||
+        !integral(text,"beaconRestored",0,1,beacon) ||
+        !integral(text,"groundedEvents",0,10000000,events) ||
+        !scalar(text,"disposition",0,1,disposition) ||
+        !integral(text,"declined",0,1,declined) ||
+        !integral(text,"accepted",0,1,accepted) ||
+        !integral(text,"restored",0,1,restored)) return false;
+    // Quest invariants are stronger than simple type checks; never load a completed
+    // purpose without its earned Sigil or an unspent shard into a restored beacon.
+    if ((beacon && (stage<4||shard||visible||!restored)) ||
+        (!beacon && (stage>=4||sigil)) || (sigil!=(stage==5)) ||
+        (stage==3 && (!shard||visible))) return false;
+    game.quest.stage=(v19game::QuestStage)stage;
+    game.quest.hasSignalShard=shard; game.quest.hasResonanceSigil=sigil;
+    game.quest.shardVisible=visible; game.quest.beaconRestored=beacon;
+    game.quest.groundedEvents=(uint32_t)events;
+    game.quest.dialogueOpen=false; game.quest.journalOpen=true;
+    game.quest.persistenceStatus="LOADED"; game.quest.lastEvent="Gameplay state loaded";
+    game.ariadne.disposition=disposition;
+    game.ariadne.remembersDecline=declined; game.ariadne.remembersAcceptance=accepted;
+    game.ariadne.remembersRestoration=restored;
+    game.publishWorld(world);
+    if (version==1) {
+        body=v20cns::Body{};
+        niche={beacon?2u:1u,beacon?1u:0u,beacon!=0,false};
+        return true;
+    }
+    int occupied=0,gear=0,contact=0,wv=0,spent=0,reobserved=0,rollback=0;
+    if (!scalar(text,"bodyX",-9.75f,9.75f,body.position.x)||
+        !scalar(text,"bodyZ",-9.75f,9.75f,body.position.z)||
+        !scalar(text,"cartX",-9.24f,9.24f,body.cartPosition.x)||
+        !scalar(text,"cartZ",-9.24f,9.24f,body.cartPosition.z)||
+        !scalar(text,"cartHeading",-10000,10000,body.cartHeading)||
+        !scalar(text,"bodyHeading",-10000,10000,body.heading)||
+        !scalar(text,"bodySpeed",-3,7,body.speed)||
+        !scalar(text,"bodySteering",-.56f,.56f,body.steering)||
+        !scalar(text,"wheelPhase",-100000,100000,body.wheelPhase)||
+        !integral(text,"occupied",0,1,occupied)||
+        !integral(text,"gear",-1,1,gear)||
+        !integral(text,"contact",0,1,contact)||
+        !integral(text,"worldVersion",1,2,wv)||
+        !integral(text,"nicheSpent",0,1,spent)||
+        !integral(text,"reobserved",0,1,reobserved)||
+        !integral(text,"rolledBack",0,1,rollback)) return false;
+    if ((occupied && ((body.speed>0.025f && gear!=1) ||
+                      (body.speed< -0.025f && gear!=-1) ||
+                      (fabsf(body.speed)<=0.025f && gear!=0))) ||
+        (!occupied && gear!=0)) return false;
+    body.position.y=0; body.cartPosition.y=0;
+    body.occupied=occupied; body.gear=gear; body.contact=contact;
+    niche={(uint64_t)wv,(uint32_t)spent,reobserved!=0,rollback!=0};
+    return true;
+}
+static bool write(const char* path,const v19game::GameplayLoop& g,const v20cns::Runtime& c) {
+    const auto& h=c.niche();
+    if (h.rolledBack || h.worldVersion<1 || h.worldVersion>2 ||
+        h.spent!=(h.worldVersion==2?1u:0u) ||
+        g.quest.beaconRestored!=(h.worldVersion==2) ||
+        (h.worldVersion==2 && !h.reobserved) ||
+        (g.quest.beaconRestored && ((int)g.quest.stage<4 ||
+            g.quest.hasSignalShard || g.quest.shardVisible || !g.ariadne.remembersRestoration)) ||
+        (g.quest.hasResonanceSigil!=(g.quest.stage==v19game::QuestStage::Complete)) ||
+        !v20cns::finitePose(c.body().position) ||
+        !v20cns::finitePose(c.body().cartPosition) ||
+        !v20cns::finite(c.body().cartHeading) ||
+        !v20cns::finite(c.body().heading) ||
+        !v20cns::finite(c.body().speed)) return false;
+    const std::string temp=std::string(path)+".tmp";
+    std::ofstream out(temp,std::ios::trunc|std::ios::binary);
+    if (!out) return false;
+    const auto& q=g.quest; const auto& b=c.body(); const auto& n=c.niche();
+    out << "{\n  \"version\": 2,\n"
+        << "  \"questStage\": " << (int)q.stage << ",\n"
+        << "  \"hasSignalShard\": " << (int)q.hasSignalShard << ",\n"
+        << "  \"hasResonanceSigil\": " << (int)q.hasResonanceSigil << ",\n"
+        << "  \"shardVisible\": " << (int)q.shardVisible << ",\n"
+        << "  \"beaconRestored\": " << (int)q.beaconRestored << ",\n"
+        << "  \"groundedEvents\": " << q.groundedEvents << ",\n"
+        << "  \"disposition\": " << g.ariadne.disposition << ",\n"
+        << "  \"declined\": " << (int)g.ariadne.remembersDecline << ",\n"
+        << "  \"accepted\": " << (int)g.ariadne.remembersAcceptance << ",\n"
+        << "  \"restored\": " << (int)g.ariadne.remembersRestoration << ",\n"
+        << "  \"bodyX\": " << b.position.x << ",\n"
+        << "  \"bodyZ\": " << b.position.z << ",\n"
+        << "  \"cartX\": " << b.cartPosition.x << ",\n"
+        << "  \"cartZ\": " << b.cartPosition.z << ",\n"
+        << "  \"cartHeading\": " << b.cartHeading << ",\n"
+        << "  \"bodyHeading\": " << b.heading << ",\n"
+        << "  \"bodySpeed\": " << b.speed << ",\n"
+        << "  \"bodySteering\": " << b.steering << ",\n"
+        << "  \"wheelPhase\": " << b.wheelPhase << ",\n"
+        << "  \"occupied\": " << (int)b.occupied << ",\n"
+        << "  \"gear\": " << b.gear << ",\n"
+        << "  \"contact\": " << (int)b.contact << ",\n"
+        << "  \"worldVersion\": " << n.worldVersion << ",\n"
+        << "  \"nicheSpent\": " << n.spent << ",\n"
+        << "  \"reobserved\": " << (int)n.reobserved << ",\n"
+        << "  \"rolledBack\": " << (int)n.rolledBack << "\n}\n";
+    out.flush(); bool okay=out.good(); out.close(); okay=okay&&out.good();
+    if (!okay || !MoveFileExA(temp.c_str(),path,MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)) {
+        DeleteFileA(temp.c_str()); return false;
+    }
+    return true;
+}
+template<class Observe>
+static bool load(const char* path,const char* legacyPath,v19game::GameplayLoop& game,
+                 avatar3d::GameWorld& world,v20cns::Runtime& c,Observe observe) {
+    std::ifstream in(path,std::ios::binary);
+    bool legacy=!in.good();
+    if (legacy) { in.clear(); in.open(legacyPath,std::ios::binary); }
+    if (!in) return false;
+    std::string text((std::istreambuf_iterator<char>(in)),std::istreambuf_iterator<char>());
+    auto nextGame=game; auto nextWorld=world;
+    v20cns::Body nextBody{}; v20cns::NicheHistory nextNiche{};
+    if (!decode(text,legacy?1:2,nextGame,nextWorld,nextBody,nextNiche)) return false;
+    if (nextWorld.beaconRestored) {
+        bool observed=false;
+        try { observed=observe(nextWorld); } catch (...) { observed=false; }
+        if (!observed) return false;
+        nextNiche.reobserved=true;
+    }
+    v20cns::Runtime nextCns;
+    if (!nextCns.restoreLocal(nextBody,nextNiche,nextGame,nextWorld)) return false;
+    game=nextGame; world=nextWorld; c=nextCns;
+    return true;
+}
+} // namespace v20save

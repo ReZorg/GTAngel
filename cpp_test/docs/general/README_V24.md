@@ -1,0 +1,18 @@
+# GTAngel v24 — fixed neural sensor, independent high-resolution display
+
+The user's clarification is now an executable architectural boundary: **the 768×768 colour/depth/object-ID framebuffer belongs to AI vision, neural training, proprioceptive feedback and local frame-confirmation. It is not a maximum window/display resolution.** The main 1024×768 Win32 window retains that 768×768 sensor as a debug view with its 256 px rail; the optional second window **rasterizes the same measured local world state anew** at 1536×864. No upscaling of the training image is presented as additional detail.
+
+## Run and inspect
+
+Start `C:\ddd\GTAngel\cpp_test\run_v24.bat`. Press **F7** in the main window to open/close the separate 1536×864 visual window. **F7 or Escape** in the display window closes only that window; WASD, Space, B, E, Q and other gameplay keys in it are forwarded to the main local game controller. **F6** retains the original sensor/debug-dashboard switch; D remains the turning key. Resize the display window freely: its independent 1536×864 raster is letterboxed/downsized to fit the available client area, while the AI buffer remains 768×768. On a large monitor the display window can show its full native pixels; on smaller monitors the physical window may be smaller even though the underlying display pass stays 1536×864.
+
+The high-resolution pass uses the same scene, avatar, local camera position, heading and pitch as the sensor, and loads a separate copy of the validated adjacent native visual LOD. It **cannot write** to the visual tensor, retinal map, neural policy, CNS motor proposals, safety commit, beacon governance or quest state. The authoritative measured AI path remains `768×768 colour/depth/object-ID → 96×96 neural tensor / 64×64 retina → 12×12 cognitive field` and does not read the display pixels. The display's Win32 paint loop is optional and currently invalidated at approximately **10 Hz** (every other 50 ms timer tick), deliberately conserving compute for the embodied sensor. This CPU software renderer is not a GPU-quality photoreal view and has the same stylized DTE art as v23; higher output resolution is not a likeness replacement.
+
+## Validation
+
+- Deterministic generator and source-boundary verifier pass. Ariadne gameplay, v20 motor/world governance, save contract, visual neural policy and visual tensor source spans are byte-identical to v23.
+- The renderer fixture still passes its native 768×768 quest/semantic benchmark: NPC 332, vehicle 3,674, shard 263 and restored goal 3,736 semantic pixels in the observed run.
+- A second native test instantiates **different typed framebuffers**: AI 589,824 pixels (768×768) and display 1,327,104 pixels (1536×864), each with its own colour/depth/object-ID arrays. The actual display pass contains 5,255 avatar ID pixels; the AI colour, depth, IDs, sequence and 64×64 retinal luminance are unchanged before and after that render. Measured single display pass ~40 ms in this sandbox; workstation rate may differ.
+- A statically linked MinGW x64 Win32 executable builds successfully; the supplied native 1536×864 preview was generated from the display pass rather than enlarged from the sensor frame. **Live Windows F7/display-window gameplay acceptance remains pending.**
+
+The source archive contains `v23_baseline.cpp`, `generate_v24.mjs`, `verify_v24_source.mjs`, standalone renderer/display tests and the validated adjacent native skin asset. Run `build_v24.bat` from the extracted source directory on a Windows computer with Node.js and MinGW. The earlier v23 files and executable are not replaced.
