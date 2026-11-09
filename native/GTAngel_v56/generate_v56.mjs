@@ -437,6 +437,25 @@ once(`        for (const auto& pl : pillars) {
             float dx = std::fabs(p.x - b.pos.x), dz = std::fabs(p.z - b.pos.z);
             if (dx < b.w * 0.5f + 0.25f && dz < b.d * 0.5f + 0.25f) return true;
         }
+        // LW55: mutual barriers — avatar body also registers vehicles, traffic,
+        // ambulance/bus, NPCs, walkers, and streetlamp props.
+        for (const auto& lamp : props) {
+            float dx = p.x - lamp.pos.x, dz = p.z - lamp.pos.z;
+            if (dx*dx + dz*dz < 0.42f * 0.42f) return true;
+        }
+        if (std::fabs(p.x - vehiclePos.x) < 1.35f && std::fabs(p.z - vehiclePos.z) < 2.35f) return true;
+        for (const auto& v : traffic) {
+            if (v.orbitR > 0.0f) continue;
+            const float hx = (v.axis == 'x') ? 2.55f : 1.30f;
+            const float hz = (v.axis == 'z') ? 2.55f : 1.30f;
+            if (std::fabs(p.x - v.pos.x) < hx && std::fabs(p.z - v.pos.z) < hz) return true;
+        }
+        if (std::fabs(p.x - ambX) < 2.55f && std::fabs(p.z + 1.4f) < 1.35f) return true;
+        if (std::fabs(p.x + 1.4f) < 1.45f && std::fabs(p.z - busZ) < 3.15f) return true;
+        if (len(p - npcPos) < 0.95f) return true;
+        for (const auto& w : walkers) {
+            if (len(p - w.pos) < 0.85f) return true;
+        }
         return false;`, 'building collision');
 once('        buildGround(world);', `        buildGround(world);
         buildRoads(world);`, 'roads before pillars');
@@ -8391,9 +8410,10 @@ once(`                framebuffer.depth[index] = depth;
                     const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
                     const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
                     const float r2 = cx * cx + cy * cy;
-                    if (prevId == ObjectAvatar || r2 < 1.0f) {
+                    if (prevId == ObjectAvatar || r2 < 1.0f || depth < 1.8f) {
                         const float u = std::clamp(r2, 0.0f, 1.0f);
-                        const float alpha = (prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u)));
+                        const float alpha = (depth < 1.8f) ? 0.12f
+                            : ((prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u))));
                         const uint32_t bg = framebuffer.colour[index];
                         const uint8_t bgB = (uint8_t)(bg & 0xFFu);
                         const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);
