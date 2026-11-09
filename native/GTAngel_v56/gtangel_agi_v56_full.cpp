@@ -9972,8 +9972,8 @@ class BodyEffector {
         // Penetration-only (approach semantics): veto motion that CLOSES INTO a
         // body core — never a wide standoff — so the avatar can still reach the
         // coupe door, brush past traffic, and always escape an overlap.
-        const float dB2 = distance2(b, w.vehiclePos), dA2 = distance2(a, w.vehiclePos);
-        if (dB2 < (radius+0.70f)*(radius+0.70f) && dB2 < dA2) return false;
+        // The parked coupe is the enterable player vehicle — never barrier it
+        // (approach is required to enter); moving traffic/peds still barrier.
         for (const auto& v : w.traffic) {
             if (v.orbitR>0.0f) continue;
             const float dBt=distance2(b,v.pos), dAt=distance2(a,v.pos);
