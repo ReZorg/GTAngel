@@ -942,7 +942,8 @@ for (const rootDir of ['src']) {
   }
 
   const writeMod = (relPath, content) => {
-    fs.writeFileSync(path.join(rootDir, relPath), content, 'utf8');
+    const withPragma = (relPath.endsWith('.hpp') && !content.startsWith('#pragma once')) ? `#pragma once\n${content}` : content;
+    fs.writeFileSync(path.join(rootDir, relPath), withPragma, 'utf8');
   };
 
   writeMod('core/PlatformPreamble.hpp', '#pragma once\n' + sliceLines(1, L_avatar3d - 1) + buildZppCppContractBlock('core', false));

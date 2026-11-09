@@ -1,3 +1,4 @@
+#pragma once
     // Component-specific Z++ street prop CDummy contract binding (from entities/ZppContracts.hpp)
     static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {
         return zpp_entities_spec::CDummy_ZppContract{};

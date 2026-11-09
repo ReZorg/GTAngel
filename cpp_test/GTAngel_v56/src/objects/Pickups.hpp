@@ -1,3 +1,4 @@
+#pragma once
     // Component-specific Z++ pickup CParticleObject contract binding (from objects/ZppContracts.hpp)
     static constexpr zpp_objects_spec::CParticleObject_ZppContract makePickupParticleContract() {
         return zpp_objects_spec::apply_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{});

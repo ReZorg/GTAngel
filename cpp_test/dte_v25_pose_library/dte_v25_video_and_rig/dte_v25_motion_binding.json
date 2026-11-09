@@ -1,0 +1,33 @@
+{
+  "schema": "gtangel.dte.visual-motion.v1",
+  "character": "Deep Tree Echo",
+  "asset": "assets/dte_v25_pose_rig.glb",
+  "source_gameplay_target": "GTAngel v24 or later, adapter not yet implemented",
+  "fps": 24,
+  "root_motion_authority": false,
+  "commit_authority": "none",
+  "body_authority": "local SRD/MOTOR_COMMIT only",
+  "niche_authority": "local WGR/NICHE_COMMIT only",
+  "network_and_agent_zero": "visual pose intent may be advisory; never a source of movement, collision, world mutation or commit tokens",
+  "skeleton": {
+    "skin_count": 1,
+    "joints": 43,
+    "wing_roots": ["wing_mount_l", "wing_mount_r"],
+    "hand_sockets": {"left": "LeftHand", "right": "RightHand"},
+    "foot_sockets": {"left": "LeftFoot", "right": "RightFoot"},
+    "look_sockets": {"head": "Head", "neck": "neck"}
+  },
+  "clips": {
+    "idle": {"name": "DTE_Pose_Idle_Explore", "loop": true, "duration_frames": 48, "trigger": "measured local speed below 0.08 m/s, not guarding"},
+    "walk": {"name": "DTE_Pose_Walk24_Loop", "loop": true, "duration_frames": 24, "trigger": "local on-foot measured speed above 0.08 m/s", "contact_frames": {"left": 1, "right": 13}, "root_motion": false},
+    "inspect": {"name": "DTE_Pose_Turn_Inspect", "loop": false, "duration_frames": 32, "trigger": "locally accepted look or inspection gesture"},
+    "reach": {"name": "DTE_Pose_Reach", "loop": false, "duration_frames": 32, "trigger": "locally accepted visual interaction gesture; E alone does not authorize a quest/world mutation"},
+    "guard_ready": {"name": "DTE_Pose_Guard_Ready", "loop": false, "duration_frames": 32, "trigger": "local B visual guard key, no new damage/physics semantics"},
+    "recovery": {"name": "DTE_Pose_Return_Recovery", "loop": false, "duration_frames": 32, "trigger": "release from visual guard or interaction"},
+    "wing_deploy_original": {"name": "ACT_DTE_V22_WingDeploy_Guard_36F", "loop": false, "duration_frames": 36, "trigger": "optional local visual-only wing deployment; inspect actual wing continuity before enabling"}
+  },
+  "crossfade_frames": 5,
+  "foot_placement": "authoring-only contacts; terrain-aware IK and runtime collision pairing not yet implemented",
+  "framebuffer_policy": "the local 768x768 colour/depth/object-ID AI sensor remains authoritative; higher-resolution presentation is separate and non-authoritative",
+  "release_gate": "Do not replace the existing v24 native dte_v22_lod.bin with this GLB. Importer, pose sampling, skinning and render regression are separate work."
+}

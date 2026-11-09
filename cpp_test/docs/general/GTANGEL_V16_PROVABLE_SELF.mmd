@@ -1,0 +1,53 @@
+flowchart LR
+  subgraph Native["GTAngel v16 — Native Authority Plane"]
+    FB["768×768 World Frame"] --> RET["64×64 Retina"] --> CF["12×12 Cognitive Field"]
+    CF --> OBS["1 · Observation Event"]
+    OBS --> AZ["2 · Agent Zero Proposal"]
+    AZ --> GATE{"3 · GTAngel Governance Gate"}
+    GATE -->|allow / modify| ACT["4 · Native Action Commit"]
+    GATE -->|deny / stale / unsafe| WAIT["Fail-closed WAIT"]
+    ACT --> OUT["World Outcome"]
+    WAIT --> OUT
+    OUT --> ENDO["5 · Deep Tree Echo Endocrine Delta"]
+    ENDO --> FACE["6 · FACS Expression Intent"]
+  end
+
+  subgraph Inference["Dynamic Inference Plane"]
+    LOCAL["llama.cpp + quantized GGUF"]
+    EDGE["Cloudflare Workers AI\nDISABLED · cost-locked reference"]
+  end
+
+  LOCAL -. "OpenAI contract" .-> AZ
+  EDGE -. "blocked by billing circuit breakers" .-> AZ
+
+  subgraph Projection["Projection and Embodiment"]
+    AV["Echo Angel AvatarFX"]
+    UE["Unreal / MetaHuman Rig Logic"]
+    DAED["daedalOS Angel Observatory"]
+  end
+
+  FACE --> AV --> UE
+
+  LEDGER[("Correlated JSONL Event Ledger")]
+  OBS --> LEDGER
+  AZ --> LEDGER
+  GATE --> LEDGER
+  ACT --> LEDGER
+  ENDO --> LEDGER
+  FACE --> LEDGER
+  LEDGER --> DAED
+  DAED -->|"replay / compare / inspect"| LEDGER
+
+  RE3["re3all clean-room patterns\nintent/override · hysteresis · frame seal"] -.-> GATE
+  RE3 -.-> LEDGER
+
+  classDef sense fill:#153449,stroke:#65d9ff,color:#f5fbff;
+  classDef cognition fill:#2b2050,stroke:#b894ff,color:#ffffff;
+  classDef gate fill:#402827,stroke:#ffbc57,color:#ffffff;
+  classDef body fill:#143d32,stroke:#57e3a6,color:#ffffff;
+  classDef ledger fill:#332541,stroke:#ff72c7,color:#ffffff;
+  class FB,RET,CF,OBS sense;
+  class AZ,LOCAL,EDGE cognition;
+  class GATE,WAIT gate;
+  class ACT,OUT,ENDO,FACE,AV,UE body;
+  class LEDGER,DAED,RE3 ledger;

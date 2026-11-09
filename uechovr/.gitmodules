@@ -1,0 +1,12 @@
+[submodule "dependencies/submodules/glm"]
+	path = dependencies/submodules/glm
+	url = https://github.com/g-truc/glm
+[submodule "dependencies/submodules/spdlog"]
+	path = dependencies/submodules/spdlog
+	url = https://github.com/praydog/spdlog-uevr
+[submodule "dependencies/submodules/imgui"]
+	path = dependencies/submodules/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "dependencies/submodules/UESDK"]
+	path = dependencies/submodules/UESDK
+	url = git@github.com:praydog/UESDK.git

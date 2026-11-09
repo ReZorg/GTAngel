@@ -46,7 +46,6 @@ Archecho/*/DerivedDataCache/
 *.txt
 *.ps1
 *.py
-!GTAngel/Assets/Gameface/Plugins/GTAngelRuntime/Content/Python/import_arc_angel_echo.py
 *.bat
 
 # --- IDE ---
@@ -64,3 +63,67 @@ Desktop.ini
 
 # --- Logs ---
 *.log
+
+# --- Package caches, build outputs, archives, and local env ---
+.nuget/
+.pnpm-store/
+.cursor/
+.gtangel-organizer/
+**/.gtangel-organizer/
+**/node_modules/
+**/bin/
+**/obj/
+**/target/
+**/dist/
+**/release/
+**/archives/
+**/versions/
+**/gamefiles/
+**/other/
+_RestoreTest/
+KSM-ORGANIZED/
+UE4VRCookbook/
+u9n/
+u9n-main/
+aihub/
+assets/
+ava/
+avamad/
+isoforest/
+isprite/
+lucyspace/
+manus-slides/
+Analysis/
+GTAngel-Cls/
+*.zip
+*.exe
+*.o
+*.pdb
+*.ilk
+*.uexp
+.env
+**/.env
+cpp_test/GTAngel_v56/models/DTEArtwork/
+cpp_test/GTAngel_v56/models/DTEMorphRig/
+cpp_test/models/
+cpp_test/vendor/
+cpp_test/GTAngel_v56/vendor/
+cpp_test/data/
+cpp_test/res/
+cpp_test/datasets/
+cpp_test/GTAngel_v56/datasets/
+cpp_test/assets/
+cpp_test/review/
+cpp_test/reports/
+cpp_test/GTAngel_v56/live2d/
+echo/
+elizaos.cpp/
+system7-dte-phasor/
+**/build/
+**/out/
+**/*.gguf
+**/*.onnx
+**/*.safetensors
+
+
+

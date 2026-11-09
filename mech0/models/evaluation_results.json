@@ -1,0 +1,85 @@
+{
+  "accuracy": 0.4,
+  "averageLoss": 0.9243101696632378,
+  "confusionMatrix": {
+    "greeting": {
+      "greeting": 2,
+      "farewell": 0,
+      "question": 0
+    },
+    "farewell": {
+      "greeting": 1,
+      "farewell": 0,
+      "question": 1
+    },
+    "question": {
+      "greeting": 0,
+      "farewell": 1,
+      "question": 0
+    }
+  },
+  "labelMetrics": {
+    "greeting": {
+      "precision": 0.6666666666666666,
+      "recall": 1,
+      "f1": 0.8
+    },
+    "farewell": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    },
+    "question": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    }
+  },
+  "sampleCount": 5,
+  "persona": {
+    "evaluatedAt": "2026-08-03T23:23:05.502Z",
+    "signatureVersion": 1,
+    "calibration": {
+      "authentic": {
+        "ceiling": 0.6481214671606969,
+        "median": 0.5239335500197818,
+        "floor": 0.19674104286868893,
+        "samples": 31
+      },
+      "synthetic": {
+        "ceiling": 0.4345291581053029,
+        "median": 0.34251659244883836,
+        "floor": 0.28097183567646805,
+        "samples": 7
+      },
+      "all": {
+        "ceiling": 0.6481214671606969,
+        "median": 0.5154536870995186,
+        "floor": 0.19674104286868893,
+        "samples": 38
+      }
+    },
+    "holdout": {
+      "count": 50,
+      "overall": 0.39184312329949406,
+      "lexical": 0.2405780983130288,
+      "structural": 0.5562325922306389,
+      "quirk": 0.3294760748434014,
+      "trait": 0.574757480809494
+    },
+    "decisiveTest": {
+      "passed": true,
+      "personaOn": 0.23041565036246858,
+      "personaOff": 0.1741283649694639,
+      "lift": 0.05628728539300468,
+      "relativeToAuthentic": 0.43978029342417363
+    },
+    "continuityRegression": {
+      "passed": true,
+      "traitsPreserved": true,
+      "meshworkPreserved": true,
+      "preservationUnchanged": true,
+      "conditioningUnchanged": true
+    }
+  }
+}

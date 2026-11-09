@@ -822,8 +822,7 @@ public:
         buildMoon();
         buildGround(world);
         buildRoads(world);
-        buildPillars(world);
-        buildBuildings(world);
+        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
         buildGoal(world);
         buildNpc(world);
         buildQuestShard(world);
@@ -831,8 +830,9 @@ public:
         buildWalkers(world);
         buildTraffic(world);
         buildPickups(world);
+        buildPillars(world);
+        buildBuildings(world);
         buildProps(world);
-        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
 
         metrics.trianglesSubmitted = (int)triangles_.size();
         metrics.trianglesRasterized = 0;
@@ -1993,9 +1993,8 @@ private:
         // LW50: opposite-lane CVehicle::bIsAmbulanceOnDuty (MI_AMBULAN, z = -1.4f)
         // and CVehicle::bIsBus (6-wheel CAR_WHEEL_RF/RM/RB metropolitan coach, x = -1.4f)
         {
-            const float ambCycle = fmodf(world.trafficTime * 2.9f, 112.0f);
-            const float ambDir   = ambCycle < 56.0f ? 1.0f : -1.0f;
-            const float ambX     = ambCycle < 56.0f ? (-28.0f + ambCycle) : (28.0f - (ambCycle - 56.0f));
+            const float ambDir   = world.ambDir;
+            const float ambX     = world.ambX;
             const Vec3  ambPos{ambX, 0.0f, -1.4f};
             const float ach = 0.0f, ash = ambDir; // heading +pi/2 or -pi/2
             auto aLoc = [&](float x, float y, float z) { return ambPos + Vec3{x*ach + z*ash, y, -x*ash + z*ach}; };
@@ -2043,9 +2042,8 @@ private:
             }
 
             // Metropolitan 6-Wheel City Bus (bIsBus / CAR_WHEEL_RF, RM, RB, LF, LM, LB) on N-S lane x = -1.4f
-            const float busCycle = fmodf(world.trafficTime * 2.2f + 18.0f, 112.0f);
-            const float busDir   = busCycle < 56.0f ? -1.0f : 1.0f;
-            const float busZ     = busCycle < 56.0f ? (28.0f - busCycle) : (-28.0f + (busCycle - 56.0f));
+            const float busDir   = world.busDir;
+            const float busZ     = world.busZ;
             const Vec3  busPos{-1.4f, 0.0f, busZ};
             const float bch = busDir, bsh = 0.0f;
             auto bLoc = [&](float x, float y, float z) { return busPos + Vec3{x*bch + z*bsh, y, -x*bsh + z*bch}; };
@@ -2413,6 +2411,32 @@ private:
                     shaded.b = (uint8_t)std::min(255, (int)shaded.b + (int)(specAddB * invFog));
                     shaded.g = (uint8_t)std::min(255, (int)shaded.g + (int)(specAddG * invFog));
                     shaded.r = (uint8_t)std::min(255, (int)shaded.r + (int)(specAddR * invFog));
+                }
+                // LW54: Smooth per-pixel alpha-blend obfuscation rectification when an
+                // obstacle or prop passes between the 3rd-person camera and the avatar/sightline
+                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 4.25f) {
+                    const uint16_t prevId = framebuffer.objectId[index];
+                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
+                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
+                    const float r2 = cx * cx + cy * cy;
+                    if (prevId == ObjectAvatar || r2 < 1.0f) {
+                        const float u = std::clamp(r2, 0.0f, 1.0f);
+                        const float alpha = (prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u)));
+                        const uint32_t bg = framebuffer.colour[index];
+                        const uint8_t bgB = (uint8_t)(bg & 0xFFu);
+                        const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);
+                        const uint8_t bgR = (uint8_t)((bg >> 16) & 0xFFu);
+                        shaded.b = (uint8_t)(shaded.b * alpha + bgB * (1.0f - alpha));
+                        shaded.g = (uint8_t)(shaded.g * alpha + bgG * (1.0f - alpha));
+                        shaded.r = (uint8_t)(shaded.r * alpha + bgR * (1.0f - alpha));
+                        framebuffer.colour[index] = Surface::pack(shaded);
+                        if (prevId != ObjectAvatar) {
+                            framebuffer.depth[index] = depth;
+                            framebuffer.objectId[index] = oid;
+                        }
+                        wrote = true;
+                        continue;
+                    }
                 }
                 framebuffer.depth[index] = depth;
                 framebuffer.objectId[index] = oid;

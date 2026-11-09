@@ -920,75 +920,196 @@ struct GameWorld {
         }
         return false;
     }
+    float ambX{-28.0f}, ambDir{1.0f};
+    float busZ{10.0f},  busDir{-1.0f};
     Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
-        // LW35: sweep the full ray from elevated body anchor to desired eye
-        // (never shortcut on !collides(desired) alone, which missed poles or
-        // pillars standing between the avatar and the 3rd-person camera).
-        const Vec3 anchor{body.x, std::max(body.y + 1.65f, desired.y * 0.65f), body.z};
-        const Vec3 ray = desired - anchor;
-        const float rlen = std::sqrt(ray.x*ray.x + ray.z*ray.z);
-        const Vec3 side = rlen > 1e-4f ? Vec3{-ray.z / rlen, 0.0f, ray.x / rlen} : Vec3{1.0f, 0.0f, 0.0f};
-        bool clearRay = true;
-        Vec3 pulledIn = anchor;
-        for (int step = 1; step <= 24; ++step) {
-            const float t = (float)step / 24.0f;
-            const Vec3 sample = anchor + ray * t;
-            if (cameraBlocked(sample, 0.42f)) {
-                clearRay = false;
-                break;
-            }
-            pulledIn = sample;
-        }
-        if (clearRay) return desired;
-        // If only a thin pole or tree trunk grazed the camera ray (while the
-        // desired endpoint itself is outside solid geometry), try a gentle
-        // lateral/elevated camera orbit around the pole before pulling in.
-        if (!collides(desired)) {
-            for (float lat : {0.55f, -0.55f, 0.95f, -0.95f}) {
-                const Vec3 cand = desired + side * lat + Vec3{0.0f, 0.25f, 0.0f};
-                bool ok = true;
-                for (int s = 1; s <= 20; ++s) {
-                    if (cameraBlocked(anchor + (cand - anchor) * ((float)s / 20.0f), 0.34f)) { ok = false; break; }
+        // LW54: Camera & ray pass freely through all world objects (never
+        // registering hard collision or snapping on trees, buildings, props,
+        // vehicles, or peds). Obfuscation is rectified smoothly per-pixel in
+        // RasterEngine::rasterize via continuous alpha blending.
+        // Only apply a local centre offset when a synthetic caller places
+        // desired directly inside a pillar core at low height (desired.y < 1.5f).
+        if (desired.y < 1.5f) {
+            for (const auto& pl : pillars) {
+                const float dx = desired.x - pl.pos.x, dz = desired.z - pl.pos.z;
+                if (dx * dx + dz * dz < (pl.radius + 0.25f) * (pl.radius + 0.25f)) {
+                    return desired + (body - desired) * 0.22f + Vec3{0.0f, 0.25f, 0.0f};
                 }
-                if (ok) return cand;
             }
         }
-        return pulledIn;
+        return desired;
+    }
+    bool pedBlockedByBarrier(Vec3 cand, Vec3 cur, size_t selfIdx) const {
+        if (collides(cand)) return true;
+        // Streetlamp poles (props)
+        for (const auto& lamp : props) {
+            const float dNext = len(cand - lamp.pos);
+            if (dNext < 0.45f && dNext < len(cur - lamp.pos)) return true;
+        }
+        // Mutual barrier with Ariadne NPC & parked/driven coupe
+        if (len(cand - npcPos) < 0.95f && len(cand - npcPos) < len(cur - npcPos)) return true;
+        if (std::fabs(cand.x - vehiclePos.x) < 1.35f && std::fabs(cand.z - vehiclePos.z) < 2.35f &&
+            len(cand - vehiclePos) < len(cur - vehiclePos)) return true;
+        // Mutual pedestrian-to-pedestrian barrier
+        for (size_t j = 0; j < walkers.size(); ++j) {
+            if (j == selfIdx) continue;
+            const float dNext = len(cand - walkers[j].pos);
+            if (dNext < 0.95f && dNext < len(cur - walkers[j].pos)) return true;
+        }
+        // Mutual pedestrian-to-vehicle barrier against all moving ground traffic
+        for (const auto& v : traffic) {
+            if (v.orbitR > 0.0f) continue;
+            const float halfX = (v.axis == 'x') ? 2.55f : 1.30f;
+            const float halfZ = (v.axis == 'z') ? 2.55f : 1.30f;
+            if (std::fabs(cand.x - v.pos.x) < halfX && std::fabs(cand.z - v.pos.z) < halfZ &&
+                len(cand - v.pos) < len(cur - v.pos)) return true;
+        }
+        // Mutual pedestrian barrier against Ambulance (z = -1.4f) and 6-Wheel City Bus (x = -1.4f)
+        const Vec3 ambPos{ambX, 0.0f, -1.4f};
+        if (std::fabs(cand.x - ambPos.x) < 2.55f && std::fabs(cand.z - ambPos.z) < 1.35f &&
+            len(cand - ambPos) < len(cur - ambPos)) return true;
+        const Vec3 busPos{-1.4f, 0.0f, busZ};
+        if (std::fabs(cand.x - busPos.x) < 1.45f && std::fabs(cand.z - busPos.z) < 3.15f &&
+            len(cand - busPos) < len(cur - busPos)) return true;
+        return false;
     }
     void tickWalkers(float dt) {
         walkerTime += dt;
-        for (auto& w : walkers) {
-            // Deterministic wander: layered sine headings, no RNG, so runs
-            // replay exactly and the world stays reproducible.
+        const Vec3 ambPos{ambX, 0.0f, -1.4f};
+        const Vec3 busPos{-1.4f, 0.0f, busZ};
+        for (size_t i = 0; i < walkers.size(); ++i) {
+            auto& w = walkers[i];
+            // Active mutual separation if encroached by another walker or vehicle
+            for (size_t j = 0; j < walkers.size(); ++j) {
+                if (i == j) continue;
+                const Vec3 diff = w.pos - walkers[j].pos;
+                const float d = len(diff);
+                if (d > 1e-4f && d < 0.90f) {
+                    const Vec3 pushed = w.pos + (diff * ((0.92f - d) / d));
+                    if (!collides(pushed)) w.pos = pushed;
+                }
+            }
+            auto pushOutOfVehicle = [&](Vec3 vp, float hx, float hz) {
+                const float dx = w.pos.x - vp.x, dz = w.pos.z - vp.z;
+                if (std::fabs(dx) < hx && std::fabs(dz) < hz) {
+                    Vec3 pushed = w.pos;
+                    if (hx - std::fabs(dx) < hz - std::fabs(dz))
+                        pushed.x = vp.x + (dx >= 0.0f ? hx + 0.15f : -(hx + 0.15f));
+                    else
+                        pushed.z = vp.z + (dz >= 0.0f ? hz + 0.15f : -(hz + 0.15f));
+                    if (!collides(pushed)) w.pos = pushed;
+                }
+            };
+            for (const auto& v : traffic) {
+                if (v.orbitR > 0.0f) continue;
+                pushOutOfVehicle(v.pos, (v.axis == 'x') ? 2.45f : 1.25f, (v.axis == 'z') ? 2.45f : 1.25f);
+            }
+            pushOutOfVehicle(ambPos, 2.45f, 1.30f);
+            pushOutOfVehicle(busPos, 1.40f, 3.05f);
+            pushOutOfVehicle(vehiclePos, 1.30f, 2.25f);
+
             w.heading += 0.7f * std::sin(walkerTime * 0.6f + w.phase) * dt
                        + 0.4f * std::sin(walkerTime * 0.23f + w.phase * 2.1f) * dt;
             const Vec3 next = w.pos + Vec3{std::sin(w.heading) * w.speed * dt, 0,
                                            std::cos(w.heading) * w.speed * dt};
-            if (collides(next) || std::fabs(next.x) > worldSize * 0.5f - 1.0f ||
+            if (pedBlockedByBarrier(next, w.pos, i) ||
+                std::fabs(next.x) > worldSize * 0.5f - 1.0f ||
                 std::fabs(next.z) > worldSize * 0.5f - 1.0f)
-                w.heading += 1.7f;
+                w.heading += 1.25f;
             else
                 w.pos = next;
         }
     }
-    // re3 CVehicle lanes: ping-pong along fixed axes, heli orbits overhead.
-    // Time-based only (no RNG) so every run replays identically.
+    // re3 CVehicle lanes with mutual vehicle-to-vehicle, intersection & pedestrian barriers.
     void tickTraffic(float dt) {
         trafficTime += dt;
-        for (auto& v : traffic) {
+        struct GroundBox { Vec3 pos; float hx, hz; char axis; };
+        auto getBoxes = [&](int skipIdx) {
+            std::vector<GroundBox> boxes;
+            for (size_t j = 0; j < traffic.size(); ++j) {
+                if ((int)j == skipIdx || traffic[j].orbitR > 0.0f) continue;
+                const auto& o = traffic[j];
+                boxes.push_back({o.pos, (o.axis == 'x') ? 2.1f : 0.95f, (o.axis == 'z') ? 2.1f : 0.95f, o.axis});
+            }
+            if (skipIdx != 100) boxes.push_back({Vec3{ambX, 0.0f, -1.4f}, 2.1f, 0.95f, 'x'});
+            if (skipIdx != 101) boxes.push_back({Vec3{-1.4f, 0.0f, busZ}, 0.95f, 2.55f, 'z'});
+            return boxes;
+        };
+        auto blockedByPedOrCross = [&](Vec3 curP, Vec3 nextP, float hx, float hz, char axis, int selfCode, bool& shouldRebound) {
+            shouldRebound = false;
+            for (const auto& b : getBoxes(selfCode)) {
+                const float curDx  = std::fabs(curP.x - b.pos.x),  curDz  = std::fabs(curP.z - b.pos.z);
+                const float nextDx = std::fabs(nextP.x - b.pos.x), nextDz = std::fabs(nextP.z - b.pos.z);
+                if (nextDx < (hx + b.hx + 0.35f) && nextDz < (hz + b.hz + 0.35f)) {
+                    const float curDist = curDx + curDz, nextDist = nextDx + nextDz;
+                    if (nextDist < curDist) {
+                        if (b.axis == axis) shouldRebound = true;
+                        return true;
+                    }
+                }
+            }
+            for (const auto& w : walkers) {
+                if (std::fabs(nextP.x - w.pos.x) < (hx + 0.55f) && std::fabs(nextP.z - w.pos.z) < (hz + 0.55f) &&
+                    len(nextP - w.pos) < len(curP - w.pos)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        for (size_t i = 0; i < traffic.size(); ++i) {
+            auto& v = traffic[i];
             if (v.orbitR > 0.0f) {
                 v.orbitA += v.speed * dt;
                 v.pos = {std::cos(v.orbitA) * v.orbitR, v.orbitY, std::sin(v.orbitA) * v.orbitR};
-                v.heading = -v.orbitA; // tangent {-sin A, 0, cos A} = {sin h, 0, cos h}
+                v.heading = -v.orbitA;
                 continue;
             }
             float& along = v.axis == 'x' ? v.pos.x : v.pos.z;
-            along += v.dir * v.speed * dt;
-            if (along >= v.max) { along = v.max; v.dir = -1; }
-            if (along <= v.min) { along = v.min; v.dir = 1; }
+            const float nextAlong = along + v.dir * v.speed * dt;
+            const Vec3 nextPos = v.axis == 'x' ? Vec3{nextAlong, v.pos.y, v.pos.z} : Vec3{v.pos.x, v.pos.y, nextAlong};
+            const float hx = (v.axis == 'x') ? 2.1f : 0.95f;
+            const float hz = (v.axis == 'z') ? 2.1f : 0.95f;
+            bool rebound = false;
+            const bool blocked = blockedByPedOrCross(v.pos, nextPos, hx, hz, v.axis, (int)i, rebound);
+            if (rebound) {
+                v.dir = -v.dir;
+            } else if (!blocked) {
+                along = nextAlong;
+                if (along >= v.max) { along = v.max; v.dir = -1; }
+                if (along <= v.min) { along = v.min; v.dir = 1; }
+            }
             v.heading = v.axis == 'x'
                 ? (v.dir > 0 ? 1.5707963f : 4.7123890f)
                 : (v.dir > 0 ? 0.0f : 3.14159265f);
+        }
+        // Step Ambulance (z = -1.4f, axis = 'x') with full mutual barriers
+        {
+            const Vec3 curAmb{ambX, 0.0f, -1.4f};
+            const float nextAmbX = ambX + ambDir * 2.9f * dt;
+            const Vec3 nextAmb{nextAmbX, 0.0f, -1.4f};
+            bool rebound = false;
+            const bool blocked = blockedByPedOrCross(curAmb, nextAmb, 2.1f, 0.95f, 'x', 100, rebound);
+            if (rebound) ambDir = -ambDir;
+            else if (!blocked) {
+                ambX = nextAmbX;
+                if (ambX >= 28.0f) { ambX = 28.0f; ambDir = -1.0f; }
+                if (ambX <= -28.0f) { ambX = -28.0f; ambDir = 1.0f; }
+            }
+        }
+        // Step 6-Wheel City Bus (x = -1.4f, axis = 'z') with full mutual barriers
+        {
+            const Vec3 curBus{-1.4f, 0.0f, busZ};
+            const float nextBusZ = busZ + busDir * 2.2f * dt;
+            const Vec3 nextBus{-1.4f, 0.0f, nextBusZ};
+            bool rebound = false;
+            const bool blocked = blockedByPedOrCross(curBus, nextBus, 0.95f, 2.55f, 'z', 101, rebound);
+            if (rebound) busDir = -busDir;
+            else if (!blocked) {
+                busZ = nextBusZ;
+                if (busZ >= 28.0f) { busZ = 28.0f; busDir = -1.0f; }
+                if (busZ <= -28.0f) { busZ = -28.0f; busDir = 1.0f; }
+            }
         }
     }
     // re3 CObject pickups: gentle bob, deterministic phase per slot.

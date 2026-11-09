@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (renderer): 38 modules, 1267 schemas, 51 enums (2dEffect.zpp, Antennas.zpp, Clouds.zpp, Console.zpp, Coronas.zpp, Credits.zpp, CutsceneShadow.zpp, Draw.zpp) ──
     static constexpr int zpp_renderer_modules() { return zpp_renderer_spec::kZppModuleCount; }
     static constexpr int zpp_renderer_schemas() { return zpp_renderer_spec::kZppSchemaCount; }
@@ -256,6 +257,32 @@
                     shaded.b = (uint8_t)std::min(255, (int)shaded.b + (int)(specAddB * invFog));
                     shaded.g = (uint8_t)std::min(255, (int)shaded.g + (int)(specAddG * invFog));
                     shaded.r = (uint8_t)std::min(255, (int)shaded.r + (int)(specAddR * invFog));
+                }
+                // LW54: Smooth per-pixel alpha-blend obfuscation rectification when an
+                // obstacle or prop passes between the 3rd-person camera and the avatar/sightline
+                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 4.25f) {
+                    const uint16_t prevId = framebuffer.objectId[index];
+                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
+                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
+                    const float r2 = cx * cx + cy * cy;
+                    if (prevId == ObjectAvatar || r2 < 1.0f) {
+                        const float u = std::clamp(r2, 0.0f, 1.0f);
+                        const float alpha = (prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u)));
+                        const uint32_t bg = framebuffer.colour[index];
+                        const uint8_t bgB = (uint8_t)(bg & 0xFFu);
+                        const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);
+                        const uint8_t bgR = (uint8_t)((bg >> 16) & 0xFFu);
+                        shaded.b = (uint8_t)(shaded.b * alpha + bgB * (1.0f - alpha));
+                        shaded.g = (uint8_t)(shaded.g * alpha + bgG * (1.0f - alpha));
+                        shaded.r = (uint8_t)(shaded.r * alpha + bgR * (1.0f - alpha));
+                        framebuffer.colour[index] = Surface::pack(shaded);
+                        if (prevId != ObjectAvatar) {
+                            framebuffer.depth[index] = depth;
+                            framebuffer.objectId[index] = oid;
+                        }
+                        wrote = true;
+                        continue;
+                    }
                 }
                 framebuffer.depth[index] = depth;
                 framebuffer.objectId[index] = oid;

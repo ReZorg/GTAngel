@@ -722,8 +722,7 @@ public:
         buildMoon();
         buildGround(world);
         buildRoads(world);
-        buildPillars(world);
-        buildBuildings(world);
+        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
         buildGoal(world);
         buildNpc(world);
         buildQuestShard(world);
@@ -731,8 +730,9 @@ public:
         buildWalkers(world);
         buildTraffic(world);
         buildPickups(world);
+        buildPillars(world);
+        buildBuildings(world);
         buildProps(world);
-        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
 
         metrics.trianglesSubmitted = (int)triangles_.size();
         metrics.trianglesRasterized = 0;

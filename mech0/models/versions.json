@@ -1,0 +1,354 @@
+{
+  "versions": [
+    {
+      "version": 1,
+      "timestamp": "2024-11-29T15:14:03.282Z",
+      "metrics": {
+        "averageLoss": 1.3154492355953074,
+        "accuracy": 0,
+        "totalSamples": 5
+      },
+      "config": {
+        "embeddingDim": 100,
+        "epochs": 10,
+        "batchSize": 32,
+        "learningRate": 0.01
+      },
+      "modelFile": "model_v1.json"
+    },
+    {
+      "version": 2,
+      "timestamp": "2024-11-29T15:15:43.417Z",
+      "metrics": {
+        "accuracy": 0.2,
+        "averageLoss": 1.1975567831920102,
+        "totalSamples": 5,
+        "labelMetrics": {
+          "farewell": {
+            "precision": 0,
+            "recall": 0,
+            "f1": 0
+          },
+          "greeting": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5
+          },
+          "question": {
+            "precision": 0,
+            "recall": 0,
+            "f1": 0
+          }
+        }
+      },
+      "config": {
+        "embeddingDim": 100,
+        "epochs": 10,
+        "batchSize": 32,
+        "learningRate": 0.01
+      },
+      "modelFile": "model_v2.json"
+    },
+    {
+      "version": 3,
+      "timestamp": "2024-11-29T15:40:04.280Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {
+        "embeddingDim": 100
+      },
+      "modelFile": "model_v3.json"
+    },
+    {
+      "version": 4,
+      "timestamp": "2024-11-29T15:40:04.301Z",
+      "metrics": {
+        "accuracy": 0.7
+      },
+      "config": {},
+      "modelFile": "model_v4.json"
+    },
+    {
+      "version": 5,
+      "timestamp": "2024-11-29T15:40:04.304Z",
+      "metrics": {
+        "accuracy": 0.8
+      },
+      "config": {},
+      "modelFile": "model_v5.json"
+    },
+    {
+      "version": 6,
+      "timestamp": "2024-11-29T15:40:04.332Z",
+      "metrics": {
+        "accuracy": 0.7,
+        "averageLoss": 0.3
+      },
+      "config": {},
+      "modelFile": "model_v6.json"
+    },
+    {
+      "version": 7,
+      "timestamp": "2024-11-29T15:40:04.334Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {},
+      "modelFile": "model_v7.json"
+    },
+    {
+      "version": 8,
+      "timestamp": "2025-09-27T14:35:44.689Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {
+        "embeddingDim": 100
+      },
+      "modelFile": "model_v8.json"
+    },
+    {
+      "version": 9,
+      "timestamp": "2025-09-27T14:35:44.697Z",
+      "metrics": {
+        "accuracy": 0.7
+      },
+      "config": {},
+      "modelFile": "model_v9.json"
+    },
+    {
+      "version": 10,
+      "timestamp": "2025-09-27T14:35:44.698Z",
+      "metrics": {
+        "accuracy": 0.8
+      },
+      "config": {},
+      "modelFile": "model_v10.json"
+    },
+    {
+      "version": 11,
+      "timestamp": "2025-09-27T14:35:44.713Z",
+      "metrics": {
+        "accuracy": 0.7,
+        "averageLoss": 0.3
+      },
+      "config": {},
+      "modelFile": "model_v11.json"
+    },
+    {
+      "version": 12,
+      "timestamp": "2025-09-27T14:35:44.714Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {},
+      "modelFile": "model_v12.json"
+    },
+    {
+      "version": 13,
+      "timestamp": "2025-09-12T08:48:03.370Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {
+        "embeddingDim": 100
+      },
+      "modelFile": "model_v13.json"
+    },
+    {
+      "version": 14,
+      "timestamp": "2025-09-12T08:48:03.381Z",
+      "metrics": {
+        "accuracy": 0.7
+      },
+      "config": {},
+      "modelFile": "model_v14.json"
+    },
+    {
+      "version": 15,
+      "timestamp": "2025-09-12T08:48:03.382Z",
+      "metrics": {
+        "accuracy": 0.8
+      },
+      "config": {},
+      "modelFile": "model_v15.json"
+    },
+    {
+      "version": 16,
+      "timestamp": "2025-09-12T08:48:03.401Z",
+      "metrics": {
+        "accuracy": 0.7,
+        "averageLoss": 0.3
+      },
+      "config": {},
+      "modelFile": "model_v16.json"
+    },
+    {
+      "version": 17,
+      "timestamp": "2025-09-12T08:48:03.402Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {},
+      "modelFile": "model_v17.json"
+    },
+    {
+      "version": 18,
+      "timestamp": "2026-08-03T22:36:27.123Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {
+        "embeddingDim": 100
+      },
+      "modelFile": "model_v18.json"
+    },
+    {
+      "version": 19,
+      "timestamp": "2026-08-03T22:36:27.131Z",
+      "metrics": {
+        "accuracy": 0.7
+      },
+      "config": {},
+      "modelFile": "model_v19.json"
+    },
+    {
+      "version": 20,
+      "timestamp": "2026-08-03T22:36:27.132Z",
+      "metrics": {
+        "accuracy": 0.8
+      },
+      "config": {},
+      "modelFile": "model_v20.json"
+    },
+    {
+      "version": 21,
+      "timestamp": "2026-08-03T22:36:27.145Z",
+      "metrics": {
+        "accuracy": 0.7,
+        "averageLoss": 0.3
+      },
+      "config": {},
+      "modelFile": "model_v21.json"
+    },
+    {
+      "version": 22,
+      "timestamp": "2026-08-03T22:36:27.145Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {},
+      "modelFile": "model_v22.json"
+    },
+    {
+      "version": 23,
+      "timestamp": "2026-08-03T22:36:58.805Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {
+        "embeddingDim": 100
+      },
+      "modelFile": "model_v23.json"
+    },
+    {
+      "version": 24,
+      "timestamp": "2026-08-03T22:36:58.814Z",
+      "metrics": {
+        "accuracy": 0.7
+      },
+      "config": {},
+      "modelFile": "model_v24.json"
+    },
+    {
+      "version": 25,
+      "timestamp": "2026-08-03T22:36:58.814Z",
+      "metrics": {
+        "accuracy": 0.8
+      },
+      "config": {},
+      "modelFile": "model_v25.json"
+    },
+    {
+      "version": 26,
+      "timestamp": "2026-08-03T22:36:58.827Z",
+      "metrics": {
+        "accuracy": 0.7,
+        "averageLoss": 0.3
+      },
+      "config": {},
+      "modelFile": "model_v26.json"
+    },
+    {
+      "version": 27,
+      "timestamp": "2026-08-03T22:36:58.828Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {},
+      "modelFile": "model_v27.json"
+    },
+    {
+      "version": 28,
+      "timestamp": "2026-08-03T22:37:27.559Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {
+        "embeddingDim": 100
+      },
+      "modelFile": "model_v28.json"
+    },
+    {
+      "version": 29,
+      "timestamp": "2026-08-03T22:37:27.567Z",
+      "metrics": {
+        "accuracy": 0.7
+      },
+      "config": {},
+      "modelFile": "model_v29.json"
+    },
+    {
+      "version": 30,
+      "timestamp": "2026-08-03T22:37:27.567Z",
+      "metrics": {
+        "accuracy": 0.8
+      },
+      "config": {},
+      "modelFile": "model_v30.json"
+    },
+    {
+      "version": 31,
+      "timestamp": "2026-08-03T22:37:27.580Z",
+      "metrics": {
+        "accuracy": 0.7,
+        "averageLoss": 0.3
+      },
+      "config": {},
+      "modelFile": "model_v31.json"
+    },
+    {
+      "version": 32,
+      "timestamp": "2026-08-03T22:37:27.581Z",
+      "metrics": {
+        "accuracy": 0.8,
+        "averageLoss": 0.2
+      },
+      "config": {},
+      "modelFile": "model_v32.json"
+    }
+  ],
+  "currentVersion": 32
+}
