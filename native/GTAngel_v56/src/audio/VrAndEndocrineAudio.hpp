@@ -1323,7 +1323,7 @@ public:
     std::vector<double> readoutWeights() const { return W_out_; }
     void setReadoutWeights(const std::vector<double>& w) { if ((int)w.size() == outDim_ * resDim_) W_out_ = w; }
     std::vector<double> rlsCovariance() const { return P_; }
-    void setRlsCovariance(const std::vector<double>& p) { if ((int)p.size() == resDim_ * resDim_) P_ = p; }
+    void setRlsCovariance(const std::vector<double>& p) { if (p.empty() || (int)p.size() == resDim_ * resDim_) P_ = p; }
     void setReservoirState(const std::vector<double>& s) { if ((int)s.size() == resDim_) state_ = s; }
     void applyIntrinsicPlasticity(double lr = 0.01) {
         double mean = 0; for (double x : state_) mean += x;

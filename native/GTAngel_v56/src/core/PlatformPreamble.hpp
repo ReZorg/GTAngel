@@ -8,6 +8,8 @@
 //              & /echo-introspect[/cogverse-evolution-accelerator])
 
 #include <windows.h>
+#include <climits>
+#include "skill_curriculum.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

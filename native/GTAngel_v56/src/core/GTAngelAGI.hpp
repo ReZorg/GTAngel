@@ -129,11 +129,14 @@ struct GTAngelAGI {
         return std::filesystem::path(std::string(path,n)).parent_path().string();
     }
     void initializeLearning() {
-        localLearningDirectory=executableDirectory();
+        localLearningDirectory=learningSessionRoot();
+        std::filesystem::create_directories(localLearningDirectory+"/models");
+        std::filesystem::create_directories(localLearningDirectory+"/datasets");
+        checkpointTimer.attempted(GetTickCount64(),true);
         trajectoryRecorder.stop(); trajectoryRecording=false;
         trajectoryRecorderReady=trajectoryRecorder.selfCheck(localLearningDirectory+"/datasets");
         previousControllerTarget=v16motor::ControllerTarget{};
-        neuralPolicyLoaded=neuralPolicy.load(localLearningDirectory+"/models/gtangel_visuomotor.gvmw");
+        neuralPolicyLoaded=neuralPolicy.load(executableDirectory()+"/models/gtangel_visuomotor.gvmw");
         if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/native/GTAngel_v56/models/gtangel_visuomotor.gvmw");
         neuralShadowEnabled=true;
         // v27 GNN motor actuator: adaptive online learning, never locked.
@@ -146,16 +149,19 @@ struct GTAngelAGI {
         motorMovedFrames=0; motorContactFrames=0; motorRejectedFrames=0; motorTravelMetres=0;
         lastGnnGate="not evaluated";
         neuralTrainingSteps=0; neuralTrainingUpdates=0; lastNeuralTrainLoss=-1.0f;
+        const bool existingMotor=gnnMotorReady;
         gnnMotorReady=gnnMotor.create();
-        if (gnnMotorReady) {
+        if (gnnMotorReady && !existingMotor) {
             // Prefer the trained network; a fresh one trains from scratch.
-            if (!gnnMotor.load(localLearningDirectory+"/models/gtangel_motor_gnn.net"))
+            if (!gnnMotor.load(executableDirectory()+"/models/gtangel_motor_gnn.net"))
                 addLog("GNN motor: fresh network, training starts now");
             else
                 addLog("GNN motor: trained network restored, training continues");
         } else {
-            addLog("GNN motor: network creation failed, NN actuation degraded");
+            if(!gnnMotorReady) addLog("GNN motor: network creation failed, NN actuation degraded");
         }
+        neuralTrainingSteps=gnnMotor.trainingSteps(); neuralTrainingUpdates=gnnMotor.trainingUpdates();
+        lastNeuralTrainLoss=gnnMotor.lastLoss();
         addLog(neuralPolicyLoaded ? "v27 NN initialized: LEARNING inference active when running" :
             std::string("v27 NN missing: ")+neuralPolicy.error());
         addLog("N: local Q learning / M: NN learning / C: capture / F4: learning monitor");
@@ -404,6 +410,16 @@ struct GTAngelAGI {
             ck(place({0,0,-.4f},3.14159265f),"pedestrian overlap fixture restore");
             drive(8);
             ck(motor.body().position.z<-.9f,"existing walker overlap permits escape");
+            ck(place({10,0,0},0),"running fixture restore");
+            ctx.visualDigest=7; ctx.worldVersion=motor.niche().worldVersion;
+            const v20cns::DteLocalMotorSeal walkSeal(ctx.frame,7,ctx.nowMs,motor.body().sequence,
+                ctx.worldVersion,.7f,0,false);
+            ck(motor.motorDte(walkSeal,.7f,0,.1f,0,ctx,fixture)==v20cns::SpinalReflex::Verdict::Stale,
+               "walking seal cannot authorize running demand");
+            const v20cns::DteLocalMotorSeal runSeal(ctx.frame,7,ctx.nowMs,motor.body().sequence,
+                ctx.worldVersion,.7f,0,true);
+            ck(motor.motorDte(runSeal,.7f,0,.1f,0,ctx,fixture)==v20cns::SpinalReflex::Verdict::Accepted,
+               "bounded local running seal moves through normal clearance");
         }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
@@ -499,13 +515,25 @@ struct GTAngelAGI {
             const bool restored = loadLearningState();
             double qL1After = 0; for (const auto& a : navTrainer.Q) for (const auto& b : a) for (const auto& c : b) for (float v : c) qL1After += std::fabs(v);
             ck(restored, "learning state file round-trips through disk");
+            esn=dte::EchoStateNetwork(32,96,8);
+            ck(loadLearningState()&&esn.rlsCovariance().size()==96u*96u,
+               "fresh reservoir restores lazily allocated RLS covariance");
             ck(episodic.episodes.size() == epsBefore && epsBefore > 0, "episodic memory persists across restart");
             ck(episodic.concepts.size() == cptsBefore && cptsBefore > 0, "semantic concepts persist across restart");
             ck(navLearning.updates == qBefore && qBefore > 0, "Q visitation counts persist across restart");
             ck(episodic.consolidations == consBefore && consBefore > 0, "consolidation history persists across restart");
             ck(esn.rlsUpdates == rlsBefore && rlsBefore > 0, "ESN readout training persists across restart");
             ck(std::fabs(qL1After - qL1Before) < 1e-3 * std::max(1.0, qL1Before), "Q weights restored bit-faithfully");
-            ck(epsWiped == epsBefore, "wipe actually cleared memory before reload");
+        ck(epsWiped == epsBefore, "wipe actually cleared memory before reload");
+            const auto originalMotor=gnnMotor.encode();
+            const auto originalState=encodeLearningState();
+            ck(!restoreLearningState(originalState.substr(0,originalState.size()/2)) &&
+               encodeLearningState()==originalState,"truncated learning payload does not partially mutate runtime");
+            ck(saveLearningState(),"second checkpoint saved");
+            const auto badId=checkpointId;
+            gtlearn::writeFile(std::filesystem::path(localLearningDirectory)/"learning/checkpoints"/badId/"motor.bin","broken");
+            ck(loadLearningState()&&checkpointId!=badId&&gnnMotor.encode()==originalMotor,
+               "runtime recovers prior complete checkpoint when latest is corrupt");
         }
         {
             // GNN motor training + persistence: the network must actually
@@ -724,7 +752,7 @@ struct GTAngelAGI {
             }
         }
         {
-            std::ofstream report(localLearningDirectory+"/V27_RUNTIME_VERIFICATION.json");
+            std::ofstream report(executableDirectory()+"/V27_RUNTIME_VERIFICATION.json");
             report<<"{\"checks\":"<<checks<<",\"passed\":"<<(checks-failed)
                 <<",\"neural_frames\":"<<neuralFrames<<",\"q_updates\":"<<navLearning.updates
                 <<",\"q_l1\":"<<magnitude(navTrainer)<<",\"dte_srd_accepted\":"<<dteNavigation.accepted
@@ -737,7 +765,7 @@ struct GTAngelAGI {
                 <<",\"nn_train_loss\":"<<lastNeuralTrainLoss
                 <<",\"nn_accepted\":"<<neuralAccepted
                 <<",\"no_keyboard_dte_test\":true,\"gui_acceptance\":false,\"in_process\":true}\n";
-            std::ofstream txt(localLearningDirectory+"/V27_SELFTEST.txt");
+            std::ofstream txt(executableDirectory()+"/V27_SELFTEST.txt");
             txt<<"GTAngel v27 in-process self-test\n"
                 <<"checks: "<<(checks-failed)<<"/"<<checks<<" passed\n"
                 <<"neural_frames: "<<neuralFrames<<"\nq_updates: "<<navLearning.updates<<"\n"
@@ -788,141 +816,316 @@ struct GTAngelAGI {
         f[18]=std::clamp(proprio.values[7],-1.0f,1.0f);  // prev forward
         f[19]=1.0f;                                      // bias
     }
-    // v27 persistence: binary snapshot of all learned state, written to the
-    // local learning directory so progress survives process restarts.
-    std::string learningStatePath() const { return localLearningDirectory + "/models/v27_learning_state.bin"; }
-    void saveLearningState() {
-        std::ofstream f(learningStatePath(), std::ios::binary | std::ios::trunc);
-        if (!f.is_open()) { addLog("learning state save failed: cannot open file"); return; }
-        const char magic[4] = {'V','2','7','L'};
-        f.write(magic, 4);
-        auto wU64 = [&](uint64_t v){ f.write((const char*)&v, 8); };
-        auto wI = [&](int v){ f.write((const char*)&v, 4); };
-        auto wF = [&](float v){ f.write((const char*)&v, 4); };
-        auto wD = [&](double v){ f.write((const char*)&v, 8); };
-        wU64(1); // format version
-        // NavTrainer Q-table + difficulty metrics.
-        for (const auto& a : navTrainer.Q) for (const auto& b : a) for (const auto& c : b) for (float v : c) wF(v);
-        wI(navTrainer.episodes); wI(navTrainer.successes); wI(navTrainer.collisions); wI(navTrainer.stepsTotal);
-        // Navigation observer visitation counts + counters.
-        for (const auto& a : navLearning.stateVisits) for (const auto& b : a) for (uint32_t v : b) f.write((const char*)&v, 4);
-        for (const auto& a : navLearning.actionVisits) for (const auto& b : a) for (const auto& c : b) for (uint32_t v : c) f.write((const char*)&v, 4);
-        wU64(navLearning.updates); wU64(navLearning.rejected); wU64(navLearning.collisions); wU64(navLearning.windows);
-        // DTE navigation counters.
-        wU64(dteNavigation.proposals); wU64(dteNavigation.learnedProposals);
-        wU64(dteNavigation.accepted); wU64(dteNavigation.contacts);
-        // Episodic memory: episodes + concepts + consolidation count.
-        wI((int)episodic.episodes.size());
-        for (const auto& e : episodic.episodes) {
-            wI((int)e.state.size()); for (double v : e.state) wD(v);
-            wF(e.meanContradiction); wF(e.reward); wU64(e.tick);
-            wF(e.strength); wF(e.activation); wI(e.accessCount); wF(e.valence);
-            wU64(e.lastAccessTick); f.write((const char*)&e.flashbulb, 1);
+// Canonical GTAngelAGI members, inlined by generate_v56.mjs.
+    gtskill::Curriculum curriculum;
+    gtskill::Selection selectedSkill;
+    gtlearn::Autosave checkpointTimer;
+    std::string checkpointId, checkpointStatus{"not saved"};
+    bool learningDirty{false};
+    bool evaluationMode{false};
+    bool evaluationUseGnn{true};
+    gtskill::Skill evaluationSkill{gtskill::Skill::Walk};
+    v27gnn::GneuralMotorPolicy gnnChampion;
+    gtskill::Curriculum championCurriculum;
+    bool gnnChampionReady{false};
+    void loadChampion(gtlearn::Store& store) {
+        gnnChampionReady=false;
+        const auto best=store.bestId();
+        if(best.empty()) return;
+        gtlearn::Snapshot snapshot; v27gnn::GneuralMotorPolicy motor; gtskill::Curriculum skills;
+        if(store.read(std::filesystem::path(executableDirectory())/"learning/checkpoints"/best,snapshot) &&
+           motor.decode(snapshot.payload[1]) && skills.decode(snapshot.payload[2]) &&
+           skills.readyFor(gtskill::Skill::Walk,motor.policyRevision())) {
+            gnnChampion.swap(motor); championCurriculum=std::move(skills); gnnChampionReady=true;
         }
-        wI((int)episodic.concepts.size());
-        for (const auto& c : episodic.concepts) {
-            wI((int)c.prototype.size()); for (double v : c.prototype) wD(v);
-            wF(c.variance); wI(c.instanceCount); wF(c.confidence);
+    }
+    static bool isolatedLearningRun() {
+        const std::string command=GetCommandLineA();
+        return command.find("--selftest")!=std::string::npos ||
+               command.find("--navdiag")!=std::string::npos ||
+               command.find("--evaluate-skills")!=std::string::npos;
+    }
+    static std::string learningSessionRoot() {
+        if(!isolatedLearningRun()) return executableDirectory();
+        return (std::filesystem::path(executableDirectory())/"../../build/learning-tests"/
+                std::to_string(GetCurrentProcessId())).lexically_normal().string();
+    }
+    std::string encodeLearningState() const {
+        gtlearn::Writer w; w.bytes="V27L"; w.put<uint64_t>(2);
+        for(const auto& a:navTrainer.Q) for(const auto& b:a) for(const auto& c:b)
+            for(float v:c) w.put(v);
+        w.put<int32_t>(navTrainer.episodes); w.put<int32_t>(navTrainer.successes);
+        w.put<int32_t>(navTrainer.collisions); w.put<int32_t>(navTrainer.stepsTotal);
+        for(const auto& a:navLearning.stateVisits) for(const auto& b:a) for(uint32_t v:b) w.put(v);
+        for(const auto& a:navLearning.actionVisits) for(const auto& b:a)
+            for(const auto& c:b) for(uint32_t v:c) w.put(v);
+        w.put(navLearning.updates); w.put(navLearning.rejected);
+        w.put(navLearning.collisions); w.put(navLearning.windows);
+        w.put(dteNavigation.proposals); w.put(dteNavigation.learnedProposals);
+        w.put(dteNavigation.accepted); w.put(dteNavigation.contacts);
+        const auto vector=[&](const std::vector<double>& values) {
+            w.put<int32_t>(static_cast<int32_t>(values.size()));
+            for(double v:values) w.put(v);
+        };
+        w.put<int32_t>(static_cast<int32_t>(episodic.episodes.size()));
+        for(const auto& e:episodic.episodes) {
+            vector(e.state); w.put<float>(e.meanContradiction); w.put<float>(e.reward); w.put<uint64_t>(e.tick);
+            w.put<float>(e.strength); w.put<float>(e.activation); w.put<int32_t>(e.accessCount);
+            w.put<float>(e.valence); w.put<uint64_t>(e.lastAccessTick); w.put<uint8_t>(e.flashbulb);
         }
-        wI(episodic.consolidations);
-        // ESN trained readout, RLS covariance, reservoir state, counters.
-        auto rw = esn.readoutWeights(); wI((int)rw.size()); for (double v : rw) wD(v);
-        auto rc = esn.rlsCovariance(); wI((int)rc.size()); for (double v : rc) wD(v);
-        auto rs = esn.state(); wI((int)rs.size()); for (double v : rs) wD(v);
-        wI(esn.rlsUpdates); wI(esn.plasticityUpdates);
-        // Social agents: trust/affinity/familiarity/grouping.
-        wI((int)groups.agents.size());
-        for (const auto& a : groups.agents) {
-            wI(a.id); wF(a.x); wF(a.y); wF(a.trust); wF(a.affinity); wF(a.familiarity);
-            wI(a.groupId); wF(a.cohesion);
+        w.put<int32_t>(static_cast<int32_t>(episodic.concepts.size()));
+        for(const auto& c:episodic.concepts) {
+            vector(c.prototype); w.put<float>(c.variance); w.put<int32_t>(c.instanceCount); w.put<float>(c.confidence);
         }
-        wI(groups.nextGroupId); wF(groups.avgCohesion);
-        // Global learning counters.
-        wU64(llmTrainingUpdates); wF(llmMetrics.accuracy); wF(llmMetrics.averageLoss);
-        wF(sensorimotor.totalReward); wI(sensorimotor.stepCount);
-        // GNN motor network + training counters (v27 NN persistence).
-        std::error_code ec;
-        std::filesystem::create_directories(localLearningDirectory+"/models", ec);
-        gnnMotor.save(localLearningDirectory+"/models/gtangel_motor_gnn.net");
-        wU64(neuralTrainingSteps); wU64(neuralTrainingUpdates); wF(lastNeuralTrainLoss);
-        f.flush();
-        addLog(f.good() ? "learning state saved (persistent progress)" : "learning state save I/O error");
+        w.put<int32_t>(episodic.consolidations);
+        vector(esn.readoutWeights()); vector(esn.rlsCovariance()); vector(esn.state());
+        w.put<int32_t>(esn.rlsUpdates); w.put<int32_t>(esn.plasticityUpdates);
+        w.put<int32_t>(static_cast<int32_t>(groups.agents.size()));
+        for(const auto& a:groups.agents) {
+            w.put<int32_t>(a.id); w.put<float>(a.x); w.put<float>(a.y);
+            w.put<float>(a.trust); w.put<float>(a.affinity); w.put<float>(a.familiarity);
+            w.put<int32_t>(a.groupId); w.put<float>(a.cohesion);
+        }
+        w.put<int32_t>(groups.nextGroupId); w.put<float>(groups.avgCohesion);
+        w.put<uint64_t>(llmTrainingUpdates); w.put<float>(llmMetrics.accuracy); w.put<float>(llmMetrics.averageLoss);
+        w.put<float>(sensorimotor.totalReward); w.put<int32_t>(sensorimotor.stepCount);
+        w.put<uint64_t>(gnnMotor.trainingSteps()); w.put<uint64_t>(gnnMotor.trainingUpdates()); w.put<float>(gnnMotor.lastLoss());
+        w.put<int32_t>(tickCount); w.put<int32_t>(gnnFrameCounter);
+        return w.bytes;
+    }
+    bool restoreLearningState(const std::string& bytes) {
+        try {
+            if(bytes.size()>gtlearn::MaxPayload||bytes.substr(0,4)!="V27L") return false;
+            gtlearn::Reader r{bytes,4}; const auto version=r.get<uint64_t>();
+            if(version!=1&&version!=2) return false;
+            // Parse into copies: any bad field leaves every live subsystem unchanged.
+            auto q=navTrainer; auto observer=navLearning; auto navigator=dteNavigation;
+            auto memory=episodic; auto reservoir=esn; auto social=groups;
+            for(auto& a:q.Q) for(auto& b:a) for(auto& c:b) for(float& v:c) v=r.get<float>();
+            auto count=[&](int maximum) {
+                const int n=r.get<int32_t>();
+                if(n<0||n>maximum) throw std::runtime_error("checkpoint count out of bounds");
+                return n;
+            };
+            q.episodes=count(INT_MAX); q.successes=count(INT_MAX);
+            q.collisions=count(INT_MAX); q.stepsTotal=count(INT_MAX);
+            for(auto& a:observer.stateVisits) for(auto& b:a) for(uint32_t& v:b) v=r.get<uint32_t>();
+            for(auto& a:observer.actionVisits) for(auto& b:a) for(auto& c:b)
+                for(uint32_t& v:c) v=r.get<uint32_t>();
+            observer.updates=r.get<uint64_t>(); observer.rejected=r.get<uint64_t>();
+            observer.collisions=r.get<uint64_t>(); observer.windows=r.get<uint64_t>();
+            navigator.proposals=r.get<uint64_t>(); navigator.learnedProposals=r.get<uint64_t>();
+            navigator.accepted=r.get<uint64_t>(); navigator.contacts=r.get<uint64_t>();
+            const auto vector=[&](int expected) {
+                const int n=count(16384);
+                if(expected>=0&&n!=expected) throw std::runtime_error("checkpoint dimension mismatch");
+                std::vector<double> result(n);
+                for(double& v:result) v=r.get<double>();
+                return result;
+            };
+            const int episodes=count(4096); memory.episodes.clear();
+            uint64_t memoryClock=0;
+            for(int i=0;i<episodes;++i) {
+                dte::EpisodicMemory::Episode e;
+                e.state=vector(reservoir.resDim()); e.meanContradiction=r.get<float>(); e.reward=r.get<float>();
+                e.tick=r.get<uint64_t>(); e.strength=r.get<float>(); e.activation=r.get<float>();
+                e.accessCount=count(INT_MAX); e.valence=r.get<float>(); e.lastAccessTick=r.get<uint64_t>();
+                memoryClock=std::max(memoryClock,std::max(static_cast<uint64_t>(e.tick),static_cast<uint64_t>(e.lastAccessTick)));
+                const auto flash=r.get<uint8_t>(); if(flash>1) return false;
+                e.flashbulb=flash!=0; memory.episodes.push_back(e);
+            }
+            const int concepts=count(4096); memory.concepts.clear();
+            for(int i=0;i<concepts;++i) {
+                dte::EpisodicMemory::SemanticConcept c;
+                c.prototype=vector(reservoir.resDim()); c.variance=r.get<float>();
+                c.instanceCount=count(INT_MAX); c.confidence=r.get<float>(); memory.concepts.push_back(c);
+            }
+            memory.consolidations=count(INT_MAX);
+            reservoir.setReadoutWeights(vector(static_cast<int>(reservoir.readoutWeights().size())));
+            // RLS allocates P lazily on the first training step. A fresh process
+            // has an empty P, but must accept the full matrix from a prior run.
+            auto covariance=vector(-1);
+            if(!covariance.empty() && covariance.size()!=static_cast<size_t>(reservoir.resDim()*reservoir.resDim()))
+                return false;
+            reservoir.setRlsCovariance(covariance);
+            reservoir.setReservoirState(vector(reservoir.resDim()));
+            reservoir.rlsUpdates=count(INT_MAX); reservoir.plasticityUpdates=count(INT_MAX);
+            const int agents=count(4096); social.agents.clear(); social.groups.clear();
+            for(int i=0;i<agents;++i) {
+                dte::Agent a; a.id=count(INT_MAX); a.x=r.get<float>(); a.y=r.get<float>();
+                a.trust=r.get<float>(); a.affinity=r.get<float>(); a.familiarity=r.get<float>();
+                a.groupId=r.get<int32_t>(); a.cohesion=r.get<float>(); social.agents.push_back(a);
+            }
+            social.nextGroupId=count(INT_MAX); social.avgCohesion=r.get<float>();
+            if(social.agents.empty()) social.init(20);
+            for(const auto& a:social.agents) if(a.groupId>=0) social.groups[a.groupId].push_back(a.id);
+            const auto mlUpdates=r.get<uint64_t>();
+            const float accuracy=r.get<float>(), loss=r.get<float>(), reward=r.get<float>();
+            const int smSteps=count(INT_MAX);
+            uint64_t steps=0,updates=0; float motorLoss=-1;
+            if(version==2 || r.cursor<bytes.size()) {
+                steps=r.get<uint64_t>(); updates=r.get<uint64_t>(); motorLoss=r.get<float>();
+            }
+            int clock=tickCount,phase=0;
+            if(version==2) { clock=count(INT_MAX); phase=count(INT_MAX); }
+            // Legacy files did not save the clock. Keep restored memories from
+            // being dated in the future relative to the restarted learner.
+            if(memoryClock>INT_MAX) return false;
+            clock=std::max(clock,static_cast<int>(memoryClock));
+            r.end();
+            navTrainer=std::move(q); navLearning=std::move(observer); dteNavigation=std::move(navigator);
+            episodic=std::move(memory); esn=std::move(reservoir); groups=std::move(social);
+            llmTrainingUpdates=mlUpdates; llmMetrics.accuracy=accuracy; llmMetrics.averageLoss=loss;
+            sensorimotor.totalReward=reward; sensorimotor.stepCount=smSteps;
+            neuralTrainingSteps=steps; neuralTrainingUpdates=updates; lastNeuralTrainLoss=motorLoss;
+            tickCount=clock; gnnFrameCounter=phase;
+            return true;
+        } catch(const std::exception& e) { checkpointStatus=e.what(); return false; }
+    }
+    bool saveLearningState() {
+        const auto now=static_cast<uint64_t>(GetTickCount64());
+        try {
+            gtlearn::Store store(std::filesystem::path(localLearningDirectory)/"learning/checkpoints");
+            const std::array<std::string,3> payload{encodeLearningState(),gnnMotor.encode(),curriculum.encode()};
+            v27gnn::GneuralMotorPolicy checkedMotor; gtskill::Curriculum checkedSkills;
+            if(!checkedMotor.decode(payload[1])||!checkedSkills.decode(payload[2])||
+               !restoreLearningState(payload[0]))
+                throw std::runtime_error("live learning state failed checkpoint validation");
+            const bool saved=store.save(payload,checkpointId);
+            checkpointTimer.attempted(now,saved);
+            checkpointStatus=saved?"saved":store.error;
+            if(saved) learningDirty=false;
+            addLog(saved?"learning checkpoint saved: "+checkpointId:"checkpoint failed: "+checkpointStatus);
+            return saved;
+        } catch(const std::exception& e) {
+            checkpointTimer.attempted(now,false); checkpointStatus=e.what();
+            addLog("checkpoint failed: "+checkpointStatus); return false;
+        }
     }
     bool loadLearningState() {
-        std::ifstream f(learningStatePath(), std::ios::binary);
-        if (!f.is_open()) return false;
-        char magic[4]; f.read(magic, 4);
-        if (!f.good() || magic[0]!='V'||magic[1]!='2'||magic[2]!='7'||magic[3]!='L') { addLog("learning state rejected: bad magic"); return false; }
-        auto rU64 = [&]() { uint64_t v; f.read((char*)&v, 8); return v; };
-        auto rI = [&]() { int v; f.read((char*)&v, 4); return v; };
-        auto rF = [&]() { float v; f.read((char*)&v, 4); return v; };
-        auto rD = [&]() { double v; f.read((char*)&v, 8); return v; };
-        uint64_t ver = rU64(); if (ver != 1) { addLog("learning state rejected: version"); return false; }
-        for (auto& a : navTrainer.Q) for (auto& b : a) for (auto& c : b) for (float& v : c) v = rF();
-        navTrainer.episodes = rI(); navTrainer.successes = rI(); navTrainer.collisions = rI(); navTrainer.stepsTotal = rI();
-        for (auto& a : navLearning.stateVisits) for (auto& b : a) for (uint32_t& v : b) f.read((char*)&v, 4);
-        for (auto& a : navLearning.actionVisits) for (auto& b : a) for (auto& c : b) for (uint32_t& v : c) f.read((char*)&v, 4);
-        navLearning.updates = rU64(); navLearning.rejected = rU64(); navLearning.collisions = rU64(); navLearning.windows = rU64();
-        dteNavigation.proposals = rU64(); dteNavigation.learnedProposals = rU64();
-        dteNavigation.accepted = rU64(); dteNavigation.contacts = rU64();
-        int n = rI();
-        if (n < 0 || n > 4096) { addLog("learning state rejected: episode count"); return false; }
-        episodic.episodes.clear();
-        for (int i = 0; i < n; i++) {
-            dte::EpisodicMemory::Episode e; int sn = rI();
-            if (sn < 0 || sn > 4096) { addLog("learning state rejected: episode dim"); return false; }
-            e.state.resize(sn); for (double& v : e.state) v = rD();
-            e.meanContradiction = rF(); e.reward = rF(); e.tick = rU64();
-            e.strength = rF(); e.activation = rF(); e.accessCount = rI(); e.valence = rF();
-            e.lastAccessTick = rU64(); f.read((char*)&e.flashbulb, 1);
-            episodic.episodes.push_back(e);
-        }
-        int cn = rI();
-        if (cn < 0 || cn > 4096) { addLog("learning state rejected: concept count"); return false; }
-        episodic.concepts.clear();
-        for (int i = 0; i < cn; i++) {
-            dte::EpisodicMemory::SemanticConcept c; int pn = rI();
-            if (pn < 0 || pn > 4096) { addLog("learning state rejected: concept dim"); return false; }
-            c.prototype.resize(pn); for (double& v : c.prototype) v = rD();
-            c.variance = rF(); c.instanceCount = rI(); c.confidence = rF();
-            episodic.concepts.push_back(c);
-        }
-        episodic.consolidations = rI();
-        int rn = rI(); std::vector<double> rw(rn > 0 && rn <= 1048576 ? rn : 0);
-        for (double& v : rw) v = rD(); esn.setReadoutWeights(rw);
-        int pn2 = rI(); std::vector<double> rc(pn2 > 0 && pn2 <= 1048576 ? pn2 : 0);
-        for (double& v : rc) v = rD(); esn.setRlsCovariance(rc);
-        int sn2 = rI(); std::vector<double> rs(sn2 > 0 && sn2 <= 1048576 ? sn2 : 0);
-        for (double& v : rs) v = rD(); esn.setReservoirState(rs);
-        esn.rlsUpdates = rI(); esn.plasticityUpdates = rI();
-        int an = rI();
-        if (an < 0 || an > 4096) { addLog("learning state rejected: agent count"); return false; }
-        groups.agents.clear(); groups.groups.clear();
-        for (int i = 0; i < an; i++) {
-            dte::Agent a; a.id = rI(); a.x = rF(); a.y = rF(); a.trust = rF();
-            a.affinity = rF(); a.familiarity = rF(); a.groupId = rI(); a.cohesion = rF();
-            groups.agents.push_back(a);
-        }
-        groups.nextGroupId = rI(); groups.avgCohesion = rF();
-        if (groups.agents.empty()) groups.init(20);
-        for (const auto& a : groups.agents) if (a.groupId >= 0) groups.groups[a.groupId].push_back(a.id);
-        llmTrainingUpdates = rU64(); llmMetrics.accuracy = rF(); llmMetrics.averageLoss = rF();
-        sensorimotor.totalReward = rF(); sensorimotor.stepCount = rI();
-        // GNN motor tail (v27): tolerate older state files without it.
-        {
-            const std::streampos tailPos = f.tellg();
-            neuralTrainingSteps = rU64(); neuralTrainingUpdates = rU64(); lastNeuralTrainLoss = rF();
-            if (!f.good()) { // older file: rewind, keep the loaded network
-                f.clear(); f.seekg(tailPos);
-                neuralTrainingSteps = gnnMotor.trainingSteps();
-                neuralTrainingUpdates = gnnMotor.trainingUpdates();
-                lastNeuralTrainLoss = gnnMotor.lastLoss();
+        try {
+            gtlearn::Store store(std::filesystem::path(localLearningDirectory)/"learning/checkpoints");
+            const auto candidates=store.candidates();
+            for(size_t i=0;i<candidates.size();++i) {
+                gtlearn::Snapshot snapshot; v27gnn::GneuralMotorPolicy motor;
+                gtskill::Curriculum skills;
+                if(!store.read(candidates[i],snapshot) || !motor.decode(snapshot.payload[1]) ||
+                   !skills.decode(snapshot.payload[2]) || !restoreLearningState(snapshot.payload[0])) continue;
+                gnnMotor.swap(motor); curriculum=std::move(skills);
+                neuralTrainingSteps=gnnMotor.trainingSteps(); neuralTrainingUpdates=gnnMotor.trainingUpdates();
+                lastNeuralTrainLoss=gnnMotor.lastLoss(); gnnMotorReady=true;
+                checkpointId=snapshot.id; checkpointStatus=i==0?"restored":"recovered older checkpoint";
+                checkpointTimer.attempted(GetTickCount64(),true); learningDirty=false;
+                if(!isolatedLearningRun()) loadChampion(store);
+                addLog(checkpointStatus+": "+checkpointId); return true;
+            }
+            if(!candidates.empty()) { checkpointStatus="no valid checkpoint; legacy import suppressed"; return false; }
+            // One-time import only when no checkpoint history exists. Legacy
+            // files are never overwritten by ongoing training or verification.
+            if(isolatedLearningRun()) return false;
+            const auto legacy=std::filesystem::path(executableDirectory())/"models/v27_learning_state.bin";
+            if(!std::filesystem::exists(legacy)) return false;
+            if(!restoreLearningState(gtlearn::readFile(legacy))) return false;
+            gnnMotor.restoreLegacyCounters(neuralTrainingSteps,neuralTrainingUpdates,lastNeuralTrainLoss);
+            checkpointStatus="legacy imported"; learningDirty=true;
+            saveLearningState(); return true;
+        } catch(const std::exception& e) { checkpointStatus=e.what(); return false; }
+    }
+    void maybeCheckpoint() {
+        if(!isolatedLearningRun() && checkpointTimer.due(GetTickCount64(),learningDirty))
+            saveLearningState();
+    }
+
+// Canonical GTAngelAGI members for an explicit, isolated held-out assessment.
+    int evaluateSkills() {
+        if(!isolatedLearningRun()) return 2;
+        initializeLearning();
+        gtlearn::Store live(std::filesystem::path(executableDirectory())/"learning/checkpoints");
+        gtlearn::Snapshot source;
+        bool found=false;
+        for(const auto& path:live.candidates()) {
+            v27gnn::GneuralMotorPolicy probe; gtskill::Curriculum skills;
+            if(live.read(path,source)&&probe.decode(source.payload[1])&&
+               skills.decode(source.payload[2])&&restoreLearningState(source.payload[0])) {
+                found=true; break;
             }
         }
-        if (!f.good()) { addLog("learning state rejected: truncated"); return false; }
-        addLog("learning state restored: " + std::to_string(n) + " episodes, " + std::to_string(cn) + " concepts, Q table + ESN readout reloaded");
-        return true;
+        if(!found) { addLog("Assessment needs a valid checkpoint from a normal session"); return 2; }
+        gtskill::Curriculum assessment;
+        if(!assessment.decode(source.payload[2])||!gnnMotor.decode(source.payload[1])) return 2;
+        const uint64_t revision=gnnMotor.policyRevision();
+        gtlearn::Snapshot incumbent;
+        const auto bestId=live.bestId();
+        const bool hasIncumbent=!bestId.empty() &&
+            live.read(std::filesystem::path(executableDirectory())/"learning/checkpoints"/bestId,incumbent);
+        evaluationMode=true; gnnChampionReady=false;
+        std::ofstream report(localLearningDirectory+"/skill-evaluation.csv");
+        report<<"skill,seed,success,contacts_per_metre,stuck_fraction,cost,reference_cost\n";
+        auto episode=[&](uint32_t seed,gtskill::Skill gait,bool candidate) {
+            restoreLearningState(source.payload[0]);
+            const auto& model=candidate||!hasIncumbent?source.payload[1]:incumbent.payload[1];
+            if(!gnnMotor.decode(model)) throw std::runtime_error("evaluation model rejected");
+            evaluationUseGnn=candidate||hasIncumbent;
+            evaluationSkill=gait;
+            neuralPolicy.reset(); previousControllerTarget={};
+            navWorld.generate(seed,48); gameplay.reset(navWorld); cns.reset();
+            syncBodyFromCns(); invalidateEcho(); dteNavigation.reset();
+            // Held-out short street routes with different scenery and traffic.
+            const avatar3d::Vec3 target=navPos+avatar3d::Vec3{(seed%3-1.0f)*.6f,0,4.5f};
+            navWorld.questShard=target; navWorld.questShardVisible=true;
+            gameplay.quest.stage=v19game::QuestStage::SeekShard;
+            avatar.pose(navPos,navHeading,0,0);
+            running=true; paused=false; dteEmbodimentEnabled=true;
+            unsigned contacts=0,stuck=0,steps=0;
+            float travel=0;
+            bool success=false;
+            for(;steps<180;++steps) {
+                const auto before=navPos;
+                tick();
+                const float moved=avatar3d::len(navPos-before);
+                travel+=moved; contacts+=cns.body().contact; stuck+=moved<.002f;
+                if(avatar3d::len(navPos-target)<1.25f) { success=true; ++steps; break; }
+            }
+            gtskill::Evaluation e;
+            e.seed=seed; e.success=success;
+            e.contactsPerMetre=contacts/std::max(travel,.1f);
+            e.stuckFraction=stuck/static_cast<float>(std::max(steps,1u));
+            e.cost=steps/180.0f; e.referenceCost=1;
+            return e;
+        };
+        try {
+            // Baseline always walks. Running must improve completion cost without
+            // weakening success/contact/stuck criteria.
+            for(const auto skill:{gtskill::Skill::Walk,gtskill::Skill::Run})
+                for(uint32_t seed=91001;seed<91009;++seed) {
+                    const auto reference=episode(seed,gtskill::Skill::Walk,false);
+                    auto result=episode(seed,skill,true);
+                    result.referenceCost=reference.cost;
+                    assessment.assess(skill,revision,1,result);
+                    report<<gtskill::name(skill)<<','<<seed<<','<<result.success<<','
+                          <<result.contactsPerMetre<<','<<result.stuckFraction<<','
+                          <<result.cost<<','<<result.referenceCost<<'\n';
+                    report.flush();
+                }
+            // An evaluation does not train or save its simulated world. Publish
+            // only the evidence, paired with the untouched source state/model.
+            const auto newest=live.candidates();
+            if(newest.empty()||newest.front().filename().string()!=source.id) {
+                report<<"publication_refused,learning advanced during evaluation\n";
+                return 3;
+            }
+            std::string evaluatedId;
+            if(!live.save({source.payload[0],source.payload[1],assessment.encode()},evaluatedId,source.id)) return 4;
+            const bool qualified=assessment.readyFor(gtskill::Skill::Walk,revision);
+            if(qualified&&!live.pinBest(evaluatedId)) return 4;
+            report<<"published,"<<evaluatedId<<"\nwalking_validated,"<<qualified
+                  <<"\nrunning_validated,"<<assessment.readyFor(gtskill::Skill::Run,revision)<<'\n';
+            report.close();
+            addLog("Assessment complete: "+localLearningDirectory+"/skill-evaluation.csv");
+            return 0; // A rejected candidate is a successful evaluation, not a tool error.
+        } catch(const std::exception& e) { addLog(e.what()); return 5; }
     }
+
     void addLog(const std::string& m) {
         log.push_back(m);
         if (log.size() > 50) log.erase(log.begin());
@@ -1071,7 +1274,7 @@ struct GTAngelAGI {
                 (float)endo.valenceArousal().arousal,lastStep.reward,
                 visualBefore.goalVisible ? 1.0f : 0.0f,risk);
             lastModelProprio=modelProprio; // pre-action efference copy
-            const v19game::PlayerControls manual=testHeldKey?testControlsFromKey(testHeldKey):gameplay.samplePlayerControls();
+            const v19game::PlayerControls manual=testHeldKey?testControlsFromKey(testHeldKey):isolatedLearningRun()?v19game::PlayerControls{}:gameplay.samplePlayerControls();
             const int questMode=gameplay.quest.stage==v19game::QuestStage::SeekShard?1:
                 gameplay.quest.stage==v19game::QuestStage::RestoreBeacon?2:0;
             float goalCompass=10.0f;
@@ -1131,6 +1334,11 @@ struct GTAngelAGI {
                     }
                 }
             }
+            const auto& availableSkills=gnnChampionReady?championCurriculum:curriculum;
+            const uint64_t controlRevision=gnnChampionReady?gnnChampion.policyRevision():gnnMotor.policyRevision();
+            selectedSkill=availableSkills.select(cns.body().occupied,cns.body().contact,
+                visualBefore.obstacleVisible?visualBefore.nearestObstacleDepth:100.0f,preTargetDist,{true,false},controlRevision);
+            if(evaluationMode) selectedSkill={evaluationSkill,"isolated assessment"};
             const auto dteProposal=dteNavigation.propose(visualActive,navTrainer,navLearning,cns.body().contact,questMode,goalCompass);
             float forward=manual.active?std::clamp(manual.move,-1.0f,1.0f):dteEmbodimentEnabled?dteProposal.forward:0;
             float turn=manual.active?manual.turn:dteEmbodimentEnabled?dteProposal.turn:0;
@@ -1156,7 +1364,7 @@ struct GTAngelAGI {
             if (gnnMotorReady && neuralShadowEnabled) {
                 float gnnFeatures[v27gnn::FeatureSize];
                 buildGnnFeatures(gnnFeatures, visualBefore, modelProprio, navSpeed, navHeading);
-                gnnValid=gnnMotor.infer(gnnFeatures, gnnTurn, gnnForward);
+                gnnValid=(gnnChampionReady?gnnChampion:gnnMotor).infer(gnnFeatures, gnnTurn, gnnForward);
                 if (gnnValid) {
                     v17policy::Prediction gnnPrediction{};
                     gnnPrediction.controller.values[0]=gnnTurn;
@@ -1176,13 +1384,19 @@ struct GTAngelAGI {
             // v27 GNN actuation: when the shield accepts the GNN proposal and
             // no human input is active, the learned network steers THROUGH the
             // sealed DteLocal path (never a raw Source::Neural submit).
-            if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled) {
+            if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled && (evaluationMode?evaluationUseGnn:gnnChampionReady)) {
                 // LW38 fix: gnnTurn is trained on controller channel 0 (-turn),
                 // so negate gnnTurn back to body turn convention and clamp
                 // forward within SpinalReflex's |forward|<=0.50 seal contract.
                 turn=std::clamp(-gnnTurn,-0.55f,0.55f);
                 forward=std::clamp(gnnForward,-0.35f,0.48f);
             }
+            // A validated running gait scales the on-foot demand; it cannot
+            // mint authority or change world state. Near obstacles we walk.
+            const bool runningGait=selectedSkill.skill==gtskill::Skill::Run && !manual.active &&
+                !cns.body().occupied && !cns.body().contact && preTargetDist>1.5f &&
+                (!visualBefore.obstacleVisible||visualBefore.nearestObstacleDepth>5.0f);
+            if(runningGait) forward=std::clamp(forward*1.6f,-.35f,.8f);
             // Observational learning is NOT a route request. Non-human sources remain locked.
             const auto source=manual.active?v20cns::Source::HumanLocal:dteEmbodimentEnabled?v20cns::Source::DteLocal:v20cns::Source::HumanLocal;
             v20cns::Context context{highResRenderer.framebuffer.sequence,
@@ -1197,7 +1411,7 @@ struct GTAngelAGI {
             if(source==v20cns::Source::DteLocal) {
                 if(echoSample && echoIngress.current(*echoSample,context.nowMs,cns.body(),cns.niche())) {
                     const v20cns::DteLocalMotorSeal seal(echoSample->sequence(),echoSample->hash(),
-                        context.nowMs,cns.body().sequence,cns.niche().worldVersion,forward,turn);
+                        context.nowMs,cns.body().sequence,cns.niche().worldVersion,forward,turn,runningGait);
                     // Coarse camera depth is advisory; final local swept geometry is authoritative.
                     verdict=cns.motorDte(seal,forward,turn,dteProposal.uncertainty,0.0f,context,navWorld);
                 }
@@ -1206,6 +1420,10 @@ struct GTAngelAGI {
             const bool collided=verdict==v20cns::SpinalReflex::Verdict::Collision;
             const float travelled=avatar3d::len(cns.body().position-navPos);
             motorTravelMetres+=travelled;
+            if(!evaluationMode) {
+                curriculum.observe(selectedSkill.skill,travelled,collided);
+                learningDirty=true;
+            }
             if(travelled>1e-4f) ++motorMovedFrames;
             if(collided) ++motorContactFrames;
             else if(verdict!=v20cns::SpinalReflex::Verdict::Accepted) ++motorRejectedFrames;
@@ -1218,7 +1436,7 @@ struct GTAngelAGI {
             navWorld.vehicleWheelPhase=cns.body().wheelPhase;
             navWorld.vehicleOccupied=cns.body().occupied;
             gameplay.tick(0.0f,navPos,navHeading,navWorld);
-            if (dteEmbodimentEnabled && !manual.active) {
+            if (!evaluationMode && dteEmbodimentEnabled && !manual.active) {
                 // Autonomous quest engagement: resolve dialogue first (choose
                 // before interact — interact() closes open dialogues), then
                 // collect, then open new conversations. Stimuli feed the
@@ -1292,7 +1510,7 @@ struct GTAngelAGI {
                 -0.01f + 0.10f * visualNavEncoder.progressReward(visualBefore, visualAfter)
                        + 2.20f * approachDelta, -1.0f, 1.0f);
             navLearning.observe(navTrainer,visualActive,visualAfter,forward,turn,reward,
-                                humanAccepted,collided,onFoot,navTraining);
+                                humanAccepted,collided,onFoot,navTraining&&!evaluationMode);
             sensorimotor.reward=reward; // local outcome, not the detached synthetic loop
             sensorimotor.totalReward+=reward; // real outcome accounting
             ++sensorimotor.stepCount;
@@ -1307,20 +1525,18 @@ struct GTAngelAGI {
                 actualTarget.values[5]=1.0f;
             }
             // v27 GNN training: learn from every accepted local action.
-            if (gnnMotorReady && onFoot && !collided && (humanAccepted || reward > 0.0f)) {
+            if (!evaluationMode && gnnMotorReady && onFoot && !collided && (humanAccepted || reward > 0.0f)) {
                 float trainFeatures[v27gnn::FeatureSize];
                 buildGnnFeatures(trainFeatures, visualBefore, modelProprio, navSpeed, navHeading);
                 gnnMotor.remember(trainFeatures, -turn, forward);
             }
             ++gnnFrameCounter;
-            if (gnnMotorReady && gnnFrameCounter>=v27gnn::TrainEveryFrames &&
+            if (!evaluationMode && gnnMotorReady && gnnFrameCounter>=v27gnn::TrainEveryFrames &&
                 gnnMotor.totalSamples()>=8) {
                 gnnFrameCounter=0;
                 if (gnnMotor.train()) {
-                    // LW25: periodic deep pass (extra batch) + periodic autosave.
+                    // Extra training batches must not skip checkpoint deadlines.
                     if (gnnMotor.trainingUpdates() % 5 == 0) gnnMotor.train();
-                    if (gnnMotor.trainingUpdates() % 200 == 0)
-                        gnnMotor.save(localLearningDirectory+"/models/gtangel_motor_gnn.net");
                     neuralTrainingSteps=gnnMotor.trainingSteps();
                     neuralTrainingUpdates=gnnMotor.trainingUpdates();
                     lastNeuralTrainLoss=gnnMotor.lastLoss();
@@ -1335,6 +1551,7 @@ struct GTAngelAGI {
             }
             previousControllerTarget=actualTarget;
             ++navEpisodeSteps;
+            maybeCheckpoint();
             for (size_t i=0;i<sensorimotor.frameBuffer.size() && i<navRenderer.frame.size();++i)
                 sensorimotor.frameBuffer[i]=navRenderer.frame[i];
             return true;

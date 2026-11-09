@@ -1,7 +1,61 @@
 #include "verify_v56_components.hpp"
+#include "skill_curriculum.hpp"
 static int checks=0,failures=0;
 static void check(bool ok,const char* label){++checks;if(!ok){++failures;std::cerr<<"FAIL "<<label<<'\n';}}
-int main(){
+static int checkpointChild(const std::string& directory) {
+    gtlearn::Store store(directory);
+    for(const auto& path:store.candidates()) {
+        gtlearn::Snapshot snapshot; v27gnn::GneuralMotorPolicy motor;
+        if(!store.read(path,snapshot)||!motor.decode(snapshot.payload[1])) continue;
+        if(motor.encode()!=snapshot.payload[1]) return 2;
+        float features[v27gnn::FeatureSize]{};
+        features[0]=1; features[6]=.5f; features[v27gnn::FeatureSize-1]=1;
+        float turn=0,forward=0;
+        gtlearn::Reader expected{snapshot.payload[0]};
+        const float expectedTurn=expected.get<float>(),expectedForward=expected.get<float>();
+        if(!motor.infer(features,turn,forward)||turn!=expectedTurn||forward!=expectedForward) return 3;
+        const auto steps=motor.trainingSteps();
+        motor.remember(features,-.4f,-.6f);
+        if(!motor.train()||motor.trainingSteps()<=steps) return 4;
+        return 0;
+    }
+    return 1;
+}
+int main(int argc,char** argv){
+    if(argc==3 && std::string(argv[1])=="--checkpoint-child") return checkpointChild(argv[2]);
+    char executable[MAX_PATH]{};
+    GetModuleFileNameA(nullptr,executable,MAX_PATH);
+    const auto testRoot=(std::filesystem::path(executable).parent_path()/"../../build/learning-tests"/
+                         ("verify-"+std::to_string(GetCurrentProcessId()))).lexically_normal();
+    std::filesystem::create_directories(testRoot);
+    {
+        gtskill::Curriculum skills;
+        for(int i=0;i<1000;++i) skills.observe(gtskill::Skill::Walk,.1f,false);
+        check(!skills.ready(gtskill::Skill::Walk),"training alone never grants mastery");
+        for(unsigned seed=0;seed<8;++seed) {
+            check(skills.assess(gtskill::Skill::Walk,123,1,{seed,true,0,0,8,10}),"valid walking assessment");
+            skills.assess(gtskill::Skill::Run,123,1,{seed,true,0,0,6,10});
+        }
+        check(skills.ready(gtskill::Skill::Walk)&&skills.ready(gtskill::Skill::Run),"distinct successful assessments validate skills");
+        skills.assess(gtskill::Skill::Run,123,1,{7,true,0,0,6,10});
+        check(skills.record(gtskill::Skill::Run).evaluations.size()==8,"duplicate seed does not inflate mastery");
+        check(skills.select(false,false,10,10,{}).skill==gtskill::Skill::Walk,"saved scores cannot grant absent motor capability");
+        check(skills.select(false,false,10,10,{true,false}).skill==gtskill::Skill::Run,"validated running selected in clear space");
+        check(skills.select(false,true,10,10,{true,false}).skill==gtskill::Skill::Walk,"contact forces walking fallback");
+        const auto snapshot=skills.encode();
+        gtskill::Curriculum restored;
+        check(restored.decode(snapshot)&&restored.encode()==snapshot,"skill evidence and lifetime observations persist");
+        check(!restored.decode(snapshot.substr(0,snapshot.size()-1))&&restored.encode()==snapshot,
+              "truncated skill state leaves incumbent intact");
+        restored.assess(gtskill::Skill::Run,123,1,{0,true,.5f,0,6,10});
+        check(!restored.ready(gtskill::Skill::Run),"safety regression demotes skill");
+        restored.assess(gtskill::Skill::Walk,124,1,{0,true,0,0,8,10});
+        check(!restored.ready(gtskill::Skill::Walk),"new model requires fresh evaluation");
+        gtlearn::Autosave schedule; schedule.attempted(100,true);
+        check(!schedule.due(60099,true)&&schedule.due(60100,true),"autosave is elapsed-time based");
+        schedule.attempted(60100,false);
+        check(!schedule.due(60101,true)&&schedule.due(70100,true),"failed autosave retries without a tight loop");
+    }
     {
         bool continuous=true, bounded=true;
         for(bool avatarBehind:{false,true})
@@ -111,7 +165,7 @@ int main(){
         float t1=0,f1=0;
         check(gnn.infer(feat,t1,f1),"GNN inference after training");
         check(std::fabs(t1-0.4f)<0.25f&&std::fabs(f1-0.6f)<0.25f,"GNN converged toward taught action");
-        const std::string tmpNet="models/gtangel_motor_gnn_verify_tmp.net";
+        const std::string tmpNet=(testRoot/"motor.net").string();
         check(gnn.save(tmpNet),"GNN save");
         v27gnn::GneuralMotorPolicy gnn2;
         check(gnn2.create()&&gnn2.load(tmpNet),"GNN reload");
@@ -129,6 +183,47 @@ int main(){
         check(gnn2.infer(feat,t3,f3) &&
               (t3+0.4f)*(t3+0.4f)+(f3+0.6f)*(f3+0.6f)<beforeError*0.5f,
               "restored GNN learns a changed target");
+        const auto state=gnn2.encode();
+        v27gnn::GneuralMotorPolicy resumed;
+        check(resumed.decode(state)&&resumed.encode()==state,"complete GNN training state round-trips exactly");
+        check(resumed.totalSamples()==gnn2.totalSamples()&&resumed.trainingSteps()==gnn2.trainingSteps(),
+              "replay samples and gradient counts survive reload");
+        check(!resumed.decode(state.substr(0,state.size()/2))&&resumed.encode()==state,
+              "invalid GNN checkpoint cannot partially replace learner");
+        const auto beforeBadLoad=resumed.encode();
+        gtlearn::writeFile(testRoot/"bad.net","999999999\n");
+        check(!resumed.load((testRoot/"bad.net").string())&&resumed.encode()==beforeBadLoad,
+              "invalid legacy topology fails without exiting or mutating network");
+        gtlearn::Store store(testRoot/"checkpoints");
+        gtlearn::Writer expected; expected.put(t3); expected.put(f3);
+        gtskill::Curriculum skills;
+        std::array<std::string,3> payload{expected.bytes,state,skills.encode()};
+        std::string first,second;
+        check(store.save(payload,first)&&store.save(payload,second),"complete checkpoint generations publish");
+        check(store.pinBest(first),"best checkpoint can be retained independently");
+        gtlearn::writeFile(testRoot/"checkpoints"/second/"motor.bin","damaged");
+        gtlearn::Snapshot restoredSnapshot;
+        check(!store.read(testRoot/"checkpoints"/second,restoredSnapshot),"checksum rejects corrupted generation");
+        check(store.read(testRoot/"checkpoints"/first,restoredSnapshot),"previous generation survives failed latest");
+        std::filesystem::create_directory(testRoot/"checkpoints"/"cp-999999.pending");
+        check(store.candidates().size()==2,"incomplete generations are not recovery candidates");
+        std::string command="\""+std::string(executable)+"\" --checkpoint-child \""+(testRoot/"checkpoints").string()+"\"";
+        STARTUPINFOA si{}; si.cb=sizeof(si); PROCESS_INFORMATION pi{};
+        bool childOk=CreateProcessA(executable,command.data(),nullptr,nullptr,FALSE,0,nullptr,nullptr,&si,&pi)!=0;
+        if(childOk) {
+            const auto wait=WaitForSingleObject(pi.hProcess,60000);
+            DWORD status=1;
+            if(wait==WAIT_OBJECT_0) GetExitCodeProcess(pi.hProcess,&status);
+            else TerminateProcess(pi.hProcess,1);
+            childOk=status==0; CloseHandle(pi.hThread); CloseHandle(pi.hProcess);
+        }
+        check(childOk,"fresh process recovers predictions and continues training");
+        for(int i=0;i<7;++i) store.save(payload,second);
+        check(std::filesystem::exists(testRoot/"checkpoints"/first)&&store.candidates().size()<=7,
+              "retention preserves best checkpoint and bounds complete history");
+        gtlearn::writeFile(testRoot/"blocked","not a directory");
+        gtlearn::Store blocked(testRoot/"blocked");
+        check(!blocked.save(payload,second),"checkpoint I/O failures return status without exiting");
         std::remove(tmpNet.c_str());
     }
     policy.reset();check(policy.loaded(),"recurrent reset keeps weights");

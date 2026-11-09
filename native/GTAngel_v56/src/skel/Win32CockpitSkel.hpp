@@ -506,6 +506,9 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
     DrawText(hdc, railX + 12, viewY + 664, "SPACE pause / O DTE / F4 ML / F8 S7->8", COL_TEXT2, g_hFontSmall);
     snprintf(line,sizeof(line),"Motion: %s | travelled %.1fm",g_agi.motorStatus(),g_agi.motorTravelMetres);
     DrawText(hdc,railX+12,viewY+684,line,COL_TEXT,g_hFontSmall);
+    snprintf(line,sizeof(line),"Skill: %s | checkpoint: %s",
+        gtskill::name(g_agi.selectedSkill.skill),g_agi.checkpointStatus.c_str());
+    DrawText(hdc,railX+12,viewY+702,line,COL_CYAN,g_hFontSmall);
 
     // ═══ 5. BOTTOM F6 TELEMETRY DECK (y = 820..992): 3 Side-by-Side F6 Cards ═══
     // 5a. Bottom-Left Card (x = 6..518, y = 820..992): Sensorimotor + Proprioception + ESN Reservoir + VR/Bridge/LLM
@@ -702,6 +705,13 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         snprintf(info,sizeof(info),"Gradient steps %llu | samples %d | travel %.2fm",
             (unsigned long long)g_agi.neuralTrainingSteps,g_agi.gnnMotor.totalSamples(),g_agi.motorTravelMetres);
         DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);
+        snprintf(info,sizeof(info),"Skill: %s (%s)",gtskill::name(g_agi.selectedSkill.skill),g_agi.selectedSkill.reason);
+        DrawText(hdc,viewX+56,viewY+286,info,COL_TEXT,g_hFontSmall);
+        snprintf(info,sizeof(info),"Checkpoint: %s / %s",g_agi.checkpointStatus.c_str(),g_agi.checkpointId.c_str());
+        DrawText(hdc,viewX+56,viewY+310,info,COL_TEXT,g_hFontSmall);
+        snprintf(info,sizeof(info),"Controller: %s | candidate learning remains active",
+            g_agi.gnnChampionReady?"validated GNN":"DTE baseline");
+        DrawText(hdc,viewX+56,viewY+334,info,COL_TEXT,g_hFontSmall);
         snprintf(info,sizeof(info),"Echo: %s / %s / spice %.2f / conf %.2f",
             g_agi.echoPersona.state().emotion,g_agi.echoPersona.state().facs,
             g_agi.echoPersona.state().spice,g_agi.echoPersona.state().confidence);
@@ -1485,6 +1495,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
+    if (strstr(GetCommandLineA(),"--evaluate-skills")) return g_agi.evaluateSkills();
     if (strstr(GetCommandLineA(),"--navdiag")) {
         // Headless navigation diagnostic: no window; 300 ticks; write
         // position, breaker state, and per-step failures to NAVDIAG.txt.

@@ -19,5 +19,5 @@ const prelude=`#pragma once\n#include <algorithm>\n#include <array>\n#include <c
 const platform='#ifdef _WIN32\n#define NOMINMAX\n#define WIN32_LEAN_AND_MEAN\n#include <windows.h>\n#endif\n';
 const portablePrelude=prelude+'#ifndef _WIN32\nstatic uint64_t GetTickCount64(){return 1000;}\n#endif\n';
 fs.writeFileSync('verify_v56_components.hpp',
-    platform+portablePrelude+avatar+'\n'+render+'\n'+motor+'\n'+policy+'\n'+observer+'\n'+local+'\n'+gnnC+'\n'+gnn+'\n');
+    platform+portablePrelude+'#include "learning_checkpoint.hpp"\n'+avatar+'\n'+render+'\n'+motor+'\n'+policy+'\n'+observer+'\n'+local+'\n'+gnnC+'\n'+gnn+'\n');
 console.log('v56 components emitted: avatar, render, motor, policy, observer, local, gnn (emission-only; learning unlocked)');

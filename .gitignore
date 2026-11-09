@@ -114,6 +114,7 @@ native/re3_reference/data/
 native/re3_reference/res/
 native/re3_reference/datasets/
 native/GTAngel_v56/datasets/
+native/GTAngel_v56/learning/
 native/re3_reference/assets/
 native/re3_reference/review/
 native/re3_reference/reports/
@@ -126,6 +127,5 @@ system7-dte-phasor/
 **/*.gguf
 **/*.onnx
 **/*.safetensors
-
 
 

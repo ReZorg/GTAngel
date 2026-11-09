@@ -34,11 +34,14 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
         return std::filesystem::path(std::string(path,n)).parent_path().string();
     }
     void initializeLearning() {
-        localLearningDirectory=executableDirectory();
+        localLearningDirectory=learningSessionRoot();
+        std::filesystem::create_directories(localLearningDirectory+"/models");
+        std::filesystem::create_directories(localLearningDirectory+"/datasets");
+        checkpointTimer.attempted(GetTickCount64(),true);
         trajectoryRecorder.stop(); trajectoryRecording=false;
         trajectoryRecorderReady=trajectoryRecorder.selfCheck(localLearningDirectory+"/datasets");
         previousControllerTarget=v16motor::ControllerTarget{};
-        neuralPolicyLoaded=neuralPolicy.load(localLearningDirectory+"/models/gtangel_visuomotor.gvmw");
+        neuralPolicyLoaded=neuralPolicy.load(executableDirectory()+"/models/gtangel_visuomotor.gvmw");
         if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/native/GTAngel_v56/models/gtangel_visuomotor.gvmw");
         neuralShadowEnabled=true;
         // v27 GNN motor actuator: adaptive online learning, never locked.
@@ -48,16 +51,19 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
         motorMovedFrames=0; motorContactFrames=0; motorRejectedFrames=0; motorTravelMetres=0;
         lastGnnGate="not evaluated";
         neuralTrainingSteps=0; neuralTrainingUpdates=0; lastNeuralTrainLoss=-1.0f;
+        const bool existingMotor=gnnMotorReady;
         gnnMotorReady=gnnMotor.create();
-        if (gnnMotorReady) {
+        if (gnnMotorReady && !existingMotor) {
             // Prefer the trained network; a fresh one trains from scratch.
-            if (!gnnMotor.load(localLearningDirectory+"/models/gtangel_motor_gnn.net"))
+            if (!gnnMotor.load(executableDirectory()+"/models/gtangel_motor_gnn.net"))
                 addLog("GNN motor: fresh network, training starts now");
             else
                 addLog("GNN motor: trained network restored, training continues");
         } else {
-            addLog("GNN motor: network creation failed, NN actuation degraded");
+            if(!gnnMotorReady) addLog("GNN motor: network creation failed, NN actuation degraded");
         }
+        neuralTrainingSteps=gnnMotor.trainingSteps(); neuralTrainingUpdates=gnnMotor.trainingUpdates();
+        lastNeuralTrainLoss=gnnMotor.lastLoss();
         addLog(neuralPolicyLoaded ? "v27 NN initialized: LEARNING inference active when running" :
             std::string("v27 NN missing: ")+neuralPolicy.error());
         addLog("N: observational Q learning / M: NN learning / C: capture / F4: learning monitor");
@@ -326,7 +332,7 @@ once(`        // v20 does not qualify autonomous actuation; all non-local/non-hu
                seal.bodySequence_!=plant.state().sequence || seal.worldVersion_!=ctx.worldVersion ||
                seal.issuedMs_>ctx.nowMs || ctx.nowMs-seal.issuedMs_>100 ||
                seal.forward_!=p.forward || seal.turn_!=p.turn ||
-               fabsf(p.forward)>.5f || fabsf(p.turn)>.6f) return Verdict::Stale;
+               fabsf(p.forward)>(seal.running_?.8f:.5f) || fabsf(p.turn)>.6f) return Verdict::Stale;
         } else if(p.source!=Source::HumanLocal) return Verdict::Untrusted;`, 'qualified DTE SRD gate');
 once('        for (const auto& pillar : w.pillars)\n            if (distance2(p,pillar.pos)<(radius+pillar.radius)*(radius+pillar.radius)) return false;', `        for (const auto& pillar : w.pillars)
             if (distance2(p,pillar.pos)<(radius+pillar.radius)*(radius+pillar.radius)) return false;
@@ -716,6 +722,16 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
             ck(place({0,0,-.4f},3.14159265f),"pedestrian overlap fixture restore");
             drive(8);
             ck(motor.body().position.z<-.9f,"existing walker overlap permits escape");
+            ck(place({10,0,0},0),"running fixture restore");
+            ctx.visualDigest=7; ctx.worldVersion=motor.niche().worldVersion;
+            const v20cns::DteLocalMotorSeal walkSeal(ctx.frame,7,ctx.nowMs,motor.body().sequence,
+                ctx.worldVersion,.7f,0,false);
+            ck(motor.motorDte(walkSeal,.7f,0,.1f,0,ctx,fixture)==v20cns::SpinalReflex::Verdict::Stale,
+               "walking seal cannot authorize running demand");
+            const v20cns::DteLocalMotorSeal runSeal(ctx.frame,7,ctx.nowMs,motor.body().sequence,
+                ctx.worldVersion,.7f,0,true);
+            ck(motor.motorDte(runSeal,.7f,0,.1f,0,ctx,fixture)==v20cns::SpinalReflex::Verdict::Accepted,
+               "bounded local running seal moves through normal clearance");
         }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
@@ -1205,7 +1221,7 @@ once(`    int plasticityUpdates = 0;`, `    int plasticityUpdates = 0;
     std::vector<double> readoutWeights() const { return W_out_; }
     void setReadoutWeights(const std::vector<double>& w) { if ((int)w.size() == outDim_ * resDim_) W_out_ = w; }
     std::vector<double> rlsCovariance() const { return P_; }
-    void setRlsCovariance(const std::vector<double>& p) { if ((int)p.size() == resDim_ * resDim_) P_ = p; }
+    void setRlsCovariance(const std::vector<double>& p) { if (p.empty() || (int)p.size() == resDim_ * resDim_) P_ = p; }
     void setReservoirState(const std::vector<double>& s) { if ((int)s.size() == resDim_) state_ = s; }`, 'ESN persistence accessors');
 
 // PS2: save/load learning state methods on GTAngelAGI (plain ofstream I/O only).
@@ -1401,13 +1417,25 @@ once(`        ck(esn.plasticityUpdates > 0, "intrinsic plasticity active");`, ` 
             const bool restored = loadLearningState();
             double qL1After = 0; for (const auto& a : navTrainer.Q) for (const auto& b : a) for (const auto& c : b) for (float v : c) qL1After += std::fabs(v);
             ck(restored, "learning state file round-trips through disk");
+            esn=dte::EchoStateNetwork(32,96,8);
+            ck(loadLearningState()&&esn.rlsCovariance().size()==96u*96u,
+               "fresh reservoir restores lazily allocated RLS covariance");
             ck(episodic.episodes.size() == epsBefore && epsBefore > 0, "episodic memory persists across restart");
             ck(episodic.concepts.size() == cptsBefore && cptsBefore > 0, "semantic concepts persist across restart");
             ck(navLearning.updates == qBefore && qBefore > 0, "Q visitation counts persist across restart");
             ck(episodic.consolidations == consBefore && consBefore > 0, "consolidation history persists across restart");
             ck(esn.rlsUpdates == rlsBefore && rlsBefore > 0, "ESN readout training persists across restart");
             ck(std::fabs(qL1After - qL1Before) < 1e-3 * std::max(1.0, qL1Before), "Q weights restored bit-faithfully");
-            ck(epsWiped == epsBefore, "wipe actually cleared memory before reload");
+        ck(epsWiped == epsBefore, "wipe actually cleared memory before reload");
+            const auto originalMotor=gnnMotor.encode();
+            const auto originalState=encodeLearningState();
+            ck(!restoreLearningState(originalState.substr(0,originalState.size()/2)) &&
+               encodeLearningState()==originalState,"truncated learning payload does not partially mutate runtime");
+            ck(saveLearningState(),"second checkpoint saved");
+            const auto badId=checkpointId;
+            gtlearn::writeFile(std::filesystem::path(localLearningDirectory)/"learning/checkpoints"/badId/"motor.bin","broken");
+            ck(loadLearningState()&&checkpointId!=badId&&gnnMotor.encode()==originalMotor,
+               "runtime recovers prior complete checkpoint when latest is corrupt");
         }
         {
             // GNN motor training + persistence: the network must actually
@@ -3374,14 +3402,12 @@ once(`            // Light pool on the ground.
             addJoint(head, 0.10f, Colour{90,190,255,255}, ObjectProp);
             addJoint(head + Vec3{0,-0.06f,0}, 0.26f, Colour{60,120,190,255}, ObjectProp);`, 'LW25 lamp glow');
 
-// T13b: deep GNN pass every 5th update + autosave every 200 updates.
+// T13b: deep GNN pass every 5th update. Checkpointing uses elapsed time.
 once(`                if (gnnMotor.train()) {
                     neuralTrainingSteps=gnnMotor.trainingSteps();`,
 `                if (gnnMotor.train()) {
-                    // LW25: periodic deep pass (extra batch) + periodic autosave.
+                    // Extra training batches must not skip checkpoint deadlines.
                     if (gnnMotor.trainingUpdates() % 5 == 0) gnnMotor.train();
-                    if (gnnMotor.trainingUpdates() % 200 == 0)
-                        gnnMotor.save(localLearningDirectory+"/models/gtangel_motor_gnn.net");
                     neuralTrainingSteps=gnnMotor.trainingSteps();`, 'LW25 deep GNN pass');
 
 // ===== LW26: TEMPORAL WINDOW FLICKER =====
@@ -8569,6 +8595,91 @@ once(`        DrawText(hdc, viewX + 56, viewY + 176, info, COL_GOLD, g_hFont);`,
         snprintf(info,sizeof(info),"Gradient steps %llu | samples %d | travel %.2fm",
             (unsigned long long)g_agi.neuralTrainingSteps,g_agi.gnnMotor.totalSamples(),g_agi.motorTravelMetres);
         DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);`,'learning decision diagnostics');
+
+// Replace the legacy in-place persistence block with the canonical checkpoint
+// implementation after historical splices have finished.
+once('std::ofstream report(localLearningDirectory+"/V27_RUNTIME_VERIFICATION.json");',
+     'std::ofstream report(executableDirectory()+"/V27_RUNTIME_VERIFICATION.json");','runtime report location');
+once('std::ofstream txt(localLearningDirectory+"/V27_SELFTEST.txt");',
+     'std::ofstream txt(executableDirectory()+"/V27_SELFTEST.txt");','runtime text report location');
+{
+    const start=out.indexOf('    // v27 persistence: binary snapshot of all learned state,');
+    const end=out.indexOf('    void addLog(const std::string& m) {',start);
+    if(start<0||end<0) throw new Error('checkpoint member anchors missing');
+    out=out.slice(0,start)+fs.readFileSync('learning_runtime.inc.hpp','utf8').replace(/\r\n/g,'\n')+
+        '\n'+fs.readFileSync('skill_evaluation.inc.hpp','utf8').replace(/\r\n/g,'\n')+
+        '\n'+out.slice(end);
+}
+once('#include <windows.h>','#include <windows.h>\n#include <climits>\n#include "skill_curriculum.hpp"',
+     'checkpoint and curriculum dependencies');
+once(`    if (strstr(GetCommandLineA(),"--navdiag")) {`,
+`    if (strstr(GetCommandLineA(),"--evaluate-skills")) return g_agi.evaluateSkills();
+    if (strstr(GetCommandLineA(),"--navdiag")) {`,'isolated skill assessment command');
+once(`            const auto dteProposal=dteNavigation.propose(visualActive,navTrainer,navLearning,cns.body().contact,questMode,goalCompass);`,
+`            const auto& availableSkills=gnnChampionReady?championCurriculum:curriculum;
+            const uint64_t controlRevision=gnnChampionReady?gnnChampion.policyRevision():gnnMotor.policyRevision();
+            selectedSkill=availableSkills.select(cns.body().occupied,cns.body().contact,
+                visualBefore.obstacleVisible?visualBefore.nearestObstacleDepth:100.0f,preTargetDist,{true,false},controlRevision);
+            if(evaluationMode) selectedSkill={evaluationSkill,"isolated assessment"};
+            const auto dteProposal=dteNavigation.propose(visualActive,navTrainer,navLearning,cns.body().contact,questMode,goalCompass);`,
+'governed skill selection');
+once('gnnValid=gnnMotor.infer(gnnFeatures, gnnTurn, gnnForward);',
+     'gnnValid=(gnnChampionReady?gnnChampion:gnnMotor).infer(gnnFeatures, gnnTurn, gnnForward);',
+     'validated champion motor inference');
+once('if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled) {',
+     'if (gnnValid && gnnDecision.accepted && !manual.active && dteEmbodimentEnabled && (evaluationMode?evaluationUseGnn:gnnChampionReady)) {',
+     'paired evaluation controller selection');
+once('            // Observational learning is NOT a route request. Non-human sources remain locked.',
+`            // A validated running gait scales the on-foot demand; it cannot
+            // mint authority or change world state. Near obstacles we walk.
+            const bool runningGait=selectedSkill.skill==gtskill::Skill::Run && !manual.active &&
+                !cns.body().occupied && !cns.body().contact && preTargetDist>1.5f &&
+                (!visualBefore.obstacleVisible||visualBefore.nearestObstacleDepth>5.0f);
+            if(runningGait) forward=std::clamp(forward*1.6f,-.35f,.8f);
+            // Observational learning is NOT a route request. Non-human sources remain locked.`,
+'bounded running gait');
+once('context.nowMs,cns.body().sequence,cns.niche().worldVersion,forward,turn);',
+     'context.nowMs,cns.body().sequence,cns.niche().worldVersion,forward,turn,runningGait);',
+     'sealed running mode');
+once('const v19game::PlayerControls manual=testHeldKey?testControlsFromKey(testHeldKey):gameplay.samplePlayerControls();',
+     'const v19game::PlayerControls manual=testHeldKey?testControlsFromKey(testHeldKey):isolatedLearningRun()?v19game::PlayerControls{}:gameplay.samplePlayerControls();',
+     'isolated runs exclude host keyboard input');
+once('if (dteEmbodimentEnabled && !manual.active) {',
+     'if (!evaluationMode && dteEmbodimentEnabled && !manual.active) {',
+     'evaluation excludes quest interactions');
+once(`            motorTravelMetres+=travelled;`,
+`            motorTravelMetres+=travelled;
+            if(!evaluationMode) {
+                curriculum.observe(selectedSkill.skill,travelled,collided);
+                learningDirty=true;
+            }`,'persistent skill observations');
+once(`            previousControllerTarget=actualTarget;
+            ++navEpisodeSteps;`,
+`            previousControllerTarget=actualTarget;
+            ++navEpisodeSteps;
+            maybeCheckpoint();`,'elapsed-time checkpoint schedule');
+once(`            if (gnnMotorReady && onFoot && !collided && (humanAccepted || reward > 0.0f)) {`,
+`            if (!evaluationMode && gnnMotorReady && onFoot && !collided && (humanAccepted || reward > 0.0f)) {`,
+'evaluation excludes replay writes');
+once(`            if (gnnMotorReady && gnnFrameCounter>=v27gnn::TrainEveryFrames &&`,
+`            if (!evaluationMode && gnnMotorReady && gnnFrameCounter>=v27gnn::TrainEveryFrames &&`,
+'evaluation excludes gradient updates');
+once(`humanAccepted,collided,onFoot,navTraining);`,
+`humanAccepted,collided,onFoot,navTraining&&!evaluationMode);`,'evaluation excludes Q updates');
+once(`    DrawText(hdc,railX+12,viewY+684,line,COL_TEXT,g_hFontSmall);`,
+`    DrawText(hdc,railX+12,viewY+684,line,COL_TEXT,g_hFontSmall);
+    snprintf(line,sizeof(line),"Skill: %s | checkpoint: %s",
+        gtskill::name(g_agi.selectedSkill.skill),g_agi.checkpointStatus.c_str());
+    DrawText(hdc,railX+12,viewY+702,line,COL_CYAN,g_hFontSmall);`,'checkpoint and skill HUD');
+once(`        DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);`,
+`        DrawText(hdc,viewX+56,viewY+260,info,COL_TEXT,g_hFont);
+        snprintf(info,sizeof(info),"Skill: %s (%s)",gtskill::name(g_agi.selectedSkill.skill),g_agi.selectedSkill.reason);
+        DrawText(hdc,viewX+56,viewY+286,info,COL_TEXT,g_hFontSmall);
+        snprintf(info,sizeof(info),"Checkpoint: %s / %s",g_agi.checkpointStatus.c_str(),g_agi.checkpointId.c_str());
+        DrawText(hdc,viewX+56,viewY+310,info,COL_TEXT,g_hFontSmall);
+        snprintf(info,sizeof(info),"Controller: %s | candidate learning remains active",
+            g_agi.gnnChampionReady?"validated GNN":"DTE baseline");
+        DrawText(hdc,viewX+56,viewY+334,info,COL_TEXT,g_hFontSmall);`,'learning checkpoint inspector');
 
 fs.writeFileSync('gtangel_agi_v56_full.cpp',out);
 const a=out.indexOf('namespace v15render {'),b=out.indexOf('} // namespace v15render',a);

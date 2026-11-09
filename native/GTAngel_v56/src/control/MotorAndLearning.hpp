@@ -3029,6 +3029,7 @@ private:
 #include <filesystem>
 #include <string>
 #include <vector>
+#include "learning_checkpoint.hpp"
 
 extern "C" {
 #include "network.h"
@@ -3115,7 +3116,7 @@ public:
         s.y[1] = forward;
         if ((int)samples_.size() >= MaxSamples) samples_.erase(samples_.begin());
         samples_.push_back(s);
-        ++newSamples_;
+        newSamples_=std::min(newSamples_+1,MaxSamples);
     }
 
     int pendingSamples() const { return newSamples_; }
@@ -3123,6 +3124,66 @@ public:
     uint64_t trainingUpdates() const { return trainingUpdates_; }
     uint64_t trainingSteps() const { return trainingSteps_; }
     float lastLoss() const { return lastLoss_; }
+    uint64_t policyRevision() const {
+        if(!net_) return 0;
+        gtlearn::Writer weights;
+        for(unsigned i=0;i<net_->num_of_neurons;++i)
+            for(unsigned j=0;j<net_->neurons[i].num_input;++j) weights.put(net_->neurons[i].w[j]);
+        return gtlearn::checksum(weights.bytes);
+    }
+    void restoreLegacyCounters(uint64_t steps,uint64_t updates,float loss) {
+        trainingSteps_=steps; trainingUpdates_=updates;
+        if(std::isfinite(loss)) lastLoss_=loss;
+    }
+    void swap(GneuralMotorPolicy& other) noexcept {
+        using std::swap;
+        swap(net_,other.net_); swap(cfg_,other.cfg_); swap(samples_,other.samples_);
+        swap(newSamples_,other.newSamples_); swap(trainingUpdates_,other.trainingUpdates_);
+        swap(trainingSteps_,other.trainingSteps_); swap(lastLoss_,other.lastLoss_);
+        swap(gamma_,other.gamma_); swap(lastError_,other.lastError_);
+    }
+    std::string encode() const {
+        if(!net_) throw std::runtime_error("motor network unavailable");
+        gtlearn::Writer w;
+        w.put<uint32_t>(1); w.put<uint32_t>(FeatureSize); w.put<uint32_t>(HiddenSize); w.put<uint32_t>(OutputSize);
+        w.put(trainingSteps_); w.put(trainingUpdates_); w.put(lastLoss_);
+        w.put(gamma_); w.put(lastError_); w.put<int32_t>(newSamples_);
+        for(unsigned i=0;i<net_->num_of_neurons;++i)
+            for(unsigned j=0;j<net_->neurons[i].num_input;++j) w.put(net_->neurons[i].w[j]);
+        w.put<uint32_t>(static_cast<uint32_t>(samples_.size()));
+        for(const auto& sample:samples_) {
+            for(float x:sample.x) w.put(x);
+            for(float y:sample.y) w.put(y);
+        }
+        return w.bytes;
+    }
+    bool decode(const std::string& bytes) {
+        try {
+            gtlearn::Reader r{bytes};
+            if(r.get<uint32_t>()!=1||r.get<uint32_t>()!=FeatureSize||
+               r.get<uint32_t>()!=HiddenSize||r.get<uint32_t>()!=OutputSize) return false;
+            GneuralMotorPolicy trial; if(!trial.create()) return false;
+            trial.trainingSteps_=r.get<uint64_t>(); trial.trainingUpdates_=r.get<uint64_t>();
+            trial.lastLoss_=r.get<float>(); trial.gamma_=r.get<double>(); trial.lastError_=r.get<double>();
+            trial.newSamples_=r.get<int32_t>();
+            if(trial.gamma_<=0||trial.gamma_>.1||trial.lastLoss_<-1||
+               trial.lastError_<0||trial.newSamples_<0) return false;
+            for(unsigned i=0;i<trial.net_->num_of_neurons;++i)
+                for(unsigned j=0;j<trial.net_->neurons[i].num_input;++j) {
+                    const double weight=r.get<double>();
+                    if(std::fabs(weight)>1e6) return false;
+                    trial.net_->neurons[i].w[j]=weight;
+                }
+            const uint32_t count=r.get<uint32_t>();
+            if(count>MaxSamples || trial.newSamples_>MaxSamples) return false;
+            trial.samples_.resize(count);
+            for(auto& sample:trial.samples_) {
+                for(float& x:sample.x) { x=r.get<float>(); if(std::fabs(x)>100) return false; }
+                for(float& y:sample.y) { y=r.get<float>(); if(std::fabs(y)>1) return false; }
+            }
+            r.end(); swap(trial); return true;
+        } catch(const std::exception&) { return false; }
+    }
 
     // One bounded online gradient-descent iteration over the recent samples.
     bool train() {
@@ -3176,28 +3237,59 @@ public:
     }
 
     bool save(const std::string& path) {
-        if (!net_ || !cfg_) return false;
-        if (cfg_->save_network_file_name) free(cfg_->save_network_file_name);
-        cfg_->save_network_file_name = dup_(path.c_str());
-        cfg_->save_neural_network = ON;
-        network_save(net_, cfg_); // void; exits the process on I/O failure
-        cfg_->save_neural_network = OFF;
-        return true;
+        if(!net_) return false;
+        try {
+            std::ostringstream out; out<<std::setprecision(17)<<net_->num_of_neurons<<"\n";
+            for(unsigned i=0;i<net_->num_of_neurons;++i) {
+                const auto& n=net_->neurons[i];
+                out<<i<<"\n"<<n.num_input<<"\n";
+                for(unsigned j=0;j<n.num_input;++j) out<<n.w[j]<<"\n";
+                for(unsigned j=0;j<n.num_input;++j) out<<n.connection[j]->global_id<<"\n";
+                out<<n.activation<<"\n"<<n.discriminant<<"\n";
+            }
+            out<<net_->num_of_layers<<"\n";
+            for(unsigned i=0;i<net_->num_of_layers;++i) {
+                out<<net_->layers[i].num_of_neurons<<"\n";
+                for(unsigned j=0;j<net_->layers[i].num_of_neurons;++j)
+                    out<<net_->layers[i].neurons[j].global_id<<"\n";
+            }
+            return gtlearn::writeFile(path,out.str());
+        } catch(const std::exception&) { return false; }
     }
 
     bool load(const std::string& path) {
-        // network_load() exits the process on a missing file; guard first.
-        if (!std::filesystem::exists(path)) return false;
-        if (!net_ && !create()) return false;
-        if (!cfg_ && !(cfg_ = network_config_alloc_default())) return false;
-        network_config_ensure(cfg_, FeatureSize + HiddenSize + OutputSize, FeatureSize);
-        cfg_->verbosity = OFF;
-        if (cfg_->load_network_file_name) free(cfg_->load_network_file_name);
-        cfg_->load_network_file_name = dup_(path.c_str());
-        cfg_->load_neural_network = ON;
-        network_load(net_, cfg_);
-        cfg_->load_neural_network = OFF;
-        return true;
+        // Validate the complete fixed topology before replacing the live model.
+        // The C loader calls exit() on failures and trusts unbounded dimensions.
+        try {
+            std::istringstream in(gtlearn::readFile(path));
+            unsigned neurons=0;
+            if(!(in>>neurons)||neurons!=FeatureSize+HiddenSize+OutputSize) return false;
+            GneuralMotorPolicy trial; if(!trial.create()) return false;
+            for(unsigned i=0;i<neurons;++i) {
+                unsigned id=0,count=0;
+                auto& n=trial.net_->neurons[i];
+                if(!(in>>id>>count)||id!=i||count!=n.num_input) return false;
+                for(unsigned j=0;j<count;++j)
+                    if(!(in>>n.w[j])||!std::isfinite(n.w[j])||std::fabs(n.w[j])>1e6) return false;
+                for(unsigned j=0;j<count;++j) {
+                    unsigned connection=0;
+                    if(!(in>>connection)||connection!=n.connection[j]->global_id) return false;
+                }
+                int activation=0,discriminant=0;
+                if(!(in>>activation>>discriminant)||activation!=n.activation||discriminant!=n.discriminant)
+                    return false;
+            }
+            unsigned layers=0; if(!(in>>layers)||layers!=3) return false;
+            for(unsigned i=0;i<3;++i) {
+                unsigned count=0; if(!(in>>count)||count!=trial.net_->layers[i].num_of_neurons) return false;
+                for(unsigned j=0;j<count;++j) {
+                    unsigned id=0;
+                    if(!(in>>id)||id!=trial.net_->layers[i].neurons[j].global_id) return false;
+                }
+            }
+            in>>std::ws; if(!in.eof()) return false;
+            swap(trial); return true;
+        } catch(const std::exception&) { return false; }
     }
 
 private:
