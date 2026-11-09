@@ -305,6 +305,8 @@ struct AvatarSkeleton {
 // Ground plane + obstacle pillars + goal beacon. The avatar must navigate
 // from spawn to the beacon while avoiding obstacles.
 struct GameWorld {
+    static constexpr Vec3 PlayerSpawn{-4.5f, 0.0f, -1.4f};
+    static constexpr Vec3 ParkedVehicleSpawn{-5.5f, 0.0f, -2.6f};
     struct Pillar { Vec3 pos; float radius; float height; };
     struct Building { Vec3 pos; float w{0}, d{0}, h{0}; }; // axis-aligned box, centred on pos
     struct RoadStrip { float x0{0}, z0{0}, x1{0}, z1{1}, width{3}; }; // axis-aligned segment
@@ -319,7 +321,7 @@ struct GameWorld {
     bool questShardVisible{true};
     bool beaconRestored{false};
     bool questComplete{false};
-    Vec3 vehiclePos{-5.5f, 0.0f, -2.6f};
+    Vec3 vehiclePos{ParkedVehicleSpawn};
     float vehicleHeading{0.0f};
     float vehicleWheelPhase{0.0f};
     bool vehicleOccupied{false};
@@ -7776,8 +7778,7 @@ public:
     uint64_t trainingSteps() const { return trainingSteps_; }
     float lastLoss() const { return lastLoss_; }
 
-    // One online gradient-descent pass over the rolling buffer. Budgeted to
-    // a few milliseconds: gamma=0.08, maxiter=8 (empirically stable).
+    // One bounded online gradient-descent iteration over the recent samples.
     bool train() {
         if (!net_ || samples_.empty()) return false;
         const int n = (int)samples_.size();
@@ -7787,16 +7788,17 @@ public:
             // alloc_default pre-ensures only 32 neurons x 16 fan-in; our net
             // is 38 neurons with fan-in 20 - grow the point buffers explicitly.
             network_config_ensure(cfg_, FeatureSize + HiddenSize + OutputSize, FeatureSize);
-            cfg_->verbosity = OFF;
-            cfg_->optimization_type = GRADIENT_DESCENT;
-            cfg_->error_type = L2;
-            // gamma set per-pass by the adaptive schedule below
-            cfg_->maxiter = 1;
-            cfg_->accuracy = 1e-4;
-            cfg_->wmin = -1.0;
-            cfg_->wmax = 1.0;
-            cfg_->nxw = 1000;
         }
+        // load() also allocates cfg_, with maxiter=0 by default. Configure
+        // training for both fresh and restored networks on every pass.
+        cfg_->verbosity = OFF;
+        cfg_->optimization_type = GRADIENT_DESCENT;
+        cfg_->error_type = L2;
+        cfg_->maxiter = 1;
+        cfg_->accuracy = 1e-4;
+        cfg_->wmin = -1.0;
+        cfg_->wmax = 1.0;
+        cfg_->nxw = 1000;
         // Train on the most recent TrainBatch samples: a full 256-point
         // pass costs ~600ms (central-difference gradient_descent), while a
         // 16-point single-iteration pass costs ~5ms - safe for the frame
@@ -9900,8 +9902,8 @@ struct MotorProposal {
     std::optional<DteLocalMotorSeal> localDteSeal;
 };
 struct Body {
-    Vec3 position{0,0,0}; float heading{0}, speed{0}, steering{0}, wheelPhase{0};
-    Vec3 cartPosition{1.5f,0,0};
+    Vec3 position{avatar3d::GameWorld::PlayerSpawn}; float heading{0}, speed{0}, steering{0}, wheelPhase{0};
+    Vec3 cartPosition{avatar3d::GameWorld::ParkedVehicleSpawn};
     float cartHeading{0};
     bool occupied{false}, contact{false}; int gear{0}; uint64_t sequence{0};
 };
@@ -9939,7 +9941,6 @@ class BodyEffector {
             const float dx=p.x-lamp.pos.x, dz=p.z-lamp.pos.z;
             if (dx*dx+dz*dz<(radius+0.20f)*(radius+0.20f)) return false;
         }
-        return false;
         if (distance2(p,w.npcPos)<(radius+0.55f)*(radius+0.55f)) return false;
         if (radius>0.5f &&
             (distance2(p,w.goal)<(radius+0.35f)*(radius+0.35f) ||
@@ -10817,7 +10818,7 @@ struct GTAngelAGI {
             std::string("v27 NN missing: ")+neuralPolicy.error());
         addLog("N: local Q learning / M: NN learning / C: capture / F4: learning monitor");
     }
-    avatar3d::Vec3 navPos{-4.5f, 0.0f, -1.4f};
+    avatar3d::Vec3 navPos{avatar3d::GameWorld::PlayerSpawn};
     float navHeading{0.0f};
     float navSpeed{0.0f};
     float navMeanContradiction{0.0f};
@@ -10901,9 +10902,7 @@ struct GTAngelAGI {
         gameplay.reset(navWorld);
         cns.reset();
         invalidateEcho();
-        navPos = avatar3d::Vec3{-4.5f, 0.0f, -1.4f};
-        navHeading = 0.0f;
-        navSpeed = 0.0f;
+        syncBodyFromCns();
         navMeanContradiction = 0.0f;
         navEpisodeSteps = 0;
         avatar.pose(navPos, navHeading, 0.0f, 0.0f);
@@ -10974,16 +10973,51 @@ struct GTAngelAGI {
     // injection, and NO API hijacking. Reports via addLog() and JSON files.
     int runSelfTest() {
         int checks=0,failed=0;
+        std::vector<std::string> checkResults;
         auto ck=[&](bool ok,const char* text){
             ++checks; if(!ok)++failed;
-            addLog(std::string(ok?"[SELFTEST PASS] ":"[SELFTEST FAIL] ")+text);
+            checkResults.push_back(std::string(ok?"[SELFTEST PASS] ":"[SELFTEST FAIL] ")+text);
+            addLog(checkResults.back());
         };
         auto magnitude=[&](const avatar3d::NavTrainer& q){
             double s=0;for(const auto& a:q.Q)for(const auto& b:a)for(const auto& c:b)for(float v:c)s+=std::fabs(v);return s;};
         navWorld.generate(1337,48); gameplay.reset(navWorld); cns.reset(); syncBodyFromCns();
+        ck(avatar3d::len(navPos-avatar3d::GameWorld::PlayerSpawn)<1e-5f &&
+           avatar3d::len(navWorld.vehiclePos-avatar3d::GameWorld::ParkedVehicleSpawn)<1e-5f,
+           "CNS reset and rendered world share street spawn");
+        {
+            // Exercise the real motor authority and swept clearance, not the
+            // separate GameWorld::collides() query.
+            auto fixture=navWorld;
+            fixture.pillars.clear(); fixture.buildings.clear(); fixture.props.clear();
+            fixture.traffic.clear(); fixture.walkers.clear();
+            fixture.npcPos={40,0,40}; fixture.ambX=40; fixture.busZ=40;
+            v20cns::Runtime motor;
+            const auto initial=motor.body().position;
+            v20cns::Context ctx{1,1,.05f,true,false};
+            const auto moved=motor.motor(v20cns::Source::HumanLocal,1,.2f,0,0,true,ctx,fixture);
+            ck(moved==v20cns::SpinalReflex::Verdict::Accepted &&
+               avatar3d::len(motor.body().position-initial)>.09f,
+               "clear street accepts translation as well as turning");
+            motor.reset();
+            fixture.pillars.push_back({initial+avatar3d::Vec3{0,0,.6f},.30f,3});
+            for(int i=0;i<10;++i) {
+                ++ctx.frame; ++ctx.nowMs;
+                motor.motor(v20cns::Source::HumanLocal,1,0,0,0,true,ctx,fixture);
+            }
+            ck(motor.body().contact &&
+               avatar3d::len(motor.body().position-fixture.pillars.back().pos)>=.55f-1e-4f,
+               "swept movement still blocks pillar penetration");
+            const auto before=motor.body().position;
+            ++ctx.frame; ++ctx.nowMs;
+            ck(motor.motor(v20cns::Source::Neural,1,0,0,0,true,ctx,fixture)==
+                   v20cns::SpinalReflex::Verdict::Untrusted &&
+               avatar3d::len(motor.body().position-before)<1e-5f,
+               "raw neural proposals cannot bypass local motor authority");
+        }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
-        highResRenderer.render(navWorld,avatar,{0,2.5f,-4},0,-0.4f,true);
+        highResRenderer.render(navWorld,avatar,navPos+avatar3d::Vec3{0,2.5f,-4},0,-0.4f,true);
         perceptionPyramid.derive(highResRenderer.framebuffer);
         perceptionPyramid.copyToLegacy(navRenderer); perceptionPyramid.mapToTriz(trizMap);
         initializeLearning();
@@ -11088,6 +11122,7 @@ struct GTAngelAGI {
             const int samplesBefore = gnnMotor.totalSamples();
             ck(samplesBefore > 0, "GNN collected demonstrations from accepted actions");
             ck(gnnMotor.trainingUpdates() > 0, "GNN online training ran in-frame");
+            ck(gnnMotor.trainingSteps() > 0, "GNN online training executes gradient steps after load");
             ck(lastNeuralTrainLoss >= 0.0f && std::isfinite(lastNeuralTrainLoss), "GNN training loss is finite");
             // Round-trip: capture inference, save, reload, compare.
             float probeFeat[v27gnn::FeatureSize];
@@ -11140,8 +11175,11 @@ struct GTAngelAGI {
                 if (navWorld.collides(pk.pos)) { pickupsClear = false; break; }
             ck(pickupsClear, "world pickups clear of geometry");
             bool propsClear = true;
-            for (const auto& lamp : navWorld.props)
-                if (navWorld.collides(lamp.pos)) { propsClear = false; break; }
+            for (size_t i=0;i<navWorld.props.size();++i) {
+                auto otherGeometry=navWorld;
+                otherGeometry.props.erase(otherGeometry.props.begin()+i);
+                if (otherGeometry.collides(navWorld.props[i].pos)) { propsClear = false; break; }
+            }
             ck(propsClear, "world props clear of geometry");
             // Lanes stay clear across a full ping-pong sweep.
             avatar3d::GameWorld sweepWorld;
@@ -11330,7 +11368,7 @@ struct GTAngelAGI {
                 <<"readout_l1: "<<esn.readoutL1()<<"\ntriz_derivative: "<<lastTrizDerivative<<"\n"
                 <<"rls_updates: "<<esn.rlsUpdates<<"\nconcepts: "<<episodic.concepts.size()<<"\n"
                 <<"plasticity: "<<esn.plasticityUpdates<<"\nconsolidations: "<<episodic.consolidations<<"\n";
-            for(const auto& line:log) txt<<line<<"\n";
+            for(const auto& line:checkResults) txt<<line<<"\n";
         }
         addLog(std::string("V27 SELFTEST ")+std::to_string(checks-failed)+"/"+std::to_string(checks)
             +" NN_frames="+std::to_string(neuralFrames)+" Q_updates="+std::to_string(navLearning.updates)
@@ -13434,6 +13472,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
         g_agi.cns.reset();
         g_agi.syncBodyFromCns();
         g_agi.initializeLearning();
+        const auto start=g_agi.navPos;
+        fprintf(nd,"spawn(%.2f,%.2f) cart(%.2f,%.2f)\n",start.x,start.z,
+            g_agi.navWorld.vehiclePos.x,g_agi.navWorld.vehiclePos.z);
         for (int i = 1; i <= 300; ++i) {
             g_agi.tick();
             if (i % 50 == 0) {
@@ -13441,6 +13482,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
                     i, g_agi.navPos.x, g_agi.navPos.z, g_agi.navHeading, g_agi.navGoalCompass,
                     g_agi.agentLoop.breaker().stateName(),
                     g_agi.agentLoop.stats().lastError.c_str());
+                fprintf(nd,"  motor=%d contact=%d nn_frames=%llu gnn_samples=%d train=%llu loss=%.5f shield_accepted=%llu\n",
+                    (int)g_agi.lastMotorVerdict,g_agi.cns.body().contact,
+                    (unsigned long long)g_agi.neuralFrames,g_agi.gnnMotor.totalSamples(),
+                    (unsigned long long)g_agi.neuralTrainingUpdates,g_agi.lastNeuralTrainLoss,
+                    (unsigned long long)g_agi.neuralAccepted);
                 fflush(nd);
             }
         }
@@ -13449,9 +13495,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
             fprintf(nd,"%-14s exec=%5llu fail=%5llu %.2fms\n",
                 s.name.c_str(), (unsigned long long)s.executions,
                 (unsigned long long)s.failures, s.lastDurationMs);
+        const float displacement=avatar3d::len(g_agi.navPos-start);
+        const bool navigated=displacement>.25f && g_agi.neuralFrames>0 &&
+            g_agi.neuralTrainingUpdates>0 && std::isfinite(g_agi.lastNeuralTrainLoss);
+        fprintf(nd,"displacement=%.3f navigation_and_learning=%s\n",
+            displacement,navigated?"PASS":"FAIL");
         fflush(nd);
         if (nd != stderr) fclose(nd);
-        return 0;
+        return navigated?0:1;
     }
     if (strstr(GetCommandLineA(),"--selftest")) {
         // In-process self-test: no window, no injected input, no capture APIs.

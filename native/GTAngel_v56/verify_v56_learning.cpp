@@ -100,6 +100,18 @@ int main(){
         check(gnn2.create()&&gnn2.load(tmpNet),"GNN reload");
         float t2=0,f2=0;
         check(gnn2.infer(feat,t2,f2)&&std::fabs(t2-t1)<1e-4f&&std::fabs(f2-f1)<1e-4f,"GNN round-trip exact");
+        // A restored network must take real gradient steps, not just report
+        // training calls. Teach the opposite action and measure its output.
+        const float beforeError=(t2+0.4f)*(t2+0.4f)+(f2+0.6f)*(f2+0.6f);
+        for(int it=0;it<80;++it) {
+            gnn2.remember(feat,-0.4f,-0.6f);
+            gnn2.train();
+        }
+        check(gnn2.trainingSteps()>0,"restored GNN performs gradient steps");
+        float t3=0,f3=0;
+        check(gnn2.infer(feat,t3,f3) &&
+              (t3+0.4f)*(t3+0.4f)+(f3+0.6f)*(f3+0.6f)<beforeError*0.5f,
+              "restored GNN learns a changed target");
         std::remove(tmpNet.c_str());
     }
     policy.reset();check(policy.loaded(),"recurrent reset keeps weights");

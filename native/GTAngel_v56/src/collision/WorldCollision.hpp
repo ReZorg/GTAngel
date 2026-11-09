@@ -760,6 +760,8 @@ static_assert(op_CColSphere_Set(CColSphere_ZppContract{}, apply_CColSphere_Set(C
 } // namespace zpp_collision_spec
 #endif // GTANGEL_ZPP_COLLISION_SPEC_GUARD
 struct GameWorld {
+    static constexpr Vec3 PlayerSpawn{-4.5f, 0.0f, -1.4f};
+    static constexpr Vec3 ParkedVehicleSpawn{-5.5f, 0.0f, -2.6f};
     struct Pillar { Vec3 pos; float radius; float height; };
     struct Building { Vec3 pos; float w{0}, d{0}, h{0}; }; // axis-aligned box, centred on pos
     struct RoadStrip { float x0{0}, z0{0}, x1{0}, z1{1}, width{3}; }; // axis-aligned segment
@@ -774,7 +776,7 @@ struct GameWorld {
     bool questShardVisible{true};
     bool beaconRestored{false};
     bool questComplete{false};
-    Vec3 vehiclePos{-5.5f, 0.0f, -2.6f};
+    Vec3 vehiclePos{ParkedVehicleSpawn};
     float vehicleHeading{0.0f};
     float vehicleWheelPhase{0.0f};
     bool vehicleOccupied{false};

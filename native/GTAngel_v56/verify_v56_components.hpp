@@ -273,6 +273,8 @@ struct AvatarSkeleton {
 // Ground plane + obstacle pillars + goal beacon. The avatar must navigate
 // from spawn to the beacon while avoiding obstacles.
 struct GameWorld {
+    static constexpr Vec3 PlayerSpawn{-4.5f, 0.0f, -1.4f};
+    static constexpr Vec3 ParkedVehicleSpawn{-5.5f, 0.0f, -2.6f};
     struct Pillar { Vec3 pos; float radius; float height; };
     struct Building { Vec3 pos; float w{0}, d{0}, h{0}; }; // axis-aligned box, centred on pos
     struct RoadStrip { float x0{0}, z0{0}, x1{0}, z1{1}, width{3}; }; // axis-aligned segment
@@ -287,7 +289,7 @@ struct GameWorld {
     bool questShardVisible{true};
     bool beaconRestored{false};
     bool questComplete{false};
-    Vec3 vehiclePos{-5.5f, 0.0f, -2.6f};
+    Vec3 vehiclePos{ParkedVehicleSpawn};
     float vehicleHeading{0.0f};
     float vehicleWheelPhase{0.0f};
     bool vehicleOccupied{false};
@@ -4604,8 +4606,7 @@ public:
     uint64_t trainingSteps() const { return trainingSteps_; }
     float lastLoss() const { return lastLoss_; }
 
-    // One online gradient-descent pass over the rolling buffer. Budgeted to
-    // a few milliseconds: gamma=0.08, maxiter=8 (empirically stable).
+    // One bounded online gradient-descent iteration over the recent samples.
     bool train() {
         if (!net_ || samples_.empty()) return false;
         const int n = (int)samples_.size();
@@ -4615,16 +4616,17 @@ public:
             // alloc_default pre-ensures only 32 neurons x 16 fan-in; our net
             // is 38 neurons with fan-in 20 - grow the point buffers explicitly.
             network_config_ensure(cfg_, FeatureSize + HiddenSize + OutputSize, FeatureSize);
-            cfg_->verbosity = OFF;
-            cfg_->optimization_type = GRADIENT_DESCENT;
-            cfg_->error_type = L2;
-            // gamma set per-pass by the adaptive schedule below
-            cfg_->maxiter = 1;
-            cfg_->accuracy = 1e-4;
-            cfg_->wmin = -1.0;
-            cfg_->wmax = 1.0;
-            cfg_->nxw = 1000;
         }
+        // load() also allocates cfg_, with maxiter=0 by default. Configure
+        // training for both fresh and restored networks on every pass.
+        cfg_->verbosity = OFF;
+        cfg_->optimization_type = GRADIENT_DESCENT;
+        cfg_->error_type = L2;
+        cfg_->maxiter = 1;
+        cfg_->accuracy = 1e-4;
+        cfg_->wmin = -1.0;
+        cfg_->wmax = 1.0;
+        cfg_->nxw = 1000;
         // Train on the most recent TrainBatch samples: a full 256-point
         // pass costs ~600ms (central-difference gradient_descent), while a
         // 16-point single-iteration pass costs ~5ms - safe for the frame

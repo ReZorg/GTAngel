@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-let out=fs.readFileSync('gtangel_agi_v26_base.cpp','utf8');
+let out=fs.readFileSync('gtangel_agi_v26_base.cpp','utf8').replace(/\r\n/g, '\n');
 function once(a,b,label){const i=out.indexOf(a);if(i<0||out.indexOf(a,i+a.length)>=0)throw Error('missing/ambiguous '+label);out=out.slice(0,i)+b+out.slice(i+a.length);}
 once('} // namespace v17policy','} // namespace v17policy\n\n'+fs.readFileSync('nav_learning_observer.hpp','utf8').replace('#pragma once\n',''),'learning observer');
 once('    bool navTraining{false};','    bool navTraining{true}; // observe accepted human actions; never authorize Route','default observation');
@@ -309,8 +309,7 @@ once('        for (const auto& pillar : w.pillars)\n            if (distance2(p,
         for (const auto& lamp : w.props) {
             const float dx=p.x-lamp.pos.x, dz=p.z-lamp.pos.z;
             if (dx*dx+dz*dz<(radius+0.20f)*(radius+0.20f)) return false;
-        }
-        return false;`, 'building clearance');
+        }`, 'building clearance');
 once('    bool toggleCart(const avatar3d::GameWorld& w, Vec3 parked) {',`    SpinalReflex::Verdict motorDte(const DteLocalMotorSeal& seal,float forward,float turn,
             float uncertainty,float risk,const Context& ctx,const avatar3d::GameWorld& world) {
         MotorProposal p; p.evidence={++sequence_,ctx.frame,ctx.nowMs,100,1.0f};
@@ -601,16 +600,51 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
     // injection, and NO API hijacking. Reports via addLog() and JSON files.
     int runSelfTest() {
         int checks=0,failed=0;
+        std::vector<std::string> checkResults;
         auto ck=[&](bool ok,const char* text){
             ++checks; if(!ok)++failed;
-            addLog(std::string(ok?"[SELFTEST PASS] ":"[SELFTEST FAIL] ")+text);
+            checkResults.push_back(std::string(ok?"[SELFTEST PASS] ":"[SELFTEST FAIL] ")+text);
+            addLog(checkResults.back());
         };
         auto magnitude=[&](const avatar3d::NavTrainer& q){
             double s=0;for(const auto& a:q.Q)for(const auto& b:a)for(const auto& c:b)for(float v:c)s+=std::fabs(v);return s;};
         navWorld.generate(1337,48); gameplay.reset(navWorld); cns.reset(); syncBodyFromCns();
+        ck(avatar3d::len(navPos-avatar3d::GameWorld::PlayerSpawn)<1e-5f &&
+           avatar3d::len(navWorld.vehiclePos-avatar3d::GameWorld::ParkedVehicleSpawn)<1e-5f,
+           "CNS reset and rendered world share street spawn");
+        {
+            // Exercise the real motor authority and swept clearance, not the
+            // separate GameWorld::collides() query.
+            auto fixture=navWorld;
+            fixture.pillars.clear(); fixture.buildings.clear(); fixture.props.clear();
+            fixture.traffic.clear(); fixture.walkers.clear();
+            fixture.npcPos={40,0,40}; fixture.ambX=40; fixture.busZ=40;
+            v20cns::Runtime motor;
+            const auto initial=motor.body().position;
+            v20cns::Context ctx{1,1,.05f,true,false};
+            const auto moved=motor.motor(v20cns::Source::HumanLocal,1,.2f,0,0,true,ctx,fixture);
+            ck(moved==v20cns::SpinalReflex::Verdict::Accepted &&
+               avatar3d::len(motor.body().position-initial)>.09f,
+               "clear street accepts translation as well as turning");
+            motor.reset();
+            fixture.pillars.push_back({initial+avatar3d::Vec3{0,0,.6f},.30f,3});
+            for(int i=0;i<10;++i) {
+                ++ctx.frame; ++ctx.nowMs;
+                motor.motor(v20cns::Source::HumanLocal,1,0,0,0,true,ctx,fixture);
+            }
+            ck(motor.body().contact &&
+               avatar3d::len(motor.body().position-fixture.pillars.back().pos)>=.55f-1e-4f,
+               "swept movement still blocks pillar penetration");
+            const auto before=motor.body().position;
+            ++ctx.frame; ++ctx.nowMs;
+            ck(motor.motor(v20cns::Source::Neural,1,0,0,0,true,ctx,fixture)==
+                   v20cns::SpinalReflex::Verdict::Untrusted &&
+               avatar3d::len(motor.body().position-before)<1e-5f,
+               "raw neural proposals cannot bypass local motor authority");
+        }
         avatar.pose(navPos,0,0,0);
         highResRenderer.loadDteAsset("");
-        highResRenderer.render(navWorld,avatar,{0,2.5f,-4},0,-0.4f,true);
+        highResRenderer.render(navWorld,avatar,navPos+avatar3d::Vec3{0,2.5f,-4},0,-0.4f,true);
         perceptionPyramid.derive(highResRenderer.framebuffer);
         perceptionPyramid.copyToLegacy(navRenderer); perceptionPyramid.mapToTriz(trizMap);
         initializeLearning();
@@ -722,7 +756,7 @@ once('    void addLog(const std::string& m) {', `    // Full in-process runtime 
                 <<"readout_l1: "<<esn.readoutL1()<<"\\ntriz_derivative: "<<lastTrizDerivative<<"\\n"
                 <<"rls_updates: "<<esn.rlsUpdates<<"\\nconcepts: "<<episodic.concepts.size()<<"\\n"
                 <<"plasticity: "<<esn.plasticityUpdates<<"\\nconsolidations: "<<episodic.consolidations<<"\\n";
-            for(const auto& line:log) txt<<line<<"\\n";
+            for(const auto& line:checkResults) txt<<line<<"\\n";
         }
         addLog(std::string("V27 SELFTEST ")+std::to_string(checks-failed)+"/"+std::to_string(checks)
             +" NN_frames="+std::to_string(neuralFrames)+" Q_updates="+std::to_string(navLearning.updates)
@@ -1305,6 +1339,7 @@ once(`        ck(esn.plasticityUpdates > 0, "intrinsic plasticity active");`, ` 
             const int samplesBefore = gnnMotor.totalSamples();
             ck(samplesBefore > 0, "GNN collected demonstrations from accepted actions");
             ck(gnnMotor.trainingUpdates() > 0, "GNN online training ran in-frame");
+            ck(gnnMotor.trainingSteps() > 0, "GNN online training executes gradient steps after load");
             ck(lastNeuralTrainLoss >= 0.0f && std::isfinite(lastNeuralTrainLoss), "GNN training loss is finite");
             // Round-trip: capture inference, save, reload, compare.
             float probeFeat[v27gnn::FeatureSize];
@@ -2183,8 +2218,11 @@ once(`            ck(walkersClear, "world walkers clear of protected zones");`,
                 if (navWorld.collides(pk.pos)) { pickupsClear = false; break; }
             ck(pickupsClear, "world pickups clear of geometry");
             bool propsClear = true;
-            for (const auto& lamp : navWorld.props)
-                if (navWorld.collides(lamp.pos)) { propsClear = false; break; }
+            for (size_t i=0;i<navWorld.props.size();++i) {
+                auto otherGeometry=navWorld;
+                otherGeometry.props.erase(otherGeometry.props.begin()+i);
+                if (otherGeometry.collides(navWorld.props[i].pos)) { propsClear = false; break; }
+            }
             ck(propsClear, "world props clear of geometry");
             // Lanes stay clear across a full ping-pong sweep.
             avatar3d::GameWorld sweepWorld;
@@ -2589,6 +2627,9 @@ once(`    if (strstr(GetCommandLineA(),"--selftest")) {`,
         g_agi.cns.reset();
         g_agi.syncBodyFromCns();
         g_agi.initializeLearning();
+        const auto start=g_agi.navPos;
+        fprintf(nd,"spawn(%.2f,%.2f) cart(%.2f,%.2f)\\n",start.x,start.z,
+            g_agi.navWorld.vehiclePos.x,g_agi.navWorld.vehiclePos.z);
         for (int i = 1; i <= 300; ++i) {
             g_agi.tick();
             if (i % 50 == 0) {
@@ -2596,6 +2637,11 @@ once(`    if (strstr(GetCommandLineA(),"--selftest")) {`,
                     i, g_agi.navPos.x, g_agi.navPos.z, g_agi.navHeading, g_agi.navGoalCompass,
                     g_agi.agentLoop.breaker().stateName(),
                     g_agi.agentLoop.stats().lastError.c_str());
+                fprintf(nd,"  motor=%d contact=%d nn_frames=%llu gnn_samples=%d train=%llu loss=%.5f shield_accepted=%llu\\n",
+                    (int)g_agi.lastMotorVerdict,g_agi.cns.body().contact,
+                    (unsigned long long)g_agi.neuralFrames,g_agi.gnnMotor.totalSamples(),
+                    (unsigned long long)g_agi.neuralTrainingUpdates,g_agi.lastNeuralTrainLoss,
+                    (unsigned long long)g_agi.neuralAccepted);
                 fflush(nd);
             }
         }
@@ -2604,9 +2650,14 @@ once(`    if (strstr(GetCommandLineA(),"--selftest")) {`,
             fprintf(nd,"%-14s exec=%5llu fail=%5llu %.2fms\\n",
                 s.name.c_str(), (unsigned long long)s.executions,
                 (unsigned long long)s.failures, s.lastDurationMs);
+        const float displacement=avatar3d::len(g_agi.navPos-start);
+        const bool navigated=displacement>.25f && g_agi.neuralFrames>0 &&
+            g_agi.neuralTrainingUpdates>0 && std::isfinite(g_agi.lastNeuralTrainLoss);
+        fprintf(nd,"displacement=%.3f navigation_and_learning=%s\\n",
+            displacement,navigated?"PASS":"FAIL");
         fflush(nd);
         if (nd != stderr) fclose(nd);
-        return 0;
+        return navigated?0:1;
     }
     if (strstr(GetCommandLineA(),"--selftest")) {`, 'LW17-DBG navdiag');
 
@@ -8445,4 +8496,3 @@ fs.writeFileSync('gtangel_agi_v56_renderer.hpp',out.slice(a,b+'} // namespace v1
 const c=out.indexOf('namespace v20cns {\nusing avatar3d::Vec3'),d=out.indexOf('} // namespace v20cns',c);
 fs.writeFileSync('gtangel_agi_v56_cns.hpp','#include <optional>\nstruct GTAngelAGI;\n'+out.slice(c,d+'} // namespace v20cns'.length));
 console.log('v56 generated SHA256 '+crypto.createHash('sha256').update(out).digest('hex'));
-

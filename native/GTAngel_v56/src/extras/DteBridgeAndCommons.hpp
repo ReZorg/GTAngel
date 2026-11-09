@@ -999,8 +999,8 @@ struct MotorProposal {
     std::optional<DteLocalMotorSeal> localDteSeal;
 };
 struct Body {
-    Vec3 position{0,0,0}; float heading{0}, speed{0}, steering{0}, wheelPhase{0};
-    Vec3 cartPosition{1.5f,0,0};
+    Vec3 position{avatar3d::GameWorld::PlayerSpawn}; float heading{0}, speed{0}, steering{0}, wheelPhase{0};
+    Vec3 cartPosition{avatar3d::GameWorld::ParkedVehicleSpawn};
     float cartHeading{0};
     bool occupied{false}, contact{false}; int gear{0}; uint64_t sequence{0};
 };
@@ -1038,7 +1038,6 @@ class BodyEffector {
             const float dx=p.x-lamp.pos.x, dz=p.z-lamp.pos.z;
             if (dx*dx+dz*dz<(radius+0.20f)*(radius+0.20f)) return false;
         }
-        return false;
         if (distance2(p,w.npcPos)<(radius+0.55f)*(radius+0.55f)) return false;
         if (radius>0.5f &&
             (distance2(p,w.goal)<(radius+0.35f)*(radius+0.35f) ||

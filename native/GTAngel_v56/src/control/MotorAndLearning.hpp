@@ -3124,8 +3124,7 @@ public:
     uint64_t trainingSteps() const { return trainingSteps_; }
     float lastLoss() const { return lastLoss_; }
 
-    // One online gradient-descent pass over the rolling buffer. Budgeted to
-    // a few milliseconds: gamma=0.08, maxiter=8 (empirically stable).
+    // One bounded online gradient-descent iteration over the recent samples.
     bool train() {
         if (!net_ || samples_.empty()) return false;
         const int n = (int)samples_.size();
@@ -3135,16 +3134,17 @@ public:
             // alloc_default pre-ensures only 32 neurons x 16 fan-in; our net
             // is 38 neurons with fan-in 20 - grow the point buffers explicitly.
             network_config_ensure(cfg_, FeatureSize + HiddenSize + OutputSize, FeatureSize);
-            cfg_->verbosity = OFF;
-            cfg_->optimization_type = GRADIENT_DESCENT;
-            cfg_->error_type = L2;
-            // gamma set per-pass by the adaptive schedule below
-            cfg_->maxiter = 1;
-            cfg_->accuracy = 1e-4;
-            cfg_->wmin = -1.0;
-            cfg_->wmax = 1.0;
-            cfg_->nxw = 1000;
         }
+        // load() also allocates cfg_, with maxiter=0 by default. Configure
+        // training for both fresh and restored networks on every pass.
+        cfg_->verbosity = OFF;
+        cfg_->optimization_type = GRADIENT_DESCENT;
+        cfg_->error_type = L2;
+        cfg_->maxiter = 1;
+        cfg_->accuracy = 1e-4;
+        cfg_->wmin = -1.0;
+        cfg_->wmax = 1.0;
+        cfg_->nxw = 1000;
         // Train on the most recent TrainBatch samples: a full 256-point
         // pass costs ~600ms (central-difference gradient_descent), while a
         // 16-point single-iteration pass costs ~5ms - safe for the frame

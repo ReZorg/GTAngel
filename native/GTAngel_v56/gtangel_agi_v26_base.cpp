@@ -173,6 +173,8 @@ struct AvatarSkeleton {
 // Ground plane + obstacle pillars + goal beacon. The avatar must navigate
 // from spawn to the beacon while avoiding obstacles.
 struct GameWorld {
+    static constexpr Vec3 PlayerSpawn{-4.5f, 0.0f, -1.4f};
+    static constexpr Vec3 ParkedVehicleSpawn{-5.5f, 0.0f, -2.6f};
     struct Pillar { Vec3 pos; float radius; float height; };
     std::vector<Pillar> pillars;
     Vec3 goal{8.0f, 0.0f, 8.0f};
@@ -183,7 +185,7 @@ struct GameWorld {
     bool questShardVisible{true};
     bool beaconRestored{false};
     bool questComplete{false};
-    Vec3 vehiclePos{-5.5f, 0.0f, -2.6f};
+    Vec3 vehiclePos{ParkedVehicleSpawn};
     float vehicleHeading{0.0f};
     float vehicleWheelPhase{0.0f};
     bool vehicleOccupied{false};
@@ -7115,8 +7117,8 @@ struct MotorProposal {
     bool ethicsApproved{true};
 };
 struct Body {
-    Vec3 position{0,0,0}; float heading{0}, speed{0}, steering{0}, wheelPhase{0};
-    Vec3 cartPosition{1.5f,0,0};
+    Vec3 position{avatar3d::GameWorld::PlayerSpawn}; float heading{0}, speed{0}, steering{0}, wheelPhase{0};
+    Vec3 cartPosition{avatar3d::GameWorld::ParkedVehicleSpawn};
     float cartHeading{0};
     bool occupied{false}, contact{false}; int gear{0}; uint64_t sequence{0};
 };
@@ -7925,7 +7927,7 @@ struct GTAngelAGI {
     avatar3d::EgocentricRenderer navRenderer;
     avatar3d::TrizMapping trizMap;
     avatar3d::NavTrainer navTrainer;
-    avatar3d::Vec3 navPos{-4.5f, 0.0f, -1.4f};
+    avatar3d::Vec3 navPos{avatar3d::GameWorld::PlayerSpawn};
     float navHeading{0.0f};
     float navSpeed{0.0f};
     float navMeanContradiction{0.0f};
@@ -8007,9 +8009,7 @@ struct GTAngelAGI {
         gameplay.reset(navWorld);
         cns.reset();
         invalidateEcho();
-        navPos = avatar3d::Vec3{-4.5f, 0.0f, -1.4f};
-        navHeading = 0.0f;
-        navSpeed = 0.0f;
+        syncBodyFromCns();
         navMeanContradiction = 0.0f;
         navEpisodeSteps = 0;
         avatar.pose(navPos, navHeading, 0.0f, 0.0f);

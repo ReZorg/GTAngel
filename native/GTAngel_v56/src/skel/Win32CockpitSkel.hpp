@@ -1486,6 +1486,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
         g_agi.cns.reset();
         g_agi.syncBodyFromCns();
         g_agi.initializeLearning();
+        const auto start=g_agi.navPos;
+        fprintf(nd,"spawn(%.2f,%.2f) cart(%.2f,%.2f)\n",start.x,start.z,
+            g_agi.navWorld.vehiclePos.x,g_agi.navWorld.vehiclePos.z);
         for (int i = 1; i <= 300; ++i) {
             g_agi.tick();
             if (i % 50 == 0) {
@@ -1493,6 +1496,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
                     i, g_agi.navPos.x, g_agi.navPos.z, g_agi.navHeading, g_agi.navGoalCompass,
                     g_agi.agentLoop.breaker().stateName(),
                     g_agi.agentLoop.stats().lastError.c_str());
+                fprintf(nd,"  motor=%d contact=%d nn_frames=%llu gnn_samples=%d train=%llu loss=%.5f shield_accepted=%llu\n",
+                    (int)g_agi.lastMotorVerdict,g_agi.cns.body().contact,
+                    (unsigned long long)g_agi.neuralFrames,g_agi.gnnMotor.totalSamples(),
+                    (unsigned long long)g_agi.neuralTrainingUpdates,g_agi.lastNeuralTrainLoss,
+                    (unsigned long long)g_agi.neuralAccepted);
                 fflush(nd);
             }
         }
@@ -1501,9 +1509,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow) {
             fprintf(nd,"%-14s exec=%5llu fail=%5llu %.2fms\n",
                 s.name.c_str(), (unsigned long long)s.executions,
                 (unsigned long long)s.failures, s.lastDurationMs);
+        const float displacement=avatar3d::len(g_agi.navPos-start);
+        const bool navigated=displacement>.25f && g_agi.neuralFrames>0 &&
+            g_agi.neuralTrainingUpdates>0 && std::isfinite(g_agi.lastNeuralTrainLoss);
+        fprintf(nd,"displacement=%.3f navigation_and_learning=%s\n",
+            displacement,navigated?"PASS":"FAIL");
         fflush(nd);
         if (nd != stderr) fclose(nd);
-        return 0;
+        return navigated?0:1;
     }
     if (strstr(GetCommandLineA(),"--selftest")) {
         // In-process self-test: no window, no injected input, no capture APIs.
