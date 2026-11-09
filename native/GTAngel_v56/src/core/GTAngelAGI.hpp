@@ -143,7 +143,7 @@ struct GTAngelAGI {
             std::string("v27 NN missing: ")+neuralPolicy.error());
         addLog("N: local Q learning / M: NN learning / C: capture / F4: learning monitor");
     }
-    avatar3d::Vec3 navPos{0, 0, 0};
+    avatar3d::Vec3 navPos{-4.5f, 0.0f, -1.4f};
     float navHeading{0.0f};
     float navSpeed{0.0f};
     float navMeanContradiction{0.0f};
@@ -227,7 +227,7 @@ struct GTAngelAGI {
         gameplay.reset(navWorld);
         cns.reset();
         invalidateEcho();
-        navPos = avatar3d::Vec3{0, 0, 0};
+        navPos = avatar3d::Vec3{-4.5f, 0.0f, -1.4f};
         navHeading = 0.0f;
         navSpeed = 0.0f;
         navMeanContradiction = 0.0f;

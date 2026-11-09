@@ -774,7 +774,7 @@ struct GameWorld {
     bool questShardVisible{true};
     bool beaconRestored{false};
     bool questComplete{false};
-    Vec3 vehiclePos{1.5f, 0.0f, 0.0f};
+    Vec3 vehiclePos{-5.5f, 0.0f, -2.6f};
     float vehicleHeading{0.0f};
     float vehicleWheelPhase{0.0f};
     bool vehicleOccupied{false};
