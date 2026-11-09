@@ -6504,9 +6504,9 @@ private:
                     const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
                     const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
                     const float r2 = cx * cx + cy * cy;
-                    if (prevId == ObjectAvatar || r2 < 1.0f || depth < 1.8f) {
+                    if (prevId == ObjectAvatar || r2 < 1.0f || depth < 3.0f) {
                         const float u = std::clamp(r2, 0.0f, 1.0f);
-                        const float alpha = (depth < 1.8f) ? 0.12f
+                        const float alpha = (depth < 3.0f) ? 0.12f
                             : ((prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u))));
                         const uint32_t bg = framebuffer.colour[index];
                         const uint8_t bgB = (uint8_t)(bg & 0xFFu);
@@ -9948,6 +9948,22 @@ class BodyEffector {
         for (const auto& b : w.buildings)
             if (std::fabs(p.x-b.pos.x)<radius+b.w*0.5f &&
                 std::fabs(p.z-b.pos.z)<radius+b.d*0.5f) return false;
+        for (const auto& lamp : w.props) {
+            const float dx=p.x-lamp.pos.x, dz=p.z-lamp.pos.z;
+            if (dx*dx+dz*dz<(radius+0.20f)*(radius+0.20f)) return false;
+        }
+        if (std::fabs(p.x-w.vehiclePos.x)<radius+1.30f &&
+            std::fabs(p.z-w.vehiclePos.z)<radius+2.30f) return false;
+        for (const auto& v : w.traffic) {
+            if (v.orbitR>0.0f) continue;
+            const float hx=(v.axis=='x')?2.50f:1.25f, hz=(v.axis=='z')?2.50f:1.25f;
+            if (std::fabs(p.x-v.pos.x)<radius+hx && std::fabs(p.z-v.pos.z)<radius+hz) return false;
+        }
+        if (std::fabs(p.x-w.ambX)<radius+2.50f && std::fabs(p.z+1.4f)<radius+1.30f) return false;
+        if (std::fabs(p.x+1.4f)<radius+1.40f && std::fabs(p.z-w.busZ)<radius+3.10f) return false;
+        for (const auto& wk : w.walkers) {
+            if (distance2(p,wk.pos)<(radius+0.45f)*(radius+0.45f)) return false;
+        }
         if (distance2(p,w.npcPos)<(radius+0.55f)*(radius+0.55f)) return false;
         if (radius>0.5f &&
             (distance2(p,w.goal)<(radius+0.35f)*(radius+0.35f) ||

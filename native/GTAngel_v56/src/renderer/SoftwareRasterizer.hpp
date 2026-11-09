@@ -273,9 +273,9 @@
                     const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
                     const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
                     const float r2 = cx * cx + cy * cy;
-                    if (prevId == ObjectAvatar || r2 < 1.0f || depth < 1.8f) {
+                    if (prevId == ObjectAvatar || r2 < 1.0f || depth < 3.0f) {
                         const float u = std::clamp(r2, 0.0f, 1.0f);
-                        const float alpha = (depth < 1.8f) ? 0.12f
+                        const float alpha = (depth < 3.0f) ? 0.12f
                             : ((prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u))));
                         const uint32_t bg = framebuffer.colour[index];
                         const uint8_t bgB = (uint8_t)(bg & 0xFFu);
