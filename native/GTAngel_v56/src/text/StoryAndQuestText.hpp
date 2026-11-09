@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/text
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/text/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/text/*.zpp
 // Modules: 3 | Formal Schemas: 121 | Free Types: 2
 // ============================================================================
 namespace zpp_text_spec {
@@ -27,7 +27,7 @@ struct tMessage_ZppContract {
     std::array<int32_t, 6> m_nNumber{}; // Z++: seq ℤ  -- bounded array [6]
     size_t m_nNumber_len{6u}; // Z++ cardinality #m_nNumber
     int32_t m_pString{0}; // Z++: seq CHAR
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nNumber_len == 6u && m_nNumber.size() == 6u)
             && (m_nFlag >= 0)
             && (m_nTime >= 0)
@@ -38,7 +38,7 @@ struct tMessage_ZppContract {
 struct tBigMessage_ZppContract {
     std::array<int32_t, 4> m_Stack{}; // Z++: seq tMessage  -- bounded array [4]
     size_t m_Stack_len{4u}; // Z++ cardinality #m_Stack
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_Stack_len == 4u && m_Stack.size() == 4u);
     }
 };
@@ -48,7 +48,7 @@ struct tPreviousBrief_ZppContract {
     std::array<int32_t, 6> m_nNumber{}; // Z++: seq ℤ  -- bounded array [6]
     size_t m_nNumber_len{6u}; // Z++ cardinality #m_nNumber
     int32_t m_pString{0}; // Z++: seq CHAR
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nNumber_len == 6u && m_nNumber.size() == 6u);
     }
 };
@@ -63,7 +63,7 @@ struct PagerMessage_ZppContract {
     int32_t unused{0}; // Z++: ℤ
     std::array<int32_t, 6> m_nNumber{}; // Z++: seq ℤ  -- bounded array [6]
     size_t m_nNumber_len{6u}; // Z++ cardinality #m_nNumber
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nNumber_len == 6u && m_nNumber.size() == 6u)
             && (m_nSpeedMs >= 0)
             && (m_nStringLength >= 0)
@@ -77,7 +77,7 @@ struct CPager_ZppContract {
     std::array<int32_t, 8> m_messages{}; // Z++: seq PagerMessage  -- bounded array [NUMPAGERMESSAGES]
     size_t m_messages_len{8u}; // Z++ cardinality #m_messages
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_messages_len == 8u && m_messages.size() == 8u)
             && (instance_addr >= 0);
     }
@@ -85,7 +85,7 @@ struct CPager_ZppContract {
 // State Schema Contract from zpp/text/Text.zpp
 struct CKeyEntry_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -93,7 +93,7 @@ struct CKeyEntry_ZppContract {
 struct CKeyArray_ZppContract {
     uint8_t entries_card{0u}; // Z++: Ref[CKeyEntry]
     int32_t numEntries{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (entries_card <= 1u);
     }
 };
@@ -102,7 +102,7 @@ struct CData_ZppContract {
     int32_t chars{0}; // Z++: seq CHAR
     int32_t numChars{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -311,7 +311,7 @@ struct QuestRuntime {
 class GameplayLoop {
     friend class v20cns::WorldEffector;
 public:
-    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v19_save.json)";
+    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v19_save.json)";
 
     MainNpc ariadne;
     QuestRuntime quest;

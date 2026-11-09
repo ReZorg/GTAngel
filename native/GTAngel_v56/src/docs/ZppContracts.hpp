@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/docs
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/docs/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/docs/*.zpp
 // Modules: 1 | Formal Schemas: 0 | Free Types: 0
 // ============================================================================
 namespace zpp_docs_spec {

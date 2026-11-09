@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/vehicles
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/vehicles/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/vehicles/*.zpp
 // Modules: 15 | Formal Schemas: 700 | Free Types: 54
 // ============================================================================
 namespace zpp_vehicles_spec {
@@ -339,7 +339,7 @@ struct CAutomobile_ZppContract {
     bool m_sAllTaxiLights{false}; // Z++: 𝔹
     int32_t m_auto_unk1{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -734,7 +734,7 @@ struct CBike_ZppContract {
     std::array<uint32_t, 180> unk2{}; // Z++: seq ℕ  -- bounded array [180]
     size_t unk2_len{180u}; // Z++ cardinality #unk2
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -1085,7 +1085,7 @@ struct CBoat_ZppContract {
     ZppVec3 m_vecMoveRes{}; // Z++: CVector
     ZppVec3 m_vecTurnRes{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -1171,7 +1171,7 @@ struct CCarGenerator_ZppContract {
     ZppVec3 m_vecInf{}; // Z++: CVector
     ZppVec3 m_vecSup{}; // Z++: CVector
     float m_fSize{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_bForceSpawn >= 0)
             && (m_nAlarm >= 0)
             && (m_nDoorlock >= 0)
@@ -1211,7 +1211,7 @@ struct CCrane_ZppContract {
     bool m_bIsMilitaryCrane{false}; // Z++: 𝔹
     bool m_bWasMilitaryCrane{false}; // Z++: 𝔹
     bool m_bIsTop{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pCraneEntity_card <= 1u)
             && (m_pHook_card <= 1u)
             && (m_pVehiclePickedUp_card <= 1u)
@@ -1233,7 +1233,7 @@ struct CDamageManager_ZppContract {
     int64_t m_lightStatus{0}; // Z++: ℕ
     int64_t m_panelStatus{0}; // Z++: ℕ
     int64_t field_18{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_wheelStatus_len == 4u && m_wheelStatus.size() == 4u)
             && (m_doorStatus_len == 6u && m_doorStatus.size() == 6u)
             && (m_engineStatus >= 0)
@@ -1254,7 +1254,7 @@ struct CDoor_ZppContract {
     float m_fAngVel{0.0f}; // Z++: ℝ
     ZppVec3 m_vecSpeed{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1269,7 +1269,7 @@ struct CTrainDoor_ZppContract {
     float m_fPrevPosn{0.0f}; // Z++: ℝ
     int32_t field_14{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1283,7 +1283,7 @@ struct CFerryDoor_ZppContract {
     float m_fPosn{0.0f}; // Z++: ℝ
     float m_fPrevPosn{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1294,7 +1294,7 @@ struct CFerryNode_ZppContract {
     float z{0.0f}; // Z++: ℝ
     float t{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1305,7 +1305,7 @@ struct CFerryInterpolationLine_ZppContract {
     float position{0.0f}; // Z++: ℝ
     float speed{0.0f}; // Z++: ℝ
     float acceleration{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (type >= 0);
     }
 };
@@ -1316,7 +1316,7 @@ struct CFerryPath_ZppContract {
     int32_t NumTrackNodes{0}; // Z++: ℤ
     uint8_t aTrackNodes_card{0u}; // Z++: Ref[CFerryNode]
     uint8_t aLineBits_card{0u}; // Z++: ℙ ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aTrackNodes_card <= 1u)
             && (aLineBits_card <= 1u);
     }
@@ -1575,7 +1575,7 @@ struct CFerry_ZppContract {
     bool m_bPlayerArrivedHorn{false}; // Z++: 𝔹
     uint8_t mspInst_card{0u}; // Z++: Ref[CFerryInst]
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -1667,7 +1667,7 @@ struct cBuoyancy_ZppContract {
     float m_volumeUnderWater{0.0f}; // Z++: ℝ
     ZppVec3 m_impulsePoint{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1704,7 +1704,7 @@ struct tHandlingData_ZppContract {
     int32_t RearLights{0}; // Z++: ℤ
     std::array<int32_t, 4> unk{}; // Z++: seq ℤ  -- bounded array [4]
     size_t unk_len{4u}; // Z++ cardinality #unk
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (unk_len == 4u && unk.size() == 4u)
             && (Flags >= 0);
     }
@@ -1728,7 +1728,7 @@ struct tBikeHandlingData_ZppContract {
     float fWheelieStabMult{0.0f}; // Z++: ℝ
     float fStoppieStabMult{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1746,7 +1746,7 @@ struct tBoatHandlingData_ZppContract {
     ZppVec3 vecMoveRes{}; // Z++: CVector
     ZppVec3 vecTurnRes{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1768,7 +1768,7 @@ struct tFlyingHandlingData_ZppContract {
     ZppVec3 vecTurnRes{}; // Z++: CVector
     ZppVec3 vecSpeedRes{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -2042,7 +2042,7 @@ struct CHeli_ZppContract {
     bool ScriptHeliOn{false}; // Z++: 𝔹
     int32_t NumScriptHelis{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -2117,7 +2117,7 @@ struct CPlaneNode_ZppContract {
     float t{0.0f}; // Z++: ℝ
     bool bOnGround{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -2128,7 +2128,7 @@ struct CPlaneInterpolationLine_ZppContract {
     float position{0.0f}; // Z++: ℝ
     float speed{0.0f}; // Z++: ℝ
     float acceleration{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (type >= 0);
     }
 };
@@ -2373,7 +2373,7 @@ struct CPlane_ZppContract {
     bool m_bIsDropOffCesna{false}; // Z++: 𝔹
     bool m_bTempPlane{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -2435,7 +2435,7 @@ struct CTrainNode_ZppContract {
     ZppVec3 p{}; // Z++: CVector
     float t{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -2446,7 +2446,7 @@ struct CTrainInterpolationLine_ZppContract {
     float position{0.0f}; // Z++: ℝ
     float speed{0.0f}; // Z++: ℝ
     float acceleration{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (type >= 0);
     }
 };
@@ -2703,7 +2703,7 @@ struct CTrain_ZppContract {
     std::array<ZppVec3, 4> aStationCoors_S{}; // Z++: seq CVector  -- bounded array [4]
     size_t aStationCoors_S_len{4u}; // Z++ cardinality #aStationCoors_S
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)
@@ -2771,7 +2771,7 @@ struct tGear_ZppContract {
     float fShiftUpVelocity{0.0f}; // Z++: ℝ
     float fShiftDownVelocity{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -2789,7 +2789,7 @@ struct cTransmission_ZppContract {
     float fMaxCruiseVelocity{0.0f}; // Z++: ℝ
     float fMaxReverseVelocity{0.0f}; // Z++: ℝ
     float fCurVelocity{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (Gears_len == 6u && Gears.size() == 6u)
             && (Flags >= 0);
     }
@@ -3026,7 +3026,7 @@ struct CVehicle_ZppContract {
     uint8_t m_pBombRigger_card{0u}; // Z++: Ref[CEntity]
     int32_t m_nRoadblockNode{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (m_aExtras_len == 2u && m_aExtras.size() == 2u)

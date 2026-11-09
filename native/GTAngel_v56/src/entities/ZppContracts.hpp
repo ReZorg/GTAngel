@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/entities
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/entities/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/entities/*.zpp
 // Modules: 3 | Formal Schemas: 190 | Free Types: 3
 // ============================================================================
 namespace zpp_entities_spec {
@@ -82,7 +82,7 @@ struct CDummy_ZppContract {
     bool m_flagE2{false}; // Z++: 𝔹
     int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)
@@ -162,7 +162,7 @@ struct CEntity_ZppContract {
     bool bZoneCulled2{false}; // Z++: 𝔹
     bool m_flagE2{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)
@@ -288,7 +288,7 @@ struct CPhysical_ZppContract {
     size_t m_treadable_len{2u}; // Z++ cardinality #m_treadable
     bool m_phy_flagA10{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (instance_addr >= 0)

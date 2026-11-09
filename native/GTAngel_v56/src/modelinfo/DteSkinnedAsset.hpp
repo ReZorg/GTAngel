@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/modelinfo
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/modelinfo/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/modelinfo/*.zpp
 // Modules: 11 | Formal Schemas: 453 | Free Types: 20
 // ============================================================================
 namespace zpp_modelinfo_spec {
@@ -47,7 +47,7 @@ struct CBaseModelInfo_ZppContract {
     uint8_t m_twodEffects_card{0u}; // Z++: Ref[C2dEffect]
     bool m_bIsTree{false}; // Z++: 𝔹
     bool m_bCanBeIgnored{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_nameKey >= 0)
             && (m_type >= 0)
@@ -62,7 +62,7 @@ struct RwObjectNameIdAssocation_ZppContract {
     int32_t name{0}; // Z++: seq CHAR
     int32_t hierId{0}; // Z++: ℤ
     int64_t flags{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (flags >= 0);
     }
 };
@@ -70,7 +70,7 @@ struct RwObjectNameIdAssocation_ZppContract {
 struct RwObjectNameAssociation_ZppContract {
     int32_t name{0}; // Z++: seq CHAR
     uint8_t frame_card{0u}; // Z++: Ref[RwFrame]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (frame_card <= 1u);
     }
 };
@@ -78,7 +78,7 @@ struct RwObjectNameAssociation_ZppContract {
 struct RwObjectIdAssociation_ZppContract {
     int32_t id{0}; // Z++: ℤ
     uint8_t frame_card{0u}; // Z++: Ref[RwFrame]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (frame_card <= 1u);
     }
 };
@@ -103,7 +103,7 @@ struct CClumpModelInfo_ZppContract {
     int32_t m_animFileName{0}; // Z++: seq CHAR
     int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
     int32_t msClassInstance{0}; // Z++: CClumpModelInfo
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_nameKey >= 0)
             && (m_type >= 0)
@@ -139,7 +139,7 @@ struct CMloModelInfo_ZppContract {
     int32_t firstInstance{0}; // Z++: ℤ
     int32_t lastInstance{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_nameKey >= 0)
             && (m_type >= 0)
@@ -439,7 +439,7 @@ struct CModelIndices_ZppContract {
     int32_t SJL_PORTACABINRED{0}; // Z++: ℤ
     int32_t advert_test{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -459,7 +459,7 @@ struct CModelInfo_ZppContract {
     int32_t ms_mloModelStore{0}; // Z++: CStore_CMloModelInfo__MLOMODELSIZE
     int32_t ms_mloInstanceStore{0}; // Z++: CStore_CInstance__MLOINSTANCESIZE
     int32_t ms_xtraCompsModelStore{0}; // Z++: CStore_CXtraCompsModelInfo__XTRACOMPSMODELSIZE
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_modelInfoPtrs_card <= 1u)
             && (resModelInfoPtrs_card <= 1u);
     }
@@ -470,7 +470,7 @@ struct LimbCBarg_ZppContract {
     uint8_t clump_card{0u}; // Z++: Ref[RpClump]
     std::array<int32_t, 3> frameIDs{}; // Z++: seq ℤ  -- bounded array [3]
     size_t frameIDs_len{3u}; // Z++ cardinality #frameIDs
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (frameIDs_len == 3u && frameIDs.size() == 3u)
             && (mi_card <= 1u)
             && (clump_card <= 1u);
@@ -484,7 +484,7 @@ struct ColNodeInfo_ZppContract {
     float z{0.0f}; // Z++: ℝ
     float radius{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -492,7 +492,7 @@ struct ColNodeInfo_ZppContract {
 struct PedChunk_ZppContract {
     uint8_t colmodel_card{0u}; // Z++: Ref[CColModel]
     uint8_t clump_card{0u}; // Z++: Ref[RpClump]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (colmodel_card <= 1u)
             && (clump_card <= 1u);
     }
@@ -525,7 +525,7 @@ struct CPedModelInfo_ZppContract {
     uint8_t m_hitColModel_card{0u}; // Z++: Ref[CColModel]
     uint8_t m_lhand_card{0u}; // Z++: Ref[RpAtomic]
     uint8_t m_rhand_card{0u}; // Z++: Ref[RpAtomic]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_nameKey >= 0)
             && (m_type >= 0)
@@ -581,7 +581,7 @@ struct CSimpleModelInfo_ZppContract {
     int32_t msClassInfo{0}; // Z++: base__cRelocatableChunkClassInfo
     int32_t msClassInstance{0}; // Z++: CSimpleModelInfo
     bool m_normalCull{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_lodDistances_len == 3u && m_lodDistances.size() == 3u)
             && (m_nameKey >= 0)
@@ -651,7 +651,7 @@ struct CTimeModelInfo_ZppContract {
     int32_t m_timeOff{0}; // Z++: ℤ
     int32_t m_otherTimeModelID{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_lodDistances_len == 3u && m_lodDistances.size() == 3u)
             && (m_nameKey >= 0)
@@ -683,7 +683,7 @@ struct editableMatCBData_ZppContract {
     uint8_t vehicle_card{0u}; // Z++: Ref[CVehicleModelInfo]
     int32_t numMats1{0}; // Z++: ℤ
     int32_t numMats2{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (vehicle_card <= 1u);
     }
 };
@@ -696,7 +696,7 @@ struct Statics_ZppContract {
     size_t ms_compsUsed_len{2u}; // Z++ cardinality #ms_compsUsed
     std::array<int32_t, 2> ms_compsToUse{}; // Z++: seq ℤ  -- bounded array [2]
     size_t ms_compsToUse_len{2u}; // Z++ cardinality #ms_compsToUse
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_vehicleColourTable_len == 256u && ms_vehicleColourTable.size() == 256u)
             && (ms_compsUsed_len == 2u && ms_compsUsed.size() == 2u)
             && (ms_compsToUse_len == 2u && ms_compsToUse.size() == 2u);
@@ -744,7 +744,7 @@ struct CWeaponModelInfo_ZppContract {
     bool m_normalCull{false}; // Z++: 𝔹
     int32_t m_animFileName{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_lodDistances_len == 3u && m_lodDistances.size() == 3u)
             && (m_nameKey >= 0)
@@ -794,7 +794,7 @@ struct CXtraCompsModelInfo_ZppContract {
     int32_t msClassInstance{0}; // Z++: CClumpModelInfo
     int32_t field_34{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_unk_len == 2u && m_unk.size() == 2u)
             && (m_nameKey >= 0)
             && (m_type >= 0)

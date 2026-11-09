@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/save
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/save/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/save/*.zpp
 // Modules: 5 | Formal Schemas: 143 | Free Types: 10
 // ============================================================================
 namespace zpp_save_spec {
@@ -39,7 +39,7 @@ struct CDate_ZppContract {
     int32_t m_nMonth{0}; // Z++: ℤ
     int32_t m_nYear{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -47,7 +47,7 @@ struct CDate_ZppContract {
 struct GenericGameStorageModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1606}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1606);
     }
@@ -56,7 +56,7 @@ struct GenericGameStorageModuleState_ZppContract {
 struct SaveBufModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{164}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 164);
     }

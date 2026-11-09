@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/animation
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/animation/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/animation/*.zpp
 // Modules: 14 | Formal Schemas: 398 | Free Types: 14
 // ============================================================================
 namespace zpp_animation_spec {
@@ -37,7 +37,7 @@ struct CAnimBlendAssocGroup_ZppContract {
     int32_t numAssociations{0}; // Z++: ℤ
     int32_t firstAnimId{0}; // Z++: ℤ
     int32_t groupId{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (animBlock_card <= 1u)
             && (assocList_card <= 1u);
     }
@@ -58,7 +58,7 @@ struct CAnimBlendAssociation_ZppContract {
     int32_t flags{0}; // Z++: ℤ
     int32_t callbackType{0}; // Z++: ℤ
     int64_t callbackArg{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (nodes_card <= 1u)
             && (hierarchy_card <= 1u);
     }
@@ -69,7 +69,7 @@ struct AnimBlendFrameData_ZppContract {
     ZppVec3 resetPos{}; // Z++: RwV3d
     uint8_t hanimFrame_card{0u}; // Z++: ℙ ℤ
     int32_t nodeID{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (flag >= 0)
             && (hanimFrame_card <= 1u);
     }
@@ -80,7 +80,7 @@ struct CAnimBlendClumpData_ZppContract {
     int32_t numFrames{0}; // Z++: ℤ
     uint8_t velocity3d_card{0u}; // Z++: Ref[CVector]
     uint8_t frames_card{0u}; // Z++: Ref[AnimBlendFrameData]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (velocity3d_card <= 1u)
             && (frames_card <= 1u);
     }
@@ -89,7 +89,7 @@ struct CAnimBlendClumpData_ZppContract {
 struct CAnimBlendLink_ZppContract {
     uint8_t next_card{0u}; // Z++: Ref[CAnimBlendLink]
     uint8_t prev_card{0u}; // Z++: Ref[CAnimBlendLink]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u)
             && (prev_card <= 1u);
     }
@@ -103,7 +103,7 @@ struct CAnimBlendNode_ZppContract {
     float remainingTime{0.0f}; // Z++: ℝ
     uint8_t sequence_card{0u}; // Z++: Ref[CAnimBlendSequence]
     uint8_t association_card{0u}; // Z++: Ref[CAnimBlendAssociation]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (sequence_card <= 1u)
             && (association_card <= 1u);
     }
@@ -113,7 +113,7 @@ struct KeyFrame_ZppContract {
     int32_t rotation{0}; // Z++: CQuaternion
     float deltaTime{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -123,7 +123,7 @@ struct KeyFrameTrans_ZppContract {
     float deltaTime{0.0f}; // Z++: ℝ
     ZppVec3 translation{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -133,7 +133,7 @@ struct KeyFrameCompressed_ZppContract {
     std::array<int32_t, 4> rot{}; // Z++: seq ℤ  -- bounded array [4]
     size_t rot_len{4u}; // Z++ cardinality #rot
     int32_t deltaTime{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (rot_len == 4u && rot.size() == 4u);
     }
 };
@@ -144,7 +144,7 @@ struct KeyFrameTransCompressed_ZppContract {
     int32_t deltaTime{0}; // Z++: ℤ
     std::array<int32_t, 3> trans{}; // Z++: seq ℤ  -- bounded array [3]
     size_t trans_len{3u}; // Z++ cardinality #trans
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (rot_len == 4u && rot.size() == 4u)
             && (trans_len == 3u && trans.size() == 3u);
     }
@@ -157,7 +157,7 @@ struct CAnimBlock_ZppContract {
     int32_t firstIndex{0}; // Z++: ℤ
     int32_t numAnims{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -166,7 +166,7 @@ struct AnimAssocDesc_ZppContract {
     int32_t animId{0}; // Z++: ℤ
     int32_t flags{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -178,7 +178,7 @@ struct AnimAssocDefinition_ZppContract {
     int32_t numAnims{0}; // Z++: ℤ
     int32_t animNames{0}; // Z++: seq CHAR
     uint8_t animDescs_card{0u}; // Z++: Ref[AnimAssocDesc]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (animDescs_card <= 1u);
     }
 };
@@ -186,7 +186,7 @@ struct AnimAssocDefinition_ZppContract {
 struct AnimationIdModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{343}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 343);
     }
@@ -195,7 +195,7 @@ struct AnimationIdModuleState_ZppContract {
 struct BonesModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{118}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 118);
     }
@@ -205,7 +205,7 @@ struct sToHideItem_ZppContract {
     float z{0.0f}; // Z++: ℝ
     int32_t name{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -226,7 +226,7 @@ struct sParticleEffect_ZppContract {
     bool unk10{false}; // Z++: 𝔹
     bool unk11{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -234,7 +234,7 @@ struct sParticleEffect_ZppContract {
 struct sAttachInfo_ZppContract {
     int32_t boneId{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -288,7 +288,7 @@ struct CCutsceneMgr_ZppContract {
     std::array<uint32_t, 1305> ms_iModelIndex{}; // Z++: seq ℕ  -- bounded array [NUMCUTSCENEOBJECTS]
     size_t ms_iModelIndex_len{1305u}; // Z++ cardinality #ms_iModelIndex
     int64_t ms_cutscenePlayStatus{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_pCutsceneObjects_len == 1305u && ms_pCutsceneObjects.size() == 1305u)
             && (ms_pParticleEffects_len == 8u && ms_pParticleEffects.size() == 8u)
             && (ms_crToHideItems_len == 1305u && ms_crToHideItems.size() == 1305u)
@@ -313,7 +313,7 @@ struct CCutsceneMgr_ZppContract {
 struct FrameUpdateModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{700}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 700);
     }
@@ -323,7 +323,7 @@ struct AnimBlendFrameUpdateData_ZppContract {
     int32_t foobar{0}; // Z++: ℤ
     std::array<int32_t, 16> nodes{}; // Z++: seq Ref[CAnimBlendNode]  -- bounded array [16]
     size_t nodes_len{16u}; // Z++ cardinality #nodes
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (nodes_len == 16u && nodes.size() == 16u);
     }
 };

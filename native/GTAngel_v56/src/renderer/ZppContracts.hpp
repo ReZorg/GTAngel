@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/renderer
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/renderer/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/renderer/*.zpp
 // Modules: 38 | Formal Schemas: 1267 | Free Types: 51
 // ============================================================================
 namespace zpp_renderer_spec {
@@ -52,7 +52,7 @@ struct C2dEffect_ZppContract {
     int32_t particle{0}; // Z++: Particle
     int32_t attractor{0}; // Z++: Attractor
     int32_t pedattr{0}; // Z++: PedAttractor
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (lightType >= 0)
             && (roadReflection >= 0)
             && (flareType >= 0)
@@ -76,7 +76,7 @@ struct Light_ZppContract {
     int64_t flags{0}; // Z++: ℕ
     uint8_t corona_card{0u}; // Z++: Ref[RwTexture]
     uint8_t shadow_card{0u}; // Z++: Ref[RwTexture]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (lightType >= 0)
             && (roadReflection >= 0)
             && (flareType >= 0)
@@ -92,7 +92,7 @@ struct Particle_ZppContract {
     ZppVec3 dir{}; // Z++: CVector
     float scale{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -101,7 +101,7 @@ struct Attractor_ZppContract {
     ZppVec3 dir{}; // Z++: CVector
     int32_t type{0}; // Z++: ℤ
     int64_t probability{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (probability >= 0);
     }
 };
@@ -111,7 +111,7 @@ struct PedAttractor_ZppContract {
     ZppVec3 useDir{}; // Z++: CVector
     int32_t type{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -125,7 +125,7 @@ struct CAntenna_ZppContract {
     size_t pos_len{6u}; // Z++ cardinality #pos
     std::array<ZppVec3, 6> speed{}; // Z++: seq CVector  -- bounded array [6]
     size_t speed_len{6u}; // Z++ cardinality #speed
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pos_len == 6u && pos.size() == 6u)
             && (speed_len == 6u && speed.size() == 6u)
             && (id >= 0);
@@ -141,7 +141,7 @@ struct CClouds_ZppContract {
     int32_t ms_colourTop{0}; // Z++: CRGBA
     int32_t ms_colourBottom{0}; // Z++: CRGBA
     int32_t ms_colourBkGrd{0}; // Z++: CRGBA
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (IndividualRotation >= 0);
     }
 };
@@ -157,7 +157,7 @@ struct CConsole_ZppContract {
     size_t m_aGreen_len{8u}; // Z++ cardinality #m_aGreen
     std::array<uint32_t, 8> m_aBlue{}; // Z++: seq ℕ  -- bounded array [MAX_LINES]
     size_t m_aBlue_len{8u}; // Z++ cardinality #m_aBlue
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aTimer_len == 8u && m_aTimer.size() == 8u)
             && (m_aRed_len == 8u && m_aRed.size() == 8u)
             && (m_aGreen_len == 8u && m_aGreen.size() == 8u)
@@ -176,7 +176,7 @@ struct FlareDef_ZppContract {
     int32_t alpha{0}; // Z++: ℤ
     int32_t texture{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -218,7 +218,7 @@ struct CRegisteredCorona_ZppContract {
     size_t prevBlue_len{6u}; // Z++ cardinality #prevBlue
     std::array<bool, 6> hasValue{}; // Z++: seq 𝔹  -- bounded array [6]
     size_t hasValue_len{6u}; // Z++ cardinality #hasValue
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (prevX_len == 6u && prevX.size() == 6u)
             && (prevY_len == 6u && prevY.size() == 6u)
             && (prevRed_len == 6u && prevRed.size() == 6u)
@@ -246,7 +246,7 @@ struct CRegisteredCorona_ZppContract {
 struct CCredits_ZppContract {
     bool bCreditsGoing{false}; // Z++: 𝔹
     int64_t CreditsStartTime{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (CreditsStartTime >= 0);
     }
 };
@@ -265,7 +265,7 @@ struct CCutsceneShadow_ZppContract {
     uint8_t m_pLight_card{0u}; // Z++: Ref[RpLight]
     int32_t m_BoundingSphere{0}; // Z++: RwSphere
     int32_t m_BaseSphere{0}; // Z++: RwSphere
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pAtomic_card <= 1u)
             && (m_pClump_card <= 1u)
             && (m_pLight_card <= 1u);
@@ -281,7 +281,7 @@ struct CDraw_ZppContract {
     int64_t FadeRed{0}; // Z++: ℕ
     int64_t FadeGreen{0}; // Z++: ℕ
     int64_t FadeBlue{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (FadeValue >= 0)
             && (FadeRed >= 0)
             && (FadeGreen >= 0)
@@ -299,7 +299,7 @@ struct CScriptPath_ZppContract {
     int32_t m_state{0}; // Z++: ℤ
     std::array<int32_t, 6> m_pObjects{}; // Z++: seq Ref[CObject]  -- bounded array [6]
     size_t m_pObjects_len{6u}; // Z++ cardinality #m_pObjects
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pObjects_len == 6u && m_pObjects.size() == 6u)
             && (m_pNode_card <= 1u);
     }
@@ -308,7 +308,7 @@ struct CScriptPath_ZppContract {
 struct CScriptPaths_ZppContract {
     std::array<int32_t, 3> aArray{}; // Z++: seq CScriptPath  -- bounded array [3]
     size_t aArray_len{3u}; // Z++ cardinality #aArray
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aArray_len == 3u && aArray.size() == 3u);
     }
 };
@@ -318,7 +318,7 @@ struct CPlaneTrail_ZppContract {
     size_t m_pos_len{16u}; // Z++ cardinality #m_pos
     std::array<int32_t, 16> m_time{}; // Z++: seq ℤ  -- bounded array [16]
     size_t m_time_len{16u}; // Z++ cardinality #m_time
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pos_len == 16u && m_pos.size() == 16u)
             && (m_time_len == 16u && m_time.size() == 16u);
     }
@@ -327,7 +327,7 @@ struct CPlaneTrail_ZppContract {
 struct CPlaneTrails_ZppContract {
     std::array<int32_t, 6> aArray{}; // Z++: seq CPlaneTrail  -- bounded array [6]
     size_t aArray_len{6u}; // Z++ cardinality #aArray
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aArray_len == 6u && aArray.size() == 6u);
     }
 };
@@ -335,7 +335,7 @@ struct CPlaneTrails_ZppContract {
 struct CPlaneBanner_ZppContract {
     std::array<ZppVec3, 8> m_pos{}; // Z++: seq CVector  -- bounded array [8]
     size_t m_pos_len{8u}; // Z++ cardinality #m_pos
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pos_len == 8u && m_pos.size() == 8u);
     }
 };
@@ -343,7 +343,7 @@ struct CPlaneBanner_ZppContract {
 struct CPlaneBanners_ZppContract {
     std::array<int32_t, 5> aArray{}; // Z++: seq CPlaneBanner  -- bounded array [5]
     size_t aArray_len{5u}; // Z++ cardinality #aArray
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aArray_len == 5u && aArray.size() == 5u);
     }
 };
@@ -363,7 +363,7 @@ struct CEscalator_ZppContract {
     float m_radius{0.0f}; // Z++: ℝ
     std::array<int32_t, 24> m_pSteps{}; // Z++: seq Ref[CObject]  -- bounded array [24]
     size_t m_pSteps_len{24u}; // Z++ cardinality #m_pSteps
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pSteps_len == 24u && m_pSteps.size() == 24u);
     }
 };
@@ -376,7 +376,7 @@ struct CMovingThing_ZppContract {
     ZppVec3 m_vecPosn{}; // Z++: CVector
     uint8_t m_pEntity_card{0u}; // Z++: Ref[CEntity]
     int32_t m_nHidden{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pNext_card <= 1u)
             && (m_pPrev_card <= 1u)
             && (m_pEntity_card <= 1u);
@@ -390,7 +390,7 @@ struct CMovingThings_ZppContract {
     std::array<int32_t, 48> aMovingThings{}; // Z++: seq CMovingThing  -- bounded array [NUMMOVINGTHINGS]
     size_t aMovingThings_len{48u}; // Z++ cardinality #aMovingThings
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aMovingThings_len == 48u && aMovingThings.size() == 48u)
             && (instance_addr >= 0);
     }
@@ -413,7 +413,7 @@ struct CScrollBar_ZppContract {
     int64_t m_uBlue{0}; // Z++: ℕ
     float m_fScale{0.0f}; // Z++: ℝ
     int32_t TonightsEvent{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_MessageBar_len == 40u && m_MessageBar.size() == 40u)
             && (m_Counter >= 0)
             && (m_MessageCurrentChar >= 0)
@@ -429,7 +429,7 @@ struct CSmokeTrails_ZppContract {
     std::array<int32_t, 3> aSmoke{}; // Z++: seq CSmokeTrail  -- bounded array [3]
     size_t aSmoke_len{3u}; // Z++ cardinality #aSmoke
     bool CigOn{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aSmoke_len == 3u && aSmoke.size() == 3u);
     }
 };
@@ -444,7 +444,7 @@ struct CTowerClock_ZppContract {
     int64_t m_uBlue{0}; // Z++: ℕ
     bool m_bVisible{false}; // Z++: 𝔹
     float m_fIntensity{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_uRed >= 0)
             && (m_uGreen >= 0)
             && (m_uBlue >= 0);
@@ -461,7 +461,7 @@ struct CDigitalClock_ZppContract {
     int64_t m_uBlue{0}; // Z++: ℕ
     bool m_bVisible{false}; // Z++: 𝔹
     float m_fIntensity{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_uRed >= 0)
             && (m_uGreen >= 0)
             && (m_uBlue >= 0);
@@ -501,7 +501,7 @@ struct CFontDetails_ZppContract {
     int32_t outlineColor{0}; // Z++: CRGBA
     int32_t bOutlineOn{0}; // Z++: ℤ
     int32_t line{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (bank >= 0)
             && (anonymous_25 >= 0);
     }
@@ -526,7 +526,7 @@ struct CFontRenderState_ZppContract {
     int32_t bOutlineOn{0}; // Z++: ℤ
     int32_t line{0}; // Z++: ℤ
     int32_t rightJustify{0}; // Z++: bool8
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (anonymous_0 >= 0);
     }
 };
@@ -547,7 +547,7 @@ struct CFallingGlassPane_ZppContract {
     bool m_bActive{false}; // Z++: 𝔹
     bool m_bShattered{false}; // Z++: 𝔹
     bool m_bCarGlass{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_attachment_card <= 1u)
             && (m_nTimer >= 0)
             && (m_nTriIndex >= 0);
@@ -558,7 +558,7 @@ struct CInstance_ZppContract {
     int32_t m_matrix{0}; // Z++: CMatrix
     int32_t m_modelIndex{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -566,7 +566,7 @@ struct CInstance_ZppContract {
 // State Schema Contract from zpp/renderer/Lines.zpp
 struct CLines_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -578,7 +578,7 @@ struct CMBlur_ZppContract {
     bool BlurOn{false}; // Z++: 𝔹
     float Drunkness{0.0f}; // Z++: ℝ
     int32_t pBufVertCount{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pFrontBuffer_card <= 1u);
     }
 };
@@ -588,7 +588,7 @@ struct ActiveOccluderLine_ZppContract {
     int32_t direction{0}; // Z++: CVector2D
     float length{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -598,7 +598,7 @@ struct CActiveOccluder_ZppContract {
     size_t lines_len{6u}; // Z++ cardinality #lines
     int32_t linesCount{0}; // Z++: ℤ
     float radius{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (lines_len == 6u && lines.size() == 6u);
     }
 };
@@ -608,7 +608,7 @@ struct COccluder_ZppContract {
     int32_t z{0}; // Z++: ℤ
     int64_t angle{0}; // Z++: ℕ
     int32_t listIndex{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (angle >= 0);
     }
 };
@@ -643,7 +643,7 @@ struct CParticle_ZppContract {
     size_t m_CosTable_len{1024u}; // Z++ cardinality #m_CosTable
     int32_t field_4C{0}; // Z++: ℤ
     ZppVec3 m_vecScreenPosition{}; // Z++: CVector
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_SinTable_len == 1024u && m_SinTable.size() == 1024u)
             && (m_CosTable_len == 1024u && m_CosTable.size() == 1024u)
             && (m_nTimeWhenWillBeDestroyed >= 0)
@@ -660,7 +660,7 @@ struct CParticle_ZppContract {
 // State Schema Contract from zpp/renderer/ParticleMgr.zpp
 struct cParticleSystemMgr_ZppContract {
     uint8_t m_aParticles_card{0u}; // Z++: Ref[tParticleSystemData]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aParticles_card <= 1u);
     }
 };
@@ -668,7 +668,7 @@ struct cParticleSystemMgr_ZppContract {
 struct ParticleTypeModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{98}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 98);
     }
@@ -677,7 +677,7 @@ struct ParticleTypeModuleState_ZppContract {
 struct CPlayerSkin_ZppContract {
     int32_t m_txdSlot{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -693,7 +693,7 @@ struct CRegisteredPointLight_ZppContract {
     int32_t fogType{0}; // Z++: ℤ
     bool castExtraShadows{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -702,7 +702,7 @@ struct RenderBuffer_ZppContract {
     int32_t VerticesToBeStored{0}; // Z++: ℤ
     int32_t IndicesToBeStored{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -713,7 +713,7 @@ struct VertexBufferUnion_ZppContract {
     std::array<int32_t, 512> im3d{}; // Z++: seq RwIm3DVertex  -- bounded array [TEMPBUFFERVERTSIZE]
     size_t im3d_len{512u}; // Z++ cardinality #im3d
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (im2d_len == 512u && im2d.size() == 512u)
             && (im3d_len == 512u && im3d.size() == 512u)
             && (instance_addr >= 0);
@@ -723,7 +723,7 @@ struct VertexBufferUnion_ZppContract {
 struct EntityInfo_ZppContract {
     uint8_t ent_card{0u}; // Z++: Ref[CEntity]
     float sort{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ent_card <= 1u);
     }
 };
@@ -731,7 +731,7 @@ struct EntityInfo_ZppContract {
 struct BlockedRange_ZppContract {
     float b{0.0f}; // Z++: ℝ
     uint8_t next_card{0u}; // Z++: Ref[BlockedRange_prev]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u);
     }
 };
@@ -752,7 +752,7 @@ struct COneSheet_ZppContract {
     bool m_targetIsVisible{false}; // Z++: 𝔹
     uint8_t m_next_card{0u}; // Z++: Ref[COneSheet]
     uint8_t m_prev_card{0u}; // Z++: Ref[COneSheet]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_moveStart >= 0)
             && (m_moveDuration >= 0)
             && (m_next_card <= 1u)
@@ -763,7 +763,7 @@ struct COneSheet_ZppContract {
 struct CShadowCamera_ZppContract {
     uint8_t m_pCamera_card{0u}; // Z++: Ref[RwCamera]
     uint8_t m_pTexture_card{0u}; // Z++: Ref[RwTexture]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pCamera_card <= 1u)
             && (m_pTexture_card <= 1u);
     }
@@ -784,7 +784,7 @@ struct CStoredShadow_ZppContract {
     int64_t m_nBlue{0}; // Z++: ℕ
     uint32_t bRendered{0u}; // Z++: 𝔹
     uint32_t bDrawOnBuildings{0u}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pTexture_card <= 1u)
             && (m_pCutsceneShadow_card <= 1u)
             && (m_ShadowType >= 0)
@@ -805,7 +805,7 @@ struct CPolyBunch_ZppContract {
     size_t m_aU_len{7u}; // Z++ cardinality #m_aU
     std::array<uint32_t, 7> m_aV{}; // Z++: seq ℕ  -- bounded array [7]
     size_t m_aV_len{7u}; // Z++ cardinality #m_aV
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aVerts_len == 7u && m_aVerts.size() == 7u)
             && (m_aU_len == 7u && m_aU.size() == 7u)
             && (m_aV_len == 7u && m_aV.size() == 7u)
@@ -831,7 +831,7 @@ struct CStaticShadow_ZppContract {
     bool m_bJustCreated{false}; // Z++: 𝔹
     bool m_bRendered{false}; // Z++: 𝔹
     bool m_bTemp{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nId >= 0)
             && (m_pPolyBunch_card <= 1u)
             && (m_nTimeCreated >= 0)
@@ -857,7 +857,7 @@ struct CPermanentShadow_ZppContract {
     int64_t m_nRed{0}; // Z++: ℕ
     int64_t m_nGreen{0}; // Z++: ℕ
     int64_t m_nBlue{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nTimeCreated >= 0)
             && (m_nLifeTime >= 0)
             && (m_pTexture_card <= 1u)
@@ -873,7 +873,7 @@ struct CShadows_ZppContract {
     uint8_t pEmptyBunchList_card{0u}; // Z++: Ref[CPolyBunch]
     std::array<int32_t, 48> aPermanentShadows{}; // Z++: seq CPermanentShadow  -- bounded array [MAX_PERMAMENTSHADOWS]
     size_t aPermanentShadows_len{48u}; // Z++ cardinality #aPermanentShadows
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aPermanentShadows_len == 48u && aPermanentShadows.size() == 48u)
             && (pEmptyBunchList_card <= 1u);
     }
@@ -898,7 +898,7 @@ struct CSkidmark_ZppContract {
     bool m_isMuddy{false}; // Z++: 𝔹
     std::array<ZppVec3, 16> m_side{}; // Z++: seq CVector  -- bounded array [SKIDMARK_LENGTH]
     size_t m_side_len{16u}; // Z++ cardinality #m_side
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pos_len == 16u && m_pos.size() == 16u)
             && (m_sideX_len == 16u && m_sideX.size() == 16u)
             && (m_sideY_len == 16u && m_sideY.size() == 16u)
@@ -918,7 +918,7 @@ struct CSpecialFX_ZppContract {
     bool bSnapShotActive{false}; // Z++: 𝔹
     int32_t SnapShotFrames{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -934,7 +934,7 @@ struct CRegisteredMotionBlurStreak_ZppContract {
     size_t m_pos2_len{3u}; // Z++ cardinality #m_pos2
     std::array<bool, 3> m_isValid{}; // Z++: seq 𝔹  -- bounded array [3]
     size_t m_isValid_len{3u}; // Z++ cardinality #m_isValid
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pos1_len == 3u && m_pos1.size() == 3u)
             && (m_pos2_len == 3u && m_pos2.size() == 3u)
             && (m_isValid_len == 3u && m_isValid.size() == 3u)
@@ -957,7 +957,7 @@ struct CBulletTrace_ZppContract {
     ZppVec3 m_vecTargetPos{}; // Z++: CVector
     int64_t m_framesInUse{0}; // Z++: ℕ
     int64_t m_lifeTime{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nCreationTime >= 0)
             && (m_nLifeTime >= 0)
             && (m_fVisibility >= 0)
@@ -983,7 +983,7 @@ struct C3dMarker_ZppContract {
     float m_fSize{0.0f}; // Z++: ℝ
     float m_fBrightness{0.0f}; // Z++: ℝ
     float m_fCameraRange{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pAtomic_card <= 1u)
             && (m_pMaterial_card <= 1u)
             && (m_nType >= 0)
@@ -1003,7 +1003,7 @@ struct CBrightLight_ZppContract {
     int64_t m_red{0}; // Z++: ℕ
     int64_t m_green{0}; // Z++: ℕ
     int64_t m_blue{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_type >= 0)
             && (m_red >= 0)
             && (m_green >= 0)
@@ -1021,7 +1021,7 @@ struct CShinyText_ZppContract {
     int64_t m_red{0}; // Z++: ℕ
     int64_t m_green{0}; // Z++: ℕ
     int64_t m_blue{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_verts_len == 4u && m_verts.size() == 4u)
             && (m_texCoords_len == 4u && m_texCoords.size() == 4u)
             && (m_type >= 0)
@@ -1033,7 +1033,7 @@ struct CShinyText_ZppContract {
 // State Schema Contract from zpp/renderer/SpecialFX.zpp
 struct CSpecialParticleStuff_ZppContract {
     int64_t BoatFromStart{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (BoatFromStart >= 0);
     }
 };
@@ -1044,7 +1044,7 @@ struct CSprite_ZppContract {
     float m_fRecipNearClipPlane{0.0f}; // Z++: ℝ
     int32_t m_bFlushSpriteBufferSwitchZTest{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1067,7 +1067,7 @@ struct CSprite2d_ZppContract {
     size_t mBankStart_len{10u}; // Z++ cardinality #mBankStart
     std::array<int32_t, 500> maBankVertices{}; // Z++: seq RwIm2DVertex  -- bounded array [500]
     size_t maBankVertices_len{500u}; // Z++ cardinality #maBankVertices
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (maVertices_len == 8u && maVertices.size() == 8u)
             && (mpBankTextures_len == 10u && mpBankTextures.size() == 10u)
             && (mCurrentSprite_len == 10u && mCurrentSprite.size() == 10u)
@@ -1081,7 +1081,7 @@ struct CTexList_ZppContract {
     std::array<bool, 400> ms_nTexUsed{}; // Z++: seq 𝔹  -- bounded array [MAX_TEXUSED]
     size_t ms_nTexUsed_len{400u}; // Z++ cardinality #ms_nTexUsed
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_nTexUsed_len == 400u && ms_nTexUsed.size() == 400u)
             && (instance_addr >= 0);
     }
@@ -1164,7 +1164,7 @@ struct CTimeCycle_ZppContract {
     size_t m_fShadowDisplacementY_len{16u}; // Z++ cardinality #m_fShadowDisplacementY
     int32_t m_nCurrentTreeShadowStrength{0}; // Z++: ℤ
     float m_fCurrentBlurAlpha{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_VectorToSun_len == 16u && m_VectorToSun.size() == 16u)
             && (m_fShadowFrontX_len == 16u && m_fShadowFrontX.size() == 16u)
             && (m_fShadowFrontY_len == 16u && m_fShadowFrontY.size() == 16u)
@@ -1194,7 +1194,7 @@ struct CVarConsoleEntry_ZppContract {
     float F_min{0.0f}; // Z++: ℝ
     int32_t bAllowExceedBounds{0}; // Z++: bool8
     int64_t VarType{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pInt8Value_card <= 1u)
             && (pInt16Value_card <= 1u)
             && (pInt32Value_card <= 1u)
@@ -1218,7 +1218,7 @@ struct CVarConsole_ZppContract {
     int32_t m_nNumPages{0}; // Z++: ℤ
     std::array<int32_t, 91> m_aEntries{}; // Z++: seq CVarConsoleEntry  -- bounded array [91]
     size_t m_aEntries_len{91u}; // Z++ cardinality #m_aEntries
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aEntries_len == 91u && m_aEntries.size() == 91u);
     }
 };
@@ -1234,7 +1234,7 @@ struct CWaterCannon_ZppContract {
     size_t m_avecVelocity_len{16u}; // Z++ cardinality #m_avecVelocity
     std::array<bool, 16> m_abUsed{}; // Z++: seq 𝔹  -- bounded array [NUM_SEGMENTPOINTS]
     size_t m_abUsed_len{16u}; // Z++ cardinality #m_abUsed
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_avecPos_len == 16u && m_avecPos.size() == 16u)
             && (m_avecVelocity_len == 16u && m_avecVelocity.size() == 16u)
             && (m_abUsed_len == 16u && m_abUsed.size() == 16u)
@@ -1249,7 +1249,7 @@ struct CWaterCreature_ZppContract {
     int32_t m_alpha{0}; // Z++: ℤ
     float m_fWaterDepth{0.0f}; // Z++: ℝ
     int32_t m_state{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pObj_card <= 1u);
     }
 };
@@ -1260,7 +1260,7 @@ struct WaterCreatureProperties_ZppContract {
     float fLevel{0.0f}; // Z++: ℝ
     float fUnknown{0.0f}; // Z++: ℝ
     float fWaterDepth{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (modelID_card <= 1u);
     }
 };
@@ -1268,7 +1268,7 @@ struct WaterCreatureProperties_ZppContract {
 struct ColData_ZppContract {
     int64_t SurfaceType{0}; // Z++: ℕ
     int64_t PieceType{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (SurfaceType >= 0)
             && (PieceType >= 0);
     }
@@ -1291,7 +1291,7 @@ struct CWaterLevel_ZppContract {
     std::array<int32_t, 8> apGeomArray{}; // Z++: seq Ref[RpGeometry]  -- bounded array [MAX_BOAT_WAKES]
     size_t apGeomArray_len{8u}; // Z++ cardinality #apGeomArray
     int32_t nGeomUsed{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_aWaterZs_len == 48u && ms_aWaterZs.size() == 48u)
             && (ms_aWaterRects_len == 48u && ms_aWaterRects.size() == 48u)
             && (apGeomArray_len == 8u && apGeomArray.size() == 8u)
@@ -1330,7 +1330,7 @@ struct CWeather_ZppContract {
     int32_t Stored_OldWeatherType{0}; // Z++: ℤ
     int32_t Stored_NewWeatherType{0}; // Z++: ℤ
     float Stored_Rain{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (LightningStart >= 0)
             && (LightningFlashLastChange >= 0)
             && (WhenToPlayLightningSound >= 0)
@@ -1342,7 +1342,7 @@ struct tRainStreak_ZppContract {
     ZppVec3 position{}; // Z++: CVector
     ZppVec3 direction{}; // Z++: CVector
     int64_t timer{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (timer >= 0);
     }
 };
@@ -1352,7 +1352,7 @@ struct CWindModifiers_ZppContract {
     int32_t m_type{0}; // Z++: ℤ
     int32_t Number{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };

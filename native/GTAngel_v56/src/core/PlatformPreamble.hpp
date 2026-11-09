@@ -68,7 +68,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/core
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/core/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/core/*.zpp
 // Modules: 54 | Formal Schemas: 2928 | Free Types: 80
 // ============================================================================
 namespace zpp_core_spec {
@@ -97,7 +97,7 @@ struct CAccident_ZppContract {
     uint8_t m_pVictim_card{0u}; // Z++: Ref[CPed]
     int64_t m_nMedicsAttending{0}; // Z++: ℕ
     int64_t m_nMedicsPerformingCPR{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pVictim_card <= 1u)
             && (m_nMedicsAttending >= 0)
             && (m_nMedicsPerformingCPR >= 0);
@@ -107,7 +107,7 @@ struct CAccident_ZppContract {
 struct CAnimViewer_ZppContract {
     int32_t animTxdSlot{0}; // Z++: ℤ
     uint8_t pTarget_card{0u}; // Z++: Ref[CEntity]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pTarget_card <= 1u);
     }
 };
@@ -115,7 +115,7 @@ struct CAnimViewer_ZppContract {
 struct CamModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{6585}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 6585);
     }
@@ -217,7 +217,7 @@ struct CCam_ZppContract {
     float m_fTargetZoomZCloseIn{0.0f}; // Z++: ℝ
     float m_fMinRealGroundDist{0.0f}; // Z++: ℝ
     float m_fTargetCloseInDist{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_arrPreviousVectors_len == 2u && m_arrPreviousVectors.size() == 2u)
             && (m_uiFinishTime >= 0)
             && (CamTargetEntity_card <= 1u)
@@ -228,7 +228,7 @@ struct CCam_ZppContract {
 // State Schema Contract from zpp/core/Camera.zpp
 struct CCamPathSplines_ZppContract {
     uint8_t m_arr_PathData_card{0u}; // Z++: ℙ ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_arr_PathData_card <= 1u);
     }
 };
@@ -241,7 +241,7 @@ struct CTrainCamNode_ZppContract {
     float m_fDesiredFOV{0.0f}; // Z++: ℝ
     float m_fNearClip{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -252,7 +252,7 @@ struct CQueuedMode_ZppContract {
     int32_t MinZoom{0}; // Z++: ℤ
     int32_t MaxZoom{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -444,7 +444,7 @@ struct CCamera_ZppContract {
     float SoundDistRightAsRead{0.0f}; // Z++: ℝ
     float SoundDistRightAsReadOld{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (Cams_len == 3u && Cams.size() == 3u)
             && (m_arrPathArray_len == 4u && m_arrPathArray.size() == 4u)
             && (m_vecFrustumNormals_len == 4u && m_vecFrustumNormals.size() == 4u)
@@ -478,7 +478,7 @@ struct CdReadInfo_ZppContract {
     int64_t pDoneSemaphore{0}; // Z++: HANDLE
     int64_t hFile{0}; // Z++: HANDLE
     int32_t Overlapped{0}; // Z++: OVERLAPPED
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (nSectorOffset >= 0)
             && (nSectorsToRead >= 0);
     }
@@ -489,7 +489,7 @@ struct Queue_ZppContract {
     int32_t head{0}; // Z++: ℤ
     int32_t tail{0}; // Z++: ℤ
     int32_t size{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (items_card <= 1u);
     }
 };
@@ -505,7 +505,7 @@ struct CClock_ZppContract {
     int64_t ms_nLastClockTick{0}; // Z++: ℕ
     bool ms_bClockHasBeenStored{false}; // Z++: 𝔹
     float ms_EnvMapTimeMultiplicator{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_nGameClockHours >= 0)
             && (ms_nGameClockMinutes >= 0)
             && (ms_nGameClockSeconds >= 0)
@@ -524,7 +524,7 @@ struct GlfwJoyState_ZppContract {
     uint8_t buttons_card{0u}; // Z++: ℙ ℕ
     std::array<bool, 17> mappedButtons{}; // Z++: seq 𝔹  -- bounded array [17]
     size_t mappedButtons_len{17u}; // Z++ cardinality #mappedButtons
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (mappedButtons_len == 17u && mappedButtons.size() == 17u)
             && (numButtons >= 0)
             && (buttons_card <= 1u);
@@ -535,7 +535,7 @@ struct tControllerConfigBind_ZppContract {
     int32_t m_Key{0}; // Z++: ℤ
     int32_t m_ContSetOrder{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -547,7 +547,7 @@ struct CCrimeBeingQd_ZppContract {
     ZppVec3 m_vecPosn{}; // Z++: CVector
     bool m_bReported{false}; // Z++: 𝔹
     bool m_bPoliceDoesntCare{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nTime >= 0);
     }
 };
@@ -555,7 +555,7 @@ struct CCrimeBeingQd_ZppContract {
 struct Line_ZppContract {
     int32_t p2{0}; // Z++: CVector_p1
     int64_t c2{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (c2 >= 0);
     }
 };
@@ -568,7 +568,7 @@ struct CEvent_ZppContract {
     ZppVec3 posn{}; // Z++: CVector
     int64_t timeout{0}; // Z++: ℕ
     int32_t state{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (criminal_card <= 1u)
             && (timeout >= 0);
     }
@@ -577,7 +577,7 @@ struct CEvent_ZppContract {
 struct CEventList_ZppContract {
     int32_t ms_nFirstFreeSlotIndex{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -585,7 +585,7 @@ struct CEventList_ZppContract {
 struct ColHeader_ZppContract {
     int64_t ident{0}; // Z++: ℕ
     int64_t size{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ident >= 0)
             && (size >= 0);
     }
@@ -594,7 +594,7 @@ struct ColHeader_ZppContract {
 struct myFILE_ZppContract {
     bool isText{false}; // Z++: 𝔹
     uint8_t file_card{0u}; // Z++: Ref[FILE]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (file_card <= 1u);
     }
 };
@@ -615,7 +615,7 @@ struct CFire_ZppContract {
     bool m_bExtinguishedWithWater{false}; // Z++: 𝔹
     int32_t field_20{0}; // Z++: ℤ
     int64_t m_nFiremenPuttingOut{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pEntity_card <= 1u)
             && (m_pSource_card <= 1u)
             && (m_nExtinguishTime >= 0)
@@ -630,7 +630,7 @@ struct CTriggerCaller_ZppContract {
     int64_t pTrigger{0}; // Z++: ADDRESS
     int32_t field_C{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -640,7 +640,7 @@ struct CPlaceableText_ZppContract {
     int32_t m_color{0}; // Z++: CRGBA
     int32_t m_text{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -649,7 +649,7 @@ struct CPlaceableTextTwoLines_ZppContract {
     int32_t m_line1{0}; // Z++: CPlaceableText
     int32_t m_line2{0}; // Z++: CPlaceableText
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -660,7 +660,7 @@ struct CShadowInfo_ZppContract {
     int32_t m_shadowColor{0}; // Z++: CRGBA
     int32_t m_shadowOffset{0}; // Z++: CVector2D
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -669,7 +669,7 @@ struct CSelectable_ZppContract {
     bool m_bSelected{false}; // Z++: 𝔹
     int32_t m_selectedColor{0}; // Z++: CRGBA
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -683,7 +683,7 @@ struct CPlaceableShText_ZppContract {
     int32_t m_shadowColor{0}; // Z++: CRGBA
     int32_t m_shadowOffset{0}; // Z++: CVector2D
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0)
             && (instance_addr >= 0);
@@ -698,7 +698,7 @@ struct CPlaceableShTextTwoLines_ZppContract {
     int32_t m_shadowColor{0}; // Z++: CRGBA
     int32_t m_shadowOffset{0}; // Z++: CVector2D
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0)
             && (instance_addr >= 0);
@@ -716,7 +716,7 @@ struct CPlaceableShOption_ZppContract {
     bool m_bSelected{false}; // Z++: 𝔹
     int32_t m_selectedColor{0}; // Z++: CRGBA
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0)
             && (instance_addr >= 0)
@@ -735,7 +735,7 @@ struct CPlaceableShOptionTwoLines_ZppContract {
     bool m_bSelected{false}; // Z++: 𝔹
     int32_t m_selectedColor{0}; // Z++: CRGBA
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0)
             && (instance_addr >= 0)
@@ -749,7 +749,7 @@ struct CPlaceableSprite_ZppContract {
     int32_t m_position{0}; // Z++: CVector2D
     int32_t m_size{0}; // Z++: CVector2D
     int32_t m_color{0}; // Z++: CRGBA
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pSprite_card <= 1u);
     }
 };
@@ -759,7 +759,7 @@ struct CPlaceableShSprite_ZppContract {
     int32_t m_shadow{0}; // Z++: CPlaceableSprite
     bool m_bDropShadow{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -768,7 +768,7 @@ struct CMenuBase_ZppContract {
     int32_t m_position{0}; // Z++: CVector2D
     bool m_bTwoState{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -780,7 +780,7 @@ struct CMenuDummy_ZppContract {
     int32_t false_field{0}; // Z++: return
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -802,7 +802,7 @@ struct CMenuPictureAndText_ZppContract {
     float m_oldWrapx{0.0f}; // Z++: ℝ
     bool m_bWrap{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_sprites_len == 5u && m_sprites.size() == 5u)
             && (m_texts_len == 20u && m_texts.size() == 20u)
             && (instance_addr >= 0);
@@ -823,7 +823,7 @@ struct CMenuMultiChoice_ZppContract {
     bool m_bSetTitleTextScale{false}; // Z++: 𝔹
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (instance_addr >= 0)
             && (instance_addr >= 0);
@@ -847,7 +847,7 @@ struct CMenuMultiChoiceTriggered_ZppContract {
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (m_triggers_len == 16u && m_triggers.size() == 16u)
             && (instance_addr >= 0)
@@ -876,7 +876,7 @@ struct CMenuMultiChoiceTriggeredAlways_ZppContract {
     int32_t m_alwaysHighlightTrigger{0}; // Z++: Trigger
     int32_t m_alwaysTrigger{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (m_triggers_len == 16u && m_triggers.size() == 16u)
             && (instance_addr >= 0)
@@ -904,7 +904,7 @@ struct CMenuMultiChoicePictured_ZppContract {
     std::array<bool, 16> m_bHasSprite{}; // Z++: seq 𝔹  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_bHasSprite_len{16u}; // Z++ cardinality #m_bHasSprite
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (m_sprites_len == 16u && m_sprites.size() == 16u)
             && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
@@ -935,7 +935,7 @@ struct CMenuMultiChoicePicturedTriggered_ZppContract {
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (m_sprites_len == 16u && m_sprites.size() == 16u)
             && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
@@ -970,7 +970,7 @@ struct CMenuMultiChoicePicturedTriggeredAnyMove_ZppContract {
     std::array<int32_t, 16> m_moveTab{}; // Z++: seq FEC_MOVETAB  -- bounded array [NUM_MULTICHOICE_OPTIONS]
     size_t m_moveTab_len{16u}; // Z++ cardinality #m_moveTab
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (m_sprites_len == 16u && m_sprites.size() == 16u)
             && (m_bHasSprite_len == 16u && m_bHasSprite.size() == 16u)
@@ -998,7 +998,7 @@ struct CMenuMultiChoiceTwoLines_ZppContract {
     bool m_bSetTitleTextScale{false}; // Z++: 𝔹
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (instance_addr >= 0)
             && (instance_addr >= 0);
@@ -1022,7 +1022,7 @@ struct CMenuMultiChoiceTwoLinesTriggered_ZppContract {
     size_t m_triggers_len{16u}; // Z++ cardinality #m_triggers
     int32_t m_defaultCancel{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 16u && m_options.size() == 16u)
             && (m_triggers_len == 16u && m_triggers.size() == 16u)
             && (instance_addr >= 0)
@@ -1046,7 +1046,7 @@ struct CMenuOnOff_ZppContract {
     int32_t false_field{0}; // Z++: return
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 2u && m_options.size() == 2u)
             && (instance_addr >= 0);
     }
@@ -1068,7 +1068,7 @@ struct CMenuOnOffTriggered_ZppContract {
     int32_t true_field{0}; // Z++: return
     int32_t m_trigger{0}; // Z++: Trigger
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_options_len == 2u && m_options.size() == 2u)
             && (instance_addr >= 0)
             && (instance_addr >= 0);
@@ -1095,7 +1095,7 @@ struct CMenuLineLister_ZppContract {
     float m_lineSpacing{0.0f}; // Z++: ℝ
     int32_t true_field{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_linesLeft_len == 51u && m_linesLeft.size() == 51u)
             && (m_linesRight_len == 51u && m_linesRight.size() == 51u)
             && (m_lineAlphas_len == 51u && m_lineAlphas.size() == 51u)
@@ -1111,7 +1111,7 @@ struct CMenuPage_ZppContract {
     int32_t m_numControls{0}; // Z++: ℤ
     uint8_t m_pCurrentControl_card{0u}; // Z++: Ref[CMenuBase]
     int32_t m_cursor{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_controls_len == 10u && m_controls.size() == 10u)
             && (m_pCurrentControl_card <= 1u);
     }
@@ -1126,7 +1126,7 @@ struct CMenuPageAnyMove_ZppContract {
     std::array<int32_t, 10> m_moveTab{}; // Z++: seq FEC_MOVETAB  -- bounded array [NUM_PAGE_WIDGETS]
     size_t m_moveTab_len{10u}; // Z++ cardinality #m_moveTab
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_controls_len == 10u && m_controls.size() == 10u)
             && (m_moveTab_len == 10u && m_moveTab.size() == 10u)
             && (m_pCurrentControl_card <= 1u)
@@ -1149,7 +1149,7 @@ struct CCustomScreenLayout_ZppContract {
     float fontScaleX{0.0f}; // Z++: ℝ
     float fontScaleY{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1159,7 +1159,7 @@ struct CCFO_ZppContract {
     int32_t saveCat{0}; // Z++: seq CHAR
     int32_t save{0}; // Z++: seq CHAR
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1176,7 +1176,7 @@ struct CCFOSelect_ZppContract {
     int32_t changeFunc{0}; // Z++: ChangeFunc
     bool disableIfGameLoaded{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -1190,7 +1190,7 @@ struct CCFOSlider_ZppContract {
     float min_field{0.0f}; // Z++: ℝ
     float max_field{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -1203,7 +1203,7 @@ struct CCFODynamic_ZppContract {
     int32_t drawFunc{0}; // Z++: DrawFunc
     int32_t buttonPressFunc{0}; // Z++: ButtonPressFunc
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -1235,7 +1235,7 @@ struct MenuTrapezoid_ZppContract {
     float mult_bottomRight_x{0.0f}; // Z++: ℝ
     float mult_bottomRight_y{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1243,7 +1243,7 @@ struct MenuTrapezoid_ZppContract {
 struct FrontendTriggersModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1393}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1393);
     }
@@ -1254,7 +1254,7 @@ struct SkyDataPrefix_ZppContract {
     int64_t data{0}; // Z++: ℕ
     int64_t pktSize2{0}; // Z++: ℕ
     int64_t unused{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pktSize1 >= 0)
             && (data >= 0)
             && (pktSize2 >= 0)
@@ -1271,7 +1271,7 @@ struct DMAGIFUpload_ZppContract {
     size_t gs_bitbltbuf_len{4u}; // Z++ cardinality #gs_bitbltbuf
     int64_t tag2_addr{0}; // Z++: ℕ
     int64_t vif_direct2{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (giftag_len == 4u && giftag.size() == 4u)
             && (gs_bitbltbuf_len == 4u && gs_bitbltbuf.size() == 4u)
             && (tag1_addr >= 0)
@@ -1285,7 +1285,7 @@ struct CGeneral_ZppContract {
     int32_t true_field{0}; // Z++: return
     int32_t arc{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1294,7 +1294,7 @@ struct CIniFile_ZppContract {
     float PedNumberMultiplier{0.0f}; // Z++: ℝ
     float CarNumberMultiplier{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1302,7 +1302,7 @@ struct CIniFile_ZppContract {
 struct CKeyGen_ZppContract {
     std::array<uint32_t, 256> keyTable{}; // Z++: seq ℕ  -- bounded array [256]
     size_t keyTable_len{256u}; // Z++ cardinality #keyTable
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (keyTable_len == 256u && keyTable.size() == 256u);
     }
 };
@@ -1310,7 +1310,7 @@ struct CKeyGen_ZppContract {
 struct LeedsModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{50}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 50);
     }
@@ -1320,7 +1320,7 @@ struct CPtrNode_ZppContract {
     int64_t item{0}; // Z++: ADDRESS
     uint8_t prev_card{0u}; // Z++: Ref[CPtrNode]
     uint8_t next_card{0u}; // Z++: Ref[CPtrNode]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (prev_card <= 1u)
             && (next_card <= 1u);
     }
@@ -1330,7 +1330,7 @@ struct CPtrList_ZppContract {
     uint8_t first_card{0u}; // Z++: Ref[CPtrNode]
     int32_t nil{0}; // Z++: return
     int32_t node{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (first_card <= 1u);
     }
 };
@@ -1341,7 +1341,7 @@ struct CEntryInfoNode_ZppContract {
     uint8_t sector_card{0u}; // Z++: Ref[CSector]
     uint8_t prev_card{0u}; // Z++: Ref[CEntryInfoNode]
     uint8_t next_card{0u}; // Z++: Ref[CEntryInfoNode]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (list_card <= 1u)
             && (listnode_card <= 1u)
             && (sector_card <= 1u)
@@ -1353,7 +1353,7 @@ struct CEntryInfoNode_ZppContract {
 struct CEntryInfoList_ZppContract {
     uint8_t first_card{0u}; // Z++: Ref[CEntryInfoNode]
     int32_t node{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (first_card <= 1u);
     }
 };
@@ -1361,7 +1361,7 @@ struct CEntryInfoList_ZppContract {
 struct MenuScreensModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{800}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 800);
     }
@@ -1370,7 +1370,7 @@ struct MenuScreensModuleState_ZppContract {
 struct MenuScreensCustomModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1457}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1457);
     }
@@ -1387,7 +1387,7 @@ struct CControllerState_ZppContract {
     int32_t RightShock{0}; // Z++: ℤ
     int32_t NetworkTalk{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1403,7 +1403,7 @@ struct CMouseControllerState_ZppContract {
     int32_t _pad0{0}; // Z++: seq CHAR
     float y{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1412,7 +1412,7 @@ struct CMousePointerStateHelper_ZppContract {
     bool bInvertHorizontally{false}; // Z++: 𝔹
     bool bInvertVertically{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1466,7 +1466,7 @@ struct CKeyboardState_ZppContract {
     int32_t LWIN{0}; // Z++: ℤ
     int32_t RWIN{0}; // Z++: ℤ
     int32_t APPS{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (F_len == 12u && F.size() == 12u)
             && (VK_KEYS_len == 256u && VK_KEYS.size() == 256u);
     }
@@ -1475,7 +1475,7 @@ struct CKeyboardState_ZppContract {
 struct CPlaceable_ZppContract {
     int32_t m_matrix{0}; // Z++: CMatrix
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1491,7 +1491,7 @@ struct CPools_ZppContract {
     uint8_t ms_pDummyPool_card{0u}; // Z++: Ref[CDummyPool]
     uint8_t ms_pAudioScriptObjectPool_card{0u}; // Z++: Ref[CAudioScriptObjectPool]
     uint8_t ms_pColModelPool_card{0u}; // Z++: Ref[CColModelPool]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_pPtrNodePool_card <= 1u)
             && (ms_pEntryInfoNodePool_card <= 1u)
             && (ms_pPedPool_card <= 1u)
@@ -1520,7 +1520,7 @@ struct CProfile_ZppContract {
     std::array<int32_t, 7> ms_aBarColours{}; // Z++: seq RwRGBA  -- bounded array [NUM_PROFILES]
     size_t ms_aBarColours_len{7u}; // Z++ cardinality #ms_aBarColours
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_afStartTime_len == 7u && ms_afStartTime.size() == 7u)
             && (ms_afCumulativeTime_len == 7u && ms_afCumulativeTime.size() == 7u)
             && (ms_afEndTime_len == 7u && ms_afEndTime.size() == 7u)
@@ -1546,7 +1546,7 @@ struct sRadarTrace_ZppContract {
     int32_t m_wScale{0}; // Z++: ℤ
     int64_t m_eBlipDisplay{0}; // Z++: ℕ
     int64_t m_eRadarSprite{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nColor >= 0)
             && (m_eBlipType >= 0)
             && (m_BlipIndex >= 0)
@@ -1570,7 +1570,7 @@ struct sRadarTraceSave_ZppContract {
     int32_t m_wScale{0}; // Z++: ℤ
     int64_t m_eBlipDisplay{0}; // Z++: ℕ
     int64_t m_eRadarSprite{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nColor >= 0)
             && (m_eBlipType >= 0)
             && (m_BlipIndex >= 0)
@@ -1582,7 +1582,7 @@ struct sRadarTraceSave_ZppContract {
 struct CRange2D_ZppContract {
     int32_t max_field{0}; // Z++: CVector2D_min
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1590,7 +1590,7 @@ struct CRange2D_ZppContract {
 struct CRange3D_ZppContract {
     int32_t max_field{0}; // Z++: CVector_min
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1598,7 +1598,7 @@ struct CRange3D_ZppContract {
 struct CReference_ZppContract {
     uint8_t next_card{0u}; // Z++: Ref[CReference]
     uint8_t pentity_card{0u}; // Z++: Ref[CEntity]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u)
             && (pentity_card <= 1u);
     }
@@ -1608,7 +1608,7 @@ struct CReferences_ZppContract {
     std::array<int32_t, 1318> aRefs{}; // Z++: seq CReference  -- bounded array [NUMREFERENCES]
     size_t aRefs_len{1318u}; // Z++ cardinality #aRefs
     uint8_t pEmptyList_card{0u}; // Z++: Ref[CReference]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aRefs_len == 1318u && aRefs.size() == 1318u)
             && (pEmptyList_card <= 1u);
     }
@@ -1624,7 +1624,7 @@ struct CRope_ZppContract {
     size_t m_pos_len{32u}; // Z++ cardinality #m_pos
     std::array<ZppVec3, 32> m_speed{}; // Z++: seq CVector  -- bounded array [32]
     size_t m_speed_len{32u}; // Z++ cardinality #m_speed
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pos_len == 32u && m_pos.size() == 32u)
             && (m_speed_len == 32u && m_speed.size() == 32u)
             && (m_id >= 0)
@@ -1635,7 +1635,7 @@ struct CRope_ZppContract {
 struct CRopes_ZppContract {
     std::array<int32_t, 8> aRopes{}; // Z++: seq CRope  -- bounded array [8]
     size_t aRopes_len{8u}; // Z++ cardinality #aRopes
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aRopes_len == 8u && aRopes.size() == 8u);
     }
 };
@@ -1648,7 +1648,7 @@ struct CStreamingInfo_ZppContract {
     int32_t m_nextID{0}; // Z++: ℤ
     int64_t m_position{0}; // Z++: ℕ
     int64_t m_size{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_next_card <= 1u)
             && (m_prev_card <= 1u)
             && (m_loadState >= 0)
@@ -1669,7 +1669,7 @@ struct CStreamingChannel_ZppContract {
     int32_t size{0}; // Z++: ℤ
     int32_t numTries{0}; // Z++: ℤ
     int32_t status{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (streamIds_len == 4u && streamIds.size() == 4u)
             && (offsets_len == 4u && offsets.size() == 4u);
     }
@@ -1677,7 +1677,7 @@ struct CStreamingChannel_ZppContract {
 // State Schema Contract from zpp/core/SurfaceTable.zpp
 struct CSurfaceTable_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1687,7 +1687,7 @@ struct CTimeStep_ZppContract {
     float ms_fFramesPerUpdate{0.0f}; // Z++: ℝ
     float ms_fTimeStep{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1703,7 +1703,7 @@ struct CTimer_ZppContract {
     float ms_fTimeStepNonClipped{0.0f}; // Z++: ℝ
     int64_t m_LogicalFramesPassed{0}; // Z++: ℕ
     bool m_CodePause{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_snTimeInMilliseconds >= 0)
             && (m_snTimeInMillisecondsPauseMode >= 0)
             && (m_snTimeInMillisecondsNonClipped >= 0)
@@ -1717,7 +1717,7 @@ struct CPlaceName_ZppContract {
     uint8_t m_pZone_card{0u}; // Z++: Ref[CZone]
     uint8_t m_pZone2_card{0u}; // Z++: Ref[CZone]
     int32_t m_nAdditionalTimer{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pZone_card <= 1u)
             && (m_pZone2_card <= 1u);
     }
@@ -1725,7 +1725,7 @@ struct CPlaceName_ZppContract {
 // State Schema Contract from zpp/core/User.zpp
 struct CCurrentVehicle_ZppContract {
     uint8_t m_pCurrentVehicle_card{0u}; // Z++: Ref[CVehicle]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pCurrentVehicle_card <= 1u);
     }
 };
@@ -1736,7 +1736,7 @@ struct CUserDisplay_ZppContract {
     int32_t Pager{0}; // Z++: CPager
     int32_t CurrentVehicle{0}; // Z++: CCurrentVehicle
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -1766,7 +1766,7 @@ struct CWanted_ZppContract {
     size_t m_pCops_len{10u}; // Z++ cardinality #m_pCops
     int32_t MaximumWantedLevel{0}; // Z++: ℤ
     int32_t nMaximumWantedLevel{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCrimes_len == 16u && m_aCrimes.size() == 16u)
             && (m_pCops_len == 10u && m_pCops.size() == 10u)
             && (m_nLastWantedLevelChange >= 0)
@@ -1797,7 +1797,7 @@ struct CCullZone_ZppContract {
     int32_t m_numBuildings{0}; // Z++: ℤ
     int32_t m_numTreadablesPlus10m{0}; // Z++: ℤ
     int32_t m_numTreadables{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_groupIndexCount_len == 3u && m_groupIndexCount.size() == 3u);
     }
 };
@@ -1812,14 +1812,14 @@ struct CAttributeZone_ZppContract {
     int32_t attributes{0}; // Z++: ℤ
     int32_t wantedLevel{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/core/common.zpp
 struct CRGBA_ZppContract {
     uint8_t this_field_card{0u}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (this_field_card <= 1u);
     }
 };
@@ -1827,7 +1827,7 @@ struct CRGBA_ZppContract {
 struct configModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{739}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 739);
     }
@@ -1836,7 +1836,7 @@ struct configModuleState_ZppContract {
 struct GlobalScene_ZppContract {
     uint8_t world_card{0u}; // Z++: Ref[RpWorld]
     uint8_t camera_card{0u}; // Z++: Ref[RwCamera]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (world_card <= 1u)
             && (camera_card <= 1u);
     }
@@ -1845,7 +1845,7 @@ struct GlobalScene_ZppContract {
 struct obrstrModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{128}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 128);
     }
@@ -1854,7 +1854,7 @@ struct obrstrModuleState_ZppContract {
 struct re3ModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1720}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1720);
     }
@@ -1869,7 +1869,7 @@ struct CPool_ZppContract {
     int32_t entry{0}; // Z++: return
     int32_t index{0}; // Z++: return
     int32_t n{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_entries_card <= 1u)
             && (m_flags_card <= 1u);
     }
@@ -1879,7 +1879,7 @@ struct CLink_ZppContract {
     int32_t item{0}; // Z++: T
     uint8_t prev_card{0u}; // Z++: Ref[CLink_T]
     uint8_t next_card{0u}; // Z++: Ref[CLink_T]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (prev_card <= 1u)
             && (next_card <= 1u);
     }
@@ -1892,7 +1892,7 @@ struct CLinkList_ZppContract {
     int32_t node{0}; // Z++: return
     uint8_t lnk_card{0u}; // Z++: Ref[CLink_T]
     int32_t n{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (links_card <= 1u)
             && (lnk_card <= 1u);
     }

@@ -778,7 +778,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
     `#include <cstdint>`,
     `// ============================================================================`,
     `// Z++ Formal Specification Contract Block: src/${folder}`,
-    `// Derived from C:/ddd/GTAngel/cpp_test/zpp/${folder}/*.zpp`,
+    `// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/${folder}/*.zpp`,
     `// Modules: ${zfiles.length} | Formal Schemas: ${totalSchemas} | Free Types: ${totalEnums}`,
     `// ============================================================================`,
     `namespace zpp_${folder}_spec {`,
@@ -806,7 +806,7 @@ function buildZppCppContractBlock(folder, insideClass = false) {
         out.push(`    size_t ${f.fname}_len{${f.hasSizeCheck}u}; // Z++ cardinality #${f.rawName}`);
       }
     }
-    out.push(`    constexpr bool checkInvariant() const {`);
+    out.push(`    [[nodiscard]] constexpr bool checkInvariant() const {`);
     out.push(`        return ${s.cppPreds.join('\n            && ')};`);
     out.push(`    }`);
     out.push(`};`);
@@ -1274,7 +1274,7 @@ for (const rootDir of ['src']) {
     ''
   ].join('\n');
   writeMod('docs/DocsZppSpec.hpp', docsHeader);
-  writeMod('docs/ARCHITECTURE.md', '# GTAngel v56 Modular Source Architecture (src/) + Z++ Formal Contracts\n\nAll 22 re3-style subsystems are organized under src/<module>/, enriched with Z++ formal contracts from cpp_test/zpp/<module>/*.zpp, and compiled through src/main.cpp.\n');
+  writeMod('docs/ARCHITECTURE.md', '# GTAngel v56 Modular Source Architecture (src/) + Z++ Formal Contracts\n\nAll 22 re3-style subsystems are organized under src/<module>/, enriched with Z++ formal contracts from native/re3_reference/zpp/<module>/*.zpp, and compiled through src/main.cpp.\n');
 
   writeMod('main.cpp', [
     '// GTAngel v56 — Modular 22-Folder Source Entry Point (src/main.cpp)',

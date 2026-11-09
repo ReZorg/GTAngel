@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/audio
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/audio/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/audio/*.zpp
 // Modules: 20 | Formal Schemas: 1021 | Free Types: 33
 // ============================================================================
 namespace zpp_audio_spec {
@@ -41,7 +41,7 @@ struct cAudioCollision_ZppContract {
     ZppVec3 m_vecPosition{}; // Z++: CVector
     float m_fDistance{0.0f}; // Z++: ℝ
     int32_t m_nBaseVolume{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pEntity1_card <= 1u)
             && (m_pEntity2_card <= 1u)
             && (m_bSurface1 >= 0)
@@ -59,7 +59,7 @@ struct cAudioCollisionManager_ZppContract {
     int64_t m_bCollisionsInQueue{0}; // Z++: ℕ
     int32_t m_sQueue{0}; // Z++: cAudioCollision
     int32_t NUMAUDIOCOLLISIONS{0}; // Z++: i
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_asCollisions1_len == 10u && m_asCollisions1.size() == 10u)
             && (m_asCollisions2_len == 10u && m_asCollisions2.size() == 10u)
             && (m_bIndicesTable_len == 10u && m_bIndicesTable.size() == 10u)
@@ -75,7 +75,7 @@ struct tVehicleSampleData_ZppContract {
     int64_t m_nSirenOrAlarmSample{0}; // Z++: ℕ
     int32_t m_nSirenOrAlarmFrequency{0}; // Z++: ℤ
     int64_t m_bDoorType{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nBank >= 0)
             && (m_nSirenOrAlarmSample >= 0)
             && (m_bDoorType >= 0);
@@ -87,7 +87,7 @@ struct sToniReactions_ZppContract {
     size_t sfx_len{4u}; // Z++ cardinality #sfx
     std::array<uint32_t, 4> count{}; // Z++: seq ℕ  -- bounded array [4]
     size_t count_len{4u}; // Z++ cardinality #count
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (sfx_len == 4u && sfx.size() == 4u)
             && (count_len == 4u && count.size() == 4u);
     }
@@ -96,7 +96,7 @@ struct sToniReactions_ZppContract {
 struct MissionAudioData_ZppContract {
     int32_t m_pName{0}; // Z++: seq CHAR
     int64_t m_nId{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nId >= 0);
     }
 };
@@ -105,7 +105,7 @@ struct tHelicopterSampleData_ZppContract {
     float m_fMaxDistance{0.0f}; // Z++: ℝ
     float m_fBaseDistance{0.0f}; // Z++: ℝ
     int64_t m_bBaseVolume{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_bBaseVolume >= 0);
     }
 };
@@ -126,7 +126,7 @@ struct tSound_ZppContract {
     int32_t m_bIsPlayingFinished{0}; // Z++: bool8
     int32_t m_nVolumeChange{0}; // Z++: ℤ
     int64_t field_51_lcs{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nBankIndex >= 0)
             && (m_nPriority >= 0)
             && (m_nFrequency >= 0)
@@ -143,7 +143,7 @@ struct tPedComment_ZppContract {
     float m_fDistance{0.0f}; // Z++: ℝ
     int64_t m_nVolume{0}; // Z++: ℕ
     int32_t m_nLoadingTimeout{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nSampleIndex >= 0)
             && (m_nVolume >= 0);
     }
@@ -153,7 +153,7 @@ struct cPedParams_ZppContract {
     int32_t m_bDistanceCalculated{0}; // Z++: bool8
     float m_fDistance{0.0f}; // Z++: ℝ
     uint8_t m_pPed_card{0u}; // Z++: Ref[CPed]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pPed_card <= 1u);
     }
 };
@@ -166,7 +166,7 @@ struct cVehicleParams_ZppContract {
     uint8_t m_pTransmission_card{0u}; // Z++: Ref[cTransmission]
     int64_t m_nIndex{0}; // Z++: ℕ
     float m_fVelocityChange{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pVehicle_card <= 1u)
             && (m_pTransmission_card <= 1u)
             && (m_nIndex >= 0);
@@ -176,7 +176,7 @@ struct cVehicleParams_ZppContract {
 struct AudioSamplesModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{17962}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 17962);
     }
@@ -187,14 +187,14 @@ struct cAudioScriptObject_ZppContract {
     ZppVec3 Posn{}; // Z++: CVector
     int32_t AudioEntity{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/audio/DMAudio.zpp
 struct cDMAudio_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -203,7 +203,7 @@ struct tStreamedSample_ZppContract {
     int64_t m_nLength{0}; // Z++: ℕ
     int64_t m_nPosition{0}; // Z++: ℕ
     int64_t m_nLastPosCheckTimer{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nLength >= 0)
             && (m_nPosition >= 0)
             && (m_nLastPosCheckTimer >= 0);
@@ -214,7 +214,7 @@ struct cAMCrime_ZppContract {
     int32_t type{0}; // Z++: ℤ
     ZppVec3 position{}; // Z++: CVector
     int64_t timer{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (timer >= 0);
     }
 };
@@ -227,7 +227,7 @@ struct cPoliceRadioQueue_ZppContract {
     int64_t m_nRemoveOffset{0}; // Z++: ℕ
     int32_t TRUE_field{0}; // Z++: return
     int32_t sample{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aSamples_len == 60u && m_aSamples.size() == 60u)
             && (m_nSamplesInQueue >= 0)
             && (m_nAddOffset >= 0)
@@ -243,7 +243,7 @@ struct ALDEVICEINFO_ZppContract {
     int32_t Extensions{0}; // Z++: ℤ
     bool bSelected{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -254,7 +254,7 @@ struct ALDeviceList_ZppContract {
     int32_t nNumOfDevices{0}; // Z++: ℤ
     int32_t defaultDeviceIndex{0}; // Z++: ℤ
     int32_t filterIndex{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (aDeviceInfo_len == 64u && aDeviceInfo.size() == 64u);
     }
 };
@@ -276,7 +276,7 @@ struct CChannel_ZppContract {
     int32_t LastProcessedOffset{0}; // Z++: ℤ
     bool bIs2D{false}; // Z++: 𝔹
     int32_t channelsThatNeedService{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (Position_len == 3u && Position.size() == 3u)
             && (Distances_len == 2u && Distances.size() == 2u)
             && (LoopPoints_len == 2u && LoopPoints.size() == 2u)
@@ -288,7 +288,7 @@ struct CChannel_ZppContract {
 struct CSortStereoBuffer_ZppContract {
     uint8_t PcmBuf_card{0u}; // Z++: ℙ ℕ
     int64_t BufSize{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (PcmBuf_card <= 1u)
             && (BufSize >= 0);
     }
@@ -299,7 +299,7 @@ struct CImaADPCMDecoder_ZppContract {
     int32_t size{0}; // Z++: i
     int32_t Sample{0}; // Z++: return
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -325,7 +325,7 @@ struct CWavFile_ZppContract {
     uint8_t m_pAdpcmDecoders_card{0u}; // Z++: Ref[CImaADPCMDecoder]
     int32_t WAVE{0}; // Z++: ℤ
     int32_t size{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (extra_len == 2u && extra.size() == 2u)
             && (instance_addr >= 0)
             && (Size >= 0)
@@ -347,7 +347,7 @@ struct CWavFile_ZppContract {
 struct tDataHeader_ZppContract {
     int64_t ID{0}; // Z++: ℕ
     int64_t Size{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ID >= 0)
             && (Size >= 0);
     }
@@ -362,7 +362,7 @@ struct tFormatHeader_ZppContract {
     int64_t BitsPerSample{0}; // Z++: ℕ
     std::array<uint32_t, 2> extra{}; // Z++: seq ℕ  -- bounded array [2]
     size_t extra_len{2u}; // Z++ cardinality #extra
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (extra_len == 2u && extra.size() == 2u)
             && (AudioFormat >= 0)
             && (NumChannels >= 0)
@@ -378,7 +378,7 @@ struct CSndFile_ZppContract {
     uint8_t m_pfSound_card{0u}; // Z++: Ref[SNDFILE]
     int32_t m_soundInfo{0}; // Z++: SF_INFO
     int32_t size{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pfSound_card <= 1u);
     }
@@ -393,7 +393,7 @@ struct CMP3File_ZppContract {
     int32_t m_pPath{0}; // Z++: seq CHAR
     bool m_bFileNotOpenedYet{false}; // Z++: 𝔹
     int64_t size{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pMH_card <= 1u)
             && (m_nRate >= 0)
@@ -412,7 +412,7 @@ struct CADFFile_ZppContract {
     bool m_bFileNotOpenedYet{false}; // Z++: 𝔹
     int64_t size{0}; // Z++: ℕ
     int32_t bytesRead{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pMH_card <= 1u)
             && (m_nRate >= 0)
@@ -428,7 +428,7 @@ struct CVagDecoder_ZppContract {
     int32_t flags{0}; // Z++: ℤ
     int32_t VAG_SAMPLES_IN_LINE{0}; // Z++: i
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -448,7 +448,7 @@ struct CVbFile_ZppContract {
     uint8_t m_ppPcmBuffers_card{0u}; // Z++: ℙ ℤ
     int32_t nChannels{0}; // Z++: i
     uint8_t VAG_SAMPLES_IN_LINE_card{0u}; // Z++: Ref[return_m_nNumberOfBlocks__NUM_VAG_LINES_IN_BLOCK]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pFile_card <= 1u)
             && (m_pVagDecoders_card <= 1u)
@@ -470,7 +470,7 @@ struct COpusFile_ZppContract {
     bool m_bOpened{false}; // Z++: 𝔹
     int64_t m_nRate{0}; // Z++: ℕ
     int64_t m_nChannels{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_FileH_card <= 1u)
             && (m_nRate >= 0)
@@ -480,7 +480,7 @@ struct COpusFile_ZppContract {
 // State Schema Contract from zpp/audio/oal/stream.zpp
 struct IDecoder_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -490,7 +490,7 @@ struct tsQueue_ZppContract {
     int32_t count{0}; // Z++: ℤ
     int32_t m_mutex{0}; // Z++: std__mutex
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -501,7 +501,7 @@ struct tSample_ZppContract {
     int64_t nFrequency{0}; // Z++: ℕ
     int64_t nLoopStart{0}; // Z++: ℕ
     int32_t nLoopEnd{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (nOffset >= 0)
             && (nSize >= 0)
             && (nFrequency >= 0)
@@ -515,7 +515,7 @@ struct tMP3Entry_ZppContract {
     int64_t nTrackStreamPos{0}; // Z++: ℕ
     uint8_t pNext_card{0u}; // Z++: Ref[tMP3Entry]
     int32_t pLinkPath{0}; // Z++: seq CHAR
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (nTrackLength >= 0)
             && (nTrackStreamPos >= 0)
             && (pNext_card <= 1u);
@@ -525,7 +525,7 @@ struct tMP3Entry_ZppContract {
 struct soundlistModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{433}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 433);
     }

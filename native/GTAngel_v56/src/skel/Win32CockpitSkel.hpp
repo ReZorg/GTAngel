@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/skel
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/skel/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/skel/*.zpp
 // Modules: 7 | Formal Schemas: 145 | Free Types: 11
 // ============================================================================
 namespace zpp_skel_spec {
@@ -40,7 +40,7 @@ struct SYSTEMTIME_ZppContract {
     int64_t wMinute{0}; // Z++: ℕ
     int64_t wSecond{0}; // Z++: ℕ
     int64_t wMilliseconds{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (wYear >= 0)
             && (wMonth >= 0)
             && (wDayOfWeek >= 0)
@@ -55,7 +55,7 @@ struct SYSTEMTIME_ZppContract {
 struct eventsModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{838}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 838);
     }
@@ -64,7 +64,7 @@ struct eventsModuleState_ZppContract {
 struct glfwModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{2602}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 2602);
     }
@@ -73,7 +73,7 @@ struct glfwModuleState_ZppContract {
 struct platformModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{116}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 116);
     }
@@ -84,7 +84,7 @@ struct RsInputDevice_ZppContract {
     bool used{false}; // Z++: 𝔹
     int32_t inputEventHandler{0}; // Z++: RsInputEventHandler
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -102,7 +102,7 @@ struct RsGlobalType_ZppContract {
     int32_t mouse{0}; // Z++: RsInputDevice
     int32_t pad{0}; // Z++: RsInputDevice
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -110,7 +110,7 @@ struct RsGlobalType_ZppContract {
 struct RsKeyStatus_ZppContract {
     int32_t keyCharCode{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -118,7 +118,7 @@ struct RsKeyStatus_ZppContract {
 struct RsPadButtonStatus_ZppContract {
     int32_t padID{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -126,7 +126,7 @@ struct RsPadButtonStatus_ZppContract {
 struct resourceModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{35}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 35);
     }
@@ -140,7 +140,7 @@ struct tJoy_ZppContract {
     int32_t m_nVendorID{0}; // Z++: ℤ
     int32_t m_nProductID{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -149,7 +149,7 @@ struct CJoySticks_ZppContract {
     std::array<int32_t, 2> m_aJoys{}; // Z++: seq tJoy  -- bounded array [MAX_JOYSTICKS]
     size_t m_aJoys_len{2u}; // Z++ cardinality #m_aJoys
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aJoys_len == 2u && m_aJoys.size() == 2u)
             && (instance_addr >= 0);
     }

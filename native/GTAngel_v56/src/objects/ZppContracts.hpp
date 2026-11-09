@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/objects
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/objects/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/objects/*.zpp
 // Modules: 8 | Formal Schemas: 160 | Free Types: 7
 // ============================================================================
 namespace zpp_objects_spec {
@@ -175,7 +175,7 @@ struct CCutsceneHead_ZppContract {
     int32_t unk2{0}; // Z++: ℤ
     int32_t bIsSkinned{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (instance_addr >= 0)
@@ -374,7 +374,7 @@ struct CCutsceneObject_ZppContract {
     int64_t m_pAttachTo{0}; // Z++: ADDRESS
     uint8_t m_pAttachmentObject_card{0u}; // Z++: Ref[CObject]
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (instance_addr >= 0)
@@ -490,7 +490,7 @@ struct CDummyObject_ZppContract {
     bool m_flagE2{false}; // Z++: 𝔹
     int32_t m_entryInfoList{0}; // Z++: CEntryInfoList
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)
@@ -648,7 +648,7 @@ struct CObject_ZppContract {
     float fDistToNearestTree{0.0f}; // Z++: ℝ
     int32_t nBodyCastHealth{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (instance_addr >= 0)
@@ -714,7 +714,7 @@ struct CObjectInfo_ZppContract {
     int64_t m_nCollisionDamageEffect{0}; // Z++: ℕ
     int64_t m_nSpecialCollisionResponseCases{0}; // Z++: ℕ
     bool m_bCameraToAvoidThisObject{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nCollisionDamageEffect >= 0)
             && (m_nSpecialCollisionResponseCases >= 0);
     }
@@ -724,7 +724,7 @@ struct CObjectData_ZppContract {
     std::array<int32_t, 210> ms_aObjectInfo{}; // Z++: seq CObjectInfo  -- bounded array [NUMOBJECTINFO]
     size_t ms_aObjectInfo_len{210u}; // Z++ cardinality #ms_aObjectInfo
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_aObjectInfo_len == 210u && ms_aObjectInfo.size() == 210u)
             && (instance_addr >= 0);
     }
@@ -752,7 +752,7 @@ struct CParticleObject_ZppContract {
     uint8_t pFarListHead_card{0u}; // Z++: Ref[CParticleObject]
     uint8_t pUnusedListHead_card{0u}; // Z++: Ref[CParticleObject]
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pNext_card <= 1u)
             && (m_pPrev_card <= 1u)
@@ -772,7 +772,7 @@ struct CParticleObject_ZppContract {
 struct CAudioHydrant_ZppContract {
     int32_t AudioEntity{0}; // Z++: ℤ
     uint8_t pParticleObject_card{0u}; // Z++: Ref[CParticleObject]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pParticleObject_card <= 1u);
     }
 };
@@ -912,7 +912,7 @@ struct CProjectile_ZppContract {
     float fDistToNearestTree{0.0f}; // Z++: ℝ
     int32_t nBodyCastHealth{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (instance_addr >= 0)
@@ -1103,7 +1103,7 @@ struct CStingerSegment_ZppContract {
     float fDistToNearestTree{0.0f}; // Z++: ℝ
     int32_t nBodyCastHealth{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_aCollisionRecords_len == 6u && m_aCollisionRecords.size() == 6u)
             && (m_treadable_len == 2u && m_treadable.size() == 2u)
             && (instance_addr >= 0)
@@ -1170,7 +1170,7 @@ struct CStinger_ZppContract {
     std::array<int32_t, 12> pSpikes{}; // Z++: seq Ref[CStingerSegment]  -- bounded array [NUM_STINGER_SEGMENTS]
     size_t pSpikes_len{12u}; // Z++ cardinality #pSpikes
     int64_t m_nSpikeState{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_vPositions_len == 60u && m_vPositions.size() == 60u)
             && (pSpikes_len == 12u && pSpikes.size() == 12u)
             && (m_nTimeOfDeploy >= 0)

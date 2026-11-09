@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/collision
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/collision/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/collision/*.zpp
 // Modules: 11 | Formal Schemas: 250 | Free Types: 2
 // ============================================================================
 namespace zpp_collision_spec {
@@ -27,7 +27,7 @@ struct CBox_ZppContract {
     ZppVec3 min_field{}; // Z++: CVector
     ZppVec3 max_field{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -37,7 +37,7 @@ struct CColBox_ZppContract {
     ZppVec3 max_field{}; // Z++: CVector
     int64_t surface{0}; // Z++: ℕ
     int64_t piece{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (surface >= 0)
             && (piece >= 0);
     }
@@ -49,7 +49,7 @@ struct CColTriBBox_ZppContract {
     int32_t first{0}; // Z++: ℤ
     int32_t last{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -61,7 +61,7 @@ struct CColLine_ZppContract {
     int32_t pad0{0}; // Z++: ℤ
     int32_t pad1{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -83,7 +83,7 @@ struct CColModel_ZppContract {
     uint8_t vertices_card{0u}; // Z++: Ref[CompressedVector]
     uint8_t triangles_card{0u}; // Z++: Ref[CColTriangle]
     uint8_t trianglePlanes_card{0u}; // Z++: Ref[CColTrianglePlane]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (level >= 0)
             && (spheres_card <= 1u)
             && (lines_card <= 1u)
@@ -105,7 +105,7 @@ struct CColPoint_ZppContract {
     int64_t surfaceB{0}; // Z++: ℕ
     int64_t pieceB{0}; // Z++: ℕ
     float depth{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (surfaceA >= 0)
             && (pieceA >= 0)
             && (surfaceB >= 0)
@@ -119,7 +119,7 @@ struct CColSphere_ZppContract {
     int64_t surface{0}; // Z++: ℕ
     int64_t piece{0}; // Z++: ℕ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (surface >= 0)
             && (piece >= 0);
@@ -130,7 +130,7 @@ struct CSphere_ZppContract {
     ZppVec3 center{}; // Z++: CVector
     float radius{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -138,7 +138,7 @@ struct CSphere_ZppContract {
 struct ColChunkEntry_ZppContract {
     int32_t modelId{0}; // Z++: ℤ
     uint8_t colModel_card{0u}; // Z++: Ref[CColModel]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (colModel_card <= 1u);
     }
 };
@@ -146,7 +146,7 @@ struct ColChunkEntry_ZppContract {
 struct CColStore_ZppContract {
     uint8_t ms_pColPool_card{0u}; // Z++: Ref[CPool_ColDef_ColDef]
     bool m_onlyBB{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_pColPool_card <= 1u);
     }
 };
@@ -156,7 +156,7 @@ struct CColTriangle_ZppContract {
     int64_t b{0}; // Z++: ℕ
     int64_t c{0}; // Z++: ℕ
     int64_t surface{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (a >= 0)
             && (b >= 0)
             && (c >= 0)
@@ -167,14 +167,14 @@ struct CColTriangle_ZppContract {
 struct CColTrianglePlane_ZppContract {
     int32_t dist{0}; // Z++: ℤ
     int64_t dir{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (dir >= 0);
     }
 };
 // State Schema Contract from zpp/collision/Collision.zpp
 struct CStoredCollPoly_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -182,14 +182,14 @@ struct CStoredCollPoly_ZppContract {
 struct CCollision_ZppContract {
     int32_t ms_collisionInMemory{0}; // Z++: eLevelName
     uint8_t ms_colModelCache_card{0u}; // Z++: Ref[CLinkList_CColModel]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_colModelCache_card <= 1u);
     }
 };
 // State Schema Contract from zpp/collision/CompressedVector.zpp
 struct CompressedVector_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -211,7 +211,7 @@ struct CTempColModels_ZppContract {
     int32_t ms_colModelDoor1{0}; // Z++: CColModel
     int32_t ms_colModelBonnet1{0}; // Z++: CColModel
     int32_t ms_colModelFerryDocked{0}; // Z++: CColModel
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_colModelCutObj_len == 10u && ms_colModelCutObj.size() == 10u);
     }
 };
@@ -220,7 +220,7 @@ struct VuTriangle_ZppContract {
     int64_t v1{0}; // Z++: ℕ
     int64_t v2{0}; // Z++: ℕ
     int64_t plane{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (v1 >= 0)
             && (v2 >= 0)
             && (plane >= 0);

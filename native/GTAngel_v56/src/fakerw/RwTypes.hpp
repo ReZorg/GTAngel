@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/fakerw
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/fakerw/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/fakerw/*.zpp
 // Modules: 12 | Formal Schemas: 146 | Free Types: 31
 // ============================================================================
 namespace zpp_fakerw_spec {
@@ -34,7 +34,7 @@ enum class RpGeometryLockMode : int32_t { rpGEOMETRYLOCKPOLYGONS_v = 0, rpGEOMET
 struct fakeModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1172}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1172);
     }
@@ -43,7 +43,7 @@ struct fakeModuleState_ZppContract {
 struct rpanisotModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{6}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 6);
     }
@@ -54,7 +54,7 @@ struct RpHAnimStdKeyFrame_ZppContract {
     float time{0.0f}; // Z++: ℝ
     int32_t q{0}; // Z++: RtQuat
     ZppVec3 t{}; // Z++: RwV3d
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (prevFrame_card <= 1u);
     }
 };
@@ -64,7 +64,7 @@ struct RpHAnimStdInterpFrame_ZppContract {
     uint8_t keyFrame2_card{0u}; // Z++: Ref[RpHAnimStdKeyFrame]
     int32_t q{0}; // Z++: RtQuat
     ZppVec3 t{}; // Z++: RwV3d
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (keyFrame1_card <= 1u)
             && (keyFrame2_card <= 1u);
     }
@@ -73,7 +73,7 @@ struct RpHAnimStdInterpFrame_ZppContract {
 struct rpmatfxModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{43}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 43);
     }
@@ -85,7 +85,7 @@ struct RwMatrixWeights_ZppContract {
     float w2{0.0f}; // Z++: ℝ
     float w3{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -95,7 +95,7 @@ struct RpClumpChunkInfo_ZppContract {
     int32_t numLights{0}; // Z++: ℤ
     int32_t numCameras{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -103,7 +103,7 @@ struct RpClumpChunkInfo_ZppContract {
 struct rtbmpModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{4}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 4);
     }
@@ -112,7 +112,7 @@ struct rtbmpModuleState_ZppContract {
 struct rtcharseModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{14}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 14);
     }
@@ -121,7 +121,7 @@ struct rtcharseModuleState_ZppContract {
 struct rtpngModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{4}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 4);
     }
@@ -131,7 +131,7 @@ struct RtQuat_ZppContract {
     int32_t imag{0}; // Z++: rw__V3d
     float real{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -139,7 +139,7 @@ struct RtQuat_ZppContract {
 struct rwcoreModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{684}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 684);
     }
@@ -147,7 +147,7 @@ struct rwcoreModuleState_ZppContract {
 // State Schema Contract from zpp/fakerw/rwplcore.zpp
 struct RwMemoryFunctions_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -155,7 +155,7 @@ struct RwMemoryFunctions_ZppContract {
 struct RwMemory_ZppContract {
     uint8_t start_card{0u}; // Z++: ℙ ℕ
     int64_t length{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (start_card <= 1u)
             && (length >= 0);
     }
@@ -164,7 +164,7 @@ struct RwMemory_ZppContract {
 struct RwEngineOpenParams_ZppContract {
     int64_t displayID{0}; // Z++: ADDRESS
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -182,7 +182,7 @@ struct RwFileFunctions_ZppContract {
     int32_t rwfflush{0}; // Z++: rwFnFflush
     int32_t rwftell{0}; // Z++: rwFnFtell
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -305,7 +305,7 @@ static_assert(verify_fakerw_zpp_invariants(), "Z++ formal contract invariant fai
 } // namespace zpp_fakerw_spec
 #endif // GTANGEL_ZPP_FAKERW_SPEC_GUARD
 namespace v15render {
-// Z++ Formal Schema Contracts derived from cpp_test/zpp/{vehicles,peds,renderer,animation}/*.zpp
+// Z++ Formal Schema Contracts derived from native/re3_reference/zpp/{vehicles,peds,renderer,animation}/*.zpp
 namespace zpp_spec {
 enum class eCarNodes : uint8_t {
     CAR_WHEEL_RF = 1, CAR_WHEEL_RM, CAR_WHEEL_RB, CAR_WHEEL_LF, CAR_WHEEL_LM, CAR_WHEEL_LB,

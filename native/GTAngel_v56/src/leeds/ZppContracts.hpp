@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/leeds
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/leeds/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/leeds/*.zpp
 // Modules: 6 | Formal Schemas: 106 | Free Types: 0
 // ============================================================================
 namespace zpp_leeds_spec {
@@ -23,7 +23,7 @@ struct cCustomSoundTrack_ZppContract {
     uint8_t m_pSingleton_card{0u}; // Z++: Ref[cCustomSoundTrack]
     bool m_bIsPlaying{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pSingleton_card <= 1u)
             && (instance_addr >= 0);
     }
@@ -31,7 +31,7 @@ struct cCustomSoundTrack_ZppContract {
 // State Schema Contract from zpp/leeds/base/memoryManager.zpp
 struct cMemoryManager_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -39,7 +39,7 @@ struct cMemoryManager_ZppContract {
 struct cMainMemoryManager_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     uint8_t m_pInstance_card{0u}; // Z++: Ref[cMainMemoryManager]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pInstance_card <= 1u);
     }
@@ -47,28 +47,28 @@ struct cMainMemoryManager_ZppContract {
 // State Schema Contract from zpp/leeds/base/memoryManager.zpp
 struct cMemoryBlock_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/leeds/base/relocatableChunk.zpp
 struct cRelocatableChunk_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/leeds/base/relocatableChunk.zpp
 struct cRelocatableChunkClassInfo_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/leeds/base/relocatableChunk.zpp
 struct cRelocatableChunkWriter_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -76,7 +76,7 @@ struct cRelocatableChunkWriter_ZppContract {
 struct cSList_ZppContract {
     int32_t item{0}; // Z++: T
     uint8_t first_card{0u}; // Z++: Ref[tSItem]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (first_card <= 1u);
     }
 };
@@ -84,7 +84,7 @@ struct cSList_ZppContract {
 struct tSItem_ZppContract {
     uint8_t next_card{0u}; // Z++: Ref[tSItem]
     int32_t item{0}; // Z++: T
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u);
     }
 };
@@ -92,7 +92,7 @@ struct tSItem_ZppContract {
 struct cSingletonManager_ZppContract {
     uint8_t head_card{0u}; // Z++: Ref[cSingletonBase]
     uint8_t tail_card{0u}; // Z++: Ref[cSingletonBase]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (head_card <= 1u)
             && (tail_card <= 1u);
     }
@@ -100,7 +100,7 @@ struct cSingletonManager_ZppContract {
 // State Schema Contract from zpp/leeds/base/singletonManager.zpp
 struct cSingletonBase_ZppContract {
     uint8_t next_card{0u}; // Z++: Ref[cSingletonBase]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u);
     }
 };
@@ -108,7 +108,7 @@ struct cSingletonBase_ZppContract {
 struct cSingleton_ZppContract {
     uint8_t next_card{0u}; // Z++: Ref[cSingletonBase]
     uint8_t mspInstance_card{0u}; // Z++: Ref[T]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u)
             && (mspInstance_card <= 1u);
     }
@@ -118,7 +118,7 @@ struct cSmallHeap_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     bool bLocked{false}; // Z++: 𝔹
     bool bUnk{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }

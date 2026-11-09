@@ -21,7 +21,7 @@ once('    avatar3d::NavTrainer navTrainer;',`    avatar3d::NavTrainer navTrainer
         trajectoryRecorderReady=trajectoryRecorder.selfCheck(localLearningDirectory+"/datasets");
         previousControllerTarget=v16motor::ControllerTarget{};
         neuralPolicyLoaded=neuralPolicy.load(localLearningDirectory+"/models/gtangel_visuomotor.gvmw");
-        if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/cpp_test/models/gtangel_visuomotor.gvmw");
+        if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/native/GTAngel_v56/models/gtangel_visuomotor.gvmw");
         neuralShadowEnabled=true;
         // v27 GNN motor actuator: adaptive online learning, never locked.
         neuralActuationUnlocked=true;
@@ -7850,7 +7850,7 @@ once(`            bBox(0.68f, 0.68f, 1.62f, 1.74f, -1.55f, 1.45f, Colour{215, 22
 //    directly into the v15render / avatar3d headers.
 once(`namespace v15render {`,
 `namespace v15render {
-// Z++ Formal Schema Contracts derived from cpp_test/zpp/{vehicles,peds,renderer,animation}/*.zpp
+// Z++ Formal Schema Contracts derived from native/re3_reference/zpp/{vehicles,peds,renderer,animation}/*.zpp
 namespace zpp_spec {
 enum class eCarNodes : uint8_t {
     CAR_WHEEL_RF = 1, CAR_WHEEL_RM, CAR_WHEEL_RB, CAR_WHEEL_LF, CAR_WHEEL_LM, CAR_WHEEL_LB,

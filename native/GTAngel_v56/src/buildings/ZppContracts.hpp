@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/buildings
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/buildings/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/buildings/*.zpp
 // Modules: 3 | Formal Schemas: 18 | Free Types: 0
 // ============================================================================
 namespace zpp_buildings_spec {
@@ -77,7 +77,7 @@ struct CBuilding_ZppContract {
     bool bZoneCulled2{false}; // Z++: 𝔹
     bool m_flagE2{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)
@@ -157,7 +157,7 @@ struct CSolid_ZppContract {
     bool bZoneCulled2{false}; // Z++: 𝔹
     bool m_flagE2{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)
@@ -237,7 +237,7 @@ struct CTreadable_ZppContract {
     bool bZoneCulled2{false}; // Z++: 𝔹
     bool m_flagE2{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)

@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/extras
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/extras/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/extras/*.zpp
 // Modules: 77 | Formal Schemas: 680 | Free Types: 11
 // ============================================================================
 namespace zpp_extras_spec {
@@ -34,7 +34,7 @@ enum class custompipes_d3d9_Enum_3 : int32_t { VSLOC_boneMatrices_v = 0, VSLOC_v
 struct GitSHA1ModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1);
     }
@@ -43,7 +43,7 @@ struct GitSHA1ModuleState_ZppContract {
 struct arrowModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{16}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 16);
     }
@@ -52,7 +52,7 @@ struct arrowModuleState_ZppContract {
 struct cursorModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{16}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 16);
     }
@@ -61,7 +61,7 @@ struct cursorModuleState_ZppContract {
 struct CustomMatExt_ZppContract {
     uint8_t glossTex_card{0u}; // Z++: Ref[rw__Texture]
     bool haveGloss{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (glossTex_card <= 1u);
     }
 };
@@ -69,14 +69,14 @@ struct CustomMatExt_ZppContract {
 struct Color_ZppContract {
     float a{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/custompipes.zpp
 struct InterpolatedValue_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -85,7 +85,7 @@ struct InterpolatedFloat_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     float curInterpolator{0.0f}; // Z++: ℝ
     float curVal{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -95,7 +95,7 @@ struct InterpolatedColor_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     float curInterpolator{0.0f}; // Z++: ℝ
     int32_t curVal{0}; // Z++: Color
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -105,7 +105,7 @@ struct InterpolatedLight_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     float curInterpolator{0.0f}; // Z++: ℝ
     int32_t curVal{0}; // Z++: Color
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0)
             && (instance_addr >= 0);
@@ -118,7 +118,7 @@ struct VsLight_ZppContract {
     size_t pos_len{4u}; // Z++ cardinality #pos
     int32_t dir{0}; // Z++: rw__V3d
     float power{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pos_len == 4u && pos.size() == 4u);
     }
 };
@@ -128,7 +128,7 @@ struct BuildingInst_ZppContract {
     uint8_t instHeader_card{0u}; // Z++: Ref[rw__d3d9__InstanceDataHeader]
     int64_t fadeAlpha{0}; // Z++: ℕ
     bool lighting{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instHeader_card <= 1u)
             && (fadeAlpha >= 0);
     }
@@ -137,7 +137,7 @@ struct BuildingInst_ZppContract {
 struct Pt_ZppContract {
     int32_t y{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -154,7 +154,7 @@ struct Menu_ZppContract {
     int32_t scrollDownR{0}; // Z++: RwRect_scrollUpR
     int32_t selection{0}; // Z++: ℤ
     uint8_t selectedEntry_card{0u}; // Z++: Ref[MenuEntry]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (parent_card <= 1u)
             && (entries_card <= 1u)
             && (selectedEntry_card <= 1u);
@@ -163,14 +163,14 @@ struct Menu_ZppContract {
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakVar_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
 // State Schema Contract from zpp/extras/debugmenu.zpp
 struct CTweakVars_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -178,7 +178,7 @@ struct CTweakVars_ZppContract {
 struct CTweakFunc_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     int32_t m_pVarName{0}; // Z++: seq CHAR
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -188,7 +188,7 @@ struct CTweakBool_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
     int32_t m_pVarName{0}; // Z++: seq CHAR
     uint8_t m_pBoolVar_card{0u}; // Z++: ℙ 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_pBoolVar_card <= 1u);
     }
@@ -200,7 +200,7 @@ struct CTweakSwitch_ZppContract {
     int64_t m_pIntVar{0}; // Z++: ADDRESS
     int32_t m_nMax{0}; // Z++: ℤ
     int32_t m_aStr{0}; // Z++: seq CHAR
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -212,7 +212,7 @@ struct MenuEntry_ZppContract {
     uint8_t next_card{0u}; // Z++: Ref[MenuEntry]
     int32_t r{0}; // Z++: RwRect
     uint8_t menu_card{0u}; // Z++: Ref[Menu]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (next_card <= 1u)
             && (menu_card <= 1u);
     }
@@ -221,7 +221,7 @@ struct MenuEntry_ZppContract {
 struct frontendoptionModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{431}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 431);
     }
@@ -233,7 +233,7 @@ struct INIMap_ZppContract {
     int32_t index{0}; // Z++: return
     int32_t data_size{0}; // Z++: i
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -242,7 +242,7 @@ struct PDataType_ZppContract {
     int32_t underlying_char{0}; // Z++: ℤ
     int32_t PDATA_UNKNOWN{0}; // Z++: PDATA_NONE__PDATA_COMMENT__PDATA_SECTION__PDATA_KEYVALUE
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -255,7 +255,7 @@ struct INIReader_ZppContract {
     int32_t section{0}; // Z++: std__string
     int32_t parseData{0}; // Z++: INIParser__T_ParseValues
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -263,7 +263,7 @@ struct INIReader_ZppContract {
 struct INIGenerator_ZppContract {
     int32_t fileWriteStream{0}; // Z++: std__ofstream
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -275,7 +275,7 @@ struct INIWriter_ZppContract {
     int32_t data{0}; // Z++: return_generator
     int32_t lineData{0}; // Z++: T_LineDataPtr
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -284,7 +284,7 @@ struct INIFile_ZppContract {
     int32_t filename{0}; // Z++: std__string
     int32_t data{0}; // Z++: return_reader
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -299,7 +299,7 @@ struct CPostFX_ZppContract {
     float Intensity{0.0f}; // Z++: ℝ
     int32_t Next{0}; // Z++: ℤ
     int32_t NumValues{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pFrontBuffer_card <= 1u)
             && (pBackBuffer_card <= 1u);
     }
@@ -319,7 +319,7 @@ struct Im2DVertexUV2_ZppContract {
     float u1{0.0f}; // Z++: ℝ
     float v2{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (r >= 0)
             && (g >= 0)
             && (b >= 0)
@@ -354,7 +354,7 @@ struct ScreenDroplets_ZppContract {
     float ms_camUpAngle{0.0f}; // Z++: ℝ
     int32_t ms_splashDuration{0}; // Z++: ℤ
     uint8_t ms_splashObject_card{0u}; // Z++: Ref[CParticleObject]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_drops_len == 2000u && ms_drops.size() == 2000u)
             && (ms_dropsMoving_len == 700u && ms_dropsMoving.size() == 700u)
             && (ms_maskTex_card <= 1u)
@@ -370,7 +370,7 @@ struct ScreenDrop_ZppContract {
     bool active{false}; // Z++: 𝔹
     bool fades{false}; // Z++: 𝔹
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -378,7 +378,7 @@ struct ScreenDrop_ZppContract {
 struct ScreenDropMoving_ZppContract {
     uint8_t drop_card{0u}; // Z++: Ref[ScreenDrop]
     float dist{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (drop_card <= 1u);
     }
 };
@@ -386,7 +386,7 @@ struct ScreenDropMoving_ZppContract {
 struct colourfilterIIIModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{24}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 24);
     }
@@ -395,7 +395,7 @@ struct colourfilterIIIModuleState_ZppContract {
 struct colourfilterLCSModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{20}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 20);
     }
@@ -404,7 +404,7 @@ struct colourfilterLCSModuleState_ZppContract {
 struct colourfilterVCModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{27}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 27);
     }
@@ -413,7 +413,7 @@ struct colourfilterVCModuleState_ZppContract {
 struct contrastModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{19}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 19);
     }
@@ -422,7 +422,7 @@ struct contrastModuleState_ZppContract {
 struct im2dModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{19}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 19);
     }
@@ -431,7 +431,7 @@ struct im2dModuleState_ZppContract {
 struct leedsBuildingModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{28}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 28);
     }
@@ -440,7 +440,7 @@ struct leedsBuildingModuleState_ZppContract {
 struct leedsDefaultModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{97}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 97);
     }
@@ -451,7 +451,7 @@ struct Light_ZppContract {
     float position{0.0f}; // Z++: ℝ
     float direction{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -459,7 +459,7 @@ struct Light_ZppContract {
 struct neoGlossModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{51}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 51);
     }
@@ -468,7 +468,7 @@ struct neoGlossModuleState_ZppContract {
 struct neoRimModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{34}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 34);
     }
@@ -477,7 +477,7 @@ struct neoRimModuleState_ZppContract {
 struct neoRimSkinModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{43}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 43);
     }
@@ -486,7 +486,7 @@ struct neoRimSkinModuleState_ZppContract {
 struct neoVehicleModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{80}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 80);
     }
@@ -495,7 +495,7 @@ struct neoVehicleModuleState_ZppContract {
 struct neoWorldIIIModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{25}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 25);
     }
@@ -504,7 +504,7 @@ struct neoWorldIIIModuleState_ZppContract {
 struct neoWorldVCModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{26}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 26);
     }
@@ -513,7 +513,7 @@ struct neoWorldVCModuleState_ZppContract {
 struct contrastPSModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{31}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 31);
     }
@@ -522,7 +522,7 @@ struct contrastPSModuleState_ZppContract {
 struct scaleModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{19}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 19);
     }
@@ -531,7 +531,7 @@ struct scaleModuleState_ZppContract {
 struct screenDropletModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{18}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 18);
     }
@@ -540,7 +540,7 @@ struct screenDropletModuleState_ZppContract {
 struct simpleModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{17}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 17);
     }
@@ -549,7 +549,7 @@ struct simpleModuleState_ZppContract {
 struct standardConstantsModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{28}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 28);
     }

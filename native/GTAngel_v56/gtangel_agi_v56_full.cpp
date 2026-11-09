@@ -4080,7 +4080,7 @@ private:
 // v13 avatar/world contracts plus GTAngel-Cls framebuffer concepts.
 
 namespace v15render {
-// Z++ Formal Schema Contracts derived from cpp_test/zpp/{vehicles,peds,renderer,animation}/*.zpp
+// Z++ Formal Schema Contracts derived from native/re3_reference/zpp/{vehicles,peds,renderer,animation}/*.zpp
 namespace zpp_spec {
 enum class eCarNodes : uint8_t {
     CAR_WHEEL_RF = 1, CAR_WHEEL_RM, CAR_WHEEL_RB, CAR_WHEEL_LF, CAR_WHEEL_LM, CAR_WHEEL_LB,
@@ -9415,7 +9415,7 @@ struct QuestRuntime {
 class GameplayLoop {
     friend class v20cns::WorldEffector;
 public:
-    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v19_save.json)";
+    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v19_save.json)";
 
     MainNpc ariadne;
     QuestRuntime quest;
@@ -10493,7 +10493,7 @@ static_assert(system78::Roots7.size()==115 && system78::Roots8.size()==286,
 
 // Single-file v20 atomic JSON save. Strict bounded primitive parser; no external JSON library.
 namespace v20save {
-static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v20_save.json)";
+static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v20_save.json)";
 static bool number(const std::string& text,const char* key,double& result) {
     const std::string needle=std::string("\"")+key+"\"";
     size_t pos=text.find(needle);
@@ -10778,7 +10778,7 @@ struct GTAngelAGI {
         trajectoryRecorderReady=trajectoryRecorder.selfCheck(localLearningDirectory+"/datasets");
         previousControllerTarget=v16motor::ControllerTarget{};
         neuralPolicyLoaded=neuralPolicy.load(localLearningDirectory+"/models/gtangel_visuomotor.gvmw");
-        if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/cpp_test/models/gtangel_visuomotor.gvmw");
+        if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/native/GTAngel_v56/models/gtangel_visuomotor.gvmw");
         neuralShadowEnabled=true;
         // v27 GNN motor actuator: adaptive online learning, never locked.
         neuralActuationUnlocked=true;

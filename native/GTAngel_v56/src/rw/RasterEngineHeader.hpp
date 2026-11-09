@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/rw
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/rw/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/rw/*.zpp
 // Modules: 12 | Formal Schemas: 395 | Free Types: 4
 // ============================================================================
 namespace zpp_rw_spec {
@@ -28,7 +28,7 @@ enum class VisibilityPlugins_Enum_1 : int32_t { ID_VISIBILITYATOMIC_v = 0, ID_VI
 struct rpGeometryList_ZppContract {
     uint8_t geometries_card{0u}; // Z++: Ref[RpGeometry]
     int32_t numGeoms{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (geometries_card <= 1u);
     }
 };
@@ -39,7 +39,7 @@ struct rpAtomicBinary_ZppContract {
     int32_t flags{0}; // Z++: ℤ
     int32_t unused{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -47,7 +47,7 @@ struct rpAtomicBinary_ZppContract {
 struct LightsModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{492}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 492);
     }
@@ -60,7 +60,7 @@ struct HeapBlockDesc_ZppContract {
     uint8_t m_next_card{0u}; // Z++: Ref[HeapBlockDesc]
     uint8_t m_prev_card{0u}; // Z++: Ref[HeapBlockDesc]
     int32_t b{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_size >= 0)
             && (m_next_card <= 1u)
             && (m_prev_card <= 1u);
@@ -71,7 +71,7 @@ struct HeapBlockList_ZppContract {
     int32_t m_first{0}; // Z++: HeapBlockDesc
     int32_t m_last{0}; // Z++: HeapBlockDesc
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -83,7 +83,7 @@ struct CommonSize_ZppContract {
     int64_t m_remaining{0}; // Z++: ℕ
     int32_t nil{0}; // Z++: return
     int32_t block{0}; // Z++: return
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_size >= 0)
             && (m_failed >= 0)
             && (m_remaining >= 0);
@@ -104,7 +104,7 @@ struct CMemoryHeap_ZppContract {
     uint8_t m_blocksUsed_card{0u}; // Z++: ℙ ℕ
     int64_t m_unkMemId{0}; // Z++: ℕ
     int32_t NUM_FIXED_MEMBLOCKS{0}; // Z++: i
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_fixedSize_len == 6u && m_fixedSize.size() == 6u)
             && (m_start_card <= 1u)
             && (m_end_card <= 1u)
@@ -120,7 +120,7 @@ struct CMemoryHeap_ZppContract {
 struct MemoryMgrModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{142}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 142);
     }
@@ -129,7 +129,7 @@ struct MemoryMgrModuleState_ZppContract {
 struct NodeNameModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{81}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 81);
     }
@@ -138,7 +138,7 @@ struct NodeNameModuleState_ZppContract {
 struct RwHelperModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{1035}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 1035);
     }
@@ -148,7 +148,7 @@ struct MatFXNothing_ZppContract {
     std::array<int32_t, 5> pad{}; // Z++: seq ℤ  -- bounded array [5]
     size_t pad_len{5u}; // Z++ cardinality #pad
     int32_t effect{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (pad_len == 5u && pad.size() == 5u);
     }
 };
@@ -160,7 +160,7 @@ struct MatFXBump_ZppContract {
     float negBumpCoefficient{0.0f}; // Z++: ℝ
     int32_t pad{0}; // Z++: ℤ
     int32_t effect{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (bumpFrame_card <= 1u)
             && (bumpedTex_card <= 1u)
             && (bumpTex_card <= 1u);
@@ -174,7 +174,7 @@ struct MatFXEnv_ZppContract {
     int32_t envFBalpha{0}; // Z++: ℤ
     int32_t pad{0}; // Z++: ℤ
     int32_t effect{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (envFrame_card <= 1u)
             && (envTex_card <= 1u);
     }
@@ -184,7 +184,7 @@ struct MatFXDual_ZppContract {
     uint8_t dualTex_card{0u}; // Z++: Ref[RwTexture]
     int32_t srcBlend{0}; // Z++: ℤ
     int32_t dstBlend{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (dualTex_card <= 1u);
     }
 };
@@ -195,7 +195,7 @@ struct MatFX_ZppContract {
     int32_t d{0}; // Z++: MatFXDual
     int32_t effects{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -203,7 +203,7 @@ struct MatFX_ZppContract {
 struct RwPS2AlphaTestModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{247}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 247);
     }
@@ -214,7 +214,7 @@ struct GPUcaps_ZppContract {
     int64_t platform{0}; // Z++: ℕ
     int64_t subplatform{0}; // Z++: ℕ
     int64_t dxtSupport{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (version >= 0)
             && (platform >= 0)
             && (subplatform >= 0)
@@ -230,7 +230,7 @@ struct CTexturePool_ZppContract {
     int32_t texturesUsed{0}; // Z++: ℤ
     int32_t texturesNum{0}; // Z++: ℤ
     uint8_t pTextures_card{0u}; // Z++: Ref[IDirect3DTexture8]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (levels >= 0)
             && (pTextures_card <= 1u);
     }
@@ -240,7 +240,7 @@ struct CPaletteList_ZppContract {
     int32_t Max{0}; // Z++: ℤ
     int32_t Num{0}; // Z++: ℤ
     uint8_t Data_card{0u}; // Z++: ℙ ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (Data_card <= 1u);
     }
 };
@@ -248,7 +248,7 @@ struct CPaletteList_ZppContract {
 struct CTxdStore_ZppContract {
     uint8_t ms_pTxdPool_card{0u}; // Z++: Ref[CPool_TxdDef_TxdDef]
     uint8_t ms_pStoredTxd_card{0u}; // Z++: Ref[RwTexDictionary]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_pTxdPool_card <= 1u)
             && (ms_pStoredTxd_card <= 1u);
     }
@@ -278,7 +278,7 @@ struct CVisibilityPlugins_ZppContract {
     float ms_pedLod1Dist{0.0f}; // Z++: ℝ
     uint8_t modelInfo_card{0u}; // Z++: Ref[union_AtomicExt_CSimpleModelInfo]
     float ms_pedLod0Dist{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (atomic_card <= 1u)
             && (ms_pCameraPosn_card <= 1u)
             && (flags >= 0)
@@ -289,7 +289,7 @@ struct CVisibilityPlugins_ZppContract {
 struct AlphaObjectInfo_ZppContract {
     uint8_t atomic_card{0u}; // Z++: Ref[RpAtomic]
     float sort{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (atomic_card <= 1u);
     }
 };
@@ -297,7 +297,7 @@ struct AlphaObjectInfo_ZppContract {
 struct AtomicExt_ZppContract {
     int32_t modelId{0}; // Z++: ℤ
     int64_t flags{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (flags >= 0);
     }
 };
@@ -305,7 +305,7 @@ struct AtomicExt_ZppContract {
 struct FrameExt_ZppContract {
     int32_t id{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -314,7 +314,7 @@ struct ClumpExt_ZppContract {
     int32_t visibilityCB{0}; // Z++: ClumpVisibilityCB
     int32_t alpha{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };

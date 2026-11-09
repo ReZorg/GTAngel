@@ -119,7 +119,7 @@ struct GTAngelAGI {
         trajectoryRecorderReady=trajectoryRecorder.selfCheck(localLearningDirectory+"/datasets");
         previousControllerTarget=v16motor::ControllerTarget{};
         neuralPolicyLoaded=neuralPolicy.load(localLearningDirectory+"/models/gtangel_visuomotor.gvmw");
-        if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/cpp_test/models/gtangel_visuomotor.gvmw");
+        if(!neuralPolicyLoaded) neuralPolicyLoaded=neuralPolicy.load("C:/ddd/GTAngel/native/GTAngel_v56/models/gtangel_visuomotor.gvmw");
         neuralShadowEnabled=true;
         // v27 GNN motor actuator: adaptive online learning, never locked.
         neuralActuationUnlocked=true;

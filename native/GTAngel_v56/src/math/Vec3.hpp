@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/math
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/math/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/math/*.zpp
 // Modules: 8 | Formal Schemas: 264 | Free Types: 0
 // ============================================================================
 namespace zpp_math_spec {
@@ -26,7 +26,7 @@ struct CMatrix_ZppContract {
     float uw{0.0f}; // Z++: ℝ
     float pw{0.0f}; // Z++: ℝ
     float fw{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_attachment_card <= 1u);
     }
 };
@@ -40,7 +40,7 @@ struct CCompressedMatrixNotAligned_ZppContract {
     int32_t m_upY{0}; // Z++: ℤ
     int32_t m_upZ{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -55,7 +55,7 @@ struct CCompressedMatrix_ZppContract {
     int32_t m_upZ{0}; // Z++: ℤ
     int32_t _alignment{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (instance_addr >= 0);
     }
@@ -64,7 +64,7 @@ struct CCompressedMatrix_ZppContract {
 struct CQuaternion_ZppContract {
     float w{0.0f}; // Z++: ℝ
     uint8_t this_field_card{0u}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (this_field_card <= 1u);
     }
 };
@@ -75,7 +75,7 @@ struct CRect_ZppContract {
     float right{0.0f}; // Z++: ℝ
     float top{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -86,7 +86,7 @@ struct CVector_ZppContract {
     float z{0.0f}; // Z++: ℝ
     float w{0.0f}; // Z++: ℝ
     uint8_t this_field_card{0u}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (this_field_card <= 1u);
     }
 };
@@ -94,7 +94,7 @@ struct CVector_ZppContract {
 struct CVector2D_ZppContract {
     float y{0.0f}; // Z++: ℝ
     uint8_t this_field_card{0u}; // Z++: Ref[return]
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (this_field_card <= 1u);
     }
 };
@@ -102,7 +102,7 @@ struct CVector2D_ZppContract {
 struct VuVectorModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{40}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 40);
     }
@@ -111,7 +111,7 @@ struct VuVectorModuleState_ZppContract {
 struct mathModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{118}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 118);
     }
@@ -120,7 +120,7 @@ struct mathModuleState_ZppContract {
 struct mathsModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{19}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 19);
     }

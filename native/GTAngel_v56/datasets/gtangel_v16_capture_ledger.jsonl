@@ -697,3 +697,13 @@
 {"timestampMs":1794195639048,"event":"capture.started","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets/gtvm_episode_27001_1794195639047.gtvm"}
 {"timestampMs":1794195639260,"event":"capture.stopped","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets/gtvm_episode_27001_1794195639047.gtvm;records=1"}
 {"timestampMs":1794195642689,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}
+{"timestampMs":1794198124784,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}
+{"timestampMs":1794198124878,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}
+{"timestampMs":1794198127554,"event":"capture.started","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets/gtvm_episode_27001_1794198127554.gtvm"}
+{"timestampMs":1794198127698,"event":"capture.stopped","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets/gtvm_episode_27001_1794198127554.gtvm;records=1"}
+{"timestampMs":1794198131801,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}
+{"timestampMs":1794198218767,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}
+{"timestampMs":1794198218869,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}
+{"timestampMs":1794198222962,"event":"capture.started","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets/gtvm_episode_27001_1794198222962.gtvm"}
+{"timestampMs":1794198223244,"event":"capture.stopped","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets/gtvm_episode_27001_1794198222962.gtvm;records=1"}
+{"timestampMs":1794198227750,"event":"capture.self_check.passed","detail":"C:\\ddd\\GTAngel\\native\\GTAngel_v56/datasets"}

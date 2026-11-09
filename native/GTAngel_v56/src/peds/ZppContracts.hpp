@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/peds
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/peds/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/peds/*.zpp
 // Modules: 17 | Formal Schemas: 673 | Free Types: 31
 // ============================================================================
 namespace zpp_peds_spec {
@@ -92,7 +92,7 @@ struct CDummyPed_ZppContract {
     int32_t pedType{0}; // Z++: ℤ
     int32_t unknown{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0)
             && (m_rwObject_card <= 1u)
             && (m_type <= 7u)
@@ -123,7 +123,7 @@ struct CGangInfo_ZppContract {
     int32_t m_Weapon1{0}; // Z++: ℤ
     int32_t m_Weapon2{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -132,7 +132,7 @@ struct CGangs_ZppContract {
     std::array<bool, 9> GangAttackWithCops{}; // Z++: seq 𝔹  -- bounded array [NUM_GANGS]
     size_t GangAttackWithCops_len{9u}; // Z++ cardinality #GangAttackWithCops
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (GangAttackWithCops_len == 9u && GangAttackWithCops.size() == 9u)
             && (instance_addr >= 0);
     }
@@ -144,7 +144,7 @@ struct PedAudioData_ZppContract {
     int32_t m_nOverrideMaxRandomDelayTime{0}; // Z++: ℤ
     int32_t m_nMaxRandomDelayTime{0}; // Z++: ℤ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -159,7 +159,7 @@ struct FightMove_ZppContract {
     int64_t hitLevel{0}; // Z++: ℕ
     int64_t damage{0}; // Z++: ℕ
     int64_t flags{0}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (hitLevel >= 0)
             && (damage >= 0)
             && (flags >= 0);
@@ -169,7 +169,7 @@ struct FightMove_ZppContract {
 struct PedAIModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{7350}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 7350);
     }
@@ -179,7 +179,7 @@ struct CVehicleToEffect_ZppContract {
     uint8_t m_pVehicle_card{0u}; // Z++: Ref[CVehicle]
     std::array<int32_t, 4> m_effects{}; // Z++: seq C2dEffect  -- bounded array [NUM_ATTRACTORS_FOR_ICECREAM_VAN]
     size_t m_effects_len{4u}; // Z++ cardinality #m_effects
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_effects_len == 4u && m_effects.size() == 4u)
             && (m_pVehicle_card <= 1u);
     }
@@ -193,7 +193,7 @@ struct CPedAttractorManager_ZppContract {
     uint8_t vShelterAttractors_card{0u}; // Z++: Ref[std__vector_CPedAttractor]
     uint8_t vIceCreamAttractors_card{0u}; // Z++: Ref[std__vector_CPedAttractor]
     int32_t vVehicleToEffect{0}; // Z++: std__vector_CVehicleToEffect
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (vAtmAttractors_card <= 1u)
             && (vSeatAttractors_card <= 1u)
             && (vStopAttractors_card <= 1u)
@@ -218,7 +218,7 @@ struct CPedAttractor_ZppContract {
     ZppVec3 vecEffectPos{}; // Z++: CVector
     ZppVec3 vecQueueDir{}; // Z++: CVector
     ZppVec3 vecUseDir{}; // Z++: CVector
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u);
@@ -241,7 +241,7 @@ struct CPedAtmAttractor_ZppContract {
     ZppVec3 vecQueueDir{}; // Z++: CVector
     ZppVec3 vecUseDir{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u)
@@ -265,7 +265,7 @@ struct CPedIceCreamAttractor_ZppContract {
     ZppVec3 vecQueueDir{}; // Z++: CVector
     ZppVec3 vecUseDir{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u)
@@ -289,7 +289,7 @@ struct CPedPizzaAttractor_ZppContract {
     ZppVec3 vecQueueDir{}; // Z++: CVector
     ZppVec3 vecUseDir{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u)
@@ -313,7 +313,7 @@ struct CPedSeatAttractor_ZppContract {
     ZppVec3 vecQueueDir{}; // Z++: CVector
     ZppVec3 vecUseDir{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u)
@@ -338,7 +338,7 @@ struct CPedShelterAttractor_ZppContract {
     ZppVec3 vecUseDir{}; // Z++: CVector
     int32_t ms_displacements{0}; // Z++: std__vector_CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u)
@@ -362,7 +362,7 @@ struct CPedStopAttractor_ZppContract {
     ZppVec3 vecQueueDir{}; // Z++: CVector
     ZppVec3 vecUseDir{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (p2dEffect_card <= 1u)
             && (vApproachingQueue_card <= 1u)
             && (vWaitingQueue_card <= 1u)
@@ -373,7 +373,7 @@ struct CPedStopAttractor_ZppContract {
 struct PedChatModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{221}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 221);
     }
@@ -382,7 +382,7 @@ struct PedChatModuleState_ZppContract {
 struct PedDebugModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{542}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 542);
     }
@@ -391,7 +391,7 @@ struct PedDebugModuleState_ZppContract {
 struct PedFightModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{6501}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 6501);
     }
@@ -401,7 +401,7 @@ struct LimbOrientation_ZppContract {
     float yaw{0.0f}; // Z++: ℝ
     float pitch{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -414,7 +414,7 @@ struct LimbMovementInfo_ZppContract {
     float minPitch{0.0f}; // Z++: ℝ
     float pitchD{0.0f}; // Z++: ℝ
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -431,14 +431,14 @@ struct CPedIK_ZppContract {
     int32_t ms_headRestoreInfo{0}; // Z++: LimbMovementInfo
     int32_t ms_upperArmInfo{0}; // Z++: LimbMovementInfo
     int32_t ms_lowerArmInfo{0}; // Z++: LimbMovementInfo
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_ped_card <= 1u);
     }
 };
 // State Schema Contract from zpp/peds/PedPlacement.zpp
 struct CPedPlacement_ZppContract {
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -447,7 +447,7 @@ struct CRouteNode_ZppContract {
     int32_t m_route{0}; // Z++: ℤ
     ZppVec3 m_pos{}; // Z++: CVector
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -463,7 +463,7 @@ struct CPedType_ZppContract {
     int64_t m_avoid{0}; // Z++: ℕ
     std::array<int32_t, 23> ms_apPedType{}; // Z++: seq Ref[CPedType]  -- bounded array [NUM_PEDTYPES]
     size_t ms_apPedType_len{23u}; // Z++ cardinality #ms_apPedType
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_apPedType_len == 23u && ms_apPedType.size() == 23u)
             && (m_flag >= 0)
             && (m_threats >= 0)
@@ -475,7 +475,7 @@ struct animAndGroup_ZppContract {
     int32_t animId{0}; // Z++: AnimationId
     int32_t groupId{0}; // Z++: AssocGroupId
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };
@@ -494,7 +494,7 @@ struct RegenerationPoint_ZppContract {
     ZppVec3 srcPosA{}; // Z++: RwV3d
     ZppVec3 srcPosB{}; // Z++: RwV3d
     int64_t instance_addr{0}; // Z++: ADDRESS
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (instance_addr >= 0);
     }
 };

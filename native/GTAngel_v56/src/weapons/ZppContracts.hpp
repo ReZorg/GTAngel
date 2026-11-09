@@ -6,7 +6,7 @@
 #include <cstdint>
 // ============================================================================
 // Z++ Formal Specification Contract Block: src/weapons
-// Derived from C:/ddd/GTAngel/cpp_test/zpp/weapons/*.zpp
+// Derived from C:/ddd/GTAngel/native/re3_reference/zpp/weapons/*.zpp
 // Modules: 8 | Formal Schemas: 171 | Free Types: 8
 // ============================================================================
 namespace zpp_weapons_spec {
@@ -39,7 +39,7 @@ struct CBulletInfo_ZppContract {
     ZppVec3 m_vecPosition{}; // Z++: CVector
     ZppVec3 m_vecSpeed{}; // Z++: CVector
     int32_t m_nDamage{0}; // Z++: ℤ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pSource_card <= 1u);
     }
 };
@@ -60,7 +60,7 @@ struct CExplosion_ZppContract {
     int64_t m_nParticlesExpireTime{0}; // Z++: ℕ
     float m_fPower{0.0f}; // Z++: ℝ
     float m_fZshift{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_pCreatorEntity_card <= 1u)
             && (m_pVictimEntity_card <= 1u)
             && (m_nIteration >= 0)
@@ -79,7 +79,7 @@ struct CShotInfo_ZppContract {
     bool m_inUse{false}; // Z++: 𝔹
     std::array<float, 20> ms_afRandTable{}; // Z++: seq ℝ  -- bounded array [20]
     size_t ms_afRandTable_len{20u}; // Z++ cardinality #ms_afRandTable
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_afRandTable_len == 20u && ms_afRandTable.size() == 20u)
             && (m_sourceEntity_card <= 1u);
     }
@@ -93,7 +93,7 @@ struct CWeapon_ZppContract {
     int64_t m_nTimer{0}; // Z++: ℕ
     bool m_bAddRotOffset{false}; // Z++: 𝔹
     bool bPhotographHasBeenTaken{false}; // Z++: 𝔹
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nTimer >= 0);
     }
 };
@@ -107,7 +107,7 @@ struct CWeaponEffects_ZppContract {
     int64_t m_nAlpha{0}; // Z++: ℕ
     float m_fSize{0.0f}; // Z++: ℝ
     float m_fRotation{0.0f}; // Z++: ℝ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (m_nRed >= 0)
             && (m_nGreen >= 0)
             && (m_nBlue >= 0)
@@ -144,7 +144,7 @@ struct CWeaponInfo_ZppContract {
     int64_t m_Flags{0}; // Z++: ℕ
     int64_t m_nWeaponSlot{0}; // Z++: ℕ
     int32_t m_Anim2ToPlay{0}; // Z++: AnimationId
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (ms_aReloadSampleTime_len == 37u && ms_aReloadSampleTime.size() == 37u)
             && (ms_aMaxAmmoForWeapon_len == 37u && ms_aMaxAmmoForWeapon.size() == 37u)
             && (m_nFiringRate >= 0)
@@ -158,7 +158,7 @@ struct CWeaponInfo_ZppContract {
 struct WeaponTypeModuleState_ZppContract {
     bool module_loaded{true}; // Z++: 𝔹
     int64_t source_lines{99}; // Z++: ℕ
-    constexpr bool checkInvariant() const {
+    [[nodiscard]] constexpr bool checkInvariant() const {
         return (module_loaded == true)
             && (source_lines == 99);
     }

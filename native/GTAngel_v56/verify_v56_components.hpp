@@ -956,7 +956,7 @@ struct NavTrainer {
 
 } // namespace avatar3d
 namespace v15render {
-// Z++ Formal Schema Contracts derived from cpp_test/zpp/{vehicles,peds,renderer,animation}/*.zpp
+// Z++ Formal Schema Contracts derived from native/re3_reference/zpp/{vehicles,peds,renderer,animation}/*.zpp
 namespace zpp_spec {
 enum class eCarNodes : uint8_t {
     CAR_WHEEL_RF = 1, CAR_WHEEL_RM, CAR_WHEEL_RB, CAR_WHEEL_LF, CAR_WHEEL_LM, CAR_WHEEL_LB,
