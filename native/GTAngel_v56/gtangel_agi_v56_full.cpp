@@ -450,21 +450,6 @@ struct GameWorld {
     float goalDistance(Vec3 p) const { return len(p - goal); }
     // Camera anti-clipping: march from the body toward the desired eye and
     // keep the last collision-free sample, so pillars never swallow the view.
-    bool cameraBlocked(Vec3 p, float pad = 0.42f) const {
-        for (const auto& pl : pillars) {
-            const float dx = p.x - pl.pos.x, dz = p.z - pl.pos.z;
-            if (dx*dx + dz*dz < (pl.radius + pad) * (pl.radius + pad)) return true;
-        }
-        for (const auto& b : buildings) {
-            const float dx = std::fabs(p.x - b.pos.x), dz = std::fabs(p.z - b.pos.z);
-            if (dx < b.w * 0.5f + pad && dz < b.d * 0.5f + pad) return true;
-        }
-        for (const auto& lamp : props) {
-            const float dx = p.x - lamp.pos.x, dz = p.z - lamp.pos.z;
-            if (dx*dx + dz*dz < (0.22f + pad) * (0.22f + pad)) return true;
-        }
-        return false;
-    }
     float ambX{-28.0f}, ambDir{1.0f};
     float busZ{10.0f},  busDir{-1.0f};
     Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
@@ -9415,7 +9400,7 @@ struct QuestRuntime {
 class GameplayLoop {
     friend class v20cns::WorldEffector;
 public:
-    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v19_save.json)";
+    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v19_save.json)";
 
     MainNpc ariadne;
     QuestRuntime quest;
@@ -10493,7 +10478,7 @@ static_assert(system78::Roots7.size()==115 && system78::Roots8.size()==286,
 
 // Single-file v20 atomic JSON save. Strict bounded primitive parser; no external JSON library.
 namespace v20save {
-static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v20_save.json)";
+static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v20_save.json)";
 static bool number(const std::string& text,const char* key,double& result) {
     const std::string needle=std::string("\"")+key+"\"";
     size_t pos=text.find(needle);

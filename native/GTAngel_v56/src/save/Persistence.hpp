@@ -205,7 +205,7 @@ static_assert(verify_save_zpp_invariants(), "Z++ formal contract invariant faile
 } // namespace zpp_save_spec
 #endif // GTANGEL_ZPP_SAVE_SPEC_GUARD
 namespace v20save {
-static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v20_save.json)";
+static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v20_save.json)";
 static bool number(const std::string& text,const char* key,double& result) {
     const std::string needle=std::string("\"")+key+"\"";
     size_t pos=text.find(needle);

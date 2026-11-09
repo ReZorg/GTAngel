@@ -4318,22 +4318,7 @@ once(`    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
         }
         return safe;
     }`,
-`    bool cameraBlocked(Vec3 p, float pad = 0.42f) const {
-        for (const auto& pl : pillars) {
-            const float dx = p.x - pl.pos.x, dz = p.z - pl.pos.z;
-            if (dx*dx + dz*dz < (pl.radius + pad) * (pl.radius + pad)) return true;
-        }
-        for (const auto& b : buildings) {
-            const float dx = std::fabs(p.x - b.pos.x), dz = std::fabs(p.z - b.pos.z);
-            if (dx < b.w * 0.5f + pad && dz < b.d * 0.5f + pad) return true;
-        }
-        for (const auto& lamp : props) {
-            const float dx = p.x - lamp.pos.x, dz = p.z - lamp.pos.z;
-            if (dx*dx + dz*dz < (0.22f + pad) * (0.22f + pad)) return true;
-        }
-        return false;
-    }
-    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
+`    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
         // LW35: sweep the full ray from elevated body anchor to desired eye
         // (never shortcut on !collides(desired) alone, which missed poles or
         // pillars standing between the avatar and the 3rd-person camera).

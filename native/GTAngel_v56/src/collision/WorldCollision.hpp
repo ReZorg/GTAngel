@@ -905,21 +905,6 @@ struct GameWorld {
     float goalDistance(Vec3 p) const { return len(p - goal); }
     // Camera anti-clipping: march from the body toward the desired eye and
     // keep the last collision-free sample, so pillars never swallow the view.
-    bool cameraBlocked(Vec3 p, float pad = 0.42f) const {
-        for (const auto& pl : pillars) {
-            const float dx = p.x - pl.pos.x, dz = p.z - pl.pos.z;
-            if (dx*dx + dz*dz < (pl.radius + pad) * (pl.radius + pad)) return true;
-        }
-        for (const auto& b : buildings) {
-            const float dx = std::fabs(p.x - b.pos.x), dz = std::fabs(p.z - b.pos.z);
-            if (dx < b.w * 0.5f + pad && dz < b.d * 0.5f + pad) return true;
-        }
-        for (const auto& lamp : props) {
-            const float dx = p.x - lamp.pos.x, dz = p.z - lamp.pos.z;
-            if (dx*dx + dz*dz < (0.22f + pad) * (0.22f + pad)) return true;
-        }
-        return false;
-    }
     float ambX{-28.0f}, ambDir{1.0f};
     float busZ{10.0f},  busDir{-1.0f};
     Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {

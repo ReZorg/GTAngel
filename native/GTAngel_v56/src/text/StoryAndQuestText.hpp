@@ -311,7 +311,7 @@ struct QuestRuntime {
 class GameplayLoop {
     friend class v20cns::WorldEffector;
 public:
-    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\native\GTAngel_v56\gtangel_v19_save.json)";
+    static constexpr const char* SavePath = R"(C:\ddd\GTAngel\cpp_test\gtangel_v19_save.json)";
 
     MainNpc ariadne;
     QuestRuntime quest;
