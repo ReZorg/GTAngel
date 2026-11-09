@@ -84,7 +84,7 @@ _RestoreTest/
 KSM-ORGANIZED/
 UE4VRCookbook/
 u9n/
-u9n-main/
+u9n-*/
 aihub/
 assets/
 ava/
@@ -95,6 +95,8 @@ lucyspace/
 manus-slides/
 Analysis/
 GTAngel-Cls/
+tools/reference/
+tools/_temp_archive/
 *.zip
 *.exe
 *.o
