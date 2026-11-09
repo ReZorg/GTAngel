@@ -598,3 +598,24 @@ This is a proprietary project. Please contact the maintainers for contribution g
 - **OpenCog Foundation**: Cognitive architecture patterns
 - **Rockstar Games**: GTA3 Definitive Edition assets
 - **Epic Games**: Unreal Engine 5
+
+---
+
+## Repository Organizer
+
+The solution now includes **GTAngel Repository Organizer**, a native .NET 8/WPF desktop application for cataloging fragmented components and safely organizing loose workspace files by **file type and functional role**. It discovers Git, .NET, Node, Python, C/C++, Unreal, installer, documentation, data, and asset boundaries; protects component internals by default; generates an explainable preview plan; journals approved moves before execution; and supports validated reverse-order undo.
+
+Launch the published application by double-clicking [`Launch-GTAngel-Organizer.cmd`](Launch-GTAngel-Organizer.cmd). Rebuild, test, and republish it with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\Build-Organizer.ps1
+```
+
+| Resource | Purpose |
+|---|---|
+| [`docs/ORGANIZER_USER_GUIDE.md`](docs/ORGANIZER_USER_GUIDE.md) | Launch, workflow, settings, watch mode, rebuild, and troubleshooting guide |
+| [`docs/ORGANIZER_ARCHITECTURE.md`](docs/ORGANIZER_ARCHITECTURE.md) | Architecture, taxonomy, state model, and safety invariants |
+| [`tools/ORGANIZER_TEST_REPORT.md`](tools/ORGANIZER_TEST_REPORT.md) | Deterministic test evidence and actual-workspace dry-scan metrics |
+| [`tools/component-integration-analysis.md`](tools/component-integration-analysis.md) | Fragmented-component inventory and integrated feature rationale |
+
+> **Safe default:** scanning and watched-folder mode never move files. A move requires a generated plan, explicit selection, user confirmation, a durable pre-move journal, and successful immediate source validation.
