@@ -30,11 +30,6 @@ public partial class AvatarViewModel : ObservableObject
     [ObservableProperty] private Brush  _avatarStateColor    = Brushes.Gray;
     [ObservableProperty] private bool   _isAvatarRunning     = false;
     [ObservableProperty] private bool   _isAvatarNotRunning  = true;
-    [ObservableProperty] private string _avatarProfileName   = "Arc Angel Echo";
-    [ObservableProperty] private string _avatarProfileVersion = "v1.0.0";
-    [ObservableProperty] private string _avatarRigSummary    = "22-bone biped • Walk + Run @ 60 fps";
-    [ObservableProperty] private string _avatarExpressionMode = "Skeletal + Neon Aura";
-    [ObservableProperty] private string _avatarAssetState    = "Awaiting integrity validation";
 
     // ── 4E Cognitive State ───────────────────────────────────────────────────
     [ObservableProperty] private float  _curiosity           = 0f;
@@ -260,14 +255,15 @@ public partial class AvatarViewModel : ObservableObject
         {
             var loggerFactory = App.Services.GetRequiredService<ILoggerFactory>();
 
-            // Reuse the DI singleton so the launcher, WPF host, DTE loop and
-            // native Arc Angel plugin all share one duplex IPC transport.
-            _ue5 = App.Services.GetRequiredService<UE5ProcessManager>();
-            _ue5.UseLumen = UseLumen;
-            _ue5.UseNanite = UseNanite;
-            _ue5.UseChaosPhysics = UseChaosPhysics;
-            _ue5.UseEnhancedInput = UseEnhancedInput;
-            _ue5.UseMLVisionCapture = UseMLVisionCapture;
+            // Create UE5ProcessManager with UE5 feature flags
+            _ue5 = new UE5ProcessManager(loggerFactory.CreateLogger<UE5ProcessManager>())
+            {
+                UseLumen          = UseLumen,
+                UseNanite         = UseNanite,
+                UseChaosPhysics   = UseChaosPhysics,
+                UseEnhancedInput  = UseEnhancedInput,
+                UseMLVisionCapture = UseMLVisionCapture
+            };
 
             // Create ESN pipeline
             var esn = App.Services.GetRequiredService<EsnReservoirPipeline>();
@@ -299,7 +295,6 @@ public partial class AvatarViewModel : ObservableObject
             _embodiment.OnNeurochemicalStateUpdated += OnNeurochemicalReadback;
             _embodiment.OnPersonalityTraitsUpdated  += OnPersonalityApplied;
             _embodiment.OnFACSAUsUpdated            += OnAuArrayUpdated;
-            _embodiment.OnAvatarProfileActivated    += OnAvatarProfileActivated;
             _embodiment.OnEmbodimentLog             += (_, msg) => App.Current.Dispatcher.InvokeAsync(() => AddLog($"[Embody] {msg}"));
             await _embodiment.StartAsync();
             AddLog("🎭 AvatarEmbodimentService started — FACS+IK+Neuro+Personality active");
@@ -356,10 +351,9 @@ public partial class AvatarViewModel : ObservableObject
             _playerAiBridge.OnObservationFused += (_, norm) => App.Current.Dispatcher.InvokeAsync(() => ObservationFusionNorm = norm);
 
             // Create avatar service (now receives real frames + embodiment + navigation)
-            var avatarProfiles = App.Services.GetRequiredService<AvatarAssetProfileService>();
             _avatarService = new DTE4EAvatarService(
                 loggerFactory.CreateLogger<DTE4EAvatarService>(),
-                _ue5, esn, _mlVision, _embodiment, _navigation, avatarProfiles);
+                _ue5, esn, _mlVision, _embodiment, _navigation);
             _avatarService.SetPlayerAiBridge(_playerAiBridge);
 
             // Phase 7: wire the embodied cognition loop into the 4E exploration loop.
@@ -380,13 +374,14 @@ public partial class AvatarViewModel : ObservableObject
             _avatarService.ActionDispatched      += OnActionDispatched;
             _avatarService.ExplorationLog        += OnExplorationLog;
 
-            UpdateUE5ModuleStatus("GTAngelRuntime", "Registered", true);
-            UpdateUE5ModuleStatus("Arc Angel Asset Profile", "Awaiting validation", false);
-            UpdateUE5ModuleStatus("Embodiment IPC", "Awaiting UE5", false);
-            UpdateUE5ModuleStatus("Command / Observation IPC", "Awaiting UE5", false);
-            Ue5ModulesStatus = "Runtime configured — UE5 not connected";
+            UpdateUE5ModuleStatus("Avatar3DComponent",          "Ready", true);
+            UpdateUE5ModuleStatus("NeurochemicalSystem",        "Ready", true);
+            UpdateUE5ModuleStatus("SuperHotGirlPersonality",    "Ready", true);
+            UpdateUE5ModuleStatus("VirtualEnvironmentManager",  "Ready", true);
+            UpdateUE5ModuleStatus("Live2DCubismAvatarComponent","Ready", true);
+            Ue5ModulesStatus = "All modules ready";
 
-            AddLog("GTAngel Arc Angel runtime configured; launch UE5 to activate the profile");
+            AddLog("✅ UE5 cognitive modules loaded from E:\\u9n\\UnrealEngine\\Source\\");
         }
         catch (Exception ex)
         {
@@ -400,12 +395,17 @@ public partial class AvatarViewModel : ObservableObject
         UE5Modules.Clear();
         var modules = new[]
         {
-            ("GTAngelRuntime", "Assets/Gameface/Plugins/GTAngelRuntime", "UE5 Native"),
-            ("Arc Angel Asset Profile", "Assets/Avatars/ArcAngelEcho/v1", "SHA-256 Manifest"),
-            ("Embodiment IPC", "GTAngel_Embodiment_IPC", "JSONL Pipe"),
-            ("Command / Observation IPC", "GTAngel_UE5_IPC", "Duplex JSONL Pipe"),
-            ("Character Motor Bridge", "ArcAngelEchoComponent", "UE5 Character"),
-            ("Skeletal + Neon Expression", "M_ArcAngelEcho", "PBR Runtime"),
+            ("Avatar3DComponent",           "E:\\u9n\\UnrealEngine\\Source\\Avatar",          "UE4→UE5"),
+            ("NeurochemicalSystem",         "E:\\u9n\\UnrealEngine\\Source\\Neurochemical",   "UE5 Native"),
+            ("SuperHotGirlPersonality",     "E:\\u9n\\UnrealEngine\\Source\\Personality",     "UE5 Native"),
+            ("VirtualEnvironmentManager",   "E:\\u9n\\UnrealEngine\\Source\\Environment",     "UE5 Lumen"),
+            ("Live2DCubismAvatarComponent", "E:\\u9n\\UnrealEngine\\Source\\Live2DCubism",    "UE5 Native"),
+            ("AssetManager",               "E:\\u9n\\UnrealEngine\\Source\\AssetManagement", "UE5 Native"),
+            ("Enhanced Input System",       "UE5 Engine Built-in",                            "UE4→UE5"),
+            ("Chaos Physics",               "UE5 Engine Built-in",                            "UE4 PhysX→UE5"),
+            ("Lumen GI",                    "UE5 Engine Built-in",                            "UE4 Baked→UE5"),
+            ("Nanite Geometry",             "UE5 Engine Built-in",                            "UE4 LOD→UE5"),
+            ("World Partition",             "UE5 Engine Built-in",                            "UE4 Streaming→UE5"),
         };
 
         foreach (var (name, path, upgrade) in modules)
@@ -423,7 +423,7 @@ public partial class AvatarViewModel : ObservableObject
 
     private void DetectUE5Engine()
     {
-        var enginePath = App.Services.GetRequiredService<AppConfiguration>().Ue5EnginePath;
+        var enginePath = DTE4EAvatarService.UE5EnginePath;
         if (System.IO.Directory.Exists(enginePath))
         {
             var buildVersionPath = System.IO.Path.Combine(enginePath, "Engine", "Build", "Build.version");
@@ -558,25 +558,6 @@ public partial class AvatarViewModel : ObservableObject
         });
     }
 
-    private void OnAvatarProfileActivated(object? sender, GTAngel.Models.AvatarRuntimeProfile profile)
-    {
-        App.Current.Dispatcher.InvokeAsync(() =>
-        {
-            AvatarProfileName = profile.Manifest.Name;
-            AvatarProfileVersion = $"v{profile.Manifest.Version}";
-            AvatarRigSummary = $"{profile.Manifest.Rig.BoneCount}-bone biped • Walk + Run @ 60 fps";
-            AvatarExpressionMode = profile.Manifest.Expression.Mode == "SkeletalAuraFallback"
-                ? "Skeletal + Neon Aura"
-                : profile.Manifest.Expression.Mode;
-            AvatarAssetState = "SHA-256 validated • UE5 activation plan sent";
-            AvatarStatusText = $"{profile.Manifest.Name} ready for embodied exploration";
-            UpdateUE5ModuleStatus("Arc Angel Asset Profile", "Active", true);
-            UpdateUE5ModuleStatus("Embodiment IPC", "Connected", true);
-            UpdateUE5ModuleStatus("Skeletal + Neon Expression", "Active", true);
-            Ue5ModulesStatus = "Arc Angel runtime active";
-        });
-    }
-
     private void AddLog(string message)
     {
         ExplorationLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] {message}");
@@ -651,14 +632,11 @@ public partial class AvatarViewModel : ObservableObject
             {
                 AddLog($"✅ UE5 ready in {result.Duration.TotalSeconds:F1}s — {result.Message}");
                 Ue5LaunchButtonText = "✓ UE5 READY";
-                UpdateUE5ModuleStatus("Command / Observation IPC", "Connected", true);
-                UpdateUE5ModuleStatus("Character Motor Bridge", "Connected", true);
             }
             else
             {
                 AddLog($"❌ UE5 launch failed at {result.FailedAtStage}: {result.Message}");
                 Ue5LaunchButtonText = "▶ LAUNCH UE5";
-                UpdateUE5ModuleStatus("Command / Observation IPC", "Disconnected", false);
             }
         });
     }
