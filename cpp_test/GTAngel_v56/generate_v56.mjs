@@ -7962,6 +7962,15 @@ static constexpr AlexanderPropertyDef ALEXANDER_15_PROPERTIES[15] = {
     {14, "Not-Separateness",       "Connected to the world",                (1u << 2) | (1u << 3) | (1u << 5)}
 };
 
+static constexpr bool verifyAlexander15PropertiesSpec() {
+    for (int i = 0; i < 15; ++i) {
+        if (ALEXANDER_15_PROPERTIES[i].id != i) return false;
+        if ((ALEXANDER_15_PROPERTIES[i].cycleMask & 0x7Eu) == 0u) return false;
+    }
+    return ALEXANDER_15_PROPERTIES[8].cycleMask == 0x7Eu;
+}
+static_assert(verifyAlexander15PropertiesSpec(), "Alexander 15 Properties KSM Cycle specification must hold");
+
 // ── Aesthetic Field (with Alexander's 15 Properties Fitness Evaluator) ──
 class AestheticField {
 public:
@@ -7976,6 +7985,16 @@ public:
     int strongestProperty() const { return strongestProp_; }
     int activeKsmCycle() const { return activeKsmCycle_; }
     void setActiveKsmCycle(int cycle) { activeKsmCycle_ = ((std::max(1, cycle) - 1) % 6) + 1; }
+    float cycleWeightedFitness() const {
+        const uint8_t bit = (uint8_t)(1u << activeKsmCycle_);
+        float sum = 0.0f, wSum = 0.0f;
+        for (int p = 0; p < 15; ++p) {
+            const float w = (ALEXANDER_15_PROPERTIES[p].cycleMask & bit) ? 2.0f : 1.0f;
+            sum += w * propScores_[p];
+            wSum += w;
+        }
+        return wSum > 0.0f ? (sum / wSum) : 0.0f;
+    }
 
     float evaluate(const std::vector<std::vector<float>>& grid) {`, 'LW53 Alexander 15 Properties definitions');
 

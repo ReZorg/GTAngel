@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (leeds): 6 modules, 106 schemas, 0 enums (CustomSoundTrack.zpp, base/memoryManager.zpp, base/relocatableChunk.zpp, base/sList.zpp, base/singletonManager.zpp, smallHeap.zpp) ──
     static constexpr int zpp_leeds_modules() { return zpp_leeds_spec::kZppModuleCount; }
     static constexpr int zpp_leeds_schemas() { return zpp_leeds_spec::kZppSchemaCount; }

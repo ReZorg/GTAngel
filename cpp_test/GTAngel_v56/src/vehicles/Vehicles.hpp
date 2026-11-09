@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
     static constexpr int zpp_vehicles_modules() { return zpp_vehicles_spec::kZppModuleCount; }
     static constexpr int zpp_vehicles_schemas() { return zpp_vehicles_spec::kZppSchemaCount; }

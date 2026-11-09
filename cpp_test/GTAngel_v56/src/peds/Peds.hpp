@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
     static constexpr int zpp_peds_modules() { return zpp_peds_spec::kZppModuleCount; }
     static constexpr int zpp_peds_schemas() { return zpp_peds_spec::kZppSchemaCount; }

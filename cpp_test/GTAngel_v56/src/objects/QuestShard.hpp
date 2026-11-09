@@ -1,3 +1,4 @@
+#pragma once
     // Component-specific Z++ quest shard CObjectInfo contract binding (from objects/ZppContracts.hpp)
     static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {
         return zpp_objects_spec::CObjectInfo_ZppContract{};

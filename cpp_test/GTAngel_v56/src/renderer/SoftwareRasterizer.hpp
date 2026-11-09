@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (renderer): 38 modules, 1267 schemas, 51 enums (2dEffect.zpp, Antennas.zpp, Clouds.zpp, Console.zpp, Coronas.zpp, Credits.zpp, CutsceneShadow.zpp, Draw.zpp) ──
     static constexpr int zpp_renderer_modules() { return zpp_renderer_spec::kZppModuleCount; }
     static constexpr int zpp_renderer_schemas() { return zpp_renderer_spec::kZppSchemaCount; }

@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (buildings): 3 modules, 18 schemas, 0 enums (Building.zpp, Solid.zpp, Treadable.zpp) ──
     static constexpr int zpp_buildings_modules() { return zpp_buildings_spec::kZppModuleCount; }
     static constexpr int zpp_buildings_schemas() { return zpp_buildings_spec::kZppSchemaCount; }

@@ -1,3 +1,4 @@
+#pragma once
     // ── Z++ Formal Spec Component Binding (entities): 3 modules, 190 schemas, 3 enums (Dummy.zpp, Entity.zpp, Physical.zpp) ──
     static constexpr int zpp_entities_modules() { return zpp_entities_spec::kZppModuleCount; }
     static constexpr int zpp_entities_schemas() { return zpp_entities_spec::kZppSchemaCount; }
