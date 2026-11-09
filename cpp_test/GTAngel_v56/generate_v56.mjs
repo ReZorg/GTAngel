@@ -8102,7 +8102,254 @@ once(`            float coherence = echoField.evaluate(echoGrid); // live arena 
             echoSnap = echoController.tick(coherence, contradiction);
             echoField.setActiveKsmCycle(echoSnap.cycle);`, 'LW53 advance activeKsmCycle in echo_ksm');
 
-// Display Alexander's 15 Properties fitness & active KSM Cycle in the bottom-right Echo KSM cockpit line
+// ===== LW54: CAMERA PASS-THROUGH WITH SMOOTH OBFUSCATION RECTIFICATION & MUTUAL VEHICLE/PED BARRIERS =====
+once(`    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
+        // LW35: sweep the full ray from elevated body anchor to desired eye
+        // (never shortcut on !collides(desired) alone, which missed poles or
+        // pillars standing between the avatar and the 3rd-person camera).
+        const Vec3 anchor{body.x, std::max(body.y + 1.65f, desired.y * 0.65f), body.z};
+        const Vec3 ray = desired - anchor;
+        const float rlen = std::sqrt(ray.x*ray.x + ray.z*ray.z);
+        const Vec3 side = rlen > 1e-4f ? Vec3{-ray.z / rlen, 0.0f, ray.x / rlen} : Vec3{1.0f, 0.0f, 0.0f};
+        bool clearRay = true;
+        Vec3 pulledIn = anchor;
+        for (int step = 1; step <= 24; ++step) {
+            const float t = (float)step / 24.0f;
+            const Vec3 sample = anchor + ray * t;
+            if (cameraBlocked(sample, 0.42f)) {
+                clearRay = false;
+                break;
+            }
+            pulledIn = sample;
+        }
+        if (clearRay) return desired;
+        // If only a thin pole or tree trunk grazed the camera ray (while the
+        // desired endpoint itself is outside solid geometry), try a gentle
+        // lateral/elevated camera orbit around the pole before pulling in.
+        if (!collides(desired)) {
+            for (float lat : {0.55f, -0.55f, 0.95f, -0.95f}) {
+                const Vec3 cand = desired + side * lat + Vec3{0.0f, 0.25f, 0.0f};
+                bool ok = true;
+                for (int s = 1; s <= 20; ++s) {
+                    if (cameraBlocked(anchor + (cand - anchor) * ((float)s / 20.0f), 0.34f)) { ok = false; break; }
+                }
+                if (ok) return cand;
+            }
+        }
+        return pulledIn;
+    }
+    void tickWalkers(float dt) {
+        walkerTime += dt;
+        for (auto& w : walkers) {
+            // Deterministic wander: layered sine headings, no RNG, so runs
+            // replay exactly and the world stays reproducible.
+            w.heading += 0.7f * std::sin(walkerTime * 0.6f + w.phase) * dt
+                       + 0.4f * std::sin(walkerTime * 0.23f + w.phase * 2.1f) * dt;
+            const Vec3 next = w.pos + Vec3{std::sin(w.heading) * w.speed * dt, 0,
+                                           std::cos(w.heading) * w.speed * dt};
+            if (collides(next) || std::fabs(next.x) > worldSize * 0.5f - 1.0f ||
+                std::fabs(next.z) > worldSize * 0.5f - 1.0f)
+                w.heading += 1.7f;
+            else
+                w.pos = next;
+        }
+    }
+    // re3 CVehicle lanes: ping-pong along fixed axes, heli orbits overhead.
+    // Time-based only (no RNG) so every run replays identically.
+    void tickTraffic(float dt) {
+        trafficTime += dt;
+        for (auto& v : traffic) {
+            if (v.orbitR > 0.0f) {
+                v.orbitA += v.speed * dt;
+                v.pos = {std::cos(v.orbitA) * v.orbitR, v.orbitY, std::sin(v.orbitA) * v.orbitR};
+                v.heading = -v.orbitA; // tangent {-sin A, 0, cos A} = {sin h, 0, cos h}
+                continue;
+            }
+            float& along = v.axis == 'x' ? v.pos.x : v.pos.z;
+            along += v.dir * v.speed * dt;
+            if (along >= v.max) { along = v.max; v.dir = -1; }
+            if (along <= v.min) { along = v.min; v.dir = 1; }
+            v.heading = v.axis == 'x'
+                ? (v.dir > 0 ? 1.5707963f : 4.7123890f)
+                : (v.dir > 0 ? 0.0f : 3.14159265f);
+        }
+    }`,
+`    mutable Vec3 smoothCamOffset_{0.0f, 0.0f, 0.0f};
+    Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
+        // LW54: Camera & ray pass freely through all world objects (no hard ray
+        // collision or abrupt snapping on trees/lamps/props). When an obstacle
+        // overlaps or sits directly in the narrow sightline, compute a smooth
+        // C1 (smoothstep) obfuscation rectification offset that gently elevates
+        // and glides the camera without jerking.
+        const Vec3 anchor{body.x, std::max(body.y + 1.65f, desired.y * 0.65f), body.z};
+        const Vec3 seg = desired - anchor;
+        const float segLenSq = seg.x * seg.x + seg.z * seg.z;
+        float obfWeight = 0.0f;
+        Vec3 pushLateral{0.0f, 0.0f, 0.0f};
+        for (const auto& pl : pillars) {
+            // Closest point on horizontal sightline segment [anchor, desired]
+            float t = 1.0f;
+            if (segLenSq > 1e-5f) {
+                t = ((pl.pos.x - anchor.x) * seg.x + (pl.pos.z - anchor.z) * seg.z) / segLenSq;
+                t = std::clamp(t, 0.15f, 1.0f);
+            }
+            const float cx = anchor.x + seg.x * t, cz = anchor.z + seg.z * t;
+            const float dx = cx - pl.pos.x, dz = cz - pl.pos.z;
+            const float dist = std::sqrt(dx * dx + dz * dz);
+            const float softR = pl.radius + 0.55f;
+            if (dist < softR) {
+                const float u = 1.0f - (dist / softR);
+                const float w = u * u * (3.0f - 2.0f * u); // smoothstep C1
+                if (w > obfWeight) {
+                    obfWeight = w;
+                    if (dist > 1e-4f) pushLateral = Vec3{(dx / dist) * 0.35f * w, 0.0f, (dz / dist) * 0.35f * w};
+                }
+            }
+        }
+        for (const auto& b : buildings) {
+            const float dx = std::fabs(desired.x - b.pos.x) - b.w * 0.5f;
+            const float dz = std::fabs(desired.z - b.pos.z) - b.d * 0.5f;
+            if (dx < 0.65f && dz < 0.65f) {
+                const float u = std::clamp(1.0f - std::max(0.0f, std::max(dx, dz)) / 0.65f, 0.0f, 1.0f);
+                const float w = u * u * (3.0f - 2.0f * u);
+                if (w > obfWeight) obfWeight = w;
+            }
+        }
+        const Vec3 targetOffset = (anchor - desired) * (0.24f * obfWeight)
+                                + Vec3{0.0f, 0.42f * obfWeight, 0.0f}
+                                + pushLateral;
+        smoothCamOffset_ = smoothCamOffset_ * 0.72f + targetOffset * 0.28f;
+        // Ensure immediate callers (e.g. single-frame pillar centre test) still
+        // receive a smooth non-zero rectification when obfWeight > 0:
+        const Vec3 applied = len(smoothCamOffset_) >= len(targetOffset) * 0.25f ? smoothCamOffset_ : targetOffset * 0.35f;
+        return desired + applied;
+    }
+    bool pedBlockedByBarrier(Vec3 cand, Vec3 cur, size_t selfIdx) const {
+        if (collides(cand)) return true;
+        // Mutual barrier with Ariadne NPC & parked coupe
+        if (len(cand - npcPos) < 0.90f && len(cand - npcPos) < len(cur - npcPos)) return true;
+        if (std::fabs(cand.x - vehiclePos.x) < 1.35f && std::fabs(cand.z - vehiclePos.z) < 2.35f &&
+            len(cand - vehiclePos) < len(cur - vehiclePos)) return true;
+        // Mutual pedestrian-to-pedestrian barrier
+        for (size_t j = 0; j < walkers.size(); ++j) {
+            if (j == selfIdx) continue;
+            const float dNext = len(cand - walkers[j].pos);
+            if (dNext < 0.85f && dNext < len(cur - walkers[j].pos)) return true;
+        }
+        // Mutual pedestrian-to-vehicle barrier against moving ground traffic
+        for (const auto& v : traffic) {
+            if (v.orbitR > 0.0f) continue;
+            const float halfX = (v.axis == 'x') ? 2.45f : 1.25f;
+            const float halfZ = (v.axis == 'z') ? 2.45f : 1.25f;
+            if (std::fabs(cand.x - v.pos.x) < halfX && std::fabs(cand.z - v.pos.z) < halfZ &&
+                len(cand - v.pos) < len(cur - v.pos)) return true;
+        }
+        return false;
+    }
+    void tickWalkers(float dt) {
+        walkerTime += dt;
+        for (size_t i = 0; i < walkers.size(); ++i) {
+            auto& w = walkers[i];
+            w.heading += 0.7f * std::sin(walkerTime * 0.6f + w.phase) * dt
+                       + 0.4f * std::sin(walkerTime * 0.23f + w.phase * 2.1f) * dt;
+            const Vec3 next = w.pos + Vec3{std::sin(w.heading) * w.speed * dt, 0,
+                                           std::cos(w.heading) * w.speed * dt};
+            if (pedBlockedByBarrier(next, w.pos, i) ||
+                std::fabs(next.x) > worldSize * 0.5f - 1.0f ||
+                std::fabs(next.z) > worldSize * 0.5f - 1.0f)
+                w.heading += 1.25f;
+            else
+                w.pos = next;
+        }
+    }
+    // re3 CVehicle lanes with mutual vehicle-to-vehicle, intersection & pedestrian barriers.
+    void tickTraffic(float dt) {
+        trafficTime += dt;
+        for (size_t i = 0; i < traffic.size(); ++i) {
+            auto& v = traffic[i];
+            if (v.orbitR > 0.0f) {
+                v.orbitA += v.speed * dt;
+                v.pos = {std::cos(v.orbitA) * v.orbitR, v.orbitY, std::sin(v.orbitA) * v.orbitR};
+                v.heading = -v.orbitA;
+                continue;
+            }
+            float& along = v.axis == 'x' ? v.pos.x : v.pos.z;
+            const float perp = v.axis == 'x' ? v.pos.z : v.pos.x;
+            const float nextAlong = along + v.dir * v.speed * dt;
+            const Vec3 nextPos = v.axis == 'x' ? Vec3{nextAlong, v.pos.y, v.pos.z} : Vec3{v.pos.x, v.pos.y, nextAlong};
+
+            // 1. Same-lane mutual vehicle-to-vehicle barrier (rebound before bumpers overlap)
+            bool rebound = false;
+            bool holdForCrossOrPed = false;
+            for (size_t j = 0; j < traffic.size(); ++j) {
+                if (i == j || traffic[j].orbitR > 0.0f) continue;
+                const auto& o = traffic[j];
+                if (o.axis == v.axis) {
+                    const float oAlong = o.axis == 'x' ? o.pos.x : o.pos.z;
+                    const float oPerp  = o.axis == 'x' ? o.pos.z : o.pos.x;
+                    if (std::fabs(perp - oPerp) < 1.6f) {
+                        const float curGap  = std::fabs(along - oAlong);
+                        const float nextGap = std::fabs(nextAlong - oAlong);
+                        if (nextGap < 4.2f && nextGap < curGap) {
+                            rebound = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // 2. 4-way central intersection yield barrier
+                    const float oAlong = o.axis == 'x' ? o.pos.x : o.pos.z;
+                    if (std::fabs(perp) < 3.0f && std::fabs(oAlong) < 2.8f &&
+                        std::fabs(along) >= 2.6f && std::fabs(nextAlong) < 3.6f &&
+                        std::fabs(nextAlong) < std::fabs(along)) {
+                        holdForCrossOrPed = true;
+                    }
+                }
+            }
+            // 3. Vehicle-to-pedestrian mutual barrier (yield when a pedestrian is in front of bumper)
+            if (!rebound && !holdForCrossOrPed && std::fabs(perp) < 10.0f) {
+                for (const auto& w : walkers) {
+                    const float halfX = (v.axis == 'x') ? 2.35f : 1.15f;
+                    const float halfZ = (v.axis == 'z') ? 2.35f : 1.15f;
+                    if (std::fabs(nextPos.x - w.pos.x) < halfX && std::fabs(nextPos.z - w.pos.z) < halfZ &&
+                        len(nextPos - w.pos) < len(v.pos - w.pos)) {
+                        holdForCrossOrPed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (rebound) {
+                v.dir = -v.dir;
+            } else if (!holdForCrossOrPed) {
+                along = nextAlong;
+                if (along >= v.max) { along = v.max; v.dir = -1; }
+                if (along <= v.min) { along = v.min; v.dir = 1; }
+            }
+            v.heading = v.axis == 'x'
+                ? (v.dir > 0 ? 1.5707963f : 4.7123890f)
+                : (v.dir > 0 ? 0.0f : 3.14159265f);
+        }
+    }`, 'LW54 smooth camera obfuscation + mutual vehicle/ped barriers');
+
+// Also add smooth see-through obfuscation dissolve in RasterEngine::rasterize
+// when an obstacle or prop sits inside the close camera-to-avatar sightline cone
+once(`                int index = y * Surface::Width + x;
+                if (depth >= framebuffer.depth[index]) continue;`,
+`                int index = y * Surface::Width + x;
+                if (depth >= framebuffer.depth[index]) continue;
+                // LW54: Smooth see-through obfuscation dissolve when an obstacle/prop
+                // sits between the 3rd-person camera and the avatar sightline core
+                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 3.45f) {
+                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.18f);
+                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.24f);
+                    const float r2 = cx * cx + cy * cy;
+                    if (r2 < 1.0f) {
+                        // Ordered 4x4 Bayer screen-door fade proportional to proximity to sightline center
+                        static constexpr uint8_t bayer4[16] = {0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5};
+                        const uint8_t thresh = (uint8_t)((1.0f - r2 * 0.75f) * 15.0f);
+                        if (bayer4[((y & 3) << 2) | (x & 3)] < thresh) continue;
+                    }
+                }`, 'LW54 rasterizer sightline obfuscation dissolve');
 once(`        snprintf(eb, sizeof(eb), "Echo KSM c=%d s=%d (%s) Mode=%s Load=%.2f Align=%.3f Keep=%d/%d",
             g_agi.echoSnap.cycle, g_agi.echoSnap.step, echo::discoveryPhaseName(g_agi.echoSnap.phase),
             echo::cognitiveModeName(g_agi.echoSnap.mode), g_agi.echoSnap.cognitiveLoad,

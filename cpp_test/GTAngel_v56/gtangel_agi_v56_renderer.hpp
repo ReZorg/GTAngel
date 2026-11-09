@@ -2320,6 +2320,19 @@ private:
                 float depth = 1.0f / inverseDepth;
                 int index = y * Surface::Width + x;
                 if (depth >= framebuffer.depth[index]) continue;
+                // LW54: Smooth see-through obfuscation dissolve when an obstacle/prop
+                // sits between the 3rd-person camera and the avatar sightline core
+                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 3.45f) {
+                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.18f);
+                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.24f);
+                    const float r2 = cx * cx + cy * cy;
+                    if (r2 < 1.0f) {
+                        // Ordered 4x4 Bayer screen-door fade proportional to proximity to sightline center
+                        static constexpr uint8_t bayer4[16] = {0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5};
+                        const uint8_t thresh = (uint8_t)((1.0f - r2 * 0.75f) * 15.0f);
+                        if (bayer4[((y & 3) << 2) | (x & 3)] < thresh) continue;
+                    }
+                }
 
                 Colour baseCol = triangle.colour;
                 float illum = baseIllum;
