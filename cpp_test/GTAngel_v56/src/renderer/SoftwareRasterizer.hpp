@@ -164,19 +164,6 @@
                 float depth = 1.0f / inverseDepth;
                 int index = y * Surface::Width + x;
                 if (depth >= framebuffer.depth[index]) continue;
-                // LW54: Smooth see-through obfuscation dissolve when an obstacle/prop
-                // sits between the 3rd-person camera and the avatar sightline core
-                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 3.45f) {
-                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.18f);
-                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.24f);
-                    const float r2 = cx * cx + cy * cy;
-                    if (r2 < 1.0f) {
-                        // Ordered 4x4 Bayer screen-door fade proportional to proximity to sightline center
-                        static constexpr uint8_t bayer4[16] = {0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5};
-                        const uint8_t thresh = (uint8_t)((1.0f - r2 * 0.75f) * 15.0f);
-                        if (bayer4[((y & 3) << 2) | (x & 3)] < thresh) continue;
-                    }
-                }
 
                 Colour baseCol = triangle.colour;
                 float illum = baseIllum;
@@ -270,6 +257,32 @@
                     shaded.b = (uint8_t)std::min(255, (int)shaded.b + (int)(specAddB * invFog));
                     shaded.g = (uint8_t)std::min(255, (int)shaded.g + (int)(specAddG * invFog));
                     shaded.r = (uint8_t)std::min(255, (int)shaded.r + (int)(specAddR * invFog));
+                }
+                // LW54: Smooth per-pixel alpha-blend obfuscation rectification when an
+                // obstacle or prop passes between the 3rd-person camera and the avatar/sightline
+                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 4.25f) {
+                    const uint16_t prevId = framebuffer.objectId[index];
+                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
+                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
+                    const float r2 = cx * cx + cy * cy;
+                    if (prevId == ObjectAvatar || r2 < 1.0f) {
+                        const float u = std::clamp(r2, 0.0f, 1.0f);
+                        const float alpha = (prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u)));
+                        const uint32_t bg = framebuffer.colour[index];
+                        const uint8_t bgB = (uint8_t)(bg & 0xFFu);
+                        const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);
+                        const uint8_t bgR = (uint8_t)((bg >> 16) & 0xFFu);
+                        shaded.b = (uint8_t)(shaded.b * alpha + bgB * (1.0f - alpha));
+                        shaded.g = (uint8_t)(shaded.g * alpha + bgG * (1.0f - alpha));
+                        shaded.r = (uint8_t)(shaded.r * alpha + bgR * (1.0f - alpha));
+                        framebuffer.colour[index] = Surface::pack(shaded);
+                        if (prevId != ObjectAvatar) {
+                            framebuffer.depth[index] = depth;
+                            framebuffer.objectId[index] = oid;
+                        }
+                        wrote = true;
+                        continue;
+                    }
                 }
                 framebuffer.depth[index] = depth;
                 framebuffer.objectId[index] = oid;

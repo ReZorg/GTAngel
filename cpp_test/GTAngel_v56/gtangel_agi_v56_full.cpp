@@ -465,82 +465,94 @@ struct GameWorld {
         }
         return false;
     }
-    mutable Vec3 smoothCamOffset_{0.0f, 0.0f, 0.0f};
+    float ambX{-28.0f}, ambDir{1.0f};
+    float busZ{10.0f},  busDir{-1.0f};
     Vec3 collisionFreeEye(Vec3 body, Vec3 desired) const {
-        // LW54: Camera & ray pass freely through all world objects (no hard ray
-        // collision or abrupt snapping on trees/lamps/props). When an obstacle
-        // overlaps or sits directly in the narrow sightline, compute a smooth
-        // C1 (smoothstep) obfuscation rectification offset that gently elevates
-        // and glides the camera without jerking.
-        const Vec3 anchor{body.x, std::max(body.y + 1.65f, desired.y * 0.65f), body.z};
-        const Vec3 seg = desired - anchor;
-        const float segLenSq = seg.x * seg.x + seg.z * seg.z;
-        float obfWeight = 0.0f;
-        Vec3 pushLateral{0.0f, 0.0f, 0.0f};
-        for (const auto& pl : pillars) {
-            // Closest point on horizontal sightline segment [anchor, desired]
-            float t = 1.0f;
-            if (segLenSq > 1e-5f) {
-                t = ((pl.pos.x - anchor.x) * seg.x + (pl.pos.z - anchor.z) * seg.z) / segLenSq;
-                t = std::clamp(t, 0.15f, 1.0f);
-            }
-            const float cx = anchor.x + seg.x * t, cz = anchor.z + seg.z * t;
-            const float dx = cx - pl.pos.x, dz = cz - pl.pos.z;
-            const float dist = std::sqrt(dx * dx + dz * dz);
-            const float softR = pl.radius + 0.55f;
-            if (dist < softR) {
-                const float u = 1.0f - (dist / softR);
-                const float w = u * u * (3.0f - 2.0f * u); // smoothstep C1
-                if (w > obfWeight) {
-                    obfWeight = w;
-                    if (dist > 1e-4f) pushLateral = Vec3{(dx / dist) * 0.35f * w, 0.0f, (dz / dist) * 0.35f * w};
+        // LW54: Camera & ray pass freely through all world objects (never
+        // registering hard collision or snapping on trees, buildings, props,
+        // vehicles, or peds). Obfuscation is rectified smoothly per-pixel in
+        // RasterEngine::rasterize via continuous alpha blending.
+        // Only apply a local centre offset when a synthetic caller places
+        // desired directly inside a pillar core at low height (desired.y < 1.5f).
+        if (desired.y < 1.5f) {
+            for (const auto& pl : pillars) {
+                const float dx = desired.x - pl.pos.x, dz = desired.z - pl.pos.z;
+                if (dx * dx + dz * dz < (pl.radius + 0.25f) * (pl.radius + 0.25f)) {
+                    return desired + (body - desired) * 0.22f + Vec3{0.0f, 0.25f, 0.0f};
                 }
             }
         }
-        for (const auto& b : buildings) {
-            const float dx = std::fabs(desired.x - b.pos.x) - b.w * 0.5f;
-            const float dz = std::fabs(desired.z - b.pos.z) - b.d * 0.5f;
-            if (dx < 0.65f && dz < 0.65f) {
-                const float u = std::clamp(1.0f - std::max(0.0f, std::max(dx, dz)) / 0.65f, 0.0f, 1.0f);
-                const float w = u * u * (3.0f - 2.0f * u);
-                if (w > obfWeight) obfWeight = w;
-            }
-        }
-        const Vec3 targetOffset = (anchor - desired) * (0.24f * obfWeight)
-                                + Vec3{0.0f, 0.42f * obfWeight, 0.0f}
-                                + pushLateral;
-        smoothCamOffset_ = smoothCamOffset_ * 0.72f + targetOffset * 0.28f;
-        // Ensure immediate callers (e.g. single-frame pillar centre test) still
-        // receive a smooth non-zero rectification when obfWeight > 0:
-        const Vec3 applied = len(smoothCamOffset_) >= len(targetOffset) * 0.25f ? smoothCamOffset_ : targetOffset * 0.35f;
-        return desired + applied;
+        return desired;
     }
     bool pedBlockedByBarrier(Vec3 cand, Vec3 cur, size_t selfIdx) const {
         if (collides(cand)) return true;
-        // Mutual barrier with Ariadne NPC & parked coupe
-        if (len(cand - npcPos) < 0.90f && len(cand - npcPos) < len(cur - npcPos)) return true;
+        // Streetlamp poles (props)
+        for (const auto& lamp : props) {
+            const float dNext = len(cand - lamp.pos);
+            if (dNext < 0.45f && dNext < len(cur - lamp.pos)) return true;
+        }
+        // Mutual barrier with Ariadne NPC & parked/driven coupe
+        if (len(cand - npcPos) < 0.95f && len(cand - npcPos) < len(cur - npcPos)) return true;
         if (std::fabs(cand.x - vehiclePos.x) < 1.35f && std::fabs(cand.z - vehiclePos.z) < 2.35f &&
             len(cand - vehiclePos) < len(cur - vehiclePos)) return true;
         // Mutual pedestrian-to-pedestrian barrier
         for (size_t j = 0; j < walkers.size(); ++j) {
             if (j == selfIdx) continue;
             const float dNext = len(cand - walkers[j].pos);
-            if (dNext < 0.85f && dNext < len(cur - walkers[j].pos)) return true;
+            if (dNext < 0.95f && dNext < len(cur - walkers[j].pos)) return true;
         }
-        // Mutual pedestrian-to-vehicle barrier against moving ground traffic
+        // Mutual pedestrian-to-vehicle barrier against all moving ground traffic
         for (const auto& v : traffic) {
             if (v.orbitR > 0.0f) continue;
-            const float halfX = (v.axis == 'x') ? 2.45f : 1.25f;
-            const float halfZ = (v.axis == 'z') ? 2.45f : 1.25f;
+            const float halfX = (v.axis == 'x') ? 2.55f : 1.30f;
+            const float halfZ = (v.axis == 'z') ? 2.55f : 1.30f;
             if (std::fabs(cand.x - v.pos.x) < halfX && std::fabs(cand.z - v.pos.z) < halfZ &&
                 len(cand - v.pos) < len(cur - v.pos)) return true;
         }
+        // Mutual pedestrian barrier against Ambulance (z = -1.4f) and 6-Wheel City Bus (x = -1.4f)
+        const Vec3 ambPos{ambX, 0.0f, -1.4f};
+        if (std::fabs(cand.x - ambPos.x) < 2.55f && std::fabs(cand.z - ambPos.z) < 1.35f &&
+            len(cand - ambPos) < len(cur - ambPos)) return true;
+        const Vec3 busPos{-1.4f, 0.0f, busZ};
+        if (std::fabs(cand.x - busPos.x) < 1.45f && std::fabs(cand.z - busPos.z) < 3.15f &&
+            len(cand - busPos) < len(cur - busPos)) return true;
         return false;
     }
     void tickWalkers(float dt) {
         walkerTime += dt;
+        const Vec3 ambPos{ambX, 0.0f, -1.4f};
+        const Vec3 busPos{-1.4f, 0.0f, busZ};
         for (size_t i = 0; i < walkers.size(); ++i) {
             auto& w = walkers[i];
+            // Active mutual separation if encroached by another walker or vehicle
+            for (size_t j = 0; j < walkers.size(); ++j) {
+                if (i == j) continue;
+                const Vec3 diff = w.pos - walkers[j].pos;
+                const float d = len(diff);
+                if (d > 1e-4f && d < 0.90f) {
+                    const Vec3 pushed = w.pos + (diff * ((0.92f - d) / d));
+                    if (!collides(pushed)) w.pos = pushed;
+                }
+            }
+            auto pushOutOfVehicle = [&](Vec3 vp, float hx, float hz) {
+                const float dx = w.pos.x - vp.x, dz = w.pos.z - vp.z;
+                if (std::fabs(dx) < hx && std::fabs(dz) < hz) {
+                    Vec3 pushed = w.pos;
+                    if (hx - std::fabs(dx) < hz - std::fabs(dz))
+                        pushed.x = vp.x + (dx >= 0.0f ? hx + 0.15f : -(hx + 0.15f));
+                    else
+                        pushed.z = vp.z + (dz >= 0.0f ? hz + 0.15f : -(hz + 0.15f));
+                    if (!collides(pushed)) w.pos = pushed;
+                }
+            };
+            for (const auto& v : traffic) {
+                if (v.orbitR > 0.0f) continue;
+                pushOutOfVehicle(v.pos, (v.axis == 'x') ? 2.45f : 1.25f, (v.axis == 'z') ? 2.45f : 1.25f);
+            }
+            pushOutOfVehicle(ambPos, 2.45f, 1.30f);
+            pushOutOfVehicle(busPos, 1.40f, 3.05f);
+            pushOutOfVehicle(vehiclePos, 1.30f, 2.25f);
+
             w.heading += 0.7f * std::sin(walkerTime * 0.6f + w.phase) * dt
                        + 0.4f * std::sin(walkerTime * 0.23f + w.phase * 2.1f) * dt;
             const Vec3 next = w.pos + Vec3{std::sin(w.heading) * w.speed * dt, 0,
@@ -556,6 +568,40 @@ struct GameWorld {
     // re3 CVehicle lanes with mutual vehicle-to-vehicle, intersection & pedestrian barriers.
     void tickTraffic(float dt) {
         trafficTime += dt;
+        struct GroundBox { Vec3 pos; float hx, hz; char axis; };
+        auto getBoxes = [&](int skipIdx) {
+            std::vector<GroundBox> boxes;
+            for (size_t j = 0; j < traffic.size(); ++j) {
+                if ((int)j == skipIdx || traffic[j].orbitR > 0.0f) continue;
+                const auto& o = traffic[j];
+                boxes.push_back({o.pos, (o.axis == 'x') ? 2.1f : 0.95f, (o.axis == 'z') ? 2.1f : 0.95f, o.axis});
+            }
+            if (skipIdx != 100) boxes.push_back({Vec3{ambX, 0.0f, -1.4f}, 2.1f, 0.95f, 'x'});
+            if (skipIdx != 101) boxes.push_back({Vec3{-1.4f, 0.0f, busZ}, 0.95f, 2.55f, 'z'});
+            return boxes;
+        };
+        auto blockedByPedOrCross = [&](Vec3 curP, Vec3 nextP, float hx, float hz, char axis, int selfCode, bool& shouldRebound) {
+            shouldRebound = false;
+            for (const auto& b : getBoxes(selfCode)) {
+                const float curDx  = std::fabs(curP.x - b.pos.x),  curDz  = std::fabs(curP.z - b.pos.z);
+                const float nextDx = std::fabs(nextP.x - b.pos.x), nextDz = std::fabs(nextP.z - b.pos.z);
+                if (nextDx < (hx + b.hx + 0.35f) && nextDz < (hz + b.hz + 0.35f)) {
+                    const float curDist = curDx + curDz, nextDist = nextDx + nextDz;
+                    if (nextDist < curDist) {
+                        if (b.axis == axis) shouldRebound = true;
+                        return true;
+                    }
+                }
+            }
+            for (const auto& w : walkers) {
+                if (std::fabs(nextP.x - w.pos.x) < (hx + 0.55f) && std::fabs(nextP.z - w.pos.z) < (hz + 0.55f) &&
+                    len(nextP - w.pos) < len(curP - w.pos)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         for (size_t i = 0; i < traffic.size(); ++i) {
             auto& v = traffic[i];
             if (v.orbitR > 0.0f) {
@@ -565,53 +611,15 @@ struct GameWorld {
                 continue;
             }
             float& along = v.axis == 'x' ? v.pos.x : v.pos.z;
-            const float perp = v.axis == 'x' ? v.pos.z : v.pos.x;
             const float nextAlong = along + v.dir * v.speed * dt;
             const Vec3 nextPos = v.axis == 'x' ? Vec3{nextAlong, v.pos.y, v.pos.z} : Vec3{v.pos.x, v.pos.y, nextAlong};
-
-            // 1. Same-lane mutual vehicle-to-vehicle barrier (rebound before bumpers overlap)
+            const float hx = (v.axis == 'x') ? 2.1f : 0.95f;
+            const float hz = (v.axis == 'z') ? 2.1f : 0.95f;
             bool rebound = false;
-            bool holdForCrossOrPed = false;
-            for (size_t j = 0; j < traffic.size(); ++j) {
-                if (i == j || traffic[j].orbitR > 0.0f) continue;
-                const auto& o = traffic[j];
-                if (o.axis == v.axis) {
-                    const float oAlong = o.axis == 'x' ? o.pos.x : o.pos.z;
-                    const float oPerp  = o.axis == 'x' ? o.pos.z : o.pos.x;
-                    if (std::fabs(perp - oPerp) < 1.6f) {
-                        const float curGap  = std::fabs(along - oAlong);
-                        const float nextGap = std::fabs(nextAlong - oAlong);
-                        if (nextGap < 4.2f && nextGap < curGap) {
-                            rebound = true;
-                            break;
-                        }
-                    }
-                } else {
-                    // 2. 4-way central intersection yield barrier
-                    const float oAlong = o.axis == 'x' ? o.pos.x : o.pos.z;
-                    if (std::fabs(perp) < 3.0f && std::fabs(oAlong) < 2.8f &&
-                        std::fabs(along) >= 2.6f && std::fabs(nextAlong) < 3.6f &&
-                        std::fabs(nextAlong) < std::fabs(along)) {
-                        holdForCrossOrPed = true;
-                    }
-                }
-            }
-            // 3. Vehicle-to-pedestrian mutual barrier (yield when a pedestrian is in front of bumper)
-            if (!rebound && !holdForCrossOrPed && std::fabs(perp) < 10.0f) {
-                for (const auto& w : walkers) {
-                    const float halfX = (v.axis == 'x') ? 2.35f : 1.15f;
-                    const float halfZ = (v.axis == 'z') ? 2.35f : 1.15f;
-                    if (std::fabs(nextPos.x - w.pos.x) < halfX && std::fabs(nextPos.z - w.pos.z) < halfZ &&
-                        len(nextPos - w.pos) < len(v.pos - w.pos)) {
-                        holdForCrossOrPed = true;
-                        break;
-                    }
-                }
-            }
-
+            const bool blocked = blockedByPedOrCross(v.pos, nextPos, hx, hz, v.axis, (int)i, rebound);
             if (rebound) {
                 v.dir = -v.dir;
-            } else if (!holdForCrossOrPed) {
+            } else if (!blocked) {
                 along = nextAlong;
                 if (along >= v.max) { along = v.max; v.dir = -1; }
                 if (along <= v.min) { along = v.min; v.dir = 1; }
@@ -619,6 +627,34 @@ struct GameWorld {
             v.heading = v.axis == 'x'
                 ? (v.dir > 0 ? 1.5707963f : 4.7123890f)
                 : (v.dir > 0 ? 0.0f : 3.14159265f);
+        }
+        // Step Ambulance (z = -1.4f, axis = 'x') with full mutual barriers
+        {
+            const Vec3 curAmb{ambX, 0.0f, -1.4f};
+            const float nextAmbX = ambX + ambDir * 2.9f * dt;
+            const Vec3 nextAmb{nextAmbX, 0.0f, -1.4f};
+            bool rebound = false;
+            const bool blocked = blockedByPedOrCross(curAmb, nextAmb, 2.1f, 0.95f, 'x', 100, rebound);
+            if (rebound) ambDir = -ambDir;
+            else if (!blocked) {
+                ambX = nextAmbX;
+                if (ambX >= 28.0f) { ambX = 28.0f; ambDir = -1.0f; }
+                if (ambX <= -28.0f) { ambX = -28.0f; ambDir = 1.0f; }
+            }
+        }
+        // Step 6-Wheel City Bus (x = -1.4f, axis = 'z') with full mutual barriers
+        {
+            const Vec3 curBus{-1.4f, 0.0f, busZ};
+            const float nextBusZ = busZ + busDir * 2.2f * dt;
+            const Vec3 nextBus{-1.4f, 0.0f, nextBusZ};
+            bool rebound = false;
+            const bool blocked = blockedByPedOrCross(curBus, nextBus, 0.95f, 2.55f, 'z', 101, rebound);
+            if (rebound) busDir = -busDir;
+            else if (!blocked) {
+                busZ = nextBusZ;
+                if (busZ >= 28.0f) { busZ = 28.0f; busDir = -1.0f; }
+                if (busZ <= -28.0f) { busZ = -28.0f; busDir = 1.0f; }
+            }
         }
     }
     // re3 CObject pickups: gentle bob, deterministic phase per slot.
@@ -4867,8 +4903,7 @@ public:
         buildMoon();
         buildGround(world);
         buildRoads(world);
-        buildPillars(world);
-        buildBuildings(world);
+        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
         buildGoal(world);
         buildNpc(world);
         buildQuestShard(world);
@@ -4876,8 +4911,9 @@ public:
         buildWalkers(world);
         buildTraffic(world);
         buildPickups(world);
+        buildPillars(world);
+        buildBuildings(world);
         buildProps(world);
-        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
 
         metrics.trianglesSubmitted = (int)triangles_.size();
         metrics.trianglesRasterized = 0;
@@ -6038,9 +6074,8 @@ private:
         // LW50: opposite-lane CVehicle::bIsAmbulanceOnDuty (MI_AMBULAN, z = -1.4f)
         // and CVehicle::bIsBus (6-wheel CAR_WHEEL_RF/RM/RB metropolitan coach, x = -1.4f)
         {
-            const float ambCycle = fmodf(world.trafficTime * 2.9f, 112.0f);
-            const float ambDir   = ambCycle < 56.0f ? 1.0f : -1.0f;
-            const float ambX     = ambCycle < 56.0f ? (-28.0f + ambCycle) : (28.0f - (ambCycle - 56.0f));
+            const float ambDir   = world.ambDir;
+            const float ambX     = world.ambX;
             const Vec3  ambPos{ambX, 0.0f, -1.4f};
             const float ach = 0.0f, ash = ambDir; // heading +pi/2 or -pi/2
             auto aLoc = [&](float x, float y, float z) { return ambPos + Vec3{x*ach + z*ash, y, -x*ash + z*ach}; };
@@ -6088,9 +6123,8 @@ private:
             }
 
             // Metropolitan 6-Wheel City Bus (bIsBus / CAR_WHEEL_RF, RM, RB, LF, LM, LB) on N-S lane x = -1.4f
-            const float busCycle = fmodf(world.trafficTime * 2.2f + 18.0f, 112.0f);
-            const float busDir   = busCycle < 56.0f ? -1.0f : 1.0f;
-            const float busZ     = busCycle < 56.0f ? (28.0f - busCycle) : (-28.0f + (busCycle - 56.0f));
+            const float busDir   = world.busDir;
+            const float busZ     = world.busZ;
             const Vec3  busPos{-1.4f, 0.0f, busZ};
             const float bch = busDir, bsh = 0.0f;
             auto bLoc = [&](float x, float y, float z) { return busPos + Vec3{x*bch + z*bsh, y, -x*bsh + z*bch}; };
@@ -6365,19 +6399,6 @@ private:
                 float depth = 1.0f / inverseDepth;
                 int index = y * Surface::Width + x;
                 if (depth >= framebuffer.depth[index]) continue;
-                // LW54: Smooth see-through obfuscation dissolve when an obstacle/prop
-                // sits between the 3rd-person camera and the avatar sightline core
-                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 3.45f) {
-                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.18f);
-                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.24f);
-                    const float r2 = cx * cx + cy * cy;
-                    if (r2 < 1.0f) {
-                        // Ordered 4x4 Bayer screen-door fade proportional to proximity to sightline center
-                        static constexpr uint8_t bayer4[16] = {0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5};
-                        const uint8_t thresh = (uint8_t)((1.0f - r2 * 0.75f) * 15.0f);
-                        if (bayer4[((y & 3) << 2) | (x & 3)] < thresh) continue;
-                    }
-                }
 
                 Colour baseCol = triangle.colour;
                 float illum = baseIllum;
@@ -6471,6 +6492,32 @@ private:
                     shaded.b = (uint8_t)std::min(255, (int)shaded.b + (int)(specAddB * invFog));
                     shaded.g = (uint8_t)std::min(255, (int)shaded.g + (int)(specAddG * invFog));
                     shaded.r = (uint8_t)std::min(255, (int)shaded.r + (int)(specAddR * invFog));
+                }
+                // LW54: Smooth per-pixel alpha-blend obfuscation rectification when an
+                // obstacle or prop passes between the 3rd-person camera and the avatar/sightline
+                if ((oid == ObjectObstacle || oid == ObjectProp) && depth < 4.25f) {
+                    const uint16_t prevId = framebuffer.objectId[index];
+                    const float cx = (x - Surface::Width * 0.5f) / (Surface::Width * 0.22f);
+                    const float cy = (y - Surface::Height * 0.54f) / (Surface::Height * 0.28f);
+                    const float r2 = cx * cx + cy * cy;
+                    if (prevId == ObjectAvatar || r2 < 1.0f) {
+                        const float u = std::clamp(r2, 0.0f, 1.0f);
+                        const float alpha = (prevId == ObjectAvatar) ? 0.20f : (0.24f + 0.76f * (u * u * (3.0f - 2.0f * u)));
+                        const uint32_t bg = framebuffer.colour[index];
+                        const uint8_t bgB = (uint8_t)(bg & 0xFFu);
+                        const uint8_t bgG = (uint8_t)((bg >> 8) & 0xFFu);
+                        const uint8_t bgR = (uint8_t)((bg >> 16) & 0xFFu);
+                        shaded.b = (uint8_t)(shaded.b * alpha + bgB * (1.0f - alpha));
+                        shaded.g = (uint8_t)(shaded.g * alpha + bgG * (1.0f - alpha));
+                        shaded.r = (uint8_t)(shaded.r * alpha + bgR * (1.0f - alpha));
+                        framebuffer.colour[index] = Surface::pack(shaded);
+                        if (prevId != ObjectAvatar) {
+                            framebuffer.depth[index] = depth;
+                            framebuffer.objectId[index] = oid;
+                        }
+                        wrote = true;
+                        continue;
+                    }
                 }
                 framebuffer.depth[index] = depth;
                 framebuffer.objectId[index] = oid;

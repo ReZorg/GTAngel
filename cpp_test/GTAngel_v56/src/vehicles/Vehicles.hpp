@@ -435,9 +435,8 @@
         // LW50: opposite-lane CVehicle::bIsAmbulanceOnDuty (MI_AMBULAN, z = -1.4f)
         // and CVehicle::bIsBus (6-wheel CAR_WHEEL_RF/RM/RB metropolitan coach, x = -1.4f)
         {
-            const float ambCycle = fmodf(world.trafficTime * 2.9f, 112.0f);
-            const float ambDir   = ambCycle < 56.0f ? 1.0f : -1.0f;
-            const float ambX     = ambCycle < 56.0f ? (-28.0f + ambCycle) : (28.0f - (ambCycle - 56.0f));
+            const float ambDir   = world.ambDir;
+            const float ambX     = world.ambX;
             const Vec3  ambPos{ambX, 0.0f, -1.4f};
             const float ach = 0.0f, ash = ambDir; // heading +pi/2 or -pi/2
             auto aLoc = [&](float x, float y, float z) { return ambPos + Vec3{x*ach + z*ash, y, -x*ash + z*ach}; };
@@ -485,9 +484,8 @@
             }
 
             // Metropolitan 6-Wheel City Bus (bIsBus / CAR_WHEEL_RF, RM, RB, LF, LM, LB) on N-S lane x = -1.4f
-            const float busCycle = fmodf(world.trafficTime * 2.2f + 18.0f, 112.0f);
-            const float busDir   = busCycle < 56.0f ? -1.0f : 1.0f;
-            const float busZ     = busCycle < 56.0f ? (28.0f - busCycle) : (-28.0f + (busCycle - 56.0f));
+            const float busDir   = world.busDir;
+            const float busZ     = world.busZ;
             const Vec3  busPos{-1.4f, 0.0f, busZ};
             const float bch = busDir, bsh = 0.0f;
             auto bLoc = [&](float x, float y, float z) { return busPos + Vec3{x*bch + z*bsh, y, -x*bsh + z*bch}; };
