@@ -413,24 +413,11 @@ struct GameWorld {
             float dx = std::fabs(p.x - b.pos.x), dz = std::fabs(p.z - b.pos.z);
             if (dx < b.w * 0.5f + 0.25f && dz < b.d * 0.5f + 0.25f) return true;
         }
-        // LW55: mutual barriers — avatar body also registers vehicles, traffic,
-        // ambulance/bus, NPCs, walkers, and streetlamp props.
+        // Static props only — dynamic bodies (vehicles/peds) are NOT point-obstacles:
+        // the avatar reaches them via swept() approach barriers instead.
         for (const auto& lamp : props) {
             float dx = p.x - lamp.pos.x, dz = p.z - lamp.pos.z;
-            if (dx*dx + dz*dz < 0.42f * 0.42f) return true;
-        }
-        if (std::fabs(p.x - vehiclePos.x) < 1.35f && std::fabs(p.z - vehiclePos.z) < 2.35f) return true;
-        for (const auto& v : traffic) {
-            if (v.orbitR > 0.0f) continue;
-            const float hx = (v.axis == 'x') ? 2.55f : 1.30f;
-            const float hz = (v.axis == 'z') ? 2.55f : 1.30f;
-            if (std::fabs(p.x - v.pos.x) < hx && std::fabs(p.z - v.pos.z) < hz) return true;
-        }
-        if (std::fabs(p.x - ambX) < 2.55f && std::fabs(p.z + 1.4f) < 1.35f) return true;
-        if (std::fabs(p.x + 1.4f) < 1.45f && std::fabs(p.z - busZ) < 3.15f) return true;
-        if (len(p - npcPos) < 0.95f) return true;
-        for (const auto& w : walkers) {
-            if (len(p - w.pos) < 0.85f) return true;
+            if (dx*dx + dz*dz < 0.30f * 0.30f) return true;
         }
         return false;
     }
