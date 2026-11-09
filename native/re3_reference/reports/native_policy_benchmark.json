@@ -1,0 +1,13 @@
+{
+  "verification": "pass",
+  "records": 3118,
+  "controllerMse": 0.06932315,
+  "controllerMae": 0.13408949,
+  "meanShieldDisagreement": 0.22108098,
+  "latencyMeanMs": 0.76637524,
+  "latencyP50Ms": 0.74074203,
+  "latencyP95Ms": 0.97033697,
+  "latencyMaxMs": 1.65082002,
+  "actuatorMode": "shadow-only",
+  "perAxisMse": [0.20150665,0.00402788,0.00020681,0.10141247,0.00008634,0.10869872]
+}

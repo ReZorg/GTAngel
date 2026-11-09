@@ -1,0 +1,184 @@
+{
+  "verification": "pass",
+  "file": "gtangel_visuomotor.gvmw",
+  "sha256": "8162a9deaebc2187556996ceca86434718419ed317d30e7ac373213a38d1fd61",
+  "bytes": 248924,
+  "tensorCount": 20,
+  "elements": 62074,
+  "tensors": {
+    "cognition.bias": {
+      "shape": [
+        288
+      ],
+      "elements": 288,
+      "minimum": -0.16840563714504242,
+      "maximum": 0.08747786283493042
+    },
+    "cognition.weight": {
+      "shape": [
+        288,
+        64
+      ],
+      "elements": 18432,
+      "minimum": -0.20567794144153595,
+      "maximum": 0.21000798046588898
+    },
+    "collision.bias": {
+      "shape": [
+        1
+      ],
+      "elements": 1,
+      "minimum": 0.08696413785219193,
+      "maximum": 0.08696413785219193
+    },
+    "collision.weight": {
+      "shape": [
+        1,
+        64
+      ],
+      "elements": 64,
+      "minimum": -0.16939297318458557,
+      "maximum": 0.1674356609582901
+    },
+    "controller.bias": {
+      "shape": [
+        6
+      ],
+      "elements": 6,
+      "minimum": -0.09249656647443771,
+      "maximum": 0.03845459222793579
+    },
+    "controller.weight": {
+      "shape": [
+        6,
+        64
+      ],
+      "elements": 384,
+      "minimum": -0.21058480441570282,
+      "maximum": 0.17974288761615753
+    },
+    "ego_motion.bias": {
+      "shape": [
+        3
+      ],
+      "elements": 3,
+      "minimum": -0.08128034323453903,
+      "maximum": 0.021949101239442825
+    },
+    "ego_motion.weight": {
+      "shape": [
+        3,
+        64
+      ],
+      "elements": 192,
+      "minimum": -0.18648894131183624,
+      "maximum": 0.1560138612985611
+    },
+    "proprioception.0.bias": {
+      "shape": [
+        32
+      ],
+      "elements": 32,
+      "minimum": -0.2668601870536804,
+      "maximum": 0.20653203129768372
+    },
+    "proprioception.0.weight": {
+      "shape": [
+        32,
+        16
+      ],
+      "elements": 512,
+      "minimum": -0.3394871950149536,
+      "maximum": 0.35537517070770264
+    },
+    "recurrent.bias_hh": {
+      "shape": [
+        192
+      ],
+      "elements": 192,
+      "minimum": -0.17287985980510712,
+      "maximum": 0.14174476265907288
+    },
+    "recurrent.bias_ih": {
+      "shape": [
+        192
+      ],
+      "elements": 192,
+      "minimum": -0.15739113092422485,
+      "maximum": 0.14295469224452972
+    },
+    "recurrent.weight_hh": {
+      "shape": [
+        192,
+        64
+      ],
+      "elements": 12288,
+      "minimum": -0.1886608749628067,
+      "maximum": 0.19188745319843292
+    },
+    "recurrent.weight_ih": {
+      "shape": [
+        192,
+        96
+      ],
+      "elements": 18432,
+      "minimum": -0.23816931247711182,
+      "maximum": 0.24608953297138214
+    },
+    "visual.0.bias": {
+      "shape": [
+        8
+      ],
+      "elements": 8,
+      "minimum": -0.14553631842136383,
+      "maximum": 0.1298062950372696
+    },
+    "visual.0.weight": {
+      "shape": [
+        8,
+        3,
+        5,
+        5
+      ],
+      "elements": 600,
+      "minimum": -0.16655826568603516,
+      "maximum": 0.17428120970726013
+    },
+    "visual.2.bias": {
+      "shape": [
+        16
+      ],
+      "elements": 16,
+      "minimum": -0.14341901242733002,
+      "maximum": 0.1392059624195099
+    },
+    "visual.2.weight": {
+      "shape": [
+        16,
+        8,
+        3,
+        3
+      ],
+      "elements": 1152,
+      "minimum": -0.16269494593143463,
+      "maximum": 0.17614762485027313
+    },
+    "visual.6.bias": {
+      "shape": [
+        64
+      ],
+      "elements": 64,
+      "minimum": -0.10578388720750809,
+      "maximum": 0.10716445744037628
+    },
+    "visual.6.weight": {
+      "shape": [
+        64,
+        144
+      ],
+      "elements": 9216,
+      "minimum": -0.13664233684539795,
+      "maximum": 0.14804615080356598
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "DTEArtwork.moc3",
+    "Textures": [
+      "artwork.png"
+    ],
+    "Physics": "hair.physics3.json",
+    "Motions": {
+      "Idle": [
+        {
+          "File": "idle.motion3.json"
+        }
+      ]
+    },
+    "Expressions": [
+      {
+        "Name": "Neutral",
+        "File": "expressions/Neutral.exp3.json"
+      },
+      {
+        "Name": "Blink",
+        "File": "expressions/Blink.exp3.json"
+      },
+      {
+        "Name": "MouthOpen",
+        "File": "expressions/MouthOpen.exp3.json"
+      },
+      {
+        "Name": "GentleSmile",
+        "File": "expressions/GentleSmile.exp3.json"
+      },
+      {
+        "Name": "Curious",
+        "File": "expressions/Curious.exp3.json"
+      }
+    ]
+  },
+  "Groups": [
+    {
+      "Target": "Parameter",
+      "Name": "EyeBlink",
+      "Ids": [
+        "ParamEyeLOpen",
+        "ParamEyeROpen"
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Name": "LipSync",
+      "Ids": [
+        "ParamMouthOpenY"
+      ]
+    }
+  ],
+  "HitAreas": []
+}

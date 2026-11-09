@@ -1,0 +1,51 @@
+{
+  "format": "dte-morph-rig-provenance/v1",
+  "sourceRights": "unverified; private user-supplied transformation only; no redistribution approval is claimed.",
+  "inputImages": {
+    "neutral": {
+      "path": "/home/ubuntu/upload/dte-avatar-fullbody-nobck.png",
+      "filename": "dte-avatar-fullbody-nobck.png",
+      "sha256": "35e87896b5b28e19aa17d774bf44943a92fa6cf675925230f7e03284f6d8f51a",
+      "bytes": 471833,
+      "width": 720,
+      "height": 1280,
+      "colorType": "RGBA",
+      "alpha": "input alpha retained through a freshly encoded RGBA atlas"
+    },
+    "explore": {
+      "path": "/home/ubuntu/upload/dte-walk-explore-motion-poses-05-nobck.png",
+      "filename": "dte-walk-explore-motion-poses-05-nobck.png",
+      "sha256": "76f5ba715746813567ec379b2f081d6e239722a21282ee0511eb2852b049bb2b",
+      "bytes": 1129202,
+      "width": 570,
+      "height": 1440,
+      "colorType": "RGBA",
+      "alpha": "input alpha retained through contain-resize/pad RGBA atlas"
+    }
+  },
+  "newTextures": {
+    "neutral": {
+      "file": "neutral-atlas.png",
+      "width": 720,
+      "height": 1280,
+      "mode": "RGBA",
+      "sha256": "fd94368b9a7d3163126f8e0e780277913bd3e870ebb160ba7f70b01148a90d72",
+      "bytes": 452581,
+      "operation": "fresh 720×1280 RGBA encode; source pixels and alpha retained"
+    },
+    "explore": {
+      "file": "explore-atlas.png",
+      "width": 720,
+      "height": 1280,
+      "mode": "RGBA",
+      "sha256": "15e620f4cb558faae083c59bd6232b98e8949466f92ac21fa0176c09575f0cfd",
+      "bytes": 523365,
+      "operation": "aspect-ratio-preserving LANCZOS resize 570×1440→507×1280; transparent left/right padding 106/107 px; alpha retained"
+    }
+  },
+  "transformations": {
+    "neutral": "Freshly encoded 720×1280 RGBA canvas; no crop; source alpha carried through.",
+    "explore": "Freshly encoded 720×1280 RGBA contain image resized to 507×1280 then horizontally padded 106 px left and 107 px right; source alpha carried through."
+  },
+  "imageInspection": "Metadata/header validation and deterministic resampling only; portrait content was not opened or analysed by this compiler."
+}

@@ -1,0 +1,15 @@
+# HELP gtangel_agentloop_avg_tick_latency_ns Average tick latency in nanoseconds
+# TYPE gtangel_agentloop_avg_tick_latency_ns gauge
+gtangel_agentloop_avg_tick_latency_ns 21316.9
+# HELP gtangel_agentloop_p95_tick_latency_ns P95 tick latency
+# TYPE gtangel_agentloop_p95_tick_latency_ns gauge
+gtangel_agentloop_p95_tick_latency_ns 29900
+# HELP gtangel_agentloop_p99_tick_latency_ns P99 tick latency
+# TYPE gtangel_agentloop_p99_tick_latency_ns gauge
+gtangel_agentloop_p99_tick_latency_ns 47200
+# HELP gtangel_agentloop_throughput_ticks_per_second Throughput
+# TYPE gtangel_agentloop_throughput_ticks_per_second gauge
+gtangel_agentloop_throughput_ticks_per_second 46775.6
+# HELP gtangel_agentloop_steps_per_tick Number of steps per tick
+# TYPE gtangel_agentloop_steps_per_tick gauge
+gtangel_agentloop_steps_per_tick 9

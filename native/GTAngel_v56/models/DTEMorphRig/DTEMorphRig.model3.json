@@ -1,0 +1,83 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "DTEMorphRig.moc3",
+    "Textures": [
+      "neutral-atlas.png",
+      "explore-atlas.png"
+    ],
+    "Motions": {
+      "Authored": [
+        {
+          "File": "motions/idle.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/wave.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/nod.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/look.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/step.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/reach.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/present.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/transition.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        },
+        {
+          "File": "motions/sequence.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ]
+    }
+  },
+  "Groups": [
+    {
+      "Target": "Parameter",
+      "Name": "EyeBlink",
+      "Ids": [
+        "ParamEyeLOpen",
+        "ParamEyeROpen"
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Name": "LipSync",
+      "Ids": [
+        "ParamMouthOpenY"
+      ]
+    }
+  ],
+  "HitAreas": [],
+  "UserData": {
+    "authoring": "direct-ArtMesh baked manual rig",
+    "poseBlend": "crossfade only; not correspondence morphing",
+    "motions": "nine authored Motion3 exports; widget uses one owned minimum-jerk clock",
+    "physics": "no native physics rig; authored hair/breathing parameter motion only"
+  }
+}

@@ -1,0 +1,343 @@
+{
+  "format": "dte-morph-rig-native-test-results/v1",
+  "runtime": "loadPurismRuntime",
+  "tests": [
+    {
+      "name": "native IDs, counts, canvas, and zero native error",
+      "status": "pass",
+      "details": {
+        "parameterCount": 27,
+        "drawableCount": 192,
+        "lastError": 0,
+        "canvas": {
+          "CanvasWidth": 720,
+          "CanvasHeight": 1280,
+          "CanvasOriginX": 360,
+          "CanvasOriginY": 640,
+          "PixelsPerUnit": 360
+        }
+      }
+    },
+    {
+      "name": "full parameter definitions and model references",
+      "status": "pass",
+      "details": {
+        "parameters": 27,
+        "exportedMotions": 9,
+        "physics": "none"
+      }
+    },
+    {
+      "name": "every non-crossfade control changes observed native vertices at intermediate values",
+      "status": "pass",
+      "details": {
+        "ParamAngleX": {
+          "meshId": "Art_Neutral_R0_C0",
+          "vertexIndex": 0,
+          "value": 10,
+          "delta": 0.0009653568267822266
+        },
+        "ParamAngleY": {
+          "meshId": "Art_Neutral_R0_C0",
+          "vertexIndex": 0,
+          "value": 7.5,
+          "delta": 0.0006206035614013672
+        },
+        "ParamAngleZ": {
+          "meshId": "Art_Neutral_R0_C0",
+          "vertexIndex": 0,
+          "value": 5,
+          "delta": 0.02987510208960861
+        },
+        "ParamBodyAngleZ": {
+          "meshId": "Art_Neutral_R5_C0",
+          "vertexIndex": 3,
+          "value": 2,
+          "delta": 0.012855947732167097
+        },
+        "ParamEyeLOpen": {
+          "meshId": "Art_Neutral_R1_C2",
+          "vertexIndex": 8,
+          "value": 0.5,
+          "delta": 0.0006905794147294012
+        },
+        "ParamEyeROpen": {
+          "meshId": "Art_Neutral_R1_C4",
+          "vertexIndex": 8,
+          "value": 0.5,
+          "delta": 0.0006905794144078674
+        },
+        "ParamEyeBallX": {
+          "meshId": "Art_Neutral_R1_C2",
+          "vertexIndex": 8,
+          "value": 0.5,
+          "delta": 0.00013694250155333216
+        },
+        "ParamEyeBallY": {
+          "meshId": "Art_Neutral_R1_C2",
+          "vertexIndex": 8,
+          "value": 0.5,
+          "delta": 0.00011682510756108221
+        },
+        "ParamBrowLY": {
+          "meshId": "Art_Neutral_R0_C2",
+          "vertexIndex": 8,
+          "value": 0.5,
+          "delta": 0.001152753830052365
+        },
+        "ParamBrowRY": {
+          "meshId": "Art_Neutral_R0_C4",
+          "vertexIndex": 7,
+          "value": 0.5,
+          "delta": 0.00003361702047896089
+        },
+        "ParamMouthOpenY": {
+          "meshId": "Art_Neutral_R4_C3",
+          "vertexIndex": 4,
+          "value": 0.65,
+          "delta": 0.000661313533782959
+        },
+        "ParamMouthForm": {
+          "meshId": "Art_Neutral_R4_C3",
+          "vertexIndex": 4,
+          "value": 0.5,
+          "delta": 0.00018459549739811642
+        },
+        "ParamBreath": {
+          "meshId": "Art_Neutral_R5_C1",
+          "vertexIndex": 5,
+          "value": 0.75,
+          "delta": 0.0001106085251625167
+        },
+        "ParamHairSwing": {
+          "meshId": "Art_Neutral_R0_C1",
+          "vertexIndex": 7,
+          "value": 0.5,
+          "delta": 0.000047240441380230855
+        },
+        "ParamArmL": {
+          "meshId": "Art_Neutral_R4_C1",
+          "vertexIndex": 7,
+          "value": 2,
+          "delta": 0.0009484668673858001
+        },
+        "ParamArmR": {
+          "meshId": "Art_Neutral_R4_C5",
+          "vertexIndex": 8,
+          "value": 2,
+          "delta": 0.0011227140019183842
+        },
+        "ParamElbowL": {
+          "meshId": "Art_Neutral_R6_C0",
+          "vertexIndex": 5,
+          "value": 2.5,
+          "delta": 0.0010115938449062145
+        },
+        "ParamElbowR": {
+          "meshId": "Art_Neutral_R6_C5",
+          "vertexIndex": 5,
+          "value": 2.5,
+          "delta": 0.00024900578223449816
+        },
+        "ParamWristL": {
+          "meshId": "Art_Neutral_R7_C0",
+          "vertexIndex": 8,
+          "value": 3,
+          "delta": 0.0018511478960777136
+        },
+        "ParamWristR": {
+          "meshId": "Art_Neutral_R7_C6",
+          "vertexIndex": 7,
+          "value": 3,
+          "delta": 0.0008011505105455595
+        },
+        "ParamHipL": {
+          "meshId": "Art_Neutral_R7_C1",
+          "vertexIndex": 5,
+          "value": 1,
+          "delta": 0.00012497006958663267
+        },
+        "ParamHipR": {
+          "meshId": "Art_Neutral_R7_C4",
+          "vertexIndex": 7,
+          "value": 1,
+          "delta": 0.00038193509525861905
+        },
+        "ParamKneeL": {
+          "meshId": "Art_Neutral_R9_C1",
+          "vertexIndex": 5,
+          "value": 1.5,
+          "delta": 0.0006782782018028155
+        },
+        "ParamKneeR": {
+          "meshId": "Art_Neutral_R9_C4",
+          "vertexIndex": 5,
+          "value": 1.5,
+          "delta": 0.000427131568405078
+        },
+        "ParamRootX": {
+          "meshId": "Art_Neutral_R0_C0",
+          "vertexIndex": 0,
+          "value": 3,
+          "delta": 0.008333384991544785
+        },
+        "ParamRootY": {
+          "meshId": "Art_Neutral_R0_C0",
+          "vertexIndex": 0,
+          "value": 2,
+          "delta": 0.005555629730224609
+        }
+      }
+    },
+    {
+      "name": "PoseBlend changes native opacity as a two-texture crossfade",
+      "status": "pass",
+      "details": {
+        "half": {
+          "neutral": 0.5,
+          "explore": 0.5
+        },
+        "full": {
+          "neutral": 0,
+          "explore": 1
+        }
+      }
+    },
+    {
+      "name": "independent left/right controls do not alter the opposite limb probe",
+      "status": "pass",
+      "details": {
+        "ParamArmL/ParamArmR": {
+          "leftOwn": 0.0009484668673858001,
+          "rightAtLeft": 0,
+          "rightOwn": 0.0011227140019183842,
+          "leftAtRight": 0
+        },
+        "ParamElbowL/ParamElbowR": {
+          "leftOwn": 0.0010115938449062145,
+          "rightAtLeft": 0,
+          "rightOwn": 0.00024900578223449816,
+          "leftAtRight": 0
+        },
+        "ParamWristL/ParamWristR": {
+          "leftOwn": 0.0018511478960777136,
+          "rightAtLeft": 0,
+          "rightOwn": 0.0008011505105455595,
+          "leftAtRight": 0
+        },
+        "ParamHipL/ParamHipR": {
+          "leftOwn": 0.00012497006958663267,
+          "rightAtLeft": 0,
+          "rightOwn": 0.00038193509525861905,
+          "leftAtRight": 0
+        },
+        "ParamKneeL/ParamKneeR": {
+          "leftOwn": 0.0006782782018028155,
+          "rightAtLeft": 0,
+          "rightOwn": 0.000427131568405078,
+          "leftAtRight": 0
+        }
+      }
+    },
+    {
+      "name": "midpoint rotation is native linear keyform interpolation within stated tolerance",
+      "status": "pass",
+      "details": {
+        "parameter": "ParamWristR",
+        "sampleValue": 3,
+        "interpolationError": 7.450580596923828e-9,
+        "directErrorPixels": 0.000836166188697037,
+        "nativeTolerance": 0.000004,
+        "analyticTolerancePixels": 0.25
+      }
+    },
+    {
+      "name": "all manual skin weight sums equal one excluding Root exactly 1",
+      "status": "pass",
+      "details": {
+        "samples": 1728,
+        "nonRootTolerance": 2e-8,
+        "rootWeight": 1
+      }
+    },
+    {
+      "name": "authored range corners evaluate finite and inside conservative geometry envelope",
+      "status": "pass",
+      "details": {
+        "corners": [
+          {
+            "maxAbs": 1.8641126155853271
+          },
+          {
+            "maxAbs": 1.858044147491455
+          }
+        ],
+        "safeModelCoordinateAbs": 2.25
+      }
+    },
+    {
+      "name": "bounded-motion triangle areas retain base orientation (no foldovers)",
+      "status": "pass",
+      "details": {
+        "poseCorners": 3,
+        "trianglesChecked": 4608,
+        "minSignedDoubleArea": 0.001157362674303497
+      }
+    },
+    {
+      "name": "source image provenance and output texture hashes",
+      "status": "pass",
+      "details": {
+        "format": "dte-morph-rig-provenance/v1",
+        "sourceRights": "unverified; private user-supplied transformation only; no redistribution approval is claimed.",
+        "inputImages": {
+          "neutral": {
+            "path": "/home/ubuntu/upload/dte-avatar-fullbody-nobck.png",
+            "filename": "dte-avatar-fullbody-nobck.png",
+            "sha256": "35e87896b5b28e19aa17d774bf44943a92fa6cf675925230f7e03284f6d8f51a",
+            "bytes": 471833,
+            "width": 720,
+            "height": 1280,
+            "colorType": "RGBA",
+            "alpha": "input alpha retained through a freshly encoded RGBA atlas"
+          },
+          "explore": {
+            "path": "/home/ubuntu/upload/dte-walk-explore-motion-poses-05-nobck.png",
+            "filename": "dte-walk-explore-motion-poses-05-nobck.png",
+            "sha256": "76f5ba715746813567ec379b2f081d6e239722a21282ee0511eb2852b049bb2b",
+            "bytes": 1129202,
+            "width": 570,
+            "height": 1440,
+            "colorType": "RGBA",
+            "alpha": "input alpha retained through contain-resize/pad RGBA atlas"
+          }
+        },
+        "newTextures": {
+          "neutral": {
+            "file": "neutral-atlas.png",
+            "width": 720,
+            "height": 1280,
+            "mode": "RGBA",
+            "sha256": "fd94368b9a7d3163126f8e0e780277913bd3e870ebb160ba7f70b01148a90d72",
+            "bytes": 452581,
+            "operation": "fresh 720×1280 RGBA encode; source pixels and alpha retained"
+          },
+          "explore": {
+            "file": "explore-atlas.png",
+            "width": 720,
+            "height": 1280,
+            "mode": "RGBA",
+            "sha256": "15e620f4cb558faae083c59bd6232b98e8949466f92ac21fa0176c09575f0cfd",
+            "bytes": 523365,
+            "operation": "aspect-ratio-preserving LANCZOS resize 570×1440→507×1280; transparent left/right padding 106/107 px; alpha retained"
+          }
+        },
+        "transformations": {
+          "neutral": "Freshly encoded 720×1280 RGBA canvas; no crop; source alpha carried through.",
+          "explore": "Freshly encoded 720×1280 RGBA contain image resized to 507×1280 then horizontally padded 106 px left and 107 px right; source alpha carried through."
+        },
+        "imageInspection": "Metadata/header validation and deterministic resampling only; portrait content was not opened or analysed by this compiler."
+      }
+    }
+  ]
+}

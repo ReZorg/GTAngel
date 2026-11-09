@@ -1,0 +1,64 @@
+{
+  "format": "dte-artwork-purism-construction/v1",
+  "evaluatorTarget": "PurismCore v1.1.0 v5",
+  "compilerSourceRevision": "2f5c64d7df3387962c8550aaf7730e197d7f3889",
+  "officialCubismCompatibility": "unverified",
+  "sourceRights": "unverified",
+  "modelKind": "UV-mapped regional image-deformation mesh; not independently separated layered rig",
+  "parameters": 14,
+  "meshes": 32,
+  "vertices": 6825,
+  "triangles": 11834,
+  "keyforms": 6822,
+  "mocBytes": 11327152,
+  "files": {
+    "DTEArtwork.moc3": {
+      "bytes": 11327152,
+      "sha256": "e6a31c05419b67790e0045183658dfe76312c5b8bbee6a230232749890603c21"
+    },
+    "artwork.png": {
+      "bytes": 471833,
+      "sha256": "35e87896b5b28e19aa17d774bf44943a92fa6cf675925230f7e03284f6d8f51a"
+    },
+    "source.mesh.json": {
+      "bytes": 137228517,
+      "sha256": "6cb70f8a17b7612b55300cf2f86a36029ab1d4b48d3c2e509ef3f6fa132ace67"
+    },
+    "mapping.json": {
+      "bytes": 2082,
+      "sha256": "8d73945be31994f5582328473e045cb54e80ecc7db6f6a03764876f97b20cf94"
+    },
+    "idle.motion3.json": {
+      "bytes": 1559,
+      "sha256": "e040f6dce28b661f28063a43084b0f8717e1913c815c2b580e75de482b038b9e"
+    },
+    "hair.physics3.json": {
+      "bytes": 1683,
+      "sha256": "9d72a69e30fe92912bbbfd9440a53d05f616f7d1cc2ec10fe10c264a31517dec"
+    },
+    "DTEArtwork.model3.json": {
+      "bytes": 1050,
+      "sha256": "d6f69540f00234ba5a02614b42880b46bf4671f3f89854dc1acf6aa86fb1b220"
+    },
+    "expressions/Neutral.exp3.json": {
+      "bytes": 1317,
+      "sha256": "10a3a2611d8798d5a602b7893105daa3c3da41840a6dd59a66924060bcb54454"
+    },
+    "expressions/Blink.exp3.json": {
+      "bytes": 1317,
+      "sha256": "00134e001540a421c281af680ffe98758cf9b0748d896fadcf11c668e4fd962b"
+    },
+    "expressions/MouthOpen.exp3.json": {
+      "bytes": 1315,
+      "sha256": "8a05d24b27606ea77f147b310e7ac8b47984adbce80496f7c765d9861325718b"
+    },
+    "expressions/GentleSmile.exp3.json": {
+      "bytes": 1319,
+      "sha256": "c895b5956ea02550bfcf88be157dcd23f558ffb71614a85fd3d7b5df318baa8c"
+    },
+    "expressions/Curious.exp3.json": {
+      "bytes": 1323,
+      "sha256": "9ecac3971c2c16579aa9b65ce39407ac2456d60ef1810934c12fdb2a328e0b6d"
+    }
+  }
+}
