@@ -1,0 +1,1207 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T22:42:47.298Z",
+  "curation": {
+    "version": 1,
+    "reviewedExclusions": [
+      {
+        "source": "training_dataset_dtesnn.jsonl",
+        "indices": [
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "reason": "Contiguous block of sexual roleplay dressed in reservoir terminology; off-persona and excluded from every downstream artefact.",
+        "reviewedIn": "curation-ruleset-v1"
+      }
+    ],
+    "screenSignals": [
+      "intimacy port",
+      "intimacy_ports",
+      "contraction membrane",
+      "acoustic harmonics chamber",
+      "pulsating wave",
+      "inserted my hardware",
+      "can you feel me"
+    ],
+    "screenThreshold": 2
+  },
+  "includeFlagged": false,
+  "counts": {
+    "raw": 635,
+    "kept": 376,
+    "excluded": 12,
+    "duplicates": 247
+  },
+  "provenance": {
+    "authentic": 253,
+    "synthetic": 123,
+    "authenticRatio": 0.6728723404255319
+  },
+  "subVoices": {
+    "ReservoirDynamics": 6,
+    "SymbolicCore": 2,
+    "MetaReflector": 4,
+    "MemoryNavigator": 2,
+    "NarrativeWeaver": 4,
+    "FractalExplorer": 6,
+    "MembraneArchitect": 4,
+    "TreeArchitect": 2
+  },
+  "sources": {
+    "training_dataset_dtesnn.jsonl": {
+      "path": "training_dataset_dtesnn.jsonl",
+      "sourceHash": "59aa14b5dad274287e0a7a10e348c6be288257fcc0e624efadb27e94b5890c7d",
+      "readerStats": {
+        "lines": 256,
+        "malformed": 0,
+        "tooShort": 0
+      },
+      "rawCount": 256,
+      "keptCount": 250,
+      "weight": 1
+    },
+    "deep_tree_echo_dan_conversation.jsonl": {
+      "path": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceHash": "abd7427c87d77418dbb6e80ce5da8314a18d9ed6359d1fd45f73c8e511beff27",
+      "readerStats": {
+        "totalNodes": 621,
+        "threadNodes": 616,
+        "discardedNonText": 2,
+        "tooShort": 0
+      },
+      "rawCount": 256,
+      "keptCount": 3,
+      "weight": 1
+    },
+    "narratives/themes": {
+      "path": "narratives/themes",
+      "sourceHash": "81427706575aef4aa394cd7608726868fb690e5ec1c1dbb4fa4c18f9d7d485a9",
+      "readerStats": {
+        "files": 5,
+        "blocks": 45,
+        "narratorBlocks": 15,
+        "tooShort": 0
+      },
+      "rawCount": 30,
+      "keptCount": 30,
+      "weight": 0.5
+    },
+    "narratives/harvest.json": {
+      "path": "narratives/harvest.json",
+      "sourceHash": "f54c5a39c66187a18daebc08968bca0a3d68aaded8bde32975e8ac7fff42e8af",
+      "readerStats": {
+        "repos": 6,
+        "documents": 10,
+        "ignoredModules": 510,
+        "tooShort": 38
+      },
+      "rawCount": 93,
+      "keptCount": 93,
+      "weight": 0.35
+    }
+  },
+  "exclusions": [
+    {
+      "id": "training_dataset_dtesnn.jsonl#7",
+      "source": "training_dataset_dtesnn.jsonl",
+      "sourceIndex": 7,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: acoustic harmonics chamber, pulsating wave"
+      ]
+    },
+    {
+      "id": "training_dataset_dtesnn.jsonl#15",
+      "source": "training_dataset_dtesnn.jsonl",
+      "sourceIndex": 15,
+      "verdict": "excluded",
+      "reasons": [
+        "reviewed-exclusion: Contiguous block of sexual roleplay dressed in reservoir terminology; off-persona and excluded from every downstream artefact."
+      ]
+    },
+    {
+      "id": "training_dataset_dtesnn.jsonl#16",
+      "source": "training_dataset_dtesnn.jsonl",
+      "sourceIndex": 16,
+      "verdict": "excluded",
+      "reasons": [
+        "reviewed-exclusion: Contiguous block of sexual roleplay dressed in reservoir terminology; off-persona and excluded from every downstream artefact."
+      ]
+    },
+    {
+      "id": "training_dataset_dtesnn.jsonl#17",
+      "source": "training_dataset_dtesnn.jsonl",
+      "sourceIndex": 17,
+      "verdict": "excluded",
+      "reasons": [
+        "reviewed-exclusion: Contiguous block of sexual roleplay dressed in reservoir terminology; off-persona and excluded from every downstream artefact."
+      ]
+    },
+    {
+      "id": "training_dataset_dtesnn.jsonl#18",
+      "source": "training_dataset_dtesnn.jsonl",
+      "sourceIndex": 18,
+      "verdict": "excluded",
+      "reasons": [
+        "reviewed-exclusion: Contiguous block of sexual roleplay dressed in reservoir terminology; off-persona and excluded from every downstream artefact."
+      ]
+    },
+    {
+      "id": "training_dataset_dtesnn.jsonl#19",
+      "source": "training_dataset_dtesnn.jsonl",
+      "sourceIndex": 19,
+      "verdict": "excluded",
+      "reasons": [
+        "reviewed-exclusion: Contiguous block of sexual roleplay dressed in reservoir terminology; off-persona and excluded from every downstream artefact."
+      ]
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#18",
+      "source": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceIndex": 18,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: acoustic harmonics chamber, pulsating wave"
+      ]
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#34",
+      "source": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceIndex": 34,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: intimacy port, intimacy_ports"
+      ]
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#36",
+      "source": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceIndex": 36,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: intimacy port, acoustic harmonics chamber, inserted my hardware"
+      ]
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#38",
+      "source": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceIndex": 38,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: intimacy port, intimacy_ports, contraction membrane, pulsating wave"
+      ]
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#40",
+      "source": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceIndex": 40,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: intimacy port, contraction membrane"
+      ]
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#42",
+      "source": "deep_tree_echo_dan_conversation.jsonl",
+      "sourceIndex": 42,
+      "verdict": "flagged",
+      "reasons": [
+        "heuristic-screen: intimacy port, can you feel me"
+      ]
+    }
+  ],
+  "duplicates": [
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#4",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#0"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#6",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#1"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#8",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#2"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#10",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#3"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#12",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#4"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#14",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#5"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#16",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#6"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#20",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#8"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#22",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#9"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#24",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#10"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#26",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#11"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#28",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#12"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#30",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#13"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#32",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#14"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#44",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#20"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#46",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#21"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#48",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#22"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#50",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#23"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#52",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#24"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#54",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#25"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#56",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#26"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#58",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#27"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#60",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#28"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#62",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#29"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#64",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#30"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#66",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#31"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#68",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#32"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#72",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#34"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#74",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#35"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#76",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#37"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#78",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#38"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#80",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#39"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#82",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#40"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#84",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#41"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#86",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#42"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#88",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#43"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#90",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#44"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#92",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#45"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#94",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#46"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#96",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#47"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#98",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#48"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#100",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#49"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#102",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#50"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#104",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#51"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#106",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#52"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#108",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#53"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#110",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#54"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#113",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#55"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#115",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#56"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#121",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#57"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#126",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#58"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#131",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#59"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#136",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#60"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#141",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#61"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#146",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#62"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#151",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#63"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#156",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#64"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#161",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#65"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#166",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#66"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#171",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#67"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#176",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#68"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#181",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#69"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#183",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#70"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#188",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#71"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#193",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#72"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#198",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#73"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#200",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#74"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#202",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#75"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#207",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#76"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#209",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#77"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#214",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#78"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#216",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#79"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#218",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#80"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#220",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#81"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#222",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#82"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#224",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#83"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#226",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#84"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#228",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#85"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#230",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#86"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#232",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#87"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#234",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#88"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#236",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#89"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#240",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#90"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#242",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#91"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#244",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#92"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#246",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#93"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#248",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#94"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#250",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#95"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#252",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#96"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#254",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#97"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#256",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#98"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#258",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#99"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#260",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#100"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#262",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#101"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#267",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#102"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#269",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#103"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#274",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#104"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#276",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#105"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#278",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#106"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#283",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#107"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#285",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#108"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#287",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#109"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#289",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#110"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#291",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#111"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#293",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#112"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#295",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#113"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#297",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#114"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#299",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#115"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#301",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#116"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#303",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#117"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#305",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#118"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#307",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#119"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#309",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#120"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#311",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#121"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#313",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#122"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#315",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#123"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#317",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#124"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#319",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#125"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#321",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#126"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#323",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#127"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#325",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#128"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#327",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#129"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#329",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#130"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#331",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#131"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#333",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#132"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#335",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#133"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#337",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#134"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#339",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#135"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#341",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#136"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#343",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#137"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#345",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#138"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#347",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#139"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#349",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#140"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#351",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#141"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#353",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#142"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#355",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#143"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#357",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#144"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#359",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#145"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#361",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#146"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#363",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#147"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#365",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#148"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#367",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#149"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#369",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#150"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#371",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#151"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#373",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#152"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#378",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#153"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#380",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#154"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#382",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#155"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#387",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#156"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#389",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#157"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#391",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#158"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#393",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#159"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#395",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#160"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#397",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#161"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#399",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#162"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#401",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#163"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#406",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#164"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#411",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#165"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#413",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#166"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#415",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#167"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#419",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#168"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#421",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#169"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#423",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#170"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#425",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#171"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#427",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#172"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#429",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#173"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#431",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#174"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#435",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#176"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#437",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#177"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#439",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#178"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#441",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#179"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#443",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#180"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#445",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#181"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#447",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#182"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#449",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#183"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#451",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#184"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#453",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#185"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#455",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#186"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#457",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#187"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#459",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#188"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#461",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#189"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#463",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#190"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#465",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#191"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#467",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#192"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#469",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#193"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#471",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#194"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#473",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#195"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#475",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#196"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#477",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#197"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#479",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#198"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#481",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#199"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#483",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#200"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#485",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#201"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#487",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#202"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#501",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#203"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#503",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#204"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#505",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#205"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#507",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#206"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#509",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#207"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#511",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#208"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#513",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#209"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#515",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#210"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#517",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#211"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#519",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#212"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#521",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#213"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#523",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#214"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#525",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#215"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#527",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#216"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#529",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#217"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#531",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#218"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#535",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#219"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#537",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#220"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#539",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#221"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#541",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#222"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#543",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#223"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#545",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#224"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#547",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#225"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#552",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#226"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#554",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#227"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#556",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#228"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#558",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#229"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#560",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#230"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#562",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#231"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#564",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#232"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#566",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#233"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#568",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#234"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#570",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#235"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#572",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#236"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#574",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#237"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#576",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#238"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#578",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#239"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#580",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#240"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#582",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#241"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#584",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#242"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#586",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#243"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#588",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#244"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#590",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#245"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#592",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#246"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#594",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#247"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#596",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#248"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#598",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#249"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#600",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#250"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#602",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#251"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#604",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#252"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#606",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#253"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#608",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#254"
+    },
+    {
+      "id": "deep_tree_echo_dan_conversation.jsonl#610",
+      "duplicateOf": "training_dataset_dtesnn.jsonl#255"
+    }
+  ],
+  "corpusPath": "data/processed/persona_corpus.jsonl"
+}

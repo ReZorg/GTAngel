@@ -1,0 +1,132 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Force git to use HTTPS
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Download llama.cpp release binaries
+        id: llama
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Fetch all asset download URLs from the latest release
+          RELEASE=$(curl -fsSL https://api.github.com/repos/ggml-org/llama.cpp/releases/latest)
+          TAG=$(echo "$RELEASE" | jq -er '.tag_name')
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Latest llama.cpp release: $TAG"
+
+          # List all assets so we can see exact names
+          echo "$RELEASE" | jq -r '.assets[:30][].name'
+
+          # Pick the highest CUDA version that has both a binary and runtime asset.
+          CUDA_VERSION=$(echo "$RELEASE" | jq -er '
+            [
+              .assets[].name
+              | select(test("^llama-.*-bin-win-cuda-[0-9]+\\.[0-9]+-x64\\.zip$"))
+              | capture("cuda-(?<version>[0-9]+\\.[0-9]+)-x64\\.zip$").version
+            ] as $binary_versions
+            | [
+                .assets[].name
+                | select(test("^cudart-llama-bin-win-cuda-[0-9]+\\.[0-9]+-x64\\.zip$"))
+                | capture("cuda-(?<version>[0-9]+\\.[0-9]+)-x64\\.zip$").version
+                | select(. as $version | $binary_versions | index($version))
+              ]
+            | unique
+            | sort_by(split(".") | map(tonumber))
+            | last
+          ') || {
+            echo "::error::No matching Windows x64 CUDA binary and CUDART asset pair found in llama.cpp release $TAG"
+            exit 1
+          }
+          echo "Selected CUDA version: $CUDA_VERSION"
+
+          ASSET_SUFFIX="bin-win-cuda-${CUDA_VERSION}-x64.zip"
+
+          # Find and download the matching CUDA binary.
+          CUDA_URL=$(echo "$RELEASE" | jq -er --arg suffix "$ASSET_SUFFIX" '
+            first(
+              .assets[]
+              | select(.name | endswith($suffix))
+              | select(.name | startswith("cudart-") | not)
+              | .browser_download_url
+            )
+          ')
+          echo "CUDA binary URL: $CUDA_URL"
+          curl -fL -o llama-cuda.zip "$CUDA_URL"
+
+          # Find and download the runtime for the same CUDA version.
+          CUDART_URL=$(echo "$RELEASE" | jq -er --arg suffix "$ASSET_SUFFIX" '
+            first(
+              .assets[]
+              | select(.name | startswith("cudart-"))
+              | select(.name | endswith($suffix))
+              | .browser_download_url
+            )
+          ')
+          echo "CUDART URL: $CUDART_URL"
+          curl -fL -o llama-cudart.zip "$CUDART_URL"
+
+      - name: Extract and merge into assets/server
+        shell: bash
+        run: |
+          mkdir -p assets/server
+
+          # Extract CUDA binaries first
+          unzip -o llama-cuda.zip -d llama-cuda-tmp
+          # Extract CUDA runtime
+          unzip -o llama-cudart.zip -d llama-cudart-tmp
+
+          # Copy CUDA files (base layer)
+          cp -r llama-cuda-tmp/*/* assets/server/ 2>/dev/null || cp -r llama-cuda-tmp/* assets/server/
+          # Overlay CUDA runtime files (merges on top)
+          cp -r llama-cudart-tmp/*/* assets/server/ 2>/dev/null || cp -r llama-cudart-tmp/* assets/server/
+
+          echo "Contents of assets/server:"
+          ls -la assets/server/
+
+      - name: Build Electron app
+        run: yarn dist -- --publish never
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: layla-server-win
+          path: |
+            dist/*.exe
+            dist/*.yml
+          if-no-files-found: warn
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Layla Server Build ${{ github.run_number }}
+          files: |
+            dist/*.exe
+          draft: false
+          prerelease: false

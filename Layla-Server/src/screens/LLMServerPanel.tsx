@@ -1,0 +1,1686 @@
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import UserSettingsService, {
+  USER_SETTING_DEFAULTS,
+  UserSettingKey,
+} from "../services/user-settings-service";
+import { WelcomeModal } from "../components/WelcomeModal";
+
+// ─── Constants ──────────────────────────────────────────────────────────────────
+
+const C = {
+  background: "#1a1a1a",
+  text: "#ffffff",
+  secondaryText: "#aaaaaa",
+  primary: "#47a6ff",
+  danger: "#ff6347",
+  border: "#333333",
+  success: "#34d399",
+  warning: "#fbbf24",
+  surface: "#282828",
+  surfaceHover: "#2e2e2e",
+  cardBg: "#252525",
+  logBg: "#1a1a1a",
+  dimText: "#888888",
+  accentGlow: "rgba(71, 166, 255, 0.25)",
+  dangerGlow: "rgba(255, 99, 71, 0.25)",
+  successGlow: "rgba(52, 211, 153, 0.20)",
+};
+
+const LAYLA_SIGNALLING_URL =
+  "https://layla-signalling-production.up.railway.app";
+const WEBRTC_DATA_CHANNEL_LABEL = "layla-datachannel";
+const CHUNK_SIZE = 16_000;
+const MAX_SERVER_LOGS_TO_DISPLAY = 500;
+
+// RTCDataChannel.send() never blocks: anything the peer has not yet drained
+// accumulates in libwebrtc's *native* outgoing buffer, which does not appear in
+// the JS heap. If llama.cpp generates faster than the phone consumes, that
+// buffer grows without limit until send() starts throwing OperationError.
+// Pause sending above the high-water mark and resume once it drains below the
+// low mark.
+const DC_BUFFER_HIGH_WATER = 4 * 1024 * 1024; // 4 MB
+const DC_BUFFER_LOW_WATER = 1 * 1024 * 1024; // 1 MB
+const DC_DRAIN_TIMEOUT_MS = 30_000;
+
+// ─── Types ──────────────────────────────────────────────────────────────────────
+
+type LogType = "INFO" | "WARN" | "ERROR" | "RTC" | "SSE" | "SERVER";
+
+interface LaylaServerTransportMessage {
+  sessionId: string;
+  type: "start" | "chunk" | "end" | "cmd";
+  payload: string;
+}
+
+interface LogEntry {
+  id: number;
+  ts: string;
+  type: LogType;
+  msg: string;
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────────
+
+const generateTimestamp = (offsetMs = 0): string => {
+  const d = new Date(Date.now() - offsetMs);
+  return d.toLocaleTimeString("en-GB", { hour12: false });
+};
+
+function wrapMessages(
+  sessionId: string,
+  fullPayload: string,
+): LaylaServerTransportMessage[] {
+  const messages: LaylaServerTransportMessage[] = [
+    { sessionId, type: "start", payload: "" },
+  ];
+  for (let i = 0; i < fullPayload.length; i += CHUNK_SIZE) {
+    messages.push({
+      sessionId,
+      type: "chunk",
+      payload: fullPayload.slice(i, i + CHUNK_SIZE),
+    });
+  }
+  messages.push({ sessionId, type: "end", payload: "" });
+  return messages;
+}
+
+/**
+ * Resolves once the channel's outgoing buffer has drained below the low-water
+ * mark, or immediately if it is already below it / the channel is not open.
+ * Falls back to a timeout so a stalled peer can never hang a stream forever.
+ */
+function waitForDataChannelDrain(dc: RTCDataChannel): Promise<void> {
+  if (dc.readyState !== "open" || dc.bufferedAmount <= DC_BUFFER_LOW_WATER) {
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    let settled = false;
+
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      dc.removeEventListener("bufferedamountlow", finish);
+      dc.removeEventListener("close", finish);
+      dc.removeEventListener("error", finish);
+      resolve();
+    };
+
+    const timer = setTimeout(finish, DC_DRAIN_TIMEOUT_MS);
+
+    dc.bufferedAmountLowThreshold = DC_BUFFER_LOW_WATER;
+    dc.addEventListener("bufferedamountlow", finish);
+    dc.addEventListener("close", finish);
+    dc.addEventListener("error", finish);
+  });
+}
+
+function getFilenameFromPath(path: string): string {
+  let filename = path.split("/").pop();
+  filename = (filename ?? path).split("\\").pop();
+  if (!filename) return path;
+  filename = filename.split(".").slice(0, -1).join(".");
+  return filename;
+}
+
+/**
+ * Best-effort label for an endpoint we do not launch, so the card can say
+ * "Ollama" rather than just a URL. Derived from the port rather than stored:
+ * pass-through mode is expressed entirely by the existing server settings.
+ */
+function describeEndpoint(url: string): string {
+  try {
+    const port = new URL(url).port;
+    if (port === "1234") return "LM Studio";
+    if (port === "11434") return "Ollama";
+    if (port === "8080") return "llama.cpp server";
+  } catch {
+    /* not a parseable URL — fall through to the generic label */
+  }
+  return "External server";
+}
+
+function extractTags(name: string): string[] {
+  const tags = new Set<string>();
+  const sizeMatch = name.match(/(?:^|[\W_])(\d+(?:\.\d+)?[Bb])(?:[\W_]|$)/);
+  if (sizeMatch?.[1]) tags.add(sizeMatch[1].toUpperCase());
+  const quantMatch = name.match(/(Q\d[A-Z0-9_]*)/i);
+  if (quantMatch?.[1]) tags.add(quantMatch[1].toUpperCase());
+  return Array.from(tags);
+}
+
+// ─── QR Code Generation (pure JS, no dependencies) ─────────────────────────────
+// Minimal QR encoder — uses the same qrcodegen algorithm approach.
+// For production, install `qrcode` from npm. Here we use dynamic import fallback.
+
+const QrCodeSvg: React.FC<{ text: string; size?: number }> = ({
+  text,
+  size = 200,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    // Use the 'qrcode' npm package: npm install qrcode @types/qrcode
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    import("qrcode").then((QRCode) => {
+      if (canvasRef.current) {
+        QRCode.toCanvas(canvasRef.current, text, {
+          width: size,
+          margin: 2,
+          color: { dark: "#000000", light: "#ffffff" },
+        });
+      }
+    });
+  }, [text, size]);
+
+  return <canvas ref={canvasRef} style={{ borderRadius: 8 }} />;
+};
+
+// ─── Subcomponents ──────────────────────────────────────────────────────────────
+
+const StatusDot: React.FC<{ running: boolean }> = ({ running }) => {
+  const colour = running ? C.success : C.danger;
+  return (
+    <div className="status-dot-wrapper">
+      {running && (
+        <div className="status-dot-pulse" style={{ backgroundColor: colour }} />
+      )}
+      <div className="status-dot" style={{ backgroundColor: colour }} />
+    </div>
+  );
+};
+
+const Header: React.FC<{
+  running: boolean;
+  status: string;
+  onSettings: () => void;
+}> = ({ running, status, onSettings }) => (
+  <div className="header">
+    <div className="header-left">
+      <StatusDot running={running} />
+      <div style={{ marginLeft: 10 }}>
+        <div className="header-title">Layla Server</div>
+        <div
+          className="header-sub"
+          style={{ color: running ? C.success : C.danger }}
+        >
+          {running ? "Online" : "Offline"}
+          {status ? ` · ${status}` : ""}
+        </div>
+      </div>
+    </div>
+    <button className="settings-btn" onClick={onSettings} aria-label="Settings">
+      ⚙
+    </button>
+  </div>
+);
+
+const PowerButton: React.FC<{ running: boolean; onToggle: () => void }> = ({
+  running,
+  onToggle,
+}) => {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <div className={`power-outer ${pressed ? "power-pressed" : ""}`}>
+      <div className={`power-glow ${running ? "power-glow-active" : ""}`} />
+      <button
+        className={`power-btn ${running ? "power-btn-running" : ""}`}
+        onClick={onToggle}
+        onMouseDown={() => setPressed(true)}
+        onMouseUp={() => setPressed(false)}
+        onMouseLeave={() => setPressed(false)}
+        aria-label={running ? "Stop server" : "Start server"}
+      >
+        <span
+          className="power-icon"
+          style={{ color: running ? C.primary : C.dimText }}
+        >
+          ⏻
+        </span>
+        <span
+          className="power-label"
+          style={{ color: running ? C.primary : C.secondaryText }}
+        >
+          {running ? "STOP SERVER" : "START SERVER"}
+        </span>
+      </button>
+    </div>
+  );
+};
+
+const Chip: React.FC<{ label: string }> = ({ label }) => (
+  <span className="chip">{label}</span>
+);
+
+const ModelCard: React.FC<{
+  label: string;
+  name: string;
+  path: string;
+  tags: string[];
+  onChange: () => void;
+}> = ({ label, name, path, tags, onChange }) => (
+  <div className="card">
+    <div className="card-header card-header-row">
+      <span className="section-label">{label}</span>
+      <button className="card-change-btn" onClick={onChange}>
+        Change
+      </button>
+    </div>
+    <div className="card-body">
+      <div className="model-image-container">
+        <img src="./images/model.png" alt={name} className="model-image" />
+      </div>
+      <div className="model-info">
+        <div className="model-name">{name}</div>
+        <div className="model-desc">{path}</div>
+        <div className="chip-row">
+          {tags.map((tag) => (
+            <Chip key={tag} label={tag} />
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const LogViewer: React.FC<{
+  logs: LogEntry[];
+  verboseSse: boolean;
+  onToggleVerboseSse: () => void;
+}> = ({ logs, verboseSse, onToggleVerboseSse }) => {
+  const [expanded, setExpanded] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const toggle = useCallback(() => {
+    setExpanded((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    if (!expanded || !scrollRef.current) return;
+
+    // A new log line can arrive per streamed token. Scheduling an uncleared
+    // timer (and a queued smooth-scroll animation) for each one leaves
+    // thousands of pending callbacks and animation states alive during a
+    // stream. Clearing on cleanup means only the latest scroll is ever
+    // pending, and "auto" avoids stacking interrupted scroll animations.
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "auto",
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [logs, expanded]);
+
+  const levelColor = (l: LogType) => {
+    switch (l) {
+      case "ERROR":
+        return C.danger;
+      case "WARN":
+        return C.warning;
+      default:
+        return C.dimText;
+    }
+  };
+
+  return (
+    <div className="log-container">
+      <button className="log-header" onClick={toggle}>
+        <span className="section-label">SERVER LOGS</span>
+        <div className="log-header-right">
+          <span
+            className={`log-verbose-toggle${verboseSse ? " log-verbose-toggle--on" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleVerboseSse();
+            }}
+            title="Log the full body of every SSE chunk. Increases memory use significantly during long generations."
+          >
+            VERBOSE
+          </span>
+          <span className="log-count-badge">{logs.length}</span>
+          <span className={`chevron ${expanded ? "chevron-open" : ""}`}>▼</span>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="log-scroll" ref={scrollRef}>
+          {logs.map((entry) => (
+            <div key={entry.id} className="log-row">
+              <span className="log-ts">{entry.ts}</span>
+              <span
+                className="log-level"
+                style={{ color: levelColor(entry.type) }}
+              >
+                {entry.type.padEnd(5)}
+              </span>
+              <span className="log-msg">{entry.msg}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── QR Modal ───────────────────────────────────────────────────────────────────
+
+const QrModal: React.FC<{
+  visible: boolean;
+  onClose: () => void;
+  deepLink: string;
+  serverSecret: string;
+}> = ({ visible, onClose, deepLink, serverSecret }) => {
+  if (!visible) return null;
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <QrCodeSvg text={deepLink} size={220} />
+        <div className="modal-text-group">
+          <span className="modal-label">Your Server Secret</span>
+          <span className="modal-secret">{serverSecret}</span>
+          <span className="modal-hint">
+            Scan the QR code with Layla to connect.
+          </span>
+        </div>
+        <button className="modal-close-btn" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── Main Component ─────────────────────────────────────────────────────────────
+
+const LlmServerPanel: React.FC<{
+  goToSettings: () => void;
+  settingsRefreshCounter: number; // used to trigger settings reload when coming back from settings page
+}> = ({ goToSettings, settingsRefreshCounter }) => {
+  // ── State ──
+  const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState("Idle");
+  const [logs, setLogs] = useState<LogEntry[]>([
+    {
+      id: 0,
+      type: "INFO",
+      ts: generateTimestamp(),
+      msg: 'Welcome to Layla Server! Click "START SERVER" to launch your local LLM server.',
+    },
+  ]);
+  const logIdRef = useRef(1);
+  const serverTransitioningRef = useRef(false);
+  const sessionIdRef = useRef<string | null>(null);
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
+  // First run has nothing to fall back to, so the modal is not dismissible;
+  // reopening it later via "Change" is.
+  const [welcomeDismissible, setWelcomeDismissible] = useState(false);
+  const runningRef = useRef(running);
+
+  // ── Settings refs ──
+  const modelPathRef = useRef<string | null>(null);
+  const visionModelPathRef = useRef<string | null>(null);
+  const additionalArgsRef = useRef<string | null>(null);
+  const localServerPathRef = useRef<string | null>(null);
+  const localServerUrlRef = useRef<string | null>(null);
+  const [serverSecret, setServerSecret] = useState("");
+  const serverSecretRef = useRef("");
+
+  // ── WebRTC refs ──
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const dataChannelRef = useRef<RTCDataChannel | null>(null);
+  const lastAnswerRef = useRef<string | null>(null);
+  const creatingRtcOfferGuardRef = useRef(false); // to prevent concurrent offer creations
+
+  // ── OpenAI proxy ──
+  const bufferedRequestRef = useRef("");
+  const streamAbortControllerRef = useRef<AbortController | null>(null);
+
+  // ── Request queue ──
+  // llama-server processes one completion at a time. Firing a second request
+  // while one is in flight either queues unbounded inside llama.cpp, drops the
+  // first connection mid-stream, or exhausts VRAM with overlapping inference —
+  // all of which can kill the backend. These refs serialise requests so the
+  // backend only ever sees one at a time.
+  const requestQueueRef = useRef<string[]>([]);
+  const queueRunningRef = useRef(false);
+
+  // ── Verbose SSE logging ──
+  // Logging every SSE chunk means one React state update per generated token.
+  // Sustained over a long generation that grows renderer memory by hundreds of
+  // MB, so it is off by default and opt-in for debugging a stream. Mirrored
+  // into a ref so the streaming loop reads the live value mid-stream.
+  const [verboseSse, setVerboseSse] = useState(false);
+  const verboseSseRef = useRef(false);
+  useEffect(() => {
+    verboseSseRef.current = verboseSse;
+  }, [verboseSse]);
+
+  const toggleVerboseSse = useCallback(() => {
+    setVerboseSse((prev) => {
+      const next = !prev;
+      verboseSseRef.current = next;
+      UserSettingsService.saveSetting(
+        UserSettingKey.VERBOSE_SSE_LOGGING,
+        next,
+      ).catch(() => {
+        /* non-fatal: setting just will not persist */
+      });
+      return next;
+    });
+  }, []);
+
+  // ── Model info ──
+  const [modelCardLabel, setModelCardLabel] = useState("ACTIVE MODEL");
+  const [modelName, setModelName] = useState("No model loaded");
+  const [modelPath, setModelPath] = useState<string | null>(null);
+  const [modelTags, setModelTags] = useState<string[]>([]);
+
+  // ── QR code ──
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [deepLink, setDeepLink] = useState("");
+
+  // ── Helpers ──
+
+  const addLog = (level: LogType, msg: string) => {
+    const ts = generateTimestamp();
+    const id = logIdRef.current++;
+    setLogs((prev) => [
+      ...prev.slice(-(MAX_SERVER_LOGS_TO_DISPLAY - 1)),
+      { id, ts, type: level, msg },
+    ]);
+  };
+
+  // ── SSE streaming via browser fetch ──
+  const streamToLocalServer = useCallback(async (requestBody: string) => {
+    try {
+      addLog("SSE", `Streaming request to local server…`);
+
+      // re-create abort controller for this stream
+      if (streamAbortControllerRef.current) {
+        streamAbortControllerRef.current.abort();
+      }
+      streamAbortControllerRef.current = new AbortController();
+
+      const response = await fetch(
+        localServerUrlRef.current ||
+          USER_SETTING_DEFAULTS[UserSettingKey.LOCAL_SERVER_URL],
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: requestBody,
+          signal: streamAbortControllerRef.current.signal,
+        },
+      );
+
+      addLog("SSE", `Stream opened: ${response.status} ${response.statusText}`);
+
+      if (!response.body) {
+        addLog("ERROR", "Response body is null");
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunkText = decoder.decode(value, { stream: true });
+
+          if (verboseSseRef.current) {
+            addLog("SSE", `Stream chunk:\n${chunkText}`);
+          }
+
+          // Forward chunk to peer via data channel
+          const sid = sessionIdRef.current ?? "unknown";
+          const messages = wrapMessages(sid, chunkText);
+          for (const msg of messages) {
+            const channel = dataChannelRef.current;
+            if (!channel || channel.readyState !== "open") continue;
+
+            // Back-pressure: if the peer is consuming slower than llama.cpp is
+            // producing, wait for the native send buffer to drain rather than
+            // piling more onto it (which grows process memory and eventually
+            // makes send() throw).
+            if (channel.bufferedAmount > DC_BUFFER_HIGH_WATER) {
+              await waitForDataChannelDrain(channel);
+              if (channel.readyState !== "open") continue;
+            }
+
+            try {
+              channel.send(JSON.stringify(msg));
+            } catch (e: any) {
+              addLog("ERROR", `Failed to send over DataChannel: ${e.message}`);
+            }
+          }
+        }
+      } finally {
+        // On abort the loop exits via throw; without cancelling, the response
+        // body and its buffers stay referenced until GC eventually notices.
+        try {
+          await reader.cancel();
+        } catch {
+          /* already closed */
+        }
+      }
+
+      addLog("SSE", "Stream completed");
+    } catch (e: any) {
+      addLog("SSE", `Stream error: ${e.message}`);
+    }
+  }, []);
+
+  /**
+   * Drains the request queue one item at a time, awaiting each stream to
+   * completion before starting the next. Re-entrant calls are no-ops: whichever
+   * call is already draining will pick up newly pushed items on its next pass.
+   */
+  const processQueue = useCallback(async () => {
+    if (queueRunningRef.current) return; // already draining
+    queueRunningRef.current = true;
+
+    try {
+      while (requestQueueRef.current.length > 0) {
+        const nextRequest = requestQueueRef.current.shift()!;
+        await streamToLocalServer(nextRequest);
+      }
+    } finally {
+      queueRunningRef.current = false;
+    }
+  }, [streamToLocalServer]);
+
+  const handleCommand = useCallback((cmd: string) => {
+    addLog("INFO", `Received command: ${cmd}`);
+    if (cmd === "stop") {
+      streamAbortControllerRef.current?.abort();
+      // Drop anything still waiting — an explicit stop should not be followed
+      // by queued prompts continuing to generate.
+      requestQueueRef.current = [];
+      queueRunningRef.current = false;
+      addLog("INFO", "Stream aborted and queue cleared by command");
+    } else {
+      addLog("WARN", `Unknown command: ${cmd}`);
+    }
+  }, []);
+
+  // ── WebRTC (browser native) ──
+  const createRtcOffer = async () => {
+    if (creatingRtcOfferGuardRef.current) return;
+    creatingRtcOfferGuardRef.current = true;
+
+    // Abort controller for cancelling in-flight fetches on shutdown or retry
+    let abortController: AbortController | null = null;
+
+    try {
+      // Outer loop: each iteration creates a fresh offer + polls for an answer
+      while (runningRef.current) {
+        abortController = new AbortController();
+        const { signal } = abortController;
+
+        let pc: RTCPeerConnection | null = null;
+        let dc: RTCDataChannel | null = null;
+
+        try {
+          // ── Tear down any previous connection ──────────────────────────
+          if (peerConnectionRef.current) {
+            addLog("WARN", "Existing RTC peer connection found, closing…");
+            try {
+              dataChannelRef.current?.close();
+              peerConnectionRef.current.close();
+            } catch (e: any) {
+              addLog("ERROR", `Failed to close existing peer: ${e.message}`);
+            }
+            peerConnectionRef.current = null;
+            dataChannelRef.current = null;
+          }
+
+          // ── Create peer connection ────────────────────────────────────
+          addLog("RTC", "Creating peer connection…");
+          setStatus("Waiting for remote connection...");
+
+          pc = new RTCPeerConnection({
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+            ],
+          });
+          peerConnectionRef.current = pc;
+          addLog("RTC", "Peer created");
+
+          // ── Create data channel ───────────────────────────────────────
+          addLog(
+            "RTC",
+            `Creating data channel "${WEBRTC_DATA_CHANNEL_LABEL}"…`,
+          );
+          dc = pc.createDataChannel(WEBRTC_DATA_CHANNEL_LABEL);
+          dataChannelRef.current = dc;
+          addLog("RTC", "DataChannel created");
+
+          // ── DataChannel events ────────────────────────────────────────
+          dc.onopen = () => {
+            addLog("RTC", `DataChannel OPEN (${dc!.label})`);
+            setStatus("Device connected, ready to stream requests");
+          };
+
+          dc.onclose = () => {
+            addLog("RTC", "DataChannel CLOSED");
+            // Abort the current polling fetch so the outer loop can
+            // immediately start a fresh offer.
+            abortController?.abort();
+          };
+
+          dc.onmessage = (event) => {
+            const data = typeof event.data === "string" ? event.data : "";
+
+            if (typeof event.data !== "string") {
+              addLog(
+                "WARN",
+                `Received unexpected binary message (${(event.data as ArrayBuffer).byteLength} bytes), ignoring`,
+              );
+              return;
+            }
+
+            addLog("RTC", `Received: ${data.substring(0, 80)}`);
+
+            if (data.length > 0) {
+              try {
+                const chunk = JSON.parse(data) as LaylaServerTransportMessage;
+
+                if (chunk.type === "start") {
+                  bufferedRequestRef.current = "";
+                  sessionIdRef.current = chunk.sessionId;
+                } else if (chunk.type === "chunk") {
+                  bufferedRequestRef.current += chunk.payload;
+                } else if (chunk.type === "end") {
+                  // Enqueue rather than firing immediately, so rapid
+                  // back-to-back prompts never overlap on the backend.
+                  requestQueueRef.current.push(bufferedRequestRef.current);
+                  processQueue();
+                } else if (chunk.type === "cmd") {
+                  handleCommand(chunk.payload);
+                }
+              } catch (e: any) {
+                addLog("ERROR", `Failed to handle RTC message: ${e.message}`);
+              }
+            }
+          };
+
+          // ── ICE / connection state logging ────────────────────────────
+          pc.onicecandidate = (event) => {
+            if (event.candidate) {
+              addLog(
+                "RTC",
+                `ICE candidate gathered: ${event.candidate.candidate.substring(0, 60)}…`,
+              );
+            }
+          };
+
+          pc.onconnectionstatechange = () => {
+            const state = pc!.connectionState;
+            addLog("RTC", `RTC state → ${state}`);
+
+            if (state === "connected") {
+              setStatus("Connected to peer");
+            } else if (state === "failed" || state === "disconnected") {
+              // Abort the current polling fetch so the outer loop retries.
+              abortController?.abort();
+            }
+          };
+
+          pc.oniceconnectionstatechange = () => {
+            addLog("RTC", `ICE connection state → ${pc!.iceConnectionState}`);
+          };
+
+          // ── Create & gather offer ─────────────────────────────────────
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+
+          await new Promise<void>((resolve) => {
+            if (pc!.iceGatheringState === "complete") {
+              resolve();
+              return;
+            }
+            pc!.onicegatheringstatechange = () => {
+              if (pc!.iceGatheringState === "complete") resolve();
+            };
+            setTimeout(resolve, 10_000);
+          });
+
+          const localSdp = pc.localDescription?.sdp;
+          if (!localSdp) {
+            addLog("ERROR", "Failed to create RTC offer: SDP is null");
+            continue; // retry with a fresh connection
+          }
+
+          addLog("RTC", `Local description ready (type: offer)\n\n${localSdp}`);
+
+          // ── Poll for answer ───────────────────────────────────────────
+          let answerReceived = false;
+
+          while (!answerReceived && runningRef.current) {
+            // Check abort before each iteration (dc.onclose or state change
+            // may have fired between iterations).
+            if (signal.aborted) break;
+
+            let response: Response;
+            try {
+              response = await fetch(`${LAYLA_SIGNALLING_URL}/rtc/get-answer`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  secret: serverSecretRef.current,
+                  offer: localSdp,
+                }),
+                signal,
+              });
+            } catch (e: any) {
+              if (e.name === "AbortError") break; // expected on shutdown / retry
+              addLog("ERROR", `Fetch error: ${e.message}`);
+              await sleep(5000, signal);
+              continue;
+            }
+
+            if (!response.ok) {
+              const text = await response.text();
+              addLog(
+                "INFO",
+                `No answer yet; status: ${response.status}, response: ${text}`,
+              );
+              await sleep(5000, signal);
+              continue;
+            }
+
+            const data = await response.json();
+
+            if (data.secret !== serverSecretRef.current) {
+              addLog(
+                "WARN",
+                `RTC answer secret mismatch: ${data.secret}, IGNORING`,
+              );
+              await sleep(5000, signal);
+              continue;
+            }
+
+            const payload = data.payload as string | undefined;
+            if (!payload) {
+              addLog("WARN", "RTC answer with empty payload, IGNORING");
+              await sleep(5000, signal);
+              continue;
+            }
+
+            if (!peerConnectionRef.current) {
+              addLog("WARN", "RTC answer but no peer connection, IGNORING");
+              break; // connection was torn down — restart outer loop
+            }
+
+            if (lastAnswerRef.current === payload) {
+              addLog("INFO", "Duplicate RTC answer, IGNORING");
+              await sleep(5000, signal);
+              continue;
+            }
+
+            // ── Apply remote answer ───────────────────────────────────
+            await peerConnectionRef.current.setRemoteDescription(
+              new RTCSessionDescription({ type: "answer", sdp: payload }),
+            );
+            addLog("RTC", "Remote answer received:\n\n" + payload);
+            lastAnswerRef.current = payload;
+
+            // ── Wait for DataChannel to open ──────────────────────────
+            if (dc.readyState !== "open") {
+              addLog("RTC", "Waiting up to 10s for DataChannel to open…");
+
+              const opened = await waitForDataChannelOpen(dc, 10_000);
+
+              if (!opened && runningRef.current) {
+                addLog(
+                  "WARN",
+                  "DataChannel did not open within 10s, retrying offer…",
+                );
+                break; // clean up happens in the inner finally, outer loop retries
+              }
+            }
+
+            answerReceived = true;
+          }
+
+          // If we got a connection, wait here until something breaks it.
+          // The dc.onclose / onconnectionstatechange handlers abort the
+          // controller, so we just await that signal.
+          if (answerReceived && runningRef.current) {
+            await new Promise<void>((resolve) => {
+              if (signal.aborted) {
+                resolve();
+                return;
+              }
+              signal.addEventListener("abort", () => resolve(), { once: true });
+            });
+            addLog("RTC", "Connection ended, will retry…");
+          }
+        } catch (e: any) {
+          if (e.name === "AbortError") {
+            addLog("RTC", "Aborted, will retry…");
+          } else {
+            addLog("ERROR", e.message);
+          }
+        } finally {
+          // ── Per-iteration cleanup: tear down this attempt's resources ──
+          try {
+            dc?.close();
+          } catch (_) {}
+          try {
+            pc?.close();
+          } catch (_) {}
+
+          if (peerConnectionRef.current === pc)
+            peerConnectionRef.current = null;
+          if (dataChannelRef.current === dc) dataChannelRef.current = null;
+        }
+
+        // Brief pause before the next attempt to avoid a tight spin
+        // if creation keeps failing immediately.
+        if (runningRef.current) {
+          await sleep(1000);
+        }
+      }
+    } finally {
+      creatingRtcOfferGuardRef.current = false;
+    }
+  };
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
+  /** Sleep that can be cancelled via an AbortSignal. */
+  const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+    new Promise((resolve) => {
+      if (signal?.aborted) {
+        resolve();
+        return;
+      }
+
+      // The same AbortSignal is reused for every iteration of the polling
+      // loop. `{ once: true }` only detaches the listener if abort actually
+      // fires — on a normal timeout it stays attached forever, so one listener
+      // accumulated per sleep and each retained closure pinned its timer and
+      // scope. Always detach explicitly instead.
+      const onAbort = () => {
+        clearTimeout(timer);
+        cleanup();
+        resolve();
+      };
+
+      const cleanup = () => {
+        signal?.removeEventListener("abort", onAbort);
+      };
+
+      const timer = setTimeout(() => {
+        cleanup();
+        resolve();
+      }, ms);
+
+      signal?.addEventListener("abort", onAbort, { once: true });
+    });
+
+  /** Wait for a DataChannel to reach "open" state, with a timeout. */
+  const waitForDataChannelOpen = (
+    dc: RTCDataChannel,
+    timeoutMs: number,
+  ): Promise<boolean> =>
+    new Promise((resolve) => {
+      if (dc.readyState === "open") {
+        resolve(true);
+        return;
+      }
+
+      const abortCtrl = new AbortController();
+
+      const timer = setTimeout(() => {
+        abortCtrl.abort();
+        resolve(false);
+      }, timeoutMs);
+
+      dc.addEventListener(
+        "open",
+        () => {
+          clearTimeout(timer);
+          resolve(true);
+        },
+        { once: true, signal: abortCtrl.signal },
+      );
+    });
+
+  // ── Server lifecycle ──
+
+  const shutdownServer = async () => {
+    addLog("INFO", "Shutting down llama.cpp server…");
+
+    try {
+      dataChannelRef.current?.close();
+      peerConnectionRef.current?.close();
+    } catch {
+      /* ignore */
+    }
+    peerConnectionRef.current = null;
+    dataChannelRef.current = null;
+
+    // Abort any in-flight stream and drop queued requests so nothing is left
+    // pointing at a backend that is going away.
+    streamAbortControllerRef.current?.abort();
+    requestQueueRef.current = [];
+    queueRunningRef.current = false;
+
+    // it is important to update the running state immediately to avoid async function calls trying to use the old RTC connection after we've initiated shutdown
+    runningRef.current = false;
+    setRunning(false);
+
+    await window.electronBridge.stopServer();
+  };
+
+  const startServer = async () => {
+    if (!localServerPathRef.current?.trim()) {
+      // No executable configured: the user is running their own engine, so we
+      // own no process here and only pass requests through to its endpoint.
+      addLog(
+        "INFO",
+        `No server executable set — passing requests through to ${localServerUrlRef.current}`,
+      );
+      setStatus("Using existing inference server...");
+    } else if (modelPathRef.current) {
+      setStatus("Starting llama.cpp server...");
+      addLog("INFO", "Starting llama.cpp server…");
+
+      await window.electronBridge.startServer(
+        localServerPathRef.current,
+        modelPathRef.current,
+        visionModelPathRef.current || "",
+        additionalArgsRef.current || "",
+      );
+    } else {
+      addLog(
+        "WARN",
+        "Model or server path is not set. Skipping LLM server start (assume another server is running).",
+      );
+    }
+
+    // Set the ref synchronously: createRtcOffer()'s polling loop reads
+    // runningRef.current immediately and would exit at once if it were still
+    // false. setRunning drives the UI; the sync effect below keeps them aligned.
+    runningRef.current = true;
+    setRunning(true);
+  };
+
+  const handleToggle = async () => {
+    if (serverTransitioningRef.current) return;
+    serverTransitioningRef.current = true;
+
+    // start llm server
+    try {
+      if (running) {
+        await shutdownServer();
+      } else {
+        await startServer();
+
+        setTimeout(() => {
+          setShowQrCode(true);
+        }, 1000);
+      }
+    } catch (err: any) {
+      addLog(
+        "ERROR",
+        `Failed to ${running ? "stop" : "start"} server: ${err.message}`,
+      );
+    } finally {
+      serverTransitioningRef.current = false;
+      setStatus("");
+    }
+
+    // start polling for RTC connections
+    createRtcOffer();
+  };
+
+  // ── Load settings ──
+
+  const loadSettings = async () => {
+    const computerName = await window.electronBridge.getDeviceName();
+
+    const settings = await UserSettingsService.getMultipleSettings([
+      UserSettingKey.MODEL_PATH,
+      UserSettingKey.ADDITIONAL_SERVER_CMD_ARGS,
+      UserSettingKey.LOCAL_SERVER_PATH,
+      UserSettingKey.SERVER_SECRET_KEY,
+      UserSettingKey.VISION_MODEL_PATH,
+      UserSettingKey.LOCAL_SERVER_URL,
+      UserSettingKey.VERBOSE_SSE_LOGGING,
+    ]);
+
+    const mp = settings[UserSettingKey.MODEL_PATH];
+    const aa = settings[UserSettingKey.ADDITIONAL_SERVER_CMD_ARGS];
+    const lsp = settings[UserSettingKey.LOCAL_SERVER_PATH];
+    const vmp = settings[UserSettingKey.VISION_MODEL_PATH];
+    const ssk = settings[UserSettingKey.SERVER_SECRET_KEY];
+    const lsu = settings[UserSettingKey.LOCAL_SERVER_URL];
+    const verbose = settings[UserSettingKey.VERBOSE_SSE_LOGGING];
+
+    setServerSecret(ssk);
+    serverSecretRef.current = ssk;
+    modelPathRef.current = mp;
+    visionModelPathRef.current = vmp;
+    additionalArgsRef.current = aa;
+    localServerPathRef.current = lsp;
+    localServerUrlRef.current = lsu;
+    setVerboseSse(verbose);
+    verboseSseRef.current = verbose;
+
+    // An empty server executable means the user runs their own engine, so
+    // there is no GGUF to describe — show the endpoint we proxy to instead.
+    if (!lsp?.trim()) {
+      setModelCardLabel("ACTIVE SERVER");
+      setModelName(describeEndpoint(lsu));
+      setModelPath(lsu);
+      setModelTags(["PASS-THROUGH"]);
+      setWelcomeVisible(false);
+    } else if (!mp) {
+      setWelcomeDismissible(false);
+      setWelcomeVisible(true);
+    } else {
+      setModelCardLabel("ACTIVE MODEL");
+      setModelPath(mp);
+      const filename = getFilenameFromPath(mp);
+      setModelName(filename);
+      setModelTags(extractTags(filename));
+    }
+
+    const params = new URLSearchParams({ name: computerName, secret: ssk });
+    const dl = `layla://server?${params.toString()}`;
+    setDeepLink(dl);
+  };
+
+  // ── Effects ──
+  // Keep the ref in sync with state so async closures (the RTC polling loop)
+  // can read the current value without capturing a stale one. React state is
+  // the source of truth for rendering; the ref is a mirror of it.
+  //
+  // Note: a ref mutation is invisible to React's dependency comparison, so the
+  // reverse of this (setRunning(runningRef.current) on [runningRef.current])
+  // cannot reliably drive a re-render.
+  useEffect(() => {
+    runningRef.current = running;
+  }, [running]);
+
+  useEffect(() => {
+    const removeStdout = window.electronBridge.onServerStdout((data) => {
+      addLog("INFO", `[stdout] ${data}`);
+    });
+
+    const removeStderr = window.electronBridge.onServerStderr((data) => {
+      addLog("INFO", `[stderr] ${data}`);
+    });
+
+    const removeExit = window.electronBridge.onServerExit(({ code, signal }) => {
+      // A clean stop also fires this event, but shutdownServer() has already
+      // cleared runningRef by then — so this guard leaves only unexpected exits.
+      if (!runningRef.current) return;
+
+      const reason = signal ? `signal ${signal}` : `code ${code}`;
+      addLog("ERROR", `llama.cpp server exited unexpectedly (${reason})`);
+
+      // Stop the RTC polling loop and drop anything still queued for a backend
+      // that no longer exists.
+      runningRef.current = false;
+      setRunning(false);
+      streamAbortControllerRef.current?.abort();
+      requestQueueRef.current = [];
+      queueRunningRef.current = false;
+
+      try {
+        dataChannelRef.current?.close();
+        peerConnectionRef.current?.close();
+      } catch {
+        /* ignore */
+      }
+      peerConnectionRef.current = null;
+      dataChannelRef.current = null;
+
+      setStatus("Server crashed — press Start to restart");
+    });
+
+    return () => {
+      removeStdout();
+      removeStderr();
+      removeExit();
+    };
+  }, []);
+
+  useEffect(() => {
+    // this logic skips the initial load when app starts
+    if (settingsRefreshCounter > 0) {
+      // reload settings (they won't be applied if the server is already running, but will be picked up on restart)
+      loadSettings()
+        .then(() => {
+          window.electronBridge.showAlert(
+            "Settings updated",
+            "Your changes have been saved. If the server is currently running, please restart it to apply the new settings.",
+          );
+        })
+        .catch((e) => addLog("ERROR", `Failed to load settings: ${e.message}`));
+    }
+  }, [settingsRefreshCounter]);
+
+  // ── Init ──
+
+  useEffect(() => {
+    loadSettings().catch((e) =>
+      addLog("ERROR", `Failed to load settings: ${e.message}`),
+    );
+
+    return () => {
+      try {
+        dataChannelRef.current?.close();
+        peerConnectionRef.current?.close();
+      } catch {
+        /* ignore */
+      }
+    };
+  }, []);
+
+  // ── Render ──
+
+  return (
+    <>
+      <div className="llm-root">
+        <div className="llm-content">
+          <Header running={running} status={status} onSettings={goToSettings} />
+          <PowerButton running={running} onToggle={handleToggle} />
+          <ModelCard
+            label={modelCardLabel}
+            name={modelName}
+            path={modelPath || ""}
+            tags={modelTags}
+            onChange={() => {
+              setWelcomeDismissible(true);
+              setWelcomeVisible(true);
+            }}
+          />
+          <LogViewer
+            logs={logs}
+            verboseSse={verboseSse}
+            onToggleVerboseSse={toggleVerboseSse}
+          />
+        </div>
+      </div>
+
+      <QrModal
+        visible={showQrCode}
+        onClose={() => setShowQrCode(false)}
+        deepLink={deepLink}
+        serverSecret={serverSecret}
+      />
+
+      <WelcomeModal
+        visible={welcomeVisible}
+        dismissible={welcomeDismissible}
+        onClose={(saved) => {
+          setWelcomeVisible(false);
+          if (!saved) return;
+
+          // Matches the settings-page flow: a live server keeps running against
+          // the backend it was started with until it is restarted.
+          const wasRunning = runningRef.current;
+          loadSettings()
+            .then(() => {
+              if (wasRunning) {
+                window.electronBridge.showAlert(
+                  "Backend changed",
+                  "Your new backend has been saved. Restart the server to switch over to it.",
+                );
+              }
+            })
+            .catch((e) => addLog("ERROR", `Failed to load settings: ${e.message}`));
+        }}
+      />
+
+      <style>{cssStyles}</style>
+    </>
+  );
+};
+
+export default LlmServerPanel;
+
+// ─── CSS (injected via <style> tag) ─────────────────────────────────────────────
+// Mirrors the original React Native styles as closely as possible.
+
+const cssStyles = `
+/* ── Reset & Root ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.llm-root {
+  flex: 1;
+  background-color: ${C.background};
+  min-height: 100vh;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: ${C.text};
+}
+
+.llm-content {
+  padding: 24px;
+  padding-bottom: 48px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+}
+.header-title {
+  color: ${C.text};
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.header-sub {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* ── Status Dot ── */
+.status-dot-wrapper {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: absolute;
+}
+.status-dot-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: absolute;
+  opacity: 0.35;
+  animation: dotPulse 1.8s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.6); }
+}
+
+/* ── Settings Button ── */
+.settings-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: ${C.surface};
+  border: 1px solid ${C.border};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: ${C.secondaryText};
+  transition: background-color 0.15s;
+}
+.settings-btn:hover {
+  background-color: ${C.surfaceHover};
+}
+
+/* ── Power Button ── */
+.power-outer {
+  align-self: center;
+  margin: 0 auto 32px;
+  position: relative;
+  transition: transform 0.15s;
+  width: fit-content;
+}
+.power-outer.power-pressed {
+  transform: scale(0.93);
+}
+.power-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px solid ${C.border};
+  pointer-events: none;
+  transition: box-shadow 0.5s ease-out, border-color 0.5s;
+}
+.power-glow-active {
+  box-shadow: 0 0 32px rgba(71, 166, 255, 0.55);
+  border-color: ${C.primary};
+}
+.power-btn {
+  width: 260px;
+  height: 120px;
+  border-radius: 12px;
+  border: 1.5px solid ${C.border};
+  background-color: ${C.surface};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  position: relative;
+}
+.power-btn-running {
+  border-color: ${C.primary};
+}
+.power-icon {
+  font-size: 38px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.power-label {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+}
+
+/* ── Section Label ── */
+.section-label {
+  color: ${C.dimText};
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+/* ── Model Card ── */
+.card {
+  background-color: ${C.cardBg};
+  border-radius: 12px;
+  border: 1px solid ${C.border};
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 14px 16px 8px;
+}
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-change-btn {
+  background: transparent;
+  border: 1px solid rgba(71, 166, 255, 0.30);
+  border-radius: 7px;
+  padding: 4px 12px;
+  color: ${C.primary};
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.card-change-btn:hover {
+  background-color: rgba(71, 166, 255, 0.12);
+}
+.card-body {
+  display: flex;
+  padding: 4px 16px 16px;
+  align-items: center;
+}
+.model-image-container {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  background-color: ${C.surface};
+  margin-right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.model-image {
+  width: 56px;
+  height: 56px;
+}
+.model-info {
+  flex: 1;
+  min-width: 0;
+}
+.model-name {
+  color: ${C.text};
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.model-desc {
+  color: ${C.secondaryText};
+  font-size: 12.5px;
+  line-height: 18px;
+  margin-bottom: 10px;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  background-color: ${C.surface};
+  border-radius: 6px;
+  padding: 3px 8px;
+  border: 1px solid ${C.border};
+  color: ${C.primary};
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+/* ── Log Viewer ── */
+.log-verbose-toggle {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--dim-text);
+  cursor: pointer;
+  user-select: none;
+}
+.log-verbose-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.log-verbose-toggle--on {
+  border-color: #fbbf24;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.log-container {
+  background-color: ${C.cardBg};
+  border-radius: 12px;
+  border: 1px solid ${C.border};
+  overflow: hidden;
+}
+.log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+.log-header:hover {
+  background-color: ${C.surfaceHover};
+}
+.log-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.log-count-badge {
+  background-color: ${C.surface};
+  border-radius: 10px;
+  padding: 2px 8px;
+  border: 1px solid ${C.border};
+  color: ${C.secondaryText};
+  font-size: 11px;
+  font-weight: 700;
+}
+.chevron {
+  color: ${C.dimText};
+  font-size: 12px;
+  transition: transform 0.25s;
+  display: inline-block;
+}
+.chevron-open {
+  transform: rotate(180deg);
+}
+.log-scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  background-color: ${C.logBg};
+  border-top: 1px solid ${C.border};
+  padding: 8px 12px 12px;
+}
+.log-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.log-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.log-scroll::-webkit-scrollbar-thumb {
+  background: ${C.border};
+  border-radius: 3px;
+}
+.log-row {
+  display: flex;
+  align-items: flex-start;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid ${C.border};
+}
+.log-ts {
+  color: ${C.dimText};
+  font-size: 11px;
+  font-family: 'Cascadia Mono', 'Fira Code', 'Consolas', monospace;
+  line-height: 16px;
+  width: 72px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  user-select: text;
+}
+.log-level {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Cascadia Mono', 'Fira Code', 'Consolas', monospace;
+  line-height: 16px;
+  width: 48px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  user-select: text;
+}
+.log-msg {
+  flex: 1;
+  color: ${C.secondaryText};
+  font-size: 11px;
+  font-family: 'Cascadia Mono', 'Fira Code', 'Consolas', monospace;
+  line-height: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+.modal-content {
+  background-color: ${C.background};
+  border: 1px solid ${C.border};
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 360px;
+  width: 100%;
+}
+.modal-text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 16px;
+}
+.modal-label {
+  color: ${C.text};
+  font-size: 14px;
+}
+.modal-secret {
+  color: ${C.text};
+  padding: 10px;
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+  user-select: text;
+  font-family: 'Cascadia Mono', 'Fira Code', monospace;
+  letter-spacing: 1px;
+}
+.modal-hint {
+  color: ${C.secondaryText};
+  font-size: 13px;
+}
+.modal-close-btn {
+  margin-top: 20px;
+  padding: 10px 32px;
+  border-radius: 8px;
+  border: 1px solid ${C.border};
+  background-color: ${C.surface};
+  color: ${C.text};
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.modal-close-btn:hover {
+  background-color: ${C.surfaceHover};
+}
+`;

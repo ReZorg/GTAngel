@@ -1,0 +1,366 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --primary: var(--color-blue-700);
+  --primary-foreground: var(--color-blue-50);
+  --sidebar-primary: var(--color-blue-600);
+  --sidebar-primary-foreground: var(--color-blue-50);
+  --chart-1: var(--color-blue-300);
+  --chart-2: var(--color-blue-500);
+  --chart-3: var(--color-blue-600);
+  --chart-4: var(--color-blue-700);
+  --chart-5: var(--color-blue-800);
+  --radius: 0.65rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.235 0.015 65);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.235 0.015 65);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.235 0.015 65);
+  --secondary: oklch(0.98 0.001 286.375);
+  --secondary-foreground: oklch(0.4 0.015 65);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.141 0.005 285.823);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.623 0.214 259.815);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.235 0.015 65);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.623 0.214 259.815);
+}
+
+.dark {
+  /* Phase-Locked Luminescence: near-black blue-charcoal canvas, luminous signal */
+  --primary: oklch(0.78 0.13 210);
+  --primary-foreground: oklch(0.13 0.015 250);
+  --sidebar-primary: oklch(0.78 0.13 210);
+  --sidebar-primary-foreground: oklch(0.13 0.015 250);
+  --background: oklch(0.13 0.015 250);
+  --foreground: oklch(0.87 0.01 250);
+  --card: oklch(0.17 0.018 252);
+  --card-foreground: oklch(0.87 0.01 250);
+  --popover: oklch(0.17 0.018 252);
+  --popover-foreground: oklch(0.87 0.01 250);
+  --secondary: oklch(0.21 0.02 252);
+  --secondary-foreground: oklch(0.75 0.01 250);
+  --muted: oklch(0.21 0.02 252);
+  --muted-foreground: oklch(0.62 0.015 250);
+  --accent: oklch(0.23 0.03 250);
+  --accent-foreground: oklch(0.92 0.01 250);
+  --destructive: oklch(0.62 0.21 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.92 0.03 230 / 12%);
+  --input: oklch(0.92 0.03 230 / 15%);
+  --ring: oklch(0.78 0.13 210 / 60%);
+  --chart-1: var(--thread-a);
+  --chart-2: var(--thread-b);
+  --chart-3: var(--thread-c);
+  --chart-4: var(--gold);
+  --chart-5: var(--gate-green);
+  --sidebar: oklch(0.15 0.017 251);
+  --sidebar-foreground: oklch(0.87 0.01 250);
+  --sidebar-accent: oklch(0.23 0.03 250);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.92 0.03 230 / 12%);
+  --sidebar-ring: oklch(0.78 0.13 210 / 60%);
+
+  /* Engine signal colors */
+  --thread-a: oklch(0.82 0.13 210); /* cyan — phase 0° */
+  --thread-b: oklch(0.72 0.2 340); /* magenta — phase 120° */
+  --thread-c: oklch(0.8 0.14 75); /* amber — phase 240° */
+  --gold: oklch(0.83 0.12 90); /* U1/U2 universal integrators */
+  --gate-green: oklch(0.75 0.17 155); /* invariant pass only */
+  --mode-e: oklch(0.95 0.02 90); /* Expressive: warm white */
+  --mode-r: oklch(0.62 0.1 295); /* Regenerative: dimmed violet */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+  .font-display {
+    font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  }
+  .font-mono {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  /**
+   * Custom container utility that centers content and adds responsive padding.
+   *
+   * This overrides Tailwind's default container behavior to:
+   * - Auto-center content (mx-auto)
+   * - Add responsive horizontal padding
+   * - Set max-width for large screens
+   *
+   * Usage: <div className="container">...</div>
+   *
+   * For custom widths, use max-w-* utilities directly:
+   * <div className="max-w-6xl mx-auto px-4">...</div>
+   */
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* 16px - mobile padding */
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem; /* 32px - desktop padding */
+      padding-right: 2rem;
+      max-width: 1280px; /* Standard content width */
+    }
+  }
+}
+
+/* ============================================================
+   Phase-Locked Luminescence — custom instrument utilities
+   ============================================================ */
+
+/* small-caps mono overline label */
+.overline-label {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* tick scanline sweep */
+@keyframes scanline-sweep {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.5;
+  }
+  92% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+.scanline {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.82 0.13 210 / 45%),
+    transparent
+  );
+  pointer-events: none;
+  z-index: 60;
+  animation: scanline-sweep 300ms linear;
+}
+
+/* subtle glow helpers */
+.glow-a {
+  filter: drop-shadow(0 0 6px oklch(0.82 0.13 210 / 55%));
+}
+.glow-b {
+  filter: drop-shadow(0 0 6px oklch(0.72 0.2 340 / 55%));
+}
+.glow-c {
+  filter: drop-shadow(0 0 6px oklch(0.8 0.14 75 / 55%));
+}
+.glow-gold {
+  filter: drop-shadow(0 0 6px oklch(0.83 0.12 90 / 55%));
+}
+.glow-green {
+  filter: drop-shadow(0 0 8px oklch(0.75 0.17 155 / 6));
+}
+
+/* packet dot travelling the loop rail */
+@keyframes packet-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+.packet-dot {
+  animation: packet-pulse 1.6s ease-in-out infinite;
+}
+
+/* gate chevron flip */
+@keyframes chevron-pass {
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+.chevron-flip {
+  animation: chevron-pass 160ms ease-out;
+}
+
+/* corpus stream vertical scroll */
+@keyframes corpus-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+.corpus-scroll {
+  animation: corpus-scroll 48s linear infinite;
+}
+.corpus-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* fine instrument grid backdrop */
+.instrument-grid {
+  background-image:
+    linear-gradient(oklch(0.87 0.01 250 / 3.5%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.87 0.01 250 / 3.5%) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* hairline divider with center notch */
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.87 0.01 250 / 18%),
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanline,
+  .packet-dot,
+  .corpus-scroll {
+    animation: none;
+  }
+}
+
+/* tick scrubber — instrument-grade range input */
+.tick-scrubber {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: oklch(0.87 0.01 250 / 15%);
+  outline: none;
+  cursor: pointer;
+}
+.tick-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--thread-a);
+  border: 1px solid oklch(0.13 0.015 250);
+  box-shadow: 0 0 8px oklch(0.82 0.13 210 / 50%);
+  cursor: grab;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.tick-scrubber::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.25);
+}
+.tick-scrubber::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 0;
+  background: var(--thread-a);
+  border: 1px solid oklch(0.13 0.015 250);
+  box-shadow: 0 0 8px oklch(0.82 0.13 210 / 50%);
+  cursor: grab;
+}

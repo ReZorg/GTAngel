@@ -1,0 +1,86 @@
+# GTAngelEcho Configuration
+# Living Architecture Settings
+
+architecture:
+  name: "GTAngelEcho"
+  version: "0.1.0"
+  autonomy_level: 2
+  composition: "GTAngel ⊗ DeepTreeEcho(SuperHotGirl ⊕ MLGamer)"
+
+centers:
+  cognitive_core:
+    module: "src/deep-tree-echo"
+    status: "scaffold"
+    echobeats_phases: 4
+    
+  avatar_expression:
+    module: "src/superhotgirl"
+    status: "scaffold"
+    chaos_intensity: 0.15
+    aesthetic_params:
+      confidence_posture: 0.8
+      charisma: 0.7
+      eye_sparkle: 0.9
+      graceful_movement: 0.8
+      emissive_glow: 0.5
+      
+  gameplay_intelligence:
+    module: "src/mlgamer"
+    status: "scaffold"
+    learning_rate: 0.01
+    discount_factor: 0.95
+    exploration_rate: 0.2
+    
+  world_navigation:
+    module: "src/gtangel"
+    status: "scaffold"
+    awareness_radius: 30.0
+    speed: 5.0
+    
+  emotional_dynamics:
+    module: "src/endocrine"
+    status: "scaffold"
+    hormone_channels: 16
+    virtual_glands: 10
+    
+  reservoir_computing:
+    module: "src/reservoir"
+    status: "scaffold"
+    reservoir_dim: 256
+    spectral_radius: 0.95
+    leak_rate: 0.3
+    
+  memory_systems:
+    module: "src/cognitive"
+    status: "scaffold"
+    episodic_capacity: 1000
+    
+  avatar_embodiment:
+    module: "src/avatar"
+    status: "scaffold"
+    cognition_model: "4E"
+
+ksm:
+  current_cycle: 2
+  previous_cycle: 1
+  weakest_center: "the_void"
+  coherence_score: 0.822
+  previous_coherence: 0.770
+  delta: 0.052
+  
+alexander_properties:
+  levels_of_scale: 0.87
+  strong_centres: 0.92
+  boundaries: 0.82
+  alternating_repetition: 0.82
+  positive_space: 0.80
+  good_shape: 0.87
+  local_symmetries: 0.82
+  deep_interlock: 0.88
+  contrast: 0.82
+  gradients: 0.78
+  roughness: 0.78
+  echoes: 0.87
+  the_void: 0.65
+  simplicity: 0.78
+  not_separateness: 0.85

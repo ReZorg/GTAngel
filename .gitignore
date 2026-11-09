@@ -116,5 +116,14 @@ cpp_test/assets/
 cpp_test/review/
 cpp_test/reports/
 cpp_test/GTAngel_v56/live2d/
+echo/
+elizaos.cpp/
+system7-dte-phasor/
+**/build/
+**/out/
+**/*.gguf
+**/*.onnx
+**/*.safetensors
+
 
 
