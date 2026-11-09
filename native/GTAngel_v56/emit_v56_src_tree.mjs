@@ -3,7 +3,13 @@ import path from 'node:path';
 
 const full = fs.readFileSync('gtangel_agi_v56_full.cpp', 'utf8');
 const lines = full.split(/\r?\n/);
-const zppRoot = fs.existsSync(path.resolve('../zpp')) ? path.resolve('../zpp') : path.resolve('../../zpp');
+const zppRoot = [
+  '../re3_reference/zpp',
+  '../zpp',
+  '../../re3_reference/zpp',
+  '../../cpp_test/zpp',
+  '../../zpp'
+].map(p => path.resolve(p)).find(p => fs.existsSync(p));
 
 function sliceLines(start1, end1) {
   return lines.slice(start1 - 1, end1).join('\n') + '\n';
@@ -751,10 +757,10 @@ function buildZppCppContractBlock(folder, insideClass = false) {
       `    // ── Z++ Formal Spec Component Binding (${folder}): ${zfiles.length} modules, ${totalSchemas} schemas, ${totalEnums} enums (${modList}) ──`,
       `    static constexpr int zpp_${folder}_modules() { return zpp_${folder}_spec::kZppModuleCount; }`,
       `    static constexpr int zpp_${folder}_schemas() { return zpp_${folder}_spec::kZppSchemaCount; }`,
-      `    static constexpr bool verifyComponent_${folder}_zpp() {`,
+      `    [[nodiscard]] static constexpr bool verifyComponent_${folder}_zpp() {`,
       `        return zpp_${folder}_spec::verify_${folder}_zpp_invariants() && (${firstSchema}) && (${firstOp});`,
       `    }`,
-      `    bool verifyLiveWorld_${folder}_zpp(const avatar3d::GameWorld& world) const {`,
+      `    [[nodiscard]] bool verifyLiveWorld_${folder}_zpp(const avatar3d::GameWorld& world) const {`,
       ...liveWorldLines,
       `    }`,
       `    static_assert(verifyComponent_${folder}_zpp(), "RasterEngine component Z++ binding failed for ${folder}");`,
@@ -993,9 +999,71 @@ for (const rootDir of ['src']) {
     'static_assert(zpp_modelinfo_spec::op_CBaseModelInfo_Init2dEffects(zpp_modelinfo_spec::CBaseModelInfo_ZppContract{}, makeDteSkinnedModelInfoContract()), "DteSkinnedAsset CBaseModelInfo Z++ contract must hold");',
     ''
   ].join('\n'));
-  writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + sliceLines(L_rasterEngine, L_buildSun - 1) + buildZppCppContractBlock('rw', true));
+  {
+    let rwSlice = sliceLines(L_rasterEngine, L_buildSun - 1);
+    rwSlice = rwSlice.replace(
+      `    const char* modelSource() const { return skinned_.valid() ? "DTE V22 SKINNED / LOCAL SENSOR" : Re3InformedAvatarClump::sourceLabel(); }`,
+      `    const char* modelSource() const { return skinned_.valid() ? "DTE V22 SKINNED / LOCAL SENSOR" : Re3InformedAvatarClump::sourceLabel(); }
+    // Latest Z++ live-world validation failure layer (nullptr when the last frame was valid).
+    [[nodiscard]] const char* lastValidationFailure() const { return lastValidationFailure_; }`
+    );
+    rwSlice = rwSlice.replace(
+      `        eye_ = eye;
+
+        buildSun();`,
+      `        eye_ = eye;
+        lastValidationFailure_ = nullptr;
+
+        // Frame-level Z++ gate: the live world must satisfy the rw + renderer
+        // contracts before any world geometry is constructed from it. Sky and
+        // ground still render so a failed world yields a diagnostic frame,
+        // not a black screen.
+        const bool worldValid =
+            verifyLiveWorld_rw_zpp(world) && verifyLiveWorld_renderer_zpp(world);
+        if (!worldValid) noteValidationFailure("render-frame");
+
+        buildSun();`
+    );
+    rwSlice = rwSlice.replace(
+      `        buildRoads(world);
+        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
+        buildGoal(world);
+        buildNpc(world);
+        buildQuestShard(world);
+        buildVehicle(world);
+        buildWalkers(world);
+        buildTraffic(world);
+        buildPickups(world);
+        buildPillars(world);
+        buildBuildings(world);
+        buildProps(world);`,
+      `        if (worldValid) {
+            buildRoads(world);
+            if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
+            buildGoal(world);
+            buildNpc(world);
+            buildQuestShard(world);
+            buildVehicle(world);
+            buildWalkers(world);
+            buildTraffic(world);
+            buildPickups(world);
+            buildPillars(world);
+            buildBuildings(world);
+            buildProps(world);
+        }`
+    );
+    rwSlice = rwSlice.replace(
+      '    float pitch_{0.0f};',
+      `    float pitch_{0.0f};
+    const char* lastValidationFailure_{nullptr};
+    void noteValidationFailure(const char* layer) {
+        if (!lastValidationFailure_) lastValidationFailure_ = layer;
+    }`
+    );
+    writeMod('rw/RasterEngineHeader.hpp', buildZppCppContractBlock('rw', false) + rwSlice + buildZppCppContractBlock('rw', true));
+  }
   const injectLiveCheck = (code, fnDecl, folder) =>
-    code.replace(fnDecl, `${fnDecl}\n        if (!verifyLiveWorld_${folder}_zpp(world)) return;`);
+    code.replace(fnDecl, `${fnDecl}\n        if (!verifyLiveWorld_${folder}_zpp(world)) { noteValidationFailure("${folder}"); return; }`);
 
   writeMod('leeds/SkyAndRoads.hpp', buildZppCppContractBlock('leeds', true) + injectLiveCheck(sliceLines(L_buildSun, L_buildBuildings - 1), '    void buildRoads(const avatar3d::GameWorld& world) {', 'leeds'));
   writeMod('buildings/Buildings.hpp', buildZppCppContractBlock('buildings', true) + injectLiveCheck(sliceLines(L_buildBuildings, L_buildPillars - 1), '    void buildBuildings(const avatar3d::GameWorld& world) {', 'buildings'));
@@ -1005,7 +1073,7 @@ for (const rootDir of ['src']) {
     '    static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {',
     '        return zpp_entities_spec::CDummy_ZppContract{};',
     '    }',
-    '    bool verifyLiveWorld_props_zpp(const avatar3d::GameWorld& world) const {',
+    '    [[nodiscard]] bool verifyLiveWorld_props_zpp(const avatar3d::GameWorld& world) const {',
     '        for (size_t i = 0; i < world.props.size(); ++i) {',
     '            const auto& p = world.props[i].pos;',
     '            zpp_entities_spec::CDummy_ZppContract c{};',
@@ -1023,7 +1091,7 @@ for (const rootDir of ['src']) {
     '    static constexpr zpp_objects_spec::CObjectInfo_ZppContract makeQuestShardObjectContract() {',
     '        return zpp_objects_spec::CObjectInfo_ZppContract{};',
     '    }',
-    '    bool verifyLiveWorld_questShard_zpp(const avatar3d::GameWorld& world) const {',
+    '    [[nodiscard]] bool verifyLiveWorld_questShard_zpp(const avatar3d::GameWorld& world) const {',
     '        zpp_objects_spec::CObjectInfo_ZppContract c{};',
     '        const bool shardFinite = std::isfinite(world.questShard.x) && std::isfinite(world.questShard.y) && std::isfinite(world.questShard.z);',
     '        c.m_nCollisionDamageEffect = shardFinite ? 1 : -1;',
@@ -1037,7 +1105,7 @@ for (const rootDir of ['src']) {
     '    static constexpr zpp_objects_spec::CParticleObject_ZppContract makePickupParticleContract() {',
     '        return zpp_objects_spec::apply_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{});',
     '    }',
-    '    bool verifyLiveWorld_pickups_zpp(const avatar3d::GameWorld& world) const {',
+    '    [[nodiscard]] bool verifyLiveWorld_pickups_zpp(const avatar3d::GameWorld& world) const {',
     '        for (size_t i = 0; i < world.pickups.size(); ++i) {',
     '            const auto& pk = world.pickups[i];',
     '            zpp_objects_spec::CObjectInfo_ZppContract c{};',
@@ -1050,9 +1118,56 @@ for (const rootDir of ['src']) {
     '    static_assert(zpp_objects_spec::op_CParticleObject_RemoveObject(zpp_objects_spec::CParticleObject_ZppContract{}, makePickupParticleContract()), "Pickups CParticleObject Z++ contract must hold");',
     ''
   ].join('\n') + injectLiveCheck(sliceLines(L_buildPickups, L_buildProps - 1), '    void buildPickups(const avatar3d::GameWorld& world) {', 'pickups'));
-  writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + injectLiveCheck(sliceLines(L_buildWalkers, L_buildShard - 1), '    void buildWalkers(const avatar3d::GameWorld& world) {', 'peds'));
-  writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + injectLiveCheck(sliceLines(L_drawCoupe, L_buildPickups - 1), '    void buildTraffic(const avatar3d::GameWorld& world) {', 'vehicles'));
-  writeMod('renderer/SoftwareRasterizer.hpp', buildZppCppContractBlock('renderer', true) + sliceLines(L_buildAvatar, L_v16motor - 1) + buildZppCppContractBlock('renderer', false));
+  {
+    let pedsSlice = sliceLines(L_buildWalkers, L_buildShard - 1);
+    pedsSlice = pedsSlice.replace(
+      '    void buildNpc(const avatar3d::GameWorld& world) {',
+      `    [[nodiscard]] bool verifyLiveWorld_npc_zpp(const avatar3d::GameWorld& world) const {
+        zpp_peds_spec::CDummyPed_ZppContract c{};
+        const bool ok = std::isfinite(world.npcPos.x) && std::isfinite(world.npcPos.y) &&
+                        std::isfinite(world.npcPos.z) && std::isfinite(world.npcHeading) &&
+                        std::isfinite(world.npcSpeed) && world.npcSpeed >= 0.0f;
+        c.instance_addr = ok ? (int64_t)1 : -1;
+        return c.checkInvariant();
+    }
+    void buildNpc(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_npc_zpp(world)) { noteValidationFailure("npc"); return; }`
+    );
+    writeMod('peds/Peds.hpp', buildZppCppContractBlock('peds', true) + injectLiveCheck(pedsSlice, '    void buildWalkers(const avatar3d::GameWorld& world) {', 'peds'));
+  }
+  {
+    let vehSlice = sliceLines(L_drawCoupe, L_buildPickups - 1);
+    vehSlice = vehSlice.replace(
+      '    void buildVehicle(const avatar3d::GameWorld& world) {',
+      `    [[nodiscard]] bool verifyLiveWorld_coupe_zpp(const avatar3d::GameWorld& world) const {
+        zpp_vehicles_spec::CDamageManager_ZppContract dmg{};
+        const bool ok = std::isfinite(world.vehiclePos.x) && std::isfinite(world.vehiclePos.y) &&
+                        std::isfinite(world.vehiclePos.z) && std::isfinite(world.vehicleHeading) &&
+                        std::isfinite(world.vehicleWheelPhase);
+        dmg.m_engineStatus = ok ? (int64_t)0 : -1;
+        return dmg.checkInvariant();
+    }
+    void buildVehicle(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_coupe_zpp(world)) { noteValidationFailure("coupe"); return; }`
+    );
+    writeMod('vehicles/Vehicles.hpp', buildZppCppContractBlock('vehicles', true) + injectLiveCheck(vehSlice, '    void buildTraffic(const avatar3d::GameWorld& world) {', 'vehicles'));
+  }
+  {
+    let renSlice = sliceLines(L_buildAvatar, L_v16motor - 1);
+    renSlice = renSlice.replace(
+      '    void buildAvatar(const avatar3d::AvatarSkeleton& avatar) {',
+      `    [[nodiscard]] bool verifyAvatarSkeleton_zpp(const avatar3d::AvatarSkeleton& avatar) const {
+        for (int j = 0; j < avatar3d::AvatarSkeleton::COUNT; ++j) {
+            const auto& p = avatar.joints[j];
+            if (!std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z)) return false;
+        }
+        return true;
+    }
+    void buildAvatar(const avatar3d::AvatarSkeleton& avatar) {
+        if (!verifyAvatarSkeleton_zpp(avatar)) { noteValidationFailure("avatar"); return; }`
+    );
+    writeMod('renderer/SoftwareRasterizer.hpp', buildZppCppContractBlock('renderer', true) + renSlice + buildZppCppContractBlock('renderer', false));
+  }
   writeMod('control/MotorAndLearning.hpp', buildZppCppContractBlock('control', false) + sliceLines(L_v16motor, L_v18peer - 1) + '#endif\n#endif\n' + [
     '// Component-specific Z++ control & CCarCtrl bindings (from control/ZppContracts.hpp)',
     'namespace gtangel_zpp_control_bind {',
@@ -1118,7 +1233,24 @@ for (const rootDir of ['src']) {
     '} // namespace gtangel_zpp_agi_bind',
     ''
   ].join('\n'));
-  writeMod('skel/Win32CockpitSkel.hpp', buildZppCppContractBlock('skel', false) + sliceLines(L_renderV15Frame, lines.length));
+  {
+    let skelSlice = sliceLines(L_renderV15Frame, lines.length);
+    skelSlice = skelSlice.replace(
+      'C:\\\\ddd\\\\GTAngel\\\\cpp_test\\\\gtangel_metrics.prom',
+      'C:\\\\ddd\\\\GTAngel\\\\native\\\\GTAngel_v56\\\\gtangel_metrics.prom'
+    );
+    skelSlice = skelSlice.replace(
+      `    snprintf(line, sizeof(line), "Frame %llu   %.2f ms",
+        (unsigned long long)g_agi.highResRenderer.metrics.sequence,
+        g_agi.highResRenderer.metrics.renderMs);`,
+      `    snprintf(line, sizeof(line), "Frame %llu   %.2f ms%s%s",
+        (unsigned long long)g_agi.highResRenderer.metrics.sequence,
+        g_agi.highResRenderer.metrics.renderMs,
+        g_agi.highResRenderer.lastValidationFailure() ? "  ZPP:" : "",
+        g_agi.highResRenderer.lastValidationFailure() ? g_agi.highResRenderer.lastValidationFailure() : "");`
+    );
+    writeMod('skel/Win32CockpitSkel.hpp', buildZppCppContractBlock('skel', false) + skelSlice);
+  }
 
   const docsHeader = [
     '#pragma once',

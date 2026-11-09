@@ -456,9 +456,11 @@ static void RenderV15Frame(HDC rawHdc, RECT& rc) {
         g_agi.gameplay.quest.pickupsCollected,
         g_agi.gameplay.quest.beaconRestored ? "RESTORED" : "BROKEN");
     DrawText(hdc, railX + 12, viewY + 230, cellBuf, g_agi.gameplay.quest.beaconRestored ? COL_CYAN : COL_GOLD, g_hFontSmall);
-    snprintf(line, sizeof(line), "Frame %llu   %.2f ms",
+    snprintf(line, sizeof(line), "Frame %llu   %.2f ms%s%s",
         (unsigned long long)g_agi.highResRenderer.metrics.sequence,
-        g_agi.highResRenderer.metrics.renderMs);
+        g_agi.highResRenderer.metrics.renderMs,
+        g_agi.highResRenderer.lastValidationFailure() ? "  ZPP:" : "",
+        g_agi.highResRenderer.lastValidationFailure() ? g_agi.highResRenderer.lastValidationFailure() : "");
     DrawText(hdc, railX + 12, viewY + 246, line, COL_TEXT2, g_hFontSmall);
 
     DrawText(hdc, railX + 12, viewY + 266, "LAST GROUNDED EVENT", COL_BRIDGE, g_hFontSmall);
@@ -1357,7 +1359,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 g_agi.addLog("Civic Angel: immediate grounded frame requested");
             } else if (wp == 'M') {
                 std::string prom = g_agi.agentLoop.toPrometheus();
-                std::ofstream f("C:\\ddd\\GTAngel\\cpp_test\\gtangel_metrics.prom");
+                std::ofstream f("C:\\ddd\\GTAngel\\native\\GTAngel_v56\\gtangel_metrics.prom");
                 f << prom;
                 f.close();
                 g_agi.addLog("Prometheus metrics exported to gtangel_metrics.prom");

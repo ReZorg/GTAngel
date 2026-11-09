@@ -2,10 +2,10 @@
     // ── Z++ Formal Spec Component Binding (vehicles): 15 modules, 700 schemas, 54 enums (Automobile.zpp, Bike.zpp, Boat.zpp, CarGen.zpp, Cranes.zpp, DamageManager.zpp, Door.zpp, Ferry.zpp) ──
     static constexpr int zpp_vehicles_modules() { return zpp_vehicles_spec::kZppModuleCount; }
     static constexpr int zpp_vehicles_schemas() { return zpp_vehicles_spec::kZppSchemaCount; }
-    static constexpr bool verifyComponent_vehicles_zpp() {
+    [[nodiscard]] static constexpr bool verifyComponent_vehicles_zpp() {
         return zpp_vehicles_spec::verify_vehicles_zpp_invariants() && (zpp_vehicles_spec::CAutomobile_ZppContract{}.checkInvariant()) && (zpp_vehicles_spec::op_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{}, zpp_vehicles_spec::apply_CCarGenerator_SwitchOff(zpp_vehicles_spec::CCarGenerator_ZppContract{})));
     }
-    bool verifyLiveWorld_vehicles_zpp(const avatar3d::GameWorld& world) const {
+    [[nodiscard]] bool verifyLiveWorld_vehicles_zpp(const avatar3d::GameWorld& world) const {
         for (size_t i = 0; i < world.traffic.size(); ++i) {
             const auto& v = world.traffic[i];
             zpp_vehicles_spec::CDamageManager_ZppContract dmg{};
@@ -205,7 +205,16 @@
         }
     }
 
+    [[nodiscard]] bool verifyLiveWorld_coupe_zpp(const avatar3d::GameWorld& world) const {
+        zpp_vehicles_spec::CDamageManager_ZppContract dmg{};
+        const bool ok = std::isfinite(world.vehiclePos.x) && std::isfinite(world.vehiclePos.y) &&
+                        std::isfinite(world.vehiclePos.z) && std::isfinite(world.vehicleHeading) &&
+                        std::isfinite(world.vehicleWheelPhase);
+        dmg.m_engineStatus = ok ? (int64_t)0 : -1;
+        return dmg.checkInvariant();
+    }
     void buildVehicle(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_coupe_zpp(world)) { noteValidationFailure("coupe"); return; }
         addBlobShadow(world.vehiclePos, 0.68f);
         const float ch = cosf(world.vehicleHeading), sh = sinf(world.vehicleHeading);
         drawSculptedCoupe(world.vehiclePos, ch, sh,
@@ -231,7 +240,7 @@
     // re3 CVehicle family: lane traffic rendered as compact vehicles with
     // spinning wheels, train as linked boxes, heli with rotor disc.
     void buildTraffic(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_vehicles_zpp(world)) return;
+        if (!verifyLiveWorld_vehicles_zpp(world)) { noteValidationFailure("vehicles"); return; }
         int trafficIndex = 0;
         for (const auto& v : world.traffic) {
             addBlobShadow(v.pos, v.orbitR > 0.0f ? 0.68f : 0.55f); // LW32: ground traffic (heli casts wide)

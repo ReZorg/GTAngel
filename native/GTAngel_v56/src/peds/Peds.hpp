@@ -2,10 +2,10 @@
     // ── Z++ Formal Spec Component Binding (peds): 17 modules, 673 schemas, 31 enums (CivilianPed.zpp, CopPed.zpp, DummyPed.zpp, EmergencyPed.zpp, Gangs.zpp, Ped.zpp, PedAI.zpp, PedAttractor.zpp) ──
     static constexpr int zpp_peds_modules() { return zpp_peds_spec::kZppModuleCount; }
     static constexpr int zpp_peds_schemas() { return zpp_peds_spec::kZppSchemaCount; }
-    static constexpr bool verifyComponent_peds_zpp() {
+    [[nodiscard]] static constexpr bool verifyComponent_peds_zpp() {
         return zpp_peds_spec::verify_peds_zpp_invariants() && (zpp_peds_spec::CDummyPed_ZppContract{}.checkInvariant()) && (zpp_peds_spec::op_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{}, zpp_peds_spec::apply_CPedType_Initialise(zpp_peds_spec::CPedType_ZppContract{})));
     }
-    bool verifyLiveWorld_peds_zpp(const avatar3d::GameWorld& world) const {
+    [[nodiscard]] bool verifyLiveWorld_peds_zpp(const avatar3d::GameWorld& world) const {
         for (size_t i = 0; i < world.walkers.size(); ++i) {
             const auto& w = world.walkers[i];
             zpp_peds_spec::CDummyPed_ZppContract c{};
@@ -16,7 +16,7 @@
     }
     static_assert(verifyComponent_peds_zpp(), "RasterEngine component Z++ binding failed for peds");
     void buildWalkers(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_peds_zpp(world)) return;
+        if (!verifyLiveWorld_peds_zpp(world)) { noteValidationFailure("peds"); return; }
         // Population rendering: compact humanoids (torso + head + legs) so
         // the retina sees real social entities, not empty pillars.
         for (const auto& w : world.walkers) {
@@ -90,7 +90,16 @@
         }
     }
 
+    [[nodiscard]] bool verifyLiveWorld_npc_zpp(const avatar3d::GameWorld& world) const {
+        zpp_peds_spec::CDummyPed_ZppContract c{};
+        const bool ok = std::isfinite(world.npcPos.x) && std::isfinite(world.npcPos.y) &&
+                        std::isfinite(world.npcPos.z) && std::isfinite(world.npcHeading) &&
+                        std::isfinite(world.npcSpeed) && world.npcSpeed >= 0.0f;
+        c.instance_addr = ok ? (int64_t)1 : -1;
+        return c.checkInvariant();
+    }
     void buildNpc(const avatar3d::GameWorld& world) {
+        if (!verifyLiveWorld_npc_zpp(world)) { noteValidationFailure("npc"); return; }
         // LW37: sculpted Ariadne keeper — tailored cyber-coat, flared coat
         // skirt, shoulder mantle, skin-toned head/hands, silver-lilac hair,
         // and glowing resonance circlet.

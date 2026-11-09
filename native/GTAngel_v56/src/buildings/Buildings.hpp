@@ -2,10 +2,10 @@
     // ── Z++ Formal Spec Component Binding (buildings): 3 modules, 18 schemas, 0 enums (Building.zpp, Solid.zpp, Treadable.zpp) ──
     static constexpr int zpp_buildings_modules() { return zpp_buildings_spec::kZppModuleCount; }
     static constexpr int zpp_buildings_schemas() { return zpp_buildings_spec::kZppSchemaCount; }
-    static constexpr bool verifyComponent_buildings_zpp() {
+    [[nodiscard]] static constexpr bool verifyComponent_buildings_zpp() {
         return zpp_buildings_spec::verify_buildings_zpp_invariants() && (zpp_buildings_spec::CBuilding_ZppContract{}.checkInvariant()) && (zpp_buildings_spec::op_CBuilding_ReplaceWithNewModel(zpp_buildings_spec::CBuilding_ZppContract{}, zpp_buildings_spec::apply_CBuilding_ReplaceWithNewModel(zpp_buildings_spec::CBuilding_ZppContract{})));
     }
-    bool verifyLiveWorld_buildings_zpp(const avatar3d::GameWorld& world) const {
+    [[nodiscard]] bool verifyLiveWorld_buildings_zpp(const avatar3d::GameWorld& world) const {
         for (size_t i = 0; i < world.buildings.size(); ++i) {
             const auto& b = world.buildings[i];
             zpp_buildings_spec::CBuilding_ZppContract c{};
@@ -19,7 +19,7 @@
     }
     static_assert(verifyComponent_buildings_zpp(), "RasterEngine component Z++ binding failed for buildings");
     void buildBuildings(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_buildings_zpp(world)) return;
+        if (!verifyLiveWorld_buildings_zpp(world)) { noteValidationFailure("buildings"); return; }
         // LW34: architectural night-city buildings with multi-column x multi-floor
         // exterior window grids on all 4 facades (placed OUTSIDE the walls so
         // depth-buffering never hides them), stone plinths, floor-ledge cornices,

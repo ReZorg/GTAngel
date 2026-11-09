@@ -3,7 +3,7 @@
     static constexpr zpp_entities_spec::CDummy_ZppContract makeStreetPropDummyContract() {
         return zpp_entities_spec::CDummy_ZppContract{};
     }
-    bool verifyLiveWorld_props_zpp(const avatar3d::GameWorld& world) const {
+    [[nodiscard]] bool verifyLiveWorld_props_zpp(const avatar3d::GameWorld& world) const {
         for (size_t i = 0; i < world.props.size(); ++i) {
             const auto& p = world.props[i].pos;
             zpp_entities_spec::CDummy_ZppContract c{};
@@ -14,7 +14,7 @@
     }
     static_assert(makeStreetPropDummyContract().checkInvariant(), "Props CDummy Z++ contract must hold");
     void buildProps(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_props_zpp(world)) return;
+        if (!verifyLiveWorld_props_zpp(world)) { noteValidationFailure("props"); return; }
         // LW36: tapered cylindrical street-light columns, curved luminaire arm,
         // compact LED cobra-head fixture, and ground-level (y=0.019f) circular
         // sodium light pool (fixes the old y=2.71m floating pool square).

@@ -707,6 +707,8 @@ public:
     const std::string& dteAssetError() const { return skinned_.error(); }
     size_t dteAssetTriangleCount() const { return skinned_.triangleCount(); }
     const char* modelSource() const { return skinned_.valid() ? "DTE V22 SKINNED / LOCAL SENSOR" : Re3InformedAvatarClump::sourceLabel(); }
+    // Latest Z++ live-world validation failure layer (nullptr when the last frame was valid).
+    [[nodiscard]] const char* lastValidationFailure() const { return lastValidationFailure_; }
 
     void render(const avatar3d::GameWorld& world,
                 const avatar3d::AvatarSkeleton& avatar,
@@ -717,22 +719,33 @@ public:
         heading_ = heading;
         pitch_ = pitch;
         eye_ = eye;
+        lastValidationFailure_ = nullptr;
+
+        // Frame-level Z++ gate: the live world must satisfy the rw + renderer
+        // contracts before any world geometry is constructed from it. Sky and
+        // ground still render so a failed world yields a diagnostic frame,
+        // not a black screen.
+        const bool worldValid =
+            verifyLiveWorld_rw_zpp(world) && verifyLiveWorld_renderer_zpp(world);
+        if (!worldValid) noteValidationFailure("render-frame");
 
         buildSun();
         buildMoon();
         buildGround(world);
-        buildRoads(world);
-        if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
-        buildGoal(world);
-        buildNpc(world);
-        buildQuestShard(world);
-        buildVehicle(world);
-        buildWalkers(world);
-        buildTraffic(world);
-        buildPickups(world);
-        buildPillars(world);
-        buildBuildings(world);
-        buildProps(world);
+        if (worldValid) {
+            buildRoads(world);
+            if (thirdPerson && !world.vehicleOccupied) buildAvatar(avatar);
+            buildGoal(world);
+            buildNpc(world);
+            buildQuestShard(world);
+            buildVehicle(world);
+            buildWalkers(world);
+            buildTraffic(world);
+            buildPickups(world);
+            buildPillars(world);
+            buildBuildings(world);
+            buildProps(world);
+        }
 
         metrics.trianglesSubmitted = (int)triangles_.size();
         metrics.trianglesRasterized = 0;
@@ -753,6 +766,10 @@ private:
     Vec3 eye_{};
     float heading_{0.0f};
     float pitch_{0.0f};
+    const char* lastValidationFailure_{nullptr};
+    void noteValidationFailure(const char* layer) {
+        if (!lastValidationFailure_) lastValidationFailure_ = layer;
+    }
 
     static Colour groundColour(int gx, int gz) {
         // LW34: cohesive urban slate plaza with 4m block joints instead of
@@ -778,10 +795,10 @@ private:
     // ── Z++ Formal Spec Component Binding (rw): 12 modules, 395 schemas, 4 enums (ClumpRead.zpp, Lights.zpp, MemoryHeap.zpp, MemoryMgr.zpp, NodeName.zpp, RwHelper.zpp, RwMatFX.zpp, RwPS2AlphaTest.zpp) ──
     static constexpr int zpp_rw_modules() { return zpp_rw_spec::kZppModuleCount; }
     static constexpr int zpp_rw_schemas() { return zpp_rw_spec::kZppSchemaCount; }
-    static constexpr bool verifyComponent_rw_zpp() {
+    [[nodiscard]] static constexpr bool verifyComponent_rw_zpp() {
         return zpp_rw_spec::verify_rw_zpp_invariants() && (zpp_rw_spec::rpGeometryList_ZppContract{}.checkInvariant()) && (zpp_rw_spec::op_CMemoryHeap_PushMemId(zpp_rw_spec::CMemoryHeap_ZppContract{}, zpp_rw_spec::apply_CMemoryHeap_PushMemId(zpp_rw_spec::CMemoryHeap_ZppContract{})));
     }
-    bool verifyLiveWorld_rw_zpp(const avatar3d::GameWorld& world) const {
+    [[nodiscard]] bool verifyLiveWorld_rw_zpp(const avatar3d::GameWorld& world) const {
         zpp_rw_spec::rpGeometryList_ZppContract c{};
         return (world.worldSize > 0.0f) && c.checkInvariant();
     }

@@ -2,10 +2,10 @@
     // ── Z++ Formal Spec Component Binding (entities): 3 modules, 190 schemas, 3 enums (Dummy.zpp, Entity.zpp, Physical.zpp) ──
     static constexpr int zpp_entities_modules() { return zpp_entities_spec::kZppModuleCount; }
     static constexpr int zpp_entities_schemas() { return zpp_entities_spec::kZppSchemaCount; }
-    static constexpr bool verifyComponent_entities_zpp() {
+    [[nodiscard]] static constexpr bool verifyComponent_entities_zpp() {
         return zpp_entities_spec::verify_entities_zpp_invariants() && (zpp_entities_spec::CDummy_ZppContract{}.checkInvariant()) && (zpp_entities_spec::op_CEntity_DetachFromRwObject(zpp_entities_spec::CEntity_ZppContract{}, zpp_entities_spec::apply_CEntity_DetachFromRwObject(zpp_entities_spec::CEntity_ZppContract{})));
     }
-    bool verifyLiveWorld_entities_zpp(const avatar3d::GameWorld& world) const {
+    [[nodiscard]] bool verifyLiveWorld_entities_zpp(const avatar3d::GameWorld& world) const {
         for (size_t i = 0; i < world.pillars.size(); ++i) {
             const auto& p = world.pillars[i];
             zpp_entities_spec::CDummy_ZppContract c{};
@@ -18,7 +18,7 @@
     }
     static_assert(verifyComponent_entities_zpp(), "RasterEngine component Z++ binding failed for entities");
     void buildPillars(const avatar3d::GameWorld& world) {
-        if (!verifyLiveWorld_entities_zpp(world)) return;
+        if (!verifyLiveWorld_entities_zpp(world)) { noteValidationFailure("entities"); return; }
         // LW34: landscaped urban street trees in stone planters + sleek
         // granite & cyan-lit cyber-columns (replaces brick-red pipes).
         static constexpr int Segments = 10;
